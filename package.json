@@ -1,0 +1,35 @@
+{
+  "name": "training-deck",
+  "private": true,
+  "version": "0.0.1",
+  "description": "Ionic Training Deck",
+  "scripts": {
+    "docs": "gulp",
+    "build": "stencil build",
+    "dev": "sd concurrent \"stencil build --dev --watch\" \"stencil-dev-server\" ",
+    "serve": "stencil-dev-server",
+    "start": "npm run dev"
+  },
+  "dependencies": {
+    "@stencil/core": "0.0.9-1",
+    "@stencil/router": "0.0.17",
+    "highlight.js": "~9.12.0",
+    "marked": "~0.3.9"
+  },
+  "devDependencies": {
+    "@stencil/dev-server": "0.0.18-0",
+    "@stencil/utils": "latest",
+    "@types/jest": "~21.1.1",
+    "jest": "~21.2.1"
+  },
+  "author": "Ionic Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ionic-team/stencil-site.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ionic-team/stencil"
+  },
+  "homepage": "https://github.com/ionic-team/stencil"
+}
