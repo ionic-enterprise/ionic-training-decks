@@ -17,7 +17,7 @@ export class AppMenu {
   render() {
     return (
       <div>
-        <ul>{this.items.map(item => <app-menu-item item={item}></app-menu-item>)}</ul>
+        <ul>{this.items.map(item => <app-menu-item lab={this.lab} item={item}></app-menu-item>)}</ul>
       </div>
     );
   }

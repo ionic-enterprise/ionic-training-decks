@@ -4,19 +4,23 @@ import { Component, Prop } from '@stencil/core';
   tag: 'app-menu-item',
   styleUrl: 'app-menu-item.scss'
 })
-export class AppMenu {
+export class AppMenuItem {
+  @Prop() lab: string;
   @Prop() item: any;
 
   render() {
-    if (this.item.pages && this.item.pages.length) {
-      return (
-        <li>
-          {this.item.title}
-          <ul>{this.item.pages.map(item => <app-menu-item item={item}></app-menu-item>)}</ul>
-        </li>
-      );
-    } else {
-      return <li>{this.item.title}</li>;
-    }
+    return (
+      <li>
+        <a href={`/lab/${this.lab}/${this.item.id}`}>{this.item.title}</a>
+        {this.item.pages &&
+          this.item.pages.length && (
+            <ul>
+              {this.item.pages.map(item => (
+                <app-menu-item lab={this.lab} item={item} />
+              ))}
+            </ul>
+          )}
+      </li>
+    );
   }
 }
