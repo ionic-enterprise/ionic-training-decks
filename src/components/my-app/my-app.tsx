@@ -11,7 +11,7 @@ export class MyApp {
     return (
       <div>
         <header>
-          <h1>Stencil App Starter</h1>
+          <h1>Ionic Training Deck</h1>
         </header>
 
         <main>
@@ -19,7 +19,10 @@ export class MyApp {
             <stencil-route url='/' component='app-home' exact={true}>
             </stencil-route>
 
-            <stencil-route url='/profile/:name' component='app-profile'>
+            <stencil-route url='/lab/:lab' component='app-lab'>
+            </stencil-route>
+
+            <stencil-route url='/lab/:lab/:file' component='app-lab'>
             </stencil-route>
           </stencil-router>
         </main>

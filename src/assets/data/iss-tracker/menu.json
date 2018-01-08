@@ -1,0 +1,56 @@
+{
+  "pages": [
+    {
+      "id": "main",
+      "title": "Start Here"
+    },
+    {
+      "id": "create",
+      "title": "Creating the Application",
+      "pages": [
+        {
+          "id": "create-overview",
+          "title": "Overview"
+        },
+        {
+          "id": "create-ion-start",
+          "title": "ionic start",
+          "pages": [
+            {
+              "id": "create-ion-start-overview",
+              "title": "Scripting Overview"
+            },
+            {
+              "id": "create-ion-start-template",
+              "title": "Starter Templates"
+            },
+            {
+              "id": "create-ion-start-strategy",
+              "title": "Choosing a Template"
+            },
+            {
+              "id": "create-ion-start-tabs",
+              "title": "Tabs Template"
+            }
+          ]
+        },
+        {
+          "id": "create-tour",
+          "title": "Code Tour"
+        }
+      ]
+    },
+    {
+      "id": "layout",
+      "title": "Basic Layout and Styling"
+    },
+    {
+      "id": "map",
+      "title": "Add a Map"
+    },
+    {
+      "id": "provider",
+      "title": "Creating a Data Provider"
+    }
+  ]
+}

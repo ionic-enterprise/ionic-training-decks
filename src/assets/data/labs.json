@@ -1,0 +1,12 @@
+{
+  "labs": [
+    {
+      "path": "iss-tracker",
+      "title": "International Space Station Tracker"
+    },
+    {
+      "path": "itunes",
+      "title": "iTunes Feed"
+    }
+  ]
+}
