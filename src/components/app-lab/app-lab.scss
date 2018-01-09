@@ -2,6 +2,10 @@
   display: flex;
   margin: 10px;
 
+  .menu {
+    min-width: 225px;
+  }
+
   .content {
     margin-left: 20px;
   }

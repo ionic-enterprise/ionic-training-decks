@@ -16,13 +16,13 @@ export class MyApp {
           <stencil-router>
             <stencil-route url="/" component="app-home" exact={true} />
 
-            <stencil-route url="/lab/:lab" component="app-lab" exact={true} />
+            <stencil-route url="/lab/:lab" component="app-lab" />
 
-            <stencil-route
+            {/* <stencil-route
               url="/lab/:lab/:file"
               component="app-lab"
               exact={true}
-            />
+            /> */}
           </stencil-router>
         </main>
       </div>

@@ -5,19 +5,13 @@ import { Component, Prop } from '@stencil/core';
   styleUrl: 'app-menu.scss'
 })
 export class AppMenu {
-  private items: Array<any> = [];
-
   @Prop() lab: string;
-
-  async ionViewWillLoad() {
-    const file = await fetch(`/assets/data/${this.lab}/menu.json`);
-    this.items = JSON.parse(await file.text()).pages;
-  }
+  @Prop() menu: any;
 
   render() {
     return (
       <div>
-        <ul>{this.items.map(item => <app-menu-item lab={this.lab} item={item}></app-menu-item>)}</ul>
+        <ul class="app-menu">{this.menu.map(item => <app-menu-item lab={this.lab} item={item}></app-menu-item>)}</ul>
       </div>
     );
   }

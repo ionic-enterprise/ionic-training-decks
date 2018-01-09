@@ -6,25 +6,41 @@ import { MatchResults } from '@stencil/router';
   styleUrl: 'app-lab.scss'
 })
 export class AppLab {
+  private items: Array<any> = [];
+
   @Prop() match: MatchResults;
+
+  async componentWillLoad() {
+    if (this.match && this.match.params.lab) {
+      const file = await fetch(`/assets/data/${this.match.params.lab}/menu.json`);
+      this.items = JSON.parse(await file.text()).pages;
+    }
+  }
 
   render() {
     if (this.match && this.match.params.lab) {
       return (
         <div class="container">
           <div class="menu">
-            <app-menu lab={this.match.params.lab} />
+            <app-menu lab={this.match.params.lab} menu={this.items} />
           </div>
           <div class="content">
-            {this.match.params.file ? (
-              <app-markdown
-                path={`/assets/data/${this.match.params.lab}/markdown/${
-                  this.match.params.file
-                }`}
-              />
-            ) : (
-              <app-empty-content />
-            )}
+            <stencil-route
+              url="/lab/:lab/:file"
+              routeRender={props => {
+                {
+                  return props.match.params.file ? (
+                    <app-markdown
+                      path={`/assets/data/${props.match.params.lab}/markdown/${
+                        props.match.params.file
+                      }`}
+                    />
+                  ) : (
+                    <app-empty-content />
+                  );
+                }
+              }}
+            />
           </div>
         </div>
       );

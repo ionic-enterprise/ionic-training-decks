@@ -6,99 +6,6 @@
 
 import '@stencil/router';
 
-import {
-  MatchResults,
-} from '@stencil/router';
-
-import {
-  AppEmptyContent as AppEmptyContent
-} from './components/app-empty-content/app-empty-content';
-
-declare global {
-  interface HTMLAppEmptyContentElement extends AppEmptyContent, HTMLElement {
-  }
-  var HTMLAppEmptyContentElement: {
-    prototype: HTMLAppEmptyContentElement;
-    new (): HTMLAppEmptyContentElement;
-  };
-  interface HTMLElementTagNameMap {
-    "app-empty-content": HTMLAppEmptyContentElement;
-  }
-  interface ElementTagNameMap {
-    "app-empty-content": HTMLAppEmptyContentElement;
-  }
-  namespace JSX {
-    interface IntrinsicElements {
-      "app-empty-content": JSXElements.AppEmptyContentAttributes;
-    }
-  }
-  namespace JSXElements {
-    export interface AppEmptyContentAttributes extends HTMLAttributes {
-      filename?: string;
-    }
-  }
-}
-
-
-import {
-  AppHome as AppHome
-} from './components/app-home/app-home';
-
-declare global {
-  interface HTMLAppHomeElement extends AppHome, HTMLElement {
-  }
-  var HTMLAppHomeElement: {
-    prototype: HTMLAppHomeElement;
-    new (): HTMLAppHomeElement;
-  };
-  interface HTMLElementTagNameMap {
-    "app-home": HTMLAppHomeElement;
-  }
-  interface ElementTagNameMap {
-    "app-home": HTMLAppHomeElement;
-  }
-  namespace JSX {
-    interface IntrinsicElements {
-      "app-home": JSXElements.AppHomeAttributes;
-    }
-  }
-  namespace JSXElements {
-    export interface AppHomeAttributes extends HTMLAttributes {
-      
-    }
-  }
-}
-
-
-import {
-  AppLab as AppLab
-} from './components/app-lab/app-lab';
-
-declare global {
-  interface HTMLAppLabElement extends AppLab, HTMLElement {
-  }
-  var HTMLAppLabElement: {
-    prototype: HTMLAppLabElement;
-    new (): HTMLAppLabElement;
-  };
-  interface HTMLElementTagNameMap {
-    "app-lab": HTMLAppLabElement;
-  }
-  interface ElementTagNameMap {
-    "app-lab": HTMLAppLabElement;
-  }
-  namespace JSX {
-    interface IntrinsicElements {
-      "app-lab": JSXElements.AppLabAttributes;
-    }
-  }
-  namespace JSXElements {
-    export interface AppLabAttributes extends HTMLAttributes {
-      match?: MatchResults;
-    }
-  }
-}
-
 
 import {
   AppMarkdown as AppMarkdown
@@ -131,37 +38,6 @@ declare global {
 
 
 import {
-  AppMenuItem as AppMenuItem
-} from './components/app-menu-item/app-menu-item';
-
-declare global {
-  interface HTMLAppMenuItemElement extends AppMenuItem, HTMLElement {
-  }
-  var HTMLAppMenuItemElement: {
-    prototype: HTMLAppMenuItemElement;
-    new (): HTMLAppMenuItemElement;
-  };
-  interface HTMLElementTagNameMap {
-    "app-menu-item": HTMLAppMenuItemElement;
-  }
-  interface ElementTagNameMap {
-    "app-menu-item": HTMLAppMenuItemElement;
-  }
-  namespace JSX {
-    interface IntrinsicElements {
-      "app-menu-item": JSXElements.AppMenuItemAttributes;
-    }
-  }
-  namespace JSXElements {
-    export interface AppMenuItemAttributes extends HTMLAttributes {
-      lab?: string;
-      item?: any;
-    }
-  }
-}
-
-
-import {
   AppMenu as AppMenu
 } from './components/app-menu/app-menu';
 
@@ -186,36 +62,7 @@ declare global {
   namespace JSXElements {
     export interface AppMenuAttributes extends HTMLAttributes {
       lab?: string;
-    }
-  }
-}
-
-
-import {
-  MyApp as MyApp
-} from './components/my-app/my-app';
-
-declare global {
-  interface HTMLMyAppElement extends MyApp, HTMLElement {
-  }
-  var HTMLMyAppElement: {
-    prototype: HTMLMyAppElement;
-    new (): HTMLMyAppElement;
-  };
-  interface HTMLElementTagNameMap {
-    "my-app": HTMLMyAppElement;
-  }
-  interface ElementTagNameMap {
-    "my-app": HTMLMyAppElement;
-  }
-  namespace JSX {
-    interface IntrinsicElements {
-      "my-app": JSXElements.MyAppAttributes;
-    }
-  }
-  namespace JSXElements {
-    export interface MyAppAttributes extends HTMLAttributes {
-      
+      menu?: any;
     }
   }
 }

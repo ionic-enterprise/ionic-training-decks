@@ -11,14 +11,17 @@ export class AppMenuItem {
   render() {
     return (
       <li>
-        <a href={`/lab/${this.lab}/${this.item.id}`}>{this.item.title}</a>
+        <stencil-route-link url={`/lab/${this.lab}/${this.item.id}`}>
+          {this.item.title}
+        </stencil-route-link>
         {this.item.pages &&
           this.item.pages.length && (
-            <ul>
-              {this.item.pages.map(item => (
-                <app-menu-item lab={this.lab} item={item} />
-              ))}
-            </ul>
+            <app-menu lab={this.lab} menu={this.item.pages} />
+            // <ul>
+            //   {this.item.pages.map(item => (
+            //     <app-menu-item lab={this.lab} item={item} />
+            //   ))}
+            // </ul>
           )}
       </li>
     );

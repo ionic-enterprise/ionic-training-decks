@@ -1,0 +1,37 @@
+.app-menu {
+  list-style-type: none;
+
+  ul {
+    padding-bottom: 6px;
+    padding-left: 12px;
+  }
+
+  li {
+
+    font-size: 16px;
+    font-weight: 400;
+
+    a {
+      color: black;
+      text-decoration: none;
+
+      &.link-active {
+        font-weight: 500;
+        color:  #5850ff;
+      }
+    }
+
+    ul li {
+      font-size: 14px;
+      a {
+        color: #464646;
+      }
+      ul li {
+        font-size: 12px;
+        a {
+          color: #7D7D7D;
+        }
+      }
+    }
+  }
+}
