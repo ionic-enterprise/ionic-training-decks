@@ -1,17 +1,17 @@
-# This is just sample markdown
+# Lab: International Space Station Tracker
 
-How does the code end up looking?
+The purpose of this lab is to introduce you to the Ionic CLI, the Ionic Framework, and the basic structure of an Ionic application. This lab's repo contains tags for each step. To use the repo to walk through the lab:
 
-```ts
-export class Foo {
-  constructor(private bar: Bar) { }
+- `git checkout tags/step1`
+- in a separate project, follow the instructions for the step (instructions are in reverse order, so current instructions are always at the top)
+- `git checkout tabs/step2`
+- compare your results to the results in this repo
+- repeat until you run out of steps
 
-  tap() {
-    return this.bar.pourBeer();
-  }
-}
-```
+By the end of this lab, you should be able to:
 
-## Was that cool?
-
-I sure hope so. Hopefully this will not suck. Then we can start filling some of this out...
+- create a new Ionic application
+- modify existing pages
+- add new services
+- add and deploy to mobile platforms
+- add and use new Cordova plugins
