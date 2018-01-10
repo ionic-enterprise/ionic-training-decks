@@ -1,0 +1,82 @@
+{
+  "pages": [
+    {
+      "id": "welcome",
+      "title": "Welcome"
+    },
+    {
+      "id": "installation",
+      "title": "Installing Ionic"
+    },
+    {
+      "id": "lab-iss-tracker",
+      "title": "Lab: Space Station Tracker",
+      "pages": [
+        {
+          "id": "lab-iss-tracker-step01",
+          "title": "Create the Application",
+          "pages": [
+            {
+              "id": "lab-iss-tracker-step01-overview",
+              "title": "Overview"
+            },
+            {
+              "id": "lab-iss-tracker-step01-details",
+              "title": "Details"
+            }
+          ]
+        },
+        {
+          "id": "lab-iss-tracker-step02",
+          "title": "Layout and Styling",
+          "pages":[
+            {
+              "id": "lab-iss-tracker-step02-change",
+              "title": "Change the Style"
+            },
+            {
+              "id": "lab-iss-tracker-step02-update",
+              "title": "Update the UI"
+            },
+            {
+              "id": "lab-iss-tracker-step02-rename",
+              "title": "Rename the Code"
+            }
+          ]
+        },
+        {
+          "id": "lab-iss-tracker-step03",
+          "title": "Step #3"
+        },
+        {
+          "id": "lab-iss-tracker-step04",
+          "title": "Step #4"
+        },
+        {
+          "id": "lab-iss-tracker-step05",
+          "title": "Step #5"
+        },
+        {
+          "id": "lab-iss-tracker-step06",
+          "title": "Step #6"
+        },
+        {
+          "id": "lab-iss-tracker-step07",
+          "title": "Step #7"
+        },
+        {
+          "id": "lab-iss-tracker-step08",
+          "title": "Step #8"
+        },
+        {
+          "id": "lab-iss-tracker-step09",
+          "title": "Step #9"
+        },
+        {
+          "id": "lab-iss-tracker-step10",
+          "title": "Step #10"
+        }
+      ]
+    }
+  ]
+}

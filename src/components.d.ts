@@ -6,6 +6,39 @@
 
 import '@stencil/router';
 
+import {
+  MatchResults,
+} from '@stencil/router';
+
+import {
+  AppHome as AppHome
+} from './components/app-home/app-home';
+
+declare global {
+  interface HTMLAppHomeElement extends AppHome, HTMLElement {
+  }
+  var HTMLAppHomeElement: {
+    prototype: HTMLAppHomeElement;
+    new (): HTMLAppHomeElement;
+  };
+  interface HTMLElementTagNameMap {
+    "app-home": HTMLAppHomeElement;
+  }
+  interface ElementTagNameMap {
+    "app-home": HTMLAppHomeElement;
+  }
+  namespace JSX {
+    interface IntrinsicElements {
+      "app-home": JSXElements.AppHomeAttributes;
+    }
+  }
+  namespace JSXElements {
+    export interface AppHomeAttributes extends HTMLAttributes {
+      match?: MatchResults;
+    }
+  }
+}
+
 
 import {
   AppMarkdown as AppMarkdown
@@ -32,6 +65,96 @@ declare global {
   namespace JSXElements {
     export interface AppMarkdownAttributes extends HTMLAttributes {
       path?: string;
+    }
+  }
+}
+
+
+import {
+  AppMenuItem as AppMenuItem
+} from './components/app-menu-item/app-menu-item';
+
+declare global {
+  interface HTMLAppMenuItemElement extends AppMenuItem, HTMLElement {
+  }
+  var HTMLAppMenuItemElement: {
+    prototype: HTMLAppMenuItemElement;
+    new (): HTMLAppMenuItemElement;
+  };
+  interface HTMLElementTagNameMap {
+    "app-menu-item": HTMLAppMenuItemElement;
+  }
+  interface ElementTagNameMap {
+    "app-menu-item": HTMLAppMenuItemElement;
+  }
+  namespace JSX {
+    interface IntrinsicElements {
+      "app-menu-item": JSXElements.AppMenuItemAttributes;
+    }
+  }
+  namespace JSXElements {
+    export interface AppMenuItemAttributes extends HTMLAttributes {
+      item?: any;
+    }
+  }
+}
+
+
+import {
+  AppMenu as AppMenu
+} from './components/app-menu/app-menu';
+
+declare global {
+  interface HTMLAppMenuElement extends AppMenu, HTMLElement {
+  }
+  var HTMLAppMenuElement: {
+    prototype: HTMLAppMenuElement;
+    new (): HTMLAppMenuElement;
+  };
+  interface HTMLElementTagNameMap {
+    "app-menu": HTMLAppMenuElement;
+  }
+  interface ElementTagNameMap {
+    "app-menu": HTMLAppMenuElement;
+  }
+  namespace JSX {
+    interface IntrinsicElements {
+      "app-menu": JSXElements.AppMenuAttributes;
+    }
+  }
+  namespace JSXElements {
+    export interface AppMenuAttributes extends HTMLAttributes {
+      menu?: any;
+    }
+  }
+}
+
+
+import {
+  MyApp as MyApp
+} from './components/my-app/my-app';
+
+declare global {
+  interface HTMLMyAppElement extends MyApp, HTMLElement {
+  }
+  var HTMLMyAppElement: {
+    prototype: HTMLMyAppElement;
+    new (): HTMLMyAppElement;
+  };
+  interface HTMLElementTagNameMap {
+    "my-app": HTMLMyAppElement;
+  }
+  interface ElementTagNameMap {
+    "my-app": HTMLMyAppElement;
+  }
+  namespace JSX {
+    interface IntrinsicElements {
+      "my-app": JSXElements.MyAppAttributes;
+    }
+  }
+  namespace JSXElements {
+    export interface MyAppAttributes extends HTMLAttributes {
+      
     }
   }
 }

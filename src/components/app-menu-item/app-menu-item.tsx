@@ -5,19 +5,16 @@ import { Component, Prop } from '@stencil/core';
   styleUrl: 'app-menu-item.scss'
 })
 export class AppMenuItem {
-  @Prop() lab: string;
   @Prop() item: any;
 
   render() {
     return (
       <li>
-        <stencil-route-link url={`/lab/${this.lab}/${this.item.id}`}>
+        <stencil-route-link url={`/${this.item.id}`}>
           {this.item.title}
         </stencil-route-link>
         {this.item.pages &&
-          this.item.pages.length && (
-            <app-menu lab={this.lab} menu={this.item.pages} />
-          )}
+          this.item.pages.length && <app-menu menu={this.item.pages} />}
       </li>
     );
   }

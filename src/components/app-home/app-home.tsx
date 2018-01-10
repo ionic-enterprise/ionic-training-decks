@@ -1,29 +1,40 @@
-import { Component } from '@stencil/core';
+import { Component, Prop } from '@stencil/core';
+import { MatchResults } from '@stencil/router';
 
 @Component({
   tag: 'app-home',
   styleUrl: 'app-home.scss'
 })
 export class AppHome {
-  private labs: Array<any> = [];
+  private items: Array<any> = [];
 
-  async ionViewWillLoad() {
-    const file = await fetch('/assets/data/labs.json');
-    this.labs = JSON.parse(await file.text()).labs;
+  @Prop() match: MatchResults;
+
+  async componentWillLoad() {
+    const file = await fetch('/assets/data/menu.json');
+    this.items = JSON.parse(await file.text()).pages;
   }
 
   render() {
     return (
-      <div>
-        <ul>
-          {this.labs.map(lab => (
-            <li>
-              <stencil-route-link url={`lab/${lab.path}/${lab.start}`}>
-                {lab.title}
-              </stencil-route-link>
-            </li>
-          ))}
-        </ul>
+      <div class="container">
+        <div class="menu">
+          <app-menu menu={this.items} />
+        </div>
+        <div class="content">
+          <stencil-route
+            url="/:step"
+            routeRender={props => {
+              {
+                return (
+                  <app-markdown
+                    path={`/assets/data/markdown/${props.match.params.step}`}
+                  />
+                );
+              }
+            }}
+          />
+        </div>
       </div>
     );
   }

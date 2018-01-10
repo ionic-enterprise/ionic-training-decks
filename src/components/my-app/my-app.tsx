@@ -10,15 +10,11 @@ export class MyApp {
       <div>
         <header>
           <h1>Ionic Training Deck</h1>
-          <div class="links">
-            <stencil-route-link url="/">All Labs</stencil-route-link>
-          </div>
         </header>
 
         <main>
           <stencil-router>
-            <stencil-route url="/" component="app-home" exact={true} />
-            <stencil-route url="/lab/:lab" component="app-lab" />
+            <stencil-route url="/" component="app-home" />
           </stencil-router>
         </main>
       </div>
