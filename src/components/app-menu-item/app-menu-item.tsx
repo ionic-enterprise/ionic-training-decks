@@ -17,11 +17,6 @@ export class AppMenuItem {
         {this.item.pages &&
           this.item.pages.length && (
             <app-menu lab={this.lab} menu={this.item.pages} />
-            // <ul>
-            //   {this.item.pages.map(item => (
-            //     <app-menu-item lab={this.lab} item={item} />
-            //   ))}
-            // </ul>
           )}
       </li>
     );

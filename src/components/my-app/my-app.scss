@@ -4,14 +4,24 @@ my-app {
     color: white;
     height: 56px;
     display: flex;
-    align-items: center;
     box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.26);
+    align-items: center;
 
     h1 {
+      flex-grow: 1;
       font-size: 1.4rem;
       font-weight: 500;
-      color: #fff;
       padding: 0 12px;
+    }
+
+    .links {
+      text-align:  right;
+      flex-grow: 1;
+      a {
+        color: white;
+        text-decoration: none;
+        padding: 0 12px;
+      }
     }
   }
 }
