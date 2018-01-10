@@ -2,10 +2,12 @@
   "labs": [
     {
       "path": "iss-tracker",
+      "start": "main",
       "title": "International Space Station Tracker"
     },
     {
       "path": "itunes",
+      "start": "main",
       "title": "iTunes Feed"
     }
   ]

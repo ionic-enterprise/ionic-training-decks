@@ -12,7 +12,9 @@ export class AppLab {
 
   async componentWillLoad() {
     if (this.match && this.match.params.lab) {
-      const file = await fetch(`/assets/data/${this.match.params.lab}/menu.json`);
+      const file = await fetch(
+        `/assets/data/${this.match.params.lab}/menu.json`
+      );
       this.items = JSON.parse(await file.text()).pages;
     }
   }
@@ -29,14 +31,12 @@ export class AppLab {
               url="/lab/:lab/:file"
               routeRender={props => {
                 {
-                  return props.match.params.file ? (
+                  return (
                     <app-markdown
                       path={`/assets/data/${props.match.params.lab}/markdown/${
                         props.match.params.file
                       }`}
                     />
-                  ) : (
-                    <app-empty-content />
                   );
                 }
               }}

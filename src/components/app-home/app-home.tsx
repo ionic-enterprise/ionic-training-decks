@@ -18,7 +18,9 @@ export class AppHome {
         <ul>
           {this.labs.map(lab => (
             <li>
-              <a href={`lab/${lab.path}`}>{lab.title}</a>
+              <stencil-route-link url={`lab/${lab.path}/${lab.start}`}>
+                {lab.title}
+              </stencil-route-link>
             </li>
           ))}
         </ul>
