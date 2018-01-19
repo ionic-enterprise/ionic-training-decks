@@ -11,6 +11,7 @@ export class AppHome {
   @Prop() match: MatchResults;
 
   async componentWillLoad() {
+    console.log('fetching menu');
     const file = await fetch('/assets/data/menu.json');
     this.items = JSON.parse(await file.text()).pages;
   }

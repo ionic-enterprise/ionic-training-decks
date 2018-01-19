@@ -1,12 +1,8 @@
 .app-menu {
-  list-style-type: none;
+  padding-bottom: 6px;
+  padding-left: 12px;
 
-  ul {
-    padding-bottom: 6px;
-    padding-left: 12px;
-  }
-
-  li {
+  .app-menu-item {
     margin-top: 6px;
     font-size: 14px;
     font-weight: 400;
@@ -15,7 +11,7 @@
       color: black;
       text-decoration: none;
 
-      &:hover{
+      &:hover {
         font-weight: 600;
       }
 
@@ -25,16 +21,30 @@
       }
     }
 
-    ul li {
+    .app-menu .app-menu-item {
       font-size: 12px;
-      a {
+      a:not(.link-active) {
         color: #464646;
       }
-      ul li {
-        a {
+      .app-menu .app-menu-item {
+        a:not(.link-active) {
           color: #7d7d7d;
         }
       }
     }
   }
 }
+
+//     ul li {
+//       font-size: 12px;
+//       a {
+//         color: #464646;
+//       }
+//       ul li {
+//         a {
+//           color: #7d7d7d;
+//         }
+//       }
+//     }
+//   }
+// }
