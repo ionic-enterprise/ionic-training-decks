@@ -2,4 +2,4 @@
 
 # Training Deck
 
-A application to display our training materials.
+A application to display our training materials. Version 1.0.0
