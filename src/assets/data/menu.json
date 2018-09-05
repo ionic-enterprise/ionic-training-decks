@@ -1,8 +1,8 @@
 {
   "pages": [
     {
-      "id": "installation",
-      "title": "Installing Ionic"
+      "id": "getting-started",
+      "title": "Getting Started"
     },
     {
       "id": "ionic-weather",
@@ -10,7 +10,7 @@
       "pages": [
         {
           "id": "ionic-weather-step01",
-          "title": "Lab: Create the Application"
+          "title": "Lab: Generate the Application"
         }
       ]
     }

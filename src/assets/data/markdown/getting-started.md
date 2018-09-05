@@ -1,4 +1,4 @@
-# Installation
+# Getting Started
 
 In order to follow along with creating the applications described here, you will need to perform the following actions on your development machine.
 

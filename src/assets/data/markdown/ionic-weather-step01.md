@@ -1,4 +1,4 @@
-# Getting Started
+# Generate the Application
 
 The first step is to create the application and connect the application to Ionic Pro. To do this we will use the `ionic start` command.
 
