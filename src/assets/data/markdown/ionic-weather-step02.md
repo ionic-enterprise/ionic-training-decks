@@ -15,6 +15,7 @@ In this lab, you will perform the following tasks:
 1. build your application for your device
 1. install the application on your device
 1. squash your committed changes, merge your branch, and push to Ionic Pro
+1. test the Ionic Pro deploy feature
 
 
 ## Creating a Feature Branch
@@ -174,7 +175,7 @@ You should also see markup similar to the following in your `package.json` file
 
 These parameters can be updated later if need be. For example, you may want to use a different update method.
 
-Be sure to commit your changes: `git commit -am "WIP - add the ionic pro plugin"
+Be sure to commit your changes: `git commit -am "WIP - add the ionic pro plugin"`
 
 ## Build the Application for Your Device
 
@@ -189,6 +190,8 @@ The iOS build may fail in the packaging step, but that is OK.
 
 ### iOS 
 
+**Note:** you may need to perform some security related configuration on your device and you will need to have some form of an Apple developer account be it via your organization or a personal account (which can be free or paid)
+
 1. open the project in Xcode: `open platforms/ios/ionic-weather.xcworkspace`
 1. click on `ionic-weather` in the project tree
 1. choose either your personal team or your organization's team
@@ -196,10 +199,122 @@ The iOS build may fail in the packaging step, but that is OK.
 1. select your phone from the device drop-down
 1. press the run button
 
-**Note:** you may need to perform some security related configuration on your device.
+**Note:** it is also possible to use `ionic cordova run ios` but I find that Xcode works better and more consistently.
 
 ### Android 
 
-**Note:** you may need to put your device in "Developer Mode" if it is not already.
+**Note:** you will need to put your device in "Developer Mode" if it is not already
+
+1. conntect your device
+1. `adb devices` - make sure your device is listed
+1. `ioinc cordova run android` - this will build your application and run it on your attached Android device
+
+**Note:** it is also possible to use Android Studio to build and run the application
 
 ## Squash and Merge
+
+During the development of this feature, I suggested that you commit your changes early and often. It is now time to squash those intermediate commits into a single commit for this feature and merge that commit into master.
+
+A typical workflow looks like the following (this assumes that you set up an origin remote)
+
+1. `git fetch origin master` - make sure we have all changes from other devs
+1. `git rebase -i origin/master` - replay all of our changes on top of the latest changes in `origin/master` 
+
+**NOTE:** if you don't have an `origin` remote, those steps are just `git rebase -i master`
+
+At this point, you will be presented with a screen such as the following (note that you will be in whatever the default editor is currently set to, which is generally `vi`):
+
+```
+pick e011996 feat(ionic-pro): integrate ionic pro
+pick 31cac5b WIP - add platforms
+pick 639cf97 WIP - init Ionic Pro
+pick ffad2b9 WIP - add the ionic pro plugin
+
+# Rebase 4b04e62..ffad2b9 onto 4b04e62 (4 commands)
+#
+# Commands:
+# p, pick <commit> = use commit
+# r, reword <commit> = use commit, but edit the commit message
+# e, edit <commit> = use commit, but stop for amending
+# s, squash <commit> = use commit, but meld into previous commit
+# f, fixup <commit> = like "squash", but discard this commit's log message
+# x, exec <command> = run command (the rest of the line) using shell
+# d, drop <commit> = remove commit
+# l, label <label> = label current HEAD with a name
+# t, reset <label> = reset HEAD to a label
+# m, merge [-C <commit> | -c <commit>] <label> [# <oneline>]
+# .       create a merge commit using the original merge commit's
+# .       message (or the oneline, if no original merge commit was
+# .       specified). Use -c <commit> to reword the commit message.
+#
+# These lines can be re-ordered; they are executed from top to bottom.
+```
+
+You have a lot of flexibility. What you want to do most of the time is `pick` the first commit, and `fixup` all of the others. So, edit this to look like such:
+
+```
+pick e011996 feat(ionic-pro): integrate ionic pro
+f 31cac5b WIP - add platforms
+f 639cf97 WIP - init Ionic Pro
+f ffad2b9 WIP - add the ionic pro plugin
+
+# Rebase 4b04e62..ffad2b9 onto 4b04e62 (4 commands)
+#
+# Commands:
+# p, pick <commit> = use commit
+# r, reword <commit> = use commit, but edit the commit message
+# e, edit <commit> = use commit, but stop for amending
+# s, squash <commit> = use commit, but meld into previous commit
+# f, fixup <commit> = like "squash", but discard this commit's log message
+# x, exec <command> = run command (the rest of the line) using shell
+# d, drop <commit> = remove commit
+# l, label <label> = label current HEAD with a name
+# t, reset <label> = reset HEAD to a label
+# m, merge [-C <commit> | -c <commit>] <label> [# <oneline>]
+# .       create a merge commit using the original merge commit's
+# .       message (or the oneline, if no original merge commit was
+# .       specified). Use -c <commit> to reword the commit message.
+#
+# These lines can be re-ordered; they are executed from top to bottom.
+```
+
+Exit `vi` while writing the file (is use `<esc>:x` but there are multiple ways to do this), and git will execute the rebase script, reapplying your changes on top of any other changes and squashing it down to a single commit
+
+You are now ready to push this branch to `origin` and submit it for peer review via a "pull request".
+
+For the purpose of this training, we will just merge into master and push that:
+
+1. `git checkout master`
+1. `git merge feature/integrateIonicPro`
+1. `get push`
+1. `git branch -d feature/integrateIonicPro`
+
+## Test Ionic Pro Deploy
+
+Currently, the about page does not show anything. Use that fact to test your deploy by modifying the `about.html` file as such:
+
+```html
+<ion-header>
+  <ion-navbar>
+    <ion-title>
+      About
+    </ion-title>
+  </ion-navbar>
+</ion-header>
+
+<ion-content padding>
+  <div>
+    This is a starter application, so I cannot really tell you much.
+  </div>
+</ion-content>
+```
+
+1. close the application running on your device (be sure to close it, not just background it)
+1. make the above change
+1. `git commit -am "test(ionic-pro): update the about page"`
+1. `git push`
+1. `git push ionic master`
+1. once the build finishes, verify that the master channel has been updated to the latest build
+1. open the app, and verify your change is there
+
+**Note:** we just made a change on `master` and pushed it rather than using a branch and merge strategy. Never do this in production. You _will_ cause issues in a multi-developer project if you do.

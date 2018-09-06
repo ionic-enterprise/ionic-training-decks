@@ -1,5 +1,7 @@
 # Lab: Generate the Application
 
+## `ionic start`
+
 The first step is to create the application and connect the application to Ionic Pro. To do this you will use the `ionic start` command.
 
 1. at a command prompt, change directory to your working folder
@@ -70,6 +72,42 @@ Your application will have been generated and you should see the following instr
        - Finally, push your code to Ionic Pro to perform real-time updates, and 
        more: git push ionic master
 ```
+
+## Remote Repositories
+
+Once you have ype the following command: `git remote -vv`. You should see something like this:
+
+```bash
+~/Projects/Training/ionic-weather (master): git remote -vv
+ionic	git@git.ionicjs.com:kensodemannionic/ionic-weather.git (fetch)
+ionic	git@git.ionicjs.com:kensodemannionic/ionic-weather.git (push)
+```
+
+This is the remote where you push changes that you want Ionic Pro to build and deploy. You should not use this as your main remote repository. For that, you should either use a cloud based git service such as GitHub or Bitbucket or use an in-house solution such as Bitbucket Enterprise. For this course, let's use one of the public cloud based services. I will use GitHub, but the process is similar for others.
+
+1. log on to GitHub
+1. click the "New" button
+1. give the repository a name like `ioinc-weather`
+1. keep it public
+1. click "Create repository"
+1. `git remote add origin git@github.com:kensodemann/ionic-weather.git`
+1. `git push -u origin master`
+
+Now `git remote -vv` will show two remote repositories:
+
+```bash
+~/Projects/Training/ionic-weather (master): git remote -vv
+ionic	git@git.ionicjs.com:kensodemannionic/ionic-weather.git (fetch)
+ionic	git@git.ionicjs.com:kensodemannionic/ionic-weather.git (push)
+origin	git@git.github.com:kensodemannionic/ionic-weather.git (fetch)
+origin	git@git.github.com:kensodemannionic/ionic-weather.git (push)
+```
+
+The `origin` remote is meant to be the source of truth for your project. This is where all developers will `pull` changes from and will `push` changes to.
+
+The `ionic` remote is meant to be pushed to when an Ionic Pro build is desired and will typically be pushed to by a smaller set of developers depending on how your project is managed.
+
+## Building and Running
 
 Let's just make sure you can build your application:
 
