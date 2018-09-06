@@ -19,6 +19,10 @@
         {
           "id": "ionic-weather-step03",
           "title": "Lab: Monitor Errors"
+        },
+        {
+          "id": "ionic-weather-step04",
+          "title": "Lab: Layout Pages"
         }
       ]
     }

@@ -2,7 +2,6 @@
 
 In order to follow along with creating the applications described here, you will need to perform the following actions on your development machine.
 
-
 - make sure you have Node and Git installed on your machines
 - create a working directory, I use `~/Projects/Training` on my Mac and Linux machines, but you can use whatever you want
 - `npm -g ionic cordova` (may need to use `sudo` or run as Administrator in Windows)
