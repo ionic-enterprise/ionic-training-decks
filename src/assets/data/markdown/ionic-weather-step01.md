@@ -1,9 +1,9 @@
-# Generate the Application
+# Lab: Generate the Application
 
-The first step is to create the application and connect the application to Ionic Pro. To do this we will use the `ionic start` command.
+The first step is to create the application and connect the application to Ionic Pro. To do this you will use the `ionic start` command.
 
 1. at a command prompt, change directory to your working folder
-1. type: `ionic start ionic-weather tabs --type=angular --cordova`
+1. type: `ionic start ionic-weather tabs --cordova`
 
 This process will run for a while. It will generate the application from a starter template, set up the application to use Cordova, install the required libraries via NPM, initialize the git repository for the application, and perform the initial git commit.
 
@@ -52,13 +52,13 @@ Initialized empty Git repository in /Users/kensodemann/Projects/Training/ionic-w
 ? Install the free Ionic Pro SDK and connect your app? (Y/n) 
 ```
 
-Note the final message in the output. This is asking you if you would like to connect your application to Ionic Pro. We want to do this.
+Note the final message in the output. This is asking you if you would like to connect your application to Ionic Pro. You want to do this.
 
 1. answer 'Y' to the Ionic Pro SDK question
 1. you will be asked if you want to link to an existing app or create a new one, choose to create a new one
 1. you will be asked if you would like to use GitHub integration or Ionic Pro, choose Ionic Pro
 
-At this point, your application will have been generated and you should see the following instructions:
+Your application will have been generated and you should see the following instructions:
 
 ```bash
 [INFO] Next Steps:
@@ -71,7 +71,9 @@ At this point, your application will have been generated and you should see the 
        more: git push ionic master
 ```
 
-At this point, let's just make sure we can build our application:
+Let's just make sure you can build your application:
 
 1. `cd ionic-weather`
 1. `ionic serve`
+
+You should now see your application running in your default browser.

@@ -11,6 +11,10 @@
         {
           "id": "ionic-weather-step01",
           "title": "Lab: Generate the Application"
+        },
+        {
+          "id": "ionic-weather-step02",
+          "title": "Lab: Integrate Ionic Pro"
         }
       ]
     }
