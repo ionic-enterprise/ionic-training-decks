@@ -15,6 +15,10 @@
         {
           "id": "ionic-weather-step02",
           "title": "Lab: Integrate Ionic Pro"
+        },
+        {
+          "id": "ionic-weather-step03",
+          "title": "Lab: Monitor Errors"
         }
       ]
     }
