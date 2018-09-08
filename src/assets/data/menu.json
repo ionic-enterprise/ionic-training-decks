@@ -27,6 +27,34 @@
         {
           "id": "ionic-weather-step05",
           "title": "Lab: Style"
+        },
+        {
+          "id": "ionic-weather-step06",
+          "title": "Lab: Use a Library"
+        },
+        {
+          "id": "ionic-weather-step07",
+          "title": "Lab: Getting Data"
+        },
+        {
+          "id": "ionic-weather-step08",
+          "title": "Lab: Other Pages"
+        },
+        {
+          "id": "ionic-weather-step09",
+          "title": "Lab: Using Plugins"
+        },
+        {
+          "id": "ionic-weather-step10",
+          "title": "Lab: Using Plugins"
+        },
+        {
+          "id": "ionic-weather-step11",
+          "title": "Lab: User Preferences"
+        },
+        {
+          "id": "ionic-weather-step12",
+          "title": "Lab: Lazy Loading"
         }
       ]
     }
