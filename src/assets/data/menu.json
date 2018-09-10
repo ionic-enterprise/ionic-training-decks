@@ -44,7 +44,13 @@
         },
         {
           "id": "ionic-weather-step08",
-          "title": "Lab: Use the Data"
+          "title": "Lab: Use the Data",
+          "pages": [
+            {
+              "id": "ionic-weather-step08-01",
+              "title": "Completed Code"
+            }
+          ]
         },
         {
           "id": "ionic-weather-step09",

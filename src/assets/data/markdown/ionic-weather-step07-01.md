@@ -1,4 +1,4 @@
-# Completed Code for Step #7
+# Completed Code for Lab: Getting Data
 
 Please try to write this code on your own before consulting this part of the guide.
 
