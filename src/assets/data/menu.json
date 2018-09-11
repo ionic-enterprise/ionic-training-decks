@@ -54,18 +54,20 @@
         },
         {
           "id": "ionic-weather-step09",
-          "title": "Lab: Using Plugins"
+          "title": "Lab: Using Plugins",
+          "pages": [
+            {
+              "id": "ionic-weather-step09-01",
+              "title": "Completed Code"
+            }
+          ]
         },
         {
           "id": "ionic-weather-step10",
-          "title": "Lab: Plugins vs. Web API"
-        },
-        {
-          "id": "ionic-weather-step11",
           "title": "Lab: User Preferences"
         },
         {
-          "id": "ionic-weather-step12",
+          "id": "ionic-weather-step11",
           "title": "Lab: Lazy Loading"
         }
       ]

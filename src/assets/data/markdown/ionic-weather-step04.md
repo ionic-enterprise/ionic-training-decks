@@ -6,6 +6,7 @@ Our application will have three tabs:
 * Forecast
 * UV Index
 
+
 1. prepare your development environment
 1. change the tab labels
 1. change the tab icons
