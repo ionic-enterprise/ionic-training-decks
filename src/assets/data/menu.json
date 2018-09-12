@@ -44,7 +44,7 @@
         },
         {
           "id": "ionic-weather-step08",
-          "title": "Lab: Use the Data",
+          "title": "Lab: Using the Data",
           "pages": [
             {
               "id": "ionic-weather-step08-01",
@@ -64,10 +64,26 @@
         },
         {
           "id": "ionic-weather-step10",
-          "title": "Lab: User Preferences"
+          "title": "Lab: User Preferences Step 1",
+          "pages": [
+            {
+              "id": "ionic-weather-step10-01",
+              "title": "Completed Code"
+            }
+          ]
         },
         {
           "id": "ionic-weather-step11",
+          "title": "Lab: User Preferences Step 2",
+          "pages": [
+            {
+              "id": "ionic-weather-step11-01",
+              "title": "Completed Code"
+            }
+          ]
+        },
+        {
+          "id": "ionic-weather-step12",
           "title": "Lab: Lazy Loading"
         }
       ]

@@ -1,4 +1,4 @@
-# Lab: Use the Data Service
+# Lab: Using the Data Service
 
 ## Injector Error 
 

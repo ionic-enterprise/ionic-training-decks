@@ -1,4 +1,4 @@
-# Lab: Get Data
+# Lab: Getting Data
 
 Your app looks nice, but it does not display real data. Let's fix that.
 
