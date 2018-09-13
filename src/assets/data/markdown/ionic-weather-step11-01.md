@@ -455,7 +455,7 @@ export class UserPreferencesProvider {
     await this.storage.ready();
     if (!this._city) {
       const city = await this.storage.get(this.keys.city);
-      this._city = cities.find(c => c.name === city.name) || cities[0];
+      this._city = cities.find(c => c.name === (city && city.name)) || cities[0];
     }
     return this._city;
   }
