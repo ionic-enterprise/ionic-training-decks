@@ -141,7 +141,9 @@ export class CurrentWeatherPage {
 }
 ```
 
-Better yet, the references in `app.module.ts` and `tabs.ts` should have changed as well. Repeat these steps for the other two pages that were renamed. At this point, you should have a functioning application once again with properly refactored code.
+Better yet, the references in `app.module.ts` and `tabs.ts` should have changed as well.
+
+Repeat these steps for the other two pages that were renamed. At this point, you should have a functioning application once again with properly refactored code.
 
 `git commit -am "WIP - rename the page classes"`
 

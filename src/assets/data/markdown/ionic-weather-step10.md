@@ -196,5 +196,3 @@ In the view, markup is required for the user controls. The two-way binding via `
 ```
 
 Also hookup the `save()` method via the save button's click event.
-
-### Create a Data Service
