@@ -1,0 +1,190 @@
+# Lab: User Preferences Step 2
+
+The user preferences will be stored on the device using <a href="https://github.com/ionic-team/ionic-storage" target="_blank">Ionic Storage</a>, which encapsulates several local storage options. In this lab, we will:
+
+* create a service to store and retrieve the data
+* create a subject that will emit when data changes
+* modify the user preferences dialog to store the data
+* modify the pages to repond to the user preference data changing
+
+## Create a Data Service
+
+This service will just save and retrieve / cache the user preference data.
+
+1. using the CLI, create a provider called `user-preferences`
+1. add the `IonicStorageModule` to the list of `imports` in `app.module.ts` as per the documentation on GitHub
+1. create methods to get and set the user preference data in the provider that was just created
+
+Here is the full code to get and set the `useCelcius` preference:
+
+```TypeScript
+import { Storage } from '@ionic/storage';
+import { Injectable } from '@angular/core';
+
+@Injectable()
+export class UserPreferencesProvider {
+  private keys = {
+    useCelcius: 'useCelcius',
+    city: 'city'
+  };
+  private _useCelcius: boolean;
+
+  constructor(private storage: Storage) {}
+
+  async getUseCelcius(): Promise<boolean> {
+    await this.storage.ready();
+    if (this._useCelcius === undefined) {
+      this._useCelcius = await this.storage.get(this.keys.useCelcius);
+    }
+    return this._useCelcius;
+  }
+
+  async setUseCelcius(value: boolean): Promise<void> {
+    await this.storage.ready();
+    this._useCelcius = value;
+    this.storage.set(this.keys.useCelcius, value);
+  }
+}
+```
+
+**Note:** we could have also used getters and setters here, but I think that makes the calling code look weird. `this.userPreferences.getUseCelcius().then(...)` vs `this.userPreferences.useCelcius.then(...)`. That is mitigated somewhat if you use `async/await` all the time in your code. The choice is totally up to you.
+
+**Challenge:** create similar methods for the city.
+
+## Refactor
+
+At this point, it does not make much sense for the cities to be defined where they are. Let's do a couple of things:
+
+1. move the `cities.ts` file in with the service
+1. add a method to the service that returns the available cities
+1. change the `getCity()` method created above such that if there is no city stored it returns the "Current Location" city (cities[0]).
+
+**Challenge:** do the above, making as few changes to the `UserPreferencesComponent` as possible while still maintaining a working application.
+
+## Use the Service in the Component
+
+**Challenge:** this one is all on you, try to do it without looking at the completed code
+
+1. inject the service in the `UserPreferencesComponent`
+1. get the values and set the properties in an appropriate life-cycle event
+1. set the data and close the modal from the `save()`
+
+**Note:** you will find a bug with the data service here that prevents the select from initializing properly, so let's discuss what that is when we all get here.
+
+The problem is that the select was being populated using the `cities` array, but we were returning the `city` as an object that we were storing. These end up being two different objects, and the select does not use deep comparisons.
+
+One easy way to fix this is to make `getCity()` return an object from the `cities` array.
+
+## Use the Service in the Pages
+
+In the `CurrentWeatherPage`:
+
+1. inject the `UserPreferencesProvider`
+1. add `cityName` and `scale` properties (both strings)
+1. update the `ionViewDidEnter()` to get the data and set the properties
+
+```TypeScript
+  ionViewDidEnter() {
+    this.userPreferences.getCity().then(c => this.cityName = c.name);
+    this.userPreferences.getUseCelcius().then(u => { this.scale = u ? 'C' : 'F' });
+    this.weather.current().subscribe(w => (this.currentWeather = w));
+  }
+```
+
+In the view, bind the data:
+
+```html
+  <div class="information">
+    <ion-label class="city">{{cityName}}</ion-label>
+    <kws-temperature class="primary-value" [scale]="scale" temperature="{{currentWeather?.temperature}}"></kws-temperature>
+  </div>
+```
+
+**Challenge:** do the same for the `ForecastPage`. You will only need to deal with the scale.
+
+## Use the Service in the Weather Service
+
+When gettng the current location, the user preferences need to be taken into account.
+
+1. inject the `UserPreferencesProvider`
+1. modify the `getCurrentLocation()` function to check the city from user preferences and either return that cities location or use geo-location via `this.location.current()`
+
+**Hints:**
+
+1. you need to change the code inside of the `Observable.fromPromise()`
+1. promises can be chained
+1. when promises are chained, the promise ulitmately resolves to whatever is returned by the inner-most `then()` callback.
+
+In other words:
+
+```TypeScript
+var z = true;
+
+foo() {
+  return Promise.resolve(z);
+}
+
+bar() {
+  return Promise.resolve('bar');
+}
+
+baz() {
+  return foo().then(x => {
+    if (x) {
+      return 'baz';
+    } else {
+      return bar();
+    }
+  })
+}
+```
+
+Calling `baz()` will resolve "baz" when `z` is `true` and "bar" when `z` is `false';
+
+Keeping that in mind will be helpful as you refactor the `getCurrentLocation()` function.
+
+## Respond to Changes in the User Preferences
+
+In rxjs, the `Subject` is kind of like an Event Emitter. Set one up in the `UserPreferenceProvider`.
+
+1. `import { Subject } from 'rxjs';`
+1. instantiate a new `Subject` in the constructor
+1. call the `Subject`'s `next()` method when you want to emit a value on it
+
+Often, you will emit a value. In this case just emit nothing. Here is a synopsis of the changes:
+
+```TypeScript
+import { Subject } from 'rxjs';
+
+import { City } from '../../models/city';
+import { cities } from './cities';
+
+@Injectable()
+export class UserPreferencesProvider {
+
+  ...
+
+  changed: Subject<void>;
+
+  constructor(private storage: Storage) {
+    this.changed = new Subject();
+  }
+
+  ...
+
+  async setUseCelcius(value: boolean): Promise<void> {
+    await this.storage.ready();
+    this._useCelcius = value;
+    this.changed.next();
+    this.storage.set(this.keys.useCelcius, value);
+  }
+
+  ...
+
+  async setCity(city: City): Promise<void> {
+    await this.storage.ready();
+    this._city = cities.find(c => c.name === city.name) || cities[0];
+    this.changed.next();
+    this.storage.set(this.keys.city, city);
+  }
+```

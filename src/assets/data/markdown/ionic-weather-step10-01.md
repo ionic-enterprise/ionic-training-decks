@@ -165,7 +165,7 @@ export let cities: Array<City> = [
   <ion-list>
     <ion-item>
       <ion-label>Use Celcius</ion-label>
-      <ion-toggle [(ngModel)]="city"></ion-toggle>
+      <ion-toggle [(ngModel)]="useCelcius"></ion-toggle>
     </ion-item>
 
     <ion-item>
