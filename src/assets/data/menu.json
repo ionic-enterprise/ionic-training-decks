@@ -84,7 +84,13 @@
         },
         {
           "id": "ionic-weather-step12",
-          "title": "Lab: Lazy Loading"
+          "title": "Lab: Lazy Loading",
+          "pages": [
+            {
+              "id": "ionic-weather-step12-01",
+              "title": "Completed Code"
+            }
+          ]
         }
       ]
     }

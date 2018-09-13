@@ -2,7 +2,7 @@
 
 Please try to write this code on your own before consulting this part of the guide.
 
-# `src/app/app.module.ts`
+## `src/app/app.module.ts`
 
 ```TypeScript
 import {
@@ -96,7 +96,7 @@ export class MyErrorHandler implements ErrorHandler {
 export class AppModule {}
 ```
 
-# `src/components/user-preferences/user-preferences.html`
+## `src/components/user-preferences/user-preferences.html`
 
 ```html
 <ion-header>
@@ -132,7 +132,7 @@ export class AppModule {}
 </ion-footer>
 ```
 
-# `src/components/user-preferences/user-preferences.ts`
+## `src/components/user-preferences/user-preferences.ts`
 
 ```TypeScript
 import { Component } from '@angular/core';
@@ -173,7 +173,7 @@ export class UserPreferencesComponent {
 }
 ```
 
-# `src/pages/current-weather/current-weather.html`
+## `src/pages/current-weather/current-weather.html`
 
 ```html
 <ion-header>
@@ -197,7 +197,7 @@ export class UserPreferencesComponent {
 </ion-content>
 ```
 
-# `src/pages/current-weather/current-weather.ts`
+## `src/pages/current-weather/current-weather.ts`
 
 ```TypeScript
 import { Component } from '@angular/core';
@@ -257,7 +257,7 @@ export class CurrentWeatherPage {
 }
 ```
 
-# `src/pages/forecast/forecast.html`
+## `src/pages/forecast/forecast.html`
 
 ```html
 <ion-header>
@@ -283,7 +283,7 @@ export class CurrentWeatherPage {
 </ion-content>
 ```
 
-# `src/pages/forecast/forecast.ts`
+## `src/pages/forecast/forecast.ts`
 
 ```TypeScript
 import { Component } from '@angular/core';
@@ -341,7 +341,7 @@ export class ForecastPage {
 }
 ```
 
-# `src/pages/uv-index/uv-index.ts`
+## `src/pages/uv-index/uv-index.ts`
 
 ```TypeScript
 import { Component } from '@angular/core';
@@ -410,7 +410,7 @@ export class UVIndexPage {
 }
 ```
 
-# `src/providers/user-preferences/user-preferences.ts`
+## `src/providers/user-preferences/user-preferences.ts`
 
 ```TypeScript
 import { Storage } from '@ionic/storage';
@@ -473,7 +473,7 @@ export class UserPreferencesProvider {
 }
 ```
 
-# `src/providers/weather/weather.ts`
+## `src/providers/weather/weather.ts`
 
 ```TypeScript
 import { HttpClient } from '@angular/common/http';
