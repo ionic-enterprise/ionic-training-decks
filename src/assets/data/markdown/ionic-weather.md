@@ -9,4 +9,4 @@ The Ioinic Weather Application is an Ionic v4 application that provides informat
 - add third party component libraries to the application
 - modify existing pages
 - add new services
-- add and and use Cordova plugins 
+- add and use Cordova plugins 

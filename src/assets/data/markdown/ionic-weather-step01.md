@@ -75,7 +75,7 @@ Your application will have been generated and you should see the following instr
 
 ## Remote Repositories
 
-Once you have ype the following command: `git remote -vv`. You should see something like this:
+After the application has finished generating, type the following command: `git remote -vv`. You should see something like this:
 
 ```bash
 ~/Projects/Training/ionic-weather (master): git remote -vv

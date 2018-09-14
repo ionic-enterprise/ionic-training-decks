@@ -188,3 +188,5 @@ export class UserPreferencesProvider {
     this.storage.set(this.keys.city, city);
   }
 ```
+
+TODO: Add the code to do respond to the "changed" subject here...
