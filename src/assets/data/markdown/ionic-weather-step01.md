@@ -73,7 +73,16 @@ Your application will have been generated and you should see the following instr
        more: git push ionic master
 ```
 
-## Remote Repositories
+## Building and Running
+
+Let's just make sure you can build your application:
+
+1. `cd ionic-weather`
+1. `ionic serve`
+
+You should now see your application running in your default browser.
+
+## Remote Repositories (Optional)
 
 After the application has finished generating, type the following command: `git remote -vv`. You should see something like this:
 
@@ -106,12 +115,3 @@ origin	git@git.github.com:kensodemannionic/ionic-weather.git (push)
 The `origin` remote is meant to be the source of truth for your project. This is where all developers will `pull` changes from and will `push` changes to.
 
 The `ionic` remote is meant to be pushed to when an Ionic Pro build is desired and will typically be pushed to by a smaller set of developers depending on how your project is managed.
-
-## Building and Running
-
-Let's just make sure you can build your application:
-
-1. `cd ionic-weather`
-1. `ionic serve`
-
-You should now see your application running in your default browser.

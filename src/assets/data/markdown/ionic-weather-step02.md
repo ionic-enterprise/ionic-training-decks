@@ -9,6 +9,7 @@ To set up your application for use with Ionic Pro, you need to install the lates
 In this lab, you will perform the following tasks:
 
 1. create a feature branch in which to perform your work
+1. update the reverse-domain ID
 1. add at least one platform to your project (iOS or Android)
 1. initialize the Ionic Pro Client
 1. add the Ionic Pro Cordova Plugin
@@ -23,7 +24,6 @@ In this lab, you will perform the following tasks:
 When using Git, you should never do your work in the `master` branch. You should get in the habit of using a workflow similar to the following:
 
 1. create a working "feature" branch
-1. update the reverse-domain ID
 1. commit changes early and often changes
 1. use a combination of `git fetch origin master` and `git rebase -i origin/master` to bring your code up to date with changes and squash changes into a single commit with a meaningful message
 1. submit your changes for review via a "pull request"
@@ -278,7 +278,7 @@ f ffad2b9 WIP - add the ionic pro plugin
 # These lines can be re-ordered; they are executed from top to bottom.
 ```
 
-Exit `vi` while writing the file (is use `<esc>:x` but there are multiple ways to do this), and git will execute the rebase script, reapplying your changes on top of any other changes and squashing it down to a single commit
+Exit `vi` while writing the file (I use `<esc>:x` but there are multiple ways to do this), and git will execute the rebase script, reapplying your changes on top of any other changes and squashing it down to a single commit
 
 You are now ready to push this branch to `origin` and submit it for peer review via a "pull request".
 
