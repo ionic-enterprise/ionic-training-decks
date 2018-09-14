@@ -88,7 +88,7 @@ You should now see your application running in your default browser.
 
 ## Remote Repositories (Optional)
 
-After the application has finished generating, type the following command: `git remote -vv`. You should see something like this:
+After the application has finished generating and you have verified your application will run, type the following command: `git remote -vv`. You should see something like this:
 
 ```bash
 ~/Projects/Training/ionic-weather (master): git remote -vv
@@ -96,15 +96,20 @@ ionic	git@git.ionicjs.com:kensodemannionic/ionic-weather.git (fetch)
 ionic	git@git.ionicjs.com:kensodemannionic/ionic-weather.git (push)
 ```
 
-This is the remote where you push changes that you want Ionic Pro to build and deploy. You should not use this as your main remote repository. For that, you should either use a cloud based git service such as GitHub or Bitbucket or use an in-house solution such as Bitbucket Enterprise. For this course, let's use one of the public cloud based services. I will use GitHub, but the process is similar for others.
+This is the remote where you push changes that you want Ionic Pro to build and deploy. You should *not* use this as your main remote repository. 
 
-1. log on to GitHub
-1. click the "New" button
-1. give the repository a name like `ioinc-weather`
-1. keep it public
-1. click "Create repository"
-1. `git remote add origin git@github.com:kensodemann/ionic-weather.git`
-1. `git push -u origin master`
+> You should either use a cloud-based git service (such as GitHub or Bitbucket) or use an in-house solution (such as Bitbucket Enterprise) for your main remote repository. 
+
+For this course, let's use one of the public cloud-based services. I will use GitHub, but the process is similar for others.
+
+1. Log on to [GitHub](https://github.com/)
+1. Click the "New" (+) button and select the **New repository** option
+1. Give the repository a name like `ionic-weather`
+1. Leave it as a Public repository
+1. Click the **Create repository** button
+1. Follow the instructions to "push an existing repository from the command line"
+    - `git remote add origin git@github.com:kensodemann/ionic-weather.git`
+    - `git push -u origin master`
 
 Now `git remote -vv` will show two remote repositories:
 
@@ -116,6 +121,6 @@ origin	git@git.github.com:kensodemannionic/ionic-weather.git (fetch)
 origin	git@git.github.com:kensodemannionic/ionic-weather.git (push)
 ```
 
-The `origin` remote is meant to be the source of truth for your project. This is where all developers will `pull` changes from and will `push` changes to.
+The `origin` (Github) remote is meant to be the source of truth for your project. This is where all developers will `pull` changes from and will `push` changes to.
 
 The `ionic` remote is meant to be pushed to when an Ionic Pro build is desired and will typically be pushed to by a smaller set of developers depending on how your project is managed.
