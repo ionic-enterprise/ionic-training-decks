@@ -121,4 +121,4 @@ origin	git@git.github.com:kensodemannionic/ionic-weather.git (push)
 
 The `origin` (Github) remote is meant to be the source of truth for your project. This is where all developers will `pull` changes from and will `push` changes to.
 
-The `ionic` remote is meant to be pushed to when an Ionic Pro build is desired and will typically be pushed to by a smaller set of developers depending on how your project is managed.
+The `ionic` remote is meant to be pushed to when an Ionic Pro Deploy or Package build is desired and will typically be pushed to by a smaller set of developers depending on how your project is managed.
