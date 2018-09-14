@@ -5,10 +5,8 @@
 The first step is to create the application and connect the application to Ionic Pro. To do this you will use the `ionic start` command.
 
 1. In a command prompt, change directory to your working folder
-1. Run the following command: 
-```
-ionic start ionic-weather tabs --cordova
-```
+1. Run the following command: `ionic start ionic-weather tabs --cordova`
+
 This process will run for a while. It will generate the application from a starter template, set up the application to use Cordova, install the required libraries via NPM, initialize the git repository for the application, and perform the initial git commit.
 
 The output looks like this:
@@ -98,11 +96,11 @@ ionic	git@git.ionicjs.com:kensodemannionic/ionic-weather.git (push)
 
 This is the remote where you push changes that you want Ionic Pro to build and deploy. You should *not* use this as your main remote repository. 
 
-> You should either use a cloud-based git service (such as GitHub or Bitbucket) or use an in-house solution (such as Bitbucket Enterprise) for your main remote repository. 
+> You should either use a cloud-based git service (such as GitHub or Bitbucket) or an in-house solution (such as Bitbucket Enterprise) for your main remote repository. 
 
 For this course, let's use one of the public cloud-based services. I will use GitHub, but the process is similar for others.
-
-1. Log on to [GitHub](https://github.com/)
+  
+1. Log on to <a href="https://github.com/" target="_blank">Github</a>
 1. Click the "New" (+) button and select the **New repository** option
 1. Give the repository a name like `ionic-weather`
 1. Leave it as a Public repository
