@@ -4,9 +4,11 @@
 
 The first step is to create the application and connect the application to Ionic Pro. To do this you will use the `ionic start` command.
 
-1. at a command prompt, change directory to your working folder
-1. type: `ionic start ionic-weather tabs --cordova`
-
+1. In a command prompt, change directory to your working folder
+1. Run the following command: 
+```
+ionic start ionic-weather tabs --cordova
+```
 This process will run for a while. It will generate the application from a starter template, set up the application to use Cordova, install the required libraries via NPM, initialize the git repository for the application, and perform the initial git commit.
 
 The output looks like this:
