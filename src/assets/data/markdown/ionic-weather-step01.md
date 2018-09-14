@@ -58,9 +58,11 @@ Initialized empty Git repository in /Users/kensodemann/Projects/Training/ionic-w
 
 Note the final message in the output. This is asking you if you would like to connect your application to Ionic Pro. You want to do this.
 
-1. answer 'Y' to the Ionic Pro SDK question
-1. you will be asked if you want to link to an existing app or create a new one, choose to create a new one
-1. you will be asked if you would like to use GitHub integration or Ionic Pro, choose Ionic Pro
+1. Answer **Y** (yes) to the Ionic Pro SDK question
+2. You will be asked if you want to link to an existing app or create a new one
+    - Choose to **Create a new one**
+3. You will be asked if you would like to use the GitHub integration or Ionic Pro
+    - Choose **Ionic Pro**
 
 Your application will have been generated and you should see the following instructions:
 
