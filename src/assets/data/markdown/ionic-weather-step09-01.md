@@ -143,7 +143,7 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { flatMap, map } from 'rxjs/operators';
 
-import { LocationProvider } from '../../providers/location/location';
+import { LocationProvider } from '../location/location';
 
 import { Forecast } from '../../models/forecast';
 import { Location } from '../../models/location';

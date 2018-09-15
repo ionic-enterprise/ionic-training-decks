@@ -482,8 +482,8 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { flatMap, map } from 'rxjs/operators';
 
-import { LocationProvider } from '../../providers/location/location';
-import { UserPreferencesProvider } from '../../providers/user-preferences/user-preferences';
+import { LocationProvider } from '../location/location';
+import { UserPreferencesProvider } from '../user-preferences/user-preferences';
 
 import { Forecast } from '../../models/forecast';
 import { Location } from '../../models/location';
