@@ -27,7 +27,7 @@ Remember to make intermediate commits with each step. We will squash and merge a
 
 ## Use the Library
 
-Good libraries usually document exactly how to use the library in your application. In the case of this library, which is a web component library built using a technology called (Stencil)[https://stenciljs.com]. For Angular applications like yours, there are a couple of steps that need to be taken to use the library.
+Good libraries usually document exactly how to use the library in your application. In the case of this library, which is a web component library built using a technology called <a href="https://stenciljs.com" target="_blank">Stencil</a>. For Angular applications like yours, there are a couple of steps that need to be taken to use the library.
 
 Since Angular does not know about the custom elements in the library, the `CUSTOM_ELEMENTS_SCHEMA` must be used. This tells the Angular compiler to ignore any elements it doesn't understand so long as they conform to the custom elements standard.
 
@@ -137,6 +137,17 @@ Add the new file and commit these changes:
 
 - `git add src/providers`
 - `git commit -am "WIP - add icon map"`
+
+## Install the Images
+
+<a download href="/assets/images/images.zip">Download the images</a> and unpack the zip file under `src/assets`, creating an `images` folder with the images in them.
+
+**Note:** the specifics on doing this depends on the type of machine you are using. On a Mac:
+
+1. drag and drop the `images.zip` from `Downloads` into `src/assets`
+1. double click the `images.zip` file in `src/assets`
+1. an `images` folder should be created
+1. remove the `images.zip` file
 
 ## Perform Some Global Styling
 
