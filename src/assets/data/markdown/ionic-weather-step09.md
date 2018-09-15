@@ -2,6 +2,16 @@
 
 Cordova plugins are used when you want to access native functionality from your application.
 
+In this lab you will learn how to:
+
+* use the status bar plugin
+* use the platform service
+* create a non-HTTP service
+* use promises
+* use promises and observables together by mapping the promises to observables
+* use `flatMap` to essentially "chain" observables
+* keep complex code clean
+
 ## Status Bar
 
 The application is currently using some corodova plugings. You just don't have to interact with them much, yet.
@@ -21,7 +31,7 @@ In the AppComponent constructor, the application waits for the platform to be re
   }
 ```
 
-**Challenge:** The application has a fairly ark background, which makes the status bar content difficult to read on iOS devices. Have a look at the documentation for the <a href="" target="_blank">Status Bar Plugin</a> and see if you can find a method to call that will fix that. Then implement it in the code.
+**Challenge:** The application has a fairly dark background, which makes the status bar content difficult to read on iOS devices. Have a look at the documentation for the <a href="" target="_blank">Status Bar Plugin</a> and see if you can find a method to call that will fix that. Then implement it in the code.
 
 **Hint:** This method will replace the `statusBar.styleDefault();` call in the code listed above. 
 

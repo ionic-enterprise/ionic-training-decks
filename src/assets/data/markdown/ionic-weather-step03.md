@@ -2,6 +2,12 @@
 
 **Note:** in this lab, we will again make changes directly in `master`. This is OK only because we are all working in with our own repositories and are not a shared remote. I will stress once again not to do this in real life.
 
+In this lab you will
+
+* change the "about" page to have a big red button that throws an exception
+* upload sourcemaps to Ionic Pro to provide better output in the error monitoring
+* deploy the application to your device 
+
 ## `about.ts`
 
 Change the `about.ts` file as follows:
@@ -61,7 +67,9 @@ This creates a big red button, and everyone knows that you should not press big 
 Source maps are required in order to provide a reasonable output of where the error is occuring. To upload source maps, run the following commands:
 
 1. `ionic build`
-1. `ionic monitoring syncmaps`
+1. `ionic monitoring syncmaps`o
+
+## Commit and Run
 
 Now commit these changes and deploy to Ionic Pro. Once the build has completed and is the active build on the Master channel, reopen the application on your device and trigger the error by pressing the big red button. After some processing time it will appear on the Ionic Pro dashboard.
 

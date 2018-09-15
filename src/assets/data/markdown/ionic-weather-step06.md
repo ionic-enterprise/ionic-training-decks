@@ -1,12 +1,19 @@
 # Lab: Use a Library
 
+In this lab you will learn how to:
+
+* install third party libraries
+* integrate the third party libraries into your application
+* model the data required by your application
+* mock up the interface of your application
+
 **Remember to start a new feature branch in git!!**
 
 ## Install the Library
 
 It is often useful to use third party libraries. For this application, we will use a library of <a href="https://github.com/kensodemann/kws-weather-widgets" target="_blank">weather related components</a> that I created and published on NPM. Many useful JavaScript libraries are availble via NPM and are available for use in your application.
 
-To instatll my weathr component library: `npm install kws-weather-widgets`
+To instatll my weather component library: `npm install kws-weather-widgets`
 
 The library is installed in `node_modules` and your `package.json` file is updated to reflect the new dependency:
 

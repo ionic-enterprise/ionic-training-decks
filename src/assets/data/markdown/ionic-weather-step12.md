@@ -1,5 +1,9 @@
 # Lab: Lazy Loading
 
+In this lab we will learn how to convert an application from using eager loading to using lazy loading.
+
+## About Lazy Loading
+
 The application so far loads two primary JavaScript files: `main.js` which contains all of the code that we wrote and `vendor.js` which contains most of our third party libraries. This means that the JavaScript for all of pages is being loaded and parsed up front. So the JavaScript for the "UV Index" page is loaded and parsed even if the user never visits that page. It would be better if that JavaScript were only loaded and parsed if the user visited the screen. That is where lazy loading comes in.
 
 **Note:** in the case of hybrid native applications, the JavaScript is being loaded from the local filesystem, so the load time is not an issue at all. On slower Android devices, however, the parse time can be significant.

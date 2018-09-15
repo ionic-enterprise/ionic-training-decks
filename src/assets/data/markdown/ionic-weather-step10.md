@@ -1,5 +1,14 @@
 # Lab: User Preferences Step 1
 
+In this lab you will learn how to:
+
+* create a component using the Ionic CLI
+* add icon buttons to the navbar
+* use the ModalController to create a modal
+* override styles locally
+* use the ViewController to dismiss the modal
+* hookup some form controls
+
 ## Create the Modal
 
 In order to launch a modal, a component to display in the modal needs to be specified. We can create the via `ionic g component user-preferences`.
@@ -57,11 +66,12 @@ The header will be very similar to the headers used on the pages, so copy the he
 
 * change the title to "user preferences"
 * change the icon button to use the "close" icon
-* change the method that it calls to "dismiss()" and create a stub method called "dismiss()" in the component's classo
+* change the method that it calls when handling the click event to "dismiss()"
+* create a stub method called "dismiss()" in the component's class
 
 The footer will be filled in later, so leave it blank.
 
-Finally, let's override some styles just for the modal component. Along with giving the modal a different look on a phone, this will make the modal more obvious when run on the web or on a tablet. 
+Finally, let's override some styles just for the modal component. Along with giving the modal a different look on a phone, this will also make the modal more obvious when run on the web or on a tablet. 
 
 ```scss
 user-preferences {

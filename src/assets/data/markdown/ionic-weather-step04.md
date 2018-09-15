@@ -1,5 +1,14 @@
 # Lab: Layout the Pages
 
+In this lab, you will learn:
+
+* how to specify icons and labels for tabs
+* how to use `git mv` to rename source files
+* how to use VSCode's refactoring tools to rename classes
+
+
+## Overview of the Process
+
 Our application will have three tabs:
 
 * Current Weather
@@ -7,7 +16,9 @@ Our application will have three tabs:
 * UV Index
 
 
-1. prepare your development environment
+To achieve this from our starting "tabs" based application, we will:
+
+1. prepare the development environment
 1. change the tab labels
 1. change the tab icons
 1. change the page titles

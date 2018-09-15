@@ -1,5 +1,11 @@
 # Lab: Generate the Application
 
+In this lab, you will:
+
+* generate an Ionic application
+* build and run the generated application
+* set up a remote git repository for your application
+
 ## `ionic start`
 
 The first step is to create the application and connect the application to Ionic Pro. To do this you will use the `ionic start` command.

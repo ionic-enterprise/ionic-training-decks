@@ -16,7 +16,7 @@ In this lab, you will perform the following tasks:
 1. build your application for your device
 1. install the application on your device
 1. squash your committed changes, merge your branch, and push to Ionic Pro
-1. test the Ionic Pro deploy feature
+1. try the Ionic Pro deploy feature
 
 
 ## Creating a Feature Branch
@@ -24,8 +24,8 @@ In this lab, you will perform the following tasks:
 When using Git, you should never do your work in the `master` branch. You should get in the habit of using a workflow similar to the following:
 
 1. create a working "feature" branch
-1. commit changes early and often changes
-1. use a combination of `git fetch origin master` and `git rebase -i origin/master` to bring your code up to date with changes and squash changes into a single commit with a meaningful message
+1. commit changes early and often
+1. use a combination of `git fetch origin master` and `git rebase -i origin/master` to bring your code up to date with changes made by other developers and squash changes into a single commit with a meaningful message
 1. submit your changes for review via a "pull request"
 1. merge the changes into master after review
 
@@ -282,14 +282,14 @@ Exit `vi` while writing the file (I use `<esc>:x` but there are multiple ways to
 
 You are now ready to push this branch to `origin` and submit it for peer review via a "pull request".
 
-For the purpose of this training, we will just merge into master and push that:
+For the purpose of this training, we will just merge into master and push:
 
 1. `git checkout master`
 1. `git merge feature/integrateIonicPro`
 1. `get push`
 1. `git branch -d feature/integrateIonicPro`
 
-## Test Ionic Pro Deploy
+## Try Ionic Pro Deploy
 
 Currently, the about page does not show anything. Use that fact to test your deploy by modifying the `about.html` file as such:
 

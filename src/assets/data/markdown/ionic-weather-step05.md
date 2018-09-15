@@ -1,5 +1,13 @@
 # Lab: Styling
 
+In this lab you will
+
+* apply defined colors to elements
+* change the default color theme
+* apply global styles
+* customize the applications splash screen and icon
+
+
 ## Setting a Color Theme
 
 **Remember to create a branch:** `git checkout -b feature/style`

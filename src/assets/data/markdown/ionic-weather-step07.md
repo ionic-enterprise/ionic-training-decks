@@ -2,11 +2,14 @@
 
 Your app looks nice, but it does not display real data. Let's fix that.
 
-In this lab, you will create a new service called `WeatherProvider` and then use Angular's HttpClient service to get data from <a href="https://openweathermap.org/" target="_blank">OpenWeatherMap.org</a>. You will then transform that data into something that can be consumed by your application in order to display data to the user.
+In this lab, you will learn how to:
+
+* create a new service using the Ionic CLI
+* use Angular's HttpClient service to get data from an API
+* transform the data for consumption by your application
+
 
 ## Getting Started
-
-The commands to accomplish the following should be familiar to you at this point, but if you have any questions please ask.
 
 * go to <a href="https://openweathermap.org/" target="_blank">OpenWeatherMap.org</a> and sign up for a free account so you can have an API key (if you do not want to do this, you can use the API key I generated for this class, but I _will_ be removing it after the class is over)
 * create a new feature branch
@@ -22,7 +25,7 @@ The API key to use if you do not want to generate your own is currently: db046b8
 The generated service gives you a lot of what you need to get started, but let's clean that up a little.
 
 1. the comment is helpful the first time you see it, rather pointless after that, remove it
-1. the `HttpClient` is injected `public` to avoid a linting error until you actually use it, make it private
+1. the `HttpClient` is injected `public` to avoid a linting error until you actually use it, make it `private`
 1. there is no need to do anything in the constructor, make it have an empty body
 
 ### Basic Configuration

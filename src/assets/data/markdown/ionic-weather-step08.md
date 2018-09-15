@@ -1,5 +1,11 @@
 # Lab: Using the Data Service
 
+In this lab you will learn how to:
+
+* inject the service into pages
+* diagnose errors that occur while you are developing your application
+* get real data from the service, replacing the fake data from our earlier mocking
+
 ## Injector Error 
 
 Start by creating a feature branch and then injecting the `WeatherProvider` into the current weather page.
