@@ -350,8 +350,8 @@ The UV index page is a little more involved. We will have some text we display h
 
 ```TypeScript
 export interface UVIndex {
-  value: number,
-  riskLevel: number
+  value: number;
+  riskLevel: number;
 }
 ```
 
