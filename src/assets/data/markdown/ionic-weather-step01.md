@@ -18,7 +18,7 @@ This process will run for a while. It will generate the application from a start
 The output looks like this:
 
 ```bash
-~/Projects/Training: ionic start ionic-weather tabs --type=angular --cordova
+~/Projects/Training: ionic start ionic-weather tabs --cordova
 ✔ Preparing directory ./ionic-weather - done!
 ✔ Downloading and extracting tabs starter - done!
 > ionic integrations enable cordova --quiet
@@ -64,7 +64,7 @@ Note the final message in the output. This is asking you if you would like to co
 
 1. Answer **Y** (yes) to the Ionic Pro SDK question
 2. You will be asked if you want to link to an existing app or create a new one
-    - Choose to **Create a new one**
+    - Choose to **Create a new app on Ionic Pro**
 3. You will be asked if you would like to use the GitHub integration or Ionic Pro
     - Choose **Ionic Pro**
 

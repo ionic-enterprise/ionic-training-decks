@@ -93,6 +93,36 @@
           ]
         }
       ]
+    },
+    {
+      "id": "ionic-weather-ionic-v4",
+      "title": "App: Ionic Weather Ionic v4 Port",
+      "pages": [
+        {
+          "id": "ionic-weather-ionic-v4-step01",
+          "title": "Lab: Building the Foundation"
+        },
+        {
+          "id": "ionic-weather-ionic-v4-step02",
+          "title": "Lab: Copy the Models"
+        },
+        {
+          "id": "ionic-weather-ionic-v4-step03",
+          "title": "Lab: Services"
+        },
+        {
+          "id": "ionic-weather-ionic-v4-step04",
+          "title": "Lab: Components"
+        },
+        {
+          "id": "ionic-weather-ionic-v4-step05",
+          "title": "Lab: Pages"
+        },
+        {
+          "id": "ionic-weather-ionic-v4-step06",
+          "title": "Lab: Styling and Theming"
+        }
+      ]
     }
   ]
 }
