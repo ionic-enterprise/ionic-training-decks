@@ -26,4 +26,5 @@ The following items are useful during any Ionic v3 to Ionic v4 port:
 
 * <a href="https://beta.ionicframework.com/docs/" target="_blank">The Ionic v4 Documentation</a>
 * <a href="https://beta.ionicframework.com/docs/building/migration" target="_blank">The Ionic v4 Migration Guide</a>
+* <a href="https://github.com/ionic-team/ionic/blob/master/angular/BREAKING.md" target="_blank">Breaking Changes</a>
 * <a href="https://github.com/ionic-team/v4-migration-tslint" target="_blank">Our Linting Tool</a>
