@@ -207,13 +207,13 @@ The iOS build may fail in the packaging step, but that is OK.
 
 **Note:** you will need to put your device in "Developer Mode" if it is not already
 
-1. conntect your device
+1. connect your device
 1. `adb devices` - make sure your device is listed
 1. `ioinc cordova run android` - this will build your application and run it on your attached Android device
 
 **Note:** it is also possible to use Android Studio to build and run the application
 
-## Squash and Merge
+## Squash (Optional) and Merge (Required)
 
 During the development of this feature, I suggested that you commit your changes early and often. It is now time to squash those intermediate commits into a single commit for this feature and merge that commit into master.
 
