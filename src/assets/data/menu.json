@@ -123,6 +123,14 @@
           "title": "Lab: Styling and Theming"
         }
       ]
+    },
+    {
+          "id": "simple-git-workflow",
+          "title": "A Simple git Workflow"
+    },
+    {
+          "id": "references",
+          "title": "References"
     }
   ]
 }
