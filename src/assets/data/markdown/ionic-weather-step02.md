@@ -60,7 +60,10 @@ Add at least the platform matching the device you will use for this course. If y
 
 ## Initialize Ionic Pro
 
+The following steps are a summary of the steps found in the Ionic Pro documentation's <a href="https://ionicframework.com/docs/pro/deploy/setup/#pro-client-setup" target="_blank">Pro Client Setup</a>.
+
 1. edit `app.module.ts`
+1. import `Injectable`, `Injector` from `@angular/core`
 1. import `Pro` from `@ionic/pro`
 1. call `Pro.init()` passing your APP_ID from Ionic Pro and configuration object with a version
 1. set up a custom error handler for monitoring
@@ -84,7 +87,7 @@ import { TabsPage } from '../pages/tabs/tabs';
 import { StatusBar } from '@ionic-native/status-bar';
 import { SplashScreen } from '@ionic-native/splash-screen';
 
-Pro.init('1234abcd`, {
+Pro.init('1234abcd', {
   appVersion: '0.0.1'
 });
 
