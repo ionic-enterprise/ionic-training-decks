@@ -66,9 +66,9 @@ The v3 styling looks kind of odd in the footer in v4. Let's not have any styling
 
 Let's appy our color scheme.
 
-1. the tabs should be the same color as the header, do this by setting the color to primary for the `ion-tabs`: `<ion-tabs color="primary">`
-1. have a look at `theme/variables` and notice that there is a tertiary color in the theme, and it is orange, use this for the "save" button color: `<ion-button expand="block" color="tertiary" (click)="save()">Save</ion-button>`
-1. in our v3 app, we redefined the primary color to be `#085a9e`, we can do the same here by changing the appropriate custom property: `--ion-color-primary: #085a9e;`
+1. the tabs should be the same color as the header, do this by setting the color to `primary` for the `ion-tabs`: `<ion-tabs color="primary">`
+1. have a look at `theme/variables` and notice that there is a `tertiary` color in the theme, and it is orange, use this for the "save" button color: `<ion-button expand="block" color="tertiary" (click)="save()">Save</ion-button>`
+1. in our v3 app, we redefined the `primary` color to be `#085a9e`, we can do the same here by changing the appropriate custom property: `--ion-color-primary: #085a9e;`
 1. using Chrome's dev tools, we can see that to set the background color we can use this: `--ion-background-color: #b9dbf7;`
 1. that last change effects the modal as well, so override that just for the modal by putting the following in the `user-preferences.component.scss` file
 
