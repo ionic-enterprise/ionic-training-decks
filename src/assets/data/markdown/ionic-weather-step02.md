@@ -59,6 +59,8 @@ Add at least the platform matching the device you will use for this course. If y
 1. `git add resources/*`
 1. `git commit -am "WIP - add platforms"`
 
+**Note:** If you have Xcode 10, you may need to take <a href="https://github.com/apache/cordova-ios/issues/407" target="_blank">this cordova-ios issue</a> into account.
+
 ## Initialize Ionic Pro
 
 1. edit `app.module.ts`
