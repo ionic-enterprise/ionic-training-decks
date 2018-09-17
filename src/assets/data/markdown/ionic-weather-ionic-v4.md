@@ -17,10 +17,10 @@ This Ioinic Weather Application is an Ionic v4 version of the Ionic Weather appl
    1. may need to be generated
    1. copy and modify the code
    1. copy and modify the HTML 
-1. styling
+1. styling & theming
    1. copy and modify global styles
    1. copy and modify local styles
-1. theme the application
+   1. theme the application
 
 The following items are useful during any Ionic v3 to Ionic v4 port:
 
