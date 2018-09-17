@@ -1,12 +1,12 @@
 # Lab: Monitor for Errors
 
-**Note:** in this lab, we will again make changes directly in `master`. This is OK only because we are all working in with our own repositories and are not a shared remote. I will stress once again not to do this in real life.
+**Note:** In this lab, we will again make changes directly in `master`. This is OK only because we are all working in with our own repositories and are not a shared remote. I will stress once again not to do this in real life.
 
-In this lab you will
+In this lab you will:
 
-* change the "about" page to have a big red button that throws an exception
-* upload sourcemaps to Ionic Pro to provide better output in the error monitoring
-* deploy the application to your device 
+* Change the "about" page to have a big red button that throws an exception
+* Upload source maps to Ionic Pro to provide better output in Monitoring
+* Deploy the updated application to your device 
 
 ## `about.ts`
 
@@ -27,15 +27,15 @@ export class AboutPage {
 
   tossIt() {
     this.message = 'you had best go check your logs...';
-    throw new Error('Seriously? Who seems a big red button and then pushes it?');
+    throw new Error('Seriously? Who sees a big red button and then pushes it?');
   }
 }
 ```
 
 What you did here was:
 
-1. create a method that throws an error
-1. add a property to store a message that will be displayed on the page
+1. Created a method that throws an error
+1. Added a property to store a message that will be displayed on the page
 
 ## `about.html`
 
@@ -62,12 +62,12 @@ Change the `about.html` file as follows:
 
 This creates a big red button, and everyone knows that you should not press big red buttons, but everyone does it anyhow.
 
-## Sourcemaps
+## Source Maps
 
 Source maps are required in order to provide a reasonable output of where the error is occuring. To upload source maps, run the following commands:
 
 1. `ionic build`
-1. `ionic monitoring syncmaps`o
+1. `ionic monitoring syncmaps`
 
 ## Commit and Run
 
