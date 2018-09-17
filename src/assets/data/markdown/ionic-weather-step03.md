@@ -5,7 +5,7 @@
 In this lab you will:
 
 * Change the "about" page to have a big red button that throws an exception
-* Upload source maps to Ionic Pro to provide better output in Monitoring
+* Upload source maps to Ionic Pro to provide better output in <a href="https://ionicframework.com/docs/pro/monitoring/" target="_blank">Monitoring</a>
 * Deploy the updated application to your device 
 
 ## `about.ts`
