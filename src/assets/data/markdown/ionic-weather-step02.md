@@ -38,7 +38,7 @@ Start by creating a new branch via `git checkout -b feature/integrateIonicPro`
 The reverse domain ID is used as the Bundle ID or iOS and the Package Name for Android. It should be something unique. For personal applications, I suggest using `com.yourname.appname`.
 
 
-1. open the `conig.xml` file
+1. open the `config.xml` file
 1. change the `id` property of the `widget` node
 1. `git commit -am "feat(ionic-pro): integrate ionic pro"`
 
@@ -56,8 +56,7 @@ Add at least the platform matching the device you will use for this course. If y
 1. run at least one of the following
     1. `ionic cordova platform add ios`
     1. `ionic cordova platform add android`
-1. `git add resources/*`
-1. `git commit -am "WIP - add platforms"`
+1. `git commit -am "Added platforms"`
 
 ## Initialize Ionic Pro
 
