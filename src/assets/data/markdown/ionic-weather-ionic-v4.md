@@ -1,6 +1,6 @@
 # App: Ionic Weather Application Ionic v4 Port
 
-This Ioinic Weather Application is an Ionic v4 version of the Ionic Weather application. We start with the v3 application and show one potential upgrade path to Ionic v4. This path is:
+This Ionic Weather Application is an Ionic v4 version of the Ionic Weather application. We start with the v3 application and show one potential upgrade path to Ionic v4. This path is:
 
 1. create the foundation
    1. generate a starting application
