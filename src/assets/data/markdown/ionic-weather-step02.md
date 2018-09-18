@@ -38,7 +38,7 @@ Start by creating a new branch via `git checkout -b feature/integrateIonicPro`
 The reverse domain ID is used as the Bundle ID or iOS and the Package Name for Android. It should be something unique. For personal applications, I suggest using `com.yourname.appname`.
 
 
-1. open the `conig.xml` file
+1. open the `config.xml` file
 1. change the `id` property of the `widget` node
 1. `git commit -am "feat(ionic-pro): integrate ionic pro"`
 
@@ -57,13 +57,16 @@ Add at least the platform matching the device you will use for this course. If y
     1. `ionic cordova platform add ios`
     1. `ionic cordova platform add android`
 1. `git add resources/*`
-1. `git commit -am "WIP - add platforms"`
+1. `git commit -am "Added platforms"`
 
 **Note:** If you have Xcode 10, you may need to take <a href="https://github.com/apache/cordova-ios/issues/407" target="_blank">this cordova-ios issue</a> into account.
 
 ## Initialize Ionic Pro
 
+The following steps are a summary of the steps found in the Ionic Pro documentation's <a href="https://ionicframework.com/docs/pro/deploy/setup/#pro-client-setup" target="_blank">Pro Client Setup</a>.
+
 1. edit `app.module.ts`
+1. import `Injectable`, `Injector` from `@angular/core`
 1. import `Pro` from `@ionic/pro`
 1. call `Pro.init()` passing your APP_ID from Ionic Pro and configuration object with a version
 1. set up a custom error handler for monitoring
@@ -87,7 +90,7 @@ import { TabsPage } from '../pages/tabs/tabs';
 import { StatusBar } from '@ionic-native/status-bar';
 import { SplashScreen } from '@ionic-native/splash-screen';
 
-Pro.init('1234abcd`, {
+Pro.init('1234abcd', {
   appVersion: '0.0.1'
 });
 
@@ -207,13 +210,13 @@ The iOS build may fail in the packaging step, but that is OK.
 
 **Note:** you will need to put your device in "Developer Mode" if it is not already
 
-1. conntect your device
+1. connect your device
 1. `adb devices` - make sure your device is listed
 1. `ioinc cordova run android` - this will build your application and run it on your attached Android device
 
 **Note:** it is also possible to use Android Studio to build and run the application
 
-## Squash and Merge
+## Squash (Optional) and Merge (Required)
 
 During the development of this feature, I suggested that you commit your changes early and often. It is now time to squash those intermediate commits into a single commit for this feature and merge that commit into master.
 
