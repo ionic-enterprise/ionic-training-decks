@@ -89,7 +89,7 @@ Rename the pages as such:
 
 It is easiest to do the move of the files from the command line. Here is a set of commands that you can run from your project's root directory in order to accomplish this.
 
-(**Note:** This was not tested on a windows machine, but if you have a Windows machine and use the GitBash shell instead of the command prompt, this should work)
+(**Note:** This was not tested on a Windows machine, but if you are on Windows and using the GitBash shell instead of the command prompt, the following should work.)
 
 ```
 // Switch to the pages directory
