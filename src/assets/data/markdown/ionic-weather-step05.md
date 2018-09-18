@@ -28,7 +28,6 @@ Make a similar modification to the `tabs.html` file:
 
 ```html
 <ion-tabs color="primary">
-<ion-tabs>
   <ion-tab [root]="tab1Root" tabTitle="Current Weather" tabIcon="cloud"></ion-tab>
   <ion-tab [root]="tab2Root" tabTitle="Forecast" tabIcon="calendar"></ion-tab>
   <ion-tab [root]="tab3Root" tabTitle="UV Index" tabIcon="sunny"></ion-tab>
