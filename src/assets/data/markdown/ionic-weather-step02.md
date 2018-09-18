@@ -57,6 +57,7 @@ Add at least the platform matching the device you will use for this course. If y
     1. `ionic cordova platform add ios`
     1. `ionic cordova platform add android`
 <<<<<<< HEAD
+<<<<<<< HEAD
 1. `git add resources/*`
 1. `git commit -am "Added platforms"`
 
@@ -64,6 +65,9 @@ Add at least the platform matching the device you will use for this course. If y
 =======
 1. `git commit -am "Added platforms"`
 >>>>>>> Fix typo, simplify platform addition instructions
+=======
+1. `git commit -am "Added platforms"`
+>>>>>>> 4c9d240d2471815feb6879528904c08982992b50
 
 ## Initialize Ionic Pro
 
