@@ -56,6 +56,7 @@ Add at least the platform matching the device you will use for this course. If y
 1. run at least one of the following
     1. `ionic cordova platform add ios`
     1. `ionic cordova platform add android`
+1. `git add resources/*`
 1. `git commit -am "Added platforms"`
 
 ## Initialize Ionic Pro
