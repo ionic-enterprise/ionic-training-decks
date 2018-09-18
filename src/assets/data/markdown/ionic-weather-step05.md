@@ -58,10 +58,10 @@ $colors: (
 
 ## Changing the Splash Screen and Icon
 
-Your application should have its own splash screen and icon rather than using the default that Ionic supplies for you. Ionic provides a service that will take two source image files and create all of the resources that your application will require. Follow these guidelines:
+Your application should have its own splash screen and icon rather than using the default that Ionic supplies for you. Ionic provides a service that will take two source image files and create all of the resources that your application will require via the <a href="https://ionicframework.com/docs/cli/cordova/resources/" target="_blank">ionic cordova resources command</a>. Follow these guidelines:
 
 * Keep the images simple and clear
-* You can supply source images in any of these format: .png, .psd, .ai
+* You can supply source images in any of these formats: `.png`, `.psd`, `.ai`
 * Icon - at least 1024x1024 pixels
 * Splashscreen - at least 2732x2732 pixels with a simple image that is centered and no bigger than 1200x1200 pixels to facilitate reasonable display on all devices
 
