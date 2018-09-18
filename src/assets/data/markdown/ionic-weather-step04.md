@@ -2,9 +2,9 @@
 
 In this lab, you will learn:
 
-* how to specify icons and labels for tabs
-* how to use `git mv` to rename source files
-* how to use VSCode's refactoring tools to rename classes
+* How to specify icons and labels for tabs
+* How to use `git mv` to rename source files
+* How to use VS Code's refactoring tools to rename classes
 
 
 ## Overview of the Process
@@ -18,12 +18,12 @@ Our application will have three tabs:
 
 To achieve this from our starting "tabs" based application, we will:
 
-1. prepare the development environment
-1. change the tab labels
-1. change the tab icons
-1. change the page titles
-1. rename the source code for the pages
-1. finish the feature
+1. Prepare the development environment
+1. Change the tab labels
+1. Change the tab icons
+1. Change the page titles
+1. Rename the source code for the pages
+1. Finish the feature
 
 ## Prepare the Development Environment
 
@@ -34,7 +34,7 @@ When we start developing a feature, we should start our development server and c
 
 ## Change the Tab Labels
 
-Open the `src/pages/tabs/tabs.htl` file. It currently looks like this:
+Open the `src/pages/tabs/tabs.html` file. It currently looks like this:
 
 ```html
 <ion-tabs>
@@ -57,7 +57,7 @@ Change the `tabTitle` values so we have the following tabs:
 
 That reads much more nicely, but picture does not really match the title. Let's fix that.
 
-Change the `tabIcon` values in the `src/pages/tabs/tabs.htl` file as such:
+Change the `tabIcon` values in the `src/pages/tabs/tabs.html` file as such:
 
 * cloud
 * calender
@@ -89,27 +89,36 @@ Rename the pages as such:
 
 It is easiest to do the move of the files from the command line. Here is a set of commands that you can run from your project's root directory in order to accomplish this.
 
-(**Note:** This was not tested on a windows machine, but if you have a Windows machine and use the GitBash shell instead of the command promt, this should work)
+(**Note:** This was not tested on a Windows machine, but if you are on Windows and using the GitBash shell instead of the command prompt, the following should work.)
 
 ```
+// Switch to the pages directory
 cd src/pages
+
+// Modify the "Home" directory to make it the "Current Weather" directory
 mkdir current-weather forecast uv-index
 git mv home/home.ts current-weather/current-weather.ts
 git mv home/home.scss current-weather/current-weather.scss
 git mv home/home.html current-weather/current-weather.html
 rmdir home
+
+// Modify the "About" directory to make it the "Forecast" directory
 git mv about/about.ts forecast/forecast.ts
 git mv about/about.scss forecast/forecast.scss
 git mv about/about.html forecast/forecast.html
 rmdir about
+
+// Modify the "Contact" directory to make it the "UV Index" directory
 git mv contact/contact.ts uv-index/uv-index.ts
 git mv contact/contact.scss uv-index/uv-index.scss
 git mv contact/contact.html uv-index/uv-index.html
 rmdir contact
+
+// Return to the project root directory
 cd ../..
 ```
 
-**Pro Tip:** when refactoring code involves renaming modules, use `git mv`. This ensures that git tracks the change as a move and not something else like a delete and add.
+**Pro Tip:** When refactoring code involves renaming modules, use `git mv`. This ensures that git tracks the change as a move and not something else like a delete and add.
 
 While that was easy enough, the app is now totally broken. Let's fix that.
 
@@ -131,11 +140,11 @@ import { ContactPage } from '../pages/uv-index/uv-index';
 import { HomePage } from '../pages/current-weather/current-weather';
 ```
 
-By fixing these errors first, this allows use to use VSCode's refactoring tools to rename the classes. Open `src/pages/current-weather/current-weather.ts` and do the following:
+By fixing these errors first, this allows use to use VS Code's refactoring tools to rename the classes. Open `src/pages/current-weather/current-weather.ts` and do the following:
 
-* change the `selector` value to `page-current-weather`
-* change the `templateUrl` value to `current-weather.html`
-* use the VSCode "Rename Symbol" tool to rename `HomePage` to `CurrentWeatherPage` (right click to get a pop-up menu, or use the `F2` hotkey on a Mac (may need to also use `fn`))
+* Change the `selector` value to `page-current-weather`
+* Change the `templateUrl` value to `current-weather.html`
+* Use the VS Code "Rename Symbol" tool to rename `HomePage` to `CurrentWeatherPage` (right click to get a pop-up menu, or use the `F2` hotkey on a Mac (may need to also use `fn`))
 
 When you are done, the code should look like this:
 
