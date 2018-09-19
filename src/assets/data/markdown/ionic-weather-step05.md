@@ -10,8 +10,6 @@ In this lab you will:
 
 ## Setting a Color Theme
 
-**Remember to create a branch:** `git checkout -b feature/style`
-
 Let's give our app a little color. We will start by just using the default "primary" color for the nav bar and the tab bar.
 
 For each of the main pages, add `color="primary"` to the `ion-navbar` element like this:
@@ -74,9 +72,11 @@ Run `ionic cordova resources` to generate new resources.
 
 Rather than doing another commit, let's just amend the previous commit with these changes: `git commit -a --amend -C HEAD` (or `git aa` if you have my aliases)
 
-## Finish the Feature
+## Push to Ioinc Pro
 
-At this point, you can merge your change into `master` and remove your feature branch. Remeber to push to both of your remotes.
+1. commit any changes that are currently uncommitted (if you have any)
+1. `git push ionic master`
+
 
 After the Ionic Pro build is complete and assigned to the Master channel, relaunch the application on your device. You will notice that the theme has changed. **But wait!!** The splash screen and icon have not. Why is that?
 

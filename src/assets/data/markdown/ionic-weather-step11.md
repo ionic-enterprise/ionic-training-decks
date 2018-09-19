@@ -189,4 +189,56 @@ export class UserPreferencesProvider {
   }
 ```
 
-TODO: Add the code to do respond to the "changed" subject here...
+
+To respond to the change, each page (current-weather, forecast, uv-index) should be changed as such:
+
+* since we will get data when the view enters and when the user preferences data changes, put that logic in a private method called `getData()`
+* when the view loads, subscribe to the changed subject
+* when the subject fires, get the data
+* when the view unloads, remove the subscription
+
+The code should look something like this:
+
+```TypeScript
+export class CurrentWeatherPage {
+  scale: string;
+  cityName: string;
+  currentWeather: Weather;
+
+  private subscription: Subscription;
+
+  constructor(
+    public iconMap: IconMapProvider,
+    private modal: ModalController,
+    private userPreferences: UserPreferencesProvider,
+    private weather: WeatherProvider
+  ) {}
+
+  ionViewDidLoad() {
+    this.subscription = this.userPreferences.changed.subscribe(() =>
+      this.getData()
+    );
+  }
+
+  ionViewDidEnter() {
+    this.getData();
+  }
+
+  ionViewWillUnload() {
+    this.subscription.unsubscribe();
+  }
+
+  openUserPreferences() {
+    const m = this.modal.create(UserPreferencesComponent);
+    m.present();
+  }
+
+  private getData() {
+    this.userPreferences.getCity().then(c => (this.cityName = c.name));
+    this.userPreferences.getUseCelcius().then(u => {
+      this.scale = u ? 'C' : 'F';
+    });
+    this.weather.current().subscribe(w => (this.currentWeather = w));
+  }
+}
+```

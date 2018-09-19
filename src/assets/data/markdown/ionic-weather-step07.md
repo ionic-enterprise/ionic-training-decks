@@ -12,7 +12,6 @@ In this lab, you will learn how to:
 ## Getting Started
 
 * go to <a href="https://openweathermap.org/" target="_blank">OpenWeatherMap.org</a> and sign up for a free account so you can have an API key (if you do not want to do this, you can use the API key I generated for this class, but I _will_ be removing it after the class is over)
-* create a new feature branch
 * use the Ionic CLI to generate a new provider (hint: the ionic CLI has a `--help` option that can be used at several levels)
 * use git to verify the files were created as you expect and that your new service is provided in `app.module.ts`
 * be sure to add the newly generated file to your commit
@@ -143,4 +142,4 @@ export interface UVIndex {
 
 ## Finish the Feature
 
-Compare your code to the completed code that I included. It does not have to match identically, but it should be functionally equivalent. We have not tested any of this yet, which is scary and a really good argument for unit tests. None the less, let's squash the commits you made and merge this branch into master
+Compare your code to the completed code that I included. It does not have to match identically, but it should be functionally equivalent. We have not tested any of this yet, which is scary and a really good argument for unit tests. None the less, let's make sure everthing has been committed.

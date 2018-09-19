@@ -8,7 +8,7 @@ In this lab you will learn how to:
 
 ## Injector Error 
 
-Start by creating a feature branch and then injecting the `WeatherProvider` into the current weather page.
+Start by injecting the `WeatherProvider` into the current-weather page.
 
 ```TypeScript
 import { WeatherProvider } from '../../providers/weather/weather';
@@ -64,3 +64,5 @@ Finally, where `currentWeather` as initialized to fake data before it can just b
 ```
 
 **Challenge:** Make similar modifications to the forecast and UV Index pages. 
+
+Make sure all of your changes have been committed.

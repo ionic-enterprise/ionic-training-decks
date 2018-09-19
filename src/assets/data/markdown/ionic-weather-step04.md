@@ -27,10 +27,9 @@ To achieve this from our starting "tabs" based application, we will:
 
 ## Prepare the Development Environment
 
-When we start developing a feature, we should start our development server and create a branch to work in.
+When we start developing a feature, we should start our development.
 
 1. `npm start` OR `ionic serve`
-1. `git checkout -b feature/layoutPages`
 
 ## Change the Tab Labels
 
@@ -50,7 +49,7 @@ Change the `tabTitle` values so we have the following tabs:
 * Forecast
 * UV Index
 
-`git commit -am "feat(layout): rename the tabs"`
+`git commit -am "rename the tabs"`
 
 
 ## Change the Tab Icons
@@ -63,7 +62,7 @@ Change the `tabIcon` values in the `src/pages/tabs/tabs.html` file as such:
 * calender
 * sunny
 
-`git commit -am "WIP - update the tab icons"`
+`git commit -am "update the tab icons"`
 
 ## Change the Page Titles
 
@@ -75,7 +74,7 @@ Open each of the following files and change the title:
 * `src/pages/about/about.html` - Forecast 
 * `src/pages/contact/contact.html` - UV Index 
 
-`git commit -am "WIP - update the page titles"`
+`git commit -am "update the page titles"`
 
 ## Moving and Renaming Source
 
@@ -92,29 +91,24 @@ It is easiest to do the move of the files from the command line. Here is a set o
 (**Note:** This was not tested on a Windows machine, but if you are on Windows and using the GitBash shell instead of the command prompt, the following should work.)
 
 ```
-// Switch to the pages directory
 cd src/pages
 
-// Modify the "Home" directory to make it the "Current Weather" directory
 mkdir current-weather forecast uv-index
 git mv home/home.ts current-weather/current-weather.ts
 git mv home/home.scss current-weather/current-weather.scss
 git mv home/home.html current-weather/current-weather.html
 rmdir home
 
-// Modify the "About" directory to make it the "Forecast" directory
 git mv about/about.ts forecast/forecast.ts
 git mv about/about.scss forecast/forecast.scss
 git mv about/about.html forecast/forecast.html
 rmdir about
 
-// Modify the "Contact" directory to make it the "UV Index" directory
 git mv contact/contact.ts uv-index/uv-index.ts
 git mv contact/contact.scss uv-index/uv-index.scss
 git mv contact/contact.html uv-index/uv-index.html
 rmdir contact
 
-// Return to the project root directory
 cd ../..
 ```
 
@@ -165,20 +159,7 @@ Better yet, the references in `app.module.ts` and `tabs.ts` should have changed 
 
 Repeat these steps for the other two pages that were renamed. At this point, you should have a functioning application once again with properly refactored code.
 
-`git commit -am "WIP - rename the page classes"`
-
-## Finish the Feature
-
-At this point, you should squash your commits and submit the branch for pull request.
-
-For the purpose of this training exercise, we will squash our commits and merge into master.
-
-1. `git fetch origin master`
-1. `git rebase -i origin/master`
-1. `git checkout master`
-1. `git merge feature/layoutPages`
-1. `git branch -d feature/layoutPages`
-1. `git push`
+1. `git commit -am "rename the page classes"`
 1. `git push ionic master`
 
 **Note:** If your dev server is now spitting out errors it is just that it picked up one of the above changes mid-way through. Just kill the dev server and restart it.

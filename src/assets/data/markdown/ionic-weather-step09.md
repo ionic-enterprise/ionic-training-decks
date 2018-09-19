@@ -175,6 +175,8 @@ But I find that messy because there are two different levels of abstraction bein
 
 ## Finish the Feature
 
-When your code is complete and you have tested it both on the web and by side-loading the application on your device, perform the usual squashing and merging and push your changes to both the `origin` and `ionic` repos.
+When your code is complete, make sure all of your changes are committed and have been pushed to Ionic Pro.
+
+You can now test it by side-loading the application on your device.
 
 **Note:** in the real world, you would need to resubmit your app to the app store at this point and not deploy it via Ionic Pro because adding a Cordova Plugin is a change that effects the binary bundle of the application.

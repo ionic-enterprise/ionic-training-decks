@@ -7,7 +7,7 @@ In order to follow along with creating the applications described here, you will
 - Create a working directory for your project
    - I use `~/Projects/Training` on my Mac and Linux machines, but you can use whatever you want so long as you have access
 
-- Run `npm -g ionic cordova` 
+- Run `npm install -g ionic cordova` 
   - You may need to use `sudo` on Mac/Linux or right-click & **Run as Administrator** in Windows
 
 - Follow one of the following guides to set up the rest of the build tools:

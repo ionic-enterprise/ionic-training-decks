@@ -7,8 +7,6 @@ In this lab you will learn how to:
 * model the data required by your application
 * mock up the interface of your application
 
-**Remember to start a new feature branch in git!!**
-
 ## Install the Library
 
 It is often useful to use third party libraries. For this application, we will use a library of <a href="https://github.com/kensodemann/kws-weather-widgets" target="_blank">weather related components</a> that I created and published on NPM. Many useful JavaScript libraries are availble via NPM and are available for use in your application.
@@ -21,9 +19,7 @@ The library is installed in `node_modules` and your `package.json` file is updat
     "kws-weather-widgets": "0.0.9",
 ```
 
-Commit your change: `git commit -am "feat(weather): add the weather component library"`
-
-Remember to make intermediate commits with each step. We will squash and merge as usual in the end.
+Commit your change: `git commit -am "add the weather component library"`
 
 ## Use the Library
 
@@ -136,7 +132,7 @@ export class IconMapProvider {
 Add the new file and commit these changes:
 
 - `git add src/providers`
-- `git commit -am "WIP - add icon map"`
+- `git commit -am "add icon map"`
 
 ## Install the Images
 
@@ -424,4 +420,4 @@ page-uv-index {
 
 ## Finish Feature
 
-At this point, the app should be fully mocked up. Do the usual squash and merge in git to close out the branch.
+At this point, the app should be fully mocked up. Make sure everything is commit and push to Ionic Pro.
