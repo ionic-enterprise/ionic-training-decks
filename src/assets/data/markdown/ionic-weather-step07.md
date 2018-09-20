@@ -12,7 +12,7 @@ In this lab, you will learn how to:
 ## Getting Started
 
 * go to <a href="https://openweathermap.org/" target="_blank">OpenWeatherMap.org</a> and sign up for a free account so you can have an API key (if you do not want to do this, you can use the API key I generated for this class, but I _will_ be removing it after the class is over)
-* use the Ionic CLI to generate a new provider (hint: the ionic CLI has a `--help` option that can be used at several levels)
+* use the Ionic CLI to generate a new provider called `weather` (hint: the ionic CLI has a `--help` option that can be used at several levels)
 * use git to verify the files were created as you expect and that your new service is provided in `app.module.ts`
 * be sure to add the newly generated file to your commit
 * make your initial commit for this feature
