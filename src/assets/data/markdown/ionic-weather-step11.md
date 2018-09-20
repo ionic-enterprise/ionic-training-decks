@@ -75,6 +75,17 @@ The problem is that the select was being populated using the `cities` array, but
 
 One easy way to fix this is to make `getCity()` return an object from the `cities` array.
 
+```TypeScript
+  async getCity(): Promise<City> {
+    await this.storage.ready();
+    if (this._city === undefined) {
+      const city = await this.storage.get(this.keys.city);
+      this._city = cities.find(c => c.name === (city && city.name)) || cities[0];
+    }
+    return this._city;
+  }
+```
+
 ## Use the Service in the Pages
 
 In the `CurrentWeatherPage`:
@@ -115,33 +126,20 @@ When gettng the current location, the user preferences need to be taken into acc
 1. promises can be chained
 1. when promises are chained, the promise ulitmately resolves to whatever is returned by the inner-most `then()` callback.
 
-In other words:
+Here is what you should have in the end:
 
 ```TypeScript
-var z = true;
-
-foo() {
-  return Promise.resolve(z);
-}
-
-bar() {
-  return Promise.resolve('bar');
-}
-
-baz() {
-  return foo().then(x => {
-    if (x) {
-      return 'baz';
-    } else {
-      return bar();
-    }
-  })
-}
+  private getCurrentLocation(): Observable<Location> {
+    return Observable.fromPromise(
+      this.userPreferences.getCity().then(c => {
+        if (c.location) {
+          return Promise.resolve(c.location);
+        } else {
+          return this.location.current();
+        }
+      }));
+  }
 ```
-
-Calling `baz()` will resolve "baz" when `z` is `true` and "bar" when `z` is `false';
-
-Keeping that in mind will be helpful as you refactor the `getCurrentLocation()` function.
 
 ## Respond to Changes in the User Preferences
 

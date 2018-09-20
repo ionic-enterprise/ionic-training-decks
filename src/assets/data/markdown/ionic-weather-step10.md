@@ -192,7 +192,7 @@ In the view, markup is required for the user controls. The two-way binding via `
   <ion-list>
     <ion-item>
       <ion-label>Use Celcius</ion-label>
-      <ion-toggle [(ngModel)]="city"></ion-toggle>
+      <ion-toggle [(ngModel)]="userCelcius"></ion-toggle>
     </ion-item>
 
     <ion-item>
