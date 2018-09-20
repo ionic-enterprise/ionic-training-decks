@@ -31,7 +31,7 @@ In the AppComponent constructor, the application waits for the platform to be re
   }
 ```
 
-**Challenge:** The application has a fairly dark background, which makes the status bar content difficult to read on iOS devices. Have a look at the documentation for the <a href="" target="_blank">Status Bar Plugin</a> and see if you can find a method to call that will fix that. Then implement it in the code.
+**Challenge:** The application has a fairly dark background, which makes the status bar content difficult to read on iOS devices. Have a look at the documentation for the <a href="https://cordova.apache.org/docs/en/8.x/reference/cordova-plugin-statusbar/" target="_blank">Status Bar Plugin</a> and see if you can find a method to call that will fix that. Then implement it in the code.
 
 **Hint:** This method will replace the `statusBar.styleDefault();` call in the code listed above. 
 

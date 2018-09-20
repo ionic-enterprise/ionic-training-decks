@@ -101,7 +101,7 @@ export interface Location {
 
 ## Location Service
 
-Your `src/models/location/location.ts` should currently look something like this:
+Your `src/providers/location/location.ts` should currently look something like this:
 
 ```TypeScript
 import { Geolocation } from '@ionic-native/geolocation';
@@ -132,9 +132,9 @@ export class LocationProvider {
 }
 ```
 
-## Weather Model
+## Weather Service
 
-Your `src/models/weather/weather.ts` should currently look something like this:
+Your `src/providers/weather/weather.ts` should currently look something like this:
 
 ```TypeScript
 import { HttpClient } from '@angular/common/http';
