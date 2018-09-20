@@ -1,4 +1,4 @@
-# Completed Code for Lab: Use the Data
+# Completed Code for Lab: Using Plugins
 
 Please try to write this code on your own before consulting this part of the guide.
 

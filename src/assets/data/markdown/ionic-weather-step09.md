@@ -40,7 +40,7 @@ In the AppComponent constructor, the application waits for the platform to be re
 
 **Hint:** use Ionic's <a href="https://ionicframework.com/docs/api/platform/Platform/" target="_blank">Platform</a> service to determine if the current platform is Android or not.
 
-Commit these changes directly to `master` and push them to Ionic Pro so you can see the changes on your device.
+Commit these changes and push them to Ionic Pro so you can see the changes on your device.
 
 
 ## Geo-Location
@@ -57,6 +57,13 @@ The <a href="https://ionicframework.com/docs/native/geolocation/" target="_blank
 * `ionic cordova plugin add cordova-plugin-geolocation --variable GEOLOCATION_USAGE_DESCRIPTION="To determine the location for which to get weather data"`
 * `npm i @ionic-native/geolocation`
 * <a href="https://ionicframework.com/docs/native/#Add_Plugins_to_Your_App_Module" target="_blank">add the plugin to your app module</a> (note that the instructions are generic, modify for your needs)
+* add the following configuration item to the `config.xml` file
+
+```xml
+    <config-file parent="NSLocationWhenInUseUsageDescription" platform="ios" target="*-Info.plist">
+        <string>To determine the location for which to get weather data</string>
+    </config-file>
+```
 
 ### Use the Plugin
 

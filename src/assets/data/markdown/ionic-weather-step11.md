@@ -55,25 +55,11 @@ export class UserPreferencesProvider {
 
 At this point, it does not make much sense for the cities to be defined where they are. Let's do a couple of things:
 
-1. move the `cities.ts` file in with the service
-1. add a method to the service that returns the available cities
-1. change the `getCity()` method created above such that if there is no city stored it returns the "Current Location" city (cities[0]).
-
-**Challenge:** do the above, making as few changes to the `UserPreferencesComponent` as possible while still maintaining a working application.
-
-## Use the Service in the Component
-
-**Challenge:** this one is all on you, try to do it without looking at the completed code
-
-1. inject the service in the `UserPreferencesComponent`
-1. get the values and set the properties in an appropriate life-cycle event
-1. set the data and close the modal from the `save()`
-
-**Note:** you will find a bug with the data service here that prevents the select from initializing properly, so let's discuss what that is when we all get here.
-
-The problem is that the select was being populated using the `cities` array, but we were returning the `city` as an object that we were storing. These end up being two different objects, and the select does not use deep comparisons.
-
-One easy way to fix this is to make `getCity()` return an object from the `cities` array.
+1. move the `cities.ts` file in with the service (`git mv src/components/user-preferences/cities.ts src/providers/user-preferences/cities.ts`)
+1. add a method to the service that returns the available cities, call it `availableCities()`
+1. makes two changes to the `getCity()` method
+   1. if there is a city stored in user preferences, look up the city by name in the cities array
+   1. if there is no city stored in user preferences, return the "Current Location" city (cities[0]).
 
 ```TypeScript
   async getCity(): Promise<City> {
@@ -85,6 +71,17 @@ One easy way to fix this is to make `getCity()` return an object from the `citie
     return this._city;
   }
 ```
+
+**Note:** when you do the above, the `UserPreferencesComponent` will break. We will fix it in the next step.
+
+
+## Use the Service in the Component
+
+**Challenge:** this one is all on you, try to do it without looking at the completed code
+
+1. inject `UserPreferencesProvider` in the constructor of `UserPreferencesComponent`
+1. set the properties (`cities`, `city`, and `useCelcius`) properties in an appropriate life-cycle event getting the data from the service
+1. set the data and close the modal from the `save()`
 
 ## Use the Service in the Pages
 
