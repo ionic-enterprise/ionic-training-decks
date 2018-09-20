@@ -420,4 +420,4 @@ page-uv-index {
 
 ## Finish Feature
 
-At this point, the app should be fully mocked up. Make sure everything is commit and push to Ionic Pro.
+At this point, the app should be fully mocked up. Make sure everything is committed and push to Ionic Pro.
