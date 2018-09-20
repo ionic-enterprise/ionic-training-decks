@@ -240,3 +240,5 @@ export class CurrentWeatherPage {
   }
 }
 ```
+
+Perform similar changes in the other two pages.
