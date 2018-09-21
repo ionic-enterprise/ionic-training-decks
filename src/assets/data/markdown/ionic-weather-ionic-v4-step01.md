@@ -62,7 +62,7 @@ Pro.init('1ec81629', {
 
 
 @NgModule({
-  declarations: [AppComponent, UserPreferencesComponent],
+  declarations: [AppComponent],
   entryComponents: [],
   imports: [
     BrowserModule,
