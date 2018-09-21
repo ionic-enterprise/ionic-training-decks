@@ -107,6 +107,29 @@ import { HomePage } from './home.page';
 export class HomePageModule {}
 ```
 
+**src/main.ts**
+
+Since we are using a web component library that was built using Stencil (`kws-weather-widgets`), we need to call its `defineCustomElement()` method somewhere. We chose `main.ts` in the v3 app, and that is a good place to do that here as well.
+
+```TypeScript
+import { enableProdMode } from '@angular/core';
+import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
+
+import { defineCustomElements } from 'kws-weather-widgets';
+
+import { AppModule } from './app/app.module';
+import { environment } from './environments/environment';
+
+
+if (environment.production) {
+  enableProdMode();
+}
+
+platformBrowserDynamic().bootstrapModule(AppModule)
+  .catch(err => console.log(err));
+defineCustomElements(window);
+```
+
 **Commit Here!**
 
 At this point, you should still have a running application. Check that this is true.
