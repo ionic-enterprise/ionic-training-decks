@@ -1,17 +1,17 @@
 # Lab: Use a Library
 
-In this lab you will learn how to:
+In this lab, you will learn how to:
 
-* install third party libraries
-* integrate the third party libraries into your application
-* model the data required by your application
-* mock up the interface of your application
+* Install third party libraries
+* Integrate the third party libraries into your application
+* Model the data required by your application
+* Mock up the interface of your application
 
 ## Install the Library
 
 It is often useful to use third party libraries. For this application, we will use a library of <a href="https://github.com/kensodemann/kws-weather-widgets" target="_blank">weather related components</a> that I created and published on NPM. Many useful JavaScript libraries are availble via NPM and are available for use in your application.
 
-To instatll my weather component library: `npm install kws-weather-widgets`
+To install my weather component library, run: `npm install kws-weather-widgets`
 
 The library is installed in `node_modules` and your `package.json` file is updated to reflect the new dependency:
 
@@ -23,9 +23,9 @@ Commit your change: `git commit -am "add the weather component library"`
 
 ## Use the Library
 
-Good libraries usually document exactly how to use the library in your application. In the case of this library, which is a web component library built using a technology called <a href="https://stenciljs.com" target="_blank">Stencil</a>. For Angular applications like yours, there are a couple of steps that need to be taken to use the library.
+Good libraries usually document exactly how to use the library in your application. In the case of this library - which is a web component library built using a technology called <a href="https://stenciljs.com" target="_blank">Stencil</a> - there are a couple of steps that need to be taken to use the library in an Angular project (like yours).
 
-Since Angular does not know about the custom elements in the library, the `CUSTOM_ELEMENTS_SCHEMA` must be used. This tells the Angular compiler to ignore any elements it doesn't understand so long as they conform to the custom elements standard.
+Since Angular does not know about the custom elements in the library, the `CUSTOM_ELEMENTS_SCHEMA` import must be used. This tells the Angular compiler to ignore any elements it doesn't understand so long as they conform to the custom elements standard.
 
 ```TypeScript
 import {
@@ -45,7 +45,7 @@ import {
 export class AppModule {}
 ```
 
-Second, there is a method in the library called `defineCustomElements()` that needs to be run. This is usually run in the `main.ts` file. This method contains the special suace that bundlers like WebPack need in order to be aware of the components. The end result being that WebPack will bundle them properly.
+Second, there is a method in the library called `defineCustomElements()` that needs to be run. This is usually run in the `main.ts` file. This method contains the special sauce that bundlers like WebPack need in order to be aware of the components, with the end result being that WebPack will bundle them properly.
 
 ```TypeScript
 import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
@@ -140,10 +140,10 @@ Add the new file and commit these changes:
 
 **Note:** the specifics on doing this depends on the type of machine you are using. On a Mac:
 
-1. drag and drop the `images.zip` from `Downloads` into `src/assets`
-1. double click the `images.zip` file in `src/assets`
-1. an `images` folder should be created
-1. remove the `images.zip` file
+1. Drag and drop the `images.zip` from `Downloads` into `src/assets`
+1. Double click the `images.zip` file in `src/assets`
+1. Create an `images` folder
+1. Remove the `images.zip` file
 
 ## Perform Some Global Styling
 
@@ -189,9 +189,9 @@ export interface Weather {
 
 First, clean up the class for the page:
 
-- the `NavController` is not being used, so let's get rid of it
-- inject the `IconMapProvider`
-- create a `Weather` object with data
+- The `NavController` is not being used, so let's get rid of it
+- Inject the `IconMapProvider`
+- Create a `Weather` object with data
 
 ```TypeScript
 import { Component } from '@angular/core';
@@ -223,11 +223,10 @@ Use the component in the view.
   <kws-condition [condition]="currentWeather?.condition" [iconPaths]="iconMap"></kws-condition>
 ```
 
-Do some page-specific styling.
+Now let's do some page-specific styling. In general, we want to minimize the use of this, but we have specific cases here where it makes sense:
 
-- in general, we want to minimize the use of this
 - `city` is specific to this page
-- only change the bits that need to be changed (`primary-value`)
+- We'd like `primary-value` to be smaller on this page (even though it's already defined globally)
 - `kws-condition` is a custom element that uses shadow DOM so a lot of its styling is handled via <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/--*" target="_blank">custom properties (aka: CSS variables)</a>.
 
 ```scss
@@ -260,7 +259,7 @@ export type Forecast = Array<Array<Weather>>;
 
 At this point, set up some simple sample data (three days worth should be fine), mock of the UI, and style it.
 
-**forcast.ts**
+**forecast.ts**
 
 ```TypeScript
 import { Component } from '@angular/core';
@@ -301,7 +300,7 @@ export class ForecastPage {
 }
 ```
 
-**forcast.html**
+**forecast.html**
 
 ```html
 <ion-header>
@@ -321,7 +320,7 @@ export class ForecastPage {
 </ion-content>
 ```
 
-**forcast.scss**
+**forecast.scss**
 
 **Note:** remember to change the main element tag from `page-about` to `page-forecast`.
 

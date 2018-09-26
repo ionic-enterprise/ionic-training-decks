@@ -70,7 +70,7 @@ For this application, we download the following images and copy them to your app
 
 Run `ionic cordova resources` to generate new resources.
 
-Rather than doing another commit, let's just amend the previous commit with these changes: `git commit -a --amend -C HEAD` (or `git aa` if you have my aliases)
+Rather than doing another commit, let's just amend the previous commit with these changes: `git commit -a --amend -C HEAD` (or `git aa` if you have my aliases).
 
 ## Push to Ionic Pro
 
