@@ -25,7 +25,7 @@ Commit your change: `git commit -am "add the weather component library"`
 
 Good libraries usually document exactly how to use the library in your application. In the case of this library - which is a web component library built using a technology called <a href="https://stenciljs.com" target="_blank">Stencil</a> - there are a couple of steps that need to be taken to use the library in an Angular project (like yours).
 
-Since Angular does not know about the custom elements in the library, the `CUSTOM_ELEMENTS_SCHEMA` import must be used. This tells the Angular compiler to ignore any elements it doesn't understand so long as they conform to the custom elements standard.
+Since Angular does not know about the custom elements in the library, the `CUSTOM_ELEMENTS_SCHEMA` import must be used in `app.module.ts`. This tells the Angular compiler to ignore any elements it doesn't understand so long as they conform to the custom elements standard.
 
 ```TypeScript
 import {
