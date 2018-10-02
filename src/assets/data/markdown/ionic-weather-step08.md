@@ -1,14 +1,14 @@
-# Lab: Using the Data Service
+# Lab: Using the Data
 
 In this lab you will learn how to:
 
-* inject the service into pages
-* diagnose errors that occur while you are developing your application
-* get real data from the service, replacing the fake data from our earlier mocking
+* Inject a service into your pages
+* Diagnose errors that occur while you are developing your application
+* Retrieve real data from the service, replacing the fake data from our earlier mocking
 
 ## Injector Error 
 
-Start by injecting the `WeatherProvider` into the current-weather page.
+Start by injecting the `WeatherProvider` into the `current-weather` page.
 
 ```TypeScript
 import { WeatherProvider } from '../../providers/weather/weather';
@@ -24,7 +24,7 @@ import { WeatherProvider } from '../../providers/weather/weather';
 When you run the application after this change, though, you should get an error in the console like this one:
 
 ```
-core.js:1449 ERROR Error: Uncaught (in promise): Error: StaticInjectorError(AppModule)[WeatherProvider -> HttpClient]: 
+Error: Uncaught (in promise): Error: StaticInjectorError(AppModule)[WeatherProvider -> HttpClient]: 
   StaticInjectorError(Platform: core)[WeatherProvider -> HttpClient]: 
     NullInjectorError: No provider for HttpClient!
 ```
@@ -47,9 +47,11 @@ import { HttpClientModule } from '@angular/common/http';
   imports: [BrowserModule, HttpClientModule, IonicModule.forRoot(MyApp)],
 ```
 
-## Get the Data
+Save those changes and check your application - the error should be gone.
 
-It makes sense to get new data each time the page is visited. The natural place to do this is the `ionViewDidEnter()` lifecycle event.
+## Using the Data
+
+In our application, we want to get new data each time the page is visited. The natural place to do this is the `ionViewDidEnter()` <a href="https://ionicframework.com/docs/api/navigation/NavController/#lifecycle-events" target="_blank">lifecycle event</a>.
 
 ```TypeScript
   ionViewDidEnter() {
@@ -63,6 +65,6 @@ Finally, where `currentWeather` as initialized to fake data before it can just b
   currentWeather: Weather;
 ```
 
-**Challenge:** Make similar modifications to the forecast and UV Index pages. 
+**Challenge:** Make similar modifications to the `forecast` and `uv-index` pages. 
 
 Make sure all of your changes have been committed.

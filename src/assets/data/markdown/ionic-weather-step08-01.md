@@ -7,19 +7,15 @@ Please try to write this code on your own before consulting this part of the gui
 Your `src/app/app.module.ts` should currently look something like this:
 
 ```TypeScript
-import {
-  CUSTOM_ELEMENTS_SCHEMA,
+import { 
+  NgModule, 
   ErrorHandler,
-  Injectable,
-  Injector,
-  NgModule
+  CUSTOM_ELEMENTS_SCHEMA 
 } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { HttpClientModule } from '@angular/common/http';
 import { IonicApp, IonicModule, IonicErrorHandler } from 'ionic-angular';
 import { MyApp } from './app.component';
-
-import { Pro } from '@ionic/pro';
 
 import { ForecastPage } from '../pages/forecast/forecast';
 import { UVIndexPage } from '../pages/uv-index/uv-index';
@@ -30,29 +26,6 @@ import { StatusBar } from '@ionic-native/status-bar';
 import { SplashScreen } from '@ionic-native/splash-screen';
 import { IconMapProvider } from '../providers/icon-map/icon-map';
 import { WeatherProvider } from '../providers/weather/weather';
-
-Pro.init('1ec81629', {
-  appVersion: '0.0.1'
-});
-
-@Injectable()
-export class MyErrorHandler implements ErrorHandler {
-  ionicErrorHandler: IonicErrorHandler;
-
-  constructor(injector: Injector) {
-    try {
-      this.ionicErrorHandler = injector.get(IonicErrorHandler);
-    } catch (e) {
-      console.error(e);
-    }
-  }
-
-  handleError(err: any): void {
-    Pro.monitoring.handleNewError(err);
-    this.ionicErrorHandler && this.ionicErrorHandler.handleError(err);
-  }
-}
-
 @NgModule({
   declarations: [
     MyApp,
@@ -61,7 +34,11 @@ export class MyErrorHandler implements ErrorHandler {
     CurrentWeatherPage,
     TabsPage
   ],
-  imports: [BrowserModule, HttpClientModule, IonicModule.forRoot(MyApp)],
+  imports: [
+    BrowserModule,
+    HttpClientModule,
+    IonicModule.forRoot(MyApp)
+  ],
   bootstrap: [IonicApp],
   entryComponents: [
     MyApp,
@@ -73,19 +50,19 @@ export class MyErrorHandler implements ErrorHandler {
   providers: [
     StatusBar,
     SplashScreen,
-    IonicErrorHandler,
-    { provide: ErrorHandler, useClass: MyErrorHandler },
     IconMapProvider,
-    WeatherProvider
+    WeatherProvider,
+    {provide: ErrorHandler, useClass: IonicErrorHandler}
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })
+
 export class AppModule {}
 ```
 
 ## Current Weather Page
 
-Your `src/pages/current-weather/current-weather.ts` should current look something like this:
+Your `src/pages/current-weather/current-weather.ts` should look something like this:
 
 ```TypeScript
 import { Component } from '@angular/core';
@@ -111,8 +88,9 @@ export class CurrentWeatherPage {
   }
 }
 ```
+## Forecast Page
 
-Your `src/pages/forecast/forecast.ts should` look something like this:
+Your `src/pages/forecast/forecast.ts` should look something like this:
 
 ```TypeScript
 import { Component } from '@angular/core';
@@ -139,7 +117,9 @@ export class ForecastPage {
 }
 ```
 
-Your `src/pages/uv-index/uv-index.ts should` look something like this:
+## UV Index Page
+
+Your `src/pages/uv-index/uv-index.ts` should look something like this:
 
 ```TypeScript
 import { Component } from '@angular/core';
