@@ -12,20 +12,20 @@ In this lab, you will learn how to:
 ## Getting Started
 
 * Go to <a href="https://openweathermap.org/" target="_blank">OpenWeatherMap.org</a> and sign up for a free account so you can have an API key (if you do not want to do this, you can use the API key I generated for this class, but I _will_ be removing it after the class is over)
-* Use the Ionic CLI to generate a new provider called `weather` (hint: the ionic CLI has a `--help` option that can be used at several levels)
-* Use git to verify the files were created as you expect and that your new service is provided in `app.module.ts`
+* Use the Ionic CLI to generate a new provider called `weather` (Hint: the Ionic CLI has a `--help` option that can be used at several levels)
+* Use git to verify the files were created and that your new service is provided in `app.module.ts`
 * Be sure to add the newly generated file to your commit
 * Make your initial commit for this feature
 
-The API key to use if you do not want to generate your own is currently: `db046b8bbe642b799cb40fa4f7529a12`we
+The API key to use if you do not want to generate your own is currently: `db046b8bbe642b799cb40fa4f7529a12`
 
 ## Initial Setup
 
-The generated `weather` service gives you a lot of what you need to get started, but let's clean that up a little.
+The generated `weather` service (or "provider") gives you a lot of what you need to get started, but let's clean that up a little.
 
 1. Remove the comment near the top of the file
-1. Modify the `HttpClient` to be `private` rather than `public`; it is initially public to avoid a linting error until you actually use it
-1. Modify the constructor to have an empty body - we don't need to do anything inside it
+1. Modify the `HttpClient` to be `private` rather than `public` (it is initially public to avoid a linting error until you actually use it)
+1. Modify the constructor to have an empty body
 
 ### Basic Configuration
 
@@ -86,7 +86,7 @@ Review the <a href="https://openweathermap.org/current#current_JSON" target="_bl
 * **condition** - This is the `weather.id`, but because `weather` is an array of objects, we will use the `id` from the first object in the array (`weather[0].id`) 
 * **date** - This is available from `dt`; note that the date is Unix UTC
 
-**Challenge**: Add a private method to your service called `unpackWeather` that has the following signature: `private unpackWeather(res: any): Weather`. Unpack `res` (the *res*ult of the HTTP call) as described above and then return it in a `Weather` object.
+**Challenge**: Add a private method to your service called `unpackWeather` that has the following signature: `private unpackWeather(res: any): Weather`. Unpack `res` (the **res**ult of the HTTP call) as described above and then return it in a `Weather` object.
 
 Try to complete this challenge without looking at the completed code.
 
@@ -125,7 +125,7 @@ Transforming the forecast data is more complex. We need to go through the `list`
   }
 ```
 
-**Challenge:** now that you have the transform, apply it in your `forecast()` method. Remember that you should change the return type. Specifically the type specified for the `Observable<T>`.
+**Challenge:** Now that you have the transform, apply it in your `forecast()` method. Remember that you should change the return type - specifically, the type specified for the `Observable<any>`.
 
 ## UV Index
 
@@ -138,16 +138,16 @@ export interface UVIndex {
 }
 ```
 
-* **value** - use the `value` from the HTTP result
-* **riskLevel** - this is based on the `value` as such:
+* **value** - Use the `value` from the HTTP result
+* **riskLevel** - This level should be calculated by us based on the `value`:
    * 0 - a `value` < 3
    * 1 - a `value` >= 3 and < 6
    * 2 - a `value` >= 6 and < 8
    * 3 - a `value` >= 8 and < 11 
    * 4 - a `value` >= 11
 
-**Challenge:** write a private `unpackUVIndex(res: any): UVIndex` method that unpacks the HTTP result as specified. When you are complete, apply the transform.
+**Challenge:** Write a private `unpackUVIndex(res: any): UVIndex` method that unpacks the HTTP result as specified. You will need to write up some code to calculate the `riskLevel` as part of the method. When that is finished, apply the `map` transform as you did with the `forecast()` method.
 
 ## Finish the Feature
 
-Compare your code to the completed code that I included. It does not have to match identically, but it should be functionally equivalent. We have not tested any of this yet, which is scary and a really good argument for unit tests. None the less, let's make sure everthing has been committed.
+Compare your code to the completed code that I've included. It does not have to be identical, but it should be functionally equivalent. We have not tested any of this yet, which is scary and a really good argument for unit tests. Nonetheless, let's make sure everything has been committed.
