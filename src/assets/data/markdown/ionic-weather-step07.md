@@ -4,40 +4,40 @@ Your app looks nice, but it does not display real data. Let's fix that.
 
 In this lab, you will learn how to:
 
-* create a new service using the Ionic CLI
-* use Angular's HttpClient service to get data from an API
-* transform the data for consumption by your application
+* Create a new service using the Ionic CLI
+* Use Angular's `HttpClient` service to get data from an API
+* Transform the data for consumption by your application
 
 
 ## Getting Started
 
-* go to <a href="https://openweathermap.org/" target="_blank">OpenWeatherMap.org</a> and sign up for a free account so you can have an API key (if you do not want to do this, you can use the API key I generated for this class, but I _will_ be removing it after the class is over)
-* use the Ionic CLI to generate a new provider called `weather` (hint: the ionic CLI has a `--help` option that can be used at several levels)
-* use git to verify the files were created as you expect and that your new service is provided in `app.module.ts`
-* be sure to add the newly generated file to your commit
-* make your initial commit for this feature
+* Go to <a href="https://openweathermap.org/" target="_blank">OpenWeatherMap.org</a> and sign up for a free account so you can have an API key (if you do not want to do this, you can use the API key I generated for this class, but I _will_ be removing it after the class is over)
+* Use the Ionic CLI to generate a new provider called `weather` (hint: the ionic CLI has a `--help` option that can be used at several levels)
+* Use git to verify the files were created as you expect and that your new service is provided in `app.module.ts`
+* Be sure to add the newly generated file to your commit
+* Make your initial commit for this feature
 
-The API key to use if you do not want to generate your own is currently: db046b8bbe642b799cb40fa4f7529a12
+The API key to use if you do not want to generate your own is currently: `db046b8bbe642b799cb40fa4f7529a12`we
 
 ## Initial Setup
 
-The generated service gives you a lot of what you need to get started, but let's clean that up a little.
+The generated `weather` service gives you a lot of what you need to get started, but let's clean that up a little.
 
-1. the comment is helpful the first time you see it, rather pointless after that, remove it
-1. the `HttpClient` is injected `public` to avoid a linting error until you actually use it, make it `private`
-1. there is no need to do anything in the constructor, make it have an empty body
+1. Remove the comment near the top of the file
+1. Modify the `HttpClient` to be `private` rather than `public`; it is initially public to avoid a linting error until you actually use it
+1. Modify the constructor to have an empty body - we don't need to do anything inside it
 
 ### Basic Configuration
 
-Let's add some basic configuration data. Have a look at the <a href="https://openweathermap.org/api" target="_blank">Open Weather Map API</a> documentation. You will see that the various endpoints all have several things in common:
+Let's add some basic configuration data. Have a look at the <a href="https://openweathermap.org/api" target="_blank">Open Weather Map API</a> documentation. You will see that the various endpoints:
 
-* they all start with: `http://api.openweathermap.org/data/2.5`
-* they all can take several formats for location (we will use lat/lng)
-* less obviously, they all take an `appid` parameter with the API key
+* All start with: `http://api.openweathermap.org/data/2.5`
+* Can take several formats for location (we will use latitude/longitude)
+* All take an `appid` parameter with the API key (this is less obvious)
 
-The first version of the app will use a hard coded location. I am using Madison, WI, USA because that is where the Ionic HQ is but you should use something closer to your home. You can use a web-site such as <a href="https://www.latlong.net/" target="_blank">LatLong.net</a> to find the coordinates of your city. Add your key, the base URL, and your coordinates as private data in the service.
+The first version of the app will use a hard coded location. I am using Madison, WI, USA because that is where the Ionic HQ is located, but you should use something closer to your home. You can use a web-site such as <a href="https://www.latlong.net/" target="_blank">LatLong.net</a> to find the coordinates of your city. 
 
-My private data looks like this:
+Add your key, the base URL, and your coordinates as private data in the service. My private data looks like this:
 
 ```TypeScript
   private appId = 'db046b8bbe642b799cb40fa4f7529a12';
@@ -49,7 +49,15 @@ My private data looks like this:
 
 ## Getting the Data
 
-Angular's <a href="https://angular.io/api/common/http/HttpClient" target="_blank">HttpClient</a> service is very flexible and has several options for working with RESTful data. This course cannot go into all of that as it could be a full course on its own. For the purpose of this course, we will only be using the GET verb to get data. The basic format for such a call is: `get(url: string): Observable<any>`. For our case, the url can be built as such: `${this.baseUrl}/foo?lat=${this.latitude}&lon=${this.longitude}&appid=${this.appId}`. So a basic method that returns this data looks like this:
+Angular's <a href="https://angular.io/api/common/http/HttpClient" target="_blank">HttpClient</a> service is very flexible and has several options for working with RESTful data. We will not go into full details, as that could be a full course on its own. For the purposes of this course, we will only be using GET verb to retrieve data. 
+
+The basic format for such a call is: `get(url: string): Observable<any>`. In our case, the url can be built as such: 
+
+```TypeScript
+${this.baseUrl}/foo?lat=${this.latitude}&lon=${this.longitude}&appid=${this.appId}
+```
+
+So a basic method that returns this data looks like this:
 
 ```TypeScript
   current(): Observable<any> {
@@ -60,25 +68,25 @@ Angular's <a href="https://angular.io/api/common/http/HttpClient" target="_blank
   }
 ```
 
-Add that method to your service plus one for forecasts and the UV index. Refer to the API docs for the exact endpoint to use.
+Add that method to your `weather` service to get the current weather. Then add two additional methods: one for forecasts and one for the UV index. Refer to the API docs for the exact endpoint to use.
 
-**Hint:** you need to import `Observable` from `rxjs` at the top of your file.
+**Hint:** You'll need to import `Observable` from `rxjs` at the top of your file.
 
 ## Transforming the Data
 
-We currently have the data, but we need to transform it into a format that our application can use.
+Now we can retrieve our data, but we need to transform it into a format that our application can use.
 
 ### Current Weather
 
 #### Transforming the Result Object
 
-Have a look at the <a href="https://openweathermap.org/current#current_JSON" target="_blank">API docs</a>. Also have a look at our own `Weather` model. We need grab the following data:
+Review the <a href="https://openweathermap.org/current#current_JSON" target="_blank">API docs</a> and have a look at our `Weather` model. We need grab the following data:
 
-* **temperature** - we can grab this from `main.temp`
-* **condition** - this is the `weather.id`, but `weather` is an array of objects, so just grab the `id` from the first one (`weather[0].id`) 
-* **date** - we can grab this from `dt` but note that the date is unix UTC and thus seconds from the epoch rather than milliseconds (for this app we don't really have to worry about timezones, so ignore that detail)
+* **temperature** - Available as part of `main.temp`
+* **condition** - This is the `weather.id`, but because `weather` is an array of objects, we will use the `id` from the first object in the array (`weather[0].id`) 
+* **date** - This is available from `dt`; note that the date is Unix UTC
 
-**Challenge**: Add a private method to your service called `unpackWeather` that has the following signature: `private unpackWeather(res: any): Weather`. Unpack `res` (the result of the HTTP call) as described above and then return it in a `Weather` object.
+**Challenge**: Add a private method to your service called `unpackWeather` that has the following signature: `private unpackWeather(res: any): Weather`. Unpack `res` (the *res*ult of the HTTP call) as described above and then return it in a `Weather` object.
 
 Try to complete this challenge without looking at the completed code.
 
