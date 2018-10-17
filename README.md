@@ -6,7 +6,7 @@ This material is meant to be used in conjunction with the Ionic Framework Traini
 
 To run this deck on your machine:
 
-1. `git clone git@github.com:ionic-team/framework-training-deck.git`
+1. `git clone https://github.com/ionic-team/framework-training-deck.git`
 1. `cd framework-training-deck`
 1. `npm install`
 1. `npm start`
