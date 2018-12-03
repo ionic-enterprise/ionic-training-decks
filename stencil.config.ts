@@ -5,7 +5,3 @@ export const config: Config = {
   plugins: [sass()]
 };
 
-// exports.devServer = {
-//   root: 'www',
-//   watchGlob: '**/**'
-// };
