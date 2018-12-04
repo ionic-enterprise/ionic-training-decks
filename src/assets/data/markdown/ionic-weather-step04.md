@@ -1,167 +1,83 @@
-# Lab: Layout the Pages
+# Lab: Styling
 
-In this lab, you will learn:
+In this lab you will:
 
-* How to specify icons and labels for tabs
-* How to use `git mv` to rename source files
-* How to use VS Code's refactoring tools to rename classes
-
-
-## Overview of the Process
-
-Our application will have three tabs:
-
-* Current Weather
-* Forecast
-* UV Index
+* Apply defined colors to elements
+* Change the default color theme
+* Apply global styles
+* Customize the application's splash screen and icon
 
 
-To achieve this from our starting "tabs" based application, we will:
+## Setting a Color Theme
 
-1. Prepare the development environment
-1. Change the tab labels
-1. Change the tab icons
-1. Change the page titles
-1. Rename the source code for the pages
-1. Finish the feature
+Let's give our app a little color. We will start by just using the default "primary" color for the nav bar and the tab bar.
 
-## Prepare the Development Environment
-
-When we start developing a feature, we should start our development.
-
-1. `npm start` OR `ionic serve`
-
-## Change the Tab Labels
-
-Open the `src/pages/tabs/tabs.html` file. It currently looks like this:
+For each of the main pages, add `color="primary"` to the `ion-navbar` element like this:
 
 ```html
-<ion-tabs>
-  <ion-tab [root]="tab1Root" tabTitle="Home" tabIcon="home"></ion-tab>
-  <ion-tab [root]="tab2Root" tabTitle="About" tabIcon="information-circle"></ion-tab>
-  <ion-tab [root]="tab3Root" tabTitle="Contact" tabIcon="contacts"></ion-tab>
+<ion-header>
+  <ion-navbar color="primary">
+    <ion-title>Current Weather</ion-title>
+  </ion-navbar>
+</ion-header>
+```
+
+Make a similar modification to the `tabs.html` file:
+
+```html
+<ion-tabs color="primary">
+  <ion-tab [root]="tab1Root" tabTitle="Current Weather" tabIcon="cloud"></ion-tab>
+  <ion-tab [root]="tab2Root" tabTitle="Forecast" tabIcon="calendar"></ion-tab>
+  <ion-tab [root]="tab3Root" tabTitle="UV Index" tabIcon="sunny"></ion-tab>
 </ion-tabs>
 ```
 
-Change the `tabTitle` values so we have the following tabs:
+Now let's supply some of our own custom colors.
 
-* Current Weather
-* Forecast
-* UV Index
+First, set the background color for all `content` regions in `app.scss`:
 
-`git commit -am "rename the tabs"`
-
-
-## Change the Tab Icons
-
-That reads much more nicely, but picture does not really match the title. Let's fix that.
-
-Change the `tabIcon` values in the `src/pages/tabs/tabs.html` file as such:
-
-* cloud
-* calender
-* sunny
-
-`git commit -am "update the tab icons"`
-
-## Change the Page Titles
-
-The titles are still wrong. Let's fix that.
-
-Open each of the following files and change the title:
-
-* `src/pages/home/home.html` - Current Weather
-* `src/pages/about/about.html` - Forecast 
-* `src/pages/contact/contact.html` - UV Index 
-
-`git commit -am "update the page titles"`
-
-## Moving and Renaming Source
-
-Visually, everything makes sense now in our application, but the page names do not match the general contents. Long term, that is going to be an issue. Let's fix that as well.
-
-Rename the pages as such:
-
-* home -> current-weather
-* about -> forecast
-* contact -> uv-index
-
-It is easiest to do the move of the files from the command line. Here is a set of commands that you can run from your project's root directory in order to accomplish this.
-
-(**Note:** This was not tested on a Windows machine, but if you are on Windows and using the GitBash shell instead of the command prompt, the following should work.)
-
-```
-cd src/pages
-
-mkdir current-weather forecast uv-index
-git mv home/home.ts current-weather/current-weather.ts
-git mv home/home.scss current-weather/current-weather.scss
-git mv home/home.html current-weather/current-weather.html
-rmdir home
-
-git mv about/about.ts forecast/forecast.ts
-git mv about/about.scss forecast/forecast.scss
-git mv about/about.html forecast/forecast.html
-rmdir about
-
-git mv contact/contact.ts uv-index/uv-index.ts
-git mv contact/contact.scss uv-index/uv-index.scss
-git mv contact/contact.html uv-index/uv-index.html
-rmdir contact
-
-cd ../..
-```
-
-**Pro Tip:** When refactoring code involves renaming modules, use `git mv`. This ensures that git tracks the change as a move and not something else like a delete and add.
-
-While that was easy enough, the app is now totally broken. Let's fix that.
-
-First, open the `src/app/app.module.ts` and `src/pages/tabs/tabs.ts` files and fix the paths as follows:
-
-**tabs.ts**
-
-```
-import { AboutPage } from '../forecast/forecast';
-import { ContactPage } from '../uv-index/uv-index';
-import { HomePage } from '../current-weather/current-weather';
-```
-
-**app.module.ts**
-
-```
-import { AboutPage } from '../pages/forecast/forecast';
-import { ContactPage } from '../pages/uv-index/uv-index';
-import { HomePage } from '../pages/current-weather/current-weather';
-```
-
-By fixing these errors first, this allows use to use VS Code's refactoring tools to rename the classes. Open `src/pages/current-weather/current-weather.ts` and do the following:
-
-* Change the `selector` value to `page-current-weather`
-* Change the `templateUrl` value to `current-weather.html`
-* Use the VS Code "Rename Symbol" tool to rename `HomePage` to `CurrentWeatherPage` (right click to get a pop-up menu, or use the `F2` hotkey on a Mac (may need to also use `fn`))
-
-When you are done, the code should look like this:
-
-```TypeScript
-import { Component } from '@angular/core';
-import { NavController } from 'ionic-angular';
-
-@Component({
-  selector: 'page-current-weather',
-  templateUrl: 'current-weather.html'
-})
-export class CurrentWeatherPage {
-  constructor(public navCtrl: NavController) {}
+```scss
+.content {
+  background-color: #b9dbf7;
 }
 ```
 
-Better yet, the references in `app.module.ts` and `tabs.ts` should have changed as well.
+Second, use a slightly different shade of blue for the `primary` color in `theme/variables.scss`:
 
-Repeat these steps for the other two pages that were renamed. At this point, you should have a functioning application once again with properly refactored code.
+```scss
+$colors: (
+  primary: #085A9E,
+  secondary: #32db64,
+  danger: #f53d3d,
+  light: #f4f4f4,
+  dark: #222
+);
+```
 
-1. `git commit -am "rename the page classes"`
+## Changing the Splash Screen and Icon
+
+Your application should have its own splash screen and icon rather than using the default that Ionic supplies for you. Ionic provides a service that will take two source image files and create all of the resources that your application will require via the <a href="https://ionicframework.com/docs/cli/cordova/resources/" target="_blank">ionic cordova resources command</a>. Follow these guidelines:
+
+* Keep the images simple and clear
+* You can supply source images in any of these formats: `.png`, `.psd`, `.ai`
+* Icon - at least 1024x1024 pixels
+* Splashscreen - at least 2732x2732 pixels with a simple image that is centered and no bigger than 1200x1200 pixels to facilitate reasonable display on all devices
+
+For this application, we download the following images and copy them to your application's `resources` directory, replacing the onces that are already there:
+
+* <a download href="/assets/images/icon.png">icon.png</a>
+* <a download href="/assets/images/splash.png">splash.png</a>
+
+Run `ionic cordova resources` to generate new resources.
+
+Rather than doing another commit, let's just amend the previous commit with these changes: `git commit -a --amend -C HEAD` (or `git aa` if you have my aliases).
+
+## Push to Ionic Pro
+
+1. commit any changes that are currently uncommitted (if you have any)
 1. `git push ionic master`
 
-**Note:** If your dev server is now spitting out errors it is just that it picked up one of the above changes mid-way through. Just kill the dev server and restart it.
 
-Once the build completes on Ionic Pro and is associated with the Master channel completely kill and restart the application on your device. At this point, you should see your modified application.
+After the Ionic Pro build is complete and assigned to the Master channel, relaunch the application on your device. You will notice that the theme has changed. **But wait!!** The splash screen and icon have not. Why is that?
+
+The Ionic Deploy service can only deploy <a href="https://ionic.zendesk.com/hc/en-us/articles/360002243614-What-Are-Binary-Compatible-Changes-" target="_blank">binary compatible changes</a>. While the icon and splash screen may sound like they are "assets", and thus binary compatible, they really are not. They are actually bundled with the binary portion of the application. Thus, to deploy the change to the icon and splash screen, you need to re-submit the application to the app stores (or in our case, reload the application on your device).

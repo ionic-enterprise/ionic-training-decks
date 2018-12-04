@@ -1,208 +1,241 @@
-# Lab: User Preferences Step 1
+# Lab: User Preferences Step 2
 
-In this lab you will learn how to:
+The user preferences will be stored on the device using <a href="https://github.com/ionic-team/ionic-storage" target="_blank">Ionic Storage</a>, which encapsulates several local storage options. In this lab, we will:
 
-* create a component using the Ionic CLI
-* add icon buttons to the navbar
-* use the ModalController to create a modal
-* override styles locally
-* use the ViewController to dismiss the modal
-* hookup some form controls
+* create a service to store and retrieve the data
+* create a subject that will emit when data changes
+* modify the user preferences dialog to store the data
+* modify the pages to repond to the user preference data changing
 
-## Create the Modal
+## Create a Data Service
 
-In order to launch a modal, a component to display in the modal needs to be specified. We can create the via `ionic g component user-preferences`.
+This service will just save and retrieve / cache the user preference data.
 
-Do that and examine the generated code.
+1. using the CLI, create a provider called `user-preferences`
+1. add the `IonicStorageModule` to the list of `imports` in `app.module.ts` as per the documentation on GitHub
+1. create methods to get and set the user preference data in the provider that was just created
 
-## Hook Up the Modal
-
-The user preferences will be accessible via each page's header via a gear button. The markup to accomplish this looks like:
-
-```http
-    <ion-buttons end>
-      <button ion-button icon-only (click)="openUserPreferences()">
-        <ion-icon name="settings"></ion-icon>
-      </button>
-    </ion-buttons>
-```
-
-Add this within the `ion-navbar` in the header of each page. Don't worry about the red squiggly line under `openUserPreferences()`. We will fix that next.
-
-Each page class will need code like this:
+Here is the full code to get and set the `useCelcius` preference:
 
 ```TypeScript
+import { Storage } from '@ionic/storage';
+import { Injectable } from '@angular/core';
+
+@Injectable()
+export class UserPreferencesProvider {
+  private keys = {
+    useCelcius: 'useCelcius',
+    city: 'city'
+  };
+  private _useCelcius: boolean;
+
+  constructor(private storage: Storage) {}
+
+  async getUseCelcius(): Promise<boolean> {
+    await this.storage.ready();
+    if (this._useCelcius === undefined) {
+      this._useCelcius = await this.storage.get(this.keys.useCelcius);
+    }
+    return this._useCelcius;
+  }
+
+  async setUseCelcius(value: boolean): Promise<void> {
+    await this.storage.ready();
+    this._useCelcius = value;
+    this.storage.set(this.keys.useCelcius, value);
+  }
+}
+```
+
+**Note:** we could have also used getters and setters here, but I think that makes the calling code look weird. `this.userPreferences.getUseCelcius().then(...)` vs `this.userPreferences.useCelcius.then(...)`. That is mitigated somewhat if you use `async/await` all the time in your code. The choice is totally up to you.
+
+**Challenge:** create similar methods for the city.
+
+## Refactor
+
+At this point, it does not make much sense for the cities to be defined where they are. Let's do a couple of things:
+
+1. move the `cities.ts` file in with the service (`git mv src/components/user-preferences/cities.ts src/providers/user-preferences/cities.ts`)
+1. add a method to the service that returns the available cities, call it `availableCities()`
+1. makes two changes to the `getCity()` method
+   1. if there is a city stored in user preferences, look up the city by name in the cities array
+   1. if there is no city stored in user preferences, return the "Current Location" city (cities[0]).
+
+```TypeScript
+  async getCity(): Promise<City> {
+    await this.storage.ready();
+    if (this._city === undefined) {
+      const city = await this.storage.get(this.keys.city);
+      this._city = cities.find(c => c.name === (city && city.name)) || cities[0];
+    }
+    return this._city;
+  }
+```
+
+**Note:** when you do the above, the `UserPreferencesComponent` will break. We will fix it in the next step.
+
+
+## Use the Service in the Component
+
+**Challenge:** this one is all on you, try to do it without looking at the completed code
+
+1. inject `UserPreferencesProvider` in the constructor of `UserPreferencesComponent`
+1. set the properties (`cities`, `city`, and `useCelcius`) properties in an appropriate life-cycle event getting the data from the service
+1. set the data and close the modal from the `save()`
+
+## Use the Service in the Pages
+
+In the `CurrentWeatherPage`:
+
+1. inject the `UserPreferencesProvider`
+1. add `cityName` and `scale` properties (both strings)
+1. update the `ionViewDidEnter()` to get the data and set the properties
+
+```TypeScript
+  ionViewDidEnter() {
+    this.userPreferences.getCity().then(c => this.cityName = c.name);
+    this.userPreferences.getUseCelcius().then(u => { this.scale = u ? 'C' : 'F' });
+    this.weather.current().subscribe(w => (this.currentWeather = w));
+  }
+```
+
+In the view, bind the data:
+
+```html
+  <div class="information">
+    <ion-label class="city">{{cityName}}</ion-label>
+    <kws-temperature class="primary-value" [scale]="scale" temperature="{{currentWeather?.temperature}}"></kws-temperature>
+  </div>
+```
+
+**Challenge:** do the same for the `ForecastPage`. You will only need to deal with the scale.
+
+## Use the Service in the Weather Service
+
+When gettng the current location, the user preferences need to be taken into account.
+
+1. inject the `UserPreferencesProvider`
+1. modify the `getCurrentLocation()` function to check the city from user preferences and either return that cities location or use geo-location via `this.location.current()`
+
+**Hints:**
+
+1. you need to change the code inside of the `Observable.fromPromise()`
+1. promises can be chained
+1. when promises are chained, the promise ulitmately resolves to whatever is returned by the inner-most `then()` callback.
+
+Here is what you should have in the end:
+
+```TypeScript
+  private getCurrentLocation(): Observable<Location> {
+    return Observable.fromPromise(
+      this.userPreferences.getCity().then(c => {
+        if (c.location) {
+          return Promise.resolve(c.location);
+        } else {
+          return this.location.current();
+        }
+      }));
+  }
+```
+
+## Respond to Changes in the User Preferences
+
+In rxjs, the `Subject` is kind of like an Event Emitter. Set one up in the `UserPreferenceProvider`.
+
+1. `import { Subject } from 'rxjs';`
+1. instantiate a new `Subject` in the constructor
+1. call the `Subject`'s `next()` method when you want to emit a value on it
+
+Often, you will emit a value. In this case just emit nothing. Here is a synopsis of the changes:
+
+```TypeScript
+import { Subject } from 'rxjs';
+
+import { City } from '../../models/city';
+import { cities } from './cities';
+
+@Injectable()
+export class UserPreferencesProvider {
+
+  ...
+
+  changed: Subject<void>;
+
+  constructor(private storage: Storage) {
+    this.changed = new Subject();
+  }
+
+  ...
+
+  async setUseCelcius(value: boolean): Promise<void> {
+    await this.storage.ready();
+    this._useCelcius = value;
+    this.changed.next();
+    this.storage.set(this.keys.useCelcius, value);
+  }
+
+  ...
+
+  async setCity(city: City): Promise<void> {
+    await this.storage.ready();
+    this._city = cities.find(c => c.name === city.name) || cities[0];
+    this.changed.next();
+    this.storage.set(this.keys.city, city);
+  }
+```
+
+
+To respond to the change, each page (current-weather, forecast, uv-index) should be changed as such:
+
+* since we will get data when the view enters and when the user preferences data changes, put that logic in a private method called `getData()`
+* when the view loads, subscribe to the changed subject
+* when the subject fires, get the data
+* when the view unloads, remove the subscription
+
+The code should look something like this:
+
+```TypeScript
+export class CurrentWeatherPage {
+  scale: string;
+  cityName: string;
+  currentWeather: Weather;
+
+  private subscription: Subscription;
+
+  constructor(
+    public iconMap: IconMapProvider,
+    private modal: ModalController,
+    private userPreferences: UserPreferencesProvider,
+    private weather: WeatherProvider
+  ) {}
+
+  ionViewDidLoad() {
+    this.subscription = this.userPreferences.changed.subscribe(() =>
+      this.getData()
+    );
+  }
+
+  ionViewDidEnter() {
+    this.getData();
+  }
+
+  ionViewWillUnload() {
+    this.subscription.unsubscribe();
+  }
+
   openUserPreferences() {
     const m = this.modal.create(UserPreferencesComponent);
     m.present();
   }
-```
 
-This requires injecting a `ModelController` as `modal` in the constructor. Do this in each page class.
-
-Once you do this, test out the application. Upon pressing the gear your application should crash. Something isn't right here. Angular doesn't know how to find the component you just created. You need to do two things:
-
-1. in the `app.module.ts` file, add the newly created `ComponentsModule` to the `imports` section of the `ngModule`
-1. in `src/components/components.module.ts`, specify the `UserPreferencesComponent` in the `entryComponents` array on the `NgModule` (you will likely have to add the property to the config object that is specified in the decorator)
-
-## Add a Header and Footer
-
-The general format of a page or modal dialog component is:
-
-```HTML
-<ion-header>
-</ion-header>
-
-<ion-content>
-</ion-content>
-
-<ion-footer>
-</ion-footer>
-```
-
-Replace the HTML in the `UserPreferencesComponent` to match this.
-
-The header will be very similar to the headers used on the pages, so copy the header from one of the pages for now. Make the following modifications:
-
-* change the title to "user preferences"
-* change the icon button to use the "close" icon
-* change the method that it calls when handling the click event to "dismiss()"
-* create a stub method called "dismiss()" in the component's class
-
-The footer will be filled in later, so leave it blank.
-
-Finally, let's override some styles just for the modal component. Along with giving the modal a different look on a phone, this will also make the modal more obvious when run on the web or on a tablet. 
-
-```scss
-user-preferences {
-  .footer {
-    padding-left: 10px;
-    padding-right: 10px;
-    padding-bottom: 5px;
-  }
-
-  .item {
-    background-color: white;
-  }
-
-  .content {
-    background-color: white;
+  private getData() {
+    this.userPreferences.getCity().then(c => (this.cityName = c.name));
+    this.userPreferences.getUseCelcius().then(u => {
+      this.scale = u ? 'C' : 'F';
+    });
+    this.weather.current().subscribe(w => (this.currentWeather = w));
   }
 }
 ```
 
-## Implement the `dismiss()` Method
-
-In the previous step, you mocked up a `dismiss()` method, but it really should dismiss the modal. This can be done by injecting the  `ViewController`, which will inject the controller for the current view. That controller has method called `dismiss()`.
-
-**Challenge:** inject the `ViewController` and dismiss the view from the `UserPreferenceComponent` `dismiss()` method.
-
-## Add a Button to the Footer
-
-The footer is a good place to put a "Save" or "OK" button. Add a save button like this: `<button ion-button block color="secondary">Save</button>`
-
-There are a couple of things I don't like about the button. First, that green is a very ugly secondary color considering the rest of our theme and second it looks a little crowded.
-
-1. change the value of the "secondary" color of our theme to be `#f58e00`
-1. add some padding to the footer for this component only (I suggest right and left padding of 10px and bottom padding of 5px)
-
-## User Preferences
-
-Let's allow the users to select two simple options just for illustration:
-
-1. Use Celcius
-1. Specify a specific city or just use the current location
-
-### Models
-
-Create a city model in the `models` folder like this:
-
-```TypeScript
-import { Location } from './location';
-
-export interface City {
-  name: string;
-  location?: Location;
-}
-```
-
-In the user prefrences folder, let create an array of cities. This is the only place that will use the data, but we will keep in its own file in order to keep the component class clean:
-
-**`src/components/user-preferences/cities.ts`**
-
-```TypeScript
-import { City } from '../../models/city';
-
-export let cities: Array<City> = [
-  { name: 'Current Location' },
-  {
-    name: 'Chicago, IL',
-    location: { latitude: 41.878113, longitude: -87.629799 }
-  },
-  {
-    name: 'Edmonton, AB',
-    location: { latitude: 53.544388, longitude: -113.490929 }
-  },
-  {
-    name: 'London, UK',
-    location: { latitude: 51.507351, longitude: -0.127758 }
-  },
-  {
-    name: 'Madison, WI',
-    location: { latitude: 43.073051, longitude: -89.40123 }
-  },
-  {
-    name: 'Milwaukee, WI',
-    location: { latitude: 43.038902, longitude: -87.906471 }
-  },
-  {
-    name: 'Orlando, FL',
-    location: { latitude: 28.538336, longitude: -81.379234 }
-  },
-  {
-    name: 'Ottawa, ON',
-    location: { latitude: 45.42042, longitude: -75.69243 }
-  }
-];
-```
-
-### Mock Up the Component
-
-The content of the user preferences modal should have a toggle for the "Use Celcius" option and selection for the city for which the user wants to get the weather. That will require defining a few properties:
-
-* `import { cities } from './cities';`
-* `cities: Array<City> = cities;`
-* `city: City = this.cities[0];`
-* `useCelcius: boolean;`
-
-**Note:** the `import` is at the top of the file, the properties are defined within the class for the component.
-
-Also create a `save()` method that just logs out some values:
-
-```TypeScript
-  save() {
-    console.log('city:', this.city);
-  }
-```
-
-In the view, markup is required for the user controls. The two-way binding via `ngModel` is used to set the data and get changes from the user.
-
-```http
-<ion-content>
-  <ion-list>
-    <ion-item>
-      <ion-label>Use Celcius</ion-label>
-      <ion-toggle [(ngModel)]="userCelcius"></ion-toggle>
-    </ion-item>
-
-    <ion-item>
-      <ion-label>Location</ion-label>
-      <ion-select [(ngModel)]="city">
-        <ion-option *ngFor="let city of cities" [value]="city">{{city.name}}</ion-option>
-      </ion-select>
-    </ion-item>
-  </ion-list>
-</ion-content>
-```
-
-Also hookup the `save()` method via the save button's click event.
+Perform similar changes in the other two pages.

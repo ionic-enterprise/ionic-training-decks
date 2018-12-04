@@ -1,189 +1,208 @@
-# Lab: Using Plugins
-
-Cordova plugins are used when you want to access native functionality from your application.
+# Lab: User Preferences Step 1
 
 In this lab you will learn how to:
 
-* use the status bar plugin
-* use the platform service
-* create a non-HTTP service
-* use promises
-* use promises and observables together by mapping the promises to observables
-* use `flatMap` to essentially "chain" observables
-* keep complex code clean
+* create a component using the Ionic CLI
+* add icon buttons to the navbar
+* use the ModalController to create a modal
+* override styles locally
+* use the ViewController to dismiss the modal
+* hookup some form controls
 
-## Status Bar
+## Create the Modal
 
-The application is currently using some corodova plugings. You just don't have to interact with them much, yet.
+In order to launch a modal, a component to display in the modal needs to be specified. We can create the via `ionic g component user-preferences`.
 
-**app.component.ts**
+Do that and examine the generated code.
 
-In the AppComponent constructor, the application waits for the platform to be ready and then interacts with the status bar and the 
+## Hook Up the Modal
+
+The user preferences will be accessible via each page's header via a gear button. The markup to accomplish this looks like:
+
+```http
+    <ion-buttons end>
+      <button ion-button icon-only (click)="openUserPreferences()">
+        <ion-icon name="settings"></ion-icon>
+      </button>
+    </ion-buttons>
+```
+
+Add this within the `ion-navbar` in the header of each page. Don't worry about the red squiggly line under `openUserPreferences()`. We will fix that next.
+
+Each page class will need code like this:
 
 ```TypeScript
-  constructor(platform: Platform, statusBar: StatusBar, splashScreen: SplashScreen) {
-    platform.ready().then(() => {
-      // Okay, so the platform is ready and our plugins are available.
-      // Here you can do any higher level native things you might need.
-      statusBar.styleDefault();
-      splashScreen.hide();
-    });
+  openUserPreferences() {
+    const m = this.modal.create(UserPreferencesComponent);
+    m.present();
   }
 ```
 
-**Challenge:** The application has a fairly dark background, which makes the status bar content difficult to read on iOS devices. Have a look at the documentation for the <a href="https://cordova.apache.org/docs/en/8.x/reference/cordova-plugin-statusbar/" target="_blank">Status Bar Plugin</a> and see if you can find a method to call that will fix that. Then implement it in the code.
+This requires injecting a `ModelController` as `modal` in the constructor. Do this in each page class.
 
-**Hint:** This method will replace the `statusBar.styleDefault();` call in the code listed above. 
+Once you do this, test out the application. Upon pressing the gear your application should crash. Something isn't right here. Angular doesn't know how to find the component you just created. You need to do two things:
 
+1. in the `app.module.ts` file, add the newly created `ComponentsModule` to the `imports` section of the `ngModule`
+1. in `src/components/components.module.ts`, specify the `UserPreferencesComponent` in the `entryComponents` array on the `NgModule` (you will likely have to add the property to the config object that is specified in the decorator)
 
-**Challenge:** Android has <a href="https://cordova.apache.org/docs/en/8.x/reference/cordova-plugin-statusbar/#android-quirks" target="_blank">some quirks</a>. Modify the code to deal with this by setting the background color to `#06487F`, but only for Android.
+## Add a Header and Footer
 
-**Hint:** use Ionic's <a href="https://ionicframework.com/docs/api/platform/Platform/" target="_blank">Platform</a> service to determine if the current platform is Android or not.
+The general format of a page or modal dialog component is:
 
-Commit these changes and push them to Ionic Pro so you can see the changes on your device.
+```HTML
+<ion-header>
+</ion-header>
 
+<ion-content>
+</ion-content>
 
-## Geo-Location
-
-Right now, the application gives us the weather for a specific location. It would be nice if it could let us know what the weather is for our current location.
-
-If you check <a href="https://whatwebcando.today/" target="_blank">What Web Can Do Today</a>, you will see that geolocation is fully supported via the web APIs. In my experience, however, the performance is not always that great, so let's use a plugin to get our current location.
-
-### Install the Plugin
-
-The <a href="https://ionicframework.com/docs/native/geolocation/" target="_blank">Ionic Native wrapper page</a> is a good place to start any time you are installing a new plugin. Let's add this to our project.
-
-* create a feature branch
-* `ionic cordova plugin add cordova-plugin-geolocation --variable GEOLOCATION_USAGE_DESCRIPTION="To determine the location for which to get weather data"`
-* `npm i @ionic-native/geolocation`
-* <a href="https://ionicframework.com/docs/native/#Add_Plugins_to_Your_App_Module" target="_blank">add the plugin to your app module</a> (note that the instructions are generic, modify for your needs)
-* add the following configuration item to the `config.xml` file
-
-```xml
-    <config-file parent="NSLocationWhenInUseUsageDescription" platform="ios" target="*-Info.plist">
-        <string>To determine the location for which to get weather data</string>
-    </config-file>
+<ion-footer>
+</ion-footer>
 ```
 
-### Use the Plugin
+Replace the HTML in the `UserPreferencesComponent` to match this.
 
-#### Create the Location Service
+The header will be very similar to the headers used on the pages, so copy the header from one of the pages for now. Make the following modifications:
 
-Generate a service ("provider") that will be used to get the current location. Specify the name as `location` in the CLI command. Once that service is generated, add a single method that will get the current location.
+* change the title to "user preferences"
+* change the icon button to use the "close" icon
+* change the method that it calls when handling the click event to "dismiss()"
+* create a stub method called "dismiss()" in the component's class
 
-Before updating the service, add another model called `Location`
+The footer will be filled in later, so leave it blank.
 
-```TypeScript
-export interface Location {
-  latitude: number;
-  longitude: number;
+Finally, let's override some styles just for the modal component. Along with giving the modal a different look on a phone, this will also make the modal more obvious when run on the web or on a tablet. 
+
+```scss
+user-preferences {
+  .footer {
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-bottom: 5px;
+  }
+
+  .item {
+    background-color: white;
+  }
+
+  .content {
+    background-color: white;
+  }
 }
 ```
 
-**Hint:** add it in the model folder in its own file
+## Implement the `dismiss()` Method
 
-Let's add a `current()` method to the `LocationProvider`:
+In the previous step, you mocked up a `dismiss()` method, but it really should dismiss the modal. This can be done by injecting the  `ViewController`, which will inject the controller for the current view. That controller has method called `dismiss()`.
+
+**Challenge:** inject the `ViewController` and dismiss the view from the `UserPreferenceComponent` `dismiss()` method.
+
+## Add a Button to the Footer
+
+The footer is a good place to put a "Save" or "OK" button. Add a save button like this: `<button ion-button block color="secondary">Save</button>`
+
+There are a couple of things I don't like about the button. First, that green is a very ugly secondary color considering the rest of our theme and second it looks a little crowded.
+
+1. change the value of the "secondary" color of our theme to be `#f58e00`
+1. add some padding to the footer for this component only (I suggest right and left padding of 10px and bottom padding of 5px)
+
+## User Preferences
+
+Let's allow the users to select two simple options just for illustration:
+
+1. Use Celcius
+1. Specify a specific city or just use the current location
+
+### Models
+
+Create a city model in the `models` folder like this:
 
 ```TypeScript
-  current(): Promise<Location> {
-    return this.geolocation.getCurrentPosition().then(loc => ({
-      latitude: loc.coords.latitude,
-      longitude: loc.coords.longitude
-    }));
+import { Location } from './location';
+
+export interface City {
+  name: string;
+  location?: Location;
+}
+```
+
+In the user prefrences folder, let create an array of cities. This is the only place that will use the data, but we will keep in its own file in order to keep the component class clean:
+
+**`src/components/user-preferences/cities.ts`**
+
+```TypeScript
+import { City } from '../../models/city';
+
+export let cities: Array<City> = [
+  { name: 'Current Location' },
+  {
+    name: 'Chicago, IL',
+    location: { latitude: 41.878113, longitude: -87.629799 }
+  },
+  {
+    name: 'Edmonton, AB',
+    location: { latitude: 53.544388, longitude: -113.490929 }
+  },
+  {
+    name: 'London, UK',
+    location: { latitude: 51.507351, longitude: -0.127758 }
+  },
+  {
+    name: 'Madison, WI',
+    location: { latitude: 43.073051, longitude: -89.40123 }
+  },
+  {
+    name: 'Milwaukee, WI',
+    location: { latitude: 43.038902, longitude: -87.906471 }
+  },
+  {
+    name: 'Orlando, FL',
+    location: { latitude: 28.538336, longitude: -81.379234 }
+  },
+  {
+    name: 'Ottawa, ON',
+    location: { latitude: 45.42042, longitude: -75.69243 }
+  }
+];
+```
+
+### Mock Up the Component
+
+The content of the user preferences modal should have a toggle for the "Use Celcius" option and selection for the city for which the user wants to get the weather. That will require defining a few properties:
+
+* `import { cities } from './cities';`
+* `cities: Array<City> = cities;`
+* `city: City = this.cities[0];`
+* `useCelcius: boolean;`
+
+**Note:** the `import` is at the top of the file, the properties are defined within the class for the component.
+
+Also create a `save()` method that just logs out some values:
+
+```TypeScript
+  save() {
+    console.log('city:', this.city);
   }
 ```
 
-Ignoring the complete lack of error handling here, there is another issue. The `geolocation` plugin is only available if we are running on a device. This leaves us some options:
+In the view, markup is required for the user controls. The two-way binding via `ngModel` is used to set the data and get changes from the user.
 
-1. let the app be broken on the web OR
-1. use a hard coded location when on the web OR
-1. use the web API call when on the web
+```http
+<ion-content>
+  <ion-list>
+    <ion-item>
+      <ion-label>Use Celcius</ion-label>
+      <ion-toggle [(ngModel)]="userCelcius"></ion-toggle>
+    </ion-item>
 
-The problem with the first option is that it makes your app hard to develop since the most convenient development option is to use the browser. The problem with the last option is that in my experience it tends to be very slow sometimes. Let's compromise and go with option number 2.
-
-```TypeScript
-  current(): Promise<Location> {
-    if (this.platform.is('cordova')) {
-      return this.geolocation.getCurrentPosition().then(loc => ({
-        latitude: loc.coords.latitude,
-        longitude: loc.coords.longitude
-      }));
-    } else {
-      return Promise.resolve(this.defaultLocation);
-    }
-  }
+    <ion-item>
+      <ion-label>Location</ion-label>
+      <ion-select [(ngModel)]="city">
+        <ion-option *ngFor="let city of cities" [value]="city">{{city.name}}</ion-option>
+      </ion-select>
+    </ion-item>
+  </ion-list>
+</ion-content>
 ```
 
-#### Use the Location Service
-
-Now that we have the service, let's use it to get the current location before grabbing data. This leaves us with a problem: competing paradigms for dealing with async code. This will be a lot easier if we can bring our Observable code into a Promise based world, or if we can bring our Promises into an Observable based world. The problem with the former is that it would result in having to rewrite all of our pages where we use this service. Therefore, we will do the latter.
-
-First, let's create a private method in the `WeatherProvider` that gets the current location and creates an `Observable` from it.
-
-```TypeScript
-  private getCurrentLocation(): Observable<Location> {
-    return Observable.fromPromise(this.location.current());
-  }
-```
-
-**Hint:** as you work through this, you may need to `import` more things at the top of your file.
-
-We can use the rxjs `flatMap` operator to combine this observable with the other one, returning just the output of the other observable.
-
-We _could_ accomplish this by just wrapping the exsting code in the callback for `flatMap`, like this:
-
-```TypeScript
-  current(): Observable<Weather> {
-    return this.getCurrentLocation().pipe(
-      flatMap((loc: Location) => {
-        return this.http
-          .get(
-            `${this.baseUrl}/weather?lat=${loc.latitude}&lon=${
-              loc.longitude
-            }&appid=${this.appId}`
-          )
-          .pipe(map((res: any) => this.unpackWeather(res)));
-      })
-    );
-  }
-```
-
-But I find that messy because there are two different levels of abstraction being used. We can mitigate that issue by abstracting the part that gets the weather into its own private method. In reality, what we are doing is:
-
-1. take the original `current(): Observable<Weather>` method, change the signature to `private getCurrentWeather(latititude: number, longitude: number): Observable<Weather>` and change the code to use the passed `latitude` and `longitude` values
-1. create a new `current(): Observable<Weather>` that gets the current location, and then uses `flatMap` to feed the location into `getCurrentWeather()` returning the latter observable.
-
-
-
-```TypeScript
-  current(): Observable<Weather> {
-    return this.getCurrentLocation().pipe(
-      flatMap((loc: Location) =>
-        this.getCurrentWeather(loc.latitude, loc.longitude)
-      )
-    );
-  }
-
-  private getCurrentWeather(
-    latitude: number,
-    longitude: number
-  ): Observable<Weather> {
-    return this.http
-      .get(
-        `${this.baseUrl}/weather?lat=${latitude}&lon=${longitude}&appid=${
-          this.appId
-        }`
-      )
-      .pipe(map((res: any) => this.unpackWeather(res)));
-  }
-```
-
-**Challenge:** rewrite the other two public methods to also get the current location before returning the weather data related observables.
-
-## Finish the Feature
-
-When your code is complete, make sure all of your changes are committed and have been pushed to Ionic Pro.
-
-You can now test it by side-loading the application on your device.
-
-**Note:** in the real world, you would need to resubmit your app to the app store at this point and not deploy it via Ionic Pro because adding a Cordova Plugin is a change that effects the binary bundle of the application.
+Also hookup the `save()` method via the save button's click event.

@@ -14,27 +14,33 @@
         },
         {
           "id": "ionic-weather-step02",
-          "title": "Lab: Integrate Ionic Pro"
+          "title": "Lab: Integrate Ionic Appflow"
         },
         {
           "id": "ionic-weather-step03",
-          "title": "Lab: Monitor Errors"
-        },
-        {
-          "id": "ionic-weather-step04",
           "title": "Lab: Layout Pages"
         },
         {
-          "id": "ionic-weather-step05",
+          "id": "ionic-weather-step04",
           "title": "Lab: Style"
         },
         {
-          "id": "ionic-weather-step06",
+          "id": "ionic-weather-step05",
           "title": "Lab: Use a Library"
         },
         {
-          "id": "ionic-weather-step07",
+          "id": "ionic-weather-step06",
           "title": "Lab: Getting Data",
+          "pages": [
+            {
+              "id": "ionic-weather-step06-01",
+              "title": "Completed Code"
+            }
+          ]
+        },
+        {
+          "id": "ionic-weather-step07",
+          "title": "Lab: Using the Data",
           "pages": [
             {
               "id": "ionic-weather-step07-01",
@@ -44,7 +50,7 @@
         },
         {
           "id": "ionic-weather-step08",
-          "title": "Lab: Using the Data",
+          "title": "Lab: Using Plugins",
           "pages": [
             {
               "id": "ionic-weather-step08-01",
@@ -54,7 +60,7 @@
         },
         {
           "id": "ionic-weather-step09",
-          "title": "Lab: Using Plugins",
+          "title": "Lab: User Preferences Step 1",
           "pages": [
             {
               "id": "ionic-weather-step09-01",
@@ -64,7 +70,7 @@
         },
         {
           "id": "ionic-weather-step10",
-          "title": "Lab: User Preferences Step 1",
+          "title": "Lab: User Preferences Step 2",
           "pages": [
             {
               "id": "ionic-weather-step10-01",
@@ -74,20 +80,10 @@
         },
         {
           "id": "ionic-weather-step11",
-          "title": "Lab: User Preferences Step 2",
-          "pages": [
-            {
-              "id": "ionic-weather-step11-01",
-              "title": "Completed Code"
-            }
-          ]
-        },
-        {
-          "id": "ionic-weather-step12",
           "title": "Lab: Lazy Loading",
           "pages": [
             {
-              "id": "ionic-weather-step12-01",
+              "id": "ionic-weather-step11-01",
               "title": "Completed Code"
             }
           ]

@@ -53,16 +53,16 @@ Initialized empty Git repository in /Users/kensodemann/Projects/Training/ionic-w
   -  ⚠️   Track runtime errors in real-time, back to your original TypeScript
   -  📲  Push remote updates and skip the app store queue
 
- Learn more about Ionic Pro: https://ionicframework.com/pro
+ Learn more about Ionic Appflow: https://ionicframework.com/appflow
 
 ────────────────────────────────────────────────────────────
 
-? Install the free Ionic Pro SDK and connect your app? (Y/n) 
+? Install the free Ionic Appflow SDK and connect your app?
 ```
 
-Note the final message in the output. This is asking you if you would like to connect your application to Ionic Pro. You want to do this.
+Note the final message in the output. This is asking you if you would like to connect your application to Appflow. You want to do this.
 
-1. Answer **Y** (yes) to the Ionic Pro SDK question
+1. Answer **Y** (yes) to the Ionic Appflow SDK question
 2. You will be asked if you want to link to an existing app or create a new one
     - Choose to **Create a new app on Ionic Pro**
 3. You will be asked if you would like to use the GitHub integration or Ionic Pro

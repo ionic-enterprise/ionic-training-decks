@@ -15,6 +15,7 @@ import {
 import { BrowserModule } from '@angular/platform-browser';
 import { HttpClientModule } from '@angular/common/http';
 import { IonicApp, IonicModule, IonicErrorHandler } from 'ionic-angular';
+import { IonicStorageModule } from '@ionic/storage';
 import { MyApp } from './app.component';
 
 import { Pro } from '@ionic/pro';
@@ -32,6 +33,7 @@ import { SplashScreen } from '@ionic-native/splash-screen';
 import { IconMapProvider } from '../providers/icon-map/icon-map';
 import { WeatherProvider } from '../providers/weather/weather';
 import { LocationProvider } from '../providers/location/location';
+import { UserPreferencesProvider } from '../providers/user-preferences/user-preferences';
 
 Pro.init('1ec81629', {
   appVersion: '0.0.1'
@@ -67,7 +69,8 @@ export class MyErrorHandler implements ErrorHandler {
     BrowserModule,
     ComponentsModule,
     HttpClientModule,
-    IonicModule.forRoot(MyApp)
+    IonicModule.forRoot(MyApp),
+    IonicStorageModule.forRoot()
   ],
   bootstrap: [IonicApp],
   entryComponents: [
@@ -85,65 +88,12 @@ export class MyErrorHandler implements ErrorHandler {
     { provide: ErrorHandler, useClass: MyErrorHandler },
     IconMapProvider,
     LocationProvider,
+    UserPreferencesProvider,
     WeatherProvider
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })
 export class AppModule {}
-```
-
-## `src/components/components.module.ts`
-
-```TypeScript
-import { NgModule } from '@angular/core';
-import { IonicModule } from 'ionic-angular';
-
-import { UserPreferencesComponent } from './user-preferences/user-preferences';
-@NgModule({
-  declarations: [UserPreferencesComponent],
-  entryComponents: [UserPreferencesComponent],
-  imports: [IonicModule],
-  exports: [UserPreferencesComponent]
-})
-export class ComponentsModule {}
-```
-
-## `src/components/user-preferences/cities.ts`
-
-```TypeScript
-import { City } from '../../models/city';
-
-export let cities: Array<City> = [
-  { name: 'Current Location' },
-  {
-    name: 'Chicago, IL',
-    location: { latitude: 41.878113, longitude: -87.629799 }
-  },
-  {
-    name: 'Edmonton, AB',
-    location: { latitude: 53.544388, longitude: -113.490929 }
-  },
-  {
-    name: 'London, UK',
-    location: { latitude: 51.507351, longitude: -0.127758 }
-  },
-  {
-    name: 'Madison, WI',
-    location: { latitude: 43.073051, longitude: -89.40123 }
-  },
-  {
-    name: 'Milwaukee, WI',
-    location: { latitude: 43.038902, longitude: -87.906471 }
-  },
-  {
-    name: 'Orlando, FL',
-    location: { latitude: 28.538336, longitude: -81.379234 }
-  },
-  {
-    name: 'Ottawa, ON',
-    location: { latitude: 45.42042, longitude: -75.69243 }
-  }
-];
 ```
 
 ## `src/components/user-preferences/user-preferences.html`
@@ -182,26 +132,6 @@ export let cities: Array<City> = [
 </ion-footer>
 ```
 
-## `src/components/user-preferences/user-preferences.scss`
-
-```scss
-user-preferences {
-  .footer {
-    padding-left: 10px;
-    padding-right: 10px;
-    padding-bottom: 5px;
-  }
-
-  .item {
-    background-color: white;
-  }
-
-  .content {
-    background-color: white;
-  }
-}
-```
-
 ## `src/components/user-preferences/user-preferences.ts`
 
 ```TypeScript
@@ -209,37 +139,37 @@ import { Component } from '@angular/core';
 import { ViewController } from 'ionic-angular';
 
 import { City } from '../../models/city';
-import { cities } from './cities';
+import { UserPreferencesProvider } from '../../providers/user-preferences/user-preferences';
 
 @Component({
   selector: 'user-preferences',
   templateUrl: 'user-preferences.html'
 })
 export class UserPreferencesComponent {
-  cities: Array<City> = cities;
-  city: City = this.cities[0];
+  cities: Array<City>;
+  city: City;
   useCelcius: boolean;
 
-  constructor(private modal: ViewController) {}
+  constructor(
+    private modal: ViewController,
+    private userPreferences: UserPreferencesProvider
+  ) {}
+
+  async ionViewDidLoad() {
+    this.cities = this.userPreferences.availableCities();
+    this.city = await this.userPreferences.getCity();
+    this.useCelcius = await this.userPreferences.getUseCelcius();
+  }
 
   dismiss() {
     this.modal.dismiss();
   }
 
   save() {
-    console.log('city:', this.city);
+    this.userPreferences.setUseCelcius(this.useCelcius);
+    this.userPreferences.setCity(this.city);
+    this.modal.dismiss();
   }
-}
-```
-
-## `src/models/city.ts`
-
-```TypeScript
-import { Location } from './location';
-
-export interface City {
-  name: string;
-  location?: Location;
 }
 ```
 
@@ -260,8 +190,8 @@ export interface City {
 
 <ion-content text-center padding>
   <div class="information">
-    <ion-label class="city">Madison</ion-label>
-    <kws-temperature class="primary-value" scale="F" temperature="{{currentWeather?.temperature}}"></kws-temperature>
+    <ion-label class="city">{{cityName}}</ion-label>
+    <kws-temperature class="primary-value" [scale]="scale" temperature="{{currentWeather?.temperature}}"></kws-temperature>
   </div>
   <kws-condition [condition]="currentWeather?.condition" [iconPaths]="iconMap"></kws-condition>
 </ion-content>
@@ -272,9 +202,11 @@ export interface City {
 ```TypeScript
 import { Component } from '@angular/core';
 import { ModalController } from 'ionic-angular';
+import { Subscription } from 'rxjs';
 
 import { IconMapProvider } from '../../providers/icon-map/icon-map';
 import { UserPreferencesComponent } from '../../components/user-preferences/user-preferences';
+import { UserPreferencesProvider } from '../../providers/user-preferences/user-preferences';
 import { Weather } from '../../models/weather';
 import { WeatherProvider } from '../../providers/weather/weather';
 
@@ -283,21 +215,44 @@ import { WeatherProvider } from '../../providers/weather/weather';
   templateUrl: 'current-weather.html'
 })
 export class CurrentWeatherPage {
+  scale: string;
+  cityName: string;
   currentWeather: Weather;
+
+  private subscription: Subscription;
 
   constructor(
     public iconMap: IconMapProvider,
     private modal: ModalController,
+    private userPreferences: UserPreferencesProvider,
     private weather: WeatherProvider
   ) {}
 
+  ionViewDidLoad() {
+    this.subscription = this.userPreferences.changed.subscribe(() =>
+      this.getData()
+    );
+  }
+
   ionViewDidEnter() {
-    this.weather.current().subscribe(w => (this.currentWeather = w));
+    this.getData();
+  }
+
+  ionViewWillUnload() {
+    this.subscription.unsubscribe();
   }
 
   openUserPreferences() {
     const m = this.modal.create(UserPreferencesComponent);
     m.present();
+  }
+
+  private getData() {
+    this.userPreferences.getCity().then(c => (this.cityName = c.name));
+    this.userPreferences.getUseCelcius().then(u => {
+      this.scale = u ? 'C' : 'F';
+    });
+    this.weather.current().subscribe(w => (this.currentWeather = w));
   }
 }
 ```
@@ -322,7 +277,7 @@ export class CurrentWeatherPage {
 <ion-content padding>
   <ion-list>
     <ion-item *ngFor="let f of forecast">
-      <kws-daily-forecast scale="F" [forecasts]="f" [iconPaths]="iconMap"></kws-daily-forecast>
+      <kws-daily-forecast [scale]="scale" [forecasts]="f" [iconPaths]="iconMap"></kws-daily-forecast>
     </ion-item>
   </ion-list>
 </ion-content>
@@ -333,10 +288,12 @@ export class CurrentWeatherPage {
 ```TypeScript
 import { Component } from '@angular/core';
 import { ModalController } from 'ionic-angular';
+import { Subscription } from 'rxjs';
 
 import { Forecast } from '../../models/forecast';
 import { IconMapProvider } from '../../providers/icon-map/icon-map';
 import { UserPreferencesComponent } from '../../components/user-preferences/user-preferences';
+import { UserPreferencesProvider } from '../../providers/user-preferences/user-preferences';
 import { WeatherProvider } from '../../providers/weather/weather';
 
 @Component({
@@ -344,48 +301,44 @@ import { WeatherProvider } from '../../providers/weather/weather';
   templateUrl: 'forecast.html'
 })
 export class ForecastPage {
+  scale: string;
   forecast: Forecast;
+
+  private subscription: Subscription;
 
   constructor(
     public iconMap: IconMapProvider,
-    private modal:ModalController,
+    private modal: ModalController,
+    private userPreferences: UserPreferencesProvider,
     private weather: WeatherProvider
   ) {}
 
+  ionViewDidLoad() {
+    this.subscription = this.userPreferences.changed.subscribe(() =>
+      this.getData()
+    );
+  }
+
   ionViewDidEnter() {
-    this.weather.forecast().subscribe(f => (this.forecast = f));
+    this.getData();
+  }
+
+  ionViewWillUnload() {
+    this.subscription.unsubscribe();
   }
 
   openUserPreferences() {
     const m = this.modal.create(UserPreferencesComponent);
     m.present();
   }
+
+  private getData() {
+    this.userPreferences.getUseCelcius().then(u => {
+      this.scale = u ? 'C' : 'F';
+    });
+    this.weather.forecast().subscribe(f => (this.forecast = f));
+  }
 }
-```
-
-## `src/pages/uv-index/uv-index.html`
-
-```html
-<ion-header>
-  <ion-navbar color="primary">
-    <ion-title>
-      UV Index
-    </ion-title>
-
-    <ion-buttons end>
-      <button ion-button icon-only (click)="openUserPreferences()">
-        <ion-icon name="settings"></ion-icon>
-      </button>
-    </ion-buttons>
-  </ion-navbar>
-</ion-header>
-
-<ion-content text-center padding>
-  <kws-uv-index class="primary-value" [uvIndex]="uvIndex?.value"></kws-uv-index>
-  <div class="description">
-    {{advice[uvIndex?.riskLevel]}}
-  </div>
-</ion-content>
 ```
 
 ## `src/pages/uv-index/uv-index.ts`
@@ -393,8 +346,10 @@ export class ForecastPage {
 ```TypeScript
 import { Component } from '@angular/core';
 import { ModalController } from 'ionic-angular';
+import { Subscription } from 'rxjs';
 
 import { UserPreferencesComponent } from '../../components/user-preferences/user-preferences';
+import { UserPreferencesProvider } from '../../providers/user-preferences/user-preferences';
 import { UVIndex } from '../../models/uv-index';
 import { WeatherProvider } from '../../providers/weather/weather';
 
@@ -404,6 +359,8 @@ import { WeatherProvider } from '../../providers/weather/weather';
 })
 export class UVIndexPage {
   uvIndex: UVIndex;
+
+  private subscription: Subscription;
 
   advice: Array<string> = [
     'Wear sunglasses on bright days. If you burn easily, cover up and use broad spectrum SPF 30+ sunscreen. ' +
@@ -424,91 +381,244 @@ export class UVIndexPage {
 
   constructor(
     private modal: ModalController,
+    private userPreferences: UserPreferencesProvider,
     private weather: WeatherProvider
   ) {}
 
+  ionViewDidLoad() {
+    this.subscription = this.userPreferences.changed.subscribe(() =>
+      this.getData()
+    );
+  }
+
   ionViewDidEnter() {
-    this.weather.uvIndex().subscribe(i => (this.uvIndex = i));
+    this.getData();
+  }
+
+  ionViewWillUnload() {
+    this.subscription.unsubscribe();
   }
 
   openUserPreferences() {
     const m = this.modal.create(UserPreferencesComponent);
     m.present();
   }
+
+  private getData() {
+    this.weather.uvIndex().subscribe(i => (this.uvIndex = i));
+  }
 }
 ```
 
-## `src/theme/variables.scss`
+## `src/providers/user-preferences/user-preferences.ts`
 
-```scss
-// Ionic Variables and Theming. For more info, please see:
-// http://ionicframework.com/docs/theming/
+```TypeScript
+import { Storage } from '@ionic/storage';
+import { Injectable } from '@angular/core';
 
-// Font path is used to include ionicons,
-// roboto, and noto sans fonts
-$font-path: '../assets/fonts';
+import { Subject } from 'rxjs';
 
-// The app direction is used to include
-// rtl styles in your app. For more info, please see:
-// http://ionicframework.com/docs/theming/rtl-support/
-$app-direction: ltr;
+import { City } from '../../models/city';
+import { cities } from './cities';
 
-@import 'ionic.globals';
+@Injectable()
+export class UserPreferencesProvider {
+  private keys = {
+    useCelcius: 'useCelcius',
+    city: 'city'
+  };
+  private _city: City;
+  private _useCelcius: boolean;
 
-// Shared Variables
-// --------------------------------------------------
-// To customize the look and feel of this app, you can override
-// the Sass variables found in Ionic's source scss files.
-// To view all the possible Ionic variables, see:
-// http://ionicframework.com/docs/theming/overriding-ionic-variables/
+  changed: Subject<void>;
 
-// Named Color Variables
-// --------------------------------------------------
-// Named colors makes it easy to reuse colors on various components.
-// It's highly recommended to change the default colors
-// to match your app's branding. Ionic uses a Sass map of
-// colors so you can add, rename and remove colors as needed.
-// The "primary" color is the only required color in the map.
+  constructor(private storage: Storage) {
+    this.changed = new Subject();
+  }
 
-$colors: (
-  primary: #085a9e,
-  secondary: #f58e00,
-  danger: #f53d3d,
-  light: #f4f4f4,
-  dark: #222
-);
+  async getUseCelcius(): Promise<boolean> {
+    await this.storage.ready();
+    if (this._useCelcius === undefined) {
+      this._useCelcius = await this.storage.get(this.keys.useCelcius);
+    }
+    return this._useCelcius;
+  }
 
-// App iOS Variables
-// --------------------------------------------------
-// iOS only Sass variables can go here
+  async setUseCelcius(value: boolean): Promise<void> {
+    await this.storage.ready();
+    this._useCelcius = value;
+    this.changed.next();
+    this.storage.set(this.keys.useCelcius, value);
+  }
 
-// App Material Design Variables
-// --------------------------------------------------
-// Material Design only Sass variables can go here
+  async getCity(): Promise<City> {
+    await this.storage.ready();
+    if (!this._city) {
+      const city = await this.storage.get(this.keys.city);
+      this._city = cities.find(c => c.name === (city && city.name)) || cities[0];
+    }
+    return this._city;
+  }
 
-// App Windows Variables
-// --------------------------------------------------
-// Windows only Sass variables can go here
+  async setCity(city: City): Promise<void> {
+    await this.storage.ready();
+    this._city = cities.find(c => c.name === city.name) || cities[0];
+    this.changed.next();
+    this.storage.set(this.keys.city, city);
+  }
 
-// App Theme
-// --------------------------------------------------
-// Ionic apps can have different themes applied, which can
-// then be future customized. This import comes last
-// so that the above variables are used and Ionic's
-// default are overridden.
+  availableCities(): Array<City> {
+    return cities;
+  }
+}
+```
 
-@import 'ionic.theme.default';
+## `src/providers/weather/weather.ts`
 
-// Ionicons
-// --------------------------------------------------
-// The premium icon font for Ionic. For more info, please see:
-// http://ionicframework.com/docs/ionicons/
+```TypeScript
+import { HttpClient } from '@angular/common/http';
+import { Injectable } from '@angular/core';
 
-@import 'ionic.ionicons';
+import { Observable } from 'rxjs';
+import { flatMap, map } from 'rxjs/operators';
 
-// Fonts
-// --------------------------------------------------
+import { LocationProvider } from '../location/location';
+import { UserPreferencesProvider } from '../user-preferences/user-preferences';
 
-@import 'roboto';
-@import 'noto-sans';
+import { Forecast } from '../../models/forecast';
+import { Location } from '../../models/location';
+import { UVIndex } from '../../models/uv-index';
+import { Weather } from '../../models/weather';
+
+@Injectable()
+export class WeatherProvider {
+  private appId = 'db046b8bbe642b799cb40fa4f7529a12';
+  private baseUrl = 'http://api.openweathermap.org/data/2.5';
+
+  constructor(
+    private http: HttpClient,
+    private location: LocationProvider,
+    private userPreferences: UserPreferencesProvider
+  ) {}
+
+  current(): Observable<Weather> {
+    return this.getCurrentLocation().pipe(
+      flatMap((loc: Location) =>
+        this.getCurrentWeather(loc.latitude, loc.longitude)
+      )
+    );
+  }
+
+  forecast(): Observable<Forecast> {
+    return this.getCurrentLocation().pipe(
+      flatMap((loc: Location) =>
+        this.getWeatherForecast(loc.latitude, loc.longitude)
+      )
+    );
+  }
+
+  uvIndex(): Observable<UVIndex> {
+    return this.getCurrentLocation().pipe(
+      flatMap((loc: Location) => this.getUVIndex(loc.latitude, loc.longitude))
+    );
+  }
+
+  private getCurrentWeather(
+    latitude: number,
+    longitude: number
+  ): Observable<Weather> {
+    return this.http
+      .get(
+        `${this.baseUrl}/weather?lat=${latitude}&lon=${longitude}&appid=${
+          this.appId
+        }`
+      )
+      .pipe(map((res: any) => this.unpackWeather(res)));
+  }
+
+  private getWeatherForecast(
+    latitude: number,
+    longitude: number
+  ): Observable<Forecast> {
+    return this.http
+      .get(
+        `${this.baseUrl}/forecast?lat=${latitude}&lon=${longitude}&appid=${
+          this.appId
+        }`
+      )
+      .pipe(map((res: any) => this.unpackForecast(res)));
+  }
+
+  private getUVIndex(latitude: number, longitude: number): Observable<UVIndex> {
+    return this.http
+      .get(
+        `${this.baseUrl}/uvi?lat=${latitude}&lon=${longitude}&appid=${
+          this.appId
+        }`
+      )
+      .pipe(map((res: any) => this.unpackUVIndex(res)));
+  }
+
+  private getCurrentLocation(): Observable<Location> {
+    return Observable.fromPromise(
+      this.userPreferences.getCity().then(c => {
+        if (c.location) {
+          return c.location;
+        } else {
+          return this.location.current();
+        }
+      })
+    );
+  }
+
+  private unpackForecast(res: any): Forecast {
+    let currentDay: Array<Weather>;
+    let prevDate: number;
+    const forecast: Forecast = [];
+
+    res.list.forEach(item => {
+      const w = this.unpackWeather(item);
+      if (w.date.getDate() !== prevDate) {
+        prevDate = w.date.getDate();
+        currentDay = [];
+        forecast.push(currentDay);
+      }
+      currentDay.push(w);
+    });
+
+    return forecast;
+  }
+
+  private unpackUVIndex(res: any): UVIndex {
+    const level = this.riskLevel(res.value);
+    return {
+      value: res.value,
+      riskLevel: level
+    };
+  }
+
+  private unpackWeather(res: any): Weather {
+    return {
+      temperature: res.main.temp,
+      condition: res.weather[0].id,
+      date: new Date(res.dt * 1000)
+    };
+  }
+
+  private riskLevel(value: number) {
+    if (value < 3) {
+      return 0;
+    }
+    if (value < 6) {
+      return 1;
+    }
+    if (value < 8) {
+      return 2;
+    }
+    if (value < 11) {
+      return 3;
+    }
+    return 4;
+  }
+}
 ```
