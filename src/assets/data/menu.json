@@ -121,6 +121,20 @@
       ]
     },
     {
+      "id": "camera-app",
+      "title": "App: Camera",
+      "pages": [
+        {
+          "id": "camera-step01",
+          "title": "Lab: Generate the Application"
+        },
+        {
+          "id": "camera-step02",
+          "title": "Lab: Add Capacitor"
+        }
+      ]
+    },
+    {
           "id": "simple-git-workflow",
           "title": "A Simple git Workflow"
     },
