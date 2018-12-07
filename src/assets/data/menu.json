@@ -131,6 +131,22 @@
         {
           "id": "camera-step02",
           "title": "Lab: Add Capacitor"
+        },
+        {
+          "id": "camera-step03",
+          "title": "Lab: Running Tests"
+        },
+        {
+          "id": "camera-step04",
+          "title": "Lab: Use the Capacitor API"
+        },
+        {
+          "id": "camera-step05",
+          "title": "Lab: Take a Picture"
+        },
+        {
+          "id": "camera-step06",
+          "title": "Lab: Add Capacitor"
         }
       ]
     },
