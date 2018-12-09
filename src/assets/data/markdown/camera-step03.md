@@ -1,4 +1,4 @@
-# Lab: Running Tests
+# Lab: Run the Tests
 
 In this lab, you will:
 
