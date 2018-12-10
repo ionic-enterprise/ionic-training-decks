@@ -121,31 +121,31 @@
       ]
     },
     {
-      "id": "camera-app",
-      "title": "App: Camera",
+      "id": "photo-gallery-app",
+      "title": "App: Photo Gallery",
       "pages": [
         {
-          "id": "camera-step01",
+          "id": "photo-gallery-step01",
           "title": "Lab: Generate the Application"
         },
         {
-          "id": "camera-step02",
+          "id": "photo-gallery-step02",
           "title": "Lab: Add Capacitor"
         },
         {
-          "id": "camera-step03",
+          "id": "photo-gallery-step03",
           "title": "Lab: Run the Tests"
         },
         {
-          "id": "camera-step04",
+          "id": "photo-gallery-step04",
           "title": "Lab: Use the Capacitor API"
         },
         {
-          "id": "camera-step05",
+          "id": "photo-gallery-step05",
           "title": "Lab: Take a Picture"
         },
         {
-          "id": "camera-step06",
+          "id": "photo-gallery-step06",
           "title": "Lab: Add Capacitor"
         }
       ]

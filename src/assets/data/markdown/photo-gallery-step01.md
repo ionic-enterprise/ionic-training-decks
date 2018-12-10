@@ -10,12 +10,12 @@ In this lab, you will:
 The first step is to create the application and connect the application to Ionic Pro. To do this, use the `ionic start` command.
 
 1. In a command prompt, change directory to the working folder
-1. Run the following command: `ionic start camera blank --type=angular`
+1. Run the following command: `ionic start photo-gallery blank --type=angular`
 
 This process will run for a while. It will generate the application from a starter template, install the required libraries via NPM, initialize the local git repository for the application, and perform the initial git commit.
 
 ```bash
-✔ Preparing directory ./camera - done!
+✔ Preparing directory ./photo-gallery - done!
 ✔ Downloading and extracting blank starter - done!
 
 Installing dependencies may take several minutes.
@@ -34,7 +34,7 @@ Installing dependencies may take several minutes.
 > npm i
 ...
 i> git init
-Initialized empty Git repository in /Users/kensodemann/Projects/CS Demos/camera/.git/
+Initialized empty Git repository in /Users/kensodemann/Projects/CS Demos/photo-gallery/.git/
 
      🔥   IONIC  APPFLOW   🔥
 
@@ -56,7 +56,7 @@ Note the final message in the output. This is asking if you would like to connec
 
 Let's just make sure the application builds and runs:
 
-1. `cd camera`
+1. `cd photo-gallery`
 1. `ionic serve`
 
 The application running in the default browser.

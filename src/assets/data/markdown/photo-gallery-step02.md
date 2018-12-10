@@ -25,7 +25,7 @@ In order to add platforms, the application needs to have been built at least onc
 Before adding any platforms, install Capacitor using `ionic capacitor update`
 
 ```bash
-~/Projects/camera (master): ionic capacitor update
+~/Projects/photo-gallery (master): ionic capacitor update
 > ionic integrations enable capacitor
 > npm i --save -E @capacitor/core
 + @capacitor/core@1.0.0-beta.11
@@ -37,14 +37,14 @@ found 0 vulnerabilities
 added 80 packages from 60 contributors and audited 51136 packages in 8.688s
 found 0 vulnerabilities
 
-> capacitor init camera io.ionic.starter
+> capacitor init photo-gallery io.ionic.starter
 ...
 ```
 
 Let's see what that did:
 
 ```bash
-~/Projects/camera (master *): git status
+~/Projects/photo-gallery (master *): git status
 On branch feature/addAndroid
 Changes not staged for commit:
   (use "git add <file>..." to update what will be committed)
@@ -66,8 +66,8 @@ Notice that it added a file called `capacitor.config.json`. Let's make some mino
 
 ```json
 {
-  "appId": "com.kensodemann.cameraapp",
-  "appName": "Camera",
+  "appId": "com.kensodemann.photogallery",
+  "appName": "Photo Gallery",
   "bundledWebRuntime": false,
   "webDir": "www"
 }
@@ -76,8 +76,8 @@ Notice that it added a file called `capacitor.config.json`. Let's make some mino
 Commit the change:
 
 ```bash
-~/Projects/camera (master *): git add capacitor.config.json
-~/Projects/camera (master *+): git commit -am "feat(app): instal capacitor"
+~/Projects/photo-gallery (master *): git add capacitor.config.json
+~/Projects/photo-gallery (master *+): git commit -am "feat(app): instal capacitor"
 ```
 
 ## Android
@@ -87,17 +87,17 @@ Commit the change:
 Use the `ionic capacitor add android` command to add the Android platform to the project. This will allow you to configure and run Android builds of your application.
 
 ```bash
-~/Projects/camera (master): ionic capacitor add android
+~/Projects/photo-gallery (master): ionic capacitor add android
 > capacitor add android
 ✔ Installing android dependencies in 7.42s
-✔ Adding native android project in: /Users/kensodemann/Projects/camera/android in 75.78ms
+✔ Adding native android project in: /Users/kensodemann/Projects/photo-gallery/android in 75.78ms
 ...
 ```
 
 This command adds an `android/` directory to the project and adds the `@capacitor/android` npm package as a dependency in the `package.json` file.
 
 ```bash
-~/Projects/camera (master *): git status
+~/Projects/photo-gallery (master *): git status
 On branch feature/addAndroid
 Changes not staged for commit:
   (use "git add <file>..." to update what will be committed)
@@ -117,10 +117,10 @@ no changes added to commit (use "git add" and/or "git commit -a")
 Add the `android/` folder to git and commit the changes. 
 
 ```bash
-~/Projects/camera (master *): git add android/
+~/Projects/photo-gallery (master *): git add android/
 warning: CRLF will be replaced by LF in android/gradlew.bat.
 The file will have its original line endings in your working directory
-~/Projects/camera (master *+): git commit -am "feat(app): add android"
+~/Projects/photo-gallery (master *+): git commit -am "feat(app): add android"
 ```
 
 ### Build and Run
@@ -128,9 +128,9 @@ The file will have its original line endings in your working directory
 Use `ionic capacitor open android` to open the application in Android Studio. From there you can build and run the application on a device or emulator.
 
 ```bash
-~/Projects/camera (feature/addAndroid): ionic capacitor open android
+~/Projects/photo-gallery (feature/addAndroid): ionic capacitor open android
 > capacitor open android
-[info] Opening Android project at /Users/kensodemann/Projects/camera/android
+[info] Opening Android project at /Users/kensodemann/Projects/photo-gallery/android
 ```
 
 Any changes that are required in the `AndroidManifest.xml` document can also be made from here and saved. Since the build configuration is a source artifact with Capacitor those changes will be retained for future builds.
@@ -142,10 +142,10 @@ Any changes that are required in the `AndroidManifest.xml` document can also be 
 Use the `ionic capacitor add ios` command to add the Android platform to the project. This will allow you to configure and run iOS builds of the application.
 
 ```bash
-~/Projects/camera (master): ionic capacitor add ios
+~/Projects/photo-gallery (master): ionic capacitor add ios
 > capacitor add ios
 ✔ Installing iOS dependencies in 10.02s
-✔ Adding native xcode project in: /Users/kensodemann/Projects/camera/ios in 93.29ms
+✔ Adding native xcode project in: /Users/kensodemann/Projects/photo-gallery/ios in 93.29ms
 ✔ add in 10.12s
 ✔ Copying web assets from www to ios/App/public in 624.01ms
 ✔ Copying native bridge in 1.50ms
@@ -160,7 +160,7 @@ Use the `ionic capacitor add ios` command to add the Android platform to the pro
 This command adds an `ios/` directory to the project and adds the `@capacitor/ios` npm package as a dependency in the `package.json` file.
 
 ```bash
-~/Projects/CS Demos/camera (master *): git status
+~/Projects/CS Demos/photo-gallery (master *): git status
 On branch master
 Changes not staged for commit:
   (use "git add <file>..." to update what will be committed)
@@ -180,8 +180,8 @@ no changes added to commit (use "git add" and/or "git commit -a")
 Add the `ios/` folder to git and commit the changes. 
 
 ```bash
-~/Projects/CS Demos/camera (master *): git add ios
-~/Projects/CS Demos/camera (master *+): git commit -am "feat(app): add ios"
+~/Projects/CS Demos/photo-gallery (master *): git add ios
+~/Projects/CS Demos/photo-gallery (master *+): git commit -am "feat(app): add ios"
 ```
 
 ### Build and Run
@@ -189,7 +189,7 @@ Add the `ios/` folder to git and commit the changes.
 Use `ionic capacitor open ios` to open the application in Xcode. From there you can build and run the application on a device or emulator. *Note:* in order to run the application on a device, you need to have specify a "Team" along with "Provisioning Profile" and "Signing Certificate"
 
 ```bash
-~/Projects/CS Demos/camera (master): ionic capacitor open ios
+~/Projects/CS Demos/photo-gallery (master): ionic capacitor open ios
 > capacitor open ios
 ✔ Opening the Xcode workspace... in 3.02s
 ```
@@ -197,7 +197,7 @@ Use `ionic capacitor open ios` to open the application in Xcode. From there you 
 Doing this modifies the project a bit.
 
 ```bash
-~/Projects/CS Demos/camera (master *): git status
+~/Projects/CS Demos/photo-gallery (master *): git status
 On branch master
 Changes not staged for commit:
   (use "git add <file>..." to update what will be committed)
@@ -216,8 +216,8 @@ no changes added to commit (use "git add" and/or "git commit -a")
 Add and commit those:
 
 ```bash
-~/Projects/CS Demos/camera (master *): git add ios/App/App.xcworkspace/xcshareddata
-~/Projects/CS Demos/camera (master *+): git commit -am "feat(app): update ios project"
+~/Projects/CS Demos/photo-gallery (master *): git add ios/App/App.xcworkspace/xcshareddata
+~/Projects/CS Demos/photo-gallery (master *+): git commit -am "feat(app): update ios project"
 ```
 
 ## Conclusion
