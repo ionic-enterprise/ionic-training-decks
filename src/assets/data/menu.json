@@ -146,7 +146,11 @@
         },
         {
           "id": "photo-gallery-step06",
-          "title": "Lab: Add Capacitor"
+          "title": "Lab: Styling"
+        },
+        {
+          "id": "photo-gallery-step07",
+          "title": "Lab: Save the Photos"
         }
       ]
     },
