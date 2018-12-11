@@ -7,3 +7,4 @@ The Photo Gallery app is an Ionic v4 Capacitor application that uses the device'
 * using the Capacitor API to access native mobile features
 * using Ionic Studio to layout a page
 * using Ionic Studio to modify the application's theme
+* using Angular services to encapsulate business logic

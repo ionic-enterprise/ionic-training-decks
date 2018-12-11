@@ -150,7 +150,11 @@
         },
         {
           "id": "photo-gallery-step07",
-          "title": "Lab: Save the Photos"
+          "title": "Lab: Create a Service"
+        },
+        {
+          "id": "photo-gallery-step08",
+          "title": "Lab: Save and Load Photos"
         }
       ]
     },
