@@ -5,85 +5,75 @@
       "title": "Getting Started"
     },
     {
-      "id": "ionic-weather",
+      "id": "ionic-weather-v4",
       "title": "App: Ionic Weather",
       "pages": [
         {
-          "id": "ionic-weather-step01",
+          "id": "ionic-weather-v4-step01",
           "title": "Lab: Generate the Application"
         },
         {
-          "id": "ionic-weather-step02",
-          "title": "Lab: Integrate Ionic Appflow"
+          "id": "ionic-weather-v4-step02",
+          "title": "Lab: Add Cordova Platforms"
         },
         {
-          "id": "ionic-weather-step03",
-          "title": "Lab: Layout Pages"
+          "id": "ionic-weather-v4-step03",
+          "title": "Lab: Layout the Pages"
         },
         {
-          "id": "ionic-weather-step04",
+          "id": "ionic-weather-v4-step04",
           "title": "Lab: Style"
         },
         {
-          "id": "ionic-weather-step05",
-          "title": "Lab: Use a Library"
+          "id": "ionic-weather-v4-step05",
+          "title": "Lab: Use a Component Library"
         },
         {
-          "id": "ionic-weather-step06",
-          "title": "Lab: Getting Data",
+          "id": "ionic-weather-v4-step06",
+          "title": "Lab: Get Data",
           "pages": [
             {
-              "id": "ionic-weather-step06-01",
+              "id": "ionic-weather-v4-step06-01",
               "title": "Completed Code"
             }
           ]
         },
         {
-          "id": "ionic-weather-step07",
+          "id": "ionic-weather-v4-step07",
           "title": "Lab: Using the Data",
           "pages": [
             {
-              "id": "ionic-weather-step07-01",
+              "id": "ionic-weather-v4-step07-01",
               "title": "Completed Code"
             }
           ]
         },
         {
-          "id": "ionic-weather-step08",
+          "id": "ionic-weather-v4-step08",
           "title": "Lab: Using Plugins",
           "pages": [
             {
-              "id": "ionic-weather-step08-01",
+              "id": "ionic-weather-v4-step08-01",
               "title": "Completed Code"
             }
           ]
         },
         {
-          "id": "ionic-weather-step09",
-          "title": "Lab: User Preferences Step 1",
+          "id": "ionic-weather-v4-step09",
+          "title": "Lab: User Preferences Phase 1",
           "pages": [
             {
-              "id": "ionic-weather-step09-01",
+              "id": "ionic-weather-v4-step09-01",
               "title": "Completed Code"
             }
           ]
         },
         {
-          "id": "ionic-weather-step10",
-          "title": "Lab: User Preferences Step 2",
+          "id": "ionic-weather-v4-step10",
+          "title": "Lab: User Preferences Phase 2",
           "pages": [
             {
-              "id": "ionic-weather-step10-01",
-              "title": "Completed Code"
-            }
-          ]
-        },
-        {
-          "id": "ionic-weather-step11",
-          "title": "Lab: Lazy Loading",
-          "pages": [
-            {
-              "id": "ionic-weather-step11-01",
+              "id": "ionic-weather-v4-step10-01",
               "title": "Completed Code"
             }
           ]
@@ -91,31 +81,117 @@
       ]
     },
     {
-      "id": "ionic-weather-ionic-v4",
-      "title": "App: Ionic Weather Ionic v4 Port",
+      "id": "ionic-weather-v3",
+      "title": "App: Ionic Weather - Ionic v3",
       "pages": [
         {
-          "id": "ionic-weather-ionic-v4-step01",
+          "id": "ionic-weather-v3-step01",
+          "title": "Lab: Generate the Application"
+        },
+        {
+          "id": "ionic-weather-v3-step02",
+          "title": "Lab: Integrate Ionic Appflow"
+        },
+        {
+          "id": "ionic-weather-v3-step03",
+          "title": "Lab: Layout Pages"
+        },
+        {
+          "id": "ionic-weather-v3-step04",
+          "title": "Lab: Style"
+        },
+        {
+          "id": "ionic-weather-v3-step05",
+          "title": "Lab: Use a Library"
+        },
+        {
+          "id": "ionic-weather-v3-step06",
+          "title": "Lab: Get Data",
+          "pages": [
+            {
+              "id": "ionic-weather-v3-step06-01",
+              "title": "Completed Code"
+            }
+          ]
+        },
+        {
+          "id": "ionic-weather-v3-step07",
+          "title": "Lab: Use the Data",
+          "pages": [
+            {
+              "id": "ionic-weather-v3-step07-01",
+              "title": "Completed Code"
+            }
+          ]
+        },
+        {
+          "id": "ionic-weather-v3-step08",
+          "title": "Lab: Using Plugins",
+          "pages": [
+            {
+              "id": "ionic-weather-v3-step08-01",
+              "title": "Completed Code"
+            }
+          ]
+        },
+        {
+          "id": "ionic-weather-v3-step09",
+          "title": "Lab: User Preferences Step 1",
+          "pages": [
+            {
+              "id": "ionic-weather-v3-step09-01",
+              "title": "Completed Code"
+            }
+          ]
+        },
+        {
+          "id": "ionic-weather-v3-step10",
+          "title": "Lab: User Preferences Step 2",
+          "pages": [
+            {
+              "id": "ionic-weather-v3-step10-01",
+              "title": "Completed Code"
+            }
+          ]
+        },
+        {
+          "id": "ionic-weather-v3-step11",
+          "title": "Lab: Lazy Loading",
+          "pages": [
+            {
+              "id": "ionic-weather-v3-step11-01",
+              "title": "Completed Code"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ionic-weather-ionic-v4-port",
+      "title": "App: Port Ionic v3 App to Ionic v4",
+      "pages": [
+        {
+          "id": "ionic-weather-ionic-v4-port-step01",
           "title": "Lab: Building the Foundation"
         },
         {
-          "id": "ionic-weather-ionic-v4-step02",
+          "id": "ionic-weather-ionic-v4-port-step02",
           "title": "Lab: Copy the Models"
         },
         {
-          "id": "ionic-weather-ionic-v4-step03",
+          "id": "ionic-weather-ionic-v4-port-step03",
           "title": "Lab: Services"
         },
         {
-          "id": "ionic-weather-ionic-v4-step04",
+          "id": "ionic-weather-ionic-v4-port-step04",
           "title": "Lab: Components"
         },
         {
-          "id": "ionic-weather-ionic-v4-step05",
+          "id": "ionic-weather-ionic-v4-port-step05",
           "title": "Lab: Pages"
         },
         {
-          "id": "ionic-weather-ionic-v4-step06",
+          "id": "ionic-weather-ionic-v4-port-step06",
           "title": "Lab: Styling and Theming"
         }
       ]
@@ -159,12 +235,12 @@
       ]
     },
     {
-          "id": "simple-git-workflow",
-          "title": "A Simple git Workflow"
+      "id": "simple-git-workflow",
+      "title": "A Simple git Workflow"
     },
     {
-          "id": "references",
-          "title": "References"
+      "id": "references",
+      "title": "References"
     }
   ]
 }
