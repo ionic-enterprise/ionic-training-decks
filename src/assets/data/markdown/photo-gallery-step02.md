@@ -2,8 +2,9 @@
 
 In this lab, you will:
 
-* generate an Ionic application
-* build and run the generated application
+* add Capacitor to the project
+* add the iOS and Adnroid platforms
+* build and run the application on both platforms
 
 ## Capacitor in a Nutshell
 
@@ -16,13 +17,9 @@ A couple of key features that will be highlighted as we build this application a
 
 For this lab, we will focus on creating the application to run natively on iOS and on Android.
 
-## First Things First
+## Install Capacitor
 
-In order to add platforms, the application needs to have been built at least once. Otherwise the adding of the platform will fail when a `www` directory is not found.
-
-`ionic build`
-
-Before adding any platforms, install Capacitor using `ionic capacitor update`
+Install Capacitor using `ionic capacitor update`
 
 ```bash
 ~/Projects/photo-gallery (master): ionic capacitor update
@@ -79,6 +76,12 @@ Commit the change:
 ~/Projects/photo-gallery (master *): git add capacitor.config.json
 ~/Projects/photo-gallery (master *+): git commit -am "feat(app): instal capacitor"
 ```
+
+## Initial Build
+
+In order to add platforms, the application needs to have been built at least once. Otherwise the adding of the platform will fail when a `www` directory is not found.
+
+`ionic build`
 
 ## Android
 
