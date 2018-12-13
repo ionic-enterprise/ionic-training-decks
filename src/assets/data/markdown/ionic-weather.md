@@ -2,11 +2,11 @@
 
 The Ionic Weather Application is an Ionic v3 application that provides information about local weather conditions.  During the development of this application, you will:
 
-- create a new Ionic application
-- integrate the application with Ionic Pro
-- deploy the application
-- monitor the application for errors
-- add third party component libraries to the application
-- modify existing pages
-- add new services
-- add and use Cordova plugins 
+- Create a new Ionic application
+- Integrate the application with Ionic Appflow
+- Deploy the application
+- Monitor the application for errors
+- Add third party component libraries to the application
+- Modify existing pages
+- Add new services
+- Add and use Cordova plugins
