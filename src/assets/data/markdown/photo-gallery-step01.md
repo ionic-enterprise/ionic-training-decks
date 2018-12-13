@@ -7,7 +7,7 @@ In this lab, you will:
 
 ## `ionic start`
 
-The first step is to create the application and connect the application to Ionic Pro. To do this, use the `ionic start` command.
+The first step is to create the application. To do this, use the `ionic start` command.
 
 1. In a command prompt, change directory to the working folder
 1. Run the following command: `ionic start photo-gallery blank --type=angular`
@@ -47,10 +47,10 @@ Initialized empty Git repository in /Users/kensodemann/Projects/CS Demos/photo-g
 
 ────────────────────────────────────────────────────────────
 
-? Install the free Ionic Appflow SDK and connect your app?
+? Install the free Ionic Appflow SDK and connect your app? (Y/n)
 ```
 
-Note the final message in the output. This is asking if you would like to connect your application to Appflow. You can answer "No" for now.
+Note the final message in the output. This is asking if you would like to connect your application to Appflow. You can answer **n** (No) for now.
 
 ## Building and Running
 
@@ -59,7 +59,7 @@ Let's just make sure the application builds and runs:
 1. `cd photo-gallery`
 1. `ionic serve`
 
-The application running in the default browser.
+The application should run in the default browser.
 
 ## Conclusion
 
