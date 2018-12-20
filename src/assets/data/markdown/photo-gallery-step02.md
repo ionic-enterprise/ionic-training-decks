@@ -162,6 +162,8 @@ Use the `ionic capacitor add ios` command to add the Android platform to the pro
 ✔ update ios in 20.97s
 ```
 
+> **Note**: The "Updating iOS native dependencies" step can take a significant amount of time (upwards of 10 minutes in some cases). This only occurs the first time you do this - subsequent projects will be much faster!
+
 This command adds an `ios/` directory to the project and adds the `@capacitor/ios` npm package as a dependency in the `package.json` file.
 
 ```bash
