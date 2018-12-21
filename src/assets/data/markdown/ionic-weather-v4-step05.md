@@ -110,6 +110,7 @@ export class IconMapProvider {
 1. Drag and drop the `images.zip` from `Downloads` into `src/assets`
 1. Double click the `images.zip` file in `src/assets`, which creates an `images` folder
 1. Remove the `images.zip` file
+1. Find the favicon.png file and move it into `src/assets/icon`
 
 ## Mock Up the Component Usage
 
