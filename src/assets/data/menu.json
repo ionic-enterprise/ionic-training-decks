@@ -77,6 +77,10 @@
               "title": "Completed Code"
             }
           ]
+        },
+        {
+          "id": "ionic-weather-v4-step11",
+          "title": "Lab: Add Simple Offline Handling"
         }
       ]
     },
