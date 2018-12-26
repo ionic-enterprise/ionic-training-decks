@@ -36,7 +36,7 @@ export class WeatherService {
 
 Let's add some basic configuration data. Have a look at the <a href="https://openweathermap.org/api" target="_blank">Open Weather Map API</a> documentation. You will see that the various endpoints:
 
-* All start with: `http://api.openweathermap.org/data/2.5`
+* All start with: `https://api.openweathermap.org/data/2.5`
 * Can take several formats for location (we will use latitude/longitude)
 * All take an `appid` parameter with the API key (this is less obvious)
 
@@ -46,7 +46,7 @@ Add your key, the base URL, and your coordinates as private data in the service.
 
 ```TypeScript
   private appId = '69f068bb8bf2bc3e061cb2b62c255c65';  // or use your own API key
-  private baseUrl = 'http://api.openweathermap.org/data/2.5';
+  private baseUrl = 'https://api.openweathermap.org/data/2.5';
 
   private latitude = 43.073051;
   private longitude = -89.401230;

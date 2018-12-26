@@ -100,7 +100,7 @@ import { Weather } from '../../models/weather';
 @Injectable()
 export class WeatherProvider {
   private appId = 'db046b8bbe642b799cb40fa4f7529a12';
-  private baseUrl = 'http://api.openweathermap.org/data/2.5';
+  private baseUrl = 'https://api.openweathermap.org/data/2.5';
 
   private latitude = 43.073051;
   private longitude = -89.40123;

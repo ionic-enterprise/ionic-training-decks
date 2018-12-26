@@ -31,7 +31,7 @@ The generated `weather` service (or "provider") gives you a lot of what you need
 
 Let's add some basic configuration data. Have a look at the <a href="https://openweathermap.org/api" target="_blank">Open Weather Map API</a> documentation. You will see that the various endpoints:
 
-* All start with: `http://api.openweathermap.org/data/2.5`
+* All start with: `https://api.openweathermap.org/data/2.5`
 * Can take several formats for location (we will use latitude/longitude)
 * All take an `appid` parameter with the API key (this is less obvious)
 
@@ -41,7 +41,7 @@ Add your key, the base URL, and your coordinates as private data in the service.
 
 ```TypeScript
   private appId = 'db046b8bbe642b799cb40fa4f7529a12';
-  private baseUrl = 'http://api.openweathermap.org/data/2.5';
+  private baseUrl = 'https://api.openweathermap.org/data/2.5';
 
   private latitude = 43.073051;
   private longitude = -89.401230;

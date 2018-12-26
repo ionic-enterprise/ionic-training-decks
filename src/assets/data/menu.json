@@ -85,6 +85,28 @@
       ]
     },
     {
+      "id":"ionic-weather-pwa",
+      "title": "App: Ionic Weather - PWA",
+      "pages": [
+        {
+          "id": "ionic-weather-pwa-step01",
+          "title": "Lab: Host the Application"
+        },
+        {
+          "id": "ionic-weather-pwa-step02",
+          "title": "Lab: Add the PWA Goodies"
+        },
+        {
+          "id": "ionic-weather-pwa-step03",
+          "title": "Lab: Get the Current Location"
+        },
+        {
+          "id": "ionic-weather-pwa-links",
+          "title": "Lab: PWA Links"
+        }
+      ]
+    },
+    {
       "id": "ionic-weather-v3",
       "title": "App: Ionic Weather - Ionic v3",
       "pages": [

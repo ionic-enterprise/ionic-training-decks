@@ -89,7 +89,7 @@ import { UserPreferencesService } from '../../services/user-preferences/user-pre
 })
 export class WeatherService {
   private appId = '69f068bb8bf2bc3e061cb2b62c255c65'; // or use your own API key
-  private baseUrl = 'http://api.openweathermap.org/data/2.5';
+  private baseUrl = 'https://api.openweathermap.org/data/2.5';
 
   constructor(
     private http: HttpClient,

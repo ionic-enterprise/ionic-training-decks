@@ -141,8 +141,7 @@ Add the new file and commit these changes:
 **Note:** the specifics on doing this depends on the type of machine you are using. On a Mac:
 
 1. Drag and drop the `images.zip` from `Downloads` into `src/assets`
-1. Double click the `images.zip` file in `src/assets`
-1. Create an `images` folder
+1. Double click the `images.zip` file in `src/assets`, which creates an `images` folder
 1. Remove the `images.zip` file
 
 ## Perform Some Global Styling
