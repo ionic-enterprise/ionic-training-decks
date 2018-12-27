@@ -1,4 +1,4 @@
-# Lab: Layout the Pages
+# Lab: Style the App 
 
 In this lab, you will learn how to:
 
@@ -13,7 +13,9 @@ The global theming and styling of an application is controlled via two different
 
 ### `src/theme/variables.scss`
 
-The `src/theme/variables.scss` file contains a collection of custom properties (AKA "CSS variables") that are used to define the color theme of the application. Since this is a weather application, a nice sky blue color might be nice for the background. Add `--ion-background-color: #b9dbf7;` within the `:root` scope in this file.
+The `src/theme/variables.scss` file contains a collection of custom properties (AKA "CSS variables") that are used to define the color theme of the application. Since this is a weather application, a nice sky blue color might be nice for the background.
+
+Add `--ion-background-color: #b9dbf7;` within the `:root` scope in this file.
 
 ### `src/global.scss`
 

@@ -22,7 +22,7 @@
         },
         {
           "id": "ionic-weather-v4-step04",
-          "title": "Lab: Style"
+          "title": "Lab: Style the App"
         },
         {
           "id": "ionic-weather-v4-step05",
@@ -30,17 +30,11 @@
         },
         {
           "id": "ionic-weather-v4-step06",
-          "title": "Lab: Get Data",
-          "pages": [
-            {
-              "id": "ionic-weather-v4-step06-01",
-              "title": "Completed Code"
-            }
-          ]
+          "title": "Lab: Mock Up the Interface"
         },
         {
           "id": "ionic-weather-v4-step07",
-          "title": "Lab: Using the Data",
+          "title": "Lab: Get Data",
           "pages": [
             {
               "id": "ionic-weather-v4-step07-01",
@@ -50,7 +44,7 @@
         },
         {
           "id": "ionic-weather-v4-step08",
-          "title": "Lab: Using Plugins",
+          "title": "Lab: Using the Data",
           "pages": [
             {
               "id": "ionic-weather-v4-step08-01",
@@ -60,7 +54,7 @@
         },
         {
           "id": "ionic-weather-v4-step09",
-          "title": "Lab: User Preferences Phase 1",
+          "title": "Lab: Using Plugins",
           "pages": [
             {
               "id": "ionic-weather-v4-step09-01",
@@ -70,7 +64,7 @@
         },
         {
           "id": "ionic-weather-v4-step10",
-          "title": "Lab: User Preferences Phase 2",
+          "title": "Lab: User Preferences Phase 1",
           "pages": [
             {
               "id": "ionic-weather-v4-step10-01",
@@ -80,6 +74,16 @@
         },
         {
           "id": "ionic-weather-v4-step11",
+          "title": "Lab: User Preferences Phase 2",
+          "pages": [
+            {
+              "id": "ionic-weather-v4-step11-01",
+              "title": "Completed Code"
+            }
+          ]
+        },
+        {
+          "id": "ionic-weather-v4-step12",
           "title": "Lab: Add Simple Offline Handling"
         }
       ]

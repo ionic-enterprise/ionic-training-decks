@@ -35,6 +35,8 @@ Here is an example of those changes:
     <author email="ken@ionic.io" href="http://ionicframework.com/">Ken Sodemann</author>
 ```
 
+Make similar changes to your application.
+
 ## Update the Splash Screen and Application Icon
 
 The application should have its own splash screen and icon rather than using the default that Ionic supplies for you. Ionic provides a service that will take two source image files and create all of the resources that your application will require. Follow these guidelines:
@@ -78,7 +80,7 @@ Android Studio project detected
 ✔ Modifying config.xml to add new image resources - done!
 ```
 
-Use `ionic cordova platform add ios` to add the iOS platform. This will create a `www/` directory if it does not exist, install the Android platform and any required Cordova plugins, and generate the appropriate icon and splash screen resources.
+Use `ionic cordova platform add ios` to add the iOS platform. This will create a `www/` directory if it does not exist, install the iOS platform and any required Cordova plugins, and generate the appropriate icon and splash screen resources.
 
 ```bash
 ~/Projects/Training/ionic-weather (master *): ionic cordova platform add ios
@@ -118,7 +120,7 @@ Both commands take several options. See `ionic cordova run --help` for details.
 **Android Quirks**
 
 * If `ionic cordova run android` fails the first time, it is often due to the emulator taking too long to launch. In that case, leave the emulator open and re-do the `ionic cordova run android` command.
-* The `--target` option is used to specify different targets in the emulator or different devices attached to the build machine. Use `cordova run ios --list` to get a list of targets.
+* The `--target` option is used to specify different targets in the emulator or different devices attached to the build machine. Use `cordova run android --list` to get a list of targets.
 
 ## Build for iOS
 
@@ -129,7 +131,7 @@ Both commands take several options. See `ionic cordova run --help` for details.
 
 **iOS Quirks**
 
-* If `ionic cordova run ios` does not work, use `open platforms/ios/My\ Weather\ App.xcworkspace` to open Xcode to build and run the application
+* If `ionic cordova run ios` does not work, use `open platforms/ios/Ionic\ Weather.xcworkspace` to open Xcode to build and run the application (NOTE: actual file name may differ depending on the `config.xml` contents at the time the platform was added)
 * When deploying to a device, you need to specify a team, provisioning profile, and signing certificate. It is usually easiest to use Xcode for this.
 * Currently if you are using Xcode 10, you need to specify the old build system as such: `ionic cordova build ios -- -buildFlag='-UseModernBuildSystem=0'`
 * Depending on how your system is set up, the default emulator may be too old to run your app. In that case, be sure to specify a `target`. Use `cordova run ios --list` to get a list of targets.

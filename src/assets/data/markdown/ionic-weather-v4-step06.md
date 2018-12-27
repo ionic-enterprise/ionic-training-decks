@@ -1,169 +1,313 @@
-# Lab: Getting Data
+# Lab: Mock Up the Interface
 
-Your app looks nice, but it does not display real data. Let's fix that.
+It is often desirable to lay out the user interface without worrying about how to get the data that will be displayed. This allows us to concentrate solely on how the application will look at feel, and to get that worked out early in the process.
 
 In this lab, you will learn how to:
 
-* Create a new service using the Ionic CLI
-* Use Angular's `HttpClient` service to get data from an API
-* Transform the data for consumption by your application
+* Create a simple service
+* Install assets that can be used by your application
+* Model the data
+* Mock up the user interface
 
+## Create a Required Service
 
-## Getting Started
+In order to allow each application to define its own weather condition images and where they exist, this library uses a specific map object. Let's just create that as a service so it can easily be injected where needed.
 
-* Go to <a href="https://openweathermap.org/" target="_blank">OpenWeatherMap.org</a> and sign up for a free account so you can have an API key (if you do not want to do this, you can use the API key I generated for this class, but I _will_ be removing it after the class is over)
-* Use `ionic g service services/weather/weather` to generate a new service
+`ionic generate service services/icon-map/icon-map`
 
-The API key to use if you do not want to generate your own is currently: `69f068bb8bf2bc3e061cb2b62c255c65`
+If you do a `git status` at this point, you should see a new directory was created for services:
 
-## Inject the HTTP Client 
+```bash
+~/Projects/Training/ionic-weather (master): git status
+On branch master
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
 
-The generated `weather` service is just a shell for an injectable class. We need to provide the details. The primary purose of this service will be to get JSON data from the API via HTTP, so we will need to inject Angular's HTTP client servicd. Dependency injection in Angular is handled via the constructor. Inject the HTTP client, creating a `private` reference to it.
+	src/app/services/
+
+nothing added to commit but untracked files present (use "git add" to track)
+```
+
+The `src/services/icon-map/icon-map.service.ts` file needs to be modified to look like this:
 
 ```TypeScript
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
 
 @Injectable({
   providedIn: 'root'
 })
-export class WeatherService {
-  constructor(private http: HttpClient) {}
+export class IconMapService {
+  sunny = 'assets/images/sunny.png';
+  cloudy = 'assets/images/cloudy.png';
+  lightRain = 'assets/images/light-rain.png';
+  shower = 'assets/images/shower.png';
+  sunnyThunderStorm = 'assets/images/partial-tstorm.png';
+  thunderStorm = 'assets/images/tstorm.png';
+  fog = 'assets/images/fog.png';
+  snow = 'assets/images/snow.png';
+  unknown = 'assets/images/dunno.png';
 }
 ```
 
-### Basic Configuration
+## Install the Images
 
-Let's add some basic configuration data. Have a look at the <a href="https://openweathermap.org/api" target="_blank">Open Weather Map API</a> documentation. You will see that the various endpoints:
+<a download href="/assets/images/images.zip">Download the images</a> and unpack the zip file under `src/assets`, creating an `images` folder with the images in them.
 
-* All start with: `https://api.openweathermap.org/data/2.5`
-* Can take several formats for location (we will use latitude/longitude)
-* All take an `appid` parameter with the API key (this is less obvious)
+**Note:** the specifics on doing this depends on the type of machine you are using. On a Mac:
 
-The first version of the app will use a hard coded location. I am using Madison, WI, USA because that is where the Ionic HQ is located, but you should use something closer to your home. You can use a web-site such as <a href="https://www.latlong.net/" target="_blank">LatLong.net</a> to find the coordinates of your city. 
+1. Drag and drop the `images.zip` from `Downloads` into `src/assets`
+1. Double click the `images.zip` file in `src/assets`, which creates an `images` folder
+1. Remove the `images.zip` file
+1. Find the favicon.png file and move it into `src/assets/icon`
 
-Add your key, the base URL, and your coordinates as private data in the service. My private data looks like this:
+## Mock Up the Component Usage
 
-```TypeScript
-  private appId = '69f068bb8bf2bc3e061cb2b62c255c65';  // or use your own API key
-  private baseUrl = 'https://api.openweathermap.org/data/2.5';
+Let's mock up how the components will be used in each page. This allows us to test out exactly what our data should look like and also allows us to concentrate on the styling without worrying about other moving parts. This is a common technique used when layout out the interface for an application.
 
-  private latitude = 43.073051;
-  private longitude = -89.401230;
-```
+### Weather Model
 
-## Getting the Data
-
-Angular's <a href="https://angular.io/api/common/http/HttpClient" target="_blank">HttpClient</a> service is very flexible and has several options for working with RESTful data. We will not go into full details, as that could be a full course on its own. For the purposes of this course, we will only be using GET verb to retrieve data. 
-
-The basic format for such a call is: `get(url: string): Observable<any>`. In our case, the url can be built as such: 
+Create a weather model that is based on the common data used by the weather component library. Create a `src/app/models` folder with a `src/app/models/weather.ts` file.
 
 ```TypeScript
-${this.baseUrl}/foo?lat=${this.latitude}&lon=${this.longitude}&appid=${this.appId}
+export interface Weather {
+  temperature: number;
+  condition: number;
+  date?: Date;
+}
 ```
-
-So a basic method that returns this data looks like this:
-
-```TypeScript
-  current(): Observable<any> {
-    return this.http.get(
-      `${this.baseUrl}/weather?lat=${this.latitude}&lon=${
-        this.longitude
-      }&appid=${this.appId}`);
-  }
-```
-j
-
-Add that method to your `weather` service to get the current weather. **Hint:** You'll need to import `Observable` from `rxjs` at the top of your file.
-
-Next add two additional methods: one called `forecast` that gets the forecast data and one called `uvIndex` that gets the UV Index data. **Hint:** Have a look at the <a href="" target="_blank">Open Weather Map API Docs</a> for details on the endpoint names. The format of the `forcast` and `uvIndex` methods will be basically the same at this point other than the name of the endpoint.
-
-## Transforming the Data
-
-Now we can retrieve our data, but we need to transform it into a format that our application can use.
 
 ### Current Weather
 
-#### Transforming the Result Object
-
-Review the <a href="https://openweathermap.org/current#current_JSON" target="_blank">API docs</a> and have a look at our `Weather` model. We need grab the following data:
-
-* **temperature** - Available as part of `main.temp`
-* **condition** - This is the `weather.id`, but because `weather` is an array of objects, we will use the `id` from the first object in the array (`weather[0].id`) 
-* **date** - This is available from `dt`; note that the date is Unix UTC
-
-**Challenge**: Add a private method to your service called `unpackWeather`. I have given you the shell of what it should do. Use the information above to properly unpack the result and put the data into a `Weather` object.
+- Inject the `IconMapService`
+- Create a `Weather` object with data
 
 ```TypeScript
-  private unpackWeather(res: any): Weather {
-    return {
-      temperature: ???,
-      condition: ???,
-      date: ???
-    };
-  }
-```
+import { Component } from '@angular/core';
 
-#### Applying the Transform
+import { IconMapService } from '../services/icon-map/icon-map.service';
+import { Weather } from '../models/weather';
 
-Observables in rxjs can be piped through a whole host of operators. One of the most useful is `map` which is used to map one object to another. The basic syntax is: `this.http.get(url).pipe(map(res: any) => someTransform(res));`
+@Component({
+  selector: 'app-current-weather',
+  templateUrl: 'current-weather.page.html',
+  styleUrls: ['current-weather.page.scss']
+})
+export class CurrentWeatherPage {
+  currentWeather: Weather = {
+    temperature: 302,
+    condition: 200
+  };
 
-**Challenge:** apply the transform to your `current()` method:
-
-* change the return type to `Observable<Weather>`
-* append the `pipe` from above to the `get()` call as such: `.pipe.map((res: any) => this.unpackWeather(res));`
-
-**Hint:** You will need to import some stuff from a couple of different ES6 modules at the top of your file. The `map` function is in the `rxjs/operators` module.
-
-## Forecast
-
-Transforming the forecast data is more complex. We need to go through the `list` and create an array of forecasts for each individual day. I am going to give you the code for that. Try walking through it as you copy it in to understand how it is working.
-
-```TypeScript
-  private unpackForecast(res: any): Forecast {
-    let currentDay: Array<Weather>;
-    let prevDate: number;
-    const forecast: Forecast = [];
-
-    res.list.forEach(item => {
-      const w = this.unpackWeather(item);
-      if (w.date.getDate() !== prevDate) {
-        prevDate = w.date.getDate();
-        currentDay = [];
-        forecast.push(currentDay);
-      }
-      currentDay.push(w);
-    });
-
-    return forecast;
-  }
-```
-
-**Challenge:** Now that you have the transform, apply it in your `forecast()` method. Remember that you should change the return type - specifically, the type is currently `Observable<any>` but `any` is far to broad, we can narrow that down.
-
-## UV Index
-
-Here is the model we have for the UV index:
-
-```TypeScript
-export interface UVIndex {
-  value: number,
-  riskLevel: number
+  constructor(public iconMap: IconMapService) { }
 }
 ```
 
-* **value** - Use the `value` from the HTTP result
-* **riskLevel** - This level should be calculated by us based on the `value`:
-   * 0 - a `value` < 3
-   * 1 - a `value` >= 3 and < 6
-   * 2 - a `value` >= 6 and < 8
-   * 3 - a `value` >= 8 and < 11 
-   * 4 - a `value` >= 11
+Use the weather components in the view.
 
-**Challenge:** Write a private `unpackUVIndex(res: any): UVIndex` method that unpacks the HTTP result as specified. You will need to write up some code to calculate the `riskLevel` as part of the method. When that is finished, apply the `map` transform as you did with the `forecast()` method.
+```html
+<ion-content padding text-center>
+  <div class="information">
+    <div class="city">Washington D.C.</div>
+    <kws-temperature
+      class="primary-value"
+      scale="F"
+      temperature="{{currentWeather?.temperature}}"
+    ></kws-temperature>
+  </div>
+  <kws-condition
+    [condition]="currentWeather?.condition"
+    [iconPaths]="iconMap"
+  ></kws-condition>
+</ion-content>
+```
+
+While we are in there, we should change the title for this page to be something more fitting. Let's say "Current Weather".
+
+Now let's do some page-specific styling. In general, we want to minimize the use of this, but we have specific cases here where it makes sense:
+
+- `city` is specific to this page
+- We'd like `primary-value` to be smaller on this page (even though it's already defined globally)
+- `kws-condition` is a custom element that uses shadow DOM so a lot of its styling is handled via <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/--*" target="_blank">custom properties (aka: CSS variables)</a>.
+
+```scss
+.city {
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.primary-value {
+  margin-top: 18px;
+}
+
+kws-condition {
+  --kws-condition-image-height: 212px;
+  --kws-condition-label-font-size: 24px;
+}
+```
+
+### Forecast
+
+Each `kws-daily-forecast` element takes an array of `Weather` data for a given day. We want to show the current forecast for several days, so we will need an array of arrays. Create a `src/models/forecast.ts` file:
+
+```TypeScript
+import { Weather } from './weather';
+
+export type Forecast = Array<Array<Weather>>;
+```
+
+At this point, set up some simple sample data (three days worth should be fine), mock up the UI, and style it.
+
+**forecast.page.ts**
+
+```TypeScript
+import { Component } from '@angular/core';
+
+import { Forecast } from '../models/forecast';
+import { IconMapService } from '../services/icon-map/icon-map.service';
+
+@Component({
+  selector: 'app-forecast',
+  templateUrl: 'forecast.page.html',
+  styleUrls: ['forecast.page.scss']
+})
+export class ForecastPage {
+  forecast: Forecast = [
+    [
+      {
+        temperature: 300,
+        condition: 200,
+        date: new Date(2018, 8, 19)
+      }
+    ],
+    [
+      {
+        temperature: 265,
+        condition: 601,
+        date: new Date(2018, 8, 20)
+      }
+    ],
+    [
+      {
+        temperature: 293,
+        condition: 800,
+        date: new Date(2018, 8, 21)
+      }
+    ]
+  ];
+
+  constructor(public iconMap: IconMapService) {}
+}
+```
+
+**forecast.page.html**
+
+```html
+<ion-header>
+  <ion-toolbar color="primary"> <ion-title> Forecast </ion-title> </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-content padding>
+    <ion-list>
+      <ion-item *ngFor="let f of forecast">
+        <kws-daily-forecast
+          scale="F"
+          [forecasts]="f"
+          [iconPaths]="iconMap"
+        ></kws-daily-forecast>
+      </ion-item>
+    </ion-list>
+  </ion-content>
+</ion-content>
+```
+
+**forecast.scss**
+
+**Note:** remember to change the main element tag from `page-about` to `page-forecast`.
+
+```scss
+kws-daily-forecast {
+  --kws-daily-forecast-display: flex;
+  --kws-daily-forecast-date-font-size: larger;
+  --kws-daily-forecast-description-font-size: large;
+  --kws-daily-forecast-description-font-weight: bold;
+  --kws-daily-forecast-description-padding-left: 24px;
+  --kws-daily-forecast-image-height: 96px;
+}
+```
+
+### UV Index
+
+The UV index page is a little more involved. We will have some text we display here that is defined in the page source.
+
+**src/models/uv-index.ts**
+
+```TypeScript
+export interface UVIndex {
+  value: number;
+  riskLevel: number;
+}
+```
+**uv-index.page.ts**
+
+```TypeScript
+import { Component } from '@angular/core';
+
+import { UVIndex } from '../models/uv-index';
+
+@Component({
+  selector: 'app-uv-index',
+  templateUrl: 'uv-index.page.html',
+  styleUrls: ['uv-index.page.scss']
+})
+export class UVIndexPage {
+  uvIndex: UVIndex = {
+    value: 6.4,
+    riskLevel: 3
+  };
+
+  advice: Array<string> = [
+    'Wear sunglasses on bright days. If you burn easily, cover up and use broad spectrum SPF 30+ sunscreen. ' +
+      'Bright surfaces, such as sand, water and snow, will increase UV exposure.',
+    'Stay in the shade near midday when the sun is strongest. If outdoors, wear sun protective clothing, ' +
+      'a wide-brimmed hat, and UV-blocking sunglasses. Generously apply broad spectrum SPF 30+ sunscreen every 2 hours, ' +
+      'even on cloudy days, and after swimming or sweating. Bright surfaces, such as sand, water and snow, will increase UV exposure.',
+    'Reduce time in the sun between 10 a.m. and 4 p.m. If outdoors, seek shade and wear sun protective clothing, a wide-brimmed hat, ' +
+      'and UV-blocking sunglasses. Generously apply broad spectrum SPF 30+ sunscreen every 2 hours, even on cloudy days, ' +
+      'and after swimming or sweating. Bright surfaces, such sand, water and snow, will increase UV exposure.',
+    'Minimize sun exposure between 10 a.m. and 4 p.m. If outdoors, seek shade and wear sun protective clothing, a wide-brimmed hat, ' +
+      'and UV-blocking sunglasses. Generously apply broad spectrum SPF 30+ sunscreen every 2 hours, even on cloudy days, and after ' +
+      'swimming or sweating. Bright surfaces, such as sand, water and snow, will increase UV exposure.',
+    'Try to avoid sun exposure between 10 a.m. and 4 p.m. If outdoors, seek shade and wear sun protective clothing, a wide-brimmed hat, ' +
+      'and UV-blocking sunglasses. Generously apply broad spectrum SPF 30+ sunscreen every 2 hours, even on cloudy days, ' +
+      'and after swimming or sweating. Bright surfaces, such as sand, water and snow, will increase UV exposure.'
+  ];
+
+  constructor() {}
+}
+```
+
+**uv-index.page.html**
+
+```html
+<ion-header>
+  <ion-toolbar color="primary"> <ion-title>UV Index</ion-title> </ion-toolbar>
+</ion-header>
+
+<ion-content text-center padding>
+  <kws-uv-index class="primary-value" [uvIndex]="uvIndex?.value"></kws-uv-index>
+  <div class="description">{{ advice[(uvIndex?.riskLevel)] }}</div>
+</ion-content>j
+```
+
+**uv-index.page.scss**
+
+```scss
+.description {
+  margin-top: 16px;
+}
+```
 
 ## Conclusion 
 
-Congratulations. You have learned how to craft a service that gets data and encapsulates some of the business logic of your application.
-
-Compare your code to the completed code that I've included. It does not have to be identical, but it should be functionally equivalent. We have not tested any of this yet, which is scary and a really good argument for unit tests. Nonetheless, be sure to commit your changes in git.
+In this lab you created a simple service and model and learned how to mock up the UI to ensure it looks the way you want it to look. Next we will look at how to get real data.
