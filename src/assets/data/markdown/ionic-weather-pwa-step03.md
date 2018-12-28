@@ -1,4 +1,4 @@
-#Lab: Get the Current Location
+# Lab: Get the Current Location
 
 When we run the application as a Hybrid Mobile application, we use a Cordova plugin to get the current location. We then fall back to a default location when running on the web. This allowed us to continue using our app in development mode. Now that is not a good strategy. We want our app to behave the same as a Hybrid Mobile app and as a PWA, and that means getting the actual current location and not some default value.
 
