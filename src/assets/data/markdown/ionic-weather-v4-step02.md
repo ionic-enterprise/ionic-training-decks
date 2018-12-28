@@ -138,6 +138,22 @@ Both commands take several options. See `ionic cordova run --help` for details.
 
 Here is how you would run the application on the iPhone 7, iOS 12.1 emulator if you have Xcode 10 on your machine: `ionic cordova run ios --target='iPhone-7, 12.1' -- -buildFlag='-UseModernBuildSystem=0'`
 
+**Note:** I find it hard to remember the full command for the iOS build, so I often add a script to the `package.json` file to do it, like this:
+
+```JSON
+  "scripts": {
+    "ng": "ng",
+    "start": "ng serve",
+    "build": "ng build",
+    "build:ios": "ionic cordova build ios -- -buildFlag='-UseModernBuildSystem=0'",
+    "test": "ng test",
+    "lint": "ng lint",
+    "e2e": "ng e2e"
+  },
+```
+
+Then all I have to do is `npm run build:ios` when I want to build for iOS.
+
 ## Add Untracked Files and Commit
 
 The above processes modified a lot of files, mostly in the `resources/` folder, and added a couple as well. Use `git status` to see them all:
