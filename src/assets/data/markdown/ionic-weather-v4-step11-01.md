@@ -305,9 +305,7 @@ export class CurrentWeatherPage implements OnDestroy, OnInit {
 
   private async getData() {
     const l = await this.loading.create({
-      spinner: 'bubbles',
-      translucent: true,
-      message: 'Loading'
+      message: 'Loading...'
     });
     l.present();
     this.cityName = (await this.userPreferences.getCity()).name;

@@ -186,15 +186,15 @@ We have learned how to utilize Cordova plugins and the Ionic Native wrappers in 
 
 Build the application for a mobile device and give it a try.
 
-**Challenge:** You may notice some slight delays when the application is run on the mobile device. Add a <a href="https://beta.ionicframework.com/docs/api/loading/" target="_blank">Loading Indicator</a> to each page. Here is the basic logic:
+**Challenge:** You may notice some slight delays when the application is run on the mobile device. Add a <a href="https://beta.ionicframework.com/docs/api/loading/" target="_blank">Loading Indicator</a> to each page. Here is the basic logic (where `loading` is the injected `LoadingController`):
 
 ```TypeScript
 async ionViewDidEnter() {
-  const loading = await this.loadingController.create({ options });
-  loading.present();
+  const l = await this.loading.create({ options });
+  l.present();
   this.weather.someMethod().subscribe(d => {
     this.someData = d;
-    loading.dismiss();
+    l.dismiss();
   });
 }
 ```

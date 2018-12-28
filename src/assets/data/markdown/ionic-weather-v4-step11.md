@@ -57,10 +57,13 @@ export class UserPreferencesService {
 At this point, it does not make much sense for the cities to be defined where they are. Let's do a couple of things:
 
 1. move the `cities.ts` file in with the service (`git mv src/app/user-preferences/cities.ts src/app/services/user-preferences/cities.ts`)
+1. fix the path to the `City` model in the moved `cities.ts` file
 1. add a method to the service that returns the available cities, call it `availableCities()`
 1. makes two changes to the `getCity()` method
    1. if there is a city stored in user preferences, look up the city by name in the cities array
    1. if there is no city stored in user preferences, return the "Current Location" city (cities[0]).
+
+Here is what the code for `getCity()` should look like when you are done (try to do it without peaking first):
 
 ```TypeScript
   async getCity(): Promise<City> {
@@ -91,12 +94,12 @@ In the `CurrentWeatherPage`:
 1. add `cityName` and `scale` properties (both strings)
 1. update the `ionViewDidEnter()` to get the data and set the properties
 
+**Example:**
+
 ```TypeScript
   async ionViewDidEnter() {
     const l = await this.loading.create({
-      spinner: 'bubbles',
-      translucent: true,
-      message: 'Loading'
+      message: 'Loading...'
     });
     l.present();
     this.cityName = (await this.userPreferences.getCity()).name;
@@ -128,16 +131,15 @@ When gettng the current location, the user preferences need to be taken into acc
 
 **Hints:**
 
-1. You need to change the code inside of the `Observable.fromPromise()`
+1. You need to change the code inside of the `from()`
 1. Promises can be chained
 1. When promises are chained, the promise ulitmately resolves to whatever is returned by the inner-most `then()` callback.
 
 Here is what you should have in the end:
 
 ```TypeScript
-  private getCurrentLocation(): Observable<Location> {
-    return Observable.fromPromise(
-          return from(
+  private getCurrentLocation(): Observable<Coordinate> {
+    return from(
       this.userPreferences.getCity().then(city => {
         if (city && city.coordinate) {
           return Promise.resolve(city.coordinate);
@@ -167,7 +169,7 @@ In rxjs, the `Subject` is kind of like an Event Emitter. Set one up in the `User
 1. `import { Subject } from 'rxjs';`
 1. create a public property on the class: 
 1. Instantiate a new `Subject` in the constructor
-1. Call the `Subject`'s `next()` method when you want to emit a value on it
+1. Call the `Subject`'s `next()` method when new preferences are changed
 
 Often, you will emit a value. In this case just emit nothing. Here is a synopsis of the changes:
 
@@ -269,4 +271,8 @@ export class CurrentWeatherPage implements {
 }
 ```
 
-Perform similar changes in the other two pages.
+**Challenge:** perform similar changes in the other two pages.
+
+## Conclusion
+
+Our weather app now has a simple set of preferences and responds to changes to them.

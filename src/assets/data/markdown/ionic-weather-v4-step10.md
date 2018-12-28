@@ -27,7 +27,7 @@ The user preferences will be accessible via each page's header via a gear button
 
 Add this within the `ion-toolbar` in the header of each page other than `tabs.page.html`. Don't worry about the red squiggly line under `openUserPreferences()`. We will fix that next.
 
-Each page class will need code like this:
+The class for each page we just updated will need code like this:
 
 ```TypeScript
   async openUserPreferences(): Promise<void> {
@@ -40,7 +40,7 @@ This requires injecting a `ModelController` as `modal` in the constructor. Do th
 
 Once you do this, test out the application. Upon pressing the gear your application should crash. Something isn't right here. Angular doesn't know how to find the component you just created. Have a look at the error message and see if you can figure out what to do.
 
-**Hint:** the change needed in `app.module.ts`
+**Hint:** a change is needed in `app.module.ts`
 
 ## Add a Header and Footer
 
@@ -61,7 +61,7 @@ Replace the HTML in the `UserPreferencesComponent` to match this.
 
 The header will be very similar to the headers used on the pages, so copy the header from one of the pages for now. Make the following modifications:
 
-- Change the title to "user preferences"
+- Change the title to "User Preferences"
 - Change the icon button to use the "close" icon
 - Change the method that it calls when handling the click event to "dismiss()"
 - Create a stub method called "dismiss()" in the component's class
