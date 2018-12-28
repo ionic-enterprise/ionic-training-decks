@@ -107,7 +107,7 @@ Use the weather components in the view.
 ```html
 <ion-content padding text-center>
   <div class="information">
-    <div class="city">Washington D.C.</div>
+    <div class="city">Madison, WI</div>
     <kws-temperature
       class="primary-value"
       scale="F"

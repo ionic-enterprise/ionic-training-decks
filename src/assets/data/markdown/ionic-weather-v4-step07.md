@@ -76,7 +76,7 @@ j
 
 Add that method to your `weather` service to get the current weather. **Hint:** You'll need to import `Observable` from `rxjs` at the top of your file.
 
-Next add two additional methods: one called `forecast` that gets the forecast data and one called `uvIndex` that gets the UV Index data. **Hint:** Have a look at the <a href="" target="_blank">Open Weather Map API Docs</a> for details on the endpoint names. The format of the `forcast` and `uvIndex` methods will be basically the same at this point other than the name of the endpoint.
+Add two additional methods: one called `forecast` that gets the forecast data and one called `uvIndex` that gets the UV Index data. **Hint:** Have a look at the <a href="https://openweathermap.org/api" target="_blank">Open Weather Map API Docs</a> for details on the endpoint names. The format of the `forcast` and `uvIndex` methods will be basically the same at this point other than the name of the endpoint.
 
 ## Transforming the Data
 
@@ -117,7 +117,7 @@ Observables in rxjs can be piped through a whole host of operators. One of the m
 
 ## Forecast
 
-Transforming the forecast data is more complex. We need to go through the `list` and create an array of forecasts for each individual day. I am going to give you the code for that. Try walking through it as you copy it in to understand how it is working.
+Transforming the forecast data is more complex. We need to go through the `list` and create an array of forecasts for each individual day. I am going to give you the code for that. Try walking through it as you copy it in to understand how it is working. Have a look at the <a href="https://openweathermap.org/forecast5#JSON" target="_blank">response data structure</a> and compare it to how we are processing it here.
 
 ```TypeScript
   private unpackForecast(res: any): Forecast {
@@ -139,7 +139,7 @@ Transforming the forecast data is more complex. We need to go through the `list`
   }
 ```
 
-**Challenge:** Now that you have the transform, apply it in your `forecast()` method. Remember that you should change the return type - specifically, the type is currently `Observable<any>` but `any` is far to broad, we can narrow that down.
+**Challenge:** Now that you have the transform, apply it in your `forecast()` method. Remember that you should change the return type - specifically, the type is currently `Observable<any>` but `any` is far too broad, we can narrow that down.
 
 ## UV Index
 
@@ -152,13 +152,15 @@ export interface UVIndex {
 }
 ```
 
+The <a href="https://openweathermap.org/api/uvi" target="_blank">response data</a> is very simple. There is only one property returned that is useful to us. That is the `value` property.
+
 * **value** - Use the `value` from the HTTP result
 * **riskLevel** - This level should be calculated by us based on the `value`:
-   * 0 - a `value` < 3
-   * 1 - a `value` >= 3 and < 6
-   * 2 - a `value` >= 6 and < 8
-   * 3 - a `value` >= 8 and < 11 
-   * 4 - a `value` >= 11
+   * 0 - `value` < 3
+   * 1 - `value` >= 3 and < 6
+   * 2 - `value` >= 6 and < 8
+   * 3 - `value` >= 8 and < 11 
+   * 4 - `value` >= 11
 
 **Challenge:** Write a private `unpackUVIndex(res: any): UVIndex` method that unpacks the HTTP result as specified. You will need to write up some code to calculate the `riskLevel` as part of the method. When that is finished, apply the `map` transform as you did with the `forecast()` method.
 
@@ -166,4 +168,4 @@ export interface UVIndex {
 
 Congratulations. You have learned how to craft a service that gets data and encapsulates some of the business logic of your application.
 
-Compare your code to the completed code that I've included. It does not have to be identical, but it should be functionally equivalent. We have not tested any of this yet, which is scary and a really good argument for unit tests. Nonetheless, be sure to commit your changes in git.
+Compare your code to the completed code that I've included. It does not have to be identical, but it should be functionally equivalent. We have not tested any of this, which is scary and a really good argument for unit tests. Nonetheless, be sure to commit your changes in git.

@@ -4,32 +4,32 @@ In this lab you will learn how to:
 
 * Inject a service into your pages
 * Diagnose errors that occur while you are developing your application
-* Retrieve real data from the service, replacing the fake data from our earlier mocking
+* Retrieve real data from the service, replacing the mock data
 
 ## Injector Error 
 
-Start by injecting the `WeatherProvider` into the `current-weather` page.
+Start by injecting the `WeatherService` into the `current-weather` page.
 
 ```TypeScript
-import { WeatherProvider } from '../../providers/weather/weather';
+import { WeatherService } from '../services/weather/weather.service';
 
 ...
 
   constructor(
-    public iconMap: IconMapProvider,
-    private weather: WeatherProvider
+    public iconMap: IconMapService,
+    private weather: WeatherService
   ) {}
 ```
 
 When you run the application after this change, though, you should get an error in the console like this one:
 
 ```
-Error: Uncaught (in promise): Error: StaticInjectorError(AppModule)[WeatherProvider -> HttpClient]: 
-  StaticInjectorError(Platform: core)[WeatherProvider -> HttpClient]: 
+Error: StaticInjectorError(AppModule)[HttpClient]: 
+  StaticInjectorError(Platform: core)[HttpClient]: 
     NullInjectorError: No provider for HttpClient!
 ```
 
-What is going on is that `HttpClient` is injected into your `WeatherProvider` service, but the `HttpClient` service has not been provided anywhere so the application does not know how to inject it. You need to modify the `AppModule` to import the `HttpClientModule` as such:
+What is going on is that `HttpClient` is injected into the `WeatherService` service, but the `HttpClient` service has not been provided anywhere so the application does not know how to inject it. You need to modify the `AppModule` to import the `HttpClientModule` as such:
 
 ```TypeScript
 import { HttpClientModule } from '@angular/common/http';
@@ -55,7 +55,7 @@ Save those changes and check your application - the error should be gone.
 
 There are two lifecycle events that are good candidates for getting data:
 
-* `ngOnInit` - Angular lifecycle event, fired when a component is instantiated, for a persistent page this will be when the page is first visited
+* `ngOnInit` - Angular lifecycle event, fired when a component is instantiated
 * `ionViewDidEnter` - Ionic lifecycle event, fired each time a page is visited
 
 In our application, we want to get new data each time the page is visited. The natural place to do this is the `ionViewDidEnter()` lifecycle event.
@@ -66,7 +66,7 @@ In our application, we want to get new data each time the page is visited. The n
   }
 ```
 
-Finally, where `currentWeather` was initialized to fake data before it can just be left declared but unassigned.
+Finally, `currentWeather` can just be left declared but unassigned. Remove the mock data that is currently assigned to it.
 
 ```TypeScript
   currentWeather: Weather;
