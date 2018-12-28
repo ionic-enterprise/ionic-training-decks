@@ -206,18 +206,16 @@ export class ForecastPage {
   <ion-toolbar color="primary"> <ion-title> Forecast </ion-title> </ion-toolbar>
 </ion-header>
 
-<ion-content>
-  <ion-content padding>
-    <ion-list>
-      <ion-item *ngFor="let f of forecast">
-        <kws-daily-forecast
-          scale="F"
-          [forecasts]="f"
-          [iconPaths]="iconMap"
-        ></kws-daily-forecast>
-      </ion-item>
-    </ion-list>
-  </ion-content>
+<ion-content padding>
+  <ion-list>
+    <ion-item *ngFor="let f of forecast">
+      <kws-daily-forecast
+        scale="F"
+        [forecasts]="f"
+        [iconPaths]="iconMap"
+      ></kws-daily-forecast>
+    </ion-item>
+  </ion-list>
 </ion-content>
 ```
 

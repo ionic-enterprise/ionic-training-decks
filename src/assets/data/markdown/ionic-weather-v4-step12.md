@@ -12,7 +12,7 @@ For this application, we will:
 
 ## Determine the Network Status
 
-If the application is running on a device, we will use the <a href="https://ionicframework.com/docs/native/network/" target="_blank">Network Status</a> to determine the status. If the `type` is falsey or `unknown` or `none`, then the application will assume it is offline. If the `type` is anything else, the application will assume it is online.
+If the application is running on a device, we will use the <a href="https://ionicframework.com/docs/native/network/" target="_blank">Network Status</a> plugin to determine the status. If the `type` is falsey or `unknown` or `none`, then the application will assume it is offline. If the `type` is anything else, the application will assume it is online.
 
 If the application is running in a web hosted scenario, `navigator.onLine` will be used to determine the online status.
 
@@ -24,8 +24,8 @@ If the application is running in a web hosted scenario, `navigator.onLine` will 
 
 ### Create a Network Service
 
-1. `ioninc g service services/network/network`
-1. Create a single getting in the service. The whole service is listed below.
+1. `ionic g service services/network/network`
+1. Create a simple getter in the service. The whole service is listed below.
 
 ```TypeScript
 import { Injectable } from '@angular/core';
@@ -50,7 +50,7 @@ export class NetworkService {
 
 ## Update the Pages
 
-For the purposes of this application, it will be sufficient modifiy the screens such that if the device is offline they will net fetch the data and they will warn the user that the data (if it exists) may be stale.
+For the purposes of this application, it will be sufficient modifiy the screens such that if the device is offline they will not fetch the data and they will warn the user that the data (if it exists) may be stale.
 
 Here is an example from the Current Weather page:
 
@@ -86,6 +86,8 @@ Here is an example from the Current Weather page:
 ```
 
 ### `current-weather.page.ts`
+
+Note the injected of the `NetworkService` as well as the minor change to `getData()`
 
 ```TypeScript
 import { Component, OnDestroy, OnInit } from '@angular/core';
