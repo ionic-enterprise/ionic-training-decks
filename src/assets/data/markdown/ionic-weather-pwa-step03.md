@@ -61,7 +61,7 @@ Now in the main code we can replace `: this.defaultLocation);` with `: await thi
 
 ## Run Another Lighthouse Audit
 
-Commit those changes and deploy the application. Load your app in an Ingocnito window. Itshould ask for permission to track your location. Allow it to do so. Run a Lighthouse audit again. Notice that the Performance and Best Practices scores have both gone down. This is because of the geolocation we just added. If the Lighthouse scores are super important to you, then you could redesign your app to NOT default to "current location".
+Commit those changes and deploy the application. Load your app in an Ingocnito window. It should ask for permission to track your location. Allow it to do so. Run a Lighthouse audit again. Notice that the Performance and Best Practices scores have both gone down. This is because of the geolocation we just added. If the Lighthouse scores are super important to you, then you could redesign your app to NOT default to "current location".
 
 ## Conclusion
 
@@ -71,4 +71,5 @@ There is still more we could do, including:
 
 * Reverse geolocation on the current location to get the city name
 * Restructuring the application startup to address the Lighthouse test scores
+* Add handling for cases where the user does not allow their location to be tracked
 * Writing unit tests (we have completely ignored those)
