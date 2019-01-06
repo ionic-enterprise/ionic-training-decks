@@ -7,7 +7,7 @@ In this lab, you will learn:
 - How to use your IDE to rename source files
 - How to use VS Code's refactoring tools to rename classes
 
-_Note:_ The latter parts of this lab can be tedious an error prone. However, being able to refactor a project like we are doing here is a good skill to learn. Classes sometimes need to be renamed because of a poor choice during initial development or a change in direction after development starts. Being able to move code around in an organized fashion without breaking things is important.
+_Note:_ The latter parts of this lab can be tedious and error prone. However, being able to refactor a project like we are doing here is a good skill to learn. Classes sometimes need to be renamed because of a poor choice during initial development or a change in direction after development starts. Being able to move code around in an organized fashion without breaking things is important.
 
 ## The Tabbed Navigation Layout
 
