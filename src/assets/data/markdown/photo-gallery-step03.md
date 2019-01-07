@@ -11,6 +11,6 @@ Unit tests are used to test individual objects in isolation. Each component, dir
 
 ## End-to-end Tests
 
-End to end tests are intended to test the application as a whole rather than testing individual objects in isolation. End-to-end tests tend to focus on "user stories" or "tasks",testing that a particular operation works as expected from start to finish. For this reason, rather than the test files existing next to any particular object's source, the test files exist in their own folder.
+End to end tests are intended to test the application as a whole rather than testing individual objects in isolation. End-to-end tests tend to focus on "user stories" or "tasks", testing that a particular operation works as expected from start to finish. For this reason, rather than the test files existing next to any particular object's source, the test files exist in their own folder.
 
 To run the end-to-end tests, type `npm run e2e`. Notice that unlike the unit tests, where the intent is that they will run as development is ongoing, the end-to-end tests run and exit. As a general rule, end-to-end tests should be run at key moments in the development of a feature or fix rather than continuously during development.
