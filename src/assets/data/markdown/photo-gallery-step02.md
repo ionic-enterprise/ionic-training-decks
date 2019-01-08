@@ -74,12 +74,12 @@ Commit the change:
 
 ```bash
 ~/Projects/photo-gallery (master *): git add capacitor.config.json
-~/Projects/photo-gallery (master *+): git commit -am "feat(app): instal capacitor"
+~/Projects/photo-gallery (master *+): git commit -am "feat(app): install capacitor"
 ```
 
 ## Initial Build
 
-In order to add platforms, the application needs to have been built at least once. Otherwise the adding of the platform will fail when a `www` directory is not found.
+In order to add platforms, the application needs to have been built at least once. Otherwise adding the platform will fail when the generated `www` directory is not found.
 
 `ionic build`
 
@@ -144,6 +144,8 @@ Any changes that are required in the `AndroidManifest.xml` document can also be 
 
 Use the `ionic capacitor add ios` command to add the Android platform to the project. This will allow you to configure and run iOS builds of the application.
 
+> **Note**: Capacitor uses CocoaPods to manage iOS dependencies. You may need to run `(sudo) gem install cocoapods` before continuing. See <a href="https://guides.cocoapods.org/using/getting-started.html#installation" target="_blank">this link</a> for more information.
+
 ```bash
 ~/Projects/photo-gallery (master): ionic capacitor add ios
 > capacitor add ios
@@ -159,6 +161,8 @@ Use the `ionic capacitor add ios` command to add the Android platform to the pro
 ✔ Updating iOS native dependencies in 20.95s
 ✔ update ios in 20.97s
 ```
+
+> **Note**: The "Updating iOS native dependencies" step can take a significant amount of time the first time around (upwards of 10 minutes in some cases) due to the number of dependencies that need to be downloaded and installed. Adding the iOS platform to subsequent projects is significantly faster.
 
 This command adds an `ios/` directory to the project and adds the `@capacitor/ios` npm package as a dependency in the `package.json` file.
 
@@ -189,7 +193,7 @@ Add the `ios/` folder to git and commit the changes.
 
 ### Build and Run
 
-Use `ionic capacitor open ios` to open the application in Xcode. From there you can build and run the application on a device or emulator. *Note:* in order to run the application on a device, you need to have specify a "Team" along with "Provisioning Profile" and "Signing Certificate"
+Use `ionic capacitor open ios` to open the application in Xcode. From there you can build and run the application on a device or emulator. *Note:* in order to run the application on a device, you need to specify a "Team" along with "Provisioning Profile" and "Signing Certificate"
 
 ```bash
 ~/Projects/CS Demos/photo-gallery (master): ionic capacitor open ios
@@ -225,4 +229,4 @@ Add and commit those:
 
 ## Conclusion
 
-In this lab we learned how to add various platforms and how to build the application for those platforms.
+In this lab, we learned how to add various platforms and how to build the application for those platforms.
