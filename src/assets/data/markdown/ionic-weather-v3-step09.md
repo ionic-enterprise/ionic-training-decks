@@ -38,7 +38,7 @@ Each page class will need code like this:
   }
 ```
 
-This requires injecting a `ModelController` as `modal` in the constructor. Do this in each page class.
+This requires injecting a `ModalController` as `modal` in the constructor. Do this in each page class.
 
 Once you do this, test out the application. Upon pressing the gear your application should crash. Something isn't right here. Angular doesn't know how to find the component you just created. You need to do two things:
 

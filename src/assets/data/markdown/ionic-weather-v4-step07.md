@@ -72,7 +72,6 @@ So a basic method that returns this data looks like this:
       }&appid=${this.appId}`);
   }
 ```
-j
 
 Add that method to your `weather` service to get the current weather. **Hint:** You'll need to import `Observable` from `rxjs` at the top of your file.
 

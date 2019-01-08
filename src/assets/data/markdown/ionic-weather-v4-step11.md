@@ -115,7 +115,7 @@ In the view, bind the data:
 
 ```html
   <div class="information">
-    <ion-label class="city">{{cityName}}</ion-label>
+    <div class="city">{{cityName}}</div>
     <kws-temperature class="primary-value" [scale]="scale" temperature="{{currentWeather?.temperature}}"></kws-temperature>
   </div>
 ```
@@ -250,8 +250,8 @@ export class CurrentWeatherPage implements {
     this.subscription.unsubscribe();
   }
 
-  openUserPreferences() {
-    const m = this.modal.create(UserPreferencesComponent);
+  async openUserPreferences() {
+    const m = this.modal.create({ component: UserPreferencesComponent });
     m.present();
   }
 

@@ -32,7 +32,7 @@ export class AppComponent {
   initializeApp() {}
 }
 ```
-j
+
 ### `app.module.ts`
 
 The `SplashScreen` and `StatusBar` Ionic Native wrappers are no longer used by the application. Thus they no longer need to be provided here. Remove their imports as well. Also remove them from the list of `providers`.
