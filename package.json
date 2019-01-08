@@ -27,7 +27,8 @@
     "jest": "^21.2.1",
     "listr": "~0.14.1",
     "rimraf": "^2.6.2",
-    "semver": "^5.5.0"
+    "semver": "^5.5.0",
+    "workbox-build": "3.4.1"
   },
   "engines": {
     "node": "10.13.0",
