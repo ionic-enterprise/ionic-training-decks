@@ -23,7 +23,7 @@ The location code currently looks like this:
       this.cachedLocation ||
       (this.platform.is('cordova')
         ? await this.geolocation.getCurrentPosition()
-        : this.defaultLocation);
+        : this.defaultPosition);
     this.cachedLocation = loc;
     return {
       longitude: loc.coords.longitude,
@@ -32,7 +32,7 @@ The location code currently looks like this:
   }
 ```
 
-We want to take the `: this.defaultLocation)` line and replace it with code that gets the location using the Web API. Time to write a private function:
+We want to take the `: this.defaultPosition)` line and replace it with code that gets the location using the Web API. Time to write a private function:
 
 ```TypeScript
   private getCurrentPositionWebApi(): Promise<{
@@ -46,7 +46,7 @@ We want to take the `: this.defaultLocation)` line and replace it with code that
         )
       );
     }
-    return Promise.resolve(this.defaultLocation);
+    return Promise.resolve(this.defaultPosition);
   }
 ```
 
@@ -57,7 +57,7 @@ Let's walk through what that is doing:
    1. the web API takes callbacks, convert that to a Promise
 1. in the rare case that geolocation is not supported, fallback to our default location
 
-Now in the main code we can replace `: this.defaultLocation);` with `: await this.getCurrentPositionWebApi());`.
+Now in the main code we can replace `: this.defaultPosition);` with `: await this.getCurrentPositionWebApi());`.
 
 ## Run Another Lighthouse Audit
 
