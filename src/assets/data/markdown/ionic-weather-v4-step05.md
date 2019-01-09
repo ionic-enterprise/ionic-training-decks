@@ -30,13 +30,14 @@ import { defineCustomElements } from 'kws-weather-widgets/dist/loader';
 
 import { AppModule } from './app.module';
 
-platformBrowserDynamic().bootstrapModule(AppModule);
+platformBrowserDynamic().bootstrapModule(AppModule)
+  .catch(err => console.log(err));
 defineCustomElements(window);
 ```
 
 Second, since Angular does not know about the custom elements in the library, the `CUSTOM_ELEMENTS_SCHEMA` must be used in each module that uses any components from the library. This tells the Angular compiler to ignore any elements it doesn't understand so long as they conform to the custom elements standard.
 
-For each of the three main pages in our library, we need to make a change similar to the following:
+For each of the three main pages in our application, we need to make a change similar to the following to each of their `module.ts` files:
 
 ```TypeScript
 ...
