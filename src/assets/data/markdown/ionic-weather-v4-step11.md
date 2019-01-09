@@ -222,7 +222,7 @@ To respond to the change, each page (current-weather, forecast, uv-index) should
 The code should look something like this:
 
 ```TypeScript
-export class CurrentWeatherPage implements {
+export class CurrentWeatherPage implements OnInit, OnDestroy {
   scale: string;
   cityName: string;
   currentWeather: Weather;

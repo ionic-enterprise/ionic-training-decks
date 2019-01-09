@@ -14,16 +14,7 @@ Add the following configuration to your `firebase.json` file:
 ```JSON
 "headers": [
   {
-    "source": "/build/app/**",
-    "headers": [
-      {
-        "key": "Cache-Control",
-        "value": "public, max-age=31536000"
-      }
-    ]
-  },
-  {
-    "source": "sw.js",
+    "source": "ngsw-worker.js",
     "headers": [
       {
         "key": "Cache-Control",
@@ -53,16 +44,7 @@ When you are comlpete, the `firebase.json` file should look something like this:
     ],
     "headers": [
       {
-        "source": "/build/app/**",
-        "headers": [
-          {
-            "key": "Cache-Control",
-            "value": "public, max-age=31536000"
-          }
-        ]
-      },
-      {
-        "source": "sw.js",
+        "source": "ngsw-worker.js.js",
         "headers": [
           {
             "key": "Cache-Control",
