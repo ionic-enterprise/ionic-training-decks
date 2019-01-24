@@ -221,8 +221,6 @@ export class ForecastPage {
 
 **forecast.scss**
 
-**Note:** remember to change the main element tag from `page-about` to `page-forecast`.
-
 ```scss
 kws-daily-forecast {
   --kws-daily-forecast-display: flex;
