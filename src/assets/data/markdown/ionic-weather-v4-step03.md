@@ -1,110 +1,111 @@
-# Lab: Layout the Pages
+# Lab: Style the App 
 
-In this lab, you will learn:
+In this lab, you will learn how to:
 
-- How the tabbed navigation is layed out
-- How to change tab labels and icons
-- How to use your IDE to rename source files
-- How to use VS Code's refactoring tools to rename classes
+* Apply global themses and styles
+* Theme the application using Ioinic Studio
+* Apply different colors within the application
+* Style the status bar
 
-_Note:_ The latter parts of this lab can be tedious and error prone. However, being able to refactor a project like we are doing here is a good skill to learn. Classes sometimes need to be renamed because of a poor choice during initial development or a change in direction after development starts. Being able to move code around in an organized fashion without breaking things is important.
+## Global Theming and Styling
 
-## The Tabbed Navigation Layout
+The global theming and styling of an application is controlled via two different files: `src/theme/variables.scss` and `src/global.scss`. The majority of theming and styling for the application should occur through these two files.
 
-Two main files work in conjunction to define the navigation: `tabs.router.module.ts` and `tabs.page.html`. Have a look at these two files to get an understanding of how the routes are defined. We will be changing these to make more sense for our app.
+### `src/theme/variables.scss`
 
-## Change Tab Labels and Icons
+The `src/theme/variables.scss` file contains a collection of custom properties (AKA "CSS variables") that are used to define the color theme of the application. Since this is a weather application, a nice sky blue color might be nice for the background.
 
-In `tabs.page.html`, change the `ion-label` values for the tabs such that the following tabs exist:
+Add `--ion-background-color: #b9dbf7;` within the `:root` scope in this file.
 
-- Current Weather
-- Forecast
-- UV Index
+### `src/global.scss`
 
-Similarily, change the `ion-icon` components to use the following icons:
+It is best to do as much styling as possible globally to give the application a consistent look and feel. Notice the existing imports. This is also a best practice. Create files that group the styles together in a manner that makes sense for the application.
 
-- cloud
-- calendar
-- sunny
+For this training application, we don't have a lot of extra styling so we will put the styles right into the `src/global/scss` file:
 
-At this point, the tabs for your application should look like this:
+```scss
+.primary-value {
+  font-size: 36px;
+}
 
-<img src="assets/screenshots/weather-4.3-tabs.png"/>
+.secondary-value {
+  font-size: 24px;
+}
 
-Commit your changes here as the next two steps can be error prone and it is good to have a fallback.
+.item-ios,
+.item-md {
+  padding-left: 0;
+}
 
-## Refactor the Class Names
+.item-inner {
+  padding: 12px;
+}
+```
 
-The tab names make sense for our application, but the classes associated with the specific pages are very generic like `Tab1Page`. Long term this will be a maintenance issue for future developers. Let's use VS Code's refactoring tools to help us change the class names for these pages.
+## Using the Ionic Studio Theming Editor
 
-- In `src/app/tab1/tab1.page.ts`, select `Tab1Page`, right click, and choose `Rename Symbol`. Rename the page to `CurrentWeatherPage`. This will change all references for us.
-- In `src/app/tab1/tab1.module.ts`, select `Tab1PageModule`, right click, and choose `Rename Symbol`. Rename the page to `CurrentWeatherPageModule`. This will change all references for us.
-- Open `src/app/tabs/tabs.router.module.ts` and notice that the `loadChildren` still references the old module class name. VS Code did not update that reference because it is a string and not an actual reference. You will have to update that one yourself
+**Note:** if you do not have Ioinc Studio, you can manually update `src/theme/variables.scss` as outlined below.
 
-At this point, if you save all files your project should rebuild and will still work. **Note:** the Angular build process can sometimes get confused when modules are changed. If something doesn't seem right, kill your dev server and restart it with `ionic serve` or `npm start`.
+Ionic Studio include a theming editor that allows you to easy specify the color theme for the appliction. The theming editor reads the current `src/theme/variables.scss` file and applies that color theme to a sample page so the color theme can be seen as it is edited.
 
-Make similar changes to rename the classes for tabs 2 and 3:
+With the theming editor, only the base value for each of the defined colors needs to be specified. The `-shade` and `-tint` variants will be automatically calculated, though the calculated values can be changed if so desired.
 
-* `Tab2Page` -> `ForecastPage`
-* `Tab2PageModule` -> `ForecastPageModule`
-* `Tab3Page` -> `UVIndexPage`
-* `Tab3PageModule` -> `UVIndexPageModule`
+* Open the project in Ioinc Studio
+* Open the theming editor, is bottom icon on left
+* Change the `Primary` color to `#085a9e`
+* Change the `Secondary` color to `#f4a942`
 
-Remember to change the routing module.
+In both cases, the `-shade` and `-tint` variants were automatically calculated. Have a look at those values by clicking on the `Primary` and `Secondary` colors. Save the changes.
 
-Commit your changes when you are done. (I suggest committing after each page move)
+Look at the `src/app/variables.scss` file and verify that the changes have been saved.
 
-## Rename the Source Files
+```scss
+  /** primary **/
+  --ion-color-primary: #085a9e;
+  --ion-color-primary-rgb: 8,90,158;
+  --ion-color-primary-contrast: #ffffff;
+  --ion-color-primary-contrast-rgb: 255,255,255;
+  --ion-color-primary-shade: #074f8b;
+  --ion-color-primary-tint: #216ba8;
+  /** secondary **/
+  --ion-color-secondary: #f4a942;
+  --ion-color-secondary-rgb: 244,169,66;
+  --ion-color-secondary-contrast: #000000;
+  --ion-color-secondary-contrast-rgb: 0,0,0;
+  --ion-color-secondary-shade: #d7953a;
+  --ion-color-secondary-tint: #f5b255;
+```
 
-The class names make sense now, but the files and folders are still a little off. It is usually advisable to use `git mv` to rename files as it makes sure that the history of the file is preserved. However in this case it is easiest to rename the files using VS Code. This will automatically update any references to the file with two exceptions:
+## Apply Colors
 
-- the `loadChildren` specified in `src/app/tabs/tabs.router.module.ts`
-- the URLs that are specified in the `@component` dectorator in the component's TypeScript file
+Right now, most of the application is sky blue. That is because most of the components in the application are using the default background color. To change this, specify the `Primary` color for the tab bar and each page's header.
 
-The items that are not changed automatically will need to be changed manually. When changing the `templateUrl` and `styleUrls`, the `selector` can be changed as well.
+* Add `color="primary"` in the `ion-tab-bar` in `src/app/tabs/tabs.page.html` 
+* Add `color="primary"` in the `ion-toolbar` in each of the other pages. 
 
-Using VS Code, change the path and file name as follows:
+## Style the Status Bar
 
-- tab1 -> current-weather
-- tab2 -> forecast
-- tab3 -> uv-index
+Run the application on a device or emulator. Notice that the status bar text is dark. That can be changed by using the "Light Content" style instead of the default style. In `src/app/app.component.ts`, change `this.statusBar.styleDefault()` to `this.statusBar.styleLightContent()`.
 
-## Rename the Paths
+Depending on which version of Android the application is run on, the status bar may be black or a rather ugly shade of teal. Let's specify a color that more closely matches out application's header while still being different (as per the Android guidelines). For this, we will use the same value as specified by `--ion-color-primary-shade`. This change in status bar color should only apply to Adroid, however, as the iOS specs call for a consistent color.
 
-The final bit that looks odd are the paths. We should change these for at least the following two reasons:
+When complete, the code should look like this:
 
-- navigation within the app code will make more sense and be self-documenting
-- the path will look better in the case where we serve this as a PWA and someone running the app on their desktop will see a more friendly path
-
-Changing the path at this point invovles changes in two files: `tabs.router.module.ts` and `tabs.page.html`
-
-### `tabs.router.module.ts`
-
-The `path` used by each tab should be changed from the generic `tabX` to something more meaningful such as `current-weather`. Here is what it currently looks like:
 
 ```TypeScript
-        path: 'tab1',
-        children: [
-          {
-            path: '',
-            loadChildren: '../current-weather/current-weather.module#CurrentWeatherPageModule'
-          }
-        ]
+  initializeApp() {
+    this.platform.ready().then(() => {
+      this.statusBar.styleLightContent();
+      this.splashScreen.hide();
+      if (this.platform.is('android')) {
+        this.statusBar.backgroundColorByHexString('#074f8b');
+      }
+    });
+  }
 ```
 
-There are also some `redirectTo` values in that same file that need to be updated. Be sure to change those.
-
-### `tabs.page.html`
-
-The `tab` property of the `ion-tab-button` needs to match the correct path. Here is what one of them currently looks like. Change them to match the pats that were updated in `tabs.router.module.ts`
-
-```HTML
-    <ion-tab-button tab="tab1">
-      <ion-icon name="cloud"></ion-icon>
-      <ion-label>Current Weather</ion-label>
-    </ion-tab-button>
-```
+<!-- TODO: Add a section on unit testing considerations. -->
 
 ## Conclusion
 
-In this lab we learned how to refactor our code to make it more maintainable in the future.
+You have learned how to apply basic theming and styling to the application. You should commit your changes at this point.

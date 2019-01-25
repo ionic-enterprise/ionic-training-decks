@@ -1,111 +1,88 @@
-# Lab: Style the App 
+# Lab: Use a Library
 
 In this lab, you will learn how to:
 
-* Apply global themses and styles
-* Theme the application using Ioinic Studio
-* Apply different colors within the application
-* Style the status bar
+* Install third party libraries
+* Integrate the third party libraries into your application
+* Manage the application's dependencies
 
-## Global Theming and Styling
+## Install the Library
 
-The global theming and styling of an application is controlled via two different files: `src/theme/variables.scss` and `src/global.scss`. The majority of theming and styling for the application should occur through these two files.
+It is often useful to use third party libraries. For this application, we will use a library of <a href="https://github.com/kensodemann/kws-weather-widgets" target="_blank">weather related components</a> that I created and published on NPM. Many useful JavaScript libraries are availble via NPM and are available for use in your application.
 
-### `src/theme/variables.scss`
+To install my weather component library, run: `npm install kws-weather-widgets`
 
-The `src/theme/variables.scss` file contains a collection of custom properties (AKA "CSS variables") that are used to define the color theme of the application. Since this is a weather application, a nice sky blue color might be nice for the background.
+The library is installed in `node_modules` and your `package.json` file is updated to reflect the new dependency:
 
-Add `--ion-background-color: #b9dbf7;` within the `:root` scope in this file.
-
-### `src/global.scss`
-
-It is best to do as much styling as possible globally to give the application a consistent look and feel. Notice the existing imports. This is also a best practice. Create files that group the styles together in a manner that makes sense for the application.
-
-For this training application, we don't have a lot of extra styling so we will put the styles right into the `src/global/scss` file:
-
-```scss
-.primary-value {
-  font-size: 36px;
-}
-
-.secondary-value {
-  font-size: 24px;
-}
-
-.item-ios,
-.item-md {
-  padding-left: 0;
-}
-
-.item-inner {
-  padding: 12px;
-}
+```JSON
+    "kws-weather-widgets": "1.0.0",
 ```
 
-## Using the Ionic Studio Theming Editor
+## Use the Library
 
-**Note:** if you do not have Ioinc Studio, you can manually update `src/theme/variables.scss` as outlined below.
+Good libraries usually document exactly how to use the library in your application. In the case of this library - which is a web component library built using a technology called <a href="https://stenciljs.com" target="_blank">Stencil</a> - there are a couple of steps that need to be taken to use the library in an Angular project (like yours).
 
-Ionic Studio include a theming editor that allows you to easy specify the color theme for the appliction. The theming editor reads the current `src/theme/variables.scss` file and applies that color theme to a sample page so the color theme can be seen as it is edited.
-
-With the theming editor, only the base value for each of the defined colors needs to be specified. The `-shade` and `-tint` variants will be automatically calculated, though the calculated values can be changed if so desired.
-
-* Open the project in Ioinc Studio
-* Open the theming editor, is bottom icon on left
-* Change the `Primary` color to `#085a9e`
-* Change the `Secondary` color to `#f4a942`
-
-In both cases, the `-shade` and `-tint` variants were automatically calculated. Have a look at those values by clicking on the `Primary` and `Secondary` colors. Save the changes.
-
-Look at the `src/app/variables.scss` file and verify that the changes have been saved.
-
-```scss
-  /** primary **/
-  --ion-color-primary: #085a9e;
-  --ion-color-primary-rgb: 8,90,158;
-  --ion-color-primary-contrast: #ffffff;
-  --ion-color-primary-contrast-rgb: 255,255,255;
-  --ion-color-primary-shade: #074f8b;
-  --ion-color-primary-tint: #216ba8;
-  /** secondary **/
-  --ion-color-secondary: #f4a942;
-  --ion-color-secondary-rgb: 244,169,66;
-  --ion-color-secondary-contrast: #000000;
-  --ion-color-secondary-contrast-rgb: 0,0,0;
-  --ion-color-secondary-shade: #d7953a;
-  --ion-color-secondary-tint: #f5b255;
-```
-
-## Apply Colors
-
-Right now, most of the application is sky blue. That is because most of the components in the application are using the default background color. To change this, specify the `Primary` color for the tab bar and each page's header.
-
-* Add `color="primary"` in the `ion-tab-bar` in `src/app/tabs/tabs.page.html` 
-* Add `color="primary"` in the `ion-toolbar` in each of the other pages. 
-
-## Style the Status Bar
-
-Run the application on a device or emulator. Notice that the status bar text is dark. That can be changed by using the "Light Content" style instead of the default style. In `src/app/app.component.ts`, change `this.statusBar.styleDefault()` to `this.statusBar.styleLightContent()`.
-
-Depending on which version of Android the application is run on, the status bar may be black or a rather ugly shade of teal. Let's specify a color that more closely matches out application's header while still being different (as per the Android guidelines). For this, we will use the same value as specified by `--ion-color-primary-shade`. This change in status bar color should only apply to Adroid, however, as the iOS specs call for a consistent color.
-
-When complete, the code should look like this:
-
+First, there is a method in the library called `defineCustomElements()` that needs to be run. This is usually run in the `main.ts` file. This method contains the special sauce that bundlers like WebPack need in order to be aware of the components, with the end result being that WebPack will bundle them properly.
 
 ```TypeScript
-  initializeApp() {
-    this.platform.ready().then(() => {
-      this.statusBar.styleLightContent();
-      this.splashScreen.hide();
-      if (this.platform.is('android')) {
-        this.statusBar.backgroundColorByHexString('#074f8b');
-      }
-    });
-  }
+import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
+import { defineCustomElements } from 'kws-weather-widgets/dist/loader';
+
+import { AppModule } from './app.module';
+
+platformBrowserDynamic().bootstrapModule(AppModule)
+  .catch(err => console.log(err));
+defineCustomElements(window);
 ```
 
-<!-- TODO: Add a section on unit testing considerations. -->
+Second, since Angular does not know about the custom elements in the library, the `CUSTOM_ELEMENTS_SCHEMA` must be used in each module that uses any components from the library. This tells the Angular compiler to ignore any elements it doesn't understand so long as they conform to the custom elements standard.
+
+For each of the three main pages in our application, we need to make a change similar to the following to each of their `module.ts` files:
+
+```TypeScript
+...
+import { CUSTOM_ELEMENTS_SCHEMA, NgModule } from '@angular/core';
+...
+
+@NgModule({
+  ...
+  schemas: [CUSTOM_ELEMENTS_SCHEMA]
+})
+export class CurrentWeatherPageModule {}
+```
+
+## Managing Dependencies
+
+NPM is also used to manage the application's dependencies. If you type `npm outdated` from the root directory of your project you can see which dependencies may need upgrading.
+
+As of the time of this writing, here are the results:
+
+```
+~/Projects/Training/ionic-weather (master *): npm outdated
+Package                            Current         Wanted  Latest  Location
+@ionic-native/core           5.0.0-beta.21  5.0.0-beta.21  4.18.0  ionic-weather
+@ionic-native/splash-screen  5.0.0-beta.21  5.0.0-beta.21  4.18.0  ionic-weather
+@ionic-native/status-bar     5.0.0-beta.21  5.0.0-beta.21  4.18.0  ionic-weather
+@types/jasmine                      2.8.14         2.8.14   3.3.5  ionic-weather
+jasmine-core                        2.99.1         2.99.1   3.3.0  ionic-weather
+karma-jasmine                        1.1.2          1.1.2   2.0.1  ionic-weather
+karma-jasmine-html-reporter          0.2.2          0.2.2   1.4.0  ionic-weather
+typescript                           3.1.6          3.1.6   3.2.2  ionic-weather
+```
+
+Som analysis and thouht it required at this point. Having done this exercise before, here is what I can tell you:
+
+* The `@ionic-native` stuff needs to stay on the `5.0.0-beta` until Ionic v4 is released, at which point it too should be released as `5.0.0`
+* The `typescript` language needs to stay at `3.1.6` for now because some Angular tools depend on that version
+* It is safe to take the Jasmine and Karma updates
+
+Let's install those: `npm i @types/jasmine@latest jasmine-core@latest karma-jasmine@latest karma-jasmine-html-reporter@latest`
+
+You can run `npm test` if you want, but I can tell you now that they will fail because we have been updating code but not updating the tests to match our changes.
+
 
 ## Conclusion
 
-You have learned how to apply basic theming and styling to the application. You should commit your changes at this point.
+In this lab you learned how to include a third party library in your application, how to configure web component libraries that have been built using Stencil, and how to manage your dependencies. Next we will look at mocking up the user interface.
+
+Be sure to commit your changes.

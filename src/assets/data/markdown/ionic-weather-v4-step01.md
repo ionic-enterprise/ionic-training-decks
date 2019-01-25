@@ -10,13 +10,13 @@ In this lab, you will:
 The first step is to create the application from a starter. To do this you will use the `ionic start` command.
 
 1. In a command prompt, change directory to your working folder
-1. Run the following command: `ionic start ionic-weather tabs --type=angular --no-link --cordova`
+1. Run the following command: `ionic start training-tabs tabs --type=angular --no-link --cordova`
 
 Let's dig into that command some more:
 
 - `ionic` - this is our wrapper around several other CLIs
 - `start` - command to start a new application
-- `ionic-weather` - the application's name
+- `training-tabs` - the application's name
 - `tabs` - the starter to use
 - `--type=angular` - create an Ionic v4 / Angular application
 - `--no-link` - do not ask to link the app to Appflow
@@ -27,8 +27,8 @@ This process will run for a while. It will generate the application from a start
 The output looks like this:
 
 ```bash
-~/Projects/Training: ionic start ionic-weather tabs --type=angular --no-link --cordova
-✔ Preparing directory ./ionic-weather - done!
+~/Projects/Training: ionic start training-tabs tabs --type=angular --no-link --cordova
+✔ Preparing directory ./training-tabs - done!
 ✔ Downloading and extracting tabs starter - done!
 > ionic integrations enable cordova --quiet
 [INFO] Downloading integration cordova
@@ -54,13 +54,13 @@ Installing dependencies may take several minutes.
 
 [INFO] Next Steps:
 
-       - Go to your newly created project: cd ./ionic-weather
+       - Go to your newly created project: cd ./training-tabs
        - Get Ionic DevApp for easy device testing: https://bit.ly/ionic-dev-app
 ```
 
-That command performec several steps. The most impotant are:
+That command performed several steps. The most impotant are:
 
-- Created an `ionic-weather` directory
+- Created an `training-tabs` directory
 - Created a fully functional skeleton application
 - Downloaded all of the application's current dependencies
 - Created a git repository
@@ -70,7 +70,7 @@ That command performec several steps. The most impotant are:
 
 Let's just make sure you can build your application:
 
-1. `cd ionic-weather`
+1. `cd training-tabs`
 1. `ionic serve`
 
 You should now see your application running in your default browser.
@@ -85,6 +85,19 @@ In a nutshell:
 - `ionic serve` finds the first unused port >= 8100 and passes passes that to the Angular CLI with some other options
 
 In either case, the Angular CLI does all the heavy lifting, so use whichever command you want to use. Personally, I use `npm start` because it take less typing and thought on my part.
+
+## Clone the Ionic Weather Starter Template
+
+For this training we will start with a template application that is based on the tabs starter but has all of the pages renamed to match the page structure of the weather application.
+
+```bash
+git clone https://github.com/ionic-enterprise/ionic-weather-starter.git ionic-weather
+cd ionic-weather
+npm i
+ionic serve
+```
+
+*Note:* Keep the `training-tabs` project that you created. We can use that to try things out as we go.
 
 ## Conclusion
 

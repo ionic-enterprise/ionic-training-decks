@@ -1,84 +1,211 @@
-# Completed Code for Lab: User Preferences Phase 1 
+# Completed Code for Lab: User Preferences Phase 2
 
 Please try to write this code on your own before consulting this part of the guide. Your code may look different, just make sure it is functionally the same.
 
-## `cities.ts`
+## `user-preferences.service.ts`
 
 ```TypeScript
-import { City } from '../models/city';
+import { Injectable } from '@angular/core';
+import { Storage } from '@ionic/storage';
 
-export let cities: Array<City> = [
-  { name: 'Current Location' },
-  {
-    name: 'Chicago, IL',
-    coordinate: { latitude: 41.878113, longitude: -87.629799 }
-  },
-  {
-    name: 'Edmonton, AB',
-    coordinate: { latitude: 53.544388, longitude: -113.490929 }
-  },
-  {
-    name: 'London, UK',
-    coordinate: { latitude: 51.507351, longitude: -0.127758 }
-  },
-  {
-    name: 'Madison, WI',
-    coordinate: { latitude: 43.073051, longitude: -89.40123 }
-  },
-  {
-    name: 'Milwaukee, WI',
-    coordinate: { latitude: 43.038902, longitude: -87.906471 }
-  },
-  {
-    name: 'Orlando, FL',
-    coordinate: { latitude: 28.538336, longitude: -81.379234 }
-  },
-  {
-    name: 'Ottawa, ON',
-    coordinate: { latitude: 45.42042, longitude: -75.69243 }
+import { Subject } from 'rxjs';
+
+import { cities } from './cities';
+import { City } from '../../models/city';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class UserPreferencesService {
+  private keys = {
+    useCelcius: 'useCelcius',
+    city: 'city'
+  };
+  private _city: City;
+  private _useCelcius: boolean;
+
+  changed: Subject<void>;
+
+  constructor(private storage: Storage) {
+    this.changed = new Subject();
   }
-];
+
+  async getUseCelcius(): Promise<boolean> {
+    await this.storage.ready();
+    if (this._useCelcius === undefined) {
+      this._useCelcius = await this.storage.get(this.keys.useCelcius);
+    }
+    return this._useCelcius;
+  }
+
+  async setUseCelcius(value: boolean): Promise<void> {
+    await this.storage.ready();
+    this._useCelcius = value;
+    await this.storage.set(this.keys.useCelcius, value);
+    this.changed.next();
+  }
+
+  getAllCities(): Array<City> {
+    return cities;
+  }
+
+  async getCity(): Promise<City> {
+    await this.storage.ready();
+    if (this._city === undefined) {
+      const city = await this.storage.get(this.keys.city);
+      this._city =
+        cities.find(c => c.name === (city && city.name)) || cities[0];
+    }
+    return this._city;
+  }
+
+  async setCity(value: City): Promise<void> {
+    await this.storage.ready();
+    this._city = value;
+    await this.storage.set(this.keys.city, value);
+    this.changed.next();
+  }
+}
 ```
 
-## `user-preferences.component.html`
+## `weather.service.ts`
 
-```html
-<ion-header>
-  <ion-toolbar color="primary">
-    <ion-buttons slot="primary">
-      <ion-button (click)="dismiss()">
-        <ion-icon slot="icon-only" name="close"></ion-icon>
-      </ion-button>
-    </ion-buttons>
-    <ion-title>User Preferences</ion-title>
-  </ion-toolbar>
-</ion-header>
+```TypeScript
+import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { from, Observable } from 'rxjs';
+import { flatMap, map } from 'rxjs/operators';
 
-<ion-content>
-  <ion-list>
-    <ion-item>
-      <ion-label>Use Celcius</ion-label>
-      <ion-toggle [(ngModel)]="useCelcius"></ion-toggle>
-    </ion-item>
+import { Forecast } from '../../models/forecast';
+import { Coordinate } from '../../models/coordinate';
+import { Weather } from '../../models/weather';
+import { UVIndex } from '../..//models/uv-index';
 
-    <ion-item>
-      <ion-label>Location</ion-label>
-      <ion-select [(ngModel)]="city">
-        <ion-select-option *ngFor="let city of cities" [value]="city">{{
-          city.name
-        }}</ion-select-option>
-      </ion-select>
-    </ion-item>
-  </ion-list>
-</ion-content>
+import { LocationService } from '../../services/location/location.service';
+import { UserPreferencesService } from '../../services/user-preferences/user-preferences.service';
 
-<ion-footer>
-  <ion-toolbar>
-    <ion-button expand="block" color="secondary" (click)="save()"
-      >Save</ion-button
-    >
-  </ion-toolbar>
-</ion-footer>
+@Injectable({
+  providedIn: 'root'
+})
+export class WeatherService {
+  private appId = '69f068bb8bf2bc3e061cb2b62c255c65'; // or use your own API key
+  private baseUrl = 'https://api.openweathermap.org/data/2.5';
+
+  constructor(
+    private http: HttpClient,
+    private location: LocationService,
+    private userPreferences: UserPreferencesService
+  ) {}
+
+  current(): Observable<Weather> {
+    return this.getCurrentLocation().pipe(
+      flatMap(coord => this.getCurrentWeather(coord))
+    );
+  }
+
+  forecast(): Observable<Forecast> {
+    return this.getCurrentLocation().pipe(
+      flatMap(coord => this.getForecast(coord))
+    );
+  }
+
+  uvIndex(): Observable<UVIndex> {
+    return this.getCurrentLocation().pipe(
+      flatMap(coord => this.getUVIndex(coord))
+    );
+  }
+
+  private getCurrentLocation(): Observable<Coordinate> {
+    return from(
+      this.userPreferences.getCity().then(city => {
+        if (city && city.coordinate) {
+          return Promise.resolve(city.coordinate);
+        } else {
+          return this.location.current();
+        }
+      })
+    );
+  }
+
+  private getCurrentWeather(coord: Coordinate): Observable<Weather> {
+    return this.http
+      .get(
+        `${this.baseUrl}/weather?lat=${coord.latitude}&lon=${
+          coord.longitude
+        }&appid=${this.appId}`
+      )
+      .pipe(map((res: any) => this.unpackWeather(res)));
+  }
+
+  private getForecast(coord: Coordinate): Observable<Forecast> {
+    return this.http
+      .get(
+        `${this.baseUrl}/forecast?lat=${coord.latitude}&lon=${
+          coord.longitude
+        }&appid=${this.appId}`
+      )
+      .pipe(map((res: any) => this.unpackForecast(res)));
+  }
+
+  private getUVIndex(coord: Coordinate): Observable<UVIndex> {
+    return this.http
+      .get(
+        `${this.baseUrl}/uvi?lat=${coord.latitude}&lon=${
+          coord.longitude
+        }&appid=${this.appId}`
+      )
+      .pipe(map((res: any) => this.unpackUvIndex(res)));
+  }
+
+  private unpackForecast(res: any): Forecast {
+    let currentDay: Array<Weather>;
+    let prevDate: number;
+    const forecast: Forecast = [];
+
+    res.list.forEach(item => {
+      const w = this.unpackWeather(item);
+      if (w.date.getDate() !== prevDate) {
+        prevDate = w.date.getDate();
+        currentDay = [];
+        forecast.push(currentDay);
+      }
+      currentDay.push(w);
+    });
+
+    return forecast;
+  }
+
+  private unpackUvIndex(res: any): UVIndex {
+    return {
+      value: res.value,
+      riskLevel: this.riskLevel(res.value)
+    };
+  }
+
+  private riskLevel(value: number): number {
+    if (value < 3) {
+      return 0;
+    }
+    if (value < 6) {
+      return 1;
+    }
+    if (value < 8) {
+      return 2;
+    }
+    if (value < 11) {
+      return 3;
+    }
+    return 4;
+  }
+
+  private unpackWeather(res: any): Weather {
+    return {
+      temperature: res.main.temp,
+      condition: res.weather[0].id,
+      date: new Date(res.dt * 1000)
+    };
+  }
+}
 ```
 
 ## `user-preferences.component.ts`
@@ -88,7 +215,7 @@ import { Component, OnInit } from '@angular/core';
 import { ModalController } from '@ionic/angular';
 
 import { City } from '../models/city';
-import { cities } from './cities';
+import { UserPreferencesService } from '../services/user-preferences/user-preferences.service';
 
 @Component({
   selector: 'app-user-preferences',
@@ -96,21 +223,97 @@ import { cities } from './cities';
   styleUrls: ['./user-preferences.component.scss']
 })
 export class UserPreferencesComponent implements OnInit {
-  cities: Array<City> = cities;
+  cities: Array<City> = this.userPreferences.getAllCities();
   city: City = this.cities[0];
   useCelcius: boolean;
 
-  constructor(private modal: ModalController) {}
+  constructor(
+    private modal: ModalController,
+    private userPreferences: UserPreferencesService
+  ) {}
 
-  ngOnInit() {}
+  async ngOnInit() {
+    this.city = await this.userPreferences.getCity();
+    this.useCelcius = await this.userPreferences.getUseCelcius();
+  }
 
   dismiss() {
     this.modal.dismiss();
   }
 
-  save() {
-    console.log('save', this.city, this.useCelcius);
+  async save() {
+    await Promise.all([
+      this.userPreferences.setUseCelcius(this.useCelcius),
+      this.userPreferences.setCity(this.city)
+    ]);
     this.modal.dismiss();
+  }
+}
+```
+
+## `current-weather.page.ts`
+
+```TypeScript
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { LoadingController, ModalController } from '@ionic/angular';
+import { Subscription } from 'rxjs';
+
+import { IconMapService } from '../services/icon-map/icon-map.service';
+import { UserPreferencesComponent } from '../user-preferences/user-preferences.component';
+import { UserPreferencesService } from '../services/user-preferences/user-preferences.service';
+import { Weather } from '../models/weather';
+import { WeatherService } from '../services/weather/weather.service';
+
+@Component({
+  selector: 'app-current-weather',
+  templateUrl: 'current-weather.page.html',
+  styleUrls: ['current-weather.page.scss']
+})
+export class CurrentWeatherPage implements OnDestroy, OnInit {
+  private prefChange: Subscription;
+
+  cityName: string;
+  currentWeather: Weather;
+  scale: string;
+
+  constructor(
+    public iconMap: IconMapService,
+    private loading: LoadingController,
+    private modal: ModalController,
+    private userPreferences: UserPreferencesService,
+    private weather: WeatherService
+  ) {}
+
+  ngOnInit() {
+    this.prefChange = this.userPreferences.changed.subscribe(() =>
+      this.getData()
+    );
+  }
+
+  ionViewDidEnter() {
+    this.getData();
+  }
+
+  ngOnDestroy() {
+    this.prefChange.unsubscribe();
+  }
+
+  async openUserPreferences(): Promise<void> {
+    const m = await this.modal.create({ component: UserPreferencesComponent });
+    await m.present();
+  }
+
+  private async getData() {
+    const l = await this.loading.create({
+      message: 'Loading...'
+    });
+    l.present();
+    this.cityName = (await this.userPreferences.getCity()).name;
+    this.scale = (await this.userPreferences.getUseCelcius()) ? 'C' : 'F';
+    this.weather.current().subscribe(w => {
+      this.currentWeather = w;
+      l.dismiss();
+    });
   }
 }
 ```

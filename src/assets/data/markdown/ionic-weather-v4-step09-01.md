@@ -1,168 +1,116 @@
-# Completed Code for Lab: Using Plugins 
+# Completed Code for Lab: User Preferences Phase 1 
 
 Please try to write this code on your own before consulting this part of the guide. Your code may look different, just make sure it is functionally the same.
 
-## `location.service.ts`
+## `cities.ts`
 
 ```TypeScript
-import { Injectable } from '@angular/core';
-import { Geolocation } from '@ionic-native/geolocation/ngx';
-import { Platform } from '@ionic/angular';
+import { City } from '../models/city';
 
-import { Coordinate } from '../../models/coordinate';
-
-@Injectable({
-  providedIn: 'root'
-})
-export class LocationService {
-  private defaultLocation = {
-    coords: {
-      latitude: 43.073051,
-      longitude: -89.40123
-    }
-  };
-
-  private cachedLocation;
-
-  constructor(private geolocation: Geolocation, private platform: Platform) {}
-
-  async current(): Promise<Coordinate> {
-    const loc =
-      this.cachedLocation ||
-      (this.platform.is('cordova')
-        ? await this.geolocation.getCurrentPosition()
-        : this.defaultLocation);
-    this.cachedLocation = loc;
-    return {
-      longitude: loc.coords.longitude,
-      latitude: loc.coords.latitude
-    };
+export let cities: Array<City> = [
+  { name: 'Current Location' },
+  {
+    name: 'Chicago, IL',
+    coordinate: { latitude: 41.878113, longitude: -87.629799 }
+  },
+  {
+    name: 'Edmonton, AB',
+    coordinate: { latitude: 53.544388, longitude: -113.490929 }
+  },
+  {
+    name: 'London, UK',
+    coordinate: { latitude: 51.507351, longitude: -0.127758 }
+  },
+  {
+    name: 'Madison, WI',
+    coordinate: { latitude: 43.073051, longitude: -89.40123 }
+  },
+  {
+    name: 'Milwaukee, WI',
+    coordinate: { latitude: 43.038902, longitude: -87.906471 }
+  },
+  {
+    name: 'Orlando, FL',
+    coordinate: { latitude: 28.538336, longitude: -81.379234 }
+  },
+  {
+    name: 'Ottawa, ON',
+    coordinate: { latitude: 45.42042, longitude: -75.69243 }
   }
-}
+];
 ```
 
-## `weather.service.ts`
+## `user-preferences.component.html`
+
+```html
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="primary">
+      <ion-button (click)="dismiss()">
+        <ion-icon slot="icon-only" name="close"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>User Preferences</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-list>
+    <ion-item>
+      <ion-label>Use Celcius</ion-label>
+      <ion-toggle [(ngModel)]="useCelcius"></ion-toggle>
+    </ion-item>
+
+    <ion-item>
+      <ion-label>Location</ion-label>
+      <ion-select [(ngModel)]="city">
+        <ion-select-option *ngFor="let city of cities" [value]="city">{{
+          city.name
+        }}</ion-select-option>
+      </ion-select>
+    </ion-item>
+  </ion-list>
+</ion-content>
+
+<ion-footer>
+  <ion-toolbar>
+    <ion-button expand="block" color="secondary" (click)="save()"
+      >Save</ion-button
+    >
+  </ion-toolbar>
+</ion-footer>
+```
+
+## `user-preferences.component.ts`
 
 ```TypeScript
-import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { from, Observable } from 'rxjs';
-import { flatMap, map } from 'rxjs/operators';
+import { Component, OnInit } from '@angular/core';
+import { ModalController } from '@ionic/angular';
 
-import { Forecast } from '../../models/forecast';
-import { Coordinate } from '../../models/coordinate';
-import { Weather } from '../../models/weather';
-import { UVIndex } from '../..//models/uv-index';
-import { LocationService } from '../../services/location/location.service';
+import { City } from '../models/city';
+import { cities } from './cities';
 
-@Injectable({
-  providedIn: 'root'
+@Component({
+  selector: 'app-user-preferences',
+  templateUrl: './user-preferences.component.html',
+  styleUrls: ['./user-preferences.component.scss']
 })
-export class WeatherService {
-  private appId = '69f068bb8bf2bc3e061cb2b62c255c65'; // or use your own API key
-  private baseUrl = 'https://api.openweathermap.org/data/2.5';
+export class UserPreferencesComponent implements OnInit {
+  cities: Array<City> = cities;
+  city: City = this.cities[0];
+  useCelcius: boolean;
 
-  constructor(private http: HttpClient, private location: LocationService) {}
+  constructor(private modal: ModalController) {}
 
-  current(): Observable<Weather> {
-    return this.getCurrentLocation().pipe(
-      flatMap(coord => this.getCurrentWeather(coord))
-    );
+  ngOnInit() {}
+
+  dismiss() {
+    this.modal.dismiss();
   }
 
-  forecast(): Observable<Forecast> {
-    return this.getCurrentLocation().pipe(
-      flatMap(coord => this.getForecast(coord))
-    );
-  }
-
-  uvIndex(): Observable<UVIndex> {
-    return this.getCurrentLocation().pipe(
-      flatMap(coord => this.getUVIndex(coord))
-    );
-  }
-
-  private getCurrentLocation(): Observable<Coordinate> {
-    return from(this.location.current());
-  }
-
-  private getCurrentWeather(coord: Coordinate): Observable<Weather> {
-    return this.http
-      .get(
-        `${this.baseUrl}/weather?lat=${coord.latitude}&lon=${
-          coord.longitude
-        }&appid=${this.appId}`
-      )
-      .pipe(map((res: any) => this.unpackWeather(res)));
-  }
-
-  private getForecast(coord: Coordinate): Observable<Forecast> {
-    return this.http
-      .get(
-        `${this.baseUrl}/forecast?lat=${coord.latitude}&lon=${
-          coord.longitude
-        }&appid=${this.appId}`
-      )
-      .pipe(map((res: any) => this.unpackForecast(res)));
-  }
-
-  private getUVIndex(coord: Coordinate): Observable<UVIndex> {
-    return this.http
-      .get(
-        `${this.baseUrl}/uvi?lat=${coord.latitude}&lon=${
-          coord.longitude
-        }&appid=${this.appId}`
-      )
-      .pipe(map((res: any) => this.unpackUvIndex(res)));
-  }
-
-  private unpackForecast(res: any): Forecast {
-    let currentDay: Array<Weather>;
-    let prevDate: number;
-    const forecast: Forecast = [];
-
-    res.list.forEach(item => {
-      const w = this.unpackWeather(item);
-      if (w.date.getDate() !== prevDate) {
-        prevDate = w.date.getDate();
-        currentDay = [];
-        forecast.push(currentDay);
-      }
-      currentDay.push(w);
-    });
-
-    return forecast;
-  }
-
-  private unpackUvIndex(res: any): UVIndex {
-    return {
-      value: res.value,
-      riskLevel: this.riskLevel(res.value)
-    };
-  }
-
-  private riskLevel(value: number): number {
-    if (value < 3) {
-      return 0;
-    }
-    if (value < 6) {
-      return 1;
-    }
-    if (value < 8) {
-      return 2;
-    }
-    if (value < 11) {
-      return 3;
-    }
-    return 4;
-  }
-
-  private unpackWeather(res: any): Weather {
-    return {
-      temperature: res.main.temp,
-      condition: res.weather[0].id,
-      date: new Date(res.dt * 1000)
-    };
+  save() {
+    console.log('save', this.city, this.useCelcius);
+    this.modal.dismiss();
   }
 }
 ```
