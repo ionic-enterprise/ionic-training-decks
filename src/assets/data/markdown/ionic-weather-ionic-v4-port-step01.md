@@ -4,17 +4,26 @@ In this portion of the port to Ionic v4 we will build a solid foundation upon wh
 
 This part of the process may be a bit tedioius is spots, but remember that this is building the foundation upon which the rest of our port will take place, so it is very important to do this part with care.
 
+## A Short-cut for Class
+
+**Note:** This guide takes you through a generic process for porting a tabs based application, including the renaming of a lot of files, classes, and routes. You will probably have to do that in your own application, so this information is still here. However, in a class setting, just clone the starter repo:
+
+```bash
+git clone https://github.com/ionic-enterprise/ionic-weather-starter.git ionic-weather-v4
+cd ionic-weather-v4
+npm i
+ionic serve
+```
+
+Once that is done, open `tabs.page.html` and have a look at the tabs page HTML in your v3 application. Use that as a guide to change the names of the icons and labels in your v4 application.
+
+If you took the shortcut, skip the rest of the steps on this page. They are only here for reference if you find yourself needing to do this from scratch for another project.
+
 ## Generate a Starting Application
 
 The file system layout and build tooling of an Ionic v4 application matches that of an Angular CLI application and not that of an Ioinc v3 application. Therefore the best way to handle this is to create a whole new application and copy your code over once chunk at a time.
 
 `ionic start ionic-weather-v4 tabs --type=angular --cordova`
-
-1. Answer **Y** (yes) to the Ionic Pro SDK question
-1. You will be asked if you want to link to an existing app or create a new one
-    - Choose to **Link an existing app on Ionic Pro**
-1. You will be asked if you would like to use the GitHub integration or Ionic Pro
-    - Choose **Ionic Pro**
 
 ## Add Libraries
 
@@ -202,16 +211,12 @@ Perform a similar action on the `module.ts` files to rename the pages' modules.
 
 Have a look at the tabs page HTML in your v3 application. Use that as a guide to change the names of the icons and labels in your v4 application.
 
-## Change the Routing and Outlet Names
-
-Notice that the tabs starter for v4 uses Angular's router outlines, and that we have our own derivation of the outlet called `ion-router-outlet`. Both the outlet name and the path end up in the URL, and they do not currently match the names of the tabs. Let's fix this.
+## Change the Routing
 
 * in `tabs.page.html`
-   * change the outlet names
-   * change the hrefs
+   * change the `ion-router-button` tab attribute values
 * in `tabs.router.module.ts`
    * change the `path` specifications
-   * change the `outlet` specifications
    * change the `redirectTo` paths
 
 We now have a nice, solid foundation. Another commit is in order.

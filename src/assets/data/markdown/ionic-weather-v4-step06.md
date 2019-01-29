@@ -11,14 +11,12 @@ In this lab, you will learn how to:
 
 ## Getting Started
 
-* Go to <a href="https://openweathermap.org/" target="_blank">OpenWeatherMap.org</a> and sign up for a free account so you can have an API key (if you do not want to do this, you can use the API key I generated for this class, but I _will_ be removing it after the class is over)
+* Go to <a href="https://openweathermap.org/" target="_blank">OpenWeatherMap.org</a> and sign up for a free account, then generate an API key for yourself
 * Use `ionic g service services/weather/weather` to generate a new service
-
-The API key to use if you do not want to generate your own is currently: `69f068bb8bf2bc3e061cb2b62c255c65`
 
 ## Inject the HTTP Client 
 
-The generated `weather` service is just a shell for an injectable class. We need to provide the details. The primary purose of this service will be to get JSON data from the API via HTTP, so we will need to inject Angular's HTTP client servicd. Dependency injection in Angular is handled via the constructor. Inject the HTTP client, creating a `private` reference to it.
+The generated `weather` service is just a shell for an injectable class. We need to provide the details. The primary purose of this service will be to get JSON data from the API via HTTP, so we will need to inject Angular's HTTP client service. Dependency injection in Angular is handled via the constructor. Inject the HTTP client, creating a `private` reference to it.
 
 ```TypeScript
 import { Injectable } from '@angular/core';
