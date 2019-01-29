@@ -9,6 +9,47 @@ In this lab, you will learn how to:
 * Model the data
 * Mock up the user interface
 
+## Change the Tabs
+
+With the starter application, all of the page names, sources, and paths were modified to make more sense for our application, but the labels and icons were not. Let's fix that now.
+
+Open the `tabs.page.html` file. Currently it looks like this:
+
+```HTML
+<ion-tabs>
+
+  <ion-tab-bar slot="bottom">
+    <ion-tab-button tab="current-weather">
+      <ion-icon name="flash"></ion-icon>
+      <ion-label>Tab One</ion-label>
+    </ion-tab-button>
+
+    <ion-tab-button tab="forecast">
+      <ion-icon name="apps"></ion-icon>
+      <ion-label>Tab Two</ion-label>
+    </ion-tab-button>
+
+    <ion-tab-button tab="uv-index">
+      <ion-icon name="send"></ion-icon>
+      <ion-label>Tab Three</ion-label>
+    </ion-tab-button>
+  </ion-tab-bar>
+
+</ion-tabs>
+```
+
+Change it such that the tabs use the following icons and labels:
+
+* **Tab:** current-weather
+   * **Icon:** cloud
+   * **Label:** Current Weather
+* **Tab:** forecast
+   * **Icon:** calendar
+   * **Label:** Forecastj 
+* **Tab:** uv-index
+   * **Icon:** sunny
+   * **Label:** UV Index
+
 ## Create a Required Service
 
 In order to allow each application to define its own weather condition images and where they exist, this library uses a specific map object. Let's just create that as a service so it can easily be injected where needed.
