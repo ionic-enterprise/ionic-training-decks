@@ -22,7 +22,7 @@ The labs that we have done show how to use the same code base to create both a t
 ## Practical Advice
 
 * <a href="https://angular.io/guide/service-worker-intro" target="_blank">PWAs in Angular Apps</a>
-* <a href="https://beta.ionicframework.com/docs/publishing/progressive-web-app" target="_blank">Publishing an Ionic PWA</a>
+* <a href="https://ionicframework.com/docs/publishing/progressive-web-app" target="_blank">Publishing an Ionic PWA</a>
 * <a href="https://blog.angular-university.io/angular-service-worker/" target="_blank">More information on the Angular service worker</a>
 * <a href="https://blog.angular-university.io/angular-push-notifications/" target="_blank">Push notifications with the Angular service worker</a>
 * <a href="https://stenciljs.com/docs/service-workers/" target="_blank">Service Workers in a Stencil App</a>

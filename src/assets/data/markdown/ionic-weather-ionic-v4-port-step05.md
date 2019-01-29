@@ -52,7 +52,7 @@ Here I suggest copying the properties first, then going method by method. A coup
 * `ionViewDidLoad()` becomes `ngOnInit()` which requires the class to implement `OnInit'
 * `ionViewWillUnload()` becomes `ngOnDestroy()` which requires the class to implement `OnDestroy'
 * both of those require additions to the imports that I did not include above
-* check out the <a href="https://beta.ionicframework.com/docs/api/modal" target="_blank">modal docs</a> for some interesting modifications to how they are presented
+* check out the <a href="https://ionicframework.com/docs/api/modal" target="_blank">modal docs</a> for some interesting modifications to how they are presented
 
 **Ionic v3 Version**
 

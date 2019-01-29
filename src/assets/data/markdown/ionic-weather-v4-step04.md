@@ -60,26 +60,14 @@ As of the time of this writing, here are the results:
 ```
 ~/Projects/Training/ionic-weather (master *): npm outdated
 Package                            Current         Wanted  Latest  Location
-@ionic-native/core           5.0.0-beta.21  5.0.0-beta.21  4.18.0  ionic-weather
-@ionic-native/splash-screen  5.0.0-beta.21  5.0.0-beta.21  4.18.0  ionic-weather
-@ionic-native/status-bar     5.0.0-beta.21  5.0.0-beta.21  4.18.0  ionic-weather
-@types/jasmine                      2.8.14         2.8.14   3.3.5  ionic-weather
-jasmine-core                        2.99.1         2.99.1   3.3.0  ionic-weather
-karma-jasmine                        1.1.2          1.1.2   2.0.1  ionic-weather
-karma-jasmine-html-reporter          0.2.2          0.2.2   1.4.0  ionic-weather
-typescript                           3.1.6          3.1.6   3.2.2  ionic-weather
+@ionic/angular-toolkit     1.2.3     1.2.3     1.3.0  ionic-weather
+@types/node             10.12.18  10.12.19  10.12.19  ionic-weather
 ```
 
-Som analysis and thouht it required at this point. Having done this exercise before, here is what I can tell you:
+Some analysis and thouht it required at this point. Having done this exercise before, here is what I can tell you:
 
-* The `@ionic-native` stuff needs to stay on the `5.0.0-beta` until Ionic v4 is released, at which point it too should be released as `5.0.0`
-* The `typescript` language needs to stay at `3.1.6` for now because some Angular tools depend on that version
-* It is safe to take the Jasmine and Karma updates
-
-Let's install those: `npm i @types/jasmine@latest jasmine-core@latest karma-jasmine@latest karma-jasmine-html-reporter@latest`
-
-You can run `npm test` if you want, but I can tell you now that they will fail because we have been updating code but not updating the tests to match our changes.
-
+* The `@types/node` upgrade can be taken safely via `npm upgrade`
+* The `@ionic/angular-toolkit` can be taken safely via `npm i @ionic/angular-toolkit@latest`
 
 ## Conclusion
 

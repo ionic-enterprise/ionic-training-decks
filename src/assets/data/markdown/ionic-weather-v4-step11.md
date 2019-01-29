@@ -19,7 +19,7 @@ If the application is running in a web hosted scenario, `navigator.onLine` will 
 ### Install and Configure the Plugin
 
 1. `ionic cordova plugin add cordova-plugin-network-information`
-1. `npm i @ionic-native/network@beta`
+1. `npm i @ionic-native/network`
 1. Modify `app.module.ts` to provide the service for the plugin
 
 ### Create a Network Service

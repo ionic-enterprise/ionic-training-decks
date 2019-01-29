@@ -11,7 +11,7 @@ We have a <a href="https://github.com/ionic-team/v4-migration-tslint" target="_b
 
 Follow the instructions to install it. When you want to run it: `npx tslint -c ionic-migration.json -p tsconfig.json`
 
-Also remember that the <a href="https://beta.ionicframework.com/docs/" target="_blank">Ionic v4 Docs</a> are an excellent source of information.
+Also remember that the <a href="https://ionicframework.com/docs/" target="_blank">Ionic v4 Docs</a> are an excellent source of information.
 
 ## Generate the Component
 

@@ -25,11 +25,11 @@ Our v3 application used a few libraries and plugins. Some required configuration
 1. copy the `icon.png` and `splash.png` from the v3 app's `resources` folder to the v4 app's `resources` folder
 1. `npm i @ionic/storage`
 1. `ionic cordova plugin add cordova-plugin-geolocation --variable GEOLOCATION_USAGE_DESCRIPTION="To determine the location for which to get weather data"`
-1. `npm i @ionic-native/geolocation@beta`
+1. `npm i @ionic-native/geolocation`
 1. `npm i kws-weather-widgets`
 1. edit the `package.json` file
-   1. update the `@ionic-native` libraries to the same beta version
-   1. update the `@ionic/angular` library to the latest beta
+   1. update the `@ionic-native` libraries to the same version (if different)
+   1. update the `@ionic/angular` library to the latest (if outdated)
    1. copy the `cordova-plugin-ionic` entries from the v3 project (this is in two places)
 1. `npm i` - this will install/update everythng that was just changed
 1. `ionic cordova platform add ios`

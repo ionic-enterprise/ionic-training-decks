@@ -63,12 +63,12 @@ export class AppModule {}
 
 ### `package.json`
 
-Find the following three lines in the `package.json` file and remove them:
+Find the following three lines in the `package.json` file and remove them (the specified version may be slightly different, that is fine):
 
 ```JSON
-    "@ionic-native/core": "5.0.0-beta.21",
-    "@ionic-native/splash-screen": "5.0.0-beta.21",
-    "@ionic-native/status-bar": "5.0.0-beta.21",
+    "@ionic-native/core": "5.0.0",
+    "@ionic-native/splash-screen": "5.0.0",
+    "@ionic-native/status-bar": "5.0.0",
 ```
 
 Run `npm i` to update the `node_modules` directory.
