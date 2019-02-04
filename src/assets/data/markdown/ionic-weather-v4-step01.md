@@ -93,6 +93,7 @@ For this training we will start with a template application that is based on the
 ```bash
 git clone https://github.com/ionic-enterprise/ionic-weather-starter.git ionic-weather
 cd ionic-weather
+git remote rm origin
 npm i
 ionic serve
 ```
