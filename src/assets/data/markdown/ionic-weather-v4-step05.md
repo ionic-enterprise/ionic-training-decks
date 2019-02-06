@@ -297,7 +297,7 @@ import { UVIndex } from '../models/uv-index';
   templateUrl: 'uv-index.page.html',
   styleUrls: ['uv-index.page.scss']
 })
-export class UVIndexPage {
+export class UvIndexPage {
   uvIndex: UVIndex = {
     value: 6.4,
     riskLevel: 3

@@ -52,7 +52,7 @@ export interface Coordinate {
 
 Generate a service that will be used to get the current location. Specify the name as `services/location/location` in the CLI command. Once that service is generated, add a single method that will get the current location.
 
-Let's add a `current()` method to the `LocationProvider`:
+Let's add a `current()` method to the `LocationService`:
 
 ```TypeScript
 import { Injectable } from '@angular/core';
