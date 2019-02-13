@@ -103,12 +103,12 @@ Review the <a href="https://openweathermap.org/current#current_JSON" target="_bl
 
 #### Applying the Transform
 
-Observables in rxjs can be piped through a whole host of operators. One of the most useful is `map` which is used to map one object to another. The basic syntax is: `this.http.get(url).pipe(map(res: any) => someTransform(res));`
+Observables in rxjs can be piped through a whole host of operators. One of the most useful is `map` which is used to map one object to another. The basic syntax is: `this.http.get(url).pipe(map((res: any) => someTransform(res)));`
 
 **Challenge:** apply the transform to your `current()` method:
 
 * change the return type to `Observable<Weather>`
-* append the `pipe` from above to the `get()` call as such: `.pipe.map((res: any) => this.unpackWeather(res));`
+* append the `pipe` from above to the `get()` call as such: `.pipe(map((res: any) => this.unpackWeather(res)));`
 
 **Hint:** You will need to import some stuff from a couple of different ES6 modules at the top of your file. The `map` function is in the `rxjs/operators` module.
 
