@@ -16,7 +16,7 @@ In this lab, you will learn how to:
 
 ## Inject the HTTP Client 
 
-The generated `weather` service is just a shell for an injectable class. We need to provide the details. The primary purose of this service will be to get JSON data from the API via HTTP, so we will need to inject Angular's HTTP client service. Dependency injection in Angular is handled via the constructor. Inject the HTTP client, creating a `private` reference to it.
+The generated `weather` service is just a shell for an injectable class. We need to provide the details. The primary purpose of this service will be to get JSON data from the API via HTTP, so we will need to inject Angular's HTTP client service. Dependency injection in Angular is handled via the constructor. Inject the HTTP client, creating a `private` reference to it.
 
 ```TypeScript
 import { Injectable } from '@angular/core';
@@ -38,7 +38,7 @@ Let's add some basic configuration data. Have a look at the <a href="https://ope
 * Can take several formats for location (we will use latitude/longitude)
 * All take an `appid` parameter with the API key (this is less obvious)
 
-The first version of the app will use a hard coded location. I am using Madison, WI, USA because that is where the Ionic HQ is located, but you should use something closer to your home. You can use a web-site such as <a href="https://www.latlong.net/" target="_blank">LatLong.net</a> to find the coordinates of your city. 
+The first version of the app will use a hard coded location. I am using Madison, WI, USA because that is where the Ionic HQ is located, but you should use something closer to your home. You can use a website such as <a href="https://www.latlong.net/" target="_blank">LatLong.net</a> to find the coordinates of your city. 
 
 Add your key, the base URL, and your coordinates as private data in the service. My private data looks like this:
 
@@ -73,7 +73,7 @@ So a basic method that returns this data looks like this:
 
 Add that method to your `weather` service to get the current weather. **Hint:** You'll need to import `Observable` from `rxjs` at the top of your file.
 
-Add two additional methods: one called `forecast` that gets the forecast data and one called `uvIndex` that gets the UV Index data. **Hint:** Have a look at the <a href="https://openweathermap.org/api" target="_blank">Open Weather Map API Docs</a> for details on the endpoint names. The format of the `forcast` and `uvIndex` methods will be basically the same at this point other than the name of the endpoint.
+Add two additional methods: one called `forecast` that gets the forecast data and one called `uvIndex` that gets the UV Index data. **Hint:** Have a look at the <a href="https://openweathermap.org/api" target="_blank">Open Weather Map API Docs</a> for details on the endpoint names. The format of the `forecast` and `uvIndex` methods will be basically the same at this point other than the name of the endpoint.
 
 ## Transforming the Data
 
@@ -159,7 +159,7 @@ The <a href="https://openweathermap.org/api/uvi" target="_blank">response data</
    * 3 - `value` >= 8 and < 11 
    * 4 - `value` >= 11
 
-**Challenge:** Write a private `unpackUVIndex(res: any): UVIndex` method that unpacks the HTTP result as specified. You will need to write up some code to calculate the `riskLevel` as part of the method. When that is finished, apply the `map` transform as you did with the `forecast()` method.
+**Challenge:** Write a private `unpackUvIndex(res: any): UVIndex` method that unpacks the HTTP result as specified. You will need to write up some code to calculate the `riskLevel` as part of the method. When that is finished, apply the `map` transform as you did with the `forecast()` method.
 
 ## Conclusion 
 
