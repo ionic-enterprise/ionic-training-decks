@@ -78,8 +78,8 @@ To do this, expand the service as such:
 
 1. Import the `Platform` service from `@ionic/angular` and inject it.
 1. Import the `Geolocation` service from `@ionic-native/geolocation/ngx` and inject it.
-1. Use the `Platform` service `is()` method to determine if the application is running in a "Cordova" constext.
-   1. If the application is running in a "cordova" context, return resolve the current position from the Geolocation plugin.
+1. Use the `Platform` service `is()` method to determine if the application is running in a "Cordova" context.
+   1. If the application is running in a "Cordova" context, return resolve the current position from the Geolocation plugin.
    1. Otherwise, return a default location (`weather.service.ts` is currently using default latitude and longitude values, those would make a good default here as well)
 
 *Note:* The Geolocation plugin's `getCurrentPosition()` method returns a structure where the coordinates are defined in a `coords` property. To make the coding easier, the default position should be defined using a similar structure. This makes the code that unpacks the results identical no matter which value is used.
