@@ -11,7 +11,18 @@ In this lab you will learn how to:
 
 ## Create the Modal
 
-In order to launch a modal, a component needs to be specified. Create the component via `ionic g component user-preferences` and examine the generated code.
+When a modal is created, a component is specified to use within the modal window. This component should be in its own module in order to allow it to be lazy loaded. In order to do this easily, use the `--createModule` flag when generating the component.
+
+```bash
+$ ionic g component user-preferences --createModule
+```
+
+Examine the generated code.
+
+Notice that the generated NgModule imports Angular's `FormsModule`. Without that import, you would not be able to use `ngModel` as such `<ion-toggle [(ngModel)]="useCelcius"></ion-toggle>`, which we will do later.
+## Import the Module
+
+In order to use the `UserPreferencesComponent` that was just created, the `UserPreferencesComponentModule` needs to be imported where it is used. Import `UserPreferencesComponentModule` in the NgModule files for each of the three main pages of the application, as they will all use the `UserPreferencesComponent`.
 
 ## Hook Up the Modal
 
@@ -40,7 +51,7 @@ This requires injecting a `ModalController` as `modal` in the constructor. Do th
 
 Once you do this, test out the application. Upon pressing the gear your application should crash. Something isn't right here. Angular doesn't know how to find the component you just created. Have a look at the error message and see if you can figure out what to do.
 
-**Hint:** a change is needed in `app.module.ts`
+**Hint:** a change is needed in `user-preferences.module.ts`
 
 ## Add a Header and Footer
 
@@ -186,28 +197,6 @@ In the view, markup is required for the user controls. The two-way binding via `
     </ion-item>
   </ion-list>
 </ion-content>
-```
-
-If you try to run the application at this point, you should get errors about not being able to bind to `ngModel`. To fix this, modify `app.module.ts` to import `FormsModule`.
-
-```TypeScript
-import { NgModule } from '@angular/core';
-import { FormsModule } from '@angular/forms';
-
-...
-
-@NgModule({
-  ...
-  imports: [
-    BrowserModule,
-    FormsModule,
-    HttpClientModule,
-    IonicModule.forRoot(),
-    AppRoutingModule
-  ],
-  ...
-})
-export class AppModule {}
 ```
 
 Modify the `save()` method to log the `city` and `useCelcius` data to the console and then close the modal.
