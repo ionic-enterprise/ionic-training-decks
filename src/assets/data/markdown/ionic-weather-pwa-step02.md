@@ -67,7 +67,7 @@ A PWA is built upon three key pieces of technology:
 
 The HTTPS bit is handled by Firebase Hosting. Now we will handle the last two as well as adding some polish.
 
-First, let's install Angular's PWA library by running `ng add @angular/pwa`. This command did several things:
+First, let's install Angular's PWA library by running `npx ng add @angular/pwa`. This command did several things:
 
 1. Installed a pre-built configurable service worker
 1. Installed a pre-defined Web App Manifest file
@@ -77,13 +77,13 @@ First, let's install Angular's PWA library by running `ng add @angular/pwa`. Thi
 Out of the box, this provides almost everything we need for our app to be served as a PWA. We need to adjust a few things, however.
 
 * All of the icons are the Angular logo
-* The application name is incorrect in the `src/manifest.json` file
+* The application name is incorrect in the `src/manifest.webmanifest` file
 
 Now is a good time to add the new files to our git repo and commit the other changes.
 
 ### Install Our Icons
 
-<a download href="/assets/images/icons.zip">Download our icons</a> and unpack the zip file under `src/assets`, replacing the files in the  `images` folder.
+<a download href="/assets/images/icons.zip">Download our icons</a> and unpack the zip file under `src/assets`, replacing the files in the  `icons` folder.
 
 **Note:** the specifics on doing this depends on the type of machine you are using. On a Mac:
 
@@ -92,9 +92,9 @@ Now is a good time to add the new files to our git repo and commit the other cha
 1. Double click the `icons.zip` file in `src/assets` which creates a new `icons` folder
 1. Remove the `icons.zip` file
 
-### Update the `src/manifest.json` File
+### Update the `src/manifest.webmanifest` File
 
-The default `src/manifest.json` file is complete, but it needs a couple of customizations for this application:
+The default `src/manifest.webmanifest` file is complete, but it needs a couple of customizations for this application:
 
 * The `name` and `short_name` need to be updated
 * The `background_color` needs to be updated to match the background of the icon
@@ -102,11 +102,11 @@ The default `src/manifest.json` file is complete, but it needs a couple of custo
 Here are the changes:
 
 ```diff
-~/Projects/Training/ionic-weather (master *): git diff src/manifest.json
-diff --git a/src/manifest.json b/src/manifest.json
+~/Projects/Training/ionic-weather (master *): git diff src/manifest.webmanifest
+diff --git a/src/manifest.webmanifest b/src/manifest.webmanifest
 index 97f0552..6bf1d68 100644
---- a/src/manifest.json
-+++ b/src/manifest.json
+--- a/src/manifest.webmanifest
++++ b/src/manifest.webmanifest
 @@ -1,8 +1,8 @@
  {
 -  "name": "app",
@@ -120,23 +120,41 @@ index 97f0552..6bf1d68 100644
 
 ## Configure the Service Worker
 
-The service worker does exactly what we need it to do out of the box, which is to say it caches the application locally, downloads changes to the application as they are deployed, and applied them the next time the application is launched so the user does not experience change while using the app.
-
-What it does not do is cache SVG files, and our app makes use of those for all of the button icons. Let's fix that.
-
-Edit the `ngsw-config.json` file and add `*.svg` to the list of files that are pre-fetched and cached:
+The current version of the service worker does not need to be configured. It currently does exactly what we need right out of the box. Here is the default configuration:
 
 ```JSON
+{
+  "index": "/index.html",
+  "assetGroups": [
+    {
+      "name": "app",
+      "installMode": "prefetch",
       "resources": {
         "files": [
           "/favicon.ico",
           "/index.html",
           "/*.css",
-          "/*.js",
-          "/*.svg"
+          "/*.js"
         ]
       }
+    }, {
+      "name": "assets",
+      "installMode": "lazy",
+      "updateMode": "prefetch",
+      "resources": {
+        "files": [
+          "/assets/**",
+          "/*.(eot|svg|cur|jpg|png|webp|gif|otf|ttf|woff|woff2|ani)"
+        ]
+      }
+    }
+  ]
+}
 ```
+
+The `app` asset group pre-fetches all of the application files. The result is that after the first access of the application, the application is launched from the user's device without having to download any code from the Internet.
+
+The `assets` asset group lazily fetches application assets that tend to be larger, such as icons, images, and other assets. This prevents a large initial download and wasted space in the cache. The theory behind using an update mode of `prefetch` is that assets that already exist in the cache are likely to be needed again, so pre-fetching changes to those assets makes sense. Assets that have not been fetched yet are not as likely to be needed any time soon and are thus still lazy loaded when needed.
 
 ## Handle iOS Quirks (Sort Of...)
 
@@ -152,7 +170,7 @@ If you build and deploy the application at this time:
 Enter <a href="https://developers.google.com/web/updates/2018/07/pwacompat" target="_blank">PWACompat</a>. Follow the instuctions on that page to add this to your application. It involves addimg a `script` tag after the Web App Manifest is loaded. At this time, the markup looks like this:
 
 ```HTML
-    <link rel="manifest" href="manifest.json" />
+    <link rel="manifest" href="manifest.webmanifest" />
     <script
       async
       src="https://cdn.jsdelivr.net/npm/pwacompat@2.0.6/pwacompat.min.js"
