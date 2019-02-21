@@ -45,7 +45,7 @@ Change it such that the tabs use the following icons and labels:
    * **Label:** Current Weather
 * **Tab:** forecast
    * **Icon:** calendar
-   * **Label:** Forecastj 
+   * **Label:** Forecast 
 * **Tab:** uv-index
    * **Icon:** sunny
    * **Label:** UV Index

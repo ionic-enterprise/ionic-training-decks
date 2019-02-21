@@ -50,13 +50,10 @@ export interface Coordinate {
 
 #### Create the Location Service
 
-Generate a service that will be used to get the current location. Specify the name as `services/location/location` in the CLI command. Once that service is generated, add a single method that will get the current location.
-
-Let's add a `current()` method to the `LocationService`:
+Generate a service that will be used to get the current location. Specify the name as `services/location/location` in the CLI command. Once that service is generated, add the stub for a single method that will get the current location.
 
 ```TypeScript
 import { Injectable } from '@angular/core';
-import { Geolocation } from '@ionic-native/geolocation/ngx';
 
 import { Coordinate } from '../../models/coordinate';
 
@@ -64,28 +61,30 @@ import { Coordinate } from '../../models/coordinate';
   providedIn: 'root'
 })
 export class LocationService {
-  constructor(private geolocation: Geolocation) { }
+  constructor() {}
 
   current(): Promise<Coordinate> {
-    return this.geolocation.getCurrentPosition().then(loc => ({
-      latitude: loc.coords.latitude,
-      longitude: loc.coords.longitude
-    }));
+    return null;
   }
 }
 ```
 
-Ignoring the complete lack of error handling here, there is another issue. The `geolocation` plugin is only available if we are running on a device. This leaves us some options:
+Let's consider what this method should do. This application will run in two contexts. It will run in a Cordova context when the application is installed on a device, and it will run in a web context when the developers are running the application in Chrome on their development machines. Here is what the method should do:
 
-1. Let the app be broken on the web OR
-1. Use a hard coded location when on the web OR
-1. Use the web API call when on the web
+1. When running in a "Cordova" context, use the Geolocation plugin to return the current location.
+1. When running in a "web" context, use the hard-coded default location.
 
-Our goal at this time is to be able to continue to use `ionic serve` during the development of our application. Option #1 would not allow that. Options #2 and #3 do allow that, with option #2 being far more simple, so let's go with that option.
+To do this, expand the service as such:
 
-- Inject the Platform service
-- Use the `Platform` service `is()` method to determine if the application is running in a "cordova" environment
-- Return a default location if it is not (`weather.service.ts` is currently using default latitude and longitude values, those would make a good default here as well)
+1. Import the `Platform` service from `@ionic/angular` and inject it.
+1. Import the `Geolocation` service from `@ionic-native/geolocation/ngx` and inject it.
+1. Use the `Platform` service `is()` method to determine if the application is running in a "Cordova" context.
+   1. If the application is running in a "Cordova" context, return resolve the current position from the Geolocation plugin.
+   1. Otherwise, return a default location (`weather.service.ts` is currently using default latitude and longitude values, those would make a good default here as well)
+
+*Note:* The Geolocation plugin's `getCurrentPosition()` method returns a structure where the coordinates are defined in a `coords` property. To make the coding easier, the default position should be defined using a similar structure. This makes the code that unpacks the results identical no matter which value is used.
+
+When complete, the bulk of the code should look something like this:
 
 ```TypeScript
   private defaultPosition = {
