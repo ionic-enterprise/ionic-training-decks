@@ -10,6 +10,8 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
+import { environment } from '../../../environments/environment';
+
 import { Forecast } from '../../models/forecast';
 import { Weather } from '../../models/weather';
 import { UVIndex } from '../..//models/uv-index';
@@ -18,9 +20,6 @@ import { UVIndex } from '../..//models/uv-index';
   providedIn: 'root'
 })
 export class WeatherService {
-  private appId = '69f068bb8bf2bc3e061cb2b62c255c65'; // use your own API key
-  private baseUrl = 'https://api.openweathermap.org/data/2.5';
-
   private latitude = 43.073051;
   private longitude = -89.40123;
 
@@ -29,9 +28,9 @@ export class WeatherService {
   current(): Observable<any> {
     return this.http
       .get(
-        `${this.baseUrl}/weather?lat=${this.latitude}&lon=${
+        `${environment.baseUrl}/weather?lat=${this.latitude}&lon=${
           this.longitude
-        }&appid=${this.appId}`
+        }&appid=${environment.appId}`
       )
       .pipe(map((res: any) => this.unpackWeather(res)));
   }
@@ -39,9 +38,9 @@ export class WeatherService {
   forecast(): Observable<any> {
     return this.http
       .get(
-        `${this.baseUrl}/forecast?lat=${this.latitude}&lon=${
+        `${environment.baseUrl}/forecast?lat=${this.latitude}&lon=${
           this.longitude
-        }&appid=${this.appId}`
+        }&appid=${environment.appId}`
       )
       .pipe(map((res: any) => this.unpackForecast(res)));
   }
@@ -49,8 +48,8 @@ export class WeatherService {
   uvIndex(): Observable<any> {
     return this.http
       .get(
-        `${this.baseUrl}/uvi?lat=${this.latitude}&lon=${this.longitude}&appid=${
-          this.appId
+        `${environment.baseUrl}/uvi?lat=${this.latitude}&lon=${this.longitude}&appid=${
+          environment.appId
         }`
       )
       .pipe(map((res: any) => this.unpackUvIndex(res)));

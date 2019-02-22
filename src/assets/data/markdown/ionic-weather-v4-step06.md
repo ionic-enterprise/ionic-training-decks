@@ -38,14 +38,24 @@ Let's add some basic configuration data. Have a look at the <a href="https://ope
 * Can take several formats for location (we will use latitude/longitude)
 * All take an `appid` parameter with the API key (this is less obvious)
 
-The first version of the app will use a hard coded location. I am using Madison, WI, USA because that is where the Ionic HQ is located, but you should use something closer to your home. You can use a website such as <a href="https://www.latlong.net/" target="_blank">LatLong.net</a> to find the coordinates of your city. 
+#### Environments
 
-Add your key, the base URL, and your coordinates as private data in the service. My private data looks like this:
+For this application, all API traffic is going to go through `https://api.openweathermap.org/data/2.5`. It is common for applications to use different APIs for development and production, so let's set up this application for that contingency from the start.
+
+Define the following values in `src/environments/environment.ts` and `src/environments/environment.prod.ts`:
+
+* baseUrl: 'https://api.openweathermap.org/data/2.5'
+* appId: 'Whatever your APP ID is...'
+
+*Note:* is a real app, you might want to protect your app ID more, at least if that app's code is stored in a publically available repo. Securing that data is beyond the scope of this course.
+
+#### Location Data
+
+The first version of the app will use a hardcoded location. I am using Madison, WI, USA because that is where the Ionic HQ is located, but you should use something closer to your home. You can use a website such as <a href="https://www.latlong.net/" target="_blank">LatLong.net</a> to find the coordinates of your city. 
+
+Add the coordinates you would like to use as private data in the service. My private data looks like this:
 
 ```TypeScript
-  private appId = '69f068bb8bf2bc3e061cb2b62c255c65';  // or use your own API key
-  private baseUrl = 'https://api.openweathermap.org/data/2.5';
-
   private latitude = 43.073051;
   private longitude = -89.401230;
 ```
@@ -57,7 +67,7 @@ Angular's <a href="https://angular.io/api/common/http/HttpClient" target="_blank
 The basic format for such a call is: `get(url: string): Observable<any>`. In our case, the url can be built as such: 
 
 ```TypeScript
-${this.baseUrl}/foo?lat=${this.latitude}&lon=${this.longitude}&appid=${this.appId}
+${environment.baseUrl}/foo?lat=${this.latitude}&lon=${this.longitude}&appid=${environment.appId}
 ```
 
 So a basic method that returns this data looks like this:
@@ -65,15 +75,17 @@ So a basic method that returns this data looks like this:
 ```TypeScript
   current(): Observable<any> {
     return this.http.get(
-      `${this.baseUrl}/weather?lat=${this.latitude}&lon=${
+      `${environment.baseUrl}/weather?lat=${this.latitude}&lon=${
         this.longitude
-      }&appid=${this.appId}`);
+      }&appid=${environment.appId}`);
   }
 ```
 
 Add that method to your `weather` service to get the current weather. **Hint:** You'll need to import `Observable` from `rxjs` at the top of your file.
 
 Add two additional methods: one called `forecast` that gets the forecast data and one called `uvIndex` that gets the UV Index data. **Hint:** Have a look at the <a href="https://openweathermap.org/api" target="_blank">Open Weather Map API Docs</a> for details on the endpoint names. The format of the `forecast` and `uvIndex` methods will be basically the same at this point other than the name of the endpoint.
+
+*Note:* be sure to `import { environment } from '../../../environments/environment';` at the top of your file
 
 ## Transforming the Data
 
