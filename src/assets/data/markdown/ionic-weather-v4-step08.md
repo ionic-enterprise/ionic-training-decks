@@ -20,7 +20,7 @@ Right now, the application gives us the weather for a specific location. It woul
 
 The <a href="https://ionicframework.com/docs/native/geolocation/" target="_blank">Ionic Native wrapper page</a> is a good place to start any time you are installing a new plugin. Let's add this to our project.
 
-- `ionic cordova plugin add cordova-plugin-geolocation --variable GEOLOCATION_USAGE_DESCRIPTION="To determine the location for which to get weather data"`
+- `ionic cordova plugin add cordova-plugin-geolocation`
 - `npm i @ionic-native/geolocation`
 - Add the plugin to the list of providers in the `AppModule`. Use either `StatusBar` or `SplashScreen` as your guide.
 - Add the following configuration item to the `config.xml` file
