@@ -1,350 +1,117 @@
-# Lab: Mock Up the Interface
-
-It is often desirable to lay out the user interface without worrying about how to get the data that will be displayed. This allows us to concentrate solely on how the application will look at feel, and to get that worked out early in the process.
+# Lab: Use a Library
 
 In this lab, you will learn how to:
 
-* Create a simple service
-* Install assets that can be used by your application
-* Model the data
-* Mock up the user interface
+* Install third party libraries
+* Integrate the third party libraries into your application
+* Maintain the application's dependencies
 
-## Change the Tabs
+## Install the Library
 
-With the starter application, all of the page names, sources, and paths were modified to make more sense for our application, but the labels and icons were not. Let's fix that now.
+It is often useful to use third party libraries. For this application, we will use a library of <a href="https://github.com/kensodemann/kws-weather-widgets" target="_blank">weather related components</a> that I created and published on NPM. Many useful JavaScript libraries are availble via NPM and are available for use in your application.
 
-Open the `tabs.page.html` file. Currently it looks like this:
+To install my weather component library, run: `npm install kws-weather-widgets`
 
-```HTML
-<ion-tabs>
+The library is installed in `node_modules` and your `package.json` file is updated to reflect the new dependency:
 
-  <ion-tab-bar slot="bottom">
-    <ion-tab-button tab="current-weather">
-      <ion-icon name="flash"></ion-icon>
-      <ion-label>Tab One</ion-label>
-    </ion-tab-button>
-
-    <ion-tab-button tab="forecast">
-      <ion-icon name="apps"></ion-icon>
-      <ion-label>Tab Two</ion-label>
-    </ion-tab-button>
-
-    <ion-tab-button tab="uv-index">
-      <ion-icon name="send"></ion-icon>
-      <ion-label>Tab Three</ion-label>
-    </ion-tab-button>
-  </ion-tab-bar>
-
-</ion-tabs>
+```JSON
+    "kws-weather-widgets": "1.0.0",
 ```
 
-Change it such that the tabs use the following icons and labels:
+## Use the Library
 
-* **Tab:** current-weather
-   * **Icon:** cloud
-   * **Label:** Current Weather
-* **Tab:** forecast
-   * **Icon:** calendar
-   * **Label:** Forecast 
-* **Tab:** uv-index
-   * **Icon:** sunny
-   * **Label:** UV Index
+Good libraries usually document exactly how to use the library in your application. In the case of this library - which is a web component library built using a technology called <a href="https://stenciljs.com" target="_blank">Stencil</a> - there are a couple of steps that need to be taken to use the library in an Angular project (like yours).
 
-## Create a Required Service
-
-In order to allow each application to define its own weather condition images and where they exist, this library uses a specific map object. Let's just create that as a service so it can easily be injected where needed.
-
-`ionic generate service services/icon-map/icon-map`
-
-If you do a `git status` at this point, you should see a new directory was created for services:
-
-```bash
-~/Projects/Training/ionic-weather (master): git status
-On branch master
-Untracked files:
-  (use "git add <file>..." to include in what will be committed)
-
-	src/app/services/
-
-nothing added to commit but untracked files present (use "git add" to track)
-```
-
-The `src/services/icon-map/icon-map.service.ts` file needs to be modified to look like this:
+First, there is a method in the library called `defineCustomElements()` that needs to be run. This is usually run in the `main.ts` file. This method contains the special sauce that bundlers like WebPack need in order to be aware of the components, with the end result being that WebPack will bundle them properly.
 
 ```TypeScript
-import { Injectable } from '@angular/core';
+import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
+import { defineCustomElements } from 'kws-weather-widgets/dist/loader';
 
-@Injectable({
-  providedIn: 'root'
+import { AppModule } from './app.module';
+
+platformBrowserDynamic().bootstrapModule(AppModule)
+  .catch(err => console.log(err));
+defineCustomElements(window);
+```
+
+Second, since Angular does not know about the custom elements in the library, the `CUSTOM_ELEMENTS_SCHEMA` must be used in each module that uses any components from the library. This tells the Angular compiler to ignore any elements it doesn't understand so long as they conform to the custom elements standard.
+
+For each of the three main pages in our application, we need to make a change similar to the following to each of their `module.ts` files:
+
+```TypeScript
+...
+import { CUSTOM_ELEMENTS_SCHEMA, NgModule } from '@angular/core';
+...
+
+@NgModule({
+  ...
+  schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })
-export class IconMapService {
-  sunny = 'assets/images/sunny.png';
-  cloudy = 'assets/images/cloudy.png';
-  lightRain = 'assets/images/light-rain.png';
-  shower = 'assets/images/shower.png';
-  sunnyThunderStorm = 'assets/images/partial-tstorm.png';
-  thunderStorm = 'assets/images/tstorm.png';
-  fog = 'assets/images/fog.png';
-  snow = 'assets/images/snow.png';
-  unknown = 'assets/images/dunno.png';
-}
+export class CurrentWeatherPageModule {}
 ```
 
-## Install the Images
+## Maintaining Dependencies
 
-The service we just created references several image assets, but these assets to do not exist yet. <a download href="/assets/images/images.zip">Download the images</a> and unpack the zip file under `src/assets`, creating an `images` folder with the images in them.
+NPM is also used to maintain the application's dependencies. If you type `npm outdated` from the root directory of your project you can see which dependencies may need upgrading.
 
-**Note:** the specifics on doing this depends on the type of machine you are using. On a Mac:
 
-1. Drag and drop the `images.zip` from `Downloads` into `src/assets`
-1. Double click the `images.zip` file in `src/assets`, which creates an `images` folder
-1. Remove the `images.zip` file
-1. Find the favicon.png file and move it into `src/assets/icon`
-
-## Mock Up the Component Usage
-
-Let's mock up how the components will be used in each page. This allows us to test out exactly what our data should look like and also allows us to concentrate on the styling without worrying about other moving parts. This is a common technique used when layout out the interface for an application.
-
-### Weather Model
-
-Create a weather model that is based on the common data used by the weather component library. Create a `src/app/models` folder with a `src/app/models/weather.ts` file.
-
-```TypeScript
-export interface Weather {
-  temperature: number;
-  condition: number;
-  date?: Date;
-}
+```
+~/Projects/Training/ionic-weather (master *): npm outdated
+Package                             Current    Wanted    Latest  Location
+@angular-devkit/architect            0.12.3    0.12.4    0.13.4  ionic-weather
+@angular-devkit/build-angular        0.12.3    0.12.4    0.13.4  ionic-weather
+@angular-devkit/core                  7.2.3     7.2.4     7.3.4  ionic-weather
+@angular-devkit/schematics            7.2.3     7.2.4     7.3.4  ionic-weather
+@angular/cli                          7.2.3     7.2.4     7.3.4  ionic-weather
+@angular/common                       7.2.2     7.2.7     7.2.7  ionic-weather
+@angular/compiler                     7.2.2     7.2.7     7.2.7  ionic-weather
+@angular/compiler-cli                 7.2.2     7.2.7     7.2.7  ionic-weather
+@angular/core                         7.2.2     7.2.7     7.2.7  ionic-weather
+@angular/forms                        7.2.2     7.2.7     7.2.7  ionic-weather
+@angular/http                         7.2.2     7.2.7     7.2.7  ionic-weather
+@angular/language-service             7.2.2     7.2.7     7.2.7  ionic-weather
+@angular/platform-browser             7.2.2     7.2.7     7.2.7  ionic-weather
+@angular/platform-browser-dynamic     7.2.2     7.2.7     7.2.7  ionic-weather
+@angular/router                       7.2.2     7.2.7     7.2.7  ionic-weather
+@ionic-native/core                    5.0.0     5.2.0     5.2.0  ionic-weather
+@ionic-native/splash-screen           5.0.0     5.2.0     5.2.0  ionic-weather
+@ionic-native/status-bar              5.0.0     5.2.0     5.2.0  ionic-weather
+@ionic/angular                        4.0.0     4.0.2     4.0.2  ionic-weather
+@ionic/angular-toolkit                1.2.3     1.2.3     1.4.0  ionic-weather
+@types/jasmine                        3.3.8     3.3.9     3.3.9  ionic-weather
+@types/node                        10.12.18  10.12.29   11.10.4  ionic-weather
+core-js                               2.6.3     2.6.5     2.6.5  ionic-weather
+karma                                 4.0.0     4.0.1     4.0.1  ionic-weather
+karma-coverage-istanbul-reporter      2.0.4     2.0.5     2.0.5  ionic-weather
+rxjs                                  6.3.3     6.3.3     6.4.0  ionic-weather
+tslint                               5.12.1    5.12.1    5.13.1  ionic-weather
+typescript                            3.2.4     3.2.4  3.3.3333  ionic-weather
 ```
 
-### Current Weather
+The three most important columns here are `Current`, `Wanted`, and `Latest`.
 
-- Inject the `IconMapService`
-- Create a `Weather` object with data
+- `Current` is the version that is currently installed
+- `Wanted` is the version that can be upgraded to accordion to the rules specified in your `package.json`. This is the version that `npm update` will install.
+-  `Latest` is the latest version available
 
-```TypeScript
-import { Component } from '@angular/core';
+For example have a look at the versions specified above for `@angular/cli`. An `npm update` will take the version from `7.2.3` to `7.2.4` but the latet version is `7.3.4`. The `7.3.4` version would need to be installed manually becaue the version is specified as `"@angular/cli": "~7.2.3"` in the `package.json` file. That is, the upgrade rule of `~` will take patch-level (bug-fix) changes but not minor version (new feature) versions.
 
-import { IconMapService } from '../services/icon-map/icon-map.service';
-import { Weather } from '../models/weather';
+Some analysis and thouht is required at this point. It is generally best to do the following with your own apps:
 
-@Component({
-  selector: 'app-current-weather',
-  templateUrl: 'current-weather.page.html',
-  styleUrls: ['current-weather.page.scss']
-})
-export class CurrentWeatherPage {
-  currentWeather: Weather = {
-    temperature: 302,
-    condition: 200
-  };
+1. Create a branch so it is easy to revert if things to wrong
+1. Upgrade according to the rules defined in your `package.json` (that is: `npm update`)
+1. Test
+1. Commit and continue if successful
+1. `npm oudated`
+1. Individually analyze the other changes
+1. Install and test one package (or set of packages) at a time
+1. Commit after each successful install so you always have a fall-back point
 
-  constructor(public iconMap: IconMapService) { }
-}
-```
+Let's walk through this process together in class.
 
-Use the weather components in the view.
+## Conclusion
 
-```html
-<ion-content padding text-center>
-  <div class="information">
-    <div class="city">Madison, WI</div>
-    <kws-temperature
-      class="primary-value"
-      scale="F"
-      temperature="{{currentWeather?.temperature}}"
-    ></kws-temperature>
-  </div>
-  <kws-condition
-    [condition]="currentWeather?.condition"
-    [iconPaths]="iconMap"
-  ></kws-condition>
-</ion-content>
-```
+In this lab you learned how to include a third party library in your application, how to configure web component libraries that have been built using Stencil, and how to manage your dependencies. Next we will look at mocking up the user interface.
 
-While we are in there, we should change the title for this page to be something more fitting. Let's say "Current Weather".
-
-Now let's do some page-specific styling. In general, we want to minimize the use of this, but we have specific cases here where it makes sense:
-
-- `city` is specific to this page
-- We'd like `primary-value` to be smaller on this page (even though it's already defined globally)
-- `kws-condition` is a custom element that uses shadow DOM so a lot of its styling is handled via <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/--*" target="_blank">custom properties (aka: CSS variables)</a>.
-
-```scss
-.city {
-  font-size: 24px;
-  font-weight: bold;
-}
-
-.primary-value {
-  margin-top: 18px;
-}
-
-kws-condition {
-  --kws-condition-image-height: 212px;
-  --kws-condition-label-font-size: 24px;
-}
-```
-
-### Forecast
-
-Each `kws-daily-forecast` element takes an array of `Weather` data for a given day. We want to show the current forecast for several days, so we will need an array of arrays. Create a `src/models/forecast.ts` file:
-
-```TypeScript
-import { Weather } from './weather';
-
-export type Forecast = Array<Array<Weather>>;
-```
-
-At this point, set up some simple sample data (three days worth should be fine), mock up the UI, and style it.
-
-**forecast.page.ts**
-
-```TypeScript
-import { Component } from '@angular/core';
-
-import { Forecast } from '../models/forecast';
-import { IconMapService } from '../services/icon-map/icon-map.service';
-
-@Component({
-  selector: 'app-forecast',
-  templateUrl: 'forecast.page.html',
-  styleUrls: ['forecast.page.scss']
-})
-export class ForecastPage {
-  forecast: Forecast = [
-    [
-      {
-        temperature: 300,
-        condition: 200,
-        date: new Date(2018, 8, 19)
-      }
-    ],
-    [
-      {
-        temperature: 265,
-        condition: 601,
-        date: new Date(2018, 8, 20)
-      }
-    ],
-    [
-      {
-        temperature: 293,
-        condition: 800,
-        date: new Date(2018, 8, 21)
-      }
-    ]
-  ];
-
-  constructor(public iconMap: IconMapService) {}
-}
-```
-
-**forecast.page.html**
-
-```html
-<ion-header>
-  <ion-toolbar color="primary"> <ion-title> Forecast </ion-title> </ion-toolbar>
-</ion-header>
-
-<ion-content padding>
-  <ion-list>
-    <ion-item *ngFor="let f of forecast">
-      <kws-daily-forecast
-        scale="F"
-        [forecasts]="f"
-        [iconPaths]="iconMap"
-      ></kws-daily-forecast>
-    </ion-item>
-  </ion-list>
-</ion-content>
-```
-
-**forecast.scss**
-
-```scss
-kws-daily-forecast {
-  --kws-daily-forecast-display: flex;
-  --kws-daily-forecast-date-font-size: larger;
-  --kws-daily-forecast-description-font-size: large;
-  --kws-daily-forecast-description-font-weight: bold;
-  --kws-daily-forecast-description-padding-left: 24px;
-  --kws-daily-forecast-image-height: 96px;
-}
-```
-
-### UV Index
-
-The UV index page is a little more involved. We will have some text we display here that is defined in the page source.
-
-**src/models/uv-index.ts**
-
-```TypeScript
-export interface UVIndex {
-  value: number;
-  riskLevel: number;
-}
-```
-**uv-index.page.ts**
-
-```TypeScript
-import { Component } from '@angular/core';
-
-import { UVIndex } from '../models/uv-index';
-
-@Component({
-  selector: 'app-uv-index',
-  templateUrl: 'uv-index.page.html',
-  styleUrls: ['uv-index.page.scss']
-})
-export class UvIndexPage {
-  uvIndex: UVIndex = {
-    value: 6.4,
-    riskLevel: 3
-  };
-
-  advice: Array<string> = [
-    'Wear sunglasses on bright days. If you burn easily, cover up and use broad spectrum SPF 30+ sunscreen. ' +
-      'Bright surfaces, such as sand, water and snow, will increase UV exposure.',
-    'Stay in the shade near midday when the sun is strongest. If outdoors, wear sun protective clothing, ' +
-      'a wide-brimmed hat, and UV-blocking sunglasses. Generously apply broad spectrum SPF 30+ sunscreen every 2 hours, ' +
-      'even on cloudy days, and after swimming or sweating. Bright surfaces, such as sand, water and snow, will increase UV exposure.',
-    'Reduce time in the sun between 10 a.m. and 4 p.m. If outdoors, seek shade and wear sun protective clothing, a wide-brimmed hat, ' +
-      'and UV-blocking sunglasses. Generously apply broad spectrum SPF 30+ sunscreen every 2 hours, even on cloudy days, ' +
-      'and after swimming or sweating. Bright surfaces, such sand, water and snow, will increase UV exposure.',
-    'Minimize sun exposure between 10 a.m. and 4 p.m. If outdoors, seek shade and wear sun protective clothing, a wide-brimmed hat, ' +
-      'and UV-blocking sunglasses. Generously apply broad spectrum SPF 30+ sunscreen every 2 hours, even on cloudy days, and after ' +
-      'swimming or sweating. Bright surfaces, such as sand, water and snow, will increase UV exposure.',
-    'Try to avoid sun exposure between 10 a.m. and 4 p.m. If outdoors, seek shade and wear sun protective clothing, a wide-brimmed hat, ' +
-      'and UV-blocking sunglasses. Generously apply broad spectrum SPF 30+ sunscreen every 2 hours, even on cloudy days, ' +
-      'and after swimming or sweating. Bright surfaces, such as sand, water and snow, will increase UV exposure.'
-  ];
-
-  constructor() {}
-}
-```
-
-**uv-index.page.html**
-
-```html
-<ion-header>
-  <ion-toolbar color="primary"> <ion-title>UV Index</ion-title> </ion-toolbar>
-</ion-header>
-
-<ion-content text-center padding>
-  <kws-uv-index class="primary-value" [uvIndex]="uvIndex?.value"></kws-uv-index>
-  <div class="description">{{ advice[(uvIndex?.riskLevel)] }}</div>
-</ion-content>
-```
-
-**uv-index.page.scss**
-
-```scss
-.description {
-  margin-top: 16px;
-}
-```
-
-## Conclusion 
-
-In this lab you created a simple service and model and learned how to mock up the UI to ensure it looks the way you want it to look. Next we will look at how to get real data.
+Be sure to commit your changes.

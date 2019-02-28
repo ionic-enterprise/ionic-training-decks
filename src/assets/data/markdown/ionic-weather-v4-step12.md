@@ -1,121 +1,58 @@
-# Lab: Simple Offline Handling
+# Lab: Create a Base Generic Class
 
-This application relies heavily on being online. If data cannot be obtained, the application is of little use, but the application should still do _something_. Currently, it just freezes up trying to get data.
+In this lab you will learn how to:
 
-There are many ways to handle this scenario, including full "offline first" strategies that store the data using a local database and then sync the data with the server once online. Since that could be a full course of work on its own, for this application will we take a more simple approach. It can always be expanded upon in the future if needed.
+- Refactor repetitive code into a base class
+- Derive other pages from the base class
 
-For this application, we will:
+## Create the Base Class
 
-* Create a service to determine if the device is online or offline
-* Modify the pages to only get data if the device is online
-* Modify the pages to display a warning if the device is offline
+All three of our main pages:
 
-## Determine the Network Status
+1.  Get data on view
+1.  Show the same basic loader while loading the data
+1.  Allow the user preferences to be opened
 
-If the application is running on a device, we will use the <a href="https://ionicframework.com/docs/native/network/" target="_blank">Network Status</a> plugin to determine the status. If the `type` is false or `unknown` or `none`, then the application will assume it is offline. If the `type` is anything else, the application will assume it is online.
+This seems like a natural "is-a" relationship with the only differences being the type. Modeling that is done most naturally via a generic base class.
 
-If the application is running in a web-hosted scenario, `navigator.onLine` will be used to determine the online status.
+_Note:_ this could also be modelled via composition, which may have some advantages as well, especially if any of these methods contain a probability of changing in any given screen in a way that would break the "is-a" relationship. In that case, composition may be a wiser move. For the current case, though, I believe composition is more complex.
 
-### Install and Configure the Plugin
+The base class will be based on the code for one of the other pages. Either "Current Weather" or "Forecast" makes the most sense because they are almost identical. The UV index page, on the other hand, has some extra code that we do not need. Also note that our test currently exist in the individual page classes. Let's leave them there.
 
-1. `ionic cordova plugin add cordova-plugin-network-information`
-1. `npm i @ionic-native/network`
-1. Modify `app.module.ts` to provide the service for the plugin
+1. `ionic g class weather-page-base/weather-page-base --skipTests`
+1. Make the class generic: `export class WeatherPageBase<T> {`
+1. Copy the body of the `CurrentWeatherPage` class to `WeatherPageBase`
+1. Fix the syntax errors:
+   1. Change the data property (`currentWeather: Weather;`)
+      1. The name is too specific, make it more generic, like `data`
+      1. The type is too specific, it should be `T`
+   1. Fix the constructor
+      1. The `IconMapService` is bound in the template and thus not needed here, remove it
+      1. The `LoadingController` and `ModalController` must be imported
+      1. This class will not know which method in `WeatherService` to call, so pass in a method signature instead like this: `private fetch: () => Observable<T>`
+   1. Fix the methods - there are three syntax errors, let's see what you can make of them
 
-### Create a Network Service
+## Use the Base Class
 
-1. `ionic g service services/network/network`
-1. Create a simple getter in the service. The whole service is listed below.
+Try the base class in one page before implementing it in all of the pages. It makes sense to use the "Current Weather" page since that is where the code was copied from.
 
-```TypeScript
-import { Injectable } from '@angular/core';
-import { Platform } from '@ionic/angular';
-import { Network } from '@ionic-native/network/ngx';
+1. `import { WeatherPageBase } from '../weather-page-base/weather-page-base';`
+1. `export class CurrentWeatherPage extends WeatherPageBase<Weather> {`
+1. Remove the `currentWeather` property, the `ionViewDidEnter()` method, and the `openUserPreferences()` method.
+1. Update the test to use the generic property name instead of `currentWeather`.
+1. Update the HTML file to use the generic property name for the data instead of `currentWeather`
+1. `LoadingController`, `ModalController`, and `WeatherService` still need to be injected, but no longer should be declared private
+1. The constructor needs to call `super()`
+   1. Pass down `loadingController` and `modalController`
+   1. For the `fetch` parameter, pass down `weather.current`
+1. Remove any unused imports.
 
-@Injectable({
-  providedIn: 'root'
-})
-export class NetworkService {
-  constructor(private network: Network, private platform: Platform) {}
+Hmmm, that gives an interesting error in the console. Now that we are here, let's stop and discuss what we believe may be wrong and discuss why and how to fix it.
 
-  get onLine(): boolean {
-    return this.platform.is('cordova')
-      ? !!this.network.type &&
-      this.network.type.toLowerCase() !== 'unknown' &&
-      this.network.type.toLowerCase() !== 'none'
-      : navigator.onLine;
-  }
-}
-```
+## Apply the Change to the Other Pages
 
-## Update the Pages
-
-For the purposes of this application, it will be sufficient modify the screens such that if the device is offline they will not fetch the data and they will warn the user that the data (if it exists) may be stale.
-
-### `weather-page-base.ts`
-
-The change to not get the data if the device is offline is done in the base class. Note that the `NetworkService` is declared `public` as it is needed in the HTML.
-
-```TypeScript
-...
-import { NetworkService } from '../services/network/network.service';
-...
-
-export class WeatherPageBase<T> implements OnDestroy, OnInit {
-
-  ...
-
-  constructor(
-    private loading: LoadingController,
-    private modal: ModalController,
-    private userPreferences: UserPreferencesService,
-    private fetch: () => Observable<T>,
-    public network: NetworkService
-  ) {}
-
-  ...
-
-  private async getData() {
-    if (this.network.onLine) {
-      const l = await this.loading.create({
-        message: 'Loading...'
-      });
-      l.present();
-      this.cityName = (await this.userPreferences.getCity()).name;
-      this.scale = (await this.userPreferences.getUseCelcius()) ? 'C' : 'F';
-      this.weather.current().subscribe(w => {
-        this.currentWeather = w;
-        l.dismiss();
-      });
-    }
-  }
-}
-```
-
-### Page Changes
-
-Here is an example of the page changes from the Current Weather page:
-
-#### `current-weather.page.html`
-
-```HTML
-<ion-header>
-  ...
-</ion-header>
-
-<ion-content padding text-center>
-  <div *ngIf="!network.onLine">Warning: network is offline, data may be stale</div>
-  ...
-</ion-content>
-```
-
-#### `current-weather.page.ts`
-
-```TypeScript
-```
-
-Update the other two pages in a similar fashion.
+Now that this is working, make similar changes to the other pages.
 
 ## Conclusion
 
-Test the application in your browser and on your device. Turn off the network and verify that the application continues to work, even though it may not display any data. Verify that the warning message is displayed after navigating while the network is off and is hidden when navigating while the network is on.
+We learned how to refactor the code into a base class. The end result should be that the code is more maintainable and the following steps will require less work than if we didn't notice this pattern and refactor the code.

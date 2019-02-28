@@ -1,192 +1,153 @@
-# Lab: Add Cordova Platforms
+# Lab: Unit Testing
 
-In this lab, you will:
+In this lab, you will learn how to:
 
-* Update the Cordova configuration
-* Update the splash screen and application icon
-* Add the iOS and Android platforms
-* Build and run the application on both platforms
+* Setup headless support for Chrome
+* Run the existing suite of unit tests
+* Create and use mock objects
+* Structure Unit Tests
 
-## Update the Configuration
+## Set Up Headless Chrome Support
 
-When a Cordova project is built, information in the `config.xml` file is used to generate some of the project files. Some of this information should be changed up front:
+Using Chrome in headless mode allows the tests to run in a real browser (Chrome) without taking up valuable screen real estate with an actual browser window. Since there is no drawing being performed, the tests also tend to run faster. Finally, if tests are going to be run on a CI/CD server of some type, headless support is almost certainly required.
 
-* The widget id should be change to something unique like `com.kensodemann.ionicweather`
-* The name and description should be changed
-* The author information should be changed
+Setting up the tests to use headless Chrome is a straight forward process:
 
-Here is an example of those changes:
+1. Optionally add a custom launcher to the `src/karma.conf.js` file
+1. Add some testing scripts that use the custom launcher
 
-**Before:**
+### `src/karma.conf.js` (optional)
 
-```xml
-<widget id="io.ionic.starter" version="0.0.1" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
-    <name>ionic-weather</name>
-    <description>An awesome Ionic/Cordova app.</description>
-    <author email="hi@ionicframework" href="http://ionicframework.com/">Ionic Framework Team</author>
+Some CI/CD servers will run into issues running `ChromeHeadless` as-is. The solution is to run it with the `--no-sandbox` option. Add a custom launcher called `ChromeHeadlessCI` right after the `browsers` array in the `src/karma.conf.js` file. It will look like this:
+
+```JavaScript
+    customLaunchers: {
+      ChromeHeadlessCI: {
+        base: 'ChromeHeadless',
+        flags: ['--no-sandbox']
+      }
+    },
 ```
 
-**After:**
+*Note:* This is only required in certain specific circumstances. See <a href="https://developers.google.com/web/updates/2017/04/headless-chrome" target="_blank">Getting Started with Headless Chrome</a> for details.
 
-```xml
-<widget id="com.kensodemann.ionicweather" version="0.0.1" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
-    <name>My Weather App</name>
-    <description>Shows the weather locally and in key cities</description>
-    <author email="ken@ionic.io" href="http://ionicframework.com/">Ken Sodemann</author>
-```
+### `package.json`
 
-Make similar changes to your application.
+I suggest changing the `test` script configuration in the `package.json` file as such:
 
-## Update the Splash Screen and Application Icon
-
-The application should have its own splash screen and icon rather than using the default that Ionic supplies for you. Ionic provides a service that will take two source image files and create all of the resources that your application will require. Follow these guidelines:
-
-* Keep the images simple and clear
-* You can supply source images in any of these formats: `.png`, `.psd`, `.ai`
-* Icon - at least 1024x1024 pixels
-* Splashscreen - at least 2732x2732 pixels with a simple image that is centered and no bigger than 1200x1200 pixels to facilitate reasonable display on all devices
-
-For this application, please download the following images and copy them to your application's `resources` directory, replacing the onces that are already there:
-
-* <a download href="/assets/images/icon.png">icon.png</a>
-* <a download href="/assets/images/splash.png">splash.png</a>
-
-The appropriate icon and splash screen resources will be generated as the platforms are added. If you ever need to change the icon or splash screen, replace the appropriate source file(s) and run `ionic cordova resources` to generate new resources.
-
-## Add the Android and iOS Platforms
-
-Use `ionic cordova platform add android` to add the Android platform. This will create a `www/` directory if it does not exist, install the Android platform and any required Cordova plugins, and generate the appropriate icon and splash screen resources.
-
-```bash
-~/Projects/Training/ionic-weather (master *): ionic cordova platform add android
-✔ Creating ./www directory for you - done!
-> cordova platform add android --save
-Using cordova-fetch for cordova-android@~7.1.1
-Adding android project...
-Creating Cordova project for the Android platform:
-	Path: platforms/android
-	Package: com.kensodemann.ionicweather
-	Name: My_Weather_App
-	Activity: MainActivity
-	Android target: android-27
-Android project created with cordova-android@7.1.4
-Android Studio project detected
-...
-> ionic cordova resources android --force
-✔ Collecting resource configuration and source images - done!
-✔ Filtering out image resources that do not need regeneration - done!
-✔ Uploading source images to prepare for transformations: 2 / 2 complete - done!
-✔ Generating platform resources: 18 / 18 complete - done!
-✔ Modifying config.xml to add new image resources - done!
-```
-
-Use `ionic cordova platform add ios` to add the iOS platform. This will create a `www/` directory if it does not exist, install the iOS platform and any required Cordova plugins, and generate the appropriate icon and splash screen resources.
-
-```bash
-~/Projects/Training/ionic-weather (master *): ionic cordova platform add ios
-> cordova platform add ios --save
-Using cordova-fetch for cordova-ios@~4.5.4
-Adding ios project...
-Creating Cordova project for the iOS platform:
-	Path: platforms/ios
-	Package: com.kensodemann.ionicweather
-	Name: My Weather App
-iOS project created with cordova-ios@4.5.5
-Installing "cordova-plugin-device" for ios
-Installing "cordova-plugin-ionic-keyboard" for ios
-Installing "cordova-plugin-ionic-webview" for ios
-Installing "cordova-plugin-splashscreen" for ios
-Installing "cordova-plugin-statusbar" for ios
-Installing "cordova-plugin-whitelist" for ios
---save flag or autosave detected
-Saving ios@~4.5.5 into config.xml file ...
-> ionic cordova resources ios --force
-✔ Collecting resource configuration and source images - done!
-✔ Filtering out image resources that do not need regeneration - done!
-✔ Uploading source images to prepare for transformations: 2 / 2 complete - done!
-✔ Generating platform resources: 32 / 32 complete - done!
-✔ Modifying config.xml to add new image resources - done!
-```
-
-## Build for Android
-
-When building for Android, the command line tools work very well:
-
-* `ionic cordova build android` - builds the APK
-* `ionic cordova run android` - build the APK and runs it on an emulator or attached device
-
-Both commands take several options. See `ionic cordova run --help` for details.
-
-**Android Quirks**
-
-* If `ionic cordova run android` fails the first time, it is often due to the emulator taking too long to launch. In that case, leave the emulator open and re-do the `ionic cordova run android` command.
-* The `--target` option is used to specify different targets in the emulator or different devices attached to the build machine. Use `cordova run android --list` to get a list of targets.
-
-## Build for iOS
-
-* `ionic cordova build ios` - builds the IPA
-* `ionic cordova run ios` - builds the IPA and runs it on an emulator or attached device
-
-Both commands take several options. See `ionic cordova run --help` for details.
-
-**iOS Quirks**
-
-* If `ionic cordova run ios` does not work, use `open platforms/ios/Ionic\ Weather.xcworkspace` to open Xcode to build and run the application (NOTE: actual file name may differ depending on the `config.xml` contents at the time the platform was added)
-* When deploying to a device, you need to specify a team, provisioning profile, and signing certificate. It is usually easiest to use Xcode for this.
-* Currently if you are using Xcode 10, you need to specify the old build system as such: `ionic cordova build ios -- -buildFlag='-UseModernBuildSystem=0'`
-* Depending on how your system is set up, the default emulator may be too old to run your app. In that case, be sure to specify a `target`. Use `cordova run ios --list` to get a list of targets.
-
-Here is how you would run the application on the iPhone 7, iOS 12.1 emulator if you have Xcode 10 on your machine: `ionic cordova run ios --target='iPhone-7, 12.1' -- -buildFlag='-UseModernBuildSystem=0'`
-
-**Note:** I find it hard to remember the full command for the iOS build, so I often add a script to the `package.json` file to do it, like this:
+- `test` - use the `ChromeHeadless` browser configuration, re-run the tests as changes are made
+- `test:debug` - use the regular `Chrome` browser configuration, re-run the tests as changes are made
+- `test:ci` - use the `ChromeHeadlessCI` browser configuration, run the tests once and exit
 
 ```JSON
   "scripts": {
+    "build": "ng build",
+    "e2e": "ng e2e",
+    "lint": "ng lint",
     "ng": "ng",
     "start": "ng serve",
-    "build": "ng build",
-    "build:ios": "ionic cordova build ios -- -buildFlag='-UseModernBuildSystem=0'",
-    "test": "ng test",
-    "lint": "ng lint",
-    "e2e": "ng e2e"
+    "test": "ng test --browsers=ChromeHeadless",
+    "test:debug": "ng test",
+    "test:ci": "ng test --no-watch --browsers=ChromeHeadlessCI"
   },
 ```
 
-Then all I have to do is `npm run build:ios` when I want to build for iOS.
+## Run the Tests
 
-## Add Untracked Files and Commit
+With our current configuration, there are three convenient ways to run the tests:
 
-The above processes modified a lot of files, mostly in the `resources/` folder, and added a couple as well. Use `git status` to see them all:
+- `npm test` - runs the tests in a headless environment and waits for changes. This is the default and should be used for most development.
+- `npm run test:debug` - runs the tests in a visible browser and waits for changes. This configuration is most useful for debugging tests and the code being tested.
+- `npm run test:ci` - runs the tests in a headless environment and exits. This is intended for use on your CI/CD server but is also useful for cases where you want to run the tests once.
 
-```bash
-~/Projects/Training/ionic-weather (master *): git status
-On branch master
-Changes not staged for commit:
-  (use "git add <file>..." to update what will be committed)
-  (use "git checkout -- <file>..." to discard changes in working directory)
+Type `npm test` and verify that the tests run.
 
-	modified:   config.xml
-	modified:   package-lock.json
-	modified:   package.json
+## Refactor `app.component.spec.ts`
 
-...
+### Use Mock Objects
 
-Untracked files:
-  (use "git add <file>..." to include in what will be committed)
+- rename `statusBarSpy` to `statusBar`
+- rename `splashScreenSpy` to `splashScreen`
+- remove the existing platform spies
+- import the platform mock factory: `import { createPlatformMock } from '../../test/mocks';`
+- provide the `Platform` via the factory: `{ provide: Platform, useFactory: createPlatformMock }`
 
-	resources/icon.png.md5
-	resources/splash.png.md5
+```TypeScript
+import { createPlatformMock } from '../../test/mocks';
 
-no changes added to commit (use "git add" and/or "git commit -a")
+import { AppComponent } from './app.component';
+
+describe('AppComponent', () => {
+  let statusBar;
+  let splashScreen;
+
+  beforeEach(async(() => {
+    statusBar = jasmine.createSpyObj('StatusBar', ['styleDefault']);
+    splashScreen = jasmine.createSpyObj('SplashScreen', ['hide']);
+
+    TestBed.configureTestingModule({
+      declarations: [AppComponent],
+      schemas: [CUSTOM_ELEMENTS_SCHEMA],
+      providers: [
+        { provide: StatusBar, useValue: statusBar },
+        { provide: SplashScreen, useValue: splashScreen },
+        { provide: Platform, useFactory: createPlatformMock }
+      ]
+    }).compileComponents();
+  }));
 ```
 
-Add the two untracked files and commit:
+- get the provided platform mock: `const platform = TestBed.get(Platform);`
+- use the platform mock just obtained and not the former mock objects
 
-```bash
-~/Projects/Training/ionic-weather (master *): git add resources/
-~/Projects/Training/ionic-weather (master *+): git commit -am "add android and ios platforms"
+```TypeScript
+  it('should initialize the app', async () => {
+    const platform = TestBed.get(Platform);
+    TestBed.createComponent(AppComponent);
+    expect(platform.ready).toHaveBeenCalled();
+    await platform.ready();
+    expect(statusBar.styleDefault).toHaveBeenCalled();
+    expect(splashScreen.hide).toHaveBeenCalled();
+  });
 ```
+
+The end result is that we are now using the standard `Platform` mock that we created to use throughout the application wherever we need to mock the `Platform` service. The next step is to break the test down to a `describe()` for the feature (initialization), and an `it()` case per requirement.
+
+### Break-up the "should initialize the app" Test
+
+Tests should be structured by feature with a seperate `it()` function covering each requirement. Here is an example:
+
+```TypeScript
+describe('my-module', () => {
+  it('builds', () => {});
+
+  describe('feature 1', () => {
+    it('does something for requirement 1', () => {});
+    it('does something else for requirement 1', () => {});
+    it('does something for requirement 2', () => {});
+    it('does something for requirement 3', () => {});
+  });
+  
+  describe('feature 2', () => {
+    ...
+  });
+});
+```
+
+*Note:* it may take more than one `it()` to cover a requirement, but a single it should not itself try to test more than a single requirement.
+
+The current "should initialize the app" test violates that a bit. Let's refactor it into a structure like this:
+
+```TypeScript
+describe('initialization', () => {
+  it('waits for the platform to be ready', () => {});
+  it('sets the default status bar style when ready', () => {});
+  it('hides the splash screen when ready', () => {});
+});
+```
+
+Refactor the current test into these test cases and let's compare notes when you are done.
 
 ## Conclusion
 
-In this lab we learned how to add various platforms and how to build the application for those platforms.
+In this lab we learned the basics of unit testing. We will apply what we learned here and expand upon it as we develop out application.

@@ -1,57 +1,513 @@
-# Lab: Create a Base Generic Class
+# Lab: Using Plugins
+
+Cordova plugins are used when you want to access native functionality from your application.
 
 In this lab you will learn how to:
 
-- Refactor repetitive code into a base class
-- Derive other pages from the base class
+- Install Cordova Plugins
+- Use Ionic Native wrappers
+- Create a non-HTTP service
+- Use Promises and Observables
+- Map a Promise to an Observable
+- Use `flatMap` to "chain" observables
+- Keep complex code clean
 
-## Create the Base Class
+## Use Geolocation
 
-All three of our main pages:
+Right now, the application gives us the weather for a specific location. It would be nice if it could let us know what the weather is for our current location. Checking the <a href="https://ionicframework.com/docs/native/" target="_blank">Ionic Native</a> project page, we see that a plugin and Ionic Native wrapper exists for geolocation.
 
-1.  Get data on view
-1.  Show the same basic loader while loading the data
-1.  Allow the user preferences to be opened
+### Install the Plugin
 
-This seems like a natural "is-a" relationship with the only differences being the type. Modeling that is done most naturally via a generic base class.
+Since we are using both the Cordova Geolocation plugin and the Ionic Native wrapper for it, be sure to consult the <a href="https://ionicframework.com/docs/native/geolocation/" target="_blank">Ionic Native wrapper page</a> for any specific instructions.
 
-_Note:_ this could also be modelled via composition, which may have some advantages as well, especially if any of these methods contain a probability of changing in a way in any given screen in a way that would break the "is-a" relationship. In that case, composition may be a wiser move. For this case, though, I believe composition is actually more complex.
+Here is a synopsis of the instructions:
 
-The base class will be based on the code for one of the other pages. Either "Current Weather" or "Forecast" makes the most sense because they are almost identical. The UV index page, on the other hand, has some extra code that we do not need.
+- `ionic cordova plugin add cordova-plugin-geolocation`
+- `npm i @ionic-native/geolocation`
+- Add the plugin to the list of providers in the `AppModule`. Use either `StatusBar` or `SplashScreen` as your guide.
+- Add the following configuration item to the `config.xml` file as a direct descendant of the `widget` node.
 
-1. `ionic g class weather-page-base/weather-page-base --skipTests`
-1. Make the class generic: `export class WeatherPageBase<T> {`
-1. Copy the body of the `CurrentWeatherPage` class to `WeatherPageBase`
-1. Fix the syntax errors:
-   1. Change the data property (`currentWeather: Weather;`)
-      1. The name is too specific, make it more generic
-      1. The type is too specific, it should be `T`
-   1. Fix the constructor
-      1. The `IconMapService` is bound in the template and thus not needed here, remove it
-      1. The `LoadingController` and `ModalController` must be imported
-      1. This class will not know which method in `WeatherService` to call, so pass in a method signature instead like this: `private fetch: () => Observable<T>`
-   1. Fix the methods - there are three syntax errors, let's see what you can make of them
+```xml
+    <config-file parent="NSLocationWhenInUseUsageDescription" platform="ios" target="*-Info.plist">
+      <string>To determine the location for which to get weather data</string>
+    </config-file>
+```
 
-## Use the Base Class
+The `config.xml` file change is required in order to modify the `info.plist` file that is generated via a Cordova build for iOS. This is something that Apple requires you to specify if you are going to use Geolocation.
 
-Try the base class in one page before implementing it in all of the pages. It makes sense to use the "Current Weather" page since that is where the code was copied from.
+### Use the Cordova Plugin
 
-1. `import { WeatherPageBase } from '../weather-page-base/weather-page-base';`
-1. `export class CurrentWeatherPage extends WeatherPageBase<Weather> {`
-1. Remove the `currentWeather` property, the `ionViewDidEnter()` method, and the `openUserPreferences()` method.
-1. `LoadingController`, `ModalController`, and `WeatherService` still need to be injected, but no longer should be declared private
-1. The constructor needs to call `super()`
-   1. Pass down `loading` and `modal`
-   1. For the `fetch` parameter, pass down `weather.current`
-1. Remove any unused imports.
-1. Update the HTML file to use the generic property name for the data instead of `currentWeather`
+#### Create the Coordinate Model
 
-Hmmm, that gives an interesting error in the console. Now that we are here, let's stop and discuss what we believe may be wrong and discuss why and how to fix it.
+Add another model called `Coordinate`:
 
-## Apply the Change to the Other Pages
+```TypeScript
+export interface Coordinate {
+  latitude: number;
+  longitude: number;
+}
+```
 
-Now that this is working, make similar changes to the other pages.
+**Hint:** Add it in the model folder in its own file.
+
+#### Create the Location Service
+
+1. Using the CLI, generate a service called `location` in the `services/location` directory.
+1. Add the stub for a single method that will get the current location.
+
+```TypeScript
+import { Injectable } from '@angular/core';
+
+import { Coordinate } from '../../models/coordinate';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class LocationService {
+  constructor() {}
+
+  current(): Promise<Coordinate> {
+    return null;
+  }
+}
+```
+
+Let's consider what this method should do. This application will run in two contexts:
+
+1. **Cordova:** In this context, the application is installed on a device. Thus Cordova and the native functionality being bridged by the plugin is available.
+1. **Web:** In this context the application is being run in a web browser. This is the context used when a developer is running the application using the development server. Neither Cordova nor the native functionality are available in this context.
+
+With that in mind, here is what the method should do:
+
+1. When running in a "Cordova" context, use the Geolocation plugin to return the current location.
+1. When running in a "web" context, use the hard-coded default location.
+
+We will build this method one step at a time, testing first and then coding.
+
+##### Step 1: Check the Platform
+
+**`location.service.spec.ts`**
+
+```TypeScript
+...
+import { Platform } from '@ionic/angular';
+
+import { createPlatformMock } from '../../../../test/mocks'
+
+  ...
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      providers: [{ provide: Platform, useFactory: createPlatformMock }]
+    });
+  });
+
+  ...
+
+  describe('current', () => {
+    it('determines if the appliction is hybrid native or not', () => {
+      const platform = TestBed.get(Platform);
+      const service: LocationService = TestBed.get(LocationService);
+      service.current();
+      expect(platform.is).toHaveBeenCalledTimes(1);
+      expect(platform.is).toHaveBeenCalledWith('cordova');
+    });
+  });  
+```
+
+**`location.service.ts`**
+
+```TypeScript
+import { Injectable } from '@angular/core';
+import { Platform } from '@ionic/angular';
+
+import { Coordinate } from '../../models/coordinate';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class LocationService {
+  constructor(private platform: Platform) {}
+
+  current(): Promise<Coordinate> {
+    this.platform.is('cordova');
+    return null;
+  }
+}
+```
+
+##### Step 2: If Hybrid Mobile Call Plugin 
+
+**`location.service.spec.ts`**
+
+````TypeScript
+...
+import { Geolocation } from '@ionic-native/geolocation/ngx';
+
+  ...
+  beforeEach(() =>
+    TestBed.configureTestingModule({
+      providers: [
+        { provide: Platform, useFactory: createPlatformMock },
+        {
+          provide: Geolocation,
+          useFactory: () =>
+            jasmine.createSpyObj('Geolocation', {
+              getCurrentPosition: Promise.resolve({
+                coords: { latitude: 42, longitute: 73 }
+              })
+            })
+        }
+      ]
+    })
+  );
+
+  ...
+   describe('current', () => {
+     ...
+    describe('when hybrid mobile', () => {
+      beforeEach(() => {
+        const platform = TestBed.get(Platform);
+        platform.is.withArgs('cordova').and.returnValue(true);
+      });
+
+      it('calls the gelocation plugin', () => {
+        const geolocation = TestBed.get(Geolocation);
+        const service: LocationService = TestBed.get(LocationService);
+        service.current();
+        expect(geolocation.getCurrentPosition).toHaveBeenCalledTimes(1);
+      });
+    });
+  }); 
+  ...
+````
+
+**`location.service.ts`**
+
+```TypeScript
+import { Injectable } from '@angular/core';
+import { Platform } from '@ionic/angular';
+import { Geolocation  } from '@ionic-native/geolocation/ngx';
+
+import { Coordinate } from '../../models/coordinate';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class LocationService {
+  constructor(private geolocation: Geolocation, private platform: Platform) {}
+
+  current(): Promise<Coordinate> {
+    this.platform.is('cordova');
+    this.geolocation.getCurrentPosition();
+    return null;
+  }
+}
+```
+
+##### Step 3: If Hybrid Mobile Return the Unpacked Value from the Plugin Call
+
+**`location.service.spec.ts`**
+
+```TypeScript
+      it('resolves the unpacked position', async () => {
+        const service: LocationService = TestBed.get(LocationService);
+        expect(await service.current()).toEqual({
+          latitude: 42,
+          longitude: 73
+        });
+      });
+```
+
+**`location.service.ts`**
+
+```TypeScript
+  async current(): Promise<Coordinate> {
+    this.platform.is('cordova');
+    const pos = await this.geolocation.getCurrentPosition();
+    return { latitude: pos.coords.latitude, longitude: pos.coords.longitude };
+  }
+```
+
+##### Step 4: If not Hybrid Mobile do not Call the Plugin
+
+**`location.service.spec.ts`**
+
+```TypeScript
+    describe('when not hybrid mobile', () => {
+      it('does not call the gelocation plugin', () => {
+        const geolocation = TestBed.get(Geolocation);
+        const service: LocationService = TestBed.get(LocationService);
+        service.current();
+        expect(geolocation.getCurrentPosition).not.toHaveBeenCalled();
+      });
+    });
+```
+
+**`location.service.ts`**
+
+```TypeScript
+  async current(): Promise<Coordinate> {
+    const pos = this.platform.is('cordova')
+      ? await this.geolocation.getCurrentPosition()
+      : {
+          coords: {
+            latitude: 0,
+            longitude: 0
+          }
+        };
+    return { latitude: pos.coords.latitude, longitude: pos.coords.longitude };
+  }
+```
+
+##### Step 5: If not Hybrid Mobile Return Default Location
+
+**`location.service.spec.ts`**
+
+```TypeScript
+    describe('when not hybrid mobile', () => {
+      ...
+      it('resolves the default position', async () => {
+        const service: LocationService = TestBed.get(LocationService);
+        expect(await service.current()).toEqual({
+          latitude: 43.073051,
+          longitude: -89.40123
+        });
+      });
+    });
+```
+
+**`location.service.ts`**
+
+```TypeScript
+  async current(): Promise<Coordinate> {
+    const pos = this.platform.is('cordova')
+      ? await this.geolocation.getCurrentPosition()
+      : {
+          coords: {
+            latitude: 43.073051,
+            longitude: -89.40123
+          }
+        };
+    return { latitude: pos.coords.latitude, longitude: pos.coords.longitude };
+```
+
+Now that we have developed a fully tested method, we can clean it up a bit. We should really define the default location using a private constant defined on the class rather than a literal value in the method. Refactor the code as such.
+
+Let' pause here and discuss what we have done.
+
+#### Use the Location Service
+
+Now that the service exists, let's use it to get the current location before grabbing data. We will again use a test-first development strategy.
+
+Our basic requirements are:
+
+1. The location is obtained from the location service.
+1. The location returned by the service is used in the HTTP call.
+1. The value current weather is unpacked and returned.
+
+##### Step 0 - Create and Use a Mock Location Service Factory
+
+**`src/app/services/location/location.service.mock.ts`**
+
+```TypeScript
+export function createLocationServiceMock() {
+  return jasmine.createSpyObj('LocationService', {
+    current: Promise.resolve()
+  });
+}
+```
+
+**`weather.service.spec.ts`
+
+```TypeScript
+import { createLocationServiceMock } from '../location/location.service.mock';
+import { LocationService } from '../location/location.service';
+...
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      imports: [HttpClientTestingModule],
+      providers: [
+        { provide: LocationService, useFactory: createLocationServiceMock }
+      ]
+    });
+    httpTestingController = TestBed.get(HttpTestingController);
+    const loc = TestBed.get(LocationService);
+    loc.current.and.returnValue(
+      Promise.resolve({ latitutde: 42.731338, longitude: -88.314159 })
+    );
+  });
+```
+
+##### Step 1 - Get the Current Location
+
+**`weather.service.spec.ts`
+
+```TypeScript
+  describe('current', () => {
+    it('gets the current location', () => {
+      const loc = TestBed.get(LocationService);
+      const service: WeatherService = TestBed.get(WeatherService);
+      service.current().subscribe();
+      expect(loc.current).toHaveBeenCalledTimes(1);
+    });
+    ...
+  });
+```
+
+**`weather.spec.ts`
+
+Getting the above test to pass is a matter of injecting the service and calling the `current()` method in the correct spot, but not really doing anything with the output. Doing that is left as an exercise for you to complete.
+
+
+##### Step 2 - Use the Current Location
+
+**`weather.service.spec.ts`
+
+We are already testing that there is an HTTP call and that we return data based on the result of that call. Updating the tests to ensure that the only functional change is that we now wait for the location to be obtained and this use it requires just two changes:
+
+1. `async/await` a call to the LocationService mock's `curent()` method after subscribing to the WeatherService's `current()` method.
+1. Modify the values used for the `lat` and `lon` parameters in the URL.
+
+Updating the tests accordingly is left as an exercise for you.
+
+**`weather.service.ts`
+
+Updating the code to work in the quickest, dirtiest way results in code something like this:
+
+```TypeScript
+  current(): Observable<Weather> {
+    return from(this.location.current()).pipe(
+      flatMap((coord: Coordinate) =>
+        this.http
+          .get(
+            `${environment.baseUrl}/weather?lat=${coord.latitude}&lon=${
+              coord.longitude
+            }&appid=${environment.appId}`
+          )
+          .pipe(map(res => this.unpackWeather(res)))
+      )
+    );
+  }
+```
+
+I find that messy because the method is responsible for knowing how to do multiple things. We can mitigate through some refactoring, made safer by the existence of our tests:
+
+1. Abstract the Promise -> Observable logic into private `getCurrentLocation(): Observable<Coorodinate>` method
+1. Abstract the HTTP call logic into private `getCurrentWeather(): Observable<Weather>` method
+
+When complete, the `current()` method should look like this:
+
+```TypeScript
+  current(): Observable<Weather> {
+    return this.getCurrentLocation().pipe(
+      flatMap((coord: Coordinate) => this.getCurrentWeather(coord)));
+  }
+```
+
+Now it only has one responsibility, chaining the other two methods.
+
+**Challenge:** Rewrite the other two public methods to also get the current location before returning the weather data related observables.
+
+Once this rewrite is complete, you should be able to remove the following code from the `WeatherService`:
+
+```TypeScript
+  private latitude = 43.073051;
+  private longitude = -89.40123;
+```
 
 ## Conclusion
 
-We learned how to refactor the code into a base class. The end result should be that the code is more maintainable and the following steps will require less work than if we didn't notice this pattern and refactor the code.
+We have learned how to utilize Cordova plugins and the Ionic Native wrappers in order to easily access native mobile APIs.
+
+Build the application for a mobile device and give it a try.
+
+<!-- TODO: Consider moving this into its own section on overlays... -->
+
+**Challenge:** You may notice some slight delays when the application is run on the mobile device. Add a <a href="https://ionicframework.com/docs/api/loading/" target="_blank">Loading Indicator</a> to each page. Here is the basic logic (where `loading` is the injected `LoadingController`):
+
+```TypeScript
+async ionViewDidEnter() {
+  const l = await this.loadingController.create({ options });
+  l.present();
+  this.weather.someMethod().subscribe(d => {
+    this.someData = d;
+    l.dismiss();
+  });
+}
+```
+
+Have a look at the docs for the various options you can use. Make similar changes to all three of the pages.
+
+**Hints on Testing**
+
+The LoadingController follows a pattern that is common in Ionic for type of components called "overlays." We will learn more about these later. The mock package that is supplied with this project contains two mocks we can use to test any overlay component: `createOverlayControllerMock()` which mocks the controller and `createOverlayElementMock()` which mocks the element created by the overlay controller. 
+
+The mocks can be set up like such:
+
+```TypeScript
+  beforeEach(async(() => {
+    loading = createOverlayElementMock('Loading');
+    TestBed.configureTestingModule({
+      declarations: [CurrentWeatherPage],
+      providers: [
+        { provide: WeatherService, useFactory: createWeatherServiceMock },
+        {
+          provide: LoadingController,
+          useFactory: () =>
+            createOverlayControllerMock('LoadingController', loading)
+        }
+      ],
+      schemas: [CUSTOM_ELEMENTS_SCHEMA]
+    }).compileComponents();
+  }));
+```
+
+The test tests should look something like this. Note that the two existing tests are change to use `async/await`:
+
+```TypeScript
+  describe('entering the page', () => {
+    it('displays a loading indicator', async () => {
+      const loadingController = TestBed.get(LoadingController);
+      await component.ionViewDidEnter();
+      expect(loadingController.create).toHaveBeenCalledTimes(1);
+      expect(loading.present).toHaveBeenCalledTimes(1);
+    });
+
+    it('gets the current weather', async () => {
+      const weather = TestBed.get(WeatherService);
+      await component.ionViewDidEnter();
+      expect(weather.current).toHaveBeenCalledTimes(1);
+    });
+
+    it('assigns the current weather', async () => {
+      const weather = TestBed.get(WeatherService);
+      weather.current.and.returnValue(
+        of({
+          temperature: 280.32,
+          condition: 300,
+          date: new Date(1485789600 * 1000)
+        })
+      );
+      await component.ionViewDidEnter();
+      expect(component.currentWeather).toEqual({
+        temperature: 280.32,
+        condition: 300,
+        date: new Date(1485789600 * 1000)
+      });
+    });
+
+    it('dismisses a loading indicator', async () => {
+      const weather = TestBed.get(WeatherService);
+      weather.current.and.returnValue(
+        of({
+          temperature: 280.32,
+          condition: 300,
+          date: new Date(1485789600 * 1000)
+        })
+      );
+      await component.ionViewDidEnter();
+      expect(loading.dismiss).toHaveBeenCalledTimes(1);
+    });
+  });
+```

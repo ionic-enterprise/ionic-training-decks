@@ -1,168 +1,129 @@
-# Completed Code for Lab: Using Plugins 
+# Completed Code for Lab: Using the Data
 
 Please try to write this code on your own before consulting this part of the guide. Your code may look different, just make sure it is functionally the same.
 
-## `location.service.ts`
+## `app.module.ts`
 
 ```TypeScript
-import { Injectable } from '@angular/core';
-import { Geolocation } from '@ionic-native/geolocation/ngx';
-import { Platform } from '@ionic/angular';
+import { NgModule } from '@angular/core';
+import { HttpClientModule } from '@angular/common/http';
+import { BrowserModule } from '@angular/platform-browser';
+import { RouteReuseStrategy } from '@angular/router';
 
-import { Coordinate } from '../../models/coordinate';
+import { IonicModule, IonicRouteStrategy } from '@ionic/angular';
+import { SplashScreen } from '@ionic-native/splash-screen/ngx';
+import { StatusBar } from '@ionic-native/status-bar/ngx';
 
-@Injectable({
-  providedIn: 'root'
+import { AppRoutingModule } from './app-routing.module';
+import { AppComponent } from './app.component';
+
+@NgModule({
+  declarations: [AppComponent],
+  entryComponents: [],
+  imports: [
+    BrowserModule,
+    HttpClientModule,
+    IonicModule.forRoot(),
+    AppRoutingModule
+  ],
+  providers: [
+    StatusBar,
+    SplashScreen,
+    { provide: RouteReuseStrategy, useClass: IonicRouteStrategy }
+  ],
+  bootstrap: [AppComponent]
 })
-export class LocationService {
-  private defaultLocation = {
-    coords: {
-      latitude: 43.073051,
-      longitude: -89.40123
-    }
-  };
-
-  private cachedLocation;
-
-  constructor(private geolocation: Geolocation, private platform: Platform) {}
-
-  async current(): Promise<Coordinate> {
-    const loc =
-      this.cachedLocation ||
-      (this.platform.is('cordova')
-        ? await this.geolocation.getCurrentPosition()
-        : this.defaultLocation);
-    this.cachedLocation = loc;
-    return {
-      longitude: loc.coords.longitude,
-      latitude: loc.coords.latitude
-    };
-  }
-}
+export class AppModule {}
 ```
 
-## `weather.service.ts`
+## `current-weather.page.spec.ts`
 
 ```TypeScript
-import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { from, Observable } from 'rxjs';
-import { flatMap, map } from 'rxjs/operators';
+import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { of } from 'rxjs';
 
-import { Forecast } from '../../models/forecast';
-import { Coordinate } from '../../models/coordinate';
-import { Weather } from '../../models/weather';
-import { UVIndex } from '../..//models/uv-index';
-import { LocationService } from '../../services/location/location.service';
+import { CurrentWeatherPage } from './current-weather.page';
+import { createWeatherServiceMock } from '../services/weather/weather.service.mock';
+import { WeatherService } from '../services/weather/weather.service';
 
-@Injectable({
-  providedIn: 'root'
-})
-export class WeatherService {
-  private appId = '69f068bb8bf2bc3e061cb2b62c255c65'; // or use your own API key
-  private baseUrl = 'https://api.openweathermap.org/data/2.5';
+describe('CurrentWeatherPage', () => {
+  let component: CurrentWeatherPage;
+  let fixture: ComponentFixture<CurrentWeatherPage>;
 
-  constructor(private http: HttpClient, private location: LocationService) {}
+  beforeEach(async(() => {
+    TestBed.configureTestingModule({
+      declarations: [CurrentWeatherPage],
+      providers: [
+        { provide: WeatherService, useFactory: createWeatherServiceMock }
+      ],
+      schemas: [CUSTOM_ELEMENTS_SCHEMA]
+    }).compileComponents();
+  }));
 
-  current(): Observable<Weather> {
-    return this.getCurrentLocation().pipe(
-      flatMap(coord => this.getCurrentWeather(coord))
-    );
-  }
+  beforeEach(() => {
+    fixture = TestBed.createComponent(CurrentWeatherPage);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
+  });
 
-  forecast(): Observable<Forecast> {
-    return this.getCurrentLocation().pipe(
-      flatMap(coord => this.getForecast(coord))
-    );
-  }
+  it('should create', () => {
+    expect(component).toBeTruthy();
+  });
 
-  uvIndex(): Observable<UVIndex> {
-    return this.getCurrentLocation().pipe(
-      flatMap(coord => this.getUVIndex(coord))
-    );
-  }
-
-  private getCurrentLocation(): Observable<Coordinate> {
-    return from(this.location.current());
-  }
-
-  private getCurrentWeather(coord: Coordinate): Observable<Weather> {
-    return this.http
-      .get(
-        `${this.baseUrl}/weather?lat=${coord.latitude}&lon=${
-          coord.longitude
-        }&appid=${this.appId}`
-      )
-      .pipe(map((res: any) => this.unpackWeather(res)));
-  }
-
-  private getForecast(coord: Coordinate): Observable<Forecast> {
-    return this.http
-      .get(
-        `${this.baseUrl}/forecast?lat=${coord.latitude}&lon=${
-          coord.longitude
-        }&appid=${this.appId}`
-      )
-      .pipe(map((res: any) => this.unpackForecast(res)));
-  }
-
-  private getUVIndex(coord: Coordinate): Observable<UVIndex> {
-    return this.http
-      .get(
-        `${this.baseUrl}/uvi?lat=${coord.latitude}&lon=${
-          coord.longitude
-        }&appid=${this.appId}`
-      )
-      .pipe(map((res: any) => this.unpackUvIndex(res)));
-  }
-
-  private unpackForecast(res: any): Forecast {
-    let currentDay: Array<Weather>;
-    let prevDate: number;
-    const forecast: Forecast = [];
-
-    res.list.forEach(item => {
-      const w = this.unpackWeather(item);
-      if (w.date.getDate() !== prevDate) {
-        prevDate = w.date.getDate();
-        currentDay = [];
-        forecast.push(currentDay);
-      }
-      currentDay.push(w);
+  describe('entering the page', () => {
+    it('gets the current weather', () => {
+      const weather =  TestBed.get(WeatherService);
+      component.ionViewDidEnter();
+      expect(weather.current).toHaveBeenCalledTimes(1);
     });
 
-    return forecast;
-  }
+    it('assigns the current weather', () => {
+      const weather =  TestBed.get(WeatherService);
+      weather.current.and.returnValue(of({
+        temperature: 280.32,
+        condition: 300,
+        date: new Date(1485789600 * 1000)
+      }));
+      component.ionViewDidEnter();
+      expect(component.currentWeather).toEqual({
+        temperature: 280.32,
+        condition: 300,
+        date: new Date(1485789600 * 1000)
+      });
+    });
+  });
+});
+```
 
-  private unpackUvIndex(res: any): UVIndex {
-    return {
-      value: res.value,
-      riskLevel: this.riskLevel(res.value)
-    };
-  }
+## `current-weather.page.ts`
 
-  private riskLevel(value: number): number {
-    if (value < 3) {
-      return 0;
-    }
-    if (value < 6) {
-      return 1;
-    }
-    if (value < 8) {
-      return 2;
-    }
-    if (value < 11) {
-      return 3;
-    }
-    return 4;
-  }
+```TypeScript
+import { Component } from '@angular/core';
 
-  private unpackWeather(res: any): Weather {
-    return {
-      temperature: res.main.temp,
-      condition: res.weather[0].id,
-      date: new Date(res.dt * 1000)
-    };
+import { IconMapService } from '../services/icon-map/icon-map.service';
+import { Weather } from '../models/weather';
+import { WeatherService } from '../services/weather/weather.service';
+
+@Component({
+  selector: 'app-current-weather',
+  templateUrl: 'current-weather.page.html',
+  styleUrls: ['current-weather.page.scss']
+})
+export class CurrentWeatherPage {
+  currentWeather: Weather;
+
+  constructor(
+    public iconMap: IconMapService,
+    private weather: WeatherService
+  ) {}
+
+  ionViewDidEnter() {
+    this.weather.current().subscribe(w => (this.currentWeather = w));
   }
 }
 ```
+
+## Forecast and UV Index Pages
+
+The code for the Forecast and UV Index pages and tests are similar to the Current Weather page.

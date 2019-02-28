@@ -1,111 +1,199 @@
-# Lab: Style the App 
+# Lab: Add Cordova Platforms
 
-In this lab, you will learn how to:
+In this lab, you will:
 
-* Apply global themes and styles
-* Theme the application using Ioinic Studio
-* Apply different colors within the application
-* Style the status bar
+* Update the Cordova configuration
+* Update the splash screen and application icon
+* Add the iOS and Android platforms
+* Build and run the application on both platforms
 
-## Global Theming and Styling
+## Update the Configuration
 
-The global theming and styling of an application is controlled via two different files: `src/theme/variables.scss` and `src/global.scss`. The majority of theming and styling for the application should occur through these two files.
+When a Cordova project is built, information in the `config.xml` file is used to generate some of the project files. Some of this information should be changed up front:
 
-### `src/theme/variables.scss`
+* The widget id should be change to something unique like `com.kensodemann.ionicweather`
+* The name and description should be changed
+* The author information should be changed
 
-The `src/theme/variables.scss` file contains a collection of custom properties (AKA "CSS variables") that are used to define the color theme of the application. Since this is a weather application, a nice sky blue color might be nice for the background.
+Here is an example of those changes:
 
-Add `--ion-background-color: #b9dbf7;` within the `:root` scope in this file.
+**Before:**
 
-### `src/global.scss`
-
-It is best to do as much styling as possible globally to give the application a consistent look and feel. Notice the existing imports. This is also a best practice. Create files that group the styles together in a manner that makes sense for the application.
-
-For this training application, we don't have a lot of extra styling so we will put the styles right into the `src/global/scss` file:
-
-```scss
-.primary-value {
-  font-size: 36px;
-}
-
-.secondary-value {
-  font-size: 24px;
-}
-
-.item-ios,
-.item-md {
-  padding-left: 0;
-}
-
-.item-inner {
-  padding: 12px;
-}
+```xml
+<widget id="io.ionic.starter" version="0.0.1" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+    <name>ionic-weather</name>
+    <description>An awesome Ionic/Cordova app.</description>
+    <author email="hi@ionicframework" href="http://ionicframework.com/">Ionic Framework Team</author>
 ```
 
-## Using the Ionic Studio Theming Editor
+**After:**
 
-**Note:** if you do not have Ioinc Studio, you can manually update `src/theme/variables.scss` as outlined below.
-
-Ionic Studio include a theming editor that allows you to easy specify the color theme for the appliction. The theming editor reads the current `src/theme/variables.scss` file and applies that color theme to a sample page so the color theme can be seen as it is edited.
-
-With the theming editor, only the base value for each of the defined colors needs to be specified. The `-shade` and `-tint` variants will be automatically calculated, though the calculated values can be changed if so desired.
-
-* Open the project in Ioinc Studio
-* Open the theming editor, is bottom icon on left
-* Change the `Primary` color to `#085a9e`
-* Change the `Secondary` color to `#f4a942`
-
-In both cases, the `-shade` and `-tint` variants were automatically calculated. Have a look at those values by clicking on the `Primary` and `Secondary` colors. Save the changes.
-
-Look at the `src/app/variables.scss` file and verify that the changes have been saved.
-
-```scss
-  /** primary **/
-  --ion-color-primary: #085a9e;
-  --ion-color-primary-rgb: 8,90,158;
-  --ion-color-primary-contrast: #ffffff;
-  --ion-color-primary-contrast-rgb: 255,255,255;
-  --ion-color-primary-shade: #074f8b;
-  --ion-color-primary-tint: #216ba8;
-  /** secondary **/
-  --ion-color-secondary: #f4a942;
-  --ion-color-secondary-rgb: 244,169,66;
-  --ion-color-secondary-contrast: #000000;
-  --ion-color-secondary-contrast-rgb: 0,0,0;
-  --ion-color-secondary-shade: #d7953a;
-  --ion-color-secondary-tint: #f5b255;
+```xml
+<widget id="com.kensodemann.ionicweather" version="0.0.1" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+    <name>My Weather App</name>
+    <description>Shows the weather locally and in key cities</description>
+    <author email="ken@ionic.io" href="http://ionicframework.com/">Ken Sodemann</author>
 ```
 
-## Apply Colors
+Make similar changes to your application.
 
-Right now, most of the application is sky blue. That is because most of the components in the application are using the default background color. To change this, specify the `Primary` color for the tab bar and each page's header.
+## Update the Splash Screen and Application Icon
 
-* Add `color="primary"` in the `ion-tab-bar` in `src/app/tabs/tabs.page.html` 
-* Add `color="primary"` in the `ion-toolbar` in each of the other pages. 
+The application should have its own splash screen and icon rather than using the default that Ionic supplies for you. Ionic provides a service that will take two source image files and create all of the resources that your application will require. Follow these guidelines:
 
-## Style the Status Bar
+* Keep the images simple and clear
+* You can supply source images in any of these formats: `.png`, `.psd`, `.ai`
+* Icon - at least 1024x1024 pixels
+* Splashscreen - at least 2732x2732 pixels with a simple image that is centered and no bigger than 1200x1200 pixels to facilitate reasonable display on all devices
 
-Run the application on a device or emulator. Notice that the status bar text is dark. That can be changed by using the "Light Content" style instead of the default style. In `src/app/app.component.ts`, change `this.statusBar.styleDefault()` to `this.statusBar.styleLightContent()`.
+For this application, please download the following images and copy them to your application's `resources` directory, replacing the onces that are already there:
 
-Depending on which version of Android the application is run on, the status bar may be black or a rather ugly shade of teal. Let's specify a color that more closely matches out application's header while still being different (as per the Android guidelines). For this, we will use the same value as specified by `--ion-color-primary-shade`. This change in status bar color should only apply to Adroid, however, as the iOS specs call for a consistent color.
+* <a download href="/assets/images/icon.png">icon.png</a>
+* <a download href="/assets/images/splash.png">splash.png</a>
 
-When complete, the code should look like this:
+The appropriate icon and splash screen resources will be generated as the platforms are added. If you ever need to change the icon or splash screen, replace the appropriate source file(s) and run `ionic cordova resources` to generate new resources.
 
+## Add the Android and iOS Platforms
 
-```TypeScript
-  initializeApp() {
-    this.platform.ready().then(() => {
-      this.statusBar.styleLightContent();
-      this.splashScreen.hide();
-      if (this.platform.is('android')) {
-        this.statusBar.backgroundColorByHexString('#074f8b');
-      }
-    });
-  }
+Use `ionic cordova platform add android` to add the Android platform. This will create a `www/` directory if it does not exist, install the Android platform and any required Cordova plugins, and generate the appropriate icon and splash screen resources.
+
+```bash
+~/Projects/Training/ionic-weather (master *): ionic cordova platform add android
+✔ Creating ./www directory for you - done!
+> cordova platform add android --save
+Using cordova-fetch for cordova-android@~7.1.1
+Adding android project...
+Creating Cordova project for the Android platform:
+	Path: platforms/android
+	Package: com.kensodemann.ionicweather
+	Name: My_Weather_App
+	Activity: MainActivity
+	Android target: android-27
+Android project created with cordova-android@7.1.4
+Android Studio project detected
+...
+> ionic cordova resources android --force
+✔ Collecting resource configuration and source images - done!
+✔ Filtering out image resources that do not need regeneration - done!
+✔ Uploading source images to prepare for transformations: 2 / 2 complete - done!
+✔ Generating platform resources: 18 / 18 complete - done!
+✔ Modifying config.xml to add new image resources - done!
 ```
 
-<!-- TODO: Add a section on unit testing considerations. -->
+Use `ionic cordova platform add ios` to add the iOS platform. This will create a `www/` directory if it does not exist, install the iOS platform and any required Cordova plugins, and generate the appropriate icon and splash screen resources.
+
+```bash
+~/Projects/Training/ionic-weather (master *): ionic cordova platform add ios
+> cordova platform add ios --save
+Using cordova-fetch for cordova-ios@~4.5.4
+Adding ios project...
+Creating Cordova project for the iOS platform:
+	Path: platforms/ios
+	Package: com.kensodemann.ionicweather
+	Name: My Weather App
+iOS project created with cordova-ios@4.5.5
+Installing "cordova-plugin-device" for ios
+Installing "cordova-plugin-ionic-keyboard" for ios
+Installing "cordova-plugin-ionic-webview" for ios
+Installing "cordova-plugin-splashscreen" for ios
+Installing "cordova-plugin-statusbar" for ios
+Installing "cordova-plugin-whitelist" for ios
+--save flag or autosave detected
+Saving ios@~4.5.5 into config.xml file ...
+> ionic cordova resources ios --force
+✔ Collecting resource configuration and source images - done!
+✔ Filtering out image resources that do not need regeneration - done!
+✔ Uploading source images to prepare for transformations: 2 / 2 complete - done!
+✔ Generating platform resources: 32 / 32 complete - done!
+✔ Modifying config.xml to add new image resources - done!
+```
+
+## Build for Android
+
+When building for Android, the command line tools work very well:
+
+* `ionic cordova build android` - builds the APK
+* `ionic cordova run android` - build the APK and runs it on an emulator or attached device
+
+Both commands take several options. See `ionic cordova run --help` for details.
+
+**Android Quirks**
+
+* If `ionic cordova run android` fails the first time, it is often due to the emulator taking too long to launch. In that case, leave the emulator open and re-do the `ionic cordova run android` command.
+* The `--target` option is used to specify different targets in the emulator or different devices attached to the build machine. Use `cordova run android --list` to get a list of targets.
+
+## Build for iOS
+
+* `ionic cordova build ios` - builds the IPA
+* `ionic cordova run ios` - builds the IPA and runs it on an emulator or attached device
+
+Both commands take several options. See `ionic cordova run --help` for details.
+
+**iOS Quirks**
+
+* If `ionic cordova run ios` does not work, use `open platforms/ios/Ionic\ Weather.xcworkspace` to open Xcode to build and run the application (NOTE: actual file name may differ depending on the `config.xml` contents at the time the platform was added)
+* When deploying to a device, you need to specify a team, provisioning profile, and signing certificate. It is usually easiest to use Xcode for this.
+* If you are using Xcode 10, make sure you have at least version 5.0.0 of `cordova-ios`. If you do not, use `npm i cordova-ios@latest`
+* Depending on how your system is set up, the default emulator may be too old to run your app. In that case, be sure to specify a `target`. Use `cordova run ios --list` to get a list of targets.
+
+Here is how you would run the application on the iPhone 7, iOS 12.1 emulator: `ionic cordova run ios --target='iPhone-7, 12.1'`
+
+## Update NPM Scripts (Optional)
+
+I find typing `ionic cordova build android` and similar commands somewhat cumbersome, so I generally add them to the `scripts` section of the `package.json` file as such:
+
+```JSON
+  "scripts": {
+    "build": "ng build",
+    "build:ios": "ionic cordova build ios",
+    "build:md": "ionic cordova build android",
+    "e2e": "ng e2e",
+    "lint": "ng lint",
+    "ng": "ng",
+    "start": "ng serve",
+    "start:ios": "ionic cordova run ios --target='iPhone-7, 12.1'",
+    "start:md": "ionic cordova run android",
+    "test": "ng test --browsers=ChromeHeadless",
+    "test:debug": "ng test",
+    "test:ci": "ng test --no-watch --browsers=ChromeHeadlessCI"
+  },
+```
+
+Then all I have to do is `npm run build:ios` when I want to build for iOS. It isn't really _that_ much less to type, but given how often I mis-type "ionic" or "cordova" it makes a big difference... 😆
+
+## Add Untracked Files and Commit
+
+The above processes modified a lot of files, mostly in the `resources/` folder, and added a couple as well. Use `git status` to see them all:
+
+```bash
+~/Projects/Training/ionic-weather (master *): git status
+On branch master
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git checkout -- <file>..." to discard changes in working directory)
+
+	modified:   config.xml
+	modified:   package-lock.json
+	modified:   package.json
+
+...
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+
+	resources/icon.png.md5
+	resources/splash.png.md5
+
+no changes added to commit (use "git add" and/or "git commit -a")
+```
+
+Add the two untracked files and commit:
+
+```bash
+~/Projects/Training/ionic-weather (master *): git add resources/
+~/Projects/Training/ionic-weather (master *+): git commit -am "add android and ios platforms"
+```
 
 ## Conclusion
 
-You have learned how to apply basic theming and styling to the application. You should commit your changes at this point.
+In this lab we learned how to add various platforms and how to build the application for those platforms.

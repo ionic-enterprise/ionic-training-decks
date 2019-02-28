@@ -1,76 +1,197 @@
-# Lab: Use a Library
+# Lab: Style the App 
 
 In this lab, you will learn how to:
 
-* Install third party libraries
-* Integrate the third party libraries into your application
-* Manage the application's dependencies
+* Apply global themes and styles
+* Theme the application using Ioinic Studio
+* Apply different colors within the application
+* Style the status bar
 
-## Install the Library
+## Global Theming and Styling
 
-It is often useful to use third party libraries. For this application, we will use a library of <a href="https://github.com/kensodemann/kws-weather-widgets" target="_blank">weather related components</a> that I created and published on NPM. Many useful JavaScript libraries are availble via NPM and are available for use in your application.
+The global theming and styling of an application is controlled via two different files: `src/theme/variables.scss` and `src/global.scss`. The majority of theming and styling for the application should occur through these two files.
 
-To install my weather component library, run: `npm install kws-weather-widgets`
+### `src/theme/variables.scss`
 
-The library is installed in `node_modules` and your `package.json` file is updated to reflect the new dependency:
+The `src/theme/variables.scss` file contains a collection of custom properties (AKA "CSS variables") that are used to define the color theme of the application. Since this is a weather application, a nice sky blue color might be nice for the background.
 
-```JSON
-    "kws-weather-widgets": "1.0.0",
+Add `--ion-background-color: #b9dbf7;` within the `:root` scope in this file.
+
+### `src/global.scss`
+
+It is best to do as much styling as possible globally to give the application a consistent look and feel. Notice the existing imports. This is also a best practice. Create files that group the styles together in a manner that makes sense for the application.
+
+For this training application, we don't have a lot of extra styling so we will put the styles right into the `src/global/scss` file:
+
+```scss
+.primary-value {
+  font-size: 36px;
+}
+
+.secondary-value {
+  font-size: 24px;
+}
+
+.item-ios,
+.item-md {
+  padding-left: 0;
+}
+
+.item-inner {
+  padding: 12px;
+}
 ```
 
-## Use the Library
+## Using the Ionic Studio Theming Editor
 
-Good libraries usually document exactly how to use the library in your application. In the case of this library - which is a web component library built using a technology called <a href="https://stenciljs.com" target="_blank">Stencil</a> - there are a couple of steps that need to be taken to use the library in an Angular project (like yours).
+**Note:** if you do not have Ioinc Studio, you can use our <a href="https://ionicframework.com/docs/theming/color-generator" target="_blank">online color generator</a> and then manually update `src/theme/variables.scss` by copying the output of the generator. 
 
-First, there is a method in the library called `defineCustomElements()` that needs to be run. This is usually run in the `main.ts` file. This method contains the special sauce that bundlers like WebPack need in order to be aware of the components, with the end result being that WebPack will bundle them properly.
+Ionic Studio include a theming editor that allows you to easy specify the color theme for the appliction. The theming editor reads the current `src/theme/variables.scss` file and applies that color theme to a sample page so the color theme can be seen as it is edited.
+
+With the theming editor, only the base value for each of the defined colors needs to be specified. The `-shade` and `-tint` variants will be automatically calculated, though the calculated values can be changed if so desired.
+
+* Open the project in Ioinc Studio
+* Open the theming editor, is bottom icon on left
+* Change the `Primary` color to `#085a9e`
+* Change the `Secondary` color to `#f4a942`
+
+In both cases, the `-shade` and `-tint` variants were automatically calculated. Have a look at those values by clicking on the `Primary` and `Secondary` colors. Save the changes.
+
+Look at the `src/app/variables.scss` file and verify that the changes have been saved.
+
+```scss
+  /** primary **/
+  --ion-color-primary: #085a9e;
+  --ion-color-primary-rgb: 8,90,158;
+  --ion-color-primary-contrast: #ffffff;
+  --ion-color-primary-contrast-rgb: 255,255,255;
+  --ion-color-primary-shade: #074f8b;
+  --ion-color-primary-tint: #216ba8;
+  /** secondary **/
+  --ion-color-secondary: #f4a942;
+  --ion-color-secondary-rgb: 244,169,66;
+  --ion-color-secondary-contrast: #000000;
+  --ion-color-secondary-contrast-rgb: 0,0,0;
+  --ion-color-secondary-shade: #d7953a;
+  --ion-color-secondary-tint: #f5b255;
+```
+
+## Apply Colors
+
+Right now, most of the application is sky blue. That is because most of the components in the application are using the default background color. To change this, specify the `Primary` color for the tab bar and each page's header.
+
+* Add `color="primary"` in the `ion-tab-bar` in `src/app/tabs/tabs.page.html` 
+* Add `color="primary"` in the `ion-toolbar` in each of the other pages. 
+
+## Style the Status Bar
+
+Run the application on a device or emulator. Notice that the status bar text is black. On Android, the status bar itself may also be black, making the status bar text invisible.
+
+There is another issue, but only on Android. The status bar color. Android guidelines call for the status bar color to be different from the application's title bar, which it is, but most Android applications pick a color that is only slightly different.
+
+We can fix all of that by:
+
+1. Using the "Light Content" style instead of the default content.
+1. Setting the background color for the status bar to `#074f8b` (the hex value for `--ion-color-primary-shade`), but only if the current platform is `Android`
+
+This changes the requirements for the application component. Following TDD, we should do this one step at a time to craft our code, first writing a test, then writing the code to satisfy that test.
+
+### Step 0 - Update the `statusBar` Mock
+
+The status bar mock is currently created as such: `statusBar = jasmine.createSpyObj('StatusBar', ['styleDefault']);`
+
+We are going to use two different methods: `styleLightContent()` and `backgroundColorByHexString()`
+
+Change the status bar mock creation to reflect that: `statusBar = jasmine.createSpyObj('StatusBar', ['styleLightContent', 'backgroundColorByHexString']);` 
+
+### Step 1 - Change the Status Bar Style
+
+Currently there is a test that verifies the following requirement: `it('sets the default status bar style when ready'...`.
+
+1. Change the title of the test to reflect the new requirement
+1. Change the content of the test to match the new requirement
 
 ```TypeScript
-import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
-import { defineCustomElements } from 'kws-weather-widgets/dist/loader';
-
-import { AppModule } from './app.module';
-
-platformBrowserDynamic().bootstrapModule(AppModule)
-  .catch(err => console.log(err));
-defineCustomElements(window);
+    it('sets the light content status bar style when ready', async () => {
+      const platform = TestBed.get(Platform);
+      TestBed.createComponent(AppComponent);
+      expect(statusBar.styleLightContent).not.toHaveBeenCalled();
+      await platform.ready();
+      expect(statusBar.styleLightContent).toHaveBeenCalledTimes(1);
+    });
 ```
 
-Second, since Angular does not know about the custom elements in the library, the `CUSTOM_ELEMENTS_SCHEMA` must be used in each module that uses any components from the library. This tells the Angular compiler to ignore any elements it doesn't understand so long as they conform to the custom elements standard.
+A couple of tests should now be failing. Update the code to make that test pass.
 
-For each of the three main pages in our application, we need to make a change similar to the following to each of their `module.ts` files:
+### Step 2 - Change the Background Color on Android
+
+This requirement has two different cases, one for Android and one for everything else. The `Platform` service has a method called `is()` that returns true if the current platform meets a specified constraint and false otherwise.
+
+The mock for the `Platform` looks like this:
 
 ```TypeScript
-...
-import { CUSTOM_ELEMENTS_SCHEMA, NgModule } from '@angular/core';
-...
-
-@NgModule({
-  ...
-  schemas: [CUSTOM_ELEMENTS_SCHEMA]
-})
-export class CurrentWeatherPageModule {}
+export function createPlatformMock() {
+  return jasmine.createSpyObj('Platform', {
+    is: false,
+    ready: Promise.resolve()
+  });
+}
 ```
 
-## Managing Dependencies
+#### Step 2.1 - Check that the background is not set
 
-NPM is also used to manage the application's dependencies. If you type `npm outdated` from the root directory of your project you can see which dependencies may need upgrading.
+So the default behavior is the `false` case. Let's create a test for that now:
 
-As of the time of this writing, here are the results:
-
+```TypeScript
+it('does not set the background color by default', async () => {
+  const platform = TestBed.get(Platform);
+  TestBed.createComponent(AppComponent);
+  expect(statusBar.backgroundColorByHexString).not.toHaveBeenCalled();
+  await platform.ready();
+  expect(statusBar.backgroundColorByHexString).not.toHaveBeenCalled();
+});
 ```
-~/Projects/Training/ionic-weather (master *): npm outdated
-Package                            Current         Wanted  Latest  Location
-@ionic/angular-toolkit     1.2.3     1.2.3     1.3.0  ionic-weather
-@types/node             10.12.18  10.12.19  10.12.19  ionic-weather
+
+This test passes already. There is nothing to do at this time.
+
+#### Step 2.2 - Check that the background is set for Android
+
+If the platform is Android we need to set the background color for the status bar. Let's write a test for that as well. For this test, we will set up `platform.is()` to return `true`, but only if called with a parameter of 'android'.
+
+```TypeScript
+it('sets the background color if the current platform is android', async () => {
+  const platform = TestBed.get(Platform);
+  platform.is.withArgs('android').and.returnValue(true);
+  TestBed.createComponent(AppComponent);
+  expect(statusBar.backgroundColorByHexString).not.toHaveBeenCalled();
+  await platform.ready();
+  expect(statusBar.backgroundColorByHexString).toHaveBeenCalledTimes(1);
+  expect(statusBar.backgroundColorByHexString).toHaveBeenCalledWith('#074f8b');
+});
 ```
 
-Some analysis and thouht it required at this point. Having done this exercise before, here is what I can tell you:
+This test fails, so let's write some code that makes it pass without the other tests failing.
 
-* The `@types/node` upgrade can be taken safely via `npm upgrade`
-* The `@ionic/angular-toolkit` can be taken safely via `npm i @ionic/angular-toolkit@latest`
+### Check Your Code
+
+When complete, the code should look like this:
+
+```TypeScript
+initializeApp() {
+  this.platform.ready().then(() => {
+    this.statusBar.styleLightContent();
+    if (this.platform.is('android')) {
+      this.statusBar.backgroundColorByHexString('#074f8b');
+    }
+    this.splashScreen.hide();
+  });
+}
+```
 
 ## Conclusion
 
-In this lab you learned how to include a third party library in your application, how to configure web component libraries that have been built using Stencil, and how to manage your dependencies. Next we will look at mocking up the user interface.
+You have learned how to apply basic theming and styling to the application.
 
-Be sure to commit your changes.
+You have also exercised a little Test Driven Development. If we continuously build your application in this manner, you have a full set of tests that are run with each change giving you more confidence that you are not breaking existing code with your current changes.
+
+You should commit your changes at this point.
