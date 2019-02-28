@@ -70,16 +70,20 @@
         },
         {
           "id": "ionic-weather-v4-step10",
+          "title": "Lab: Create a Generic Base Class"
+        },
+        {
+          "id": "ionic-weather-v4-step11",
           "title": "Lab: User Preferences Phase 2",
           "pages": [
             {
-              "id": "ionic-weather-v4-step10-01",
+              "id": "ionic-weather-v4-step11-01",
               "title": "Completed Code"
             }
           ]
         },
         {
-          "id": "ionic-weather-v4-step11",
+          "id": "ionic-weather-v4-step12",
           "title": "Lab: Add Simple Offline Handling"
         }
       ]

@@ -1,129 +1,242 @@
-# Lab: Simple Offline Handling
+# Lab: User Preferences Phase 2
 
-This application relies heavily on being online. If data cannot be obtained, the appication is of little use, but the application should still do _something_. Currently, it just freezes up trying to get data.
+The user preferences will be stored on the device using <a href="https://github.com/ionic-team/ionic-storage" target="_blank">Ionic Storage</a>, which encapsulates several local storage options. In this lab, we will:
 
-There are many ways to handle this scenario, including full "offline first" strategies that store the data using a local database and then sync the data with the server once online. Since that could be a full course of work on its own, for this application will we take a more simple approach. It can always be expanded upon in the future if needed.
+* Create a service to store and retrieve the data
+* Create a subject that will emit when data changes
+* Modify the user preferences dialog to store the data
+* Modify the pages to respond to the user preference data changing
 
-For this application, we will:
+## Create a Data Service
 
-* Create a service to determine if the device is online or offline
-* Modify the pages to only get data if the device is online
-* Modify the pages to display a warning if the device is offline
+This service will save and retrieve/cache the user preference data.
 
-## Determine the Network Status
+1. Using the CLI, create a service called `services/user-preferences/user-preferences`
+1. Using NPM, install the `@ionic/storage` package as a dependency of our application
+1. Add the `IonicStorageModule` to the list of `imports` in `app.module.ts` as per the documentation on GitHub
+1. Create methods to get and set the user preference data in the service that was just created
 
-If the application is running on a device, we will use the <a href="https://ionicframework.com/docs/native/network/" target="_blank">Network Status</a> plugin to determine the status. If the `type` is falsey or `unknown` or `none`, then the application will assume it is offline. If the `type` is anything else, the application will assume it is online.
-
-If the application is running in a web hosted scenario, `navigator.onLine` will be used to determine the online status.
-
-### Install and Configure the Plugin
-
-1. `ionic cordova plugin add cordova-plugin-network-information`
-1. `npm i @ionic-native/network`
-1. Modify `app.module.ts` to provide the service for the plugin
-
-### Create a Network Service
-
-1. `ionic g service services/network/network`
-1. Create a simple getter in the service. The whole service is listed below.
+Here is the full code to get and set the `useCelcius` preference:
 
 ```TypeScript
 import { Injectable } from '@angular/core';
-import { Platform } from '@ionic/angular';
-import { Network } from '@ionic-native/network/ngx';
+import { Storage } from '@ionic/storage';
 
 @Injectable({
   providedIn: 'root'
 })
-export class NetworkService {
-  constructor(private network: Network, private platform: Platform) {}
+export class UserPreferencesService {
+  private keys = {
+    useCelcius: 'useCelcius',
+    city: 'city'
+  };
+  private _useCelcius: boolean;
 
-  get onLine(): boolean {
-    return this.platform.is('cordova')
-      ? !!this.network.type &&
-      this.network.type.toLowerCase() !== 'unknown' &&
-      this.network.type.toLowerCase() !== 'none'
-      : navigator.onLine;
+  constructor(private storage: Storage) {}
+
+  async getUseCelcius(): Promise<boolean> {
+    await this.storage.ready();
+    if (this._useCelcius === undefined) {
+      this._useCelcius = await this.storage.get(this.keys.useCelcius);
+    }
+    return this._useCelcius;
+  }
+
+  async setUseCelcius(value: boolean): Promise<void> {
+    await this.storage.ready();
+    this._useCelcius = value;
+    this.storage.set(this.keys.useCelcius, value);
   }
 }
 ```
 
-## Update the Pages
+**Challenge:** create similar methods for the city.
 
-For the purposes of this application, it will be sufficient modifiy the screens such that if the device is offline they will not fetch the data and they will warn the user that the data (if it exists) may be stale.
+## Refactor
 
-Here is an example from the Current Weather page:
+At this point, it does not make much sense for the cities to be defined where they are. Let's do a couple of things:
 
-### `current-weather.page.html`
+1. move the `cities.ts` file in with the service (`git mv src/app/user-preferences/cities.ts src/app/services/user-preferences/cities.ts`)
+1. fix the path to the `City` model in the moved `cities.ts` file
+1. add a method to the service that returns the available cities, call it `availableCities()`
+1. makes two changes to the `getCity()` method
+   1. if there is a city stored in user preferences, look up the city by name in the cities array
+   1. if there is no city stored in user preferences, return the "Current Location" city (cities[0]).
 
-```HTML
-<ion-header>
-  <ion-toolbar color="primary">
-    <ion-buttons slot="primary">
-      <ion-button (click)="openUserPreferences()">
-        <ion-icon slot="icon-only" name="settings"></ion-icon>
-      </ion-button>
-    </ion-buttons>
-    <ion-title> Current Weather </ion-title>
-  </ion-toolbar>
-</ion-header>
-
-<ion-content padding text-center>
-  <div *ngIf="!network.onLine">Warning: network is offline, data may be stale</div>
-  <div class="information">
-    <div class="city">{{cityName}}</div>
-    <kws-temperature
-      class="primary-value"
-      [scale]="scale"
-      temperature="{{currentWeather?.temperature}}"
-    ></kws-temperature>
-  </div>
-  <kws-condition
-    [condition]="currentWeather?.condition"
-    [iconPaths]="iconMap"
-  ></kws-condition>
-</ion-content>
-```
-
-### `current-weather.page.ts`
-
-Note the injected of the `NetworkService` as well as the minor change to `getData()`
+Here is what the code for `getCity()` should look like when you are done (try to do it without peaking first):
 
 ```TypeScript
-import { Component, OnDestroy, OnInit } from '@angular/core';
-import { LoadingController, ModalController } from '@ionic/angular';
-import { Subscription } from 'rxjs';
+  async getCity(): Promise<City> {
+    await this.storage.ready();
+    if (this._city === undefined) {
+      const city = await this.storage.get(this.keys.city);
+      this._city = cities.find(c => c.name === (city && city.name)) || cities[0];
+    }
+    return this._city;
+  }
+```
 
-import { IconMapService } from '../services/icon-map/icon-map.service';
-import { NetworkService } from '../services/network/network.service';
-import { UserPreferencesComponent } from '../user-preferences/user-preferences.component';
-import { UserPreferencesService } from '../services/user-preferences/user-preferences.service';
-import { Weather } from '../models/weather';
-import { WeatherService } from '../services/weather/weather.service';
+**Note:** when you do the above, the `UserPreferencesComponent` will break. We will fix it in the next step.
 
-@Component({
-  selector: 'app-current-weather',
-  templateUrl: 'current-weather.page.html',
-  styleUrls: ['current-weather.page.scss']
+## Use the Service in the Component
+
+**Challenge:** this one is all on you, try to do it without looking at the completed code
+
+1. Inject `UserPreferencesServices` in the constructor of `UserPreferencesComponent`
+1. Set the properties (`cities`, `city`, and `useCelcius`) properties in an appropriate life-cycle event getting the data from the service
+1. Set the data before closing the modal from the `save()`
+
+## Use the Service in the base class
+
+In the `WeatherPageBase`:
+
+1. Include the `UserPreferencesService` in the constructor
+1. In each page, inject the `UserPreferencesService` and pass it down to the base class
+1. Add `cityName` and `scale` properties (both strings)
+1. Update the `ionViewDidEnter()` to get the data and set the properties
+
+**Example:**
+
+```TypeScript
+  async ionViewDidEnter() {
+    const l = await this.loading.create({
+      message: 'Loading...'
+    });
+    l.present();
+    this.cityName = (await this.userPreferences.getCity()).name;
+    this.scale = (await this.userPreferences.getUseCelcius()) ? 'C' : 'F';
+    this.weather.current().subscribe(w => {
+      this.currentWeather = w;
+      l.dismiss();
+    });
+  }
+```
+
+In the page views, bind the user preference data. Here is an example from the current weather page:
+
+```html
+  <div class="information">
+    <div class="city">{{cityName}}</div>
+    <kws-temperature class="primary-value" [scale]="scale" temperature="{{currentWeather?.temperature}}"></kws-temperature>
+  </div>
+```
+
+**Challenge:** do the same for the `ForecastPage`. You will only need to deal with the scale.
+
+## Use the Service in the Weather Service
+
+When getting the current location, the user preferences need to be taken into account.
+
+1. inject the `UserPreferencesService`
+1. modify the `getCurrentLocation()` function to check the city from user preferences and either return that city's location or use geo-location via `this.location.current()`
+
+**Hints:**
+
+1. You need to change the code inside of the `from()`
+1. Promises can be chained
+1. When promises are chained, the promise ultimately resolves to whatever is returned by the inner-most `then()` callback.
+
+Here is what you should have in the end:
+
+```TypeScript
+  private getCurrentLocation(): Observable<Coordinate> {
+    return from(
+      this.userPreferences.getCity().then(city => {
+        if (city && city.coordinate) {
+          return Promise.resolve(city.coordinate);
+        } else {
+          return this.location.current();
+        }
+      })
+    );
+  }
+```
+
+You could also write this to use `async / await` if you want:
+
+```TypeScript
+  private getCurrentLocation(): Observable<Coordinate> {
+    return from((async (): Promise<Coordinate> => {
+      const city = await this.userPreferences.getCity();
+      return (city && city.coordinate) || await this.location.current();
+    })());
+  }
+```
+
+## Respond to Changes in the User Preferences
+
+In rxjs, the `Subject` is kind of like an Event Emitter. Set one up in the `UserPreferenceService`.
+
+1. `import { Subject } from 'rxjs';`
+1. create a public property on the class: 
+1. Instantiate a new `Subject` in the constructor
+1. Call the `Subject`'s `next()` method when new preferences are changed
+
+Often, you will emit a value. In this case, just emit nothing. Here is a synopsis of the changes:
+
+```TypeScript
+import { Subject } from 'rxjs';
+
+import { City } from '../../models/city';
+import { cities } from './cities';
+
+@Injectable({
+  providedIn: 'root'
 })
-export class CurrentWeatherPage implements OnDestroy, OnInit {
-  private prefChange: Subscription;
+export class UserPreferencesService {
 
-  cityName: string;
-  currentWeather: Weather;
+  ...
+
+  changed: Subject<void>;
+
+  constructor(private storage: Storage) {
+    this.changed = new Subject();
+  }
+
+  ...
+
+  async setUseCelcius(value: boolean): Promise<void> {
+    await this.storage.ready();
+    this._useCelcius = value;
+    await this.storage.set(this.keys.useCelcius, value);
+    this.changed.next();
+  }
+
+  ...
+
+  async setCity(city: City): Promise<void> {
+    await this.storage.ready();
+    this._city = cities.find(c => c.name === city.name) || cities[0];
+    await this.storage.set(this.keys.city, city);
+    this.changed.next();
+  }
+```
+
+To respond to the change, the base page should be changed as such:
+
+* Since we will get data when the view enters and when the user preferences data changes, put that logic in a private method called `getData()`
+* When the view loads, subscribe to the changed subject
+* When the subject fires, get the data
+* When the view unloads, remove the subscription
+
+The code should look something like this:
+
+```TypeScript
+export class WeatherPageBase<T> implements OnInit, OnDestroy {
   scale: string;
+  cityName: string;
+  data: T;
+
+  private subscription: Subscription;
 
   constructor(
-    public iconMap: IconMapService,
-    private loading: LoadingController,
     private modal: ModalController,
-    public network: NetworkService,
     private userPreferences: UserPreferencesService,
-    private weather: WeatherService
+    fetch: () => Observable<T>
   ) {}
 
   ngOnInit() {
-    this.prefChange = this.userPreferences.changed.subscribe(() =>
+    this.subscription = this.userPreferences.changed.subscribe(() =>
       this.getData()
     );
   }
@@ -133,31 +246,28 @@ export class CurrentWeatherPage implements OnDestroy, OnInit {
   }
 
   ngOnDestroy() {
-    this.prefChange.unsubscribe();
+    this.subscription.unsubscribe();
   }
 
-  async openUserPreferences(): Promise<void> {
-    const m = await this.modal.create({ component: UserPreferencesComponent });
-    await m.present();
+  async openUserPreferences() {
+    const m = this.modal.create({ component: UserPreferencesComponent });
+    m.present();
   }
 
   private async getData() {
-    if (this.network.onLine) {
-      const l = await this.loading.create({
-        message: 'Loading...'
-      });
-      l.present();
-      this.cityName = (await this.userPreferences.getCity()).name;
-      this.scale = (await this.userPreferences.getUseCelcius()) ? 'C' : 'F';
-      this.weather.current().subscribe(w => {
-        this.currentWeather = w;
-        l.dismiss();
-      });
-    }
-  }
+    const l = await this.loading.create({
+      message: 'Loading...'
+    });
+    l.present();
+    this.cityName = (await this.userPreferences.getCity()).name;
+    this.scale = (await this.userPreferences.getUseCelcius()) ? 'C' : 'F';
+    this.fetch().subscribe(d => {
+      this.data = d;
+      l.dismiss();
+    });
 }
 ```
 
-Update the other two pages in a similar fashion.
+## Conclusion
 
-Test the application in your browser and on your device. Turn off the network and verify that the application continues to work, even though it may not display any data. Verify that the warning message is displayed after navigating while the network is off and is hidden when navigating while the network is on.
+Our weather app now has a simple set of preferences and responds to changes to them.
