@@ -4,19 +4,40 @@ Cordova plugins are used when you want to access native functionality from your 
 
 In this lab you will learn how to:
 
-- Install Cordova Plugins
-- Use Ionic Native wrappers
+- Install a Cordova plugin
+- Use an Ionic Native wrapper for a particular Cordova plugin
 - Create a non-HTTP service
-- Use promises
-- Use promises and observables together by mapping the promises to observables
-- Use `flatMap` to essentially "chain" observables
+- Use Promises and Observables
+- Map a Promise to an Observable
+- Use `flatMap` to "chain" observables
 - Keep complex code clean
 
-## Geo-Location
+## Using Geolocation
 
-Right now, the application gives us the weather for a specific location. It would be nice if it could let us know what the weather is for our current location. Checking the <a href="https://ionicframework.com/docs/native/" target="_blank">Ionic Native</a> project page we see that a plugin and Ionic Native wrapper exists for geolocation.
+Right now, the application gives us the weather for a specific location. It would be nice if it could let us know what the weather is for our current location. Checking the <a href="https://ionicframework.com/docs/native/" target="_blank">Ionic Native</a> project page, we see that a plugin and Ionic Native wrapper exists for geolocation.
 
-### Install the Plugin
+## Comparing the Cordova Plugin and Ionic Native Wrapper
+One important thing to remember is that Ionic Native plugin wrappers are just that: simple wrappers created to make it easy to access Cordova plugin functionality in an Ionic application. The plugin actually handles all of the logic for that particular feature. 
+
+In our case, the Geolocation Cordova plugin (<a href="https://github.com/apache/cordova-plugin-geolocation" target="_blank">cordova-plugin-geolocation</a>) contains and performs any logic required to actually retrieve location data. 
+
+Here's an example API call to the Geolocation plugin directly:
+
+```TypeScript
+navigator.geolocation.getCurrentPosition(geolocationSuccess,
+                                          [geolocationError],
+                                          [geolocationOptions]);
+```
+
+The Geolocation Ionic Native Wrapper simplifies the logic to make the same call to the Geolocation plugin APIs in a cleaner manner:
+
+```TypeScript
+this.geolocation.getCurrentPosition().then(res => { ... });
+```
+
+This means that if you have an issue with a particular feature of your application that uses a plugin and a wrapper, it is best to start investigating the Cordova plugin first. 
+
+## Install the Plugin
 
 The <a href="https://ionicframework.com/docs/native/geolocation/" target="_blank">Ionic Native wrapper page</a> is a good place to start any time you are installing a new plugin. Let's add this to our project.
 
@@ -33,11 +54,11 @@ The <a href="https://ionicframework.com/docs/native/geolocation/" target="_blank
 
 The `config.xml` file change is required in order to modify the `info.plist` file that is generated via a Cordova build for iOS. This is something that Apple requires you to specify if you are going to use Geolocation.
 
-### Use the Plugin
+## Using the Cordova Plugin
 
-#### Create the Coordinate Model
+### Create the Coordinate Model
 
-Add another model called `Coordinate`
+Add another model called `Coordinate`:
 
 ```TypeScript
 export interface Coordinate {
@@ -46,9 +67,9 @@ export interface Coordinate {
 }
 ```
 
-**Hint:** add it in the model folder in its own file.
+**Hint:** Add it in the `model` folder in its own file.
 
-#### Create the Location Service
+### Create the Location Service
 
 Generate a service that will be used to get the current location. Specify the name as `services/location/location` in the CLI command. Once that service is generated, add the stub for a single method that will get the current location.
 
@@ -69,7 +90,9 @@ export class LocationService {
 }
 ```
 
-Let's consider what this method should do. This application will run in two contexts. It will run in a Cordova context when the application is installed on a device, and it will run in a web context when the developers are running the application in Chrome on their development machines. Here is what the method should do:
+Let's consider what this method should do. This application will run in two contexts. It will run in a Cordova context when the application is installed on a device, and it will run in a web context when the developers are running the application in Chrome on their development machines. 
+
+With that in mind, let's consider the logic for this method:
 
 1. When running in a "Cordova" context, use the Geolocation plugin to return the current location.
 1. When running in a "web" context, use the hard-coded default location.
@@ -107,7 +130,7 @@ When complete, the bulk of the code should look something like this:
   }
 ```
 
-#### Use the Location Service
+### Use the Location Service
 
 Now that the service exists, let's use it to get the current location before grabbing data. This leaves us with a problem: competing paradigms for dealing with async code. This will be a lot easier if we can bring our Observable code into a Promise based world, or if we can bring our Promises into an Observable based world. The problem with the former is that it would result in having to rewrite all of our pages where we use this service. Therefore, we will do the latter.
 
@@ -170,7 +193,7 @@ But I find that messy because there are two different levels of abstraction bein
   }
 ```
 
-**Challenge:** rewrite the other two public methods to also get the current location before returning the weather data related observables.
+**Challenge:** Rewrite the other two public methods to also get the current location before returning the weather data related observables.
 
 Once this rewrite is complete, you should be able to remove the following code from the `WeatherService`:
 
