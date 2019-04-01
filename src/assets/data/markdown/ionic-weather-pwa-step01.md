@@ -21,10 +21,9 @@ Since this is something that will be done often, and I suggest adding it as a sc
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
-    "start:iphone7": "ionic cordova run ios --target='iPhone-7, 12.1' -- -buildFlag='-UseModernBuildSystem=0'",
-    "start:iphonex": "ionic cordova run ios --target='iPhone-X, 12.1' -- -buildFlag='-UseModernBuildSystem=0'",
+    "start:iphone7": "ionic cordova run ios --target='iPhone-7, 12.1'",
+    "start:iphonex": "ionic cordova run ios --target='iPhone-X, 12.1'",
     "build": "ng build",
-    "build:ios": "ionic cordova build ios --prod -- -buildFlag='-UseModernBuildSystem=0'",
     "build:web": "ionic build --engine=browser --prod",
     "test": "ng test",
     "lint": "ng lint",

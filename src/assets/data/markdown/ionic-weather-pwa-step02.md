@@ -67,17 +67,24 @@ A PWA is built upon three key pieces of technology:
 
 The HTTPS bit is handled by Firebase Hosting. Now we will handle the last two as well as adding some polish.
 
-First, let's install Angular's PWA library by running `npx ng add @angular/pwa`. This command did several things:
+First, let's install Angular's PWA library:
+
+```
+npx ng add @angular/pwa
+```
+
+This command did several things:
 
 1. Installed a pre-built configurable service worker
 1. Installed a pre-defined Web App Manifest file
 1. Installed several default icons
+
 1. Modified a couple of project files to load the service worker and web app manifest
 
-Out of the box, this provides almost everything we need for our app to be served as a PWA. We need to adjust a few things, however.
+Out of the box, this provides almost everything we need for our app to be served as a PWA. We need to adjust a few things:
 
 * All of the icons are the Angular logo
-* The application name is incorrect in the `src/manifest.webmanifest` file
+* The application name is incorrect in the `src/manifest.json` file
 
 Now is a good time to add the new files to our git repo and commit the other changes.
 
@@ -170,11 +177,11 @@ If you build and deploy the application at this time:
 Enter <a href="https://developers.google.com/web/updates/2018/07/pwacompat" target="_blank">PWACompat</a>. Follow the instuctions on that page to add this to your application. It involves addimg a `script` tag after the Web App Manifest is loaded. At this time, the markup looks like this:
 
 ```HTML
-    <link rel="manifest" href="manifest.webmanifest" />
-    <script
+    <link rel="manifest" href="manifest.json" />
+        <script
       async
-      src="https://cdn.jsdelivr.net/npm/pwacompat@2.0.6/pwacompat.min.js"
-      integrity="sha384-GOaSLecPIMCJksN83HLuYf9FToOiQ2Df0+0ntv7ey8zjUHESXhthwvq9hXAZTifA"
+      src="https://cdn.jsdelivr.net/npm/pwacompat@2.0.8/pwacompat.min.js"
+      integrity="sha384-uONtBTCBzHKF84F6XvyC8S0gL8HTkAPeCyBNvfLfsqHh+Kd6s/kaS4BdmNQ5ktp1"
       crossorigin="anonymous"
     ></script>
 ```

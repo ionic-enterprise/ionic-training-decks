@@ -15,24 +15,62 @@ Another good place to check is <a href="https://caniuse.com/" target="_blank">ca
 
 ## Use the Geolocation Web API
 
-The location code currently looks like this:
+The location service currently uses a default position if the user is on the web. It should be changed to use the web API when running within a web context.
+
+### Test First
+
+1. Spy on the web API and call a fake instead of the real method
+1. Modify the "when not hybrid mobile" tests to express the requirements to get the position using the web API
 
 ```TypeScript
-  async current(): Promise<Coordinate> {
-    const loc =
-      this.cachedLocation ||
-      (this.platform.is('cordova')
-        ? await this.geolocation.getCurrentPosition()
-        : this.defaultPosition);
-    this.cachedLocation = loc;
-    return {
-      longitude: loc.coords.longitude,
-      latitude: loc.coords.latitude
-    };
-  }
+  describe('current', () => {
+    beforeEach(() => {
+      spyOn(navigator.geolocation, 'getCurrentPosition').and.callFake(
+        function() {
+          const position = { coords: { latitude: 32, longitude: -96 } };
+          arguments[0](position);
+        }
+      );
+    });
+
+    ... // most tests stay the same
+
+    describe('when not hybrid mobile', () => {
+      beforeEach(() => {
+        const platform = TestBed.get(Platform);
+        platform.is.withArgs('cordova').and.returnValue(false);
+      });
+
+      it('does not call the geolocation plugin', () => {
+        const geolocation = TestBed.get(Geolocation);
+        const service: LocationService = TestBed.get(LocationService);
+        service.current();
+        expect(geolocation.getCurrentPosition).not.toHaveBeenCalled();
+      });
+
+      it('calls the web API geolocation', () => {
+        const service: LocationService = TestBed.get(LocationService);
+        service.current();
+        expect(navigator.geolocation.getCurrentPosition).toHaveBeenCalledTimes(
+          1
+        );
+      });
+
+      it('resolves the position using the web API', async () => {
+        const service: LocationService = TestBed.get(LocationService);
+        expect(await service.current()).toEqual({
+          latitude: 32,
+          longitude: -96
+        });
+      });
+    });
+  });
 ```
 
-We want to take the `: this.defaultPosition)` line and replace it with code that gets the location using the Web API. Time to write a private function:
+
+### Then Code
+
+Create a private function that uses the web API. Here is an example:
 
 ```TypeScript
   private getCurrentPositionWebApi(): Promise<{
@@ -52,10 +90,10 @@ We want to take the `: this.defaultPosition)` line and replace it with code that
 
 Let's walk through what that is doing:
 
-1. if the current environment supports geolocation
-   1. call the web API
-   1. the web API takes callbacks, convert that to a Promise
-1. in the rare case that geolocation is not supported, fallback to our default location
+1. If the current environment supports geolocation:
+   1. Call the web API
+   1. The web API takes callbacks, convert that to a Promise
+1. In the rare case that geolocation is not supported, fallback to our default location (not tested)
 
 Now in the main code we can replace `: this.defaultPosition);` with `: await this.getCurrentPositionWebApi());`.
 
