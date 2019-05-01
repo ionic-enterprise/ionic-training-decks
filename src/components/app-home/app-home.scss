@@ -1,16 +1,17 @@
 .container {
   display: flex;
-  margin: 10px;
   height: calc(100vh - 56px);
 
   .menu {
     min-width: 225px;
+    margin-top: 10px;
+    margin-left: 10px;
     overflow-y: auto;
   }
 
   .content {
     margin-left: 20px;
-    margin-right: 5px;
+    padding-right: 10px;
     overflow-y: auto;
   }
 }
