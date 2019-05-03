@@ -96,9 +96,14 @@ We can fix all of that by:
 
 This changes the requirements for the application component. Following TDD, we should do this one step at a time to craft our code, first writing a test, then writing the code to satisfy that test.
 
+The following steps require changes to two files:
+
+- `src/app/app.component.spec.ts`
+- `src/app/app.component.ts`
+
 ### Step 0 - Update the `statusBar` Mock
 
-The status bar mock is currently created as such: `statusBar = jasmine.createSpyObj('StatusBar', ['styleDefault']);`
+The status bar mock is currently created in `app.component.spec.ts` as such: `statusBar = jasmine.createSpyObj('StatusBar', ['styleDefault']);`
 
 We are going to use two different methods: `styleLightContent()` and `backgroundColorByHexString()`
 

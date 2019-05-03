@@ -32,7 +32,7 @@ Here is an example of those changes:
 <widget id="com.kensodemann.ionicweather" version="0.0.1" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
     <name>My Weather App</name>
     <description>Shows the weather locally and in key cities</description>
-    <author email="ken@ionic.io" href="http://ionicframework.com/">Ken Sodemann</author>
+    <author email="ken@ionicframework.com" href="http://ionicframework.com/">Ken Sodemann</author>
 ```
 
 Make similar changes to your application.
