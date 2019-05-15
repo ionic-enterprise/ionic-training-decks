@@ -3,7 +3,7 @@
 In this lab, you will learn how to:
 
 * Apply global themes and styles
-* Theme the application using Ioinic Studio
+* Theme the application using Ioinic Studio (or our online color generator)
 * Apply different colors within the application
 * Style the status bar
 

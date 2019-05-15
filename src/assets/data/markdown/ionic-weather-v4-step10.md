@@ -72,7 +72,7 @@ export class LocationService {
 }
 ```
 
-Let's consider what this method should do. This application will run in two contexts:
+Let's consider what the `current()` method should do. This application will run in two contexts:
 
 1. **Cordova:** In this context, the application is installed on a device. Thus Cordova and the native functionality being bridged by the plugin is available.
 1. **Web:** In this context the application is being run in a web browser. This is the context used when a developer is running the application using the development server. Neither Cordova nor the native functionality are available in this context.
@@ -154,7 +154,7 @@ import { Geolocation } from '@ionic-native/geolocation/ngx';
           useFactory: () =>
             jasmine.createSpyObj('Geolocation', {
               getCurrentPosition: Promise.resolve({
-                coords: { latitude: 42, longitute: 73 }
+                coords: { latitude: 42, longitude: 73 }
               })
             })
         }
@@ -224,8 +224,8 @@ export class LocationService {
 ```TypeScript
   async current(): Promise<Coordinate> {
     this.platform.is('cordova');
-    const pos = await this.geolocation.getCurrentPosition();
-    return { latitude: pos.coords.latitude, longitude: pos.coords.longitude };
+    const { coords } = await this.geolocation.getCurrentPosition();
+    return { latitude: coords.latitude, longitude: coords.longitude };
   }
 ```
 
@@ -248,15 +248,10 @@ export class LocationService {
 
 ```TypeScript
   async current(): Promise<Coordinate> {
-    const pos = this.platform.is('cordova')
+    const { coords } = this.platform.is('cordova')
       ? await this.geolocation.getCurrentPosition()
-      : {
-          coords: {
-            latitude: 0,
-            longitude: 0
-          }
-        };
-    return { latitude: pos.coords.latitude, longitude: pos.coords.longitude };
+      : { coords: { latitude: 0, longitude: 0 } };
+    return { latitude: coords.latitude, longitude: coords.longitude }
   }
 ```
 
@@ -318,7 +313,7 @@ export function createLocationServiceMock() {
 }
 ```
 
-**`weather.service.spec.ts`
+**`weather.service.spec.ts`**
 
 ```TypeScript
 import { createLocationServiceMock } from '../location/location.service.mock';
@@ -334,14 +329,14 @@ import { LocationService } from '../location/location.service';
     httpTestingController = TestBed.get(HttpTestingController);
     const loc = TestBed.get(LocationService);
     loc.current.and.returnValue(
-      Promise.resolve({ latitutde: 42.731338, longitude: -88.314159 })
+      Promise.resolve({ latitude: 42.731338, longitude: -88.314159 })
     );
   });
 ```
 
 ##### Step 1 - Get the Current Location
 
-**`weather.service.spec.ts`
+**`weather.service.spec.ts`**
 
 ```TypeScript
   describe('current', () => {
@@ -355,23 +350,57 @@ import { LocationService } from '../location/location.service';
   });
 ```
 
-**`weather.spec.ts`
+**`weather.service.ts`**
 
-Getting the above test to pass is a matter of injecting the service and calling the `current()` method in the correct spot, but not really doing anything with the output. Doing that is left as an exercise for you to complete.
-
+Getting the above test to pass is a matter of injecting the service and calling the `current()` method in the correct spot. Doing so is left as an exercise for you to complete. **Note:** we do not need to do anything with the result at this time. We just need to get the test to pass.
 
 ##### Step 2 - Use the Current Location
 
-**`weather.service.spec.ts`
+**`weather.service.spec.ts`**
 
-We are already testing that there is an HTTP call and that we return data based on the result of that call. Updating the tests to ensure that the only functional change is that we now wait for the location to be obtained and this use it requires just two changes:
+We are already have tests verifying the HTTP call and return. Update thost tests to ensure that the returned location is used in the HTTP call.
 
-1. `async/await` a call to the LocationService mock's `curent()` method after subscribing to the WeatherService's `current()` method.
+This requires two changes to the tests:
+
+1. Use Angular's `fakeAsync()` zone and a `tick()` call so the location Promise gets resolved.
 1. Modify the values used for the `lat` and `lon` parameters in the URL.
 
 Updating the tests accordingly is left as an exercise for you.
 
-**`weather.service.ts`
+**Hint:** Here is the general pattern:
+
+```TypeScript
+import { fakeAsync, TestBed, tick } from '@angular/core/testing';
+...
+
+    it('gets the data from the server', fakeAsync(() => {
+      const service: SomeService = TestBed.get(SomeService);
+      service.someMethod().subscribe();
+      tick();
+      const req = httpTestingController.expectOne('some url');
+      expect(req.request.method).toEqual('GET');
+      httpTestingController.verify();
+    }));
+...
+```
+
+**`weather.service.ts`**
+
+Make the changes to the `WeatherService`'s `current()` method to make those tests pass.
+
+**Hint:** Recall this pattern from when we talked about combining Observables and Promises:
+
+```TypeScript
+function getSomeData (): Observable<ChildDataType> {
+  return from(this.getParentData()).pipe(
+    flatMap((data: DataType) =>
+      this.getChildData(data)
+    )
+  );
+}
+```
+
+##### Step 3 - Refactor for Single Responsibility
 
 Updating the code to work in the quickest, dirtiest way results in code something like this:
 
@@ -393,8 +422,8 @@ Updating the code to work in the quickest, dirtiest way results in code somethin
 
 I find that messy because the method is responsible for knowing how to do multiple things. We can mitigate through some refactoring, made safer by the existence of our tests:
 
-1. Abstract the Promise -> Observable logic into private `getCurrentLocation(): Observable<Coorodinate>` method
-1. Abstract the HTTP call logic into private `getCurrentWeather(): Observable<Weather>` method
+1. Abstract the Promise -> Observable logic into `private getCurrentLocation(): Observable<Coorodinate>` method
+1. Abstract the HTTP call logic into `private getCurrentWeather(): Observable<Weather>` method
 
 When complete, the `current()` method should look like this:
 
