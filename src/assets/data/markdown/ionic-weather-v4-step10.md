@@ -475,6 +475,8 @@ The LoadingController follows a pattern that is common in Ionic for type of comp
 The mocks can be set up like such:
 
 ```TypeScript
+  let loading;
+  ...
   beforeEach(async(() => {
     loading = createOverlayElementMock('Loading');
     TestBed.configureTestingModule({
@@ -526,7 +528,7 @@ The test tests should look something like this. Note that the two existing tests
       });
     });
 
-    it('dismisses a loading indicator', async () => {
+    it('dismisses the loading indicator', async () => {
       const weather = TestBed.get(WeatherService);
       weather.current.and.returnValue(
         of({
