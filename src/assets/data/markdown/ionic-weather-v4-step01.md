@@ -102,4 +102,4 @@ ionic serve
 
 ## Conclusion
 
-Congratulations on creating your `@ionic/angular` application. Next we will have to add some Cordova platforms so we can run the application on devices.
+Congratulations on creating your `@ionic/angular` application. Next we will explore unit tests and discuss how they can help us in our development lifecycle.
