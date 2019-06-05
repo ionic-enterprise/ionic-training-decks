@@ -24,7 +24,7 @@ Here is a synopsis of the instructions:
 
 - `ionic cordova plugin add cordova-plugin-geolocation`
 - `npm i @ionic-native/geolocation`
-- Add the plugin to the list of providers in the `AppModule`. Use either `StatusBar` or `SplashScreen` as your guide.
+- Add the Ionic Native Wrapper service to the list of providers in the `AppModule`. Use either `StatusBar` or `SplashScreen` as your guide.
 - Add the following configuration item to the `config.xml` file as a direct descendant of the `widget` node.
 
 ```xml

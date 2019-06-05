@@ -270,7 +270,7 @@ export class WeatherService {
 
   constructor(private http: HttpClient) {}
 
-  current(): Observable<any> {
+  current(): Observable<Weather> {
     return this.http
       .get(
         `${environment.baseUrl}/weather?lat=${this.latitude}&lon=${
@@ -280,7 +280,7 @@ export class WeatherService {
       .pipe(map((res: any) => this.unpackWeather(res)));
   }
 
-  forecast(): Observable<any> {
+  forecast(): Observable<Forecast> {
     return this.http
       .get(
         `${environment.baseUrl}/forecast?lat=${this.latitude}&lon=${
@@ -290,7 +290,7 @@ export class WeatherService {
       .pipe(map((res: any) => this.unpackForecast(res)));
   }
 
-  uvIndex(): Observable<any> {
+  uvIndex(): Observable<UVIndex> {
     return this.http
       .get(
         `${environment.baseUrl}/uvi?lat=${this.latitude}&lon=${this.longitude}&appid=${

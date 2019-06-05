@@ -54,7 +54,7 @@ _Note:_ is a real app, you might want to protect your app ID more, at least if t
 
 The first version of the app will use a hardcoded location. I am using Madison, WI, USA because that is where the Ionic HQ is located, but you should use something closer to your home. You can use a website such as <a href="https://www.latlong.net/" target="_blank">LatLong.net</a> to find the coordinates of your city.
 
-Add the coordinates you would like to use as private data in the service. My private data looks like this:
+Add the coordinates you would like to use as private data in the `src/app/services/weather/weather.service.ts` service. My private data looks like this:
 
 ```TypeScript
   private latitude = 43.073051;
@@ -384,7 +384,34 @@ The <a href="https://openweathermap.org/api/uvi" target="_blank">response data</
 - The transform should be similar to the other transforms.
 - The code is cleaner if you write a private method to calculate the risk level.
 
-**Extra Credit:** Write extra tests to verify each of the risk levels
+One way to write that test is to create a testng template and feed an array of value to the test template as such:
+
+```TypeScript
+    [
+      { value: 0, riskLevel: 0 },
+      { value: 2.9, riskLevel: 0 },
+      { value: 3, riskLevel: 1 },
+      { value: 5.9, riskLevel: 1 },
+      { value: 6, riskLevel: 2 },
+      { value: 7.9, riskLevel: 2 },
+      { value: 8, riskLevel: 3 },
+      { value: 10.9, riskLevel: 3 },
+      { value: 11, riskLevel: 4 },
+      { value: 18, riskLevel: 4 }
+    ].forEach(test =>
+      it(`transforms the data (value: ${test.value})`, () => {
+        const service: WeatherService = TestBed.get(WeatherService);
+        let uvIndex: UVIndex;
+        service.uvIndex().subscribe(i => (uvIndex = i));
+        const req = httpTestingController.expectOne(
+          `${environment.baseUrl}/uvi?lat=43.073051&lon=-89.40123&appid=${environment.appId}`
+        );
+        req.flush({ value: test.value });
+        expect(uvIndex).toEqual({ value: test.value, riskLevel: test.riskLevel });
+        httpTestingController.verify();
+      })
+    );
+```
 
 ## Conclusion
 

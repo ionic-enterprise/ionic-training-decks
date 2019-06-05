@@ -143,7 +143,7 @@ export class CurrentWeatherPage {
 }
 ```
 
-Use the weather components in the view.
+Use the weather components in the `src/app/current-weather/current-weather.page.html` view.
 
 ```html
 <ion-content padding text-center>
@@ -188,7 +188,7 @@ kws-condition {
 
 ### Forecast
 
-Each `kws-daily-forecast` element takes an array of `Weather` data for a given day. We want to show the current forecast for several days, so we will need an array of arrays. Create a `src/models/forecast.ts` file:
+Each `kws-daily-forecast` element takes an array of `Weather` data for a given day. We want to show the current forecast for several days, so we will need an array of arrays. Create a `src/app/models/forecast.ts` file:
 
 ```TypeScript
 import { Weather } from './weather';
@@ -277,7 +277,7 @@ kws-daily-forecast {
 
 The UV index page is a little more involved. We will have some text we display here that is defined in the page source.
 
-**src/models/uv-index.ts**
+**src/app/models/uv-index.ts**
 
 ```TypeScript
 export interface UVIndex {

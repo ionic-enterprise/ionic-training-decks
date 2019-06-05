@@ -67,7 +67,7 @@ I prefer to keep my mocks along side my services. This has a couple of benefits:
 
 The factory creates a jasmine spy matching the API for the service. In the case of the weather service, each method returns an `EMPTY` observable by default.
 
-**`src/app/services/weather/wether.service.mock.ts`**
+**`src/app/services/weather/weather.service.mock.ts`**
 
 ```TypeScript
 import { EMPTY } from 'rxjs';
@@ -144,6 +144,8 @@ We have some new functionallity to cover. That functionallity is "entering the p
     });
   });
 ```
+
+**Note:** You will need to add `import { of } from 'rxjs';` to the top of your test file.
 
 Once you get those test written, they should be failing. Let's talk about the strategy of those tests a bit before moving on to writing the code.
 
