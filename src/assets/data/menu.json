@@ -5,111 +5,111 @@
       "title": "Getting Started"
     },
     {
-      "id": "ionic-weather-v4",
+      "id": "iw-crd-v4",
       "title": "App: Ionic Weather",
       "pages": [
         {
-          "id": "ionic-weather-v4-step01",
+          "id": "iw-crd-v4-generate",
           "title": "Lab: Generate the Application"
         },
         {
-          "id": "ionic-weather-v4-step02",
+          "id": "iw-crd-v4-unit-testing",
           "title": "Lab: Unit Testing"
         },
         {
-          "id": "ionic-weather-v4-step03",
+          "id": "iw-crd-v4-platforms",
           "title": "Lab: Add Cordova Platforms"
         },
         {
-          "id": "ionic-weather-v4-step04",
+          "id": "iw-crd-v4-style",
           "title": "Lab: Style the App"
         },
         {
-          "id": "ionic-weather-v4-step05",
+          "id": "iw-crd-v4-library",
           "title": "Lab: Use a Component Library"
         },
         {
-          "id": "ionic-weather-v4-step06",
+          "id": "iw-crd-v4-ui-mock",
           "title": "Lab: Mock Up the Interface"
         },
         {
-          "id": "ionic-weather-v4-step07",
+          "id": "iw-crd-v4-get-data",
           "title": "Lab: Get Data",
           "pages": [
             {
-              "id": "ionic-weather-v4-step07-01",
+              "id": "iw-crd-v4-get-data-code",
               "title": "Completed Code"
             }
           ]
         },
         {
-          "id": "ionic-weather-v4-step08",
+          "id": "iw-crd-v4-use-data",
           "title": "Lab: Using the Data",
           "pages": [
             {
-              "id": "ionic-weather-v4-step08-01",
+              "id": "iw-crd-v4-use-data-code",
               "title": "Completed Code"
             }
           ]
         },
         {
-          "id": "ionic-weather-v4-step10",
+          "id": "iw-crd-v4-plugins",
           "title": "Lab: Using Plugins",
           "pages": [
             {
-              "id": "ionic-weather-v4-step10-01",
+              "id": "iw-crd-v4-plugins-code",
               "title": "Completed Code"
             }
           ]
         },
         {
-          "id": "ionic-weather-v4-step11",
+          "id": "iw-crd-v4-user-pref1",
           "title": "Lab: User Preferences Phase 1",
           "pages": [
             {
-              "id": "ionic-weather-v4-step11-01",
+              "id": "iw-crd-v4-user-pref1-code",
               "title": "Completed Code"
             }
           ]
         },
         {
-          "id": "ionic-weather-v4-step12",
+          "id": "iw-crd-v4-base-class",
           "title": "Lab: Create a Generic Base Class"
         },
         {
-          "id": "ionic-weather-v4-step13",
+          "id": "iw-crd-v4-user-pref2",
           "title": "Lab: User Preferences Phase 2",
           "pages": [
             {
-              "id": "ionic-weather-v4-step13-01",
+              "id": "iw-crd-v4-user-pref2-code",
               "title": "Completed Code"
             }
           ]
         },
         {
-          "id": "ionic-weather-v4-step14",
+          "id": "iw-crd-v4-offline",
           "title": "Lab: Add Simple Offline Handling"
         }
       ]
     },
     {
-      "id":"ionic-weather-pwa",
+      "id":"iw-crd-v4-pwa",
       "title": "App: Ionic Weather - PWA",
       "pages": [
         {
-          "id": "ionic-weather-pwa-step01",
+          "id": "iw-crd-v4-pwa-host",
           "title": "Lab: Host the Application"
         },
         {
-          "id": "ionic-weather-pwa-step02",
+          "id": "iw-crd-v4-pwa-make-pwa",
           "title": "Lab: Add the PWA Goodies"
         },
         {
-          "id": "ionic-weather-pwa-step03",
+          "id": "iw-crd-v4-pwa-web-api",
           "title": "Lab: Get the Current Location"
         },
         {
-          "id": "ionic-weather-pwa-links",
+          "id": "iw-crd-v4-pwa-links",
           "title": "Lab: PWA Links"
         }
       ]
