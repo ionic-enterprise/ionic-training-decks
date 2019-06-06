@@ -285,6 +285,7 @@ export class LocationService {
           }
         };
     return { latitude: pos.coords.latitude, longitude: pos.coords.longitude };
+  }
 ```
 
 Now that we have developed a fully tested method, we can clean it up a bit. We should really define the default location using a private constant defined on the class rather than a literal value in the method. Refactor the code as such.
