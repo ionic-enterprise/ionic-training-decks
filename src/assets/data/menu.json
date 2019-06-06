@@ -17,10 +17,6 @@
           "title": "Lab: Unit Testing"
         },
         {
-          "id": "iw-crd-v4-platforms",
-          "title": "Lab: Add Cordova Platforms"
-        },
-        {
           "id": "iw-crd-v4-style",
           "title": "Lab: Style the App"
         },
@@ -51,6 +47,10 @@
               "title": "Completed Code"
             }
           ]
+        },
+        {
+          "id": "iw-crd-v4-platforms",
+          "title": "Lab: Add Cordova Platforms"
         },
         {
           "id": "iw-crd-v4-plugins",
