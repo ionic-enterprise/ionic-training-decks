@@ -289,7 +289,7 @@ export class LocationService {
 
 Now that we have developed a fully tested method, we can clean it up a bit. We should really define the default location using a private constant defined on the class rather than a literal value in the method. Refactor the code as such.
 
-Let' pause here and discuss what we have done.
+Let's pause here and discuss what we have done.
 
 #### Use the Location Service
 
