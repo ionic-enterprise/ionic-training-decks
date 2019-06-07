@@ -141,8 +141,8 @@ The current "should initialize the app" test violates that a bit. Let's refactor
 ```TypeScript
 describe('initialization', () => {
   it('waits for the platform to be ready', () => {});
-  it('sets the default status bar style when ready', () => {});
-  it('hides the splash screen when ready', () => {});
+  it('sets the default status bar style when ready', async () => {});
+  it('hides the splash screen when ready', async () => {});
 });
 ```
 
