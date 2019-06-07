@@ -91,14 +91,11 @@ In either case, the Angular CLI does all the heavy lifting, so use whichever com
 For this training we will start with a template application that is based on the tabs starter but has all of the pages renamed to match the page structure of the weather application.
 
 ```bash
-git clone https://github.com/ionic-enterprise/ionic-weather-starter.git ionic-weather
+git clone https://github.com/ionic-team/ionic-weather-starter.git ionic-weather
 cd ionic-weather
-git remote rm origin
 npm i
 ionic serve
 ```
-
-*Note:* Keep the `training-tabs` project that you created. We can use that to try things out as we go.
 
 ## Conclusion
 
