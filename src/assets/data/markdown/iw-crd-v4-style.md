@@ -87,7 +87,7 @@ Right now, most of the application is sky blue. That is because most of the comp
 
 Run the application on a device or emulator. Notice that the status bar text is black. On Android, the status bar itself may also be black, making the status bar text invisible.
 
-There is another issue, but only on Android. The status bar color. Android guidelines call for the status bar color to be different from the application's title bar, which it is, but most Android applications pick a color that is only slightly different.
+There is another issue, but only on Android. The status bar color. Android guidelines <a href="https://cordova.apache.org/docs/en/latest/reference/cordova-plugin-statusbar/#android-quirks" target="_blank">call for the status bar color to be different from the application's title bar</a>, which it is, but most Android applications pick a color that is only slightly different.
 
 We can fix all of that by:
 
