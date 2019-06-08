@@ -197,6 +197,6 @@ initializeApp() {
 
 You have learned how to apply basic theming and styling to the application.
 
-You have also exercised a little Test Driven Development. If we continuously build your application in this manner, you have a full set of tests that are run with each change giving you more confidence that you are not breaking existing code with your current changes.
+You have also exercised a little Test Driven Development. If you continuously build your application in this manner, you will have a full set of tests that are run with each change. This gives you more confidence that your current changes are not breaking your existing code.
 
 You should commit your changes at this point.
