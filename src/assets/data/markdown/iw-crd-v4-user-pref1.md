@@ -161,7 +161,7 @@ export interface City {
 }
 ```
 
-In the user prefrences folder, let create an array of cities. This is the only place that will use the data, but we will keep in its own file in order to keep the component class clean:
+In the user prefrences folder, let's create an array of cities. This is the only place that will use the data, but we will keep in its own file in order to keep the component class clean:
 
 **`src/components/user-preferences/cities.ts`**
 
