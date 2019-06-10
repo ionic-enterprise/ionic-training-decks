@@ -113,7 +113,7 @@ I will provide the requirements one by one as tests.
     });
 ```
 
-**`getUseCelcius()`**
+**`setUseCelcius()`**
 
 ```TypeScript
     it('waits for storage to be ready', () => {
@@ -173,7 +173,7 @@ export class UserPreferencesService {
     if (this.useCelcius === undefined) {
       this.useCelcius = await this.storage.get(this.keys.useCelcius);
     }
-    return this._useCelcius;
+    return this.useCelcius;
   }
 
   async setUseCelcius(value: boolean): Promise<void> {
@@ -247,9 +247,9 @@ Here is what the code for `getCity()` should look like when you are done (try to
 ```TypeScript
   async getCity(): Promise<City> {
     await this.storage.ready();
-    if (this._city === undefined) {
+    if (this.city === undefined) {
       const city = await this.storage.get(this.keys.city);
-      this._city = cities.find(c => c.name === (city && city.name)) || cities[0];
+      this.city = cities.find(c => c.name === (city && city.name)) || cities[0];
     }
     return this._city;
   }
