@@ -40,11 +40,11 @@ describe('UserPreferencesService', () => {
 
   describe('getUseCelcius', () => {
     // Test for each requirement will go here
-  }
+  });
 
   describe('setUseCelcius', () => {
     // Test for each requirement will go here
-  }
+  });
 });
 
 function createIonicStorageMock() {
