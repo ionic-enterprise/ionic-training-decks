@@ -450,14 +450,14 @@ In the page views, bind the user preference data. Here is an example from the cu
 
 ## Use the Service in the Weather Service
 
-When getting the current location, the user preferences need to be taken into account. This will require a change to the tests:
+When getting the current location, the user preferences need to be taken into account. This will require a change to the tests. Here is a synoposis of what we will do:
 
 1. Add a test that ensures that the user preferences for the city are read.
-1. Add a set of tests that exercise when the user has selected "Current Location"
-1. Add a set of tests that exercise when the user has selected a city
-1. Many test cases now need to await both the user preferences service and the location service
+1. Move the existing 'for the current location' and 'gets the data from the server' into a `describe` that verifies the behavior when the user has selected "Current Location."
+1. Add a set of tests that exercise when the user has selected a city.
+1. Many test cases now need to await both the user preferences service and the location service.
 
-Here are the new tests for `current()`. Add similar tests for `forecast()` and `uvIndex()`:
+Here are the new and modified tests for `current()`. Add similar tests for `forecast()` and `uvIndex()`:
 
 ```TypeScript
   describe('current', () => {
@@ -489,7 +489,7 @@ Here are the new tests for `current()`. Add similar tests for `forecast()` and `
         service.current().subscribe();
         tick();
         const req = httpTestingController.expectOne(
-          `${environment.baseUrl}/weather?lat=42.731138&lon=-88.314159&appid=${
+          `${environment.baseUrl}/weather?lat=42.731338&lon=-88.314159&appid=${
             environment.appId
           }`
         );
