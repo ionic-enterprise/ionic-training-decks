@@ -21,7 +21,7 @@ import { WeatherService } from '../services/weather/weather.service';
   ) {}
 ```
 
-When you run the application after this change, though, you should get an error in the console like this one:
+When you run the application after this change, though, you should get an error like the following in the *console* and in your *test runner*:
 
 ```
 Error: StaticInjectorError(AppModule)[HttpClient]: 
@@ -29,7 +29,7 @@ Error: StaticInjectorError(AppModule)[HttpClient]:
     NullInjectorError: No provider for HttpClient!
 ```
 
-What is going on is that `HttpClient` is injected into the `WeatherService` service, but the `HttpClient` service has not been provided anywhere so the application does not know how to inject it. You need to modify the `AppModule` to import the `HttpClientModule` as such:
+What is going on with the application is that `HttpClient` is injected into the `WeatherService` service, but the `HttpClient` service has not been provided anywhere so the application does not know how to inject it. You need to modify the `AppModule` to import the `HttpClientModule` as such:
 
 ```TypeScript
 import { HttpClientModule } from '@angular/common/http';
@@ -49,7 +49,7 @@ import { HttpClientModule } from '@angular/common/http';
 export class AppModule {}
 ```
 
-Save those changes and check your application - the error should be gone.
+Save those changes and check your application - the error should be gone there. We will tackle the issue in the tests next by mocking the service.
 
 ## Mock the Service
 
