@@ -93,23 +93,23 @@
       ]
     },
     {
-      "id":"iw-crd-v4-pwa",
+      "id":"iw-crdpwa-v4-pwa",
       "title": "App: Ionic Weather - PWA",
       "pages": [
         {
-          "id": "iw-crd-v4-pwa-host",
+          "id": "iw-crdpwa-v4-host",
           "title": "Lab: Host the Application"
         },
         {
-          "id": "iw-crd-v4-pwa-make-pwa",
+          "id": "iw-crdpwa-v4-make-pwa",
           "title": "Lab: Add the PWA Goodies"
         },
         {
-          "id": "iw-crd-v4-pwa-web-api",
+          "id": "iw-crdpwa-v4-web-api",
           "title": "Lab: Get the Current Location"
         },
         {
-          "id": "iw-crd-v4-pwa-links",
+          "id": "iw-crdpwa-v4-links",
           "title": "Lab: PWA Links"
         }
       ]

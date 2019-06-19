@@ -2,11 +2,11 @@
 
 In this lab you will learn how to:
 
-* Inject a service into your pages
-* Diagnose errors that occur while you are developing your application
-* Retrieve real data from the service, replacing the mock data
+- Inject a service into your pages
+- Diagnose errors that occur while you are developing your application
+- Retrieve real data from the service, replacing the mock data
 
-## Injector Error 
+## Injector Error
 
 Start by injecting the `WeatherService` into the `current-weather` page.
 
@@ -21,11 +21,11 @@ import { WeatherService } from '../services/weather/weather.service';
   ) {}
 ```
 
-When you run the application after this change, though, you should get an error like the following in the *console* and in your *test runner*:
+When you run the application after this change, though, you should get an error like the following in the _console_ and in your _test runner_:
 
 ```
-Error: StaticInjectorError(AppModule)[HttpClient]: 
-  StaticInjectorError(Platform: core)[HttpClient]: 
+Error: StaticInjectorError(AppModule)[HttpClient]:
+  StaticInjectorError(Platform: core)[HttpClient]:
     NullInjectorError: No provider for HttpClient!
 ```
 
@@ -111,8 +111,8 @@ The mock can either be manually created and injecting via `useValue` or we can p
 
 There are two lifecycle events that are good candidates for getting data:
 
-* `ngOnInit` - Angular lifecycle event, fired when a component is instantiated
-* `ionViewDidEnter` - Ionic lifecycle event, fired each time a page is visited
+- `ngOnInit` - Angular lifecycle event, fired when a component is instantiated
+- `ionViewDidEnter` - Ionic lifecycle event, fired each time a page is visited
 
 In our application, we want to get new data each time the page is visited. The natural place to do this is the `ionViewDidEnter()` lifecycle event.
 
@@ -163,7 +163,7 @@ Finally, `currentWeather` can just be left declared but unassigned. Remove the m
   currentWeather: Weather;
 ```
 
-**Challenge:** Make similar modifications to the `forecast` and `uv-index` tests and pages. 
+**Challenge:** Make similar modifications to the `forecast` and `uv-index` tests and pages.
 
 ## Conclusion
 

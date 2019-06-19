@@ -14,6 +14,8 @@ We have been building our application for the web using `ng serve` (or a command
 
 To build for the web, use `ionic build --engine=browser --prod`. This will build the application into the `www/` folder. It will also not include `cordova.js` since that is not available on the web, and it will minify the source.
 
+**Note:** `--engine=browser` is technically the default and does not need to be specified if you do not want to. I like to be explicit, however.
+
 Since this is something that will be done often, and I suggest adding it as a script in your `package.json` file. Here is my full set of scripts for this project:
 
 
