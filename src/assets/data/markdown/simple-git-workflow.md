@@ -41,18 +41,18 @@ Over time, I have collected several useful `git` aliases. Feel free to add any o
 
 The ones the use the most are:
 
-* `git bra` - list branches
-* `git sta` - show current status in a nice format
-* `git ls` - list changes to repo in a nice format
-* `git co` - short for checkout
-* `git ci` - short for commit (old CVS or SVN users will understand)
-* `git aa` - amend the previous commit (NEVER do this in `master`)
-* `git stg` - stage changes, giving you a chance to review each one
-* `git rb` - fetch `master` from `origin`, rebase
-* `git squash` - fetch `master` from `origin`, rebase interactively
-* `git rmb` - remove local branch (safely)
-* `git rmbr` - remove remote branch
-* `git lsc` - show files in specified commit-ish
+- `git bra` - list branches
+- `git sta` - show current status in a nice format
+- `git ls` - list changes to repo in a nice format
+- `git co` - short for checkout
+- `git ci` - short for commit (old CVS or SVN users will understand)
+- `git aa` - amend the previous commit (NEVER do this in `master`)
+- `git stg` - stage changes, giving you a chance to review each one
+- `git rb` - fetch `master` from `origin`, rebase
+- `git squash` - fetch `master` from `origin`, rebase interactively
+- `git rmb` - remove local branch (safely)
+- `git rmbr` - remove remote branch
+- `git lsc` - show files in specified commit-ish
 
 ## Workflow
 
@@ -118,7 +118,7 @@ Here is example with just some modified files:
  M src/assets/data/menu.json
 ~/project (feature/addGitWorkflow *): git stg
 
-... 
+...
 
 diff --git a/src/assets/data/menu.json b/src/assets/data/menu.json
 index 5651afe..be68787 100644
@@ -139,7 +139,7 @@ index 5651afe..be68787 100644
      }
    ]
  }
-Stage this hunk [y,n,q,a,d,e,?]? 
+Stage this hunk [y,n,q,a,d,e,?]?
 
 ...
 
@@ -154,7 +154,6 @@ In `git` a rebase replays your changes on top of other a commit other than the c
 1. `git rebase origin/master`
 
 I do this so often that I have an alias that does both in one step: `git rb`
-
 
 ### Squash
 

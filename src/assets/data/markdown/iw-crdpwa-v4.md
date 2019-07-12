@@ -1,4 +1,4 @@
-# App: Ionic Weather PWA
+# Training: PWA / Ionic / Angular / Cordova
 
 This set of labs take the Ionic Weather application and deploys it as a PWA. Minor modifications are required in order to run the application as a PWA. Most of this lab is actually lecture material. If you design and build your appication appropriately, then there is very little effort required in order to create a PWA from your application. In these labs you will learn:
 
