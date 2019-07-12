@@ -27,9 +27,7 @@ export class AppHome {
             routeRender={props => {
               {
                 return (
-                  <app-markdown
-                    path={`/assets/data/markdown/${props.match.params.step}`}
-                  />
+                  <app-markdown path={`/assets/data/markdown/${props.match.params.step}`} />
                 );
               }
             }}

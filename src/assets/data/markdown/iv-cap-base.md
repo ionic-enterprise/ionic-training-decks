@@ -1,6 +1,6 @@
 # Lab: The Base Application
 
-This training starts with a basic Ionic Framework application that uses `@ionic/storage` in order to store the current authentication token in a local storage mechanism. This is a common way to stoke such tokens in web applications. For hybrid mobile applications, however, we can go a step further and store the token in a secure storage area, and also lock the token behind biometric or PIN based security.
+This training starts with an Ionic Framework application that uses `@ionic/storage` to store the current authentication token in a local storage mechanism. This is a common paradigm used in web applications. For hybrid mobile applications, however, we can go a step further and store the token in a secure storage area, and also lock the token behind biometric or PIN based security.
 
 ## Getting Started
 

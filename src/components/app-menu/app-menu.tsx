@@ -7,10 +7,6 @@ import { Component, h, Prop } from '@stencil/core';
 export class AppMenu {
   @Prop() menu: any;
 
-  componentWillLoad() {
-    console.log('creating a menu');
-  }
-
   render() {
     return (
       <div>
