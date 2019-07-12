@@ -1,4 +1,5 @@
-import { Component } from '@stencil/core';
+import '@stencil/router';
+import { Component, h } from '@stencil/core';
 
 @Component({
   tag: 'my-app',

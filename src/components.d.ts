@@ -5,65 +5,28 @@
  */
 
 
-import '@stencil/core';
-
-import '@stencil/router';
-import '@stencil/state-tunnel';
+import { HTMLStencilElement, JSXBase } from '@stencil/core/internal';
 import {
   MatchResults,
 } from '@stencil/router';
 
-
 export namespace Components {
-
   interface AppHome {
     'match': MatchResults;
   }
-  interface AppHomeAttributes extends StencilHTMLAttributes {
-    'match'?: MatchResults;
-  }
-
   interface AppMarkdown {
     'path': string;
   }
-  interface AppMarkdownAttributes extends StencilHTMLAttributes {
-    'path'?: string;
-  }
-
-  interface AppMenuItem {
-    'item': any;
-  }
-  interface AppMenuItemAttributes extends StencilHTMLAttributes {
-    'item'?: any;
-  }
-
   interface AppMenu {
     'menu': any;
   }
-  interface AppMenuAttributes extends StencilHTMLAttributes {
-    'menu'?: any;
+  interface AppMenuItem {
+    'item': any;
   }
-
   interface MyApp {}
-  interface MyAppAttributes extends StencilHTMLAttributes {}
 }
 
 declare global {
-  interface StencilElementInterfaces {
-    'AppHome': Components.AppHome;
-    'AppMarkdown': Components.AppMarkdown;
-    'AppMenuItem': Components.AppMenuItem;
-    'AppMenu': Components.AppMenu;
-    'MyApp': Components.MyApp;
-  }
-
-  interface StencilIntrinsicElements {
-    'app-home': Components.AppHomeAttributes;
-    'app-markdown': Components.AppMarkdownAttributes;
-    'app-menu-item': Components.AppMenuItemAttributes;
-    'app-menu': Components.AppMenuAttributes;
-    'my-app': Components.MyAppAttributes;
-  }
 
 
   interface HTMLAppHomeElement extends Components.AppHome, HTMLStencilElement {}
@@ -78,16 +41,16 @@ declare global {
     new (): HTMLAppMarkdownElement;
   };
 
-  interface HTMLAppMenuItemElement extends Components.AppMenuItem, HTMLStencilElement {}
-  var HTMLAppMenuItemElement: {
-    prototype: HTMLAppMenuItemElement;
-    new (): HTMLAppMenuItemElement;
-  };
-
   interface HTMLAppMenuElement extends Components.AppMenu, HTMLStencilElement {}
   var HTMLAppMenuElement: {
     prototype: HTMLAppMenuElement;
     new (): HTMLAppMenuElement;
+  };
+
+  interface HTMLAppMenuItemElement extends Components.AppMenuItem, HTMLStencilElement {}
+  var HTMLAppMenuItemElement: {
+    prototype: HTMLAppMenuItemElement;
+    new (): HTMLAppMenuItemElement;
   };
 
   interface HTMLMyAppElement extends Components.MyApp, HTMLStencilElement {}
@@ -95,30 +58,46 @@ declare global {
     prototype: HTMLMyAppElement;
     new (): HTMLMyAppElement;
   };
-
   interface HTMLElementTagNameMap {
-    'app-home': HTMLAppHomeElement
-    'app-markdown': HTMLAppMarkdownElement
-    'app-menu-item': HTMLAppMenuItemElement
-    'app-menu': HTMLAppMenuElement
-    'my-app': HTMLMyAppElement
-  }
-
-  interface ElementTagNameMap {
     'app-home': HTMLAppHomeElement;
     'app-markdown': HTMLAppMarkdownElement;
-    'app-menu-item': HTMLAppMenuItemElement;
     'app-menu': HTMLAppMenuElement;
+    'app-menu-item': HTMLAppMenuItemElement;
     'my-app': HTMLMyAppElement;
   }
-
-
-  export namespace JSX {
-    export interface Element {}
-    export interface IntrinsicElements extends StencilIntrinsicElements {
-      [tagName: string]: any;
-    }
-  }
-  export interface HTMLAttributes extends StencilHTMLAttributes {}
-
 }
+
+declare namespace LocalJSX {
+  interface AppHome extends JSXBase.HTMLAttributes<HTMLAppHomeElement> {
+    'match'?: MatchResults;
+  }
+  interface AppMarkdown extends JSXBase.HTMLAttributes<HTMLAppMarkdownElement> {
+    'path'?: string;
+  }
+  interface AppMenu extends JSXBase.HTMLAttributes<HTMLAppMenuElement> {
+    'menu'?: any;
+  }
+  interface AppMenuItem extends JSXBase.HTMLAttributes<HTMLAppMenuItemElement> {
+    'item'?: any;
+  }
+  interface MyApp extends JSXBase.HTMLAttributes<HTMLMyAppElement> {}
+
+  interface IntrinsicElements {
+    'app-home': AppHome;
+    'app-markdown': AppMarkdown;
+    'app-menu': AppMenu;
+    'app-menu-item': AppMenuItem;
+    'my-app': MyApp;
+  }
+}
+
+export { LocalJSX as JSX };
+
+
+declare module "@stencil/core" {
+  export namespace JSX {
+    interface IntrinsicElements extends LocalJSX.IntrinsicElements {}
+  }
+}
+
+

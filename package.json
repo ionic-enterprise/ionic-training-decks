@@ -6,28 +6,18 @@
   "main": "index.js",
   "scripts": {
     "build": "stencil build",
-    "bump": "node scripts/bump-version.js",
-    "changelog": "conventional-changelog -p angular -i CHANGELOG.md -s",
-    "release": "node scripts/release.js",
     "start": "stencil build --dev --watch --serve",
     "test": "jest --no-cache",
     "test.watch": "jest --watch --no-cache"
   },
   "dependencies": {
-    "@stencil/router": "~0.3.3"
+    "@stencil/router": "~1.0.1"
   },
   "devDependencies": {
-    "@stencil/core": "~0.17.0",
-    "@stencil/sass": "0.1.1",
-    "@types/jest": "~21.1.10",
-    "chalk": "~2.4.2",
-    "conventional-changelog": "~3.0.5",
-    "execa": "~1.0.0",
-    "inquirer": "~6.2.1",
-    "jest": "^21.2.1",
-    "listr": "~0.14.3",
-    "rimraf": "~2.6.3",
-    "semver": "~5.6.0"
+    "@stencil/core": "~1.1.6",
+    "@stencil/sass": "~1.0.1",
+    "@types/jest": "~24.0.15",
+    "jest": "~24.8.0"
   },
   "engines": {
     "node": "10.13.0",
