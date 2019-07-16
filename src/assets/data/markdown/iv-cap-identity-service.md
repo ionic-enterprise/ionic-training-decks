@@ -26,17 +26,19 @@ $ npx cap update
 
 ## Inherit from `IonicIdentityVaultUser`
 
-Identity Vault includes a class called `IonicIdentityVaultUser` which defines the currently logged in user and provides an interface with the identity vault plugin.
-
-The original code contained a service that had a very similar role. This is the `IdentityService`. We will make the `IdentityService` a subclass of the `IonicIdentityVaultUser` class.
+Identity Vault includes a class called `IonicIdentityVaultUser` which defines the currently logged in user and provides an interface with the identity vault plugin. By the end of this section, we will have updated our `IdentityService` to be a subclass of the `IonicIdentityVaultUser` class, giving us the access we need to the Identity Vault functionallity.
 
 ### Update the Unit Test
 
+First we need to update our unit tests.
+
 #### Remove Storage
 
-At this point, many of the requirements for the `IdentityService` change. We will start by removing the tests for requirements that no longer exist. Namely, any requirement to store data using `@ionic/storage`.
+Many of the requirements for the `IdentityService` change since we are change how the token is stored. We will start by removing the tests for requirements that no longer exist. Namely, any requirement to store data using `@ionic/storage`.
 
-For example, all of the following tests can be removed:
+We will no longer require the setup and configuration of the `Storage` mock (see the main `beforeEach()` as well as the imports section at the top of the file). Comment out that code. As it turns out we will need it later.
+
+At this point it should be easy to find the tests we no longer need. They will be the tests that reference the now removed `storage` reference. For example, all of the following tests can be removed:
 
 ```TypeScript
     it('waits for the storage to be ready', async () => {
@@ -57,7 +59,7 @@ For example, all of the following tests can be removed:
     });
 ```
 
-At this point, we can also remove the setup and configuration of the `Storage` mock (see the main `beforeEach()`). All references to "storage" within this test should have now been eliminated. Be sure to also clean up any unsed declarations and imports at this time.
+All references to "storage" within this test should have now been eliminated.
 
 #### Add the Platform service
 
@@ -65,10 +67,12 @@ The `IonicIdentityVaultUser` takes the `Platorm` service as its first parameter 
 
 ```TypeScript
   beforeEach(() => {
+    // storage = createStorageMock();
     TestBed.configureTestingModule({
       imports: [HttpClientTestingModule],
       providers: [
         IdentityService,
+        // { provide: Storage, useValue: storage },
         { provide: Platform, useFactory: createPlatformMock }
       ]
     });
@@ -87,7 +91,7 @@ Our `IdentityService` needs to be changed to inherit from `IonicIdentityVaultUse
 
 #### Imports
 
-Revmoe the import from `@ionic/storage`. Instead import the required items from `@ionic/angular` and `@ionic-enterprise/identity-vault`:
+Remove the import from `@ionic/storage`. Instead import the required items from `@ionic/angular` and `@ionic-enterprise/identity-vault`:
 
 ```TypeScript
 import { Platform } from '@ionic/angular';
