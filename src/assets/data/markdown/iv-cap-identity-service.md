@@ -13,12 +13,15 @@ Once that is set up properly, make sure you are in your `iv-training-starter` wo
 
 ```Bash
 $ ionic enterprise register --key=YOURPRODUCTKEY
-$ ionic cordova plugin add @ionic-enterprise/identity-vault
+$ npm i @ionic-enterprise/identity-vault
 ```
 
-The above command will have created a `resources/` folder and a `config.xml` file. Since this is a Capacitor application, these items will not be used and can be removed.
+*Note:* Two different commands exist for installing Identity Vault in your project depending on whether you are using Capacitor or Cordova:
 
-Since we are using Capacitor, however, we need to make sure the native projects get updated with the newly installed Cordova plugin:
+- _Capacitor_: `npm i @ionic-enterprise/identity-vault`
+- _Cordova_: `ionic cordova plugin add @ionic-enterprise/identity-vault`
+
+Be sure to use the correct command based on your application's stack. Since we are using Capacitor, we need to use the `npm install` based command. We also need to make sure the native projects get updated with the newly installed Cordova plugin:
 
 ```
 $ npx cap update
@@ -158,6 +161,31 @@ Rather than removing the token using Ionic Storage, call the base class's `logou
    }
 ```
 
+#### `restoreSession()`
+
+It is possible for the vault to get into a state where it it locked but cannot be unlocked. For example if a user locks via touch ID and then removes their fingerprint. In this case, we will get a `VaultErrorCodes.VaultLocked` error indicating that we cannot unlock the vault. If this is the case, clear the vault so the user can log in again.
+
+```TypeScript
+  async restoreSession(): Promise<DefaultSession> {
+    try {
+      return await super.restoreSession();
+    } catch (error) {
+      if (error.code === VaultErrorCodes.VaultLocked) {
+        const vault = await this.getVault();
+        await vault.clear();
+      }
+    }
+  }
+```
+
 #### Final Cleanup
 
 At this point, there should be some dead code and unused parameters. If you are using VSCode these will show with a lighter font. Remove all of the dead code and unused parameters and/or imports.
+
+## Conclusion
+
+At this point, the application should no longer work in the browser and you will need to run it on a device (we will fix that soon). Try it out on your device:
+
+- `npm run build`
+- `npx cap open ios` or `npx cap open android`
+- use Xcode or Android Studio to run the application on your attached device
