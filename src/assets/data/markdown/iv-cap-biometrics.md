@@ -88,25 +88,9 @@ There are a few issues:
 1. When the user cancels, the app does not redirect to the login screen
 1. The "Edit Category" page has no data in it
 
-Let's fix these one at a time, starting with the last two.
-
-### Wrap `restoreSession()` to Catch Exceptions
-
-The odd behavior if the user cancels the unlock is because `getToken()` throws an exception causing the HTTP request to not be sent. This exception originates from `restoreSession()`. For the purpose of this application, we will wrap `restoreSession()` to eat all errors:
-
-```TypeScript
-  async restoreSession(): Promise<DefaultSession> {
-    try {
-      return await super.restoreSession();
-    } catch (error) {}
-  }
-```
-
-Try it again. That takes care of some of the issue, but it would be better if the application would start at the login screen if the vault is locked.
-
 ### Implement the `onVaultLocked` Event Handler
 
-When the vault is locked, all we need to do is redirect to the login page.
+When the app is locked it should redirect to a page where the user can either unlock the application or login in again. The `onVaultLoccked` event handler should be used to accomplish this task.
 
 The test for that looks like this:
 
@@ -129,9 +113,11 @@ The code to accomplish this is:
   }
 ```
 
+That should fix all three of the errors mentioned above, though it does present one problem which we will now fix.
+
 ## `LoginPage` Modifications
 
-The application now redirects to the login page as needed. However, the login page does not allow the token to be unlocked, forcing the user to have to log in again. In order to do this, the `LoginPage` will have to interact with the `IdentityService`.
+The application now redirects to the login page as needed. However, the login page does not allow the token to be unlocked, forcing the user to log in again. In order to allow unlocking the token the `LoginPage` will have to interact with the `IdentityService`.
 
 ### Update the `IdentityService` Mock
 
