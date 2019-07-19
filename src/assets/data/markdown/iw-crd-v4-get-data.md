@@ -416,5 +416,3 @@ One way to write that test is to create a testng template and feed an array of v
 ## Conclusion
 
 Congratulations. You have learned how to craft a service that gets data and encapsulates some of the business logic of your application.
-
-Compare your code to the completed code that I've included. It does not have to be identical, but it should be functionally equivalent. Be sure to commit your changes to git.

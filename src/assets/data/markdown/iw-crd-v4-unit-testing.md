@@ -1,4 +1,4 @@
-# Lab: Unit Testing
+# Lab: Unit Tests
 
 In this lab, you will learn how to:
 

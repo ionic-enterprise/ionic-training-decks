@@ -1,4 +1,4 @@
-# Lab: Using the Data
+# Lab: Use the Data
 
 In this lab you will learn how to:
 

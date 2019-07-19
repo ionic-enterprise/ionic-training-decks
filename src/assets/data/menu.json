@@ -9,12 +9,12 @@
       "title": "Ionic / Angular / Cordova",
       "pages": [
         {
-          "id": "iw-crd-v4-generate",
-          "title": "Generate the Application"
+          "id": "iw-crd-v4-start",
+          "title": "Get Started"
         },
         {
           "id": "iw-crd-v4-unit-testing",
-          "title": "Unit Testing"
+          "title": "Unit Tests"
         },
         {
           "id": "iw-crd-v4-style",
@@ -30,23 +30,11 @@
         },
         {
           "id": "iw-crd-v4-get-data",
-          "title": "Get Data",
-          "pages": [
-            {
-              "id": "iw-crd-v4-get-data-code",
-              "title": "Completed Code"
-            }
-          ]
+          "title": "Get Data"
         },
         {
           "id": "iw-crd-v4-use-data",
-          "title": "Using the Data",
-          "pages": [
-            {
-              "id": "iw-crd-v4-use-data-code",
-              "title": "Completed Code"
-            }
-          ]
+          "title": "Use the Data"
         },
         {
           "id": "iw-crd-v4-platforms",
@@ -54,23 +42,11 @@
         },
         {
           "id": "iw-crd-v4-plugins",
-          "title": "Using Plugins",
-          "pages": [
-            {
-              "id": "iw-crd-v4-plugins-code",
-              "title": "Completed Code"
-            }
-          ]
+          "title": "Use Plugins"
         },
         {
           "id": "iw-crd-v4-user-pref1",
-          "title": "User Preferences Phase 1",
-          "pages": [
-            {
-              "id": "iw-crd-v4-user-pref1-code",
-              "title": "Completed Code"
-            }
-          ]
+          "title": "User Preferences Phase 1"
         },
         {
           "id": "iw-crd-v4-base-class",
@@ -78,13 +54,7 @@
         },
         {
           "id": "iw-crd-v4-user-pref2",
-          "title": "User Preferences Phase 2",
-          "pages": [
-            {
-              "id": "iw-crd-v4-user-pref2-code",
-              "title": "Completed Code"
-            }
-          ]
+          "title": "User Preferences Phase 2"
         },
         {
           "id": "iw-crd-v4-offline",

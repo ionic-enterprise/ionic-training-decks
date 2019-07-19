@@ -1,4 +1,4 @@
-# Lab: Using Plugins
+# Lab: Use Plugins
 
 Cordova plugins are used when you want to access native functionality from your application.
 

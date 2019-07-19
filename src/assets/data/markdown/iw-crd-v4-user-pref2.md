@@ -257,7 +257,7 @@ Here is what the code for `getCity()` should look like when you are done (try to
 
 ## Use the Service in the User Preferences Component
 
-**Challenge:** this one is (almost) all on you (I will give you the tests), try to do it without looking at the completed code. Here are the requirements:
+**Challenge:** this one is (almost) all on you (I will give you the tests), try to do it without looking at the completed code that is available in the repo. Here are the requirements:
 
 1. When the view is created
    1. Initialize the `cities` property to all available cities
