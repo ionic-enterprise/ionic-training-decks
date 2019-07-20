@@ -37,6 +37,14 @@
           "title": "Use the Data"
         },
         {
+          "id": "iw-crd-v4-loading",
+          "title": "Add Loading Indicator"
+        },
+        {
+          "id": "iw-crd-v4-base-class",
+          "title": "Create a Generic Base Class"
+        },
+        {
           "id": "iw-crd-v4-platforms",
           "title": "Add Cordova Platforms"
         },
@@ -45,20 +53,8 @@
           "title": "Use Plugins"
         },
         {
-          "id": "iw-crd-v4-user-pref1",
-          "title": "User Preferences Phase 1"
-        },
-        {
-          "id": "iw-crd-v4-base-class",
-          "title": "Create a Generic Base Class"
-        },
-        {
-          "id": "iw-crd-v4-user-pref2",
-          "title": "User Preferences Phase 2"
-        },
-        {
-          "id": "iw-crd-v4-offline",
-          "title": "Add Simple Offline Handling"
+          "id": "iw-crd-v4-switch-scale",
+          "title": "Switch Scale"
         }
       ]
     },

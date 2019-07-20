@@ -148,7 +148,6 @@ Use the weather components in the `src/app/current-weather/current-weather.page.
 ```html
 <ion-content padding text-center>
   <div class="information">
-    <div class="city">Madison, WI</div>
     <kws-temperature
       class="primary-value"
       scale="F"
@@ -166,16 +165,10 @@ While we are in there, we should change the title for this page to be something 
 
 Now let's do some page-specific styling. In general, we want to minimize the use of this, but we have specific cases here where it makes sense:
 
-- `city` is specific to this page
 - We'd like `primary-value` to be smaller on this page (even though it's already defined globally)
 - `kws-condition` is a custom element that uses shadow DOM so a lot of its styling is handled via <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/--*" target="_blank">custom properties (aka: CSS variables)</a>.
 
 ```scss
-.city {
-  font-size: 24px;
-  font-weight: bold;
-}
-
 .primary-value {
   margin-top: 18px;
 }

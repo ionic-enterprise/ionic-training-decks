@@ -82,6 +82,8 @@ With that in mind, here is what the method should do:
 1. When running in a "Cordova" context, use the Geolocation plugin to return the current location.
 1. When running in a "web" context, use the hard-coded default location.
 
+*Note:*  this "Cordova" vs. "Web" context stuff is just being done for illustration. We will discuss this more when we look at the PWA implementation.
+
 We will build this method one step at a time, testing first and then coding.
 
 ##### Step 1: Check the Platform
@@ -290,8 +292,6 @@ export class LocationService {
 
 Now that we have developed a fully tested method, we can clean it up a bit. We should really define the default location using a private constant defined on the class rather than a literal value in the method. Refactor the code as such.
 
-Let's pause here and discuss what we have done.
-
 #### Use the Location Service
 
 Now that the service exists, let's use it to get the current location before grabbing data. We will again use a test-first development strategy.
@@ -451,95 +451,3 @@ Once this rewrite is complete, you should be able to remove the following code f
 We have learned how to utilize Cordova plugins and the Ionic Native wrappers in order to easily access native mobile APIs.
 
 Build the application for a mobile device and give it a try.
-
-<!-- TODO: Consider moving this into its own section on overlays... -->
-
-**Challenge:** You may notice some slight delays when the application is run on the mobile device. Add a <a href="https://ionicframework.com/docs/api/loading/" target="_blank">Loading Indicator</a> to each page. Here is the basic logic (where `loading` is the injected `LoadingController`):
-
-```TypeScript
-async ionViewDidEnter() {
-  const l = await this.loadingController.create({ options });
-  l.present();
-  this.weather.someMethod().subscribe(d => {
-    this.someData = d;
-    l.dismiss();
-  });
-}
-```
-
-Have a look at the docs for the various options you can use. Make similar changes to all three of the pages.
-
-**Hints on Testing**
-
-The LoadingController follows a pattern that is common in Ionic for type of components called "overlays." We will learn more about these later. The mock package that is supplied with this project contains two mocks we can use to test any overlay component: `createOverlayControllerMock()` which mocks the controller and `createOverlayElementMock()` which mocks the element created by the overlay controller. 
-
-The mocks can be set up like such:
-
-```TypeScript
-  let loading;
-  ...
-  beforeEach(async(() => {
-    loading = createOverlayElementMock('Loading');
-    TestBed.configureTestingModule({
-      declarations: [CurrentWeatherPage],
-      providers: [
-        { provide: WeatherService, useFactory: createWeatherServiceMock },
-        {
-          provide: LoadingController,
-          useFactory: () =>
-            createOverlayControllerMock('LoadingController', loading)
-        }
-      ],
-      schemas: [CUSTOM_ELEMENTS_SCHEMA]
-    }).compileComponents();
-  }));
-```
-
-The test tests should look something like this. Note that the two existing tests are change to use `async/await`:
-
-```TypeScript
-  describe('entering the page', () => {
-    it('displays a loading indicator', async () => {
-      const loadingController = TestBed.get(LoadingController);
-      await component.ionViewDidEnter();
-      expect(loadingController.create).toHaveBeenCalledTimes(1);
-      expect(loading.present).toHaveBeenCalledTimes(1);
-    });
-
-    it('gets the current weather', async () => {
-      const weather = TestBed.get(WeatherService);
-      await component.ionViewDidEnter();
-      expect(weather.current).toHaveBeenCalledTimes(1);
-    });
-
-    it('assigns the current weather', async () => {
-      const weather = TestBed.get(WeatherService);
-      weather.current.and.returnValue(
-        of({
-          temperature: 280.32,
-          condition: 300,
-          date: new Date(1485789600 * 1000)
-        })
-      );
-      await component.ionViewDidEnter();
-      expect(component.currentWeather).toEqual({
-        temperature: 280.32,
-        condition: 300,
-        date: new Date(1485789600 * 1000)
-      });
-    });
-
-    it('dismisses the loading indicator', async () => {
-      const weather = TestBed.get(WeatherService);
-      weather.current.and.returnValue(
-        of({
-          temperature: 280.32,
-          condition: 300,
-          date: new Date(1485789600 * 1000)
-        })
-      );
-      await component.ionViewDidEnter();
-      expect(loading.dismiss).toHaveBeenCalledTimes(1);
-    });
-  });
-```

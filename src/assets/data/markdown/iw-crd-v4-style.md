@@ -1,11 +1,11 @@
-# Lab: Style the App 
+# Lab: Style the App
 
 In this lab, you will learn how to:
 
-* Apply global themes and styles
-* Theme the application using Ioinic Studio (or our online color generator)
-* Apply different colors within the application
-* Style the status bar
+- Apply global themes and styles
+- Theme the application using Ioinic Studio (or our online color generator)
+- Apply different colors within the application
+- Style the status bar
 
 ## Global Theming and Styling
 
@@ -44,44 +44,44 @@ For this training application, we don't have a lot of extra styling so we will p
 
 ## Using the Ionic Studio Theming Editor
 
-**Note:** if you do not have Ioinc Studio, you can use our <a href="https://ionicframework.com/docs/theming/color-generator" target="_blank">online color generator</a> and then manually update `src/theme/variables.scss` by copying the output of the generator. 
+**Note:** if you do not have Ioinc Studio, you can use our <a href="https://ionicframework.com/docs/theming/color-generator" target="_blank">online color generator</a> and then manually update `src/theme/variables.scss` by copying the output of the generator.
 
 Ionic Studio include a theming editor that allows you to easy specify the color theme for the appliction. The theming editor reads the current `src/theme/variables.scss` file and applies that color theme to a sample page so the color theme can be seen as it is edited.
 
 With the theming editor, only the base value for each of the defined colors needs to be specified. The `-shade` and `-tint` variants will be automatically calculated, though the calculated values can be changed if so desired.
 
-* Open the project in Ioinc Studio
-* Open the theming editor, is bottom icon on left
-* Change the `Primary` color to `#085a9e`
-* Change the `Secondary` color to `#f4a942`
+- Open the project in Ioinc Studio
+- Open the theming editor, is bottom icon on left
+- Change the `Primary` color to `#085a9e`
+- Change the `Secondary` color to `#f4a942`
 
 In both cases, the `-shade` and `-tint` variants were automatically calculated. Have a look at those values by clicking on the `Primary` and `Secondary` colors. Save the changes.
 
 Look at the `src/app/variables.scss` file and verify that the changes have been saved.
 
 ```scss
-  /** primary **/
-  --ion-color-primary: #085a9e;
-  --ion-color-primary-rgb: 8,90,158;
-  --ion-color-primary-contrast: #ffffff;
-  --ion-color-primary-contrast-rgb: 255,255,255;
-  --ion-color-primary-shade: #074f8b;
-  --ion-color-primary-tint: #216ba8;
-  /** secondary **/
-  --ion-color-secondary: #f4a942;
-  --ion-color-secondary-rgb: 244,169,66;
-  --ion-color-secondary-contrast: #000000;
-  --ion-color-secondary-contrast-rgb: 0,0,0;
-  --ion-color-secondary-shade: #d7953a;
-  --ion-color-secondary-tint: #f5b255;
+/** primary **/
+--ion-color-primary: #085a9e;
+--ion-color-primary-rgb: 8, 90, 158;
+--ion-color-primary-contrast: #ffffff;
+--ion-color-primary-contrast-rgb: 255, 255, 255;
+--ion-color-primary-shade: #074f8b;
+--ion-color-primary-tint: #216ba8;
+/** secondary **/
+--ion-color-secondary: #f4a942;
+--ion-color-secondary-rgb: 244, 169, 66;
+--ion-color-secondary-contrast: #000000;
+--ion-color-secondary-contrast-rgb: 0, 0, 0;
+--ion-color-secondary-shade: #d7953a;
+--ion-color-secondary-tint: #f5b255;
 ```
 
 ## Apply Colors
 
 Right now, most of the application is sky blue. That is because most of the components in the application are using the default background color. To change this, specify the `Primary` color for the tab bar and each page's header.
 
-* Add `color="primary"` in the `ion-tab-bar` in `src/app/tabs/tabs.page.html` 
-* Add `color="primary"` in the `ion-toolbar` in each of the other pages. 
+- Add `color="primary"` in the `ion-tab-bar` in `src/app/tabs/tabs.page.html`
+- Add `color="primary"` in the `ion-toolbar` in each of the other pages.
 
 ## Style the Status Bar
 
@@ -107,7 +107,7 @@ The status bar mock is currently created in `app.component.spec.ts` as such: `st
 
 We are going to use two different methods: `styleLightContent()` and `backgroundColorByHexString()`
 
-Change the status bar mock creation to reflect that: `statusBar = jasmine.createSpyObj('StatusBar', ['styleLightContent', 'backgroundColorByHexString']);` 
+Change the status bar mock creation to reflect that: `statusBar = jasmine.createSpyObj('StatusBar', ['styleLightContent', 'backgroundColorByHexString']);`
 
 ### Step 1 - Change the Status Bar Style
 

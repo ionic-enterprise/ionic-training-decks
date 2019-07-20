@@ -9,9 +9,8 @@ In this lab you will learn how to:
 
 All three of our main pages:
 
-1.  Get data on view
-1.  Show the same basic loader while loading the data
-1.  Allow the user preferences to be opened
+1. Get data on view
+1. Show the same basic loader while loading the data
 
 This seems like a natural "is-a" relationship with the only differences being the type. Modeling that is done most naturally via a generic base class.
 
@@ -28,7 +27,7 @@ The base class will be based on the code for one of the other pages. Either "Cur
       1. The type is too specific, it should be `T`
    1. Fix the constructor
       1. The `IconMapService` is bound in the template and thus not needed here, remove it
-      1. The `LoadingController` and `ModalController` must be imported
+      1. The `LoadingController` must be imported
       1. This class will not know which method in `WeatherService` to call, so pass in a method signature instead like this: `private fetch: () => Observable<T>`
    1. Fix the methods - there are three syntax errors, let's see what you can make of them
 
@@ -38,12 +37,12 @@ Try the base class in one page before implementing it in all of the pages. It ma
 
 1. `import { WeatherPageBase } from '../weather-page-base/weather-page-base';`
 1. `export class CurrentWeatherPage extends WeatherPageBase<Weather> {`
-1. Remove the `currentWeather` property, the `ionViewDidEnter()` method, and the `openUserPreferences()` method.
-1. Update the test to use the generic property name instead of `currentWeather`.
-1. Update the HTML file to use the generic property name for the data instead of `currentWeather`
-1. `LoadingController`, `ModalController`, and `WeatherService` still need to be injected, but no longer should be declared private
+1. Remove the `currentWeather` property, and all of the methods other than the constructor.
+1. Update the test to use the generic property name (`data`) instead of `currentWeather`.
+1. Update the HTML file to use the generic property name (`data`) for the data instead of `currentWeather`
+1. `LoadingController`, and `WeatherService` still need to be injected, but no longer should be declared private
 1. The constructor needs to call `super()`
-   1. Pass down `loadingController` and `modalController`
+   1. Pass down `loadingController`
    1. For the `fetch` parameter, pass down `weather.current`
 1. Remove any unused imports.
 
