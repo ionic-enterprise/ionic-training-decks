@@ -272,7 +272,9 @@ The tests for `getToken()` are a little more involved. We need to control the `t
       (identity as any).session = { username: 'blah', token: 'fubbily-doo-dah' };
       const token = await identity.getToken();
       expect(identity.restoreSession).not.toHaveBeenCalled();
-      expect(token).toEqual('dude');
+      expect(token).toEqual('fubbily-doo-dah');
     });
   });
 ```
+
+We are now covering a lot more of the logic in this service. Adding any other missing coverage is left as an exercise for the reader.

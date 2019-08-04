@@ -268,6 +268,14 @@ Add the following tests to the `current-weather.page.spec.ts`, then write code t
 
 Once the code is written, add a `click` event binding to the `kws-temperature` component that calls the `toggleScale()` method.
 
+*Note:* the cursor isn't right if you are running in the browser. For a hybrid native app, this doesn't really matter, but we should fix it anyhow just in case we decide to also host this app on the web. To fix this, add the following CSS to the `current-weather.page.scss` file.
+
+```css
+kws-temperature {
+  cursor: pointer;
+}
+```
+
 ## Conclusion
 
 Our weather app now allows the user to choose whichever temperature scale the desire and remembers their choice.

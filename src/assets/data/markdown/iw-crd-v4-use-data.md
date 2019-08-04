@@ -118,7 +118,7 @@ In our application, we want to get new data each time the page is visited. The n
 
 ### Test First
 
-We have some new functionallity to cover. That functionallity is "entering the page", and the requirements are "it gets the current weather" and "it assigns the the weather." Let's create some tests that express these requirements:
+We have some new functionallity to cover. That functionallity is "entering the page", and the requirements are "it gets the current weather" and "it displays the the weather." Let's create some tests that express these requirements:
 
 ```TypeScript
   describe('entering the page', () => {
@@ -128,19 +128,20 @@ We have some new functionallity to cover. That functionallity is "entering the p
       expect(weather.current).toHaveBeenCalledTimes(1);
     });
 
-    it('assigns the current weather', () => {
-      const weather =  TestBed.get(WeatherService);
-      weather.current.and.returnValue(of({
-        temperature: 280.32,
-        condition: 300,
-        date: new Date(1485789600 * 1000)
-      }));
+    it('displays the current weather', async () => {
+      const weather = TestBed.get(WeatherService);
+      weather.current.and.returnValue(
+        of({
+          temperature: 280.32,
+          condition: 300,
+          date: new Date(1485789600 * 1000)
+        })
+      );
       component.ionViewDidEnter();
-      expect(component.currentWeather).toEqual({
-        temperature: 280.32,
-        condition: 300,
-        date: new Date(1485789600 * 1000)
-      });
+      fixture.detectChanges();
+      await new Promise(resolve => setTimeout(() => resolve()));
+      const t = fixture.debugElement.query(By.css('kws-temperature'));
+      expect(t.nativeElement.shadowRoot.textContent).toContain('45 ℉');
     });
   });
 ```
@@ -163,7 +164,90 @@ Finally, `currentWeather` can just be left declared but unassigned. Remove the m
   currentWeather: Weather;
 ```
 
-**Challenge:** Make similar modifications to the `forecast` and `uv-index` tests and pages.
+**Challenge:** Make similar modifications to the `forecast` and `uv-index` tests and pages. Here are some possible tests to use:
+
+#### `forecast.page.spec.ts`
+
+```TypeScript
+  describe('entering the page', () => {
+    it('gets the forecast', () => {
+      const weather = TestBed.get(WeatherService);
+      component.ionViewDidEnter();
+      expect(weather.forecast).toHaveBeenCalledTimes(1);
+    });
+
+    it('shows the forecast items', () => {
+      const weather = TestBed.get(WeatherService);
+      weather.forecast.and.returnValue(
+        of([
+          [
+            {
+              temperature: 300,
+              condition: 200,
+              date: new Date(2018, 8, 19)
+            }
+          ],
+          [
+            {
+              temperature: 265,
+              condition: 601,
+              date: new Date(2018, 8, 20)
+            }
+          ],
+          [
+            {
+              temperature: 293,
+              condition: 800,
+              date: new Date(2018, 8, 21)
+            }
+          ]
+        ])
+      );
+      component.ionViewDidEnter();
+      fixture.detectChanges();
+      const f = fixture.debugElement.queryAll(By.css('kws-daily-forecast'));
+      expect(f.length).toEqual(3);
+    });
+  });
+```
+
+#### `uv-index.page.spec.ts`
+
+```TypeScript
+  describe('entering the page', () => {
+    beforeEach(() => {
+      const weather = TestBed.get(WeatherService);
+      weather.uvIndex.and.returnValue(
+        of({
+          value: 3.5,
+          riskLevel: 1
+        })
+      );
+    });
+
+    it('gets the UV index', () => {
+      const weather = TestBed.get(WeatherService);
+      component.ionViewDidEnter();
+      expect(weather.uvIndex).toHaveBeenCalledTimes(1);
+    });
+
+    it('displays the UV index', async () => {
+      component.ionViewDidEnter();
+      fixture.detectChanges();
+      await new Promise(resolve => setTimeout(() => resolve()));
+      const el = fixture.debugElement.query(By.css('kws-uv-index'));
+      expect(el.nativeElement.shadowRoot.innerHTML).toContain('3.5');
+      expect(el.nativeElement.shadowRoot.textContent).toContain('Moderate');
+    });
+
+    it('displays the appropriate description', () => {
+      component.ionViewDidEnter();
+      fixture.detectChanges();
+      const el = fixture.debugElement.query(By.css('.description'));
+      expect(el.nativeElement.textContent).toContain('Stay in the shade');
+    });
+  });
+```
 
 ## Conclusion
 

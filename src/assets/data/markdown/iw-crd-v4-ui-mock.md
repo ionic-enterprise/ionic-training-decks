@@ -4,10 +4,10 @@ It is often desirable to lay out the user interface without worrying about how t
 
 In this lab, you will learn how to:
 
-* Create a simple service
-* Install assets that can be used by your application
-* Model the data
-* Mock up the user interface
+- Create a simple service
+- Install assets that can be used by your application
+- Model the data
+- Mock up the user interface
 
 ## Change the Tabs
 
@@ -40,15 +40,15 @@ Open the `tabs.page.html` file. Currently it looks like this:
 
 Change it such that the tabs use the following icons and labels:
 
-* **Tab:** current-weather
-   * **Icon:** cloud
-   * **Label:** Current Weather
-* **Tab:** forecast
-   * **Icon:** calendar
-   * **Label:** Forecast 
-* **Tab:** uv-index
-   * **Icon:** sunny
-   * **Label:** UV Index
+- **Tab:** current-weather
+  - **Icon:** cloud
+  - **Label:** Current Weather
+- **Tab:** forecast
+  - **Icon:** calendar
+  - **Label:** Forecast
+- **Tab:** uv-index
+  - **Icon:** sunny
+  - **Label:** UV Index
 
 ## Create a Required Service
 
@@ -148,16 +148,9 @@ Use the weather components in the `src/app/current-weather/current-weather.page.
 ```html
 <ion-content padding text-center>
   <div class="information">
-    <kws-temperature
-      class="primary-value"
-      scale="F"
-      temperature="{{currentWeather?.temperature}}"
-    ></kws-temperature>
+    <kws-temperature class="primary-value" scale="F" temperature="{{currentWeather?.temperature}}"></kws-temperature>
   </div>
-  <kws-condition
-    [condition]="currentWeather?.condition"
-    [iconPaths]="iconMap"
-  ></kws-condition>
+  <kws-condition [condition]="currentWeather?.condition" [iconPaths]="iconMap"></kws-condition>
 </ion-content>
 ```
 
@@ -243,11 +236,7 @@ export class ForecastPage {
 <ion-content padding>
   <ion-list>
     <ion-item *ngFor="let f of forecast">
-      <kws-daily-forecast
-        scale="F"
-        [forecasts]="f"
-        [iconPaths]="iconMap"
-      ></kws-daily-forecast>
+      <kws-daily-forecast scale="F" [forecasts]="f" [iconPaths]="iconMap"></kws-daily-forecast>
     </ion-item>
   </ion-list>
 </ion-content>
@@ -278,6 +267,7 @@ export interface UVIndex {
   riskLevel: number;
 }
 ```
+
 **uv-index.page.ts**
 
 ```TypeScript
@@ -338,6 +328,10 @@ export class UvIndexPage {
 }
 ```
 
-## Conclusion 
+## Fix the Tests
+
+There is a problem with the tests now. The problem is that we added custom elements to the HTML templates but we are not using the CUSTOM_ELEMENTS_SCHEMA in the tests. Update the module accordingly.
+
+## Conclusion
 
 In this lab you created a simple service and model and learned how to mock up the UI to ensure it looks the way you want it to look. Next we will look at how to get real data.
