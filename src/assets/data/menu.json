@@ -71,10 +71,6 @@
           "title": "Add the PWA Goodies"
         },
         {
-          "id": "iw-crdpwa-v4-web-api",
-          "title": "Get the Current Location"
-        },
-        {
           "id": "iw-crdpwa-v4-links",
           "title": "PWA Links"
         }
