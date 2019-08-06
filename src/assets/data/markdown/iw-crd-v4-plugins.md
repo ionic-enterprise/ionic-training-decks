@@ -80,65 +80,21 @@ Let's consider what the `current()` method should do. This application will run 
 With that in mind, here is what the method should do:
 
 1. When running in a "Cordova" context, use the Geolocation plugin to return the current location.
-1. When running in a "web" context, use the hard-coded default location.
+1. When running in a "web" context, use the <a href="https://whatwebcando.today/geolocation.html" target="_blank">Geolocation Web API</a> to return the current location.
 
-*Note:*  this "Cordova" vs. "Web" context stuff is just being done for illustration. We will discuss this more when we look at the PWA implementation.
-
-We will build this method one step at a time, testing first and then coding.
-
-##### Step 1: Check the Platform
-
-**`location.service.spec.ts`**
+Normally doing this would involve code like this:
 
 ```TypeScript
-...
-import { Platform } from '@ionic/angular';
-
-import { createPlatformMock } from '../../../../test/mocks'
-
-  ...
-
-  beforeEach(() => {
-    TestBed.configureTestingModule({
-      providers: [{ provide: Platform, useFactory: createPlatformMock }]
-    });
-  });
-
-  ...
-
-  describe('current', () => {
-    it('determines if the appliction is hybrid native or not', () => {
-      const platform = TestBed.get(Platform);
-      const service: LocationService = TestBed.get(LocationService);
-      service.current();
-      expect(platform.is).toHaveBeenCalledTimes(1);
-      expect(platform.is).toHaveBeenCalledWith('cordova');
-    });
-  });  
-```
-
-**`location.service.ts`**
-
-```TypeScript
-import { Injectable } from '@angular/core';
-import { Platform } from '@ionic/angular';
-
-import { Coordinate } from '../../models/coordinate';
-
-@Injectable({
-  providedIn: 'root'
-})
-export class LocationService {
-  constructor(private platform: Platform) {}
-
-  current(): Promise<Coordinate> {
-    this.platform.is('cordova');
-    return null;
-  }
+if (this.platform.is('cordova')) {
+  getLocationViaPlugin();
+} else {
+  getLocationViaWebAPI();
 }
 ```
 
-##### Step 2: If Hybrid Mobile Call Plugin 
+However, if we look at the <a href="https://cordova.apache.org/docs/en/latest/reference/cordova-plugin-geolocation/" target="_blank">Cordova Geolocation Plugin documentation</a> we will see that it is doing something clever. It is implementing an API that mirrors the web API. That means that our `@ionic/native` wrapper will wrap the web API when the application is running in a web context and the Cordova plugin when the application is running in a Cordova context. That is less work for us.
+
+##### Step 1: Call the Plugin Wrapper
 
 **`location.service.spec.ts`**
 
@@ -150,7 +106,6 @@ import { Geolocation } from '@ionic-native/geolocation/ngx';
   beforeEach(() =>
     TestBed.configureTestingModule({
       providers: [
-        { provide: Platform, useFactory: createPlatformMock },
         {
           provide: Geolocation,
           useFactory: () =>
@@ -165,30 +120,22 @@ import { Geolocation } from '@ionic-native/geolocation/ngx';
   );
 
   ...
-   describe('current', () => {
-     ...
-    describe('when hybrid mobile', () => {
-      beforeEach(() => {
-        const platform = TestBed.get(Platform);
-        platform.is.withArgs('cordova').and.returnValue(true);
-      });
-
-      it('calls the gelocation plugin', () => {
-        const geolocation = TestBed.get(Geolocation);
-        const service: LocationService = TestBed.get(LocationService);
-        service.current();
-        expect(geolocation.getCurrentPosition).toHaveBeenCalledTimes(1);
-      });
+  describe('current', () => {
+    it('calls the gelocation plugin', () => {
+      const geolocation = TestBed.get(Geolocation);
+      const service: LocationService = TestBed.get(LocationService);
+      service.current();
+      expect(geolocation.getCurrentPosition).toHaveBeenCalledTimes(1);
     });
-  }); 
+  });
   ...
+});
 ````
 
 **`location.service.ts`**
 
 ```TypeScript
 import { Injectable } from '@angular/core';
-import { Platform } from '@ionic/angular';
 import { Geolocation  } from '@ionic-native/geolocation/ngx';
 
 import { Coordinate } from '../../models/coordinate';
@@ -197,100 +144,39 @@ import { Coordinate } from '../../models/coordinate';
   providedIn: 'root'
 })
 export class LocationService {
-  constructor(private geolocation: Geolocation, private platform: Platform) {}
+  constructor(private geolocation: Geolocation) {}
 
   current(): Promise<Coordinate> {
-    this.platform.is('cordova');
     this.geolocation.getCurrentPosition();
     return null;
   }
 }
 ```
 
-##### Step 3: If Hybrid Mobile Return the Unpacked Value from the Plugin Call
+##### Step 2: Return the Unpacked Value
 
 **`location.service.spec.ts`**
 
 ```TypeScript
-      it('resolves the unpacked position', async () => {
-        const service: LocationService = TestBed.get(LocationService);
-        expect(await service.current()).toEqual({
-          latitude: 42,
-          longitude: 73
-        });
+    it('resolves the unpacked position', async () => {
+      const service: LocationService = TestBed.get(LocationService);
+      expect(await service.current()).toEqual({
+        latitude: 42,
+        longitude: 73
       });
+    });
 ```
 
 **`location.service.ts`**
 
 ```TypeScript
   async current(): Promise<Coordinate> {
-    this.platform.is('cordova');
     const { coords } = await this.geolocation.getCurrentPosition();
     return { latitude: coords.latitude, longitude: coords.longitude };
   }
 ```
 
-##### Step 4: If not Hybrid Mobile do not Call the Plugin
-
-**`location.service.spec.ts`**
-
-```TypeScript
-    describe('when not hybrid mobile', () => {
-      it('does not call the gelocation plugin', () => {
-        const geolocation = TestBed.get(Geolocation);
-        const service: LocationService = TestBed.get(LocationService);
-        service.current();
-        expect(geolocation.getCurrentPosition).not.toHaveBeenCalled();
-      });
-    });
-```
-
-**`location.service.ts`**
-
-```TypeScript
-  async current(): Promise<Coordinate> {
-    const { coords } = this.platform.is('cordova')
-      ? await this.geolocation.getCurrentPosition()
-      : { coords: { latitude: 0, longitude: 0 } };
-    return { latitude: coords.latitude, longitude: coords.longitude }
-  }
-```
-
-##### Step 5: If not Hybrid Mobile Return Default Location
-
-**`location.service.spec.ts`**
-
-```TypeScript
-    describe('when not hybrid mobile', () => {
-      ...
-      it('resolves the default position', async () => {
-        const service: LocationService = TestBed.get(LocationService);
-        expect(await service.current()).toEqual({
-          latitude: 43.073051,
-          longitude: -89.40123
-        });
-      });
-    });
-```
-
-**`location.service.ts`**
-
-```TypeScript
-  async current(): Promise<Coordinate> {
-    const pos = this.platform.is('cordova')
-      ? await this.geolocation.getCurrentPosition()
-      : {
-          coords: {
-            latitude: 43.073051,
-            longitude: -89.40123
-          }
-        };
-    return { latitude: pos.coords.latitude, longitude: pos.coords.longitude };
-  }
-```
-
-Now that we have developed a fully tested method, we can clean it up a bit. We should really define the default location using a private constant defined on the class rather than a literal value in the method. Refactor the code as such.
+*Note:* you may ask why even create such a simple service? The answer is that the Geolocation plugin is an external dependency, and one that we might want to change at some point in the future, so instead of the rest of our application depending on it, the rest of our application is depending on an abstraction of it. This allows us to completely swap out this dependency without changing much code.
 
 #### Use the Location Service
 

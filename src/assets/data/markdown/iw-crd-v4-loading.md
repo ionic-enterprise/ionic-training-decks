@@ -45,7 +45,7 @@ The test tests should look something like this. Note that the two existing tests
       expect(weather.current).toHaveBeenCalledTimes(1);
     });
 
-    it('assigns the current weather', async () => {
+    it('displays the current weather', async () => {
       const weather = TestBed.get(WeatherService);
       weather.current.and.returnValue(
         of({
@@ -55,11 +55,10 @@ The test tests should look something like this. Note that the two existing tests
         })
       );
       await component.ionViewDidEnter();
-      expect(component.currentWeather).toEqual({
-        temperature: 280.32,
-        condition: 300,
-        date: new Date(1485789600 * 1000)
-      });
+      fixture.detectChanges();
+      await new Promise(resolve => setTimeout(() => resolve()));
+      const t = fixture.debugElement.query(By.css('kws-temperature'));
+      expect(t.nativeElement.shadowRoot.textContent).toContain('45 ℉');
     });
 
     it('dismisses the loading indicator', async () => {
