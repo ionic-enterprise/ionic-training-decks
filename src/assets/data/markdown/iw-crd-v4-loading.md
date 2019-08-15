@@ -58,7 +58,7 @@ The test tests should look something like this. Note that the two existing tests
       fixture.detectChanges();
       await new Promise(resolve => setTimeout(() => resolve()));
       const t = fixture.debugElement.query(By.css('kws-temperature'));
-      expect(t.nativeElement.shadowRoot.textContent).toContain('45 ℉');
+      expect(t).toBeTruthy();
     });
 
     it('dismisses the loading indicator', async () => {
