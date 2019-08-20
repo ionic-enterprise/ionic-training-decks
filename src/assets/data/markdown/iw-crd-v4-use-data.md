@@ -237,7 +237,6 @@ Finally, `currentWeather` can just be left declared but unassigned. Remove the m
       await new Promise(resolve => setTimeout(() => resolve()));
       const el = fixture.debugElement.query(By.css('kws-uv-index'));
       expect(el).toBeTruthy();
-      expect(el.nativeElement.shadowRoot.textContent).toContain('Moderate');
     });
 
     it('displays the appropriate description', () => {
