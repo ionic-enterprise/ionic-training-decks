@@ -55,6 +55,10 @@
         {
           "id": "iw-crd-v4-switch-scale",
           "title": "Switch Scale"
+        },
+        {
+          "id": "iw-crd-v4-on-push",
+          "title": "On Push Change Detection"
         }
       ]
     },

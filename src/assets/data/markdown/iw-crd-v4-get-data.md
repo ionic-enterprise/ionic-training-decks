@@ -139,7 +139,7 @@ The basic format for such a `get()` call is: `get(url: string): Observable<any>`
 
 ### Add the Other Methods
 
-Add two additional methods: one called `forecast` that gets the forecast data from the `forecast` endpoint and one called `uvIndex` that gets the UV Index data from the `uvi` endpoint. **Hint:** Have a look at the <a href="https://openweathermap.org/api" target="_blank">Open Weather Map API Docs</a> for more information on the endpoints. The format of the `forecast` and `uvIndex` methods will be basically the same at this point other than the name of the endpoint.
+Add two additional methods: one called `forecast` that gets the forecast data from the `forecast` endpoint (5 day / 3 hour forecast) and one called `uvIndex` that gets the UV Index data from the `uvi` endpoint (UV Index). **Hint:** Have a look at the <a href="https://openweathermap.org/api" target="_blank">Open Weather Map API Docs</a> for more information on the endpoints. The format of the `forecast` and `uvIndex` methods will be basically the same at this point other than the name of the endpoint.
 
 **Be sure the first create tests, then write code.**
 
