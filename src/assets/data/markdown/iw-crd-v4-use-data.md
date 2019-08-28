@@ -146,7 +146,7 @@ We have some new functionallity to cover. That functionallity is "entering the p
   });
 ```
 
-**Note:** You will need to add `import { of } from 'rxjs';` to the top of your test file.
+**Note:** You will need to add `import { of } from 'rxjs';` and `import { By } from '@angular/platform-browser';` to the top of your test file.
 
 Once you get those test written, they should be failing. Let's talk about the strategy of those tests a bit before moving on to writing the code.
 
