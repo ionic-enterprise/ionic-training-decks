@@ -153,11 +153,21 @@ Finally, the getting of the data is turned into an Observable pipeline
   }
 ```
 
+Depending on how you had coded your base class before, the creation of the loading indicator may not be in its own method. For referenence, here is my `showLoading()` method: 
+
+```TypeScript
+  private async showLoading() {
+    const l = await this.loadingController.create({ message: 'Getting Weather' });
+    await l.present();
+    return l;
+  }
+```
+
 The final change we need to make is to the HTML for the views.
 
 For view like the forcast page that uses `ngFor` to iterate over a collection, the change is easy. The name of the collection changes to include the `$`, and we pipe it through the `async` pipe. This `<ion-item *ngFor="let f of data">` becomes this `<ion-item *ngFor="let f of data$ | async">`
 
-For views like the current weather page and the UV index page, we will wrap the existing marking with a `div` that uses `ngIf` to get the data. Here is an example from the UV index page.
+For views like the current weather page and the UV index page, we will wrap the existing markup with a `div` that uses `ngIf` to get the data. Here is an example from the UV index page.
 
 ```HTML
   <div *ngIf="data$ | async as data">

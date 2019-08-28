@@ -16,7 +16,7 @@ This seems like a natural "is-a" relationship with the only differences being th
 
 _Note:_ this could also be modelled via composition, which may have some advantages as well, especially if any of these methods contain a probability of changing in any given screen in a way that would break the "is-a" relationship. In that case, composition may be a wiser move. For the current case, though, I believe composition is more complex.
 
-The base class will be based on the code for one of the other pages. Either "Current Weather" or "Forecast" makes the most sense because they are almost identical. The UV index page, on the other hand, has some extra code that we do not need. Also note that our test currently exist in the individual page classes. Let's leave them there.
+The base class will be based on the code for one of the other pages. Either "Current Weather" or "Forecast" makes the most sense because they are almost identical. The UV index page, on the other hand, has some extra code that we do not need. Also note that our tests currently exist in the individual page classes. Let's leave them there.
 
 1. `ionic g class weather-page-base/weather-page-base --skipTests`
 1. Make the class generic: `export class WeatherPageBase<T> {`
@@ -29,7 +29,7 @@ The base class will be based on the code for one of the other pages. Either "Cur
       1. The `IconMapService` is bound in the template and thus not needed here, remove it
       1. The `LoadingController` must be imported
       1. This class will not know which method in `WeatherService` to call, so pass in a method signature instead like this: `private fetch: () => Observable<T>`
-   1. Fix the methods - there are three syntax errors, let's see what you can make of them
+   1. Fix the methods - there are a few syntax errors, let's see what you can make of them
 
 ## Use the Base Class
 
@@ -38,7 +38,6 @@ Try the base class in one page before implementing it in all of the pages. It ma
 1. `import { WeatherPageBase } from '../weather-page-base/weather-page-base';`
 1. `export class CurrentWeatherPage extends WeatherPageBase<Weather> {`
 1. Remove the `currentWeather` property, and all of the methods other than the constructor.
-1. Update the test to use the generic property name (`data`) instead of `currentWeather`.
 1. Update the HTML file to use the generic property name (`data`) for the data instead of `currentWeather`
 1. `LoadingController`, and `WeatherService` still need to be injected, but no longer should be declared private
 1. The constructor needs to call `super()`

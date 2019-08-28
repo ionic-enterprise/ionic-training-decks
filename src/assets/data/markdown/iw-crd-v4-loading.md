@@ -4,7 +4,7 @@ In this lab, you will learn how to use overlay component. Specifically the Loadi
 
 ## Test First
 
-The LoadingController follows a pattern that is common in Ionic for type of components called "overlays." We will learn more about these later. The mock package that is supplied with this project contains two mocks we can use to test any overlay component: `createOverlayControllerMock()` which mocks the controller and `createOverlayElementMock()` which mocks the element created by the overlay controller.
+The LoadingController follows a pattern that is common in Ionic for type of components called "overlays." The mock package that is supplied with this project contains two mocks we can use to test any overlay component: `createOverlayControllerMock()` which mocks the controller and `createOverlayElementMock()` which mocks the element created by the overlay controller.
 
 The mocks can be set up like such:
 
