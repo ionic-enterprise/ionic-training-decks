@@ -32,13 +32,9 @@ For this training application, we don't have a lot of extra styling so we will p
   font-size: 24px;
 }
 
-.item-ios,
-.item-md {
-  padding-left: 0;
-}
-
-.item-inner {
-  padding: 12px;
+ion-item {
+  --inner-padding-top: 12px;
+  --inner-padding-bottom: 12px;
 }
 ```
 
@@ -67,6 +63,7 @@ Look at the `src/app/variables.scss` file and verify that the changes have been 
 --ion-color-primary-contrast-rgb: 255, 255, 255;
 --ion-color-primary-shade: #074f8b;
 --ion-color-primary-tint: #216ba8;
+
 /** secondary **/
 --ion-color-secondary: #f4a942;
 --ion-color-secondary-rgb: 244, 169, 66;
@@ -81,7 +78,16 @@ Look at the `src/app/variables.scss` file and verify that the changes have been 
 Right now, most of the application is sky blue. That is because most of the components in the application are using the default background color. To change this, specify the `Primary` color for the tab bar and each page's header.
 
 - Add `color="primary"` in the `ion-tab-bar` in `src/app/tabs/tabs.page.html`
-- Add `color="primary"` in the `ion-toolbar` in each of the other pages.
+- Add the following styling to the `global.scss` file
+
+```scss
+ion-toolbar {
+  --background: var(--ion-color-primary);
+  --color: var(--ion-color-primary-contrast);
+}
+```
+
+This shows two different ways to apply the color to a component. The `color="primary"` was used on the `ion-tab-bar` because it is less work for the one tab bar that we have. The Custom CSS Property values were set for the `ion-toolbar` to avoid having to add `color="primary"` to the tollbar in every page of our application.
 
 ## Style the Status Bar
 
