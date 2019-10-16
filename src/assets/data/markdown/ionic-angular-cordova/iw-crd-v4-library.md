@@ -15,7 +15,7 @@ To install my weather component library, run: `npm install kws-weather-widgets`
 The library is installed in `node_modules` and your `package.json` file is updated to reflect the new dependency:
 
 ```JSON
-    "kws-weather-widgets": "1.0.0",
+    "kws-weather-widgets": "~2.0.2",
 ```
 
 ## Use the Library
@@ -26,7 +26,7 @@ First, there is a method in the library called `defineCustomElements()` that nee
 
 ```TypeScript
 import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
-import { defineCustomElements } from 'kws-weather-widgets/dist/loader';
+import { defineCustomElements } from 'kws-weather-widgets/loader';
 
 import { AppModule } from './app.module';
 
@@ -54,6 +54,8 @@ export class CurrentWeatherPageModule {}
 ## Maintaining Dependencies
 
 NPM is also used to maintain the application's dependencies. If you type `npm outdated` from the root directory of your project you can see which dependencies may need upgrading.
+
+You will see something like this, with the actual contents varrying over time.
 
 
 ```

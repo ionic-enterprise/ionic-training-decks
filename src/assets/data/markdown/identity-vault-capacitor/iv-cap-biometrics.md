@@ -146,7 +146,7 @@ These methods are used by the `LoginPage` in managing the unlocking of the authe
 In cases where a locked session exists we want to display something that the user can clock to begin the unlock process.
 
 ```HTML
-    <div class="unlock-app" text-center *ngIf="displayVaultLogin" (click)="unlockClicked()">
+    <div class="unlock-app ion-text-center" *ngIf="displayVaultLogin" (click)="unlockClicked()">
       <ion-icon [name]="unlockIcon"></ion-icon>
       <div>Unlock</div>
     </div>

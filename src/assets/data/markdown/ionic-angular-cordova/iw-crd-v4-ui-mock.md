@@ -90,6 +90,8 @@ export class IconMapService {
 }
 ```
 
+This could have also been created as an object that we just import into each place it is required, but I like letting the injection engine manage it. To each their own.
+
 ## Install the Images
 
 The service we just created references several image assets, but these assets to do not exist yet. <a download href="/assets/images/images.zip">Download the images</a> and unpack the zip file under `src/assets`, creating an `images` folder with the images in them.
@@ -146,7 +148,7 @@ export class CurrentWeatherPage {
 Use the weather components in the `src/app/current-weather/current-weather.page.html` view.
 
 ```html
-<ion-content padding text-center>
+<ion-content class="ion-padding ion-text-center">
   <div class="information">
     <kws-temperature class="primary-value" scale="F" temperature="{{currentWeather?.temperature}}"></kws-temperature>
   </div>
@@ -233,7 +235,7 @@ export class ForecastPage {
   <ion-toolbar color="primary"> <ion-title> Forecast </ion-title> </ion-toolbar>
 </ion-header>
 
-<ion-content padding>
+<ion-content class="ion-padding">
   <ion-list>
     <ion-item *ngFor="let f of forecast">
       <kws-daily-forecast scale="F" [forecasts]="f" [iconPaths]="iconMap"></kws-daily-forecast>
@@ -314,7 +316,7 @@ export class UvIndexPage {
   <ion-toolbar color="primary"> <ion-title>UV Index</ion-title> </ion-toolbar>
 </ion-header>
 
-<ion-content text-center padding>
+<ion-content class="ion-text-center ion-padding">
   <kws-uv-index class="primary-value" [uvIndex]="uvIndex?.value"></kws-uv-index>
   <div class="description">{{ advice[(uvIndex?.riskLevel)] }}</div>
 </ion-content>
