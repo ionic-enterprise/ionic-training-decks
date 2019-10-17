@@ -10,8 +10,8 @@ export class AppMarkdown {
   @Prop() path: string;
   @State() markup: any;
 
-  async componentWillLoad() {
-    await this.loadMarkdown();
+  componentWillLoad() {
+    this.loadMarkdown();
   }
 
   async componentWillUpdate() {
@@ -23,7 +23,7 @@ export class AppMarkdown {
   }
 
   private async loadMarkdown() {
-    const data = await fetch(`${this.path}.md`);
+    const data = await fetch(this.path);
     this.markup = marked(await data.text());
   }
 }

@@ -1,33 +1,34 @@
 import { Component, h, Prop } from '@stencil/core';
 import { MatchResults } from '@stencil/router';
 
+import menuService from "../../services/menu-service";
+
 @Component({
   tag: 'app-home',
   styleUrl: 'app-home.scss'
 })
 export class AppHome {
-  private items: Array<any> = [];
-
   @Prop() match: MatchResults;
 
   async componentWillLoad() {
-    const file = await fetch('/assets/data/menu.json');
-    this.items = JSON.parse(await file.text()).pages;
+    await menuService.loadMenu();
   }
 
   render() {
     return (
       <div class="container">
         <div class="menu">
-          <app-menu menu={this.items} />
+          <app-menu menu={menuService.items} />
         </div>
         <div class="content">
           <stencil-route
             url="/:step"
             routeRender={props => {
               {
+                const id = props.match.params.step;
+                const path = menuService.paths[id];
                 return (
-                  <app-markdown path={`/assets/data/markdown/${props.match.params.step}`} />
+                  <app-markdown path={`/assets/data/markdown/${path}`} />
                 );
               }
             }}

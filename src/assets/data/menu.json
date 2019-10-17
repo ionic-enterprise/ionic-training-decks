@@ -7,6 +7,7 @@
     {
       "id": "iw-crd-v4",
       "title": "Ionic / Angular / Cordova",
+      "folder": "ionic-angular-cordova",
       "pages": [
         {
           "id": "iw-crd-v4-start",
@@ -65,6 +66,7 @@
     {
       "id":"iw-crdpwa-v4",
       "title": "PWA / Ionic / Angular / Cordova",
+      "folder": "ionic-angular-cordova-pwa",
       "pages": [
         {
           "id": "iw-crdpwa-v4-host",
@@ -83,6 +85,7 @@
     {
       "id": "iv-cap",
       "title": "Identity Vault",
+      "folder": "identity-vault-capacitor",
       "pages": [
         {
           "id": "iv-cap-base",
