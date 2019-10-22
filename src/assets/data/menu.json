@@ -2,83 +2,102 @@
   "pages": [
     {
       "id": "getting-started",
-      "title": "Getting Started"
+      "title": "Getting Started",
+      "file": "getting-started"
     },
     {
       "id": "iw-crd-v4",
       "title": "Ionic / Angular / Cordova",
       "folder": "ionic-angular-cordova",
+      "file": "intro",
       "pages": [
         {
           "id": "iw-crd-v4-start",
-          "title": "Get Started"
+          "title": "Get Started",
+          "file": "start"
         },
         {
           "id": "iw-crd-v4-unit-testing",
-          "title": "Unit Tests"
+          "title": "Unit Tests",
+          "file": "unit-testing"
         },
         {
           "id": "iw-crd-v4-style",
-          "title": "Style the App"
+          "title": "Style the App",
+          "file": "style"
         },
         {
           "id": "iw-crd-v4-library",
-          "title": "Use a Component Library"
+          "title": "Use a Component Library",
+          "file": "use-library"
         },
         {
           "id": "iw-crd-v4-ui-mock",
-          "title": "Mock Up the Interface"
+          "title": "Mock Up the Interface",
+          "file": "mock-ui"
         },
         {
           "id": "iw-crd-v4-get-data",
-          "title": "Get Data"
+          "title": "Get Data",
+          "file": "get-data"
         },
         {
           "id": "iw-crd-v4-use-data",
-          "title": "Use the Data"
+          "title": "Use the Data",
+          "file": "use-data"
         },
         {
           "id": "iw-crd-v4-loading",
-          "title": "Add Loading Indicator"
+          "title": "Add Loading Indicator",
+          "file": "loading-indicator"
         },
         {
           "id": "iw-crd-v4-base-class",
-          "title": "Create a Generic Base Class"
+          "title": "Create a Generic Base Class",
+          "file": "base-class"
         },
         {
           "id": "iw-crd-v4-platforms",
-          "title": "Add Cordova Platforms"
+          "title": "Add Cordova Platforms",
+          "file": "platforms"
         },
         {
           "id": "iw-crd-v4-plugins",
-          "title": "Use Plugins"
+          "title": "Use Plugins",
+          "file": "plugins"
         },
         {
           "id": "iw-crd-v4-switch-scale",
-          "title": "Switch Scale"
+          "title": "Switch Scale",
+          "file": "ionic-storage"
         },
         {
           "id": "iw-crd-v4-on-push",
-          "title": "On Push Change Detection"
+          "title": "On Push Change Detection",
+          "file": "change-detection"
         }
       ]
     },
     {
-      "id":"iw-crdpwa-v4",
+      "id": "iw-crdpwa-v4",
       "title": "PWA / Ionic / Angular / Cordova",
       "folder": "ionic-angular-cordova-pwa",
+      "file": "intro",
       "pages": [
         {
           "id": "iw-crdpwa-v4-host",
-          "title": "Host the Application"
+          "title": "Host the Application",
+          "file": "host"
         },
         {
           "id": "iw-crdpwa-v4-make-pwa",
-          "title": "Add the PWA Goodies"
+          "title": "Add the PWA Goodies",
+          "file": "pwa"
         },
         {
           "id": "iw-crdpwa-v4-links",
-          "title": "PWA Links"
+          "title": "PWA Links",
+          "file": "links"
         }
       ]
     },
@@ -86,36 +105,44 @@
       "id": "iv-cap",
       "title": "Identity Vault",
       "folder": "identity-vault-capacitor",
+      "file": "intro",
       "pages": [
         {
           "id": "iv-cap-base",
-          "title": "The Base Application"
+          "title": "The Base Application",
+          "file": "base"
         },
         {
           "id": "iv-cap-identity-service",
-          "title": "Identity Service"
+          "title": "Identity Service",
+          "file": "identity-service"
         },
         {
           "id": "iv-cap-browser-service",
-          "title": "Make it Work in the Browser"
+          "title": "Make it Work in the Browser",
+          "file": "browser-service"
         },
         {
           "id": "iv-cap-biometrics",
-          "title": "Add Biometrics to Login"
+          "title": "Add Biometrics to Login",
+          "file": "biometrics"
         },
         {
           "id": "iv-cap-custom-pin",
-          "title": "Customize the PIN Dialog"
+          "title": "Customize the PIN Dialog",
+          "file": "custom-pin"
         }
       ]
     },
     {
       "id": "simple-git-workflow",
-      "title": "A Simple git Workflow"
+      "title": "A Simple git Workflow",
+      "file": "simple-git-workflow"
     },
     {
       "id": "references",
-      "title": "References"
+      "title": "References",
+      "file": "references"
     }
   ]
 }

@@ -22,7 +22,7 @@ class MenuService {
       if (item.folder) {
         path += `${item.folder}/`;
       }
-      this._paths[item.id] = `${path}${item.id}.md`;
+      this._paths[item.id] = `${path}${item.file || item.id}.md`;
       if (item.pages && item.pages.length) {
         this.buildPaths(item.pages, path);
       }
