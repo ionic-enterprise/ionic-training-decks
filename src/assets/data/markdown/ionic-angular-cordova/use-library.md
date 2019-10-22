@@ -22,7 +22,7 @@ The library is installed in `node_modules` and your `package.json` file is updat
 
 Good libraries usually document exactly how to use the library in your application. In the case of this library - which is a web component library built using a technology called <a href="https://stenciljs.com" target="_blank">Stencil</a> - there are a couple of steps that need to be taken to use the library in an Angular project (like yours).
 
-First, there is a method in the library called `defineCustomElements()` that needs to be run. This is usually run in the `main.ts` file. This method contains the special sauce that bundlers like WebPack need in order to be aware of the components, with the end result being that WebPack will bundle them properly.
+First, there is a method in the library called `defineCustomElements()` that needs to be called. This is usually called in the `main.ts` file. This method contains the special sauce that bundlers like WebPack need in order to be aware of the components, with the end result being that WebPack will bundle them properly.
 
 ```TypeScript
 import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';

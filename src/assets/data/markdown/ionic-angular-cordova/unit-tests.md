@@ -150,4 +150,4 @@ Refactor the current test into these test cases and let's compare notes when you
 
 ## Conclusion
 
-In this lab we learned the basics of unit testing. We will apply what we learned here and expand upon it as we develop out application. Next we will have to add some Cordova platforms so we can run the application on devices.
+In this lab we learned the basics of unit testing. We will apply what we learned here and expand upon it as we develop our application. Next we will have to add some Cordova platforms so we can run the application on devices.

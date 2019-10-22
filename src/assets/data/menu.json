@@ -19,7 +19,7 @@
         {
           "id": "iw-crd-v4-unit-testing",
           "title": "Unit Tests",
-          "file": "unit-testing"
+          "file": "unit-tests"
         },
         {
           "id": "iw-crd-v4-style",
@@ -98,6 +98,64 @@
           "id": "iw-crdpwa-v4-links",
           "title": "PWA Links",
           "file": "links"
+        }
+      ]
+    },
+    {
+      "id": "iw-react-cap",
+      "title": "Ionic / React / Capacitor",
+      "folder": "ionic-react-capacitor",
+      "file": "intro",
+      "pages": [
+        {
+          "id": "iw-react-cap-start",
+          "title": "Get Started",
+          "file": "start"
+        },
+        {
+          "id": "iw-react-cap-unit-testing",
+          "title": "Unit Tests",
+          "file": "unit-tests"
+        },
+        {
+          "id": "iw-react-cap-style",
+          "title": "Style the App",
+          "file": "style"
+        },
+        {
+          "id": "iw-react-cap-library",
+          "title": "Use a Component Library",
+          "file": "use-library"
+        },
+        {
+          "id": "iw-react-cap-ui-mock",
+          "title": "Mock Up the Interface",
+          "file": "mock-ui"
+        },
+        {
+          "id": "iw-react-cap-get-data",
+          "title": "Get Data",
+          "file": "get-data"
+        },
+        {
+          "id": "iw-react-cap-use-data",
+          "title": "Use the Data",
+          "file": "use-data"
+        },
+        {
+          "id": "iw-react-cap-capacitor",
+          "title": "The Capacitor Workflow",
+          "file": "capacitor"
+        },
+        {
+          "id": "iw-react-cap-loading",
+          "title": "Add Loading Indicator",
+          "file": "loading-indicator"
+        },
+        {
+          "id": "iw-react-cap-switch-scale",
+          "title": "Switch Scale",
+          "file": "toggle-scale"
         }
       ]
     },

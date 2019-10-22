@@ -21,7 +21,7 @@ Add `--ion-background-color: #b9dbf7;` within the `:root` scope in this file.
 
 It is best to do as much styling as possible globally to give the application a consistent look and feel. Notice the existing imports. This is also a best practice. Create files that group the styles together in a manner that makes sense for the application.
 
-For this training application, we don't have a lot of extra styling so we will put the styles right into the `src/global/scss` file:
+For this training application, we don't have a lot of extra styling so we will put the styles right into the `src/global.scss` file:
 
 ```scss
 .primary-value {
@@ -87,11 +87,11 @@ ion-toolbar {
 }
 ```
 
-This shows two different ways to apply the color to a component. The `color="primary"` was used on the `ion-tab-bar` because it is less work for the one tab bar that we have. The Custom CSS Property values were set for the `ion-toolbar` to avoid having to add `color="primary"` to the tollbar in every page of our application.
+This shows two different ways to apply the color to a component. The `color="primary"` was used on the `ion-tab-bar` because it is less work for the one tab bar that we have. The Custom CSS Property values were set for the `ion-toolbar` to avoid having to add `color="primary"` to the tollbar in every page of our application. In many cases it is better to use the `color` property as it will fully apply all related shades and tints as needed.
 
 ## Style the Status Bar
 
-Run the application on a device or emulator. Notice that the status bar text is black. On Android, the status bar itself may also be black, making the status bar text invisible.
+Run the application on a device or emulator if you can. Notice that the status bar text is black. On Android, the status bar itself may also be black, making the status bar text invisible.
 
 There is another issue, but only on Android. The status bar color. Android guidelines <a href="https://cordova.apache.org/docs/en/latest/reference/cordova-plugin-statusbar/#android-quirks" target="_blank">call for the status bar color to be different from the application's title bar</a>, which it is, but most Android applications pick a color that is only slightly different.
 
