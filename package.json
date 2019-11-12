@@ -1,8 +1,8 @@
 {
-  "name": "training-deck",
+  "name": "ionic-training-decks",
   "private": true,
   "version": "0.0.1",
-  "description": "Ionic Training Deck",
+  "description": "Ionic Training Decks",
   "main": "index.js",
   "scripts": {
     "build": "stencil build",
