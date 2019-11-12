@@ -19,7 +19,7 @@ $ npm i @ionic-enterprise/auth
 *Note:* Two different commands exist for installing Auth Connect in your project depending on whether you are using Capacitor or Cordova:
 
 - _Capacitor_: `npm i @ionic-enterprise/auth`
-- _Cordova_: `ionic cordova plugin add @ionic-enterprise/auth`
+- _Cordova_: `ionic cordova plugin add @ionic-enterprise/auth --variable AUTH_URL_SCHEME='com.ionic.actraining'`
 
 Be sure to use the correct command based on your application's stack. Since we are using Capacitor, we need to use the `npm install` based command. We also need to make sure the native projects get updated with the newly installed Cordova plugin:
 
@@ -93,7 +93,7 @@ export class Auth0Service extends IonicAuth {
             redirectUri: `${host}login`,
             scope: 'openid offline_access email picture profile',
             logoutUrl: `${host}logout`,
-            iosWebView: 'private'
+            iosWebView: 'shared'
         };
         super(config);
     }

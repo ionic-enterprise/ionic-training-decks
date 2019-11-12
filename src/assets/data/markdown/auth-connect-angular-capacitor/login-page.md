@@ -24,7 +24,7 @@ We will import our new service from the `@ac/core/services` import. We will also
 import { ..., Auth0Service, IdentityService } from '@ac/core/services';
 ```
 
-> This special import is using a combination of Typescript Barrel files and a Typescript Path configuration. For more information, see `https://somereallycoolurl.com/about/this/information`.
+> This special import is using a combination of Typescript Barrel files and a Typescript Path configuration. For more information, see [Barrels](https://basarat.gitbooks.io/typescript/docs/tips/barrel.html) and [TsConfig Paths](https://decembersoft.com/posts/say-goodbye-to-relative-paths-in-typescript-imports/).
 
 #### Constructor
 
