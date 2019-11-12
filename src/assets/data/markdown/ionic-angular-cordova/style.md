@@ -40,7 +40,7 @@ ion-item {
 
 ## Using the Ionic Studio Theming Editor
 
-**Note:** if you do not have Ioinc Studio, you can use our <a href="https://ionicframework.com/docs/theming/color-generator" target="_blank">online color generator</a> and then manually update `src/theme/variables.scss` by copying the output of the generator.
+**Note:** if you do not have Ionic Studio, you can use our <a href="https://ionicframework.com/docs/theming/color-generator" target="_blank">online color generator</a> and then manually update `src/theme/variables.scss` by copying the output of the generator.
 
 Ionic Studio include a theming editor that allows you to easy specify the color theme for the appliction. The theming editor reads the current `src/theme/variables.scss` file and applies that color theme to a sample page so the color theme can be seen as it is edited.
 
