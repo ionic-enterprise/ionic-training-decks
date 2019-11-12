@@ -12,12 +12,12 @@
   },
   "dependencies": {
     "@stencil/router": "~1.0.1",
-    "chokidar": "~3.2.1"
+    "chokidar": "~3.3.0"
   },
   "devDependencies": {
-    "@stencil/core": "~1.7.2",
-    "@stencil/sass": "~1.1.0",
-    "@types/jest": "~24.0.19",
+    "@stencil/core": "~1.7.5",
+    "@stencil/sass": "~1.1.1",
+    "@types/jest": "~24.0.22",
     "jest": "~24.9.0"
   },
   "engines": {

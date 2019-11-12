@@ -31,31 +31,31 @@ declare global {
 
 
   interface HTMLAppHomeElement extends Components.AppHome, HTMLStencilElement {}
-  const HTMLAppHomeElement: {
+  var HTMLAppHomeElement: {
     prototype: HTMLAppHomeElement;
     new (): HTMLAppHomeElement;
   };
 
   interface HTMLAppMarkdownElement extends Components.AppMarkdown, HTMLStencilElement {}
-  const HTMLAppMarkdownElement: {
+  var HTMLAppMarkdownElement: {
     prototype: HTMLAppMarkdownElement;
     new (): HTMLAppMarkdownElement;
   };
 
   interface HTMLAppMenuElement extends Components.AppMenu, HTMLStencilElement {}
-  const HTMLAppMenuElement: {
+  var HTMLAppMenuElement: {
     prototype: HTMLAppMenuElement;
     new (): HTMLAppMenuElement;
   };
 
   interface HTMLAppMenuItemElement extends Components.AppMenuItem, HTMLStencilElement {}
-  const HTMLAppMenuItemElement: {
+  var HTMLAppMenuItemElement: {
     prototype: HTMLAppMenuItemElement;
     new (): HTMLAppMenuItemElement;
   };
 
   interface HTMLMyAppElement extends Components.MyApp, HTMLStencilElement {}
-  const HTMLMyAppElement: {
+  var HTMLMyAppElement: {
     prototype: HTMLMyAppElement;
     new (): HTMLMyAppElement;
   };
