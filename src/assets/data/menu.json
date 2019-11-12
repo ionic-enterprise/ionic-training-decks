@@ -135,6 +135,44 @@
       ]
     },
     {
+      "id": "ac-ng-cap",
+      "title": "Auth Connect",
+      "folder": "auth-connect-angular-capacitor",
+      "file": "intro",
+      "pages": [
+        {
+          "id": "ac-cap-base",
+          "title": "The Base Application",
+          "file": "base"
+        },
+        {
+          "id": "ac-auth0-config",
+          "title": "Auth0 Configuration",
+          "file": "auth0-setup"
+        },
+        {
+          "id": "ac-authentication-service",
+          "title": "Authentication Service",
+          "file": "authentication-service"
+        },
+        {
+          "id": "ac-login-page",
+          "title": "Login Page",
+          "file": "login-page"
+        },
+        {
+          "id": "ac-home-page",
+          "title": "Home Page",
+          "file": "home-page"
+        },
+        {
+          "id": "ac-browser-support",
+          "title": "Run in Browser",
+          "file": "configure-browser"
+        }
+      ]
+    },
+    {
       "id": "simple-git-workflow",
       "title": "A Simple git Workflow",
       "file": "simple-git-workflow"
