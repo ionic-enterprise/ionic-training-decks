@@ -28,7 +28,7 @@ The mocks can be set up like such:
   }));
 ```
 
-The test tests should look something like this. Note that the two existing tests are change to use `async/await`:
+The test tests should look something like this. Note that the two existing tests are changed to use `async/await`:
 
 ```TypeScript
   describe('entering the page', () => {
