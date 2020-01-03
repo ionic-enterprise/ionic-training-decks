@@ -88,13 +88,14 @@ it('contains three tabs', () => {
 If we have a test that is highly repetative using the same logic across differing data, we can use `it.each()` to supply an array of values to use for the test.
 
 ```TypeScript
-it.each([[0, 'Current Weather'], [1, 'Forecast'], [2, 'UV Index']])(
-  'contains the proper text for tab %i',
-  (tab, text) => {
-    const { container } = render(<App />);
-    expect(container.querySelectorAll('ion-tab-button')[tab as number].textContent).toEqual(text);
-  }
-);
+it.each([
+  [0, 'Tab One'],
+  [1, 'Tab Two'],
+  [2, 'Tab Three']
+])('contains the proper text for tab %i', (tab, text) => {
+  const { container } = render(<App />);
+  expect(container.querySelectorAll('ion-tab-button')[tab as number].textContent).toEqual(text);
+});
 ```
 
 ### Snapshot Tests

@@ -139,10 +139,10 @@ const CurrentWeather: React.FC = () => {
 
 Note that the class for `kws-temperature` is set using `class` just like in normal HTML and not using the usual React `className` hack-around. That is because this is a custom element and not either a standard HTML element or a React component.
 
-Also note the "ref" bit on the `kws-condition`. That is necessary because we need to pass the `iconPaths` object to the web component. However, React doesn't particularily work well with standard web components and would only pass the a string to the property, so instead, we will get a ref to the element and then we will use the Effect hook to set the property as such:
+Also note the "ref" bit on the `kws-condition`. That is necessary because we need to pass the `iconPaths` object to the web component. However, React doesn't particularily work well with standard web components and will only pass the a string to the property, so instead, we will get a ref to the element and then we will use the Effect hook to set the property as such:
 
 ```TypeScript
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 ...
 const CurrentWeather: React.FC = () => {
   ...

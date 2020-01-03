@@ -18,11 +18,9 @@ Add `--ion-background-color: #b9dbf7;` within the `:root` scope in this file.
 
 ### `src/theme/styles.css`
 
-**Note:** this file does not exist, you will need to create it yourself.
+**Note:** this file does not exist, you will need to create it yourself. Be sure to also import it in your `App.tsx` file just like the `variables.css` file is.
 
-It is best to do as much styling as possible globally to give the application a consistent look and feel. Notice the existing imports. This is also a best practice. Create files that group the styles together in a manner that makes sense for the application.
-
-For this training application, we don't have a lot of extra styling so we will put the styles right into the `src/theme/styles.css` file:
+It is best to do as much styling as possible globally to give the application a consistent look and feel. For this training application, we don't have a lot of extra styling so we will put the styles right into the `src/theme/styles.css` file:
 
 ```css
 .primary-value {
@@ -74,7 +72,7 @@ Look at the `src/app/variables.css` file and verify that the changes have been s
 Right now, most of the application is sky blue. That is because most of the components in the application are using the default background color. To change this, specify the `Primary` color for the tab bar and each page's header.
 
 - Add `color="primary"` in the `ion-tab-bar` in `src/app/tabs/tabs.page.html`
-- Add the following styling to the `global.css` file
+- Add the following styling to the `styles.css` file
 
 ```css
 ion-toolbar {
