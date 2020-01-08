@@ -74,6 +74,35 @@ Change both of these files such that the tabs use the following icons and labels
   - **Icon:** sunny
   - **Label:** UV Index
 
+## Side Note: Barrels
+
+Before we go any further, let's have a look at "barrel" files. For many folders, I suggested creating an `index.ts` file to make importing the items easier. This is often called a "barrel file". For a folder of models, it will look something like this:
+
+```TypeScript
+export * from './coordinate';
+export * from './forecast';
+export * from './uv-index';
+export * from './weather';
+export * from './weekly-forecast';
+```
+
+This allows us to import the models like this:
+
+```TypeScript
+import { Coordinate, UVIndex, Weather, WeeklyForecast } from '../models';
+```
+
+Instead of like this:
+
+```TypeScript
+import { Coordinate } from '../models/coordinate';
+import { UVIndex } from '../models/uv-index';
+import { Weather } from '../models/weather';
+import { WeeklyForecast } from '../models/weekly-forecast';
+```
+
+We will be creating these files as we go.
+
 ## Specify Our Icon Paths
 
 In order to allow each application to define its own weather condition images and where they exist, this library uses a specific map object. Let's create an object that can easily be imported where needed.
@@ -93,6 +122,8 @@ export const iconPaths = {
   unknown: 'assets/images/dunno.png'
 };
 ```
+
+Also create an `index.ts` barrel file for this folder.
 
 ## Install the Images
 
@@ -117,7 +148,7 @@ Let's walk through the changes that need to be made to the `CurrentWeather.tsx` 
 
 - change the `IonTitle` to "Current Weather"
 - remove the current contents defined for the `IonContent` (do not remove the `IonContent` tags themselves)
-- import the iconPaths as such `import { iconPaths  } from "../util/iconPaths";`
+- import the iconPaths as such `import { iconPaths  } from "../util";`
 - add a couple of hooks to set the data as such:
 
 ```TypeScript
@@ -161,7 +192,7 @@ The code should now look something like this:
 import { IonContent, IonHeader, IonPage, IonTitle, IonToolbar } from '@ionic/react';
 import React, { useEffect, useRef, useState } from 'react';
 import './CurrentWeather.css';
-import { iconPaths } from '../util/iconPaths';
+import { iconPaths } from '../util';
 
 const CurrentWeatherPage: React.FC = () => {
   const [temperature] = useState(302);
@@ -264,6 +295,8 @@ import { Forecast } from './forecast';
 export type WeeklyForecast = Array<Forecast>;
 ```
 
+Remember to create a barrel file for this folder.
+
 #### Daily Forecast Component
 
 Since we are going to have to pass objects to a HTML standard web component (not a React component), we are going to have to use that `ref` trick several times. This will be easiest if we take the HTML standard web component and wrap it with a React component.
@@ -272,8 +305,8 @@ Create a `src/compnents/DailyForecast.tsx` file. Its contents will look like thi
 
 ```TypeScript
 import React, { useRef, useEffect } from 'react';
-import { Forecast } from '../models/forecast';
-import { iconPaths } from '../util/iconPaths';
+import { Forecast } from '../models';
+import { iconPaths } from '../util';
 
 const DailyForecast: React.FC<{ forecast: Forecast; scale: string }> = ({ forecast, scale }) => {
   const elementRef = useRef(null);
@@ -341,7 +374,7 @@ The final code should look something like this:
 import React, { useState } from 'react';
 import { IonContent, IonHeader, IonItem, IonList, IonPage, IonTitle, IonToolbar } from '@ionic/react';
 
-import DailyForecast from '../components/DailyForecast';
+import DailyForecast from '../components';
 
 const ForecastPage: React.FC = () => {
   const [forecast] = useState([

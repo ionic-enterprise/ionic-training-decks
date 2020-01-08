@@ -70,7 +70,6 @@ describe('weather service', () => {
 
   afterEach(() => spy.mockReset());
 
-  afterEach(() => spy.mockReset());
   it('exists', () => {
     expect(weather).toBeTruthy();
   });
@@ -89,7 +88,7 @@ describe('weather service', () => {
   });
 });
 
-let currentWeather = {
+const currentWeather = {
   coord: { lon: -0.13, lat: 51.51 },
   weather: [{ id: 300, main: 'Drizzle', description: 'light intensity drizzle', icon: '09d' }],
   base: 'stations',
@@ -171,7 +170,7 @@ Upon completion, our code looks something like this:
 That code works, but it is horrible:
 
 - the coordinates are hard coded
-- the method iself knows how to do multiple things, specifically getting the data and unpacking the data
+- the method itself knows how to do multiple things, specifically getting the data and unpacking the data
 
 Let's clean that up a bit.
 
@@ -326,7 +325,7 @@ describe('forecast', () => {
 And our test data looks like this:
 
 ```TypeScript
-let forecast = {
+const forecast = {
   list: [
     {
       dt: 1485799200,
@@ -486,7 +485,7 @@ describe('UV index', () => {
 
 ...
 
-let uvi = {
+const uvi = {
   lat: 37.75,
   lon: -122.37,
   date_iso: '2017-06 - 26T12: 00: 00Z',

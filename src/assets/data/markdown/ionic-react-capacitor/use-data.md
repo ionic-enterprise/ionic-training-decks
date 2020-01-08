@@ -5,35 +5,6 @@ In this lab you will learn how to:
 - Import a service into your pages
 - Retrieve real data from the service, replacing the mock data
 
-## Barrels
-
-Before we go any farther, let's have a look at "barrel" files. In the last section, I suggested creating an `index.ts` file to make importing the models easier. This is often called a "barrel file". For models, it will look something like this:
-
-```TypeScript
-export * from './coordinate';
-export * from './forecast';
-export * from './uv-index';
-export * from './weather';
-export * from './weekly-forecast';
-```
-
-This allows us to import the models like this:
-
-```TypeScript
-import { Coordinate, UVIndex, Weather, WeeklyForecast } from '../models';
-```
-
-Instead of like this:
-
-```TypeScript
-import { Coordinate } from '../models/coordinate';
-import { UVIndex } from '../models/uv-index';
-import { Weather } from '../models/weather';
-import { WeeklyForecast } from '../models/weekly-forecast';
-```
-
-Create a similar barrel file for the `util` directory.
-
 ## Current Weather Page
 
 The changes required to use the weather service in the `CurrentWeatherPage.tsx` file are pretty straight forward:
