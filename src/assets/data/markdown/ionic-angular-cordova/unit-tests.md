@@ -66,10 +66,9 @@ Type `npm test` and verify that the tests run.
 
 ### Use Mock Objects
 
-- rename `statusBarSpy` to `statusBar`
-- rename `splashScreenSpy` to `splashScreen`
-- remove the existing platform spies
+- remove the existing spy variables
 - import the platform mock factory: `import { createPlatformMock } from '../../test/mocks';`
+- provide the `StatusBar` and `SplashScreen` via a factory: `{ provide: StatusBar, useFactory: () => jasmine.createSpyObj<StatusBar>('StatusBar', ['styleDefault']) }`
 - provide the `Platform` via the factory: `{ provide: Platform, useFactory: createPlatformMock }`
 
 ```TypeScript
@@ -78,31 +77,28 @@ import { createPlatformMock } from '../../test/mocks';
 import { AppComponent } from './app.component';
 
 describe('AppComponent', () => {
-  let statusBar;
-  let splashScreen;
 
   beforeEach(async(() => {
-    statusBar = jasmine.createSpyObj('StatusBar', ['styleDefault']);
-    splashScreen = jasmine.createSpyObj('SplashScreen', ['hide']);
-
     TestBed.configureTestingModule({
       declarations: [AppComponent],
       schemas: [CUSTOM_ELEMENTS_SCHEMA],
       providers: [
-        { provide: StatusBar, useValue: statusBar },
-        { provide: SplashScreen, useValue: splashScreen },
+        { provide: StatusBar, useFactory: () => jasmine.createSpyObj<StatusBar>('StatusBar', ['styleDefault']) },
+        { provide: SplashScreen, useFactory: () => jasmine.createSpyObj<SplashScreen>('SplashScreen', ['hide']) },
         { provide: Platform, useFactory: createPlatformMock }
       ]
     }).compileComponents();
   }));
 ```
 
-- get the provided platform mock: `const platform = TestBed.get(Platform);`
-- use the platform mock just obtained and not the former mock objects
+- get the provided mock services. Example: `const platform = TestBed.inject(Platform);`
+- use the mocks just obtained and not the former mock objects
 
 ```TypeScript
   it('should initialize the app', async () => {
-    const platform = TestBed.get(Platform);
+    const platform = TestBed.inject(Platform);
+    const statusBar = TestBed.inject(StatusBar);
+    const splashScreen = TestBed.inject(SplashScreen);
     TestBed.createComponent(AppComponent);
     expect(platform.ready).toHaveBeenCalled();
     await platform.ready();

@@ -18,7 +18,7 @@ Open the `tabs.page.html` file. Currently it looks like this:
 ```HTML
 <ion-tabs>
 
-  <ion-tab-bar slot="bottom">
+  <ion-tab-bar slot="bottom" color="primary">
     <ion-tab-button tab="current-weather">
       <ion-icon name="flash"></ion-icon>
       <ion-label>Tab One</ion-label>
@@ -119,6 +119,59 @@ export interface Weather {
 }
 ```
 
+### Path Mapping and Barrel Files
+
+Before we get into the next section, let's make TypeScript module resolution a bit easier to deal with. If we don't do this, we could end up with a lot of code that looks like this:
+
+```TypeScript
+import { BarService } from '../../services/bar/bar.service';
+import { FooService } from '../../services/foo/foo.service';
+import { Weather } from '../../models/weather';
+import { environment } from '../../../environments/environment';
+```
+
+The relative paths are obnoxious. They are also a maintenance headache as the application grows since you may need to adjust them as services and components are reorganized into different subdirectories over time. It would be better if our code could look like this:
+
+```TypeScript
+import { BarService, FooService } from '@app/services';
+import { Weather } from '@app/models';
+import { environment } from '@env/environment';
+```
+
+This can be achieved by creating TypeScript path mappings and by grouping like items into "barrel" files.
+
+#### Path Mapping
+
+Open the `tsconfig.json` file and add the following lines under the `baseUrl` setting:
+
+```json
+    "paths": {
+      "@app/*": ["src/app/*"],
+      "@env/*": ["src/environments/*"],
+      "@test/*": ["test/*"]
+    },
+```
+
+This tells TypeScript exactly which directory, relative to the `baseUrl`, to use when it finds one of the mappings in an `import` statement.
+
+#### Barrel Files
+
+We will group all of our services in a single `index.ts` file within the `services` folder. Similarily, we will group all of our models together via a similar file.
+
+**`src/app/services/index.ts`**
+
+```TypeScript
+export * from './icon-map/icon-map.service'
+```
+
+**`src/app/models/index.ts`**
+
+```TypeScript
+export * from './weather';
+```
+
+The files are very redundant right now, but as the app grows this will keep our import statements from getting out of hand.
+
 ### Current Weather
 
 - Inject the `IconMapService`
@@ -127,8 +180,8 @@ export interface Weather {
 ```TypeScript
 import { Component } from '@angular/core';
 
-import { IconMapService } from '../services/icon-map/icon-map.service';
-import { Weather } from '../models/weather';
+import { IconMapService } from '@app/services';
+import { Weather } from '@app/models'
 
 @Component({
   selector: 'app-current-weather',
@@ -176,7 +229,7 @@ kws-condition {
 
 ### Forecast
 
-Each `kws-daily-forecast` element takes an array of `Weather` data for a given day. We want to show the current forecast for several days, so we will need an array of arrays. Create a `src/app/models/forecast.ts` file:
+Each `kws-daily-forecast` element takes an array of `Weather` data for a given day. We want to show the current forecast for several days, so we will need an array of arrays. Create a `src/app/models/forecast.ts` file. Remmmber to add it to the barrel file as well.
 
 ```TypeScript
 import { Weather } from './weather';
@@ -191,8 +244,8 @@ At this point, set up some simple sample data (three days worth should be fine),
 ```TypeScript
 import { Component } from '@angular/core';
 
-import { Forecast } from '../models/forecast';
-import { IconMapService } from '../services/icon-map/icon-map.service';
+import { Forecast } from '@app/models';
+import { IconMapService } from '@app/services'
 
 @Component({
   selector: 'app-forecast',
@@ -232,7 +285,7 @@ export class ForecastPage {
 
 ```html
 <ion-header>
-  <ion-toolbar color="primary"> <ion-title> Forecast </ion-title> </ion-toolbar>
+  <ion-toolbar> <ion-title> Forecast </ion-title> </ion-toolbar>
 </ion-header>
 
 <ion-content class="ion-padding">
@@ -275,7 +328,7 @@ export interface UVIndex {
 ```TypeScript
 import { Component } from '@angular/core';
 
-import { UVIndex } from '../models/uv-index';
+import { UVIndex } from '@app/models';
 
 @Component({
   selector: 'app-uv-index',
@@ -313,7 +366,7 @@ export class UvIndexPage {
 
 ```html
 <ion-header>
-  <ion-toolbar color="primary"> <ion-title>UV Index</ion-title> </ion-toolbar>
+  <ion-toolbar> <ion-title>UV Index</ion-title> </ion-toolbar>
 </ion-header>
 
 <ion-content class="ion-text-center ion-padding">
@@ -332,8 +385,9 @@ export class UvIndexPage {
 
 ## Fix the Tests
 
-There is a problem with the tests now. The problem is that we added custom elements to the HTML templates but we are not using the CUSTOM_ELEMENTS_SCHEMA in the tests. Update the module accordingly.
+There is a problem with the tests now. The problem is that we added custom elements to the HTML templates but we are not using the CUSTOM_ELEMENTS_SCHEMA in the tests. They also do not need the `forRoot()` portion on the `IonicModule` import. Update the module accordingly.
 
 ## Conclusion
 
-In this lab you created a simple service and model and learned how to mock up the UI to ensure it looks the way you want it to look. Next we will look at how to get real data.
+In this lab you created a simple service and model and learned how to mock up the UI to ensure it looks the way you want it to look. Make sure you have a look at your app in both light and dark mode. Next we will look at how to get real data.
+

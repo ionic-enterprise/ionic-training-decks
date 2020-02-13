@@ -15,7 +15,7 @@ To install my weather component library, run: `npm install kws-weather-widgets`
 The library is installed in `node_modules` and your `package.json` file is updated to reflect the new dependency:
 
 ```JSON
-    "kws-weather-widgets": "~2.0.2",
+    "kws-weather-widgets": "~2.0.3",
 ```
 
 ## Use the Library
