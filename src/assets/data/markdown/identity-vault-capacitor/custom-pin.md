@@ -54,7 +54,7 @@ The tests for this look like:
 
     [true, false].forEach(setPasscode => {
       it(`creates a PIN dialog, setting passcode: ${setPasscode}`, async () => {
-        const modalController = TestBed.get(ModalController);
+        const modalController = TestBed.inject(ModalController);
         await identity.onPasscodeRequest(setPasscode);
         expect(modalController.create).toHaveBeenCalledTimes(1);
         expect(modalController.create).toHaveBeenCalledWith({

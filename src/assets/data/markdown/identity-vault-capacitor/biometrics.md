@@ -97,7 +97,7 @@ The test for that looks like this:
 ```TypeScript
   describe('onVaultLocked', () => {
     it('redirects to the login page', () => {
-      const navController = TestBed.get(NavController);
+      const navController = TestBed.inject(NavController);
       identity.onVaultLocked();
       expect(navController.navigateRoot).toHaveBeenCalledTimes(1);
       expect(navController.navigateRoot).toHaveBeenCalledWith(['login']);
@@ -172,8 +172,8 @@ When the login page is initialized, we need to determine if the user has a locke
     describe('without a stored session', () => {
       let identity;
       beforeEach(() => {
-        identity = TestBed.get(IdentityService);
-        identity.hasStoredSession.and.returnValue(Promise.resolve(false));
+        identity = TestBed.inject(IdentityService);
+        (identity.hasStoredSession as any).and.returnValue(Promise.resolve(false));
       });
 
       it('sets unlockIcon to an empty string', async () => {
@@ -190,8 +190,8 @@ When the login page is initialized, we need to determine if the user has a locke
     describe('with a stored session', () => {
       let identity;
       beforeEach(() => {
-        identity = TestBed.get(IdentityService);
-        identity.hasStoredSession.and.returnValue(Promise.resolve(true));
+        identity = TestBed.inject(IdentityService);
+        (identity.hasStoredSession as any).and.returnValue(Promise.resolve(true));
       });
 
       it('sets displayVaultLogin to true', async () => {
@@ -254,28 +254,28 @@ When the unlock button is clicked, we need to attempt to restore the session. If
 ```TypeScript
   describe('clicking the "unlock" button', () => {
     it('restores the session', async () => {
-      const identity = TestBed.get(IdentityService);
+      const identity = TestBed.inject(IdentityService);
       await component.unlockClicked();
       expect(identity.restoreSession).toHaveBeenCalledTimes(1);
     });
 
     it('navigates to the tea-categories page if the session is restored ', async () => {
-      const identity = TestBed.get(IdentityService);
-      identity.restoreSession.and.returnValue(Promise.resolve({ username: 'test@test.com', token: 'IAmALittleToken' }));
+      const identity = TestBed.inject(IdentityService);
+      (identity.restoreSession as any).and.returnValue(Promise.resolve({ username: 'test@test.com', token: 'IAmALittleToken' }));
       await component.unlockClicked();
       expect(navController.navigateRoot).toHaveBeenCalledTimes(1);
       expect(navController.navigateRoot).toHaveBeenCalledWith('/tea-categories');
     });
 
     it('does not navigate if a session is not restored', async () => {
-      const identity = TestBed.get(IdentityService);
+      const identity = TestBed.inject(IdentityService);
       await component.unlockClicked();
       expect(navController.navigateRoot).not.toHaveBeenCalled();
     });
 
     it('does not navigate if a session is restored but it does not have a token', async () => {
-      const identity = TestBed.get(IdentityService);
-      identity.restoreSession.and.returnValue(Promise.resolve({ username: 'test@test.com' }));
+      const identity = TestBed.inject(IdentityService);
+      (identity.restoreSession as any).and.returnValue(Promise.resolve({ username: 'test@test.com' }));
       await component.unlockClicked();
       expect(navController.navigateRoot).not.toHaveBeenCalled();
     });

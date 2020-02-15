@@ -11,7 +11,7 @@ In this lab you will learn how to:
 Start by injecting the `WeatherService` into the `current-weather` page.
 
 ```TypeScript
-import { WeatherService } from '../services/weather/weather.service';
+import { WeatherService } from '@app/services';
 
 ...
 
@@ -71,9 +71,10 @@ The factory creates a jasmine spy matching the API for the service. In the case 
 
 ```TypeScript
 import { EMPTY } from 'rxjs';
+import { WeatherService } from './weather.service';
 
 export function createWeatherServiceMock() {
-  return jasmine.createSpyObj('WeatherService', {
+  return jasmine.createSpyObj<WeatherService>('WeatherService', {
     current: EMPTY,
     forecast: EMPTY,
     uvIndex: EMPTY
@@ -81,7 +82,7 @@ export function createWeatherServiceMock() {
 }
 ```
 
-Creating this file causes the `npm start` build to begin failing as it tries to include the mock. Add the `**/*.mock.js` files to the exclusions in `src/tsconfig.app.json`
+Creating this file may cause the `npm start` build to begin failing as it tries to include the mock. Add the `**/*.mock.js` files to the exclusions in `tsconfig.app.json`
 
 ```JSON
   "exclude": [
@@ -123,14 +124,14 @@ We have some new functionallity to cover. That functionallity is "entering the p
 ```TypeScript
   describe('entering the page', () => {
     it('gets the current weather', () => {
-      const weather =  TestBed.get(WeatherService);
+      const weather =  TestBed.inject(WeatherService);
       component.ionViewDidEnter();
       expect(weather.current).toHaveBeenCalledTimes(1);
     });
 
-    it('displays the current weather', async () => {
-      const weather = TestBed.get(WeatherService);
-      weather.current.and.returnValue(
+    it('displays the current weather', () => {
+      const weather = TestBed.inject(WeatherService);
+      (weather.current as any).and.returnValue(
         of({
           temperature: 280.32,
           condition: 300,
@@ -139,7 +140,6 @@ We have some new functionallity to cover. That functionallity is "entering the p
       );
       component.ionViewDidEnter();
       fixture.detectChanges();
-      await new Promise(resolve => setTimeout(() => resolve()));
       const t = fixture.debugElement.query(By.css('kws-temperature'));
       expect(t).toBeTruthy();
     });
@@ -171,14 +171,14 @@ Finally, `currentWeather` can just be left declared but unassigned. Remove the m
 ```TypeScript
   describe('entering the page', () => {
     it('gets the forecast', () => {
-      const weather = TestBed.get(WeatherService);
+      const weather = TestBed.inject(WeatherService);
       component.ionViewDidEnter();
       expect(weather.forecast).toHaveBeenCalledTimes(1);
     });
 
     it('shows the forecast items', () => {
-      const weather = TestBed.get(WeatherService);
-      weather.forecast.and.returnValue(
+      const weather = TestBed.inject(WeatherService);
+      (weather.forecast as any).and.returnValue(
         of([
           [
             {
@@ -216,8 +216,8 @@ Finally, `currentWeather` can just be left declared but unassigned. Remove the m
 ```TypeScript
   describe('entering the page', () => {
     beforeEach(() => {
-      const weather = TestBed.get(WeatherService);
-      weather.uvIndex.and.returnValue(
+      const weather = TestBed.inject(WeatherService);
+      (weather.uvIndex as any).and.returnValue(
         of({
           value: 3.5,
           riskLevel: 1
@@ -226,15 +226,14 @@ Finally, `currentWeather` can just be left declared but unassigned. Remove the m
     });
 
     it('gets the UV index', () => {
-      const weather = TestBed.get(WeatherService);
+      const weather = TestBed.inject(WeatherService);
       component.ionViewDidEnter();
       expect(weather.uvIndex).toHaveBeenCalledTimes(1);
     });
 
-    it('displays the UV index', async () => {
+    it('displays the UV index', () => {
       component.ionViewDidEnter();
       fixture.detectChanges();
-      await new Promise(resolve => setTimeout(() => resolve()));
       const el = fixture.debugElement.query(By.css('kws-uv-index'));
       expect(el).toBeTruthy();
     });
@@ -247,6 +246,25 @@ Finally, `currentWeather` can just be left declared but unassigned. Remove the m
     });
   });
 ```
+
+## Extra Credit
+
+Have a look at the ES6 imports in our page tests where we are bringing in the service and the factory for its mock:
+
+```TypeScript
+import { WeatherService } from '@app/services';
+import { createWeatherServiceMock } from '@app/services/weather/weather.service.mock';
+```
+
+The service is imported from a barrel file in the `services` base folder, but if the mock factory is broght in via a full path. If we later refactor the directory structure this will become a maintenance problem. It would be nice if we could do this:
+
+```TypeScript
+import { WeatherService } from '@app/services';
+import { createWeatherServiceMock } from '@app/services/testing';
+```
+
+**Challenge:** figure out how to accomlish this, make sure you can still do an `npm run build` when you are done
+
 
 ## Conclusion
 

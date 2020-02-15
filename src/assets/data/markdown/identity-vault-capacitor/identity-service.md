@@ -80,7 +80,7 @@ The `IonicIdentityVaultUser` takes the `Platorm` service as its first parameter 
       ]
     });
 
-    httpTestingController = TestBed.get(HttpTestingController);
+    httpTestingController = TestBed.inject(HttpTestingController);
   })
 ```
 

@@ -212,7 +212,7 @@ Now that we have the `BrowserAuthPlugin` being used by the service we can either
       ]
     });
 
-    httpTestingController = TestBed.get(HttpTestingController);
+    httpTestingController = TestBed.inject(HttpTestingController);
   });
 ```
 

@@ -10,8 +10,10 @@ In this lab, you will learn how to:
 
 ## Getting Started
 
-- Go to <a href="https://openweathermap.org/" target="_blank">OpenWeatherMap.org</a> and sign up for a free account, then generate an API key for yourself
+- The API we use requires an API key. A key will be provided for this class. However, this key will be deleted after the class is over
+- If you would like to use your own key, go to <a href="https://openweathermap.org/" target="_blank">OpenWeatherMap.org</a> and sign up for a free account. You can then generate an API key for your own use
 - Use `ionic g service services/weather/weather` to generate a new service
+- Remember to add the new service to the services barrel file
 
 ## Inject the HTTP Client
 
@@ -85,15 +87,17 @@ describe('WeatherService', () => {
     TestBed.configureTestingModule({
       imports: [HttpClientTestingModule]
     });
-    httpTestingController = TestBed.get(HttpTestingController);
+    httpTestingController = TestBed.inject(HttpTestingController);
   });
 
   it('should be created', () => {
-    const service: WeatherService = TestBed.get(WeatherService);
+    const service: WeatherService = TestBed.inject(WeatherService);
     expect(service).toBeTruthy();
   });
 });
 ```
+
+**Note:** The test may have been generated with a `TestBed.get()` call. If so, change that to the now preferred `TestBed.inject()`.
 
 Don't worry about the fact that we are currently getting a `HttpTestingController` and not using it. We will address that next.
 
@@ -106,7 +110,7 @@ We need to get the current weather using an URL similar to the following: `https
 ```
   describe('current', () => {
     it('gets the data from the server', () => {
-      const service: WeatherService = TestBed.get(WeatherService);
+      const service: WeatherService = TestBed.inject(WeatherService);
       service.current().subscribe();
       const req = httpTestingController.expectOne(
         `${environment.baseUrl}/weather?lat=43.073051&lon=-89.40123&appid=${
@@ -135,13 +139,15 @@ The basic format for such a `get()` call is: `get(url: string): Observable<any>`
 **Hints:**
 
 - You will need to import `Observable` from `rxjs` at the top of your file.
-- You will also to `import { environment } from '../../../environments/environment';`
+- You will also to `import { environment } from '@env/environment';`
 
 ### Add the Other Methods
 
 Add two additional methods: one called `forecast` that gets the forecast data from the `forecast` endpoint (5 day / 3 hour forecast) and one called `uvIndex` that gets the UV Index data from the `uvi` endpoint (UV Index). **Hint:** Have a look at the <a href="https://openweathermap.org/api" target="_blank">Open Weather Map API Docs</a> for more information on the endpoints. The format of the `forecast` and `uvIndex` methods will be basically the same at this point other than the name of the endpoint.
 
 **Be sure the first create tests, then write code.**
+
+**Extra Credit:** There seems to be a pattern here that you could abstract out into a `private` method.
 
 ## Transforming the Data
 
@@ -159,7 +165,7 @@ First we create a test that exercises the transform:
 
 ```TypeScript
     it('transforms the data', () => {
-      const service: WeatherService = TestBed.get(WeatherService);
+      const service: WeatherService = TestBed.inject(WeatherService);
       let weather: Weather;
       service.current().subscribe(w => (weather = w));
       const req = httpTestingController.expectOne(
@@ -197,11 +203,11 @@ First we create a test that exercises the transform:
 - Observables in rxjs can be piped through a whole host of operators. One of the most useful is `map` which is used to map one object to another. The basic syntax is: `this.http.get(url).pipe(map((res: any) => someTransform(res)));`
 - You will need to import some stuff from a couple of different ES6 modules at the top of your file.
 - The `map` function is in the `rxjs/operators` module.
-- Change the return type of `current()` to `Observable<Weather>`
+- Change the return type of `current()` to `Observable<Weather>` (that is, use our model instead of `any`)
 - Create a private method called `unpackWeather(res: any): Weather` that transforms the data from the raw result to a `Weather` object
 - Append the `pipe` to the `get()` call as such: `.pipe(map((res: any) => this.unpackWeather(res)));`
 
-When you are done, your code should look something like this:
+When you are done, your code should look something functionally equivalent to this (the code itself will be significantly different if you did the Extra Credit above):
 
 ```TypeScript
   current(): Observable<Weather> {
@@ -231,7 +237,7 @@ Transforming the forecast data is more complex. We need to go through the `list`
 
 ```TypeScript
     it('transforms the data', () => {
-      const service: WeatherService = TestBed.get(WeatherService);
+      const service: WeatherService = TestBed.inject(WeatherService);
       let forecast: Forecast;
       service.forecast().subscribe(f => (forecast = f));
       const req = httpTestingController.expectOne(
@@ -400,7 +406,7 @@ One way to write that test is to create a testng template and feed an array of v
       { value: 18, riskLevel: 4 }
     ].forEach(test =>
       it(`transforms the data (value: ${test.value})`, () => {
-        const service: WeatherService = TestBed.get(WeatherService);
+        const service: WeatherService = TestBed.inject(WeatherService);
         let uvIndex: UVIndex;
         service.uvIndex().subscribe(i => (uvIndex = i));
         const req = httpTestingController.expectOne(

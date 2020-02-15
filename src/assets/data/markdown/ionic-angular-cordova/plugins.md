@@ -122,8 +122,8 @@ import { Geolocation } from '@ionic-native/geolocation/ngx';
   ...
   describe('current', () => {
     it('calls the gelocation plugin', () => {
-      const geolocation = TestBed.get(Geolocation);
-      const service: LocationService = TestBed.get(LocationService);
+      const geolocation = TestBed.inject(Geolocation);
+      const service: LocationService = TestBed.inject(LocationService);
       service.current();
       expect(geolocation.getCurrentPosition).toHaveBeenCalledTimes(1);
     });
@@ -159,7 +159,7 @@ export class LocationService {
 
 ```TypeScript
     it('resolves the unpacked position', async () => {
-      const service: LocationService = TestBed.get(LocationService);
+      const service: LocationService = TestBed.inject(LocationService);
       expect(await service.current()).toEqual({
         latitude: 42,
         longitude: 73
@@ -213,9 +213,9 @@ import { LocationService } from '../location/location.service';
         { provide: LocationService, useFactory: createLocationServiceMock }
       ]
     });
-    httpTestingController = TestBed.get(HttpTestingController);
-    const loc = TestBed.get(LocationService);
-    loc.current.and.returnValue(
+    httpTestingController = TestBed.inject(HttpTestingController);
+    const loc = TestBed.inject(LocationService);
+    (loc.current as any).and.returnValue(
       Promise.resolve({ latitude: 42.731338, longitude: -88.314159 })
     );
   });
@@ -228,8 +228,8 @@ import { LocationService } from '../location/location.service';
 ```TypeScript
   describe('current', () => {
     it('gets the current location', () => {
-      const loc = TestBed.get(LocationService);
-      const service: WeatherService = TestBed.get(WeatherService);
+      const loc = TestBed.inject(LocationService);
+      const service: WeatherService = TestBed.inject(WeatherService);
       service.current().subscribe();
       expect(loc.current).toHaveBeenCalledTimes(1);
     });
@@ -261,7 +261,7 @@ import { fakeAsync, TestBed, tick } from '@angular/core/testing';
 ...
 
     it('gets the data from the server', fakeAsync(() => {
-      const service: SomeService = TestBed.get(SomeService);
+      const service: SomeService = TestBed.inject(SomeService);
       service.someMethod().subscribe();
       tick();
       const req = httpTestingController.expectOne('some url');

@@ -33,7 +33,7 @@ describe('UserPreferencesService', () => {
   );
 
   it('should be created', () => {
-    const service: UserPreferencesService = TestBed.get(UserPreferencesService);
+    const service: UserPreferencesService = TestBed.inject(UserPreferencesService);
     expect(service).toBeTruthy();
   });
 
@@ -68,10 +68,10 @@ Requirement 1: Wait for storage to be ready.
 
 ```TypeScript
     it('waits for storage to be ready', () => {
-      const service: UserPreferencesService = TestBed.get(
+      const service: UserPreferencesService = TestBed.inject(
         UserPreferencesService
       );
-      const storage = TestBed.get(Storage);
+      const storage = TestBed.inject(Storage);
       service.getUseCelcius();
       expect(storage.ready).toHaveBeenCalledTimes(1);
     });
@@ -81,10 +81,10 @@ Requirement 2a: Get the value from storage.
 
 ```TypeScript
     it('gets the useCelcius value', async () => {
-      const service: UserPreferencesService = TestBed.get(
+      const service: UserPreferencesService = TestBed.inject(
         UserPreferencesService
       );
-      const storage = TestBed.get(Storage);
+      const storage = TestBed.inject(Storage);
       await service.getUseCelcius();
       expect(storage.get).toHaveBeenCalledTimes(1);
       expect(storage.get).toHaveBeenCalledWith('useCelcius');
@@ -95,11 +95,11 @@ Requirement 2b: Return the resolved the value from storage
 
 ```TypeScript
     it('resolves the useCelcius value', async () => {
-      const service: UserPreferencesService = TestBed.get(
+      const service: UserPreferencesService = TestBed.inject(
         UserPreferencesService
       );
-      const storage = TestBed.get(Storage);
-      storage.get.withArgs('useCelcius').and.returnValue(Promise.resolve(true));
+      const storage = TestBed.inject(Storage);
+      (storage.get as any).withArgs('useCelcius').and.returnValue(Promise.resolve(true));
       expect(await service.getUseCelcius()).toEqual(true);
     });
 ```
@@ -108,11 +108,11 @@ Requirement 3: Cache the resolved value
 
 ```TypeScript
     it('caches the resolved useCelcius value', async () => {
-      const service: UserPreferencesService = TestBed.get(
+      const service: UserPreferencesService = TestBed.inject(
         UserPreferencesService
       );
-      const storage = TestBed.get(Storage);
-      storage.get.withArgs('useCelcius').and.returnValue(Promise.resolve(true));
+      const storage = TestBed.inject(Storage);
+      (storage.get as any).withArgs('useCelcius').and.returnValue(Promise.resolve(true));
       expect(await service.getUseCelcius()).toEqual(true);
       expect(await service.getUseCelcius()).toEqual(true);
       expect(await service.getUseCelcius()).toEqual(true);
@@ -126,10 +126,10 @@ Requirement 1: Wait for storage to be ready.
 
 ```TypeScript
     it('waits for storage to be ready', () => {
-      const service: UserPreferencesService = TestBed.get(
+      const service: UserPreferencesService = TestBed.injectj(
         UserPreferencesService
       );
-      const storage = TestBed.get(Storage);
+      const storage = TestBed.injectj(Storage);
       service.setUseCelcius(false);
       expect(storage.ready).toHaveBeenCalledTimes(1);
     });
@@ -139,10 +139,10 @@ Requirement 2: Set the value in storage.
 
 ```TypeScript
     it('sets the useCelcius value', async () => {
-      const service: UserPreferencesService = TestBed.get(
+      const service: UserPreferencesService = TestBed.injectj(
         UserPreferencesService
       );
-      const storage = TestBed.get(Storage);
+      const storage = TestBed.injectj(Storage);
       await service.setUseCelcius(false);
       expect(storage.set).toHaveBeenCalledTimes(1);
       expect(storage.set).toHaveBeenCalledWith('useCelcius', false);
@@ -153,10 +153,10 @@ Requirement 3: Update the cached value.
 
 ```TypeScript
     it('updates the cache value for useCelcius', async () => {
-      const service: UserPreferencesService = TestBed.get(
+      const service: UserPreferencesService = TestBed.injectj(
         UserPreferencesService
       );
-      const storage = TestBed.get(Storage);
+      const storage = TestBed.inject(Storage);
       await service.setUseCelcius(false);
       expect(await service.getUseCelcius()).toEqual(false);
       expect(storage.get).not.toHaveBeenCalled();
@@ -243,7 +243,7 @@ Add the following tests to the `current-weather.page.spec.ts`, then write code t
     });
 
     it('sets the preference false when toggling from "C" to "F"', () => {
-      const userPreferences = TestBed.get(UserPreferencesService);
+      const userPreferences = TestBed.inject(UserPreferencesService);
       component.scale = 'C';
       component.toggleScale();
       expect(userPreferences.setUseCelcius).toHaveBeenCalledTimes(1);
@@ -257,7 +257,7 @@ Add the following tests to the `current-weather.page.spec.ts`, then write code t
     });
 
     it('sets the preference true when toggling from "F" to "C"', () => {
-      const userPreferences = TestBed.get(UserPreferencesService);
+      const userPreferences = TestBed.inject(UserPreferencesService);
       component.scale = 'F';
       component.toggleScale();
       expect(userPreferences.setUseCelcius).toHaveBeenCalledTimes(1);

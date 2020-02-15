@@ -69,7 +69,7 @@ First we will need to clean up the tests. Several of them use `async/await` beca
 
 ```TypeScript
     it('displays a loading indicator', async () => {
-      const loadingController = TestBed.get(LoadingController);
+      const loadingController = TestBed.inject(LoadingController);
       await component.ionViewDidEnter();
       expect(loadingController.create).toHaveBeenCalledTimes(1);
       expect(loading.present).toHaveBeenCalledTimes(1);
@@ -80,7 +80,7 @@ First we will need to clean up the tests. Several of them use `async/await` beca
 
 ```TypeScript
     it('displays a loading indicator', fakeAsync(() => {
-      const loadingController = TestBed.get(LoadingController);
+      const loadingController = TestBed.inject(LoadingController);
       component.ionViewDidEnter();
       tick();
       expect(loadingController.create).toHaveBeenCalledTimes(1);
@@ -92,8 +92,8 @@ There are a couple of tests that also query the DOM. For those tests, also run a
 
 ```TypeScript
     it('displays the current weather', fakeAsync(() => {
-      const weather = TestBed.get(WeatherService);
-      weather.current.and.returnValue(
+      const weather = TestBed.inject(WeatherService);
+      (lweather.current as any).and.returnValue(
         of({
           temperature: 280.32,
           condition: 300,
