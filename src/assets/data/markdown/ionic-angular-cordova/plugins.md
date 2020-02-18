@@ -58,7 +58,7 @@ export interface Coordinate {
 ```TypeScript
 import { Injectable } from '@angular/core';
 
-import { Coordinate } from '../../models/coordinate';
+import { Coordinate } from '@app/models';
 
 @Injectable({
   providedIn: 'root'
@@ -138,7 +138,7 @@ import { Geolocation } from '@ionic-native/geolocation/ngx';
 import { Injectable } from '@angular/core';
 import { Geolocation  } from '@ionic-native/geolocation/ngx';
 
-import { Coordinate } from '../../models/coordinate';
+import { Coordinate } from '@app/models';
 
 @Injectable({
   providedIn: 'root'
@@ -193,9 +193,11 @@ Our basic requirements are:
 **`src/app/services/location/location.service.mock.ts`**
 
 ```TypeScript
+import { LocationService } from './location.service';
+
 export function createLocationServiceMock() {
-  return jasmine.createSpyObj('LocationService', {
-    current: Promise.resolve()
+  return jasmine.createSpyObj<LocationService>('LocationService', {
+    current: Promise.resolve({ latitude: 0, longitude: 0 })
   });
 }
 ```
@@ -237,15 +239,17 @@ import { LocationService } from '../location/location.service';
   });
 ```
 
+Create similar tests for `forecast` and `uvIndex`.
+
 **`weather.service.ts`**
 
-Getting the above test to pass is a matter of injecting the service and calling the `current()` method in the correct spot. Doing so is left as an exercise for you to complete. **Note:** we do not need to do anything with the result at this time. We just need to get the test to pass.
+Getting the above test to pass is a matter of injecting the service and calling the `current()` method in the correct spot(s). Doing so is left as an exercise for you to complete. **Note:** we do not need to do anything with the result at this time. We just need to get the test to pass.
 
 ##### Step 2 - Use the Current Location
 
 **`weather.service.spec.ts`**
 
-We are already have tests verifying the HTTP call and return. Update thost tests to ensure that the returned location is used in the HTTP call.
+We are already have tests verifying the HTTP call and return. Update those tests to ensure that the returned location is used in the HTTP call.
 
 This requires two changes to the tests:
 
@@ -271,9 +275,11 @@ import { fakeAsync, TestBed, tick } from '@angular/core/testing';
 ...
 ```
 
+Remember to change the expected `lat` and `lon` values passed to those resolved by the location service mock. Be sure to make these changes to `current`, `forecast`, and `uvIndex`.
+
 **`weather.service.ts`**
 
-Make the changes to the `WeatherService`'s `current()` method to make those tests pass.
+Make the changes to the `WeatherService` in order to to make those tests pass.
 
 **Hint:** Recall this pattern from when we talked about combining Observables and Promises:
 
@@ -287,45 +293,9 @@ function getSomeData (): Observable<ChildDataType> {
 }
 ```
 
-##### Step 3 - Refactor for Single Responsibility
+You will need to perform similar code in your `WeatherService`. Where, exactly, depends on whether or not use did the **Extra Credit** when we created the service. If you did, then you only need to change one method. Otherwise, you may have to change three methods.
 
-Updating the code to work in the quickest, dirtiest way results in code something like this:
-
-```TypeScript
-  current(): Observable<Weather> {
-    return from(this.location.current()).pipe(
-      flatMap((coord: Coordinate) =>
-        this.http
-          .get(
-            `${environment.baseUrl}/weather?lat=${coord.latitude}&lon=${
-              coord.longitude
-            }&appid=${environment.appId}`
-          )
-          .pipe(map(res => this.unpackWeather(res)))
-      )
-    );
-  }
-```
-
-I find that messy because the method is responsible for knowing how to do multiple things. We can mitigate through some refactoring, made safer by the existence of our tests:
-
-1. Abstract the Promise -> Observable logic into `private getCurrentLocation(): Observable<Coorodinate>` method
-1. Abstract the HTTP call logic into `private getCurrentWeather(): Observable<Weather>` method
-
-When complete, the `current()` method should look like this:
-
-```TypeScript
-  current(): Observable<Weather> {
-    return this.getCurrentLocation().pipe(
-      flatMap((coord: Coordinate) => this.getCurrentWeather(coord)));
-  }
-```
-
-Now it only has one responsibility, chaining the other two methods.
-
-**Challenge:** Rewrite the other two public methods to also get the current location before returning the weather data related observables.
-
-Once this rewrite is complete, you should be able to remove the following code from the `WeatherService`:
+Once this is complete, you should be able to remove the following code from the `WeatherService`:
 
 ```TypeScript
   private latitude = 43.073051;

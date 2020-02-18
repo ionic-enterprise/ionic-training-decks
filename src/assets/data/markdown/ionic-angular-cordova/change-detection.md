@@ -63,7 +63,7 @@ Rather than explicitly kicking off a change detection cycle, we will use the `as
 
 ### Clean up the Tests
 
-First we will need to clean up the tests. Several of them use `async/await` because of the loading indicator using promises. We will be modifying this whole workflow to be part of an `Observable` pipeline, so `async/await` will no longer be appropriate. Instead, use the `fakeAsync()` zone and `tick()` as such:
+First we will need to clean up the tests. Several of them use `async/await` because of the loading indicator using promises. We will be modifying this whole workflow to be part of an `Observable` pipeline, so `async/await` will no longer be appropriate. Instead, use the `fakeAsync()` zone and `tick()` as such (**note** you do not need to change the "user preferences" related tests):
 
 **`async/await` Test**
 
@@ -93,7 +93,7 @@ There are a couple of tests that also query the DOM. For those tests, also run a
 ```TypeScript
     it('displays the current weather', fakeAsync(() => {
       const weather = TestBed.inject(WeatherService);
-      (lweather.current as any).and.returnValue(
+      (weather.current as any).and.returnValue(
         of({
           temperature: 280.32,
           condition: 300,
@@ -175,3 +175,7 @@ For views like the current weather page and the UV index page, we will wrap the 
     <div class="description">{{ advice[data.riskLevel] }}</div>
   </div>
 ```
+
+## Conclusion
+
+You're application now uses OnPush change detection. I think we can call version 1.0 complete!

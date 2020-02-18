@@ -47,10 +47,10 @@ describe('UserPreferencesService', () => {
 });
 
 function createIonicStorageMock() {
-  return jasmine.createSpyObj('Storage', {
+  return jasmine.createSpyObj<Storage>('Storage', {
     get: Promise.resolve(),
     set: Promise.resolve(),
-    ready: Promise.resolve()
+    ready: Promise.resolve(null)
   });
 }
 ```
@@ -61,6 +61,8 @@ I will provide the requirements one by one as tests.
 
 1. Copy them one by one into the proper `describe` block.
 1. Write the code that staisfies the requirement as you copy in each test.
+
+If you get stuck, sample code is included in the "Conclusion" section.
 
 **`getUseCelcius()`**
 
@@ -126,10 +128,10 @@ Requirement 1: Wait for storage to be ready.
 
 ```TypeScript
     it('waits for storage to be ready', () => {
-      const service: UserPreferencesService = TestBed.injectj(
+      const service: UserPreferencesService = TestBed.inject(
         UserPreferencesService
       );
-      const storage = TestBed.injectj(Storage);
+      const storage = TestBed.inject(Storage);
       service.setUseCelcius(false);
       expect(storage.ready).toHaveBeenCalledTimes(1);
     });
@@ -139,10 +141,10 @@ Requirement 2: Set the value in storage.
 
 ```TypeScript
     it('sets the useCelcius value', async () => {
-      const service: UserPreferencesService = TestBed.injectj(
+      const service: UserPreferencesService = TestBed.inject(
         UserPreferencesService
       );
-      const storage = TestBed.injectj(Storage);
+      const storage = TestBed.inject(Storage);
       await service.setUseCelcius(false);
       expect(storage.set).toHaveBeenCalledTimes(1);
       expect(storage.set).toHaveBeenCalledWith('useCelcius', false);
@@ -153,7 +155,7 @@ Requirement 3: Update the cached value.
 
 ```TypeScript
     it('updates the cache value for useCelcius', async () => {
-      const service: UserPreferencesService = TestBed.injectj(
+      const service: UserPreferencesService = TestBed.inject(
         UserPreferencesService
       );
       const storage = TestBed.inject(Storage);
@@ -163,47 +165,13 @@ Requirement 3: Update the cached value.
     });
 ```
 
-When you are done your code should look similar to this:
-
-```TypeScript
-import { Injectable } from '@angular/core';
-import { Storage } from '@ionic/storage';
-
-@Injectable({
-  providedIn: 'root'
-})
-export class UserPreferencesService {
-  private keys = {
-    useCelcius: 'useCelcius'
-  };
-  private cache: Map<string, any>;
-
-  constructor(private storage: Storage) {
-    this.cache = new Map();
-  }
-
-  async getUseCelcius(): Promise<boolean> {
-    await this.storage.ready();
-    if (!this.cache.has(this.keys.useCelcius)) {
-      this.cache.set(this.keys.useCelcius, await this.storage.get(this.keys.useCelcius));
-    }
-    return this.cache.get(this.keys.useCelcius);
-  }
-
-  async setUseCelcius(value: boolean): Promise<void> {
-    await this.storage.ready();
-    await this.storage.set(this.keys.useCelcius, value);
-    await this.cache.set(this.keys.useCelcius, value);
-  }
-}
-```
-
 ## Use the Service in the Base Class
 
 ### Add Tests
 
 Our requirements are defined at the page level, specifically the Current Weather, Forecast, and UV Index pages. That is where we will add the tests.
 
+1. Create a mock factory for the `UserPreferencesService`.
 1. Modify the tests for the all three main pages to provide the `UserPreferencesService` mock via the factory.
 1. Add tests that verifies that the scale is set to 'C' or 'F' when entering the page, depending on the value resolved by `getUseCelcius()`
 
@@ -232,7 +200,7 @@ In the page views, bind the user preference data. Here is an example from the cu
 
 ## Toggle the Scale
 
-Add the following tests to the `current-weather.page.spec.ts`, then write code to satisfy those tests.
+Add the following tests to the `current-weather.page.spec.ts`, then write code to satisfy those tests (I put the code in the base class, then it could be used from any page).
 
 ```TypeScript
   describe('toggling the scale', () => {
@@ -279,5 +247,40 @@ kws-temperature {
 ## Conclusion
 
 Our weather app now allows the user to choose whichever temperature scale the desire and remembers their choice.
+
+In the process, you created the start of a User Preferences service. The code for that probably looks similar to this:
+
+```TypeScript
+import { Injectable } from '@angular/core';
+import { Storage } from '@ionic/storage';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class UserPreferencesService {
+  private keys = {
+    useCelcius: 'useCelcius'
+  };
+  private cache: Map<string, any>;
+
+  constructor(private storage: Storage) {
+    this.cache = new Map();
+  }
+
+  async getUseCelcius(): Promise<boolean> {
+    await this.storage.ready();
+    if (!this.cache.has(this.keys.useCelcius)) {
+      this.cache.set(this.keys.useCelcius, await this.storage.get(this.keys.useCelcius));
+    }
+    return this.cache.get(this.keys.useCelcius);
+  }
+
+  async setUseCelcius(value: boolean): Promise<void> {
+    await this.storage.ready();
+    await this.storage.set(this.keys.useCelcius, value);
+    this.cache.set(this.keys.useCelcius, value);
+  }
+}
+```
 
 *Note:* this is not the most discoverable of features in the app, and we may want other preferences in the future, but this is a start even if the UI is not actually "best practice" for the UX.
