@@ -1,0 +1,8 @@
+{
+  "appId": "io.ionic.starter",
+  "appName": "markdown-reader",
+  "bundledWebRuntime": false,
+  "npmClient": "npm",
+  "webDir": "www",
+  "cordova": {}
+}

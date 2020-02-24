@@ -1,0 +1,5 @@
+<ion-list>
+  <ion-item *ngFor="let item of menuItems; index as idx" (click)="popoverController.dismiss(idx, 'select')">
+    <ion-label>{{ item }}</ion-label>
+  </ion-item>
+</ion-list>

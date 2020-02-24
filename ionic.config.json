@@ -1,0 +1,7 @@
+{
+  "name": "markdown-reader",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular"
+}
