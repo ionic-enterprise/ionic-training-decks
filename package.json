@@ -1,16 +1,17 @@
 {
   "name": "ionic-training-decks",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "author": "Ionic Framework",
   "homepage": "https://ionicframework.com/",
   "description": "The labs used during Customer Success hosted Enterprise training sessions",
   "scripts": {
-    "build": "ng build",
+    "build": "ng build --prod && cap copy",
     "e2e": "ng e2e",
     "lint": "ng lint",
     "ng": "ng",
     "start": "ng serve",
-    "test": "ng test --browsers=ChromeHeadless"
+    "test": "ng test --browsers=ChromeHeadless",
+    "test:ci": "ng test --browsers=ChromeHeadless --no-watch"
   },
   "private": true,
   "dependencies": {
