@@ -24,9 +24,9 @@ export class AppComponent implements OnInit {
   async initializeApp() {
     await this.platform.ready();
     if (this.platform.is('hybrid')) {
-      const { SplashScreen, StatusBar } = Plugins;
+      const { SplashScreen } = Plugins;
       SplashScreen.hide();
-      StatusBar.setStyle({ style: StatusBarStyle.Light });
+      this.styleByMode();
     } else {
       this.applicationService.registerForUpdates();
     }
@@ -46,5 +46,16 @@ export class AppComponent implements OnInit {
       url: `/folder/${idx}`,
       icon: x.icon || 'reader'
     }));
+  }
+
+  private styleByMode() {
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)');
+    this.setStatusBarStyle(prefersDark.matches);
+    prefersDark.addEventListener('change', mediaQuery => this.setStatusBarStyle(mediaQuery.matches));
+  }
+
+  private setStatusBarStyle(darkMode: boolean) {
+    const { StatusBar } = Plugins;
+    StatusBar.setStyle({ style: darkMode ? StatusBarStyle.Dark : StatusBarStyle.Light });
   }
 }
