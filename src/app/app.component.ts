@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Platform } from '@ionic/angular';
 import { Plugins, StatusBarStyle } from '@capacitor/core';
 
-import { MenuItemsService } from '@app/core';
+import { MenuItemsService, ApplicationService } from '@app/core';
 
 @Component({
   selector: 'app-root',
@@ -13,7 +13,11 @@ export class AppComponent implements OnInit {
   selectedIndex = 0;
   appPages = [];
 
-  constructor(private menuItems: MenuItemsService, private platform: Platform) {
+  constructor(
+    private applicationService: ApplicationService,
+    private menuItems: MenuItemsService,
+    private platform: Platform
+  ) {
     this.initializeApp();
   }
 
@@ -23,6 +27,8 @@ export class AppComponent implements OnInit {
       const { SplashScreen, StatusBar } = Plugins;
       SplashScreen.hide();
       StatusBar.setStyle({ style: StatusBarStyle.Light });
+    } else {
+      this.applicationService.registerForUpdates();
     }
   }
 

@@ -23,7 +23,7 @@
         ]
       },
       {
-        "source": "sw.js",
+        "source": "ngsw-worker.js",
         "headers": [
           {
             "key": "Cache-Control",

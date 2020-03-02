@@ -7,8 +7,8 @@ import { RouterTestingModule } from '@angular/router/testing';
 
 import { AppComponent } from './app.component';
 import { createPlatformMock } from '@test/mocks';
-import { MenuItemsService } from '@app/core';
-import { createMenuItemsServiceMock } from '@app/core/testing';
+import { MenuItemsService, ApplicationService } from '@app/core';
+import { createMenuItemsServiceMock, createAppliationServiceMock } from '@app/core/testing';
 
 describe('AppComponent', () => {
   let originalSplashScreen;
@@ -23,6 +23,7 @@ describe('AppComponent', () => {
       declarations: [AppComponent],
       schemas: [CUSTOM_ELEMENTS_SCHEMA],
       providers: [
+        { provide: ApplicationService, useFactory: createAppliationServiceMock },
         { provide: MenuItemsService, useFactory: createMenuItemsServiceMock },
         { provide: Platform, useFactory: createPlatformMock }
       ],
@@ -57,6 +58,14 @@ describe('AppComponent', () => {
           style: StatusBarStyle.Light
         });
       }));
+
+      it('does not register for updates', fakeAsync(() => {
+        const application = TestBed.inject(ApplicationService);
+        const fixture = TestBed.createComponent(AppComponent);
+        expect(application.registerForUpdates).not.toHaveBeenCalled();
+        tick();
+        expect(application.registerForUpdates).not.toHaveBeenCalled();
+      }));
     });
 
     describe('as any app other than hybrid mobile', () => {
@@ -70,6 +79,14 @@ describe('AppComponent', () => {
         TestBed.createComponent(AppComponent);
         tick();
         expect(Plugins.StatusBar.setStyle).not.toHaveBeenCalled();
+      }));
+
+      it('registers for updates', fakeAsync(() => {
+        const application = TestBed.inject(ApplicationService);
+        const fixture = TestBed.createComponent(AppComponent);
+        expect(application.registerForUpdates).not.toHaveBeenCalled();
+        tick();
+        expect(application.registerForUpdates).toHaveBeenCalledTimes(1);
       }));
     });
 
