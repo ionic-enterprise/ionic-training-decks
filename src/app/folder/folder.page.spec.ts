@@ -358,7 +358,7 @@ describe('FolderPage', () => {
 
   describe('show menu', () => {
     beforeEach(async () => {
-      popover.onDidDismiss.and.returnValue(Promise.resolve({ data: undefined, role: 'backdrop' }));
+      popover.onWillDismiss.and.returnValue(Promise.resolve({ data: undefined, role: 'backdrop' }));
       const activatedRoute = TestBed.inject(ActivatedRoute);
       const menuItems = TestBed.inject(MenuItemsService);
       (activatedRoute.snapshot.paramMap.get as any).withArgs('section').and.returnValue('1');
@@ -383,7 +383,7 @@ describe('FolderPage', () => {
     it('navigates to the chosen page', async () => {
       const evt = new Event('click');
       const navController = TestBed.inject(NavController);
-      popover.onDidDismiss.and.returnValue(Promise.resolve({ data: 2, role: 'select' }));
+      popover.onWillDismiss.and.returnValue(Promise.resolve({ data: 2, role: 'select' }));
       await component.showMenu(evt);
       expect(navController.navigateRoot).toHaveBeenCalledTimes(1);
       expect(navController.navigateRoot).toHaveBeenCalledWith(['/', 'folder', '1', '2']);
@@ -392,7 +392,7 @@ describe('FolderPage', () => {
     it('does not navigate if a menu item was not selected', async () => {
       const evt = new Event('click');
       const navController = TestBed.inject(NavController);
-      popover.onDidDismiss.and.returnValue(Promise.resolve({ data: 2, role: 'somethingElse' }));
+      popover.onWillDismiss.and.returnValue(Promise.resolve({ data: 2, role: 'somethingElse' }));
       await component.showMenu(evt);
       expect(navController.navigateRoot).not.toHaveBeenCalled();
     });

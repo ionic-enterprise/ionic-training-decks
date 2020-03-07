@@ -46,7 +46,7 @@ export class FolderPage implements OnInit {
       componentProps: { menuItems: this.section.pages.map(p => p.title) }
     });
     await menu.present();
-    const res = await menu.onDidDismiss();
+    const res = await menu.onWillDismiss();
     if (res.role === 'select') {
       this.navController.navigateRoot(this.buildRoute(res.data));
     }
