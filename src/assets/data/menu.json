@@ -6,8 +6,8 @@
       "icon": "logo-ionic"
     },
     {
-      "title": "Ionic / Angular / Cordova",
-      "folder": "ionic-angular-cordova",
+      "title": "Ionic & Angular",
+      "folder": "ionic-angular",
       "file": "intro",
       "icon": "logo-angular",
       "pages": [
@@ -66,8 +66,8 @@
       ]
     },
     {
-      "title": "PWA / Ionic / Angular / Cordova",
-      "folder": "ionic-angular-cordova-pwa",
+      "title": "PWA - Ionic & Angular",
+      "folder": "pwa-ionic-angular",
       "file": "intro",
       "icon": "logo-pwa",
       "pages": [
@@ -86,8 +86,8 @@
       ]
     },
     {
-      "title": "Ionic / React / Capacitor",
-      "folder": "ionic-react-capacitor",
+      "title": "Ionic & React",
+      "folder": "ionic-react",
       "file": "intro",
       "icon": "logo-react",
       "pages": [
@@ -135,7 +135,7 @@
     },
     {
       "title": "Identity Vault",
-      "folder": "identity-vault-capacitor",
+      "folder": "identity-vault-angular",
       "file": "intro",
       "icon": "lock-closed",
       "pages": [
@@ -163,7 +163,7 @@
     },
     {
       "title": "Auth Connect",
-      "folder": "auth-connect-angular-capacitor",
+      "folder": "auth-connect-angular",
       "file": "intro",
       "icon": "people",
       "pages": [
