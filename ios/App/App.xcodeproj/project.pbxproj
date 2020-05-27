@@ -127,6 +127,7 @@
 				TargetAttributes = {
 					504EC3031FED79650016851F = {
 						CreatedOnToolsVersion = 9.2;
+						LastSwiftMigration = 1150;
 						ProvisioningStyle = Automatic;
 					};
 				};
@@ -353,7 +354,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = io.ionic.trainingdecks;
 				PRODUCT_NAME = "Ionic Training Deks";
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG USE_PUSH";
-				SWIFT_VERSION = 4.2;
+				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
@@ -371,7 +372,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = io.ionic.trainingdecks;
 				PRODUCT_NAME = "Ionic Training Deks";
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = USE_PUSH;
-				SWIFT_VERSION = 4.2;
+				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;
