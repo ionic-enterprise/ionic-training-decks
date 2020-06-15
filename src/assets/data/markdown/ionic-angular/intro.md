@@ -4,9 +4,12 @@ This training focuses on building an application using the Ionic Framework with 
 
 - Create a new Ionic application
 - Build the application for mobile devices using Capacitor
-- Add third party component libraries to the application
-- Modify existing pages
-- Add new services
+- Manage the application dependencies
 - Use Capacitor Plugins
+- Add new services
+- Modify existing pages
+- Add new pages
+- Design and use reusable components
+- Modify the application to use a tabs based layout
 
-The application you build provides information about local weather conditions.
+The application you build provides information about various teas.

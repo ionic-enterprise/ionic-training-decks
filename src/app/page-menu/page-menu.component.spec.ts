@@ -9,8 +9,8 @@ describe('PageMenuComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ PageMenuComponent ],
-      imports: [IonicModule]
+      declarations: [PageMenuComponent],
+      imports: [IonicModule],
     }).compileComponents();
 
     fixture = TestBed.createComponent(PageMenuComponent);

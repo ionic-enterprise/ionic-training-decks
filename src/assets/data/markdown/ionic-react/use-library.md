@@ -2,9 +2,9 @@
 
 In this lab, you will learn how to:
 
-* Install third party libraries
-* Integrate the third party libraries into your application
-* Maintain the application's dependencies
+- Install third party libraries
+- Integrate the third party libraries into your application
+- Maintain the application's dependencies
 
 ## Install the Library
 
@@ -49,7 +49,6 @@ NPM is also used to maintain the application's dependencies. If you type `npm ou
 
 You will see something like this, with the actual contents varrying over time.
 
-
 ```
 $ npm outdated
 Package                  Current    Wanted   Latest  Location
@@ -72,7 +71,7 @@ The three most important columns here are `Current`, `Wanted`, and `Latest`.
 
 - `Current` is the version that is currently installed
 - `Wanted` is the version that can be upgraded to accordion to the rules specified in your `package.json`. This is the version that `npm update` will install.
--  `Latest` is the latest version available
+- `Latest` is the latest version available
 
 For example have a look at the versions specified above for `@testing-library/react`. An `npm update` will take the version from `9.3.2` to `9.3.3` because the version is specified with a `~` prefix in the `package.json` file. However, the latet version is `9.4.0`. The `9.4.0` version would need to be installed manually.
 

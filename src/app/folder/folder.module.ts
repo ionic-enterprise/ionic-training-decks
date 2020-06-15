@@ -17,8 +17,8 @@ import { PageMenuModule } from '@app/page-menu/page-menu.module';
     IonicModule,
     FolderPageRoutingModule,
     MarkdownViewModule,
-    PageMenuModule
+    PageMenuModule,
   ],
-  declarations: [FolderPage]
+  declarations: [FolderPage],
 })
 export class FolderPageModule {}

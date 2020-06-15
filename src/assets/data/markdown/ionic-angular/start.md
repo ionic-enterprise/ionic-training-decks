@@ -2,25 +2,52 @@
 
 In this lab, you will:
 
-- Clone a repo to get started
+- Use the CLI to create a starter application
+- Learn some Ionic CLI commands
 - Build and run the starter application
 
-## Clone the Ionic Weather Starter Template
+## Overview
 
-For this training we will start with a template application that is based on the tabs starter but has all of the pages renamed to match the page structure of the weather application.
+The Ionic command line is the main tool used to develop Ionic applications. This tool allows you to generate new applications, add features to the application, build the application, interact with Appflow and many other tasks. The command line also wraps and extends several other command lines such as the Cordova or Capacitor command lines, the Angular command line, etc.
+
+If you type `ionic --help` at the command line you get a list of the available top level commands that can be run via the CLI. These commands are broken into two sections: Global Commands and Project Commands. Global Commands can be run from anywhere where as Project Commands can only be run from an Ionic project directory. Commonly used commands include `start`, `info`, `generate`, and `serve`. We wil learn more about these commands as we use them.
+
+## Create the Application
+
+The first thing we will use the Ionic CLI for is to start a new application. Type `ionic start --help` to get some instructions on how the `start` command works as well as some expamples on how to use it. Notice that it has two basic modes of operation. You an either enter the command with a complete set of options, at which point the start operation will run all of the way through without asking questions, or you can supply a partial set of options, and the `start` command will prompt you for the information that it needs. If you just type `ionic start`, it will prompt for all of the information.
+
+Lets start our application via whichever technique you want.
+
+1. At the command line, change directories in to a starting directory. I use `~/Projects/Training`
+1. Enter the following command: `ionic start tea-taster blank --type=angular --capacitor`
+1. Alternatively, you could just enter `ionic start` and let the command line ask you for what it needs
+
+**Example:**
 
 ```bash
-git clone https://github.com/ionic-team/ionic-weather-starter.git ionic-weather
-cd ionic-weather
-npm i
-ionic serve
+$ cd ~/Projects/Training
+$ ionic start tea-taster blank --type=angular --capacitor
+```
+
+Let's look at some of those options more closely.
+
+- The third option is the name of the application.
+- The forth option, `blank` tells Ioinic to use the `blank` starter. We have three basic starters: `blank`, `tabs`, and `sidemenu`. The main difference is the main style of navigation.
+- The `--type` option specifies the type of application to create. Options include `angular`, `react`, `ionic-angular`, and `ionic1`. The `ionic-angular` type is an Ionic v3 application.
+- The `--capacitor` options tells the command line to integrate Capacitor as the native bridge. You could also choose Cordova, or nothing at all.
+
+Once the application has been generated, let's start the development server:
+
+```bash
+$ cd tea-taster
+$ ionic serve
 ```
 
 ## Enforce Consistent Styling
 
 <a href="https://prettier.io/" target="_blank">Prettier</a> is an excellent tool that you can use to keep the formatting of your code consistent and clean. We highly suggest you use a tool such as this. Whether your are a lone developer or part of a team, using a tool such as Prettier means that you do not have to think about the formatting of your code. Better yet, you do not run into "formatting wars" between developers.
 
-Prettier itself is an opinionated code formatter, and Ionic has its own opinions on how it is best configured, so let's install a package that provides both Prettier and Ionic's configuration. We will also install <a href="https://www.npmjs.com/package/husky" target="_blank">husky</a> and <a href="https://www.npmjs.com/package/pretty-quick" target="_blank">pretty-quick</a>. This will allow us to set up a commit hook to make sure Prettier is run with each commit. After that we don't have to waste brain cycles thinking about code formatting ever again.
+Prettier itself is an opinionated code formatter, and Ionic has its own opinions on how it is best configured, so let's install both Prettier and Ionic's Prettier configuration. We will also install <a href="https://www.npmjs.com/package/husky" target="_blank">husky</a> and <a href="https://www.npmjs.com/package/pretty-quick" target="_blank">pretty-quick</a>. This will allow us to set up a commit hook to make sure Prettier is run with each commit. After that we don't have to waste brain cycles thinking about code formatting ever again.
 
 ```bash
 $ npm install -D @ionic/prettier-config husky prettier pretty-quick
@@ -30,8 +57,8 @@ Modify your `package.json` file. I suggest moving the `description` up to the to
 
 ```json
 {
-  "name": "ionic-weather",
-  "description": "A personal weather application",
+  "name": "tea-taster",
+  "description": "Tea Tasting Notes",
   "version": "0.0.1",
   "author": "Ionic Framework",
   "homepage": "https://ionicframework.com/",
@@ -72,15 +99,6 @@ In a nutshell:
 - `ionic serve` finds the first unused port >= 8100 and passes that to the Angular CLI with some other options
 
 In either case, the Angular CLI does all the heavy lifting, so use whichever command you want to use. Personally, I use `npm start` because it take less typing and thought on my part.
-
-## Using the CLI
-
-Note that you could have also used the Ionic CLI to generate your application:
-
-- `ionic start` - this will ask for information like the application's name, desired framework, and starter template.
-- `ionic start my-cool-app tabs --type=angular --capacitor` - this will create an `@ionic/angular` app called `my-cool-app` using the `tabs` starter template and will provide minimal Capacitor scaffolding.
-
-The reason we do not do this for this training is that you would then have to rename the files and paths yourself, which doesn't really teach you anything... 😀
 
 ## Conclusion
 

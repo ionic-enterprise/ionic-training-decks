@@ -3,7 +3,7 @@ import { AlertController } from '@ionic/angular';
 import { SwUpdate } from '@angular/service-worker';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class ApplicationService {
   constructor(private alert: AlertController, private update: SwUpdate) {}
@@ -19,8 +19,8 @@ export class ApplicationService {
         'An update is available for this application. Would you like to restart this application to get the update?',
       buttons: [
         { text: 'Yes', role: 'confirm' },
-        { text: 'No', role: 'cancel' }
-      ]
+        { text: 'No', role: 'cancel' },
+      ],
     });
     await alert.present();
     const result = await alert.onDidDismiss();

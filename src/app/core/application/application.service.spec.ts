@@ -4,7 +4,10 @@ import { SwUpdate } from '@angular/service-worker';
 
 import { ApplicationService } from './application.service';
 import { Subject } from 'rxjs';
-import { createOverlayControllerMock, createOverlayElementMock } from '@test/mocks';
+import {
+  createOverlayControllerMock,
+  createOverlayElementMock,
+} from '@test/mocks';
 
 describe('ApplicationService', () => {
   let alert;
@@ -15,14 +18,15 @@ describe('ApplicationService', () => {
         {
           provide: SwUpdate,
           useFactory: () => ({
-            available: new Subject()
-          })
+            available: new Subject(),
+          }),
         },
         {
           provide: AlertController,
-          useFactory: () => createOverlayControllerMock('AlertController', alert)
-        }
-      ]
+          useFactory: () =>
+            createOverlayControllerMock('AlertController', alert),
+        },
+      ],
     });
   });
 

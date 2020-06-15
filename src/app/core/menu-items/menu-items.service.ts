@@ -4,7 +4,7 @@ import { HttpClient } from '@angular/common/http';
 import { MenuItem } from '@app/models';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class MenuItemsService {
   private items: Array<MenuItem>;

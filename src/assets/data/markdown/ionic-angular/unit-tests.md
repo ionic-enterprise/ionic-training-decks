@@ -2,10 +2,10 @@
 
 In this lab, you will learn how to:
 
-* Setup headless support for Chrome
-* Run the existing suite of unit tests
-* Create and use mock objects
-* Structure Unit Tests
+- Setup headless support for Chrome
+- Run the existing suite of unit tests
+- Create and use mock objects
+- Structure Unit Tests
 
 ## Set Up Headless Chrome Support
 
@@ -29,7 +29,7 @@ Some CI/CD servers will run into issues running `ChromeHeadless` as-is. The solu
     },
 ```
 
-*Note:* This is only required in certain specific circumstances. See <a href="https://developers.google.com/web/updates/2017/04/headless-chrome" target="_blank">Getting Started with Headless Chrome</a> for details.
+_Note:_ This is only required in certain specific circumstances. See <a href="https://developers.google.com/web/updates/2017/04/headless-chrome" target="_blank">Getting Started with Headless Chrome</a> for details.
 
 ### `package.json`
 
@@ -64,7 +64,17 @@ Type `npm test` and verify that the tests run.
 
 ## Refactor `app.component.spec.ts`
 
+The current `app.component.spec.ts` file has some issues:
+
+- I do not like the way the mocks are created
+- The "Platform Ready" handling awkward
+- There are several requirements being tested with a single test.
+
 ### Use Mock Objects
+
+I favor the use of centralized factory functions to create mocks whenever it makes sense. This allows me to use a consistently defined mock throughout the tests in my application and reduces maintenance costs. For this application, I provide a set of centralized mock factories. <a download href="/assets/packages/angular/test.zip">Download the zip file</a> and unpack it in the root of the project creating a `test` folder.
+
+Once that is in place, perform the following tasks:
 
 - remove the existing spy variables and their initialization
 - import the platform mock factory: `import { createPlatformMock } from '../../test/mocks';`
@@ -72,9 +82,9 @@ Type `npm test` and verify that the tests run.
 - provide the `Platform` via the factory: `{ provide: Platform, useFactory: createPlatformMock }`
 
 ```TypeScript
-import { createPlatformMock } from '../../test/mocks';
-
+...
 import { AppComponent } from './app.component';
+import { createPlatformMock } from '../../test/mocks';
 
 describe('AppComponent', () => {
 
@@ -89,7 +99,10 @@ describe('AppComponent', () => {
       ]
     }).compileComponents();
   }));
+...
 ```
+
+Next we will refactor the existing test as-is. This will just be an incremental improvement.
 
 - get the provided mock services. Example: `const platform = TestBed.inject(Platform);`
 - use the mocks just obtained and not the former mock objects
@@ -107,7 +120,9 @@ describe('AppComponent', () => {
   });
 ```
 
-The end result is that we are now using the standard `Platform` mock that we created to use throughout the application wherever we need to mock the `Platform` service. The next step is to break the test down to a `describe()` for the feature (initialization), and an `it()` case per requirement.
+The end result is that we are now using the standard `Platform` mock that we created to use throughout the application wherever we need to mock the `Platform` service. However, this test case still has problems: it is testing the whole initialization method and not individual requirements, and the matchers are too generic.
+
+The next step is to break the test down to a `describe()` for the feature (initialization), and an `it()` case per requirement.
 
 ### Break-up the "should initialize the app" Test
 
@@ -123,14 +138,14 @@ describe('my-module', () => {
     it('does something for requirement 2', () => {});
     it('does something for requirement 3', () => {});
   });
-  
+
   describe('feature 2', () => {
     ...
   });
 });
 ```
 
-*Note:* it may take more than one `it()` to cover a requirement, but a single it should not itself try to test more than a single requirement.
+_Note:_ it may take more than one `it()` to cover a requirement, but a single it should not itself try to test more than a single requirement.
 
 The current "should initialize the app" test violates that a bit. Let's refactor it into a structure like this (I'll give you the code for the first test to get started):
 

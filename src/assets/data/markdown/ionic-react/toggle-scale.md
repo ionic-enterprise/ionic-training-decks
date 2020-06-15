@@ -125,7 +125,6 @@ The changes for the `ForeccastPage` are pretty straight forward:
 1. In the `useIonViewWillEnter()` callback, set the scale: `setScale(await settings.getScale());`
 1. When rendering the page, use the scale from the state instead of the previously hard coded value: `<DailyForecast scale={scale} forecast={f}></DailyForecast>`
 
-
 ### Current Weather
 
 The `CurrentWeatherPage` needs to do more work because it needs to also toggle the scale.

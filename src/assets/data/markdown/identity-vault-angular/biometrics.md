@@ -139,7 +139,7 @@ We will have to add some methods from the base class to the `IdentityService` mo
  }
 ```
 
-These methods are used by the `LoginPage` in managing the unlocking of the authentication token. 
+These methods are used by the `LoginPage` in managing the unlocking of the authentication token.
 
 ### Markup Changes
 

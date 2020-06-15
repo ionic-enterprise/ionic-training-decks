@@ -20,16 +20,32 @@
           "file": "unit-tests"
         },
         {
-          "title": "Style the App",
-          "file": "style"
+          "title": "Add Platforms",
+          "file": "platforms"
         },
         {
-          "title": "Use a Component Library",
-          "file": "use-library"
+          "title": "Use Native APIs",
+          "file": "native-apis"
         },
         {
           "title": "Mock Up the Interface",
           "file": "mock-ui"
+        },
+        {
+          "title": "Login Page",
+          "file": "login-page"
+        },
+        {
+          "title": "Identity",
+          "file": "identity"
+        },
+        {
+          "title": "Authentication",
+          "file": "auth"
+        },
+        {
+          "title": "Guards",
+          "file": "auth-guard"
         },
         {
           "title": "Get Data",
@@ -40,28 +56,24 @@
           "file": "use-data"
         },
         {
-          "title": "Add Loading Indicator",
-          "file": "loading-indicator"
+          "title": "Details Page",
+          "file": "details-page"
         },
         {
-          "title": "Create a Generic Base Class",
-          "file": "base-class"
+          "title": "Reusable Component",
+          "file": "reusable-component"
         },
         {
-          "title": "Add Platforms",
-          "file": "platforms"
+          "title": "Tabbed Navigation",
+          "file": "tabbed-navigation"
         },
         {
-          "title": "Use Native APIs",
-          "file": "native-apis"
+          "title": "The Notes Feature",
+          "file": "notes-feature"
         },
         {
-          "title": "Switch Scale",
-          "file": "toggle-scale"
-        },
-        {
-          "title": "On Push Change Detection",
-          "file": "change-detection"
+          "title": "About Page",
+          "file": "about-page"
         }
       ]
     },

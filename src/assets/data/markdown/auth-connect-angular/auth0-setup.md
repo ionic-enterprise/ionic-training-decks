@@ -2,7 +2,7 @@
 
 ## Determine an `Auth_URL_Scheme`
 
-The Auth URL Scheme is a custom scheme that is used to call into your application from a browser window on a device. It can be thought of like the `https://` on a normal web address. This can be anything you want it to be, though it must all lowercase and be globally unique. A good suggestion for this scheme is to use your bundle ID from your application. In our case this is `com.ionic.actraining`. 
+The Auth URL Scheme is a custom scheme that is used to call into your application from a browser window on a device. It can be thought of like the `https://` on a normal web address. This can be anything you want it to be, though it must all lowercase and be globally unique. A good suggestion for this scheme is to use your bundle ID from your application. In our case this is `com.ionic.actraining`.
 
 > Avoid using dash (`-`) or underscore (`_`) characters in this url scheme as they can cause issues on Android devices.
 
