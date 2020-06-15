@@ -2,8 +2,36 @@
 
 In this lab, you will:
 
-- Clone a repo to get started
+- Use the CLI to create a starter application
+- Learn some Ionic CLI commands
 - Build and run the starter application
+
+## Overview
+
+The Ionic command line is the main tool used to develop Ionic applications. This tool allows you to generate new applications, add features to application, build the application, interact with Appflow and many other tasks. The command line also wraps and extends
+several other command lines such as the Cordova or Capacitor command lines, the Angular command line, etc.
+
+If you type `ionic --help` at the command line you get a list of the available top level commands that can be run via the CLI. These commands are broken into two sections: Global Commands and Project Commands. Global Commands can be run from anywhere where as Project Commands
+can only be run from an Ionic project directory. Common top level commands include start, info, generate, and serve. We wil learn more about these commands as we use them.
+
+## Create the Application
+
+The first thing we will use the Ionic CLI for is to start a new application. Type `ionic start --help` to get some instructions on how the `start` command works as well as some expamples on how to use it. Notice that it has two basic modes of operation. You an either
+enter enter the command with a complete set of options, at which point the start operation will run all of the way through without asking questions, or you can supply a partial set of options, and the `start` command will prompt you for the information that it needs.
+If you just type `ionic start`, it will prompt for all of the information.
+
+Lets start our application via whichever technique you want.
+
+1. At the command line, change directories in to a starting directory. I use `~/Projects/Training`
+1. Enter the following command: `ionic start tea-taster blank --type=angular --capacitor`
+1. Alternately, you could just enter `ionic start` and let the command line ask you for what it needs
+
+Let's look at some of those options more closely.
+
+- The forth option, `blank` tells Ioinic to use the `blank` starter. We have three basic starters: `blank`, `tabs`, and `sidemenu`. The main difference is the main style of navigation.
+- The `--type` option specifies the type of application to create. Options include `angular`, `react`, `ionic-angular`, and `ionic1`. The `ionic-angular` type is an Ionic v3 application.
+- The `--capacitor` options tells the command line to integrate Capacitor as the native bridge. You could also choose Cordova, or nothing at all.
+
 
 ## Clone the Ionic Weather Starter Template
 
