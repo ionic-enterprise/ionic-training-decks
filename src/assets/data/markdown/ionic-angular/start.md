@@ -32,7 +32,7 @@ In either case, the Angular CLI does all the heavy lifting, so use whichever com
 Note that you could have also used the Ionic CLI to generate your application:
 
 - `ionic start` - this will ask for information like the application's name, desired framework, and starter template.
-- `ionic start my-cool-app tabs --type=angular --cordova` - this will create an `@ionic/angular` app called `my-cool-app` using the `tabs` starter template and will provide minimal Cordova scaffolding.
+- `ionic start my-cool-app tabs --type=angular --capacitor` - this will create an `@ionic/angular` app called `my-cool-app` using the `tabs` starter template and will provide minimal Capacitor scaffolding.
 
 The reason we do not do this for this training is that you would then have to rename the files and paths yourself, which doesn't really teach you anything... 😀
 

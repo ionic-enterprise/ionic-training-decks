@@ -63,7 +63,7 @@ Rather than explicitly kicking off a change detection cycle, we will use the `as
 
 ### Clean up the Tests
 
-First we will need to clean up the tests. Several of them use `async/await` because of the loading indicator using promises. We will be modifying this whole workflow to be part of an `Observable` pipeline, so `async/await` will no longer be appropriate. Instead, use the `fakeAsync()` zone and `tick()` as such (**note** you do not need to change the "user preferences" related tests):
+First we will need to clean up the page tests. Several of them use `async/await` because of the loading indicator using promises. We will be modifying this whole workflow to be part of an `Observable` pipeline, so `async/await` will no longer be appropriate. Instead, use the `fakeAsync()` zone and `tick()` as such (**note** you do not need to change the "user preferences" related tests):
 
 **`async/await` Test**
 
@@ -85,26 +85,6 @@ First we will need to clean up the tests. Several of them use `async/await` beca
       tick();
       expect(loadingController.create).toHaveBeenCalledTimes(1);
       expect(loading.present).toHaveBeenCalledTimes(1);
-    }));
-```
-
-There are a couple of tests that also query the DOM. For those tests, also run a change detection cycle in the test after the `tick()` as such:
-
-```TypeScript
-    it('displays the current weather', fakeAsync(() => {
-      const weather = TestBed.inject(WeatherService);
-      (weather.current as any).and.returnValue(
-        of({
-          temperature: 280.32,
-          condition: 300,
-          date: new Date(1485789600 * 1000)
-        })
-      );
-      component.ionViewDidEnter();
-      tick();
-      fixture.detectChanges();
-      const t = fixture.debugElement.query(By.css('kws-temperature'));
-      expect(t).toBeTruthy();
     }));
 ```
 
@@ -131,8 +111,7 @@ In the constructor, we will create the subject and construct the full Observable
 When we enter the view we want to refresh the data. We will get the current scale preference and then trigger a refresh.
 
 ```TypeScript
-  async ionViewDidEnter() {
-    this.scale = (await this.userPreferences.getUseCelcius()) ? 'C' : 'F';
+  ionViewDidEnter() {
     this.refresh.next();
   }
 ```

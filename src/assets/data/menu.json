@@ -48,12 +48,12 @@
           "file": "base-class"
         },
         {
-          "title": "Add Cordova Platforms",
+          "title": "Add Platforms",
           "file": "platforms"
         },
         {
-          "title": "Use Plugins",
-          "file": "plugins"
+          "title": "Use Native APIs",
+          "file": "native-apis"
         },
         {
           "title": "Switch Scale",

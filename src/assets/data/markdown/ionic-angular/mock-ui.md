@@ -54,12 +54,14 @@ Change it such that the tabs use the following icons and labels:
 
 In order to allow each application to define its own weather condition images and where they exist, this library uses a specific map object. Let's just create that as a service so it can easily be injected where needed.
 
-`ionic generate service services/icon-map/icon-map`
+```bash
+$ ionic generate service services/icon-map/icon-map
+```
 
 If you do a `git status` at this point, you should see a new directory was created for services:
 
 ```bash
-~/Projects/Training/ionic-weather (master): git status
+$ git status
 On branch master
 Untracked files:
   (use "git add <file>..." to include in what will be committed)
@@ -161,7 +163,7 @@ We will group all of our services in a single `index.ts` file within the `servic
 **`src/app/services/index.ts`**
 
 ```TypeScript
-export * from './icon-map/icon-map.service'
+export * from './icon-map/icon-map.service';
 ```
 
 **`src/app/models/index.ts`**
@@ -201,7 +203,7 @@ export class CurrentWeatherPage {
 Use the weather components in the `src/app/current-weather/current-weather.page.html` view.
 
 ```html
-<ion-content class="ion-padding ion-text-center">
+<ion-content class="ion-padding ion-text-center" [fullscreen]="true">
   <div class="information">
     <kws-temperature class="primary-value" scale="F" temperature="{{currentWeather?.temperature}}"></kws-temperature>
   </div>
@@ -229,7 +231,7 @@ kws-condition {
 
 ### Forecast
 
-Each `kws-daily-forecast` element takes an array of `Weather` data for a given day. We want to show the current forecast for several days, so we will need an array of arrays. Create a `src/app/models/forecast.ts` file. Remmmber to add it to the barrel file as well.
+Each `kws-daily-forecast` element takes an array of `Weather` data for a given day. We want to show the current forecast for several days, so we will need an array of arrays. Create a `src/app/models/forecast.ts` file. **Remember to add it to the barrel file as well.**
 
 ```TypeScript
 import { Weather } from './weather';
@@ -284,11 +286,15 @@ export class ForecastPage {
 **forecast.page.html**
 
 ```html
-<ion-header>
-  <ion-toolbar> <ion-title> Forecast </ion-title> </ion-toolbar>
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-title>
+      Forecast
+    </ion-title>
+  </ion-toolbar>
 </ion-header>
 
-<ion-content class="ion-padding">
+<ion-content [fullscreen]="true">
   <ion-list>
     <ion-item *ngFor="let f of forecast">
       <kws-daily-forecast scale="F" [forecasts]="f" [iconPaths]="iconMap"></kws-daily-forecast>
@@ -345,17 +351,21 @@ export class UvIndexPage {
     'Wear sunglasses on bright days. If you burn easily, cover up and use broad spectrum SPF 30+ sunscreen. ' +
       'Bright surfaces, such as sand, water and snow, will increase UV exposure.',
     'Stay in the shade near midday when the sun is strongest. If outdoors, wear sun protective clothing, ' +
-      'a wide-brimmed hat, and UV-blocking sunglasses. Generously apply broad spectrum SPF 30+ sunscreen every 2 hours, ' +
-      'even on cloudy days, and after swimming or sweating. Bright surfaces, such as sand, water and snow, will increase UV exposure.',
-    'Reduce time in the sun between 10 a.m. and 4 p.m. If outdoors, seek shade and wear sun protective clothing, a wide-brimmed hat, ' +
-      'and UV-blocking sunglasses. Generously apply broad spectrum SPF 30+ sunscreen every 2 hours, even on cloudy days, ' +
-      'and after swimming or sweating. Bright surfaces, such sand, water and snow, will increase UV exposure.',
-    'Minimize sun exposure between 10 a.m. and 4 p.m. If outdoors, seek shade and wear sun protective clothing, a wide-brimmed hat, ' +
-      'and UV-blocking sunglasses. Generously apply broad spectrum SPF 30+ sunscreen every 2 hours, even on cloudy days, and after ' +
-      'swimming or sweating. Bright surfaces, such as sand, water and snow, will increase UV exposure.',
-    'Try to avoid sun exposure between 10 a.m. and 4 p.m. If outdoors, seek shade and wear sun protective clothing, a wide-brimmed hat, ' +
-      'and UV-blocking sunglasses. Generously apply broad spectrum SPF 30+ sunscreen every 2 hours, even on cloudy days, ' +
-      'and after swimming or sweating. Bright surfaces, such as sand, water and snow, will increase UV exposure.'
+      'a wide-brimmed hat, and UV-blocking sunglasses. Generously apply broad spectrum SPF 30+ sunscreen every ' + 
+      '2 hours, even on cloudy days, and after swimming or sweating. Bright surfaces, such as sand, water and ' +
+      'snow, will increase UV exposure.',
+    'Reduce time in the sun between 10 a.m. and 4 p.m. If outdoors, seek shade and wear sun protective clothing, ' +
+      'a wide-brimmed hat, and UV-blocking sunglasses. Generously apply broad spectrum SPF 30+ sunscreen every 2 ' +
+      'hours, even on cloudy days, and after swimming or sweating. Bright surfaces, such sand, water and snow, will ' +
+      'increase UV exposure.',
+    'Minimize sun exposure between 10 a.m. and 4 p.m. If outdoors, seek shade and wear sun protective clothing, ' +
+      'a wide-brimmed hat, and UV-blocking sunglasses. Generously apply broad spectrum SPF 30+ sunscreen every 2 ' +
+      'hours, even on cloudy days, and after swimming or sweating. Bright surfaces, such as sand, water and snow, ' +
+      'will increase UV exposure.',
+    'Try to avoid sun exposure between 10 a.m. and 4 p.m. If outdoors, seek shade and wear sun protective clothing, ' +
+      'a wide-brimmed hat, and UV-blocking sunglasses. Generously apply broad spectrum SPF 30+ sunscreen every ' +
+      '2 hours, even on cloudy days, and after swimming or sweating. Bright surfaces, such as sand, water and snow, ' + 
+      'will increase UV exposure.'
   ];
 
   constructor() {}
@@ -365,11 +375,15 @@ export class UvIndexPage {
 **uv-index.page.html**
 
 ```html
-<ion-header>
-  <ion-toolbar> <ion-title>UV Index</ion-title> </ion-toolbar>
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-title>
+      UV Index
+    </ion-title>
+  </ion-toolbar>
 </ion-header>
 
-<ion-content class="ion-text-center ion-padding">
+<ion-content class="ion-text-center ion-padding" [fullscreen]="true">
   <kws-uv-index class="primary-value" [uvIndex]="uvIndex?.value"></kws-uv-index>
   <div class="description">{{ advice[(uvIndex?.riskLevel)] }}</div>
 </ion-content>

@@ -13,10 +13,10 @@ Using Chrome in headless mode allows the tests to run in a real browser (Chrome)
 
 Setting up the tests to use headless Chrome is a straight forward process:
 
-1. Optionally add a custom launcher to the `src/karma.conf.js` file
+1. Optionally add a custom launcher to the `karma.conf.js` file
 1. Add some testing scripts that use the custom launcher
 
-### `src/karma.conf.js` (optional)
+### `karma.conf.js` (optional)
 
 Some CI/CD servers will run into issues running `ChromeHeadless` as-is. The solution is to run it with the `--no-sandbox` option. Add a custom launcher called `ChromeHeadlessCI` right after the `browsers` array in the `src/karma.conf.js` file. It will look like this:
 
@@ -36,8 +36,8 @@ Some CI/CD servers will run into issues running `ChromeHeadless` as-is. The solu
 I suggest changing the `test` script configuration in the `package.json` file as such:
 
 - `test` - use the `ChromeHeadless` browser configuration, re-run the tests as changes are made
-- `test:debug` - use the regular `Chrome` browser configuration, re-run the tests as changes are made
 - `test:ci` - use the `ChromeHeadlessCI` browser configuration, run the tests once and exit
+- `test:debug` - use the regular `Chrome` browser configuration, re-run the tests as changes are made
 
 ```JSON
   "scripts": {
@@ -47,8 +47,8 @@ I suggest changing the `test` script configuration in the `package.json` file as
     "ng": "ng",
     "start": "ng serve",
     "test": "ng test --browsers=ChromeHeadless",
-    "test:debug": "ng test",
-    "test:ci": "ng test --no-watch --browsers=ChromeHeadlessCI"
+    "test:ci": "ng test --no-watch --browsers=ChromeHeadlessCI",
+    "test:debug": "ng test"
   },
 ```
 
@@ -132,17 +132,22 @@ describe('my-module', () => {
 
 *Note:* it may take more than one `it()` to cover a requirement, but a single it should not itself try to test more than a single requirement.
 
-The current "should initialize the app" test violates that a bit. Let's refactor it into a structure like this:
+The current "should initialize the app" test violates that a bit. Let's refactor it into a structure like this (I'll give you the code for the first test to get started):
 
 ```TypeScript
 describe('initialization', () => {
-  it('waits for the platform to be ready', () => {});
+  it('waits for the platform to be ready', () => {
+    const platform = TestBed.inject(Platform);
+    TestBed.createComponent(AppComponent);
+    expect(platform.ready).toHaveBeenCalledTimes(1);
+  });
+
   it('sets the default status bar style when ready', async () => {});
   it('hides the splash screen when ready', async () => {});
 });
 ```
 
-Refactor the current test into these test cases and let's compare notes when you are done.
+Refactor the current test into these test cases and let's compare notes when you are done. Was there any repetative code that could perhaps be refactored?
 
 ## Conclusion
 

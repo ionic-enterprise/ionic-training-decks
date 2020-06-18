@@ -45,7 +45,7 @@ You will see something like this, with the actual contents varrying over time.
 
 
 ```
-~/Projects/Training/ionic-weather (master *): npm outdated
+$ npm outdated
 Package                  Current    Wanted   Latest  Location
 @ionic/react              4.11.2    4.11.7   4.11.7  ionic-weather-react-starter
 @ionic/react-router       4.11.2    4.11.7   4.11.7  ionic-weather-react-starter

@@ -29,6 +29,8 @@ Error: StaticInjectorError(AppModule)[HttpClient]:
     NullInjectorError: No provider for HttpClient!
 ```
 
+**Note:** You may have to restart the dev server to see the error.
+
 What is going on with the application is that `HttpClient` is injected into the `WeatherService` service, but the `HttpClient` service has not been provided anywhere so the application does not know how to inject it. You need to modify the `AppModule` to import the `HttpClientModule` as such:
 
 ```TypeScript
@@ -50,6 +52,8 @@ export class AppModule {}
 ```
 
 Save those changes and check your application - the error should be gone there. We will tackle the issue in the tests next by mocking the service.
+
+**Note:** You may have to restart the dev server to see the error go away.
 
 ## Mock the Service
 
@@ -86,7 +90,6 @@ Creating this file may cause the `npm start` build to begin failing as it tries 
 
 ```JSON
   "exclude": [
-    "test.ts",
     "**/*.mock.ts",
     "**/*.spec.ts"
   ]

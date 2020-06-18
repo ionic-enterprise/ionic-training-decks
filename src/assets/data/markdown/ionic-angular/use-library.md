@@ -25,14 +25,22 @@ Good libraries usually document exactly how to use the library in your applicati
 First, there is a method in the library called `defineCustomElements()` that needs to be called. This is usually called in the `main.ts` file. This method contains the special sauce that bundlers like WebPack need in order to be aware of the components, with the end result being that WebPack will bundle them properly.
 
 ```TypeScript
+import { enableProdMode } from '@angular/core';
 import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
+
 import { defineCustomElements } from 'kws-weather-widgets/loader';
 
-import { AppModule } from './app.module';
+import { AppModule } from './app/app.module';
+import { environment } from './environments/environment';
 
-platformBrowserDynamic().bootstrapModule(AppModule)
+if (environment.production) {
+  enableProdMode();
+}
+
+platformBrowserDynamic()
+  .bootstrapModule(AppModule)
   .catch(err => console.log(err));
-defineCustomElements(window);
+defineCustomElements();
 ```
 
 Second, since Angular does not know about the custom elements in the library, the `CUSTOM_ELEMENTS_SCHEMA` must be used in each module that uses any components from the library. This tells the Angular compiler to ignore any elements it doesn't understand so long as they conform to the custom elements standard.
@@ -59,36 +67,17 @@ You will see something like this, with the actual contents varrying over time.
 
 
 ```
-~/Projects/Training/ionic-weather (master *): npm outdated
-Package                             Current    Wanted    Latest  Location
-@angular-devkit/architect            0.12.3    0.12.4    0.13.4  ionic-weather
-@angular-devkit/build-angular        0.12.3    0.12.4    0.13.4  ionic-weather
-@angular-devkit/core                  7.2.3     7.2.4     7.3.4  ionic-weather
-@angular-devkit/schematics            7.2.3     7.2.4     7.3.4  ionic-weather
-@angular/cli                          7.2.3     7.2.4     7.3.4  ionic-weather
-@angular/common                       7.2.2     7.2.7     7.2.7  ionic-weather
-@angular/compiler                     7.2.2     7.2.7     7.2.7  ionic-weather
-@angular/compiler-cli                 7.2.2     7.2.7     7.2.7  ionic-weather
-@angular/core                         7.2.2     7.2.7     7.2.7  ionic-weather
-@angular/forms                        7.2.2     7.2.7     7.2.7  ionic-weather
-@angular/http                         7.2.2     7.2.7     7.2.7  ionic-weather
-@angular/language-service             7.2.2     7.2.7     7.2.7  ionic-weather
-@angular/platform-browser             7.2.2     7.2.7     7.2.7  ionic-weather
-@angular/platform-browser-dynamic     7.2.2     7.2.7     7.2.7  ionic-weather
-@angular/router                       7.2.2     7.2.7     7.2.7  ionic-weather
-@ionic-native/core                    5.0.0     5.2.0     5.2.0  ionic-weather
-@ionic-native/splash-screen           5.0.0     5.2.0     5.2.0  ionic-weather
-@ionic-native/status-bar              5.0.0     5.2.0     5.2.0  ionic-weather
-@ionic/angular                        4.0.0     4.0.2     4.0.2  ionic-weather
-@ionic/angular-toolkit                1.2.3     1.2.3     1.4.0  ionic-weather
-@types/jasmine                        3.3.8     3.3.9     3.3.9  ionic-weather
-@types/node                        10.12.18  10.12.29   11.10.4  ionic-weather
-core-js                               2.6.3     2.6.5     2.6.5  ionic-weather
-karma                                 4.0.0     4.0.1     4.0.1  ionic-weather
-karma-coverage-istanbul-reporter      2.0.4     2.0.5     2.0.5  ionic-weather
-rxjs                                  6.3.3     6.3.3     6.4.0  ionic-weather
-tslint                               5.12.1    5.12.1    5.13.1  ionic-weather
-typescript                            3.2.4     3.2.4  3.3.3333  ionic-weather
+$ npm outdated
+Package                            Current    Wanted   Latest  Location
+@types/node                       12.12.47  12.12.47  14.0.13  ionic-weather
+jasmine-spec-reporter                4.2.1     4.2.1    5.0.2  ionic-weather
+karma                                5.0.9     5.0.9    5.1.0  ionic-weather
+karma-coverage-istanbul-reporter     2.1.1     2.1.1    3.0.3  ionic-weather
+karma-jasmine                        3.0.3     3.0.3    3.3.1  ionic-weather
+protractor                           5.4.4     5.4.4    7.0.0  ionic-weather
+ts-node                              8.3.0     8.3.0   8.10.2  ionic-weather
+tslib                               1.13.0    1.13.0    2.0.0  ionic-weather
+typescript                           3.8.3     3.8.3    3.9.5  ionic-weather
 ```
 
 The three most important columns here are `Current`, `Wanted`, and `Latest`.
@@ -96,8 +85,6 @@ The three most important columns here are `Current`, `Wanted`, and `Latest`.
 - `Current` is the version that is currently installed
 - `Wanted` is the version that can be upgraded to accordion to the rules specified in your `package.json`. This is the version that `npm update` will install.
 -  `Latest` is the latest version available
-
-For example have a look at the versions specified above for `@angular/cli`. An `npm update` will take the version from `7.2.3` to `7.2.4` but the latet version is `7.3.4`. The `7.3.4` version would need to be installed manually becaue the version is specified as `"@angular/cli": "~7.2.3"` in the `package.json` file. That is, the upgrade rule of `~` will take patch-level (bug-fix) changes but not minor version (new feature) versions.
 
 Some analysis and thouht is required at this point. It is generally best to do the following with your own apps:
 

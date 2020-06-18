@@ -165,24 +165,29 @@ Requirement 3: Update the cached value.
     });
 ```
 
-## Use the Service in the Base Class
+## Use the Service
+
+At this point you have two choices:
+
+1. Add the `UserPreferencesService` to the base class
+1. Add the `UserPreferencesService` only to the Current Weather and Forecast pages
+
+The argument for the former is that User Preferences could be expanded in the future to include items that are applicable to all pages. The argument for the latter would be that while that is true, it is not _currently_ true.
+
+We will write the tests as if we are only adding the service to the pages that actually need it. How you actually code it is an implementation detail that is left up to you.
+
 
 ### Add Tests
 
-Our requirements are defined at the page level, specifically the Current Weather, Forecast, and UV Index pages. That is where we will add the tests.
+Our requirements are defined at the page level, specifically the Current Weather and Forecast pages. That is where we will add the tests.
 
 1. Create a mock factory for the `UserPreferencesService`.
-1. Modify the tests for the all three main pages to provide the `UserPreferencesService` mock via the factory.
-1. Add tests that verifies that the scale is set to 'C' or 'F' when entering the page, depending on the value resolved by `getUseCelcius()`
+1. Modify the tests for the Current Weather and Forecast pages to provide the `UserPreferencesService` mock via the factory.
+1. Add tests that verifies that a property named "scale" is set to 'C' or 'F' when entering the page, depending on the value resolved by `getUseCelcius()`
 
 ### Write the Code
 
-In the `WeatherPageBase`:
-
-1. Include the `UserPreferencesService` in the constructor
-1. In each page, inject the `UserPreferencesService` and pass it down to the base class
-1. Add the `scale` property (type: string)
-1. Update the `ionViewDidEnter()` to set the scale
+Implementation details depend upon you. If you get stuck, you can have a look at the <a href="https://github.com/ionic-team/ionic-weather-starter/commit/55e0cd585b521f4871cb0d3bc59a4ba31eaf7a9d" target="_blank">"step(eleven)" commit</a> in the `training/stepByStep` branch of the training starter repo to see how I implemented this.
 
 ### Update the Views
 
@@ -200,7 +205,7 @@ In the page views, bind the user preference data. Here is an example from the cu
 
 ## Toggle the Scale
 
-Add the following tests to the `current-weather.page.spec.ts`, then write code to satisfy those tests (I put the code in the base class, then it could be used from any page).
+Add the following tests to the `current-weather.page.spec.ts`, then write code to satisfy those tests.
 
 ```TypeScript
   describe('toggling the scale', () => {

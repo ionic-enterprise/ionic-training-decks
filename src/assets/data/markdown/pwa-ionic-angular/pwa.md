@@ -109,7 +109,7 @@ The default `src/manifest.webmanifest` file is complete, but it needs a couple o
 Here are the changes:
 
 ```diff
-~/Projects/Training/ionic-weather (master *): git diff src/manifest.webmanifest
+$ git diff src/manifest.webmanifest
 diff --git a/src/manifest.webmanifest b/src/manifest.webmanifest
 index 97f0552..6bf1d68 100644
 --- a/src/manifest.webmanifest

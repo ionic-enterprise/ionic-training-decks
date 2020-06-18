@@ -68,7 +68,7 @@ At this point, you are ready to build and deploy.
 The deploy process should look something like this:
 
 ```
-~/Projects/Training/ionic-weather (master): firebase deploy
+$ firebase deploy
 
 === Deploying to 'ionic-weather-1792a'...
 
@@ -118,7 +118,7 @@ This indicates that our app is performaing well from a general web application p
 The `firebase init` and `firebase deploy` steps created a few files:
 
 ```
-~/Projects/Training/ionic-weather (master): git status
+$ git status
 On branch master
 Untracked files:
   (use "git add <file>..." to include in what will be committed)

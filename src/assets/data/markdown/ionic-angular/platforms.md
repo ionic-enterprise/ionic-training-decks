@@ -1,41 +1,82 @@
-# Lab: Add Cordova Platforms
+# Lab: Add Capacitor Platforms
 
 In this lab, you will:
 
-* Update the Cordova configuration
+* Update the Capacitor configuration
 * Update the splash screen and application icon
 * Add the iOS and Android platforms
 * Build and run the application on both platforms
 
 ## Update the Configuration
 
-When a Cordova project is built, information in the `config.xml` file is used to generate some of the project files. Some of this information should be changed up front:
+When a Capacitor platform is added or updated, information in the `capacitor.config.json` file is used to generate some of the project files. Some of this information should be changed up front:
 
-* The widget id should be change to something unique like `com.kensodemann.ionicweather`
-* The name and description should be changed
-* The author information should be changed
+* The `appId` should be change to something unique like `com.kensodemann.ionicweather`
+* The `appName` should be checked to ensure it is correct
 
 Here is an example of those changes:
 
 **Before:**
 
 ```xml
-<widget id="io.ionic.starter" version="0.0.1" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
-    <name>ionic-weather</name>
-    <description>An awesome Ionic/Cordova app.</description>
-    <author email="hi@ionicframework" href="http://ionicframework.com/">Ionic Framework Team</author>
+{
+  "appId": "io.ionic.starter",
+  "appName": "ionic-weather",
+  "bundledWebRuntime": false,
+  "npmClient": "npm",
+  "webDir": "www",
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 0
+    }
+  },
+  "cordova": {}
+}
 ```
 
 **After:**
 
 ```xml
-<widget id="com.kensodemann.ionicweather" version="0.0.1" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
-    <name>My Weather App</name>
-    <description>Shows the weather wherever I am</description>
-    <author email="ken@ionicframework.com" href="http://ionicframework.com/">Ken Sodemann</author>
+{
+  "appId": "com.kensodemann.weather",
+  "appName": "ionic-weather",
+  "bundledWebRuntime": false,
+  "npmClient": "npm",
+  "webDir": "www",
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 0
+    }
+  },
+  "cordova": {}
+}
 ```
 
-Make similar changes to your application.
+In our case, only the `appId` required a change in order to make it globally unique.  Make similar changes to your application.
+
+## Add the Android and iOS Platforms
+
+Before adding any Capacitor platforms, you need to make sure that your application has been built. If it has not been built, the `www` directory will not exist and the attempt to add the platform will fail.
+
+```bash
+$ npm run build
+```
+
+Now you can add both the Android and iOS platforms.
+
+```bash
+$ ionic cap add android
+$ ionic cap add ios
+```
+
+Once the platforms are added, open the native projects, each in their own IDE.
+
+```bash
+$ ionic cap open android
+$ ionic cap open ios
+```
+
+**Note:** you need to have Android Studio installed if you want to build on Android. You need to be using a Mac that has Xcode properly installed in order to build for iOS.
 
 ## Update the Splash Screen and Application Icon
 
@@ -51,149 +92,43 @@ For this application, please download the following images and copy them to your
 * <a download href="/assets/images/icon.png">icon.png</a>
 * <a download href="/assets/images/splash.png">splash.png</a>
 
-The appropriate icon and splash screen resources will be generated as the platforms are added. If you ever need to change the icon or splash screen, replace the appropriate source file(s) and run `ionic cordova resources` to generate new resources.
-
-## Add the Android and iOS Platforms
-
-Use `ionic cordova platform add android` to add the Android platform. This will create a `www/` directory if it does not exist, install the Android platform and any required Cordova plugins, and generate the appropriate icon and splash screen resources.
+To generate the required resources and copy them to the native projects, use the following commands:
 
 ```bash
-~/Projects/Training/ionic-weather (master *): ionic cordova platform add android
-✔ Creating ./www directory for you - done!
-> cordova platform add android --save
-Using cordova-fetch for cordova-android@~7.1.1
-Adding android project...
-Creating Cordova project for the Android platform:
-	Path: platforms/android
-	Package: com.kensodemann.ionicweather
-	Name: My_Weather_App
-	Activity: MainActivity
-	Android target: android-27
-Android project created with cordova-android@7.1.4
-Android Studio project detected
-...
-> ionic cordova resources android --force
-✔ Collecting resource configuration and source images - done!
-✔ Filtering out image resources that do not need regeneration - done!
-✔ Uploading source images to prepare for transformations: 2 / 2 complete - done!
-✔ Generating platform resources: 18 / 18 complete - done!
-✔ Modifying config.xml to add new image resources - done!
+$ cordova-res ios --skip-config --copy
+$ cordova-res android --skip-config --copy
 ```
 
-Use `ionic cordova platform add ios` to add the iOS platform. This will create a `www/` directory if it does not exist, install the iOS platform and any required Cordova plugins, and generate the appropriate icon and splash screen resources.
+These commands will use the source images to produce all of the various images required by the native projects and then copy them to the proper locations.
+
+## Live Reload (Optional)
+
+Now that the projects are set up and building properly, you can use Ionic's "live reload" feature if you would like to. This feature allows you to run the application on your device and then rebuild and reload the application on your device as you develop. This is similar to `ionic serve` but is running the application on your device(s) instead of the browser.
 
 ```bash
-~/Projects/Training/ionic-weather (master *): ionic cordova platform add ios
-> cordova platform add ios --save
-Using cordova-fetch for cordova-ios@~4.5.4
-Adding ios project...
-Creating Cordova project for the iOS platform:
-	Path: platforms/ios
-	Package: com.kensodemann.ionicweather
-	Name: My Weather App
-iOS project created with cordova-ios@4.5.5
-Installing "cordova-plugin-device" for ios
-Installing "cordova-plugin-ionic-keyboard" for ios
-Installing "cordova-plugin-ionic-webview" for ios
-Installing "cordova-plugin-splashscreen" for ios
-Installing "cordova-plugin-statusbar" for ios
-Installing "cordova-plugin-whitelist" for ios
---save flag or autosave detected
-Saving ios@~4.5.5 into config.xml file ...
-> ionic cordova resources ios --force
-✔ Collecting resource configuration and source images - done!
-✔ Filtering out image resources that do not need regeneration - done!
-✔ Uploading source images to prepare for transformations: 2 / 2 complete - done!
-✔ Generating platform resources: 32 / 32 complete - done!
-✔ Modifying config.xml to add new image resources - done!
+$ ionic cap run android --livereload --external
+$ ionic cap run ios --livereload --external
 ```
 
-## Build for Android
-
-When building for Android, the command line tools work very well:
-
-* `ionic cordova build android` - builds the APK
-* `ionic cordova run android` - build the APK and runs it on an emulator or attached device
-
-Both commands take several options. See `ionic cordova run --help` for details.
-
-**Android Quirks**
-
-* If `ionic cordova run android` fails the first time, it is often due to the emulator taking too long to launch. In that case, leave the emulator open and re-do the `ionic cordova run android` command.
-* The `--target` option is used to specify different targets in the emulator or different devices attached to the build machine. Use `cordova run android --list` to get a list of targets.
-
-## Build for iOS
-
-* `ionic cordova build ios` - builds the IPA
-* `ionic cordova run ios` - builds the IPA and runs it on an emulator or attached device
-
-Both commands take several options. See `ionic cordova run --help` for details.
-
-**iOS Quirks**
-
-* If `ionic cordova run ios` does not work, use `open platforms/ios/Ionic\ Weather.xcworkspace` to open Xcode to build and run the application (NOTE: actual file name may differ depending on the `config.xml` contents at the time the platform was added)
-* When deploying to a device, you need to specify a team, provisioning profile, and signing certificate. It is usually easiest to use Xcode for this.
-* If you are using Xcode 10, make sure you have at least version 5.0.0 of `cordova-ios`. If you do not, use `npm i cordova-ios@latest`
-* Depending on how your system is set up, the default emulator may be too old to run your app. In that case, be sure to specify a `target`. Use `cordova run ios --list` to get a list of targets.
-
-Here is how you would run the application on the iPhone 7, iOS 12.1 emulator: `ionic cordova run ios --target='iPhone-7, 12.1'`
+These commands start a dev server that monitors changes to the Ionic project, launches the proper IDE, and allows you to run the application on a device. Once that is done, then when you change the Ionic application, it will be rebuilt and reloaded on the device(s).
 
 ## Update NPM Scripts (Optional)
 
-I find typing `ionic cordova build android` and similar commands somewhat cumbersome, so I generally add them to the `scripts` section of the `package.json` file as such:
+I like to have my build do a copy for me. For this reason, I do a `cap copy` with every build. This ensures my native projects are always up to date.
 
 ```JSON
   "scripts": {
-    "build": "ng build",
-    "build:ios": "ionic cordova build ios",
-    "build:md": "ionic cordova build android",
+    "build": "ng build && cap copy",
     "e2e": "ng e2e",
     "lint": "ng lint",
     "ng": "ng",
     "start": "ng serve",
-    "start:ios": "ionic cordova run ios --target='iPhone-7, 12.1'",
-    "start:md": "ionic cordova run android",
     "test": "ng test --browsers=ChromeHeadless",
-    "test:debug": "ng test",
-    "test:ci": "ng test --no-watch --browsers=ChromeHeadlessCI"
+    "test:ci": "ng test --no-watch --browsers=ChromeHeadlessCI",
+    "test:debug": "ng test"
   },
-```
-
-Then all I have to do is `npm run build:ios` when I want to build for iOS. It isn't really _that_ much less to type, but given how often I mis-type "ionic" or "cordova" it makes a big difference... 😆
-
-## Add Untracked Files and Commit
-
-The above processes modified a lot of files, mostly in the `resources/` folder, and added a couple as well. Use `git status` to see them all:
-
-```bash
-~/Projects/Training/ionic-weather (master *): git status
-On branch master
-Changes not staged for commit:
-  (use "git add <file>..." to update what will be committed)
-  (use "git checkout -- <file>..." to discard changes in working directory)
-
-	modified:   config.xml
-	modified:   package-lock.json
-	modified:   package.json
-
-...
-
-Untracked files:
-  (use "git add <file>..." to include in what will be committed)
-
-	resources/icon.png.md5
-	resources/splash.png.md5
-
-no changes added to commit (use "git add" and/or "git commit -a")
-```
-
-Add the two untracked files and commit:
-
-```bash
-~/Projects/Training/ionic-weather (master *): git add resources/
-~/Projects/Training/ionic-weather (master *+): git commit -am "add android and ios platforms"
 ```
 
 ## Conclusion
 
-In this lab we learned how to add various platforms and how to build the application for those platforms.
+In this lab we learned how to add iOS and Android platforms and how to build the application for those platforms.

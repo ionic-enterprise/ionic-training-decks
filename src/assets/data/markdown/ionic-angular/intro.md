@@ -1,12 +1,12 @@
-# Training: Ionic / Angular / Cordova
+# Training: Ionic / Angular / Capacitor
 
-This training focuses on building an application using the Ionic Framework with Angular and Cordova. During the development of this application, you will:
+This training focuses on building an application using the Ionic Framework with Angular and Capacitor. During the development of this application, you will:
 
 - Create a new Ionic application
-- Build the application for mobile devices using Cordova
+- Build the application for mobile devices using Capacitor
 - Add third party component libraries to the application
 - Modify existing pages
 - Add new services
-- Use Cordova Plugins
+- Use Capacitor Plugins
 
 The application you build provides information about local weather conditions.
