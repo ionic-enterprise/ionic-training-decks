@@ -1,3 +1,12 @@
+# [2.2.0](https://github.com/ionic-team/ionic-training-decks/compare/v2.1.3...v2.2.0) (2020-06-21)
+
+
+### Features
+
+* **angular:** use Capacitor for framework training ([b6891a1](https://github.com/ionic-team/ionic-training-decks/commit/b6891a1e8e7feea1ece1da51248df9010883a73d))
+
+
+
 ## 2.1.3 (2020-05-27)
 
 
