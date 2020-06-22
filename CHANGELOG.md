@@ -1,3 +1,17 @@
+## [2.2.1](https://github.com/ionic-team/ionic-training-decks/compare/v2.2.0...v2.2.1) (2020-06-22)
+
+
+### Bug Fixes
+
+* **angular:** install proper CLI and remove Cordova references ([5ca8983](https://github.com/ionic-team/ionic-training-decks/commit/5ca89833f755b77485c801b7317beb3897f6ae0d))
+
+
+### Features
+
+* **angular:** update slides to Capacitor ([16cadec](https://github.com/ionic-team/ionic-training-decks/commit/16cadec84d7a0da1299e8fc84ec8c3d9450226ce))
+
+
+
 # [2.2.0](https://github.com/ionic-team/ionic-training-decks/compare/v2.1.3...v2.2.0) (2020-06-21)
 
 
