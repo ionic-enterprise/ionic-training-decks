@@ -186,7 +186,7 @@ The `getPlugin()` method from the base class needs to be overridden to return th
 
 ```TypeScript
   getPlugin(): IonicNativeAuthPlugin {
-    if ((this.platform as Platform).is('cordova')) {
+    if ((this.platform as Platform).is('hybrid')) {
       return super.getPlugin();
     }
     return this.browserAuthPlugin;

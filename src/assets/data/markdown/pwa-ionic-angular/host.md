@@ -12,28 +12,26 @@ In this lab you will learn:
 
 We have been building our application for the web using `ng serve` (or a command that ultimately runs `ng serve`), but that is all virtual. It does not actually write the files out to disk so we can serve them in some other way. If you would like to test this for yourself, remove the `www/` directory (if it exists) and start the development server. The usual build steps occur, and you can view your application, but no `www/` folder is generated.
 
-To build for the web, use `ionic build --engine=browser --prod`. This will build the application into the `www/` folder. It will also not include `cordova.js` since that is not available on the web, and it will minify the source.
-
-**Note:** `--engine=browser` is technically the default and does not need to be specified if you do not want to. I like to be explicit, however.
+To build for the web, use `ionic build --prod`. This will build the application into the `www/` folder.
 
 Since this is something that will be done often, and I suggest adding it as a script in your `package.json` file. Here is my full set of scripts for this project:
 
 
 ```JSON
   "scripts": {
+    "build": "ng build",
+    "build:prod": "ng build --prod",
+    "e2e": "ng e2e",
+    "lint": "ng lint",
     "ng": "ng",
     "start": "ng serve",
-    "start:iphone7": "ionic cordova run ios --target='iPhone-7, 12.1'",
-    "start:iphonex": "ionic cordova run ios --target='iPhone-X, 12.1'",
-    "build": "ng build",
-    "build:web": "ionic build --engine=browser --prod",
-    "test": "ng test",
-    "lint": "ng lint",
-    "e2e": "ng e2e"
+    "test": "ng test --browsers=ChromeHeadless",
+    "test:ci": "ng test --browsers=ChromeHeadlessCI --no-watch",
+    "test:debug": "ng test"
   },
 ```
 
-Now running `npm run build:web` will result in a build that is ready to be served as a web application.
+Now running `npm run build:prod` will result in a build that is ready to be served as a web application.
 
 ## Host the Application on Firebase
 
@@ -62,7 +60,7 @@ From the `ionic-weather` root directory, run `firebase init` which will walk you
 
 At this point, you are ready to build and deploy.
 
-* `npm run build:web` - if you didn't already do this above
+* `npm run build:prod` - if you didn't already do this above
 * `firebase deploy`
 
 The deploy process should look something like this:

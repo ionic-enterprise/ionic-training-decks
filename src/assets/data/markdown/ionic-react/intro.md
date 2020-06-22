@@ -1,4 +1,4 @@
-# Training: Ionic / React / Cordova
+# Training: Ionic / React
 
 This training focuses on building an application using the Ionic Framework with React and Capacitor. During the development of this application, you will:
 

@@ -193,7 +193,7 @@ It should be noted that PWACompat <a href="https://medium.com/@firt/you-shouldnt
 Do the following:
 
 * commit all changes in git
-* `npm run build:web`
+* `npm run build:prod`
 * `firebase deploy`
 
 You should be able to open the app on a web-browser on your Android or iOS device. On Android you will be prompted to install the app. On iOS you will have to it your self via the "Share" button. Once it is installed to your desktop, you should be able to launch it on either platform and get an experience that is just like the Hybrid Mobile app we developed.
