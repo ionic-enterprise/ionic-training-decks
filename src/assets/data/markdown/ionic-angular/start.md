@@ -26,22 +26,24 @@ Lets start our application via whichever technique you want.
 1. Enter the following command: `ionic start tea-taster blank --type=angular --capacitor`
 1. Alternately, you could just enter `ionic start` and let the command line ask you for what it needs
 
+**Example:**
+
+```bash
+$ cd ~/Projects/Training
+$ ionic start tea-taster blank --type=angular --capacitor
+```
+
 Let's look at some of those options more closely.
 
 - The forth option, `blank` tells Ioinic to use the `blank` starter. We have three basic starters: `blank`, `tabs`, and `sidemenu`. The main difference is the main style of navigation.
 - The `--type` option specifies the type of application to create. Options include `angular`, `react`, `ionic-angular`, and `ionic1`. The `ionic-angular` type is an Ionic v3 application.
 - The `--capacitor` options tells the command line to integrate Capacitor as the native bridge. You could also choose Cordova, or nothing at all.
 
-
-## Clone the Ionic Weather Starter Template
-
-For this training we will start with a template application that is based on the tabs starter but has all of the pages renamed to match the page structure of the weather application.
+Once the application has been generated, let's start the development server:
 
 ```bash
-git clone https://github.com/ionic-team/ionic-weather-starter.git ionic-weather
-cd ionic-weather
-npm i
-ionic serve
+$ cd tea-taster
+$ ionic serve
 ```
 
 ## Side Note: `ionic serve` vs. `npm start`
@@ -54,15 +56,6 @@ In a nutshell:
 - `ionic serve` finds the first unused port >= 8100 and passes that to the Angular CLI with some other options
 
 In either case, the Angular CLI does all the heavy lifting, so use whichever command you want to use. Personally, I use `npm start` because it take less typing and thought on my part.
-
-## Using the CLI
-
-Note that you could have also used the Ionic CLI to generate your application:
-
-- `ionic start` - this will ask for information like the application's name, desired framework, and starter template.
-- `ionic start my-cool-app tabs --type=angular --capacitor` - this will create an `@ionic/angular` app called `my-cool-app` using the `tabs` starter template and will provide minimal Capacitor scaffolding.
-
-The reason we do not do this for this training is that you would then have to rename the files and paths yourself, which doesn't really teach you anything... 😀
 
 ## Conclusion
 
