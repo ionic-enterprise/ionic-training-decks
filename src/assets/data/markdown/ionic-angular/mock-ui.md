@@ -303,7 +303,7 @@ export class ForecastPage {
 </ion-content>
 ```
 
-**forecast.scss**
+**forecast.page.scss**
 
 ```scss
 kws-daily-forecast {
@@ -328,6 +328,8 @@ export interface UVIndex {
   riskLevel: number;
 }
 ```
+
+**Note:** remember to add the export for this file to `src/app/models/index.ts`!
 
 **uv-index.page.ts**
 
