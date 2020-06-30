@@ -20,16 +20,12 @@
           "file": "unit-tests"
         },
         {
-          "title": "Style the App",
-          "file": "style"
-        },
-        {
-          "title": "Use a Component Library",
-          "file": "use-library"
-        },
-        {
           "title": "Mock Up the Interface",
           "file": "mock-ui"
+        },
+        {
+          "title": "Routing",
+          "file": "routing"
         },
         {
           "title": "Get Data",
