@@ -1,3 +1,13 @@
+## [2.2.2](https://github.com/ionic-team/ionic-training-decks/compare/v2.2.1...v2.2.2) (2020-06-30)
+
+
+### Bug Fixes
+
+* **ionic-angular:** change references to Cordova ([5c89d48](https://github.com/ionic-team/ionic-training-decks/commit/5c89d4864273b6fab58c190f448250b93d38dcad))
+* **mock-ui:** fix file name and add note ([d6e65c2](https://github.com/ionic-team/ionic-training-decks/commit/d6e65c2ba193326fa6fda15ac73e32b8c2c7e54f))
+
+
+
 ## [2.2.1](https://github.com/ionic-team/ionic-training-decks/compare/v2.2.0...v2.2.1) (2020-06-22)
 
 
