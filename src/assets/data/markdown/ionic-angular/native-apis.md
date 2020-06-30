@@ -160,7 +160,7 @@ console.log('primary shade', style.getPropertyValue('--ion-color-primary-shade')
 
 Right now, the application gives us the weather for a specific location. It would be nice if it could let us know what the weather is for our current location. As it turns out, Capacitor includes a <a href="https://capacitorjs.com/docs/apis/geolocation" target="_blank">Geolocation API</a>.
 
-### Use the Cordova Plugin
+### Use the Capacitor API 
 
 #### Create the Coordinate Model
 
@@ -442,6 +442,6 @@ export class AppComponent {
 
 ## Conclusion
 
-We have learned how to utilize Cordova plugins and the Ionic Native wrappers in order to easily access native mobile APIs.
+We have learned how to utilize Capacitor APIs in order to easily access native mobile APIs.
 
 Build the application for a mobile device and give it a try.
