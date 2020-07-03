@@ -170,7 +170,34 @@ export class LoginPage {
 }
 ``` 
 
-Finally hook up the inputs in the templates. The following should be added to both of the inputs:
+### Binding the Data
+
+The bindings should be tested to make sure they are done correctly. Here are the tests for the Email Address input. Add these and then create similar tests for the password input. You will have to import `fakeAsync` and `tick` from `@angular/core/testing`.
+
+```TypeScript
+  describe('email input binding', () => {
+    it('updates the component model when the input changes', () => {
+      const input = fixture.nativeElement.querySelector('#email-input');
+      const event = new InputEvent('ionChange');
+
+      input.value = 'test@test.com';
+      input.dispatchEvent(event);
+      fixture.detectChanges();
+
+      expect(component.email).toEqual('test@test.com');
+    });
+
+    it('updates the input when the component model changes', fakeAsync(()=>{
+      component.email = 'testy@mctesterson.com';
+      fixture.detectChanges();
+      tick();
+      const input = fixture.nativeElement.querySelector('#email-input');
+      expect(input.value).toEqual('testy@mctesterson.com');
+    }));
+  });
+```
+
+Hook up the inputs in the templates. The following should be added to both of the inputs:
 
 - The `ngModel` binding (example: `[(ngModel)]="email"`)
 - A template variable for the input (example: `#emailInput="ngModel"`)
@@ -203,9 +230,56 @@ The password input is similar:
         ></ion-input>
 ```
 
-## Disable button
+### Disable button
 
 The user should not be able to click the "Sign In" button if the form itself is not valid. Also, when the user does click on the button our page should do something. What that _something_ is currently is undefined, but we will bind the event so it is ready once we do define what it should do.
+
+Let's use our tests to define when the button should be enabled and disabled.
+
+```TypeScript
+  describe('signon button', () => {
+    let button: HTMLIonButtonElement;
+    let email: HTMLIonInputElement;
+    let password: HTMLIonInputElement;
+    let event: InputEvent;
+    beforeEach(fakeAsync(() => {
+      button = fixture.nativeElement.querySelector('ion-button');
+      email = fixture.nativeElement.querySelector('#email-input');
+      password = fixture.nativeElement.querySelector('#password-input');
+      event = new InputEvent('ionChange');
+      fixture.detectChanges();
+      tick();
+    }));
+
+    it('starts disabled', () => {
+      expect(button.disabled).toEqual(true);
+    });
+
+    it('is disabled with just an email address', () => {
+      email.value = 'test@test.com';
+      email.dispatchEvent(event);
+      fixture.detectChanges();
+
+      expect(button.disabled).toEqual(true);
+    });
+
+    it('is disabled with just a password', () => {
+      // TODO: Fill this in
+    });
+
+    it('is enabled with both an email address and a password', () => {
+      // TODO: Fill this in
+    });
+
+    it('is disabled when the email address is not a valid format', () => {
+      // TODO: Fill this in
+    });
+  });
+```
+
+Be sure to fill in the logic for the missing tests.
+
+Now that we have the tests, let's update the HTML with the proper bindings.
 
 ```html
 <ion-footer>
@@ -218,9 +292,71 @@ The user should not be able to click the "Sign In" button if the form itself is 
 </ion-footer>
 ```
 
-## Display Error Messages
+### Test Refactor
 
-If the data in one of the inputs is invalid, the Sign In button will be disabled, which is good, but the user will not know why, which is bad. So let's add a section where we display some helpful messages for the user. Add the following to the lower portion of the form:
+Those tests are getting very verbose, especially when it comes to setting a value in one of the form inputs. Let's clean that up a bit.
+
+Add a `setInputValue()` function within the main `describe()`.
+
+```TypeScript
+function setInputValue(input: HTMLIonInputElement, value: string) {
+  const event = new InputEvent('ionChange');
+  input.value = value;
+  input.dispatchEvent(event);
+  fixture.detectChanges();
+}
+```
+
+With that in place, clean up the tests.
+
+### Display Error Messages
+
+If the data in one of the inputs is invalid, the Sign In button will be disabled, which is good, but the user will not know why, which is bad. So let's add a section where we display some helpful messages for the user. We will modify the form to display the following error messages when appropriate:
+
+- E-Mail Address must have a valid format
+- E-Mail Address is required
+- Password is required
+
+First let's use our tests to define when the error messages should be displayed:
+
+```typescript
+  describe('error messages', () => {
+    let errorDiv: HTMLDivElement;
+    let email: HTMLIonInputElement;
+    let password: HTMLIonInputElement;
+    beforeEach(fakeAsync(() => {
+      errorDiv = fixture.nativeElement.querySelector('.error-message');
+      email = fixture.nativeElement.querySelector('#email-input');
+      password = fixture.nativeElement.querySelector('#password-input');
+      fixture.detectChanges();
+      tick();
+    }));
+
+    it('starts with no error message', () => {
+      expect(errorDiv.textContent).toEqual('');
+    });
+
+    it('displays an error message if the e-mail address is dirty and empty', () => {
+      setInputValue(email, 'test@test.com');
+      setInputValue(email, '');
+      expect(errorDiv.textContent.trim()).toEqual('E-Mail Address is required');
+    });
+
+    it('displays an error message if the e-mail address has an invalid format', () => {
+      // TODO: Fill this in
+    });
+
+    it('clears the error message when the e-mail address has a valid format', () => {
+      // TODO: Fill this in
+    });
+
+    it('displays an error message if the password is dirty and empty', () => {
+      // TODO: Fill this in
+    });
+  });
+```
+
+Now let's update the form. Add the following to the lower portion of the form:
 
 ```html
     <div class="error-message">
