@@ -28,6 +28,10 @@
           "file": "login-page"
         },
         {
+          "title": "Authentication",
+          "file": "auth"
+        },
+        {
           "title": "Get Data",
           "file": "get-data"
         },
