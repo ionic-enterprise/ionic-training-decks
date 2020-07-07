@@ -20,6 +20,14 @@
           "file": "unit-tests"
         },
         {
+          "title": "Add Platforms",
+          "file": "platforms"
+        },
+        {
+          "title": "Use Native APIs",
+          "file": "native-apis"
+        },
+        {
           "title": "Mock Up the Interface",
           "file": "mock-ui"
         },
@@ -46,14 +54,6 @@
         {
           "title": "Create a Generic Base Class",
           "file": "base-class"
-        },
-        {
-          "title": "Add Platforms",
-          "file": "platforms"
-        },
-        {
-          "title": "Use Native APIs",
-          "file": "native-apis"
         },
         {
           "title": "Switch Scale",
