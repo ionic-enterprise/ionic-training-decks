@@ -30,11 +30,6 @@ Be sure to update `src/app/models/index.ts`
 dataService: 'https://cs-demo-api.herokuapp.com'
 ```
 
-## Install @ionic/storage
-
-install
-set up... (refer to web page)
-
 ## Create the Identity Service
 
 ```bash
@@ -52,7 +47,6 @@ export * from './identity/identity.service';
 ```typescript
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Storage } from '@ionic/storage';
 import { Subject, Observable } from 'rxjs';
 
 import { User } from '@app/models';
@@ -78,7 +72,7 @@ export class IdentityService {
     return this._user;
   }
 
-  constructor(private storage: Storage, private http: HttpClient) {
+  constructor(private http: HttpClient) {
     this._changed = new Subject();
   }
 
@@ -95,21 +89,31 @@ export class IdentityService {
 ```TypeScript
 import { TestBed } from '@angular/core/testing';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
-import { Storage } from '@ionic/storage';
+import { Plugins } from '@capacitor/core';
 
 import { IdentityService } from './identity.service';
 
 describe('IdentityService', () => {
   let service: IdentityService;
   let httpTestController: HttpTestingController;
+  let originalStorage: any;
 
   beforeEach(() => {
+    originalStorage = Plugins.Storage;
+    Plugins.Storage = jasmine.createSpyObj('Storage', {
+      get: Promise.resolve(),
+      set: Promise.resolve(),
+      remove: Promise.resolve()
+    });
     TestBed.configureTestingModule({
-      imports: [HttpClientTestingModule],
-      providers: [{ provide: Storage, useFactory: createIonicStorageMock }]
+      imports: [HttpClientTestingModule]
     });
     service = TestBed.inject(IdentityService);
     httpTestController = TestBed.inject(HttpTestingController);
+  });
+
+  afterEach(() => {
+    Plugins.Storage = originalStorage;
   });
 
   it('should be created', () => {
@@ -122,30 +126,15 @@ describe('IdentityService', () => {
 
   describe('clear', () => {});
 });
-
-function createIonicStorageMock() {
-  return jasmine.createSpyObj<Storage>('Storage', {
-    get: Promise.resolve(),
-    set: Promise.resolve(),
-    ready: Promise.resolve(null)
-  });
-}
 ```
 
 ### Init
 
 ```typescript
-    it('waits for storage to be ready', () => {
-      const storage = TestBed.inject(Storage);
-      service.init();
-      expect(storage.ready).toHaveBeenCalledTimes(1);
-    });
-
     it('gets the stored token', async () => {
-      const storage = TestBed.inject(Storage);
       await service.init();
-      expect(storage.get).toHaveBeenCalledTimes(1);
-      expect(storage.get).toHaveBeenCalledWith('auth-token');
+      expect(Plugins.Storage.get).toHaveBeenCalledTimes(1);
+      expect(Plugins.Storage.get).toHaveBeenCalledWith({ key: 'auth-token' });
     });
 ```
 
@@ -154,8 +143,7 @@ function createIonicStorageMock() {
 ```typescript
     describe('if there is a token', () => {
       beforeEach(() => {
-        const storage = TestBed.inject(Storage);
-        (storage.get as any).and.returnValue(Promise.resolve('3884915llf950'));
+        (Plugins.Storage.get as any).and.returnValue({ value: '3884915llf950' });
       });
     });
 ```
@@ -218,28 +206,17 @@ Step 2 - set the token
     });
 ```
 
-Step 3 - wait for the storage to be ready
-
-```typescript
-    it('waits for storage to be ready', ()=>{
-      const storage = TestBed.inject(Storage);
-      service.set({id: 42, firstName: 'Joe', lastName: 'Tester', email: 'test@test.org'}, '19940059fkkf039');
-      expect(storage.ready).toHaveBeenCalledTimes(1);
-    });
-```
-
-Step 4 - save the token
+Step 3 - save the token
 
 ```typescript
     it('saves the token in storage', async ()=>{
-      const storage = TestBed.inject(Storage);
       await service.set({id: 42, firstName: 'Joe', lastName: 'Tester', email: 'test@test.org'}, '19940059fkkf039');
-      expect(storage.set).toHaveBeenCalledTimes(1);
-      expect(storage.set).toHaveBeenCalledWith('auth-token', '19940059fkkf039');
+      expect(Plugins.Storage.set).toHaveBeenCalledTimes(1);
+      expect(Plugins.Storage.set).toHaveBeenCalledWith({ key: 'auth-token', value: '19940059fkkf039' });
     });
 ```
 
-Step 5 - emits changed
+Step 4 - emits changed
 
 ```typescript
     it('emits the change', async () => {
@@ -258,8 +235,6 @@ Test Setup:
   describe('clear', () => {
     beforeEach(async () => {
       await service.set({ id: 42, firstName: 'Joe', lastName: 'Tester', email: 'test@test.org' }, '19940059fkkf039');
-      const storage = TestBed.inject(Storage);
-      (storage.ready as any).calls.reset();
     });
   });
 ```
@@ -282,28 +257,17 @@ Step 2 - clear the token
     });
 ```
 
-Step 3 - await ready 
-
-```typescript
-    it('waits for the storage to be ready', () => {
-      const storage = TestBed.inject(Storage);
-      service.clear();
-      expect(storage.ready).toHaveBeenCalledTimes(1);
-    });
-```
-
-Step 4 - clear the storage
+Step 3 - clear the storage
 
 ```typescript
     it('clears the storage', async () => {
-      const storage = TestBed.inject(Storage);
       await service.clear();
-      expect(storage.remove).toHaveBeenCalledTimes(1);
-      expect(storage.remove).toHaveBeenCalledWith('auth-token');
+      expect(Plugins.Storage.remove).toHaveBeenCalledTimes(1);
+      expect(Plugins.Storage.remove).toHaveBeenCalledWith({ key: 'auth-token' });
     });
 ```
 
-Step 5 - emit undefined
+Step 4 - emit undefined
 
 ```typescript
     it('emits empty', async () => {
