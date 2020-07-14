@@ -40,6 +40,10 @@
           "file": "auth"
         },
         {
+          "title": "Guards",
+          "file": "auth-guard"
+        },
+        {
           "title": "Get Data",
           "file": "get-data"
         },
