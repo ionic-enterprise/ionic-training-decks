@@ -16,7 +16,7 @@ $ ionic enterprise register --key=YOURPRODUCTKEY
 $ npm i @ionic-enterprise/identity-vault
 ```
 
-*Note:* Two different commands exist for installing Identity Vault in your project depending on whether you are using Capacitor or Cordova:
+_Note:_ Two different commands exist for installing Identity Vault in your project depending on whether you are using Capacitor or Cordova:
 
 - _Capacitor_: `npm i @ionic-enterprise/identity-vault`
 - _Cordova_: `ionic cordova plugin add @ionic-enterprise/identity-vault`

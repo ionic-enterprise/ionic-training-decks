@@ -412,13 +412,13 @@ export interface UVIndex {
 }
 ```
 
- We get the UV index itself from the `value` property of the result, and then we calculate a risk level based on the following schedule:
+We get the UV index itself from the `value` property of the result, and then we calculate a risk level based on the following schedule:
 
-  - 0 - `value` < 3
-  - 1 - `value` >= 3 and < 6
-  - 2 - `value` >= 6 and < 8
-  - 3 - `value` >= 8 and < 11
-  - 4 - `value` >= 11
+- 0 - `value` < 3
+- 1 - `value` >= 3 and < 6
+- 2 - `value` >= 6 and < 8
+- 3 - `value` >= 8 and < 11
+- 4 - `value` >= 11
 
 I will provide the tests for these and let you write the code.
 

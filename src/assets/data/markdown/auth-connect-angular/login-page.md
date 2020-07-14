@@ -74,7 +74,7 @@ async ngOnInit(): Promise<void> {
 }
 ```
 
-In this method, we first check to see if there is a hash value in our URL. That hash contains our token that we will send to Auth0 to complete the authentication exchange. If that hash exists, then we will pass the entire URL to the `handleCallback` method on our `auth0Service`. This method will extract the token and communicate with Auth0 and finalize the login process. At this point, we are now successfully logged in. 
+In this method, we first check to see if there is a hash value in our URL. That hash contains our token that we will send to Auth0 to complete the authentication exchange. If that hash exists, then we will pass the entire URL to the `handleCallback` method on our `auth0Service`. This method will extract the token and communicate with Auth0 and finalize the login process. At this point, we are now successfully logged in.
 
 We can get details of the user by calling `getIdToken()` on the `auth0Service`. This method returns information from Auth0 about the currently logged in user. For our application, we will only store the nickname from the token as the username. The `auth0Service` also has a method for getting an access token. This access token is what you would use to authenticate the user if they were to make any API calls to another server. We will save both of these items into our `identityService` so our application can know who the current user is.
 

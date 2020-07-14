@@ -6,7 +6,10 @@
           <ion-list-header>Ionic Framework</ion-list-header>
           <ion-note>Training Labs <ion-icon name="school"></ion-icon></ion-note>
 
-          <ion-menu-toggle auto-hide="false" *ngFor="let p of appPages; let i = index">
+          <ion-menu-toggle
+            auto-hide="false"
+            *ngFor="let p of appPages; let i = index"
+          >
             <ion-item
               (click)="selectedIndex = i"
               routerDirection="root"

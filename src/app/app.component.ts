@@ -7,7 +7,7 @@ import { MenuItemsService, ApplicationService } from '@app/core';
 @Component({
   selector: 'app-root',
   templateUrl: 'app.component.html',
-  styleUrls: ['app.component.scss']
+  styleUrls: ['app.component.scss'],
 })
 export class AppComponent implements OnInit {
   selectedIndex = 0;
@@ -16,7 +16,7 @@ export class AppComponent implements OnInit {
   constructor(
     private applicationService: ApplicationService,
     private menuItems: MenuItemsService,
-    private platform: Platform
+    private platform: Platform,
   ) {
     this.initializeApp();
   }
@@ -44,18 +44,22 @@ export class AppComponent implements OnInit {
     this.appPages = (await this.menuItems.courses()).map((x, idx) => ({
       title: x.title,
       url: `/folder/${idx}`,
-      icon: x.icon || 'reader'
+      icon: x.icon || 'reader',
     }));
   }
 
   private styleByMode() {
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)');
     this.setStatusBarStyle(prefersDark.matches);
-    prefersDark.addEventListener('change', mediaQuery => this.setStatusBarStyle(mediaQuery.matches));
+    prefersDark.addEventListener('change', mediaQuery =>
+      this.setStatusBarStyle(mediaQuery.matches),
+    );
   }
 
   private setStatusBarStyle(darkMode: boolean) {
     const { StatusBar } = Plugins;
-    StatusBar.setStyle({ style: darkMode ? StatusBarStyle.Dark : StatusBarStyle.Light });
+    StatusBar.setStyle({
+      style: darkMode ? StatusBarStyle.Dark : StatusBarStyle.Light,
+    });
   }
 }

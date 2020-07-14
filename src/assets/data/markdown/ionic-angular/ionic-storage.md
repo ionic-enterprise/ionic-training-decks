@@ -176,7 +176,6 @@ The argument for the former is that User Preferences could be expanded in the fu
 
 We will write the tests as if we are only adding the service to the pages that actually need it. How you actually code it is an implementation detail that is left up to you.
 
-
 ### Add Tests
 
 Our requirements are defined at the page level, specifically the Current Weather and Forecast pages. That is where we will add the tests.
@@ -241,7 +240,7 @@ Add the following tests to the `current-weather.page.spec.ts`, then write code t
 
 Once the code is written, add a `click` event binding to the `kws-temperature` component that calls the `toggleScale()` method.
 
-*Note:* the cursor isn't right if you are running in the browser. For a hybrid native app, this doesn't really matter, but we should fix it anyhow just in case we decide to also host this app on the web. To fix this, add the following CSS to the `current-weather.page.scss` file.
+_Note:_ the cursor isn't right if you are running in the browser. For a hybrid native app, this doesn't really matter, but we should fix it anyhow just in case we decide to also host this app on the web. To fix this, add the following CSS to the `current-weather.page.scss` file.
 
 ```css
 kws-temperature {
@@ -288,4 +287,4 @@ export class UserPreferencesService {
 }
 ```
 
-*Note:* this is not the most discoverable of features in the app, and we may want other preferences in the future, but this is a start even if the UI is not actually "best practice" for the UX.
+_Note:_ this is not the most discoverable of features in the app, and we may want other preferences in the future, but this is a start even if the UI is not actually "best practice" for the UX.

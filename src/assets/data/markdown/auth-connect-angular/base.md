@@ -30,7 +30,7 @@ The `AuthenticationService` handles the POSTs to the login endpoint. If this ope
 
 ##### Construction
 
-This service is registered with the dependency injection engine such that it is available to the whole application. This service exposes various methods that can be called to perform authentication actions. Currently, supports a `login()` action. 
+This service is registered with the dependency injection engine such that it is available to the whole application. This service exposes various methods that can be called to perform authentication actions. Currently, supports a `login()` action.
 
 ##### `login()` - Attempt to login with email and password
 
@@ -145,14 +145,11 @@ The user and the token are removed from memory and from the local storage mechan
 
 This method should be called as part of the login workflow.
 
-
-
 ### Additional Classes
 
 #### AuthInterceptor
 
 This HTTP Interceptor adds the authentication token to the outgoing requests that require a token. For this application, that is every request that is not itself the `login` request.
-
 
 #### LoggedInGuard
 
@@ -166,6 +163,6 @@ Upon starting up, the application attempts to load the `HomePage`. Three scenari
 
 - A valid token has been stored from a previous session and the User data is available
 - A token has been stored from a previous session but is invalid and will not load the User data
-- A token has not been stored from a previous session 
+- A token has not been stored from a previous session
 
 In the first scenario, the `HomePage` successfully loads and displays the username of the current user. In the last two scenarios, the system will be unable to restore the user data from the server and the `LoggedInGuard` will prevent the user from accessing any secured pages and redirect them to the login page.

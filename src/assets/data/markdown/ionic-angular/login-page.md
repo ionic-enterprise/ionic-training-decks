@@ -7,7 +7,6 @@ In this lab, you will learn how to:
 - Create new pages
 - Set up basic routes
 
-
 ```bash
 $ ionic generate page login
 ```
@@ -85,16 +84,16 @@ Well, that's a start, but let's pretty it up a bit. First, let's use the "floati
 We should also give the inputs an `id`, a `name`, and a `type` like this:
 
 ```html
-    <ion-list>
-      <ion-item>
-        <ion-label position="floating">E-Mail Address</ion-label>
-        <ion-input id="email-input" name="email" type="email"></ion-input>
-      </ion-item>
-      <ion-item>
-        <ion-label position="floating">Password</ion-label>
-        <ion-input id="password-input" name="password" type="password"></ion-input>
-      </ion-item>
-    </ion-list>
+<ion-list>
+  <ion-item>
+    <ion-label position="floating">E-Mail Address</ion-label>
+    <ion-input id="email-input" name="email" type="email"></ion-input>
+  </ion-item>
+  <ion-item>
+    <ion-label position="floating">Password</ion-label>
+    <ion-input id="password-input" name="password" type="password"></ion-input>
+  </ion-item>
+</ion-list>
 ```
 
 Now the password shows us markers instead of the text we are typing. This also gets us ready for work we will need to do later.
@@ -168,7 +167,7 @@ export class LoginPage {
     console.log(this.email, this.password);
   }
 }
-``` 
+```
 
 ### Binding the Data
 
@@ -201,33 +200,33 @@ Hook up the inputs in the templates. The following should be added to both of th
 
 - The `ngModel` binding (example: `[(ngModel)]="email"`)
 - A template variable for the input (example: `#emailInput="ngModel"`)
-- Any required validation directives (example: `email required`) 
+- Any required validation directives (example: `email required`)
 
 Here is the E-Mail Address input:
 
 ```html
-        <ion-input
-          id="email-input"
-          name="email"
-          type="email"
-          [(ngModel)]="email"
-          #emailInput="ngModel"
-          email
-          required
-        ></ion-input>
+<ion-input
+  id="email-input"
+  name="email"
+  type="email"
+  [(ngModel)]="email"
+  #emailInput="ngModel"
+  email
+  required
+></ion-input>
 ```
 
 The password input is similar:
 
 ```html
-        <ion-input
-          id="password-input"
-          name="password"
-          type="password"
-          [(ngModel)]="password"
-          #passwordInput="ngModel"
-          required
-        ></ion-input>
+<ion-input
+  id="password-input"
+  name="password"
+  type="password"
+  [(ngModel)]="password"
+  #passwordInput="ngModel"
+  required
+></ion-input>
 ```
 
 ### Disable button
@@ -284,7 +283,11 @@ Now that we have the tests, let's update the HTML with the proper bindings.
 ```html
 <ion-footer>
   <ion-toolbar>
-    <ion-button id="signin-button" expand="full" [disabled]="!loginForm.form.valid" (click)="signIn()"
+    <ion-button
+      id="signin-button"
+      expand="full"
+      [disabled]="!loginForm.form.valid"
+      (click)="signIn()"
       >Sign In
       <ion-icon slot="end" name="log-in-outline"></ion-icon>
     </ion-button>
@@ -320,61 +323,63 @@ If the data in one of the inputs is invalid, the Sign In button will be disabled
 First let's use our tests to define when the error messages should be displayed:
 
 ```typescript
-  describe('error messages', () => {
-    let errorDiv: HTMLDivElement;
-    let email: HTMLIonInputElement;
-    let password: HTMLIonInputElement;
-    beforeEach(fakeAsync(() => {
-      errorDiv = fixture.nativeElement.querySelector('.error-message');
-      email = fixture.nativeElement.querySelector('#email-input');
-      password = fixture.nativeElement.querySelector('#password-input');
-      fixture.detectChanges();
-      tick();
-    }));
+describe('error messages', () => {
+  let errorDiv: HTMLDivElement;
+  let email: HTMLIonInputElement;
+  let password: HTMLIonInputElement;
+  beforeEach(fakeAsync(() => {
+    errorDiv = fixture.nativeElement.querySelector('.error-message');
+    email = fixture.nativeElement.querySelector('#email-input');
+    password = fixture.nativeElement.querySelector('#password-input');
+    fixture.detectChanges();
+    tick();
+  }));
 
-    it('starts with no error message', () => {
-      expect(errorDiv.textContent).toEqual('');
-    });
-
-    it('displays an error message if the e-mail address is dirty and empty', () => {
-      setInputValue(email, 'test@test.com');
-      setInputValue(email, '');
-      expect(errorDiv.textContent.trim()).toEqual('E-Mail Address is required');
-    });
-
-    it('displays an error message if the e-mail address has an invalid format', () => {
-      // TODO: Fill this in
-    });
-
-    it('clears the error message when the e-mail address has a valid format', () => {
-      // TODO: Fill this in
-    });
-
-    it('displays an error message if the password is dirty and empty', () => {
-      // TODO: Fill this in
-    });
+  it('starts with no error message', () => {
+    expect(errorDiv.textContent).toEqual('');
   });
+
+  it('displays an error message if the e-mail address is dirty and empty', () => {
+    setInputValue(email, 'test@test.com');
+    setInputValue(email, '');
+    expect(errorDiv.textContent.trim()).toEqual('E-Mail Address is required');
+  });
+
+  it('displays an error message if the e-mail address has an invalid format', () => {
+    // TODO: Fill this in
+  });
+
+  it('clears the error message when the e-mail address has a valid format', () => {
+    // TODO: Fill this in
+  });
+
+  it('displays an error message if the password is dirty and empty', () => {
+    // TODO: Fill this in
+  });
+});
 ```
 
 Now let's update the form. Add the following to the lower portion of the form:
 
 ```html
-    <div class="error-message">
-      <div *ngIf="emailInput.invalid && (emailInput.dirty || emailInput.touched)">
-        <div *ngIf="emailInput.errors.email">
-          E-Mail Address must have a valid format
-        </div>
-        <div *ngIf="emailInput.errors.required">
-          E-Mail Address is required
-        </div>
-      </div>
-
-      <div *ngIf="passwordInput.invalid && (passwordInput.dirty || passwordInput.touched)">
-        <div *ngIf="passwordInput.errors.required">
-          Password is required
-        </div>
-      </div>
+<div class="error-message">
+  <div *ngIf="emailInput.invalid && (emailInput.dirty || emailInput.touched)">
+    <div *ngIf="emailInput.errors.email">
+      E-Mail Address must have a valid format
     </div>
+    <div *ngIf="emailInput.errors.required">
+      E-Mail Address is required
+    </div>
+  </div>
+
+  <div
+    *ngIf="passwordInput.invalid && (passwordInput.dirty || passwordInput.touched)"
+  >
+    <div *ngIf="passwordInput.errors.required">
+      Password is required
+    </div>
+  </div>
+</div>
 ```
 
 That is helpful, but a little styling will make it look better. Since this is not the only page where we _could_ potentially want to display the error messages, let's add this to the `src/global.scss` file:
@@ -382,6 +387,6 @@ That is helpful, but a little styling will make it look better. Since this is no
 ```scss
 .error-message {
   padding: 2em;
-  color: var(--ion-color-danger, #ff0000)
+  color: var(--ion-color-danger, #ff0000);
 }
 ```

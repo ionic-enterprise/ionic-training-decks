@@ -2,17 +2,17 @@
 
 In this lab, you will:
 
-* Update the Capacitor configuration
-* Update the splash screen and application icon
-* Add the iOS and Android platforms
-* Build and run the application on both platforms
+- Update the Capacitor configuration
+- Update the splash screen and application icon
+- Add the iOS and Android platforms
+- Build and run the application on both platforms
 
 ## Update the Configuration
 
 When a Capacitor platform is added or updated, information in the `capacitor.config.json` file is used to generate some of the project files. Some of this information should be changed up front:
 
-* The `appId` should be change to something unique like `com.kensodemann.ionicweather`
-* The `appName` should be checked to ensure it is correct
+- The `appId` should be change to something unique like `com.kensodemann.ionicweather`
+- The `appName` should be checked to ensure it is correct
 
 Here is an example of those changes:
 
@@ -52,7 +52,7 @@ Here is an example of those changes:
 }
 ```
 
-In our case, only the `appId` required a change in order to make it globally unique.  Make similar changes to your application.
+In our case, only the `appId` required a change in order to make it globally unique. Make similar changes to your application.
 
 ## Add the Android and iOS Platforms
 
@@ -82,15 +82,15 @@ $ ionic cap open ios
 
 The application should have its own splash screen and icon rather than using the default that Ionic supplies for you. Ionic provides a service that will take two source image files and create all of the resources that your application will require. Follow these guidelines:
 
-* Keep the images simple and clear
-* You can supply source images in any of these formats: `.png`, `.psd`, `.ai`
-* Icon - at least 1024x1024 pixels
-* Splashscreen - at least 2732x2732 pixels with a simple image that is centered and no bigger than 1200x1200 pixels to facilitate reasonable display on all devices
+- Keep the images simple and clear
+- You can supply source images in any of these formats: `.png`, `.psd`, `.ai`
+- Icon - at least 1024x1024 pixels
+- Splashscreen - at least 2732x2732 pixels with a simple image that is centered and no bigger than 1200x1200 pixels to facilitate reasonable display on all devices
 
 For this application, please download the following images and copy them to your application's `resources` directory, replacing the onces that are already there:
 
-* <a download href="/assets/images/icon.png">icon.png</a>
-* <a download href="/assets/images/splash.png">splash.png</a>
+- <a download href="/assets/images/icon.png">icon.png</a>
+- <a download href="/assets/images/splash.png">splash.png</a>
 
 To generate the required resources and copy them to the native projects, use the following commands:
 

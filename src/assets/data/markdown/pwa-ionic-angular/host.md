@@ -1,12 +1,12 @@
 # Lab: Host the Application
 
-The Ionic Weather application has been written as a hybrid mobile application, but we have also taken care to make sure it will still work in our development environment, which is web-based. Therefore it is very easy to run the application as a web app. In order to do this, it will need to be hosted somewhere. One of the easiest ways to do that is to use Firebase hosting. 
+The Ionic Weather application has been written as a hybrid mobile application, but we have also taken care to make sure it will still work in our development environment, which is web-based. Therefore it is very easy to run the application as a web app. In order to do this, it will need to be hosted somewhere. One of the easiest ways to do that is to use Firebase hosting.
 
-In this lab you will learn: 
+In this lab you will learn:
 
-* How to build your application as a web application
-* How to host your application on Firebase
-* How to run Lighthouse audits on your app
+- How to build your application as a web application
+- How to host your application on Firebase
+- How to run Lighthouse audits on your app
 
 ## Building the Application for the Web
 
@@ -15,7 +15,6 @@ We have been building our application for the web using `ng serve` (or a command
 To build for the web, use `ionic build --prod`. This will build the application into the `www/` folder.
 
 Since this is something that will be done often, and I suggest adding it as a script in your `package.json` file. Here is my full set of scripts for this project:
-
 
 ```JSON
   "scripts": {
@@ -37,31 +36,31 @@ Now running `npm run build:prod` will result in a build that is ready to be serv
 
 As the PWA is developed, it will need to be hosted. Firebase is one hosting option that exists. It is used for this course because it is easy to set up and use, and because Google offers a generous free tier that will easily cover our needs.
 
-* If you do not already have a Firebase account, create one here: https://firebase.google.com/
-* Go to the console and add a project: https://console.firebase.google.com/
-   * Call the project `ionic-weather`
-   * Firebase will generate a project ID for you
-   * Use the default settings
-   * Accept the terms and conditions
-   * Click `Create project`
+- If you do not already have a Firebase account, create one here: https://firebase.google.com/
+- Go to the console and add a project: https://console.firebase.google.com/
+  - Call the project `ionic-weather`
+  - Firebase will generate a project ID for you
+  - Use the default settings
+  - Accept the terms and conditions
+  - Click `Create project`
 
 That is all you have to do on Firebase itself. The rest of the work needs to be done from the command line. First make sure you have the Firebase CLI tools and that you are logged in.
 
-* `npm install -g firebase-tools`
-* `firebase login`
+- `npm install -g firebase-tools`
+- `firebase login`
 
 From the `ionic-weather` root directory, run `firebase init` which will walk you through some steps to initialize your app:
 
-* The only feature you need to chose is "Hosting: Configure and deploy Firebase Hosting sites".
-* For "Project Setup", choose the project you just created
-* Use `www` as your public directory
-* Answer `Y` to "Configure as a single-page app (rewrite all urls to /index.html)?"
-* Answer `N` to "File www/index.html already exists. Overwrite?" (if asked)
+- The only feature you need to chose is "Hosting: Configure and deploy Firebase Hosting sites".
+- For "Project Setup", choose the project you just created
+- Use `www` as your public directory
+- Answer `Y` to "Configure as a single-page app (rewrite all urls to /index.html)?"
+- Answer `N` to "File www/index.html already exists. Overwrite?" (if asked)
 
 At this point, you are ready to build and deploy.
 
-* `npm run build:prod` - if you didn't already do this above
-* `firebase deploy`
+- `npm run build:prod` - if you didn't already do this above
+- `firebase deploy`
 
 The deploy process should look something like this:
 
@@ -93,21 +92,21 @@ Open an Icognito window and go to the specified `Hosting URL`.
 
 Notice that in the last step we opened the application in an Incognito window. It is suggested that you always run the Lighthouse tests in an Incognito window for the most accurate results.
 
-* Open the dev tools and select the `Audits` tab
-* Select the folloing options:
-   * Device: Mobile
-   * Audits:
-      * Performance
-      * Progressive Web App
-      * Best Practices
-   * Throttling: Simulated Fast 3G, 4x CPU Slowdown
-   * Clear storage: checked
+- Open the dev tools and select the `Audits` tab
+- Select the folloing options:
+  - Device: Mobile
+  - Audits:
+    - Performance
+    - Progressive Web App
+    - Best Practices
+  - Throttling: Simulated Fast 3G, 4x CPU Slowdown
+  - Clear storage: checked
 
 The last time I ran Lighthouse on the app in this stage, I got the following scores:
 
-* **Performance:** 95
-* **Progressive Web App:** 54
-* **Best Practices:** 100
+- **Performance:** 95
+- **Progressive Web App:** 54
+- **Best Practices:** 100
 
 This indicates that our app is performaing well from a general web application perspective, but it is falling down from a PWA perspetive. The Lighthouse report will tell you exactly which tests the application is failing.
 
@@ -128,9 +127,9 @@ Untracked files:
 
 The `firebase.json` and `.firebaserc` contain firebase configuration information and should be committed. The `.firebase` directory contains cache information and should be ignored.
 
-* Add `.firebase/` to the `.gitignore` file
-* Add `firebase.json` and `.firebaserc` to git
-* Commit the two new files and changed `.gitignore` file
+- Add `.firebase/` to the `.gitignore` file
+- Add `firebase.json` and `.firebaserc` to git
+- Commit the two new files and changed `.gitignore` file
 
 ## Conclusion
 

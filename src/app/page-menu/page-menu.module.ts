@@ -7,6 +7,6 @@ import { PageMenuComponent } from './page-menu.component';
 @NgModule({
   declarations: [PageMenuComponent],
   exports: [PageMenuComponent],
-  imports: [CommonModule, IonicModule]
+  imports: [CommonModule, IonicModule],
 })
 export class PageMenuModule {}

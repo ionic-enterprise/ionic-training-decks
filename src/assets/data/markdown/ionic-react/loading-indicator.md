@@ -1,6 +1,5 @@
 # Lab: Add a Loading Indicator
 
-
 In this lab, you will learn how to use overlay component. Specifically the Loading Indicator.
 
 ## Steps
@@ -15,6 +14,6 @@ Do that on each page, change the message to be appropriate to the page itself (o
 
 ## Conclusion
 
-Well, that was easy...  😁
+Well, that was easy... 😁
 
 **Note:** In a produtcion app, you want to have unit tests for each of these pages. This training has not been developed that far yet. This section will get bigger once that is in place.

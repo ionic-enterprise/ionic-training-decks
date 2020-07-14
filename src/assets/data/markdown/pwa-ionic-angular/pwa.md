@@ -2,8 +2,8 @@
 
 Let's raise that PWA scrore to 100. In this lab you will learn:
 
-* How to optimize the Firebase hosting
-* How to install the Angular PWA library
+- How to optimize the Firebase hosting
+- How to install the Angular PWA library
 
 ## Optimize Firebase Hosting
 
@@ -61,9 +61,9 @@ When you are comlpete, the `firebase.json` file should look something like this:
 
 A PWA is built upon three key pieces of technology:
 
-* HTTPS
-* Service Workers
-* The Web App Manifest
+- HTTPS
+- Service Workers
+- The Web App Manifest
 
 The HTTPS bit is handled by Firebase Hosting. Now we will handle the last two as well as adding some polish.
 
@@ -83,14 +83,14 @@ This command did several things:
 
 Out of the box, this provides almost everything we need for our app to be served as a PWA. We need to adjust a few things:
 
-* All of the icons are the Angular logo
-* The application name is incorrect in the `src/manifest.json` file
+- All of the icons are the Angular logo
+- The application name is incorrect in the `src/manifest.json` file
 
 Now is a good time to add the new files to our git repo and commit the other changes.
 
 ### Install Our Icons
 
-<a download href="/assets/images/icons.zip">Download our icons</a> and unpack the zip file under `src/assets`, replacing the files in the  `icons` folder.
+<a download href="/assets/images/icons.zip">Download our icons</a> and unpack the zip file under `src/assets`, replacing the files in the `icons` folder.
 
 **Note:** the specifics on doing this depends on the type of machine you are using. On a Mac:
 
@@ -103,8 +103,8 @@ Now is a good time to add the new files to our git repo and commit the other cha
 
 The default `src/manifest.webmanifest` file is complete, but it needs a couple of customizations for this application:
 
-* The `name` and `short_name` need to be updated
-* The `background_color` needs to be updated to match the background of the icon
+- The `name` and `short_name` need to be updated
+- The `background_color` needs to be updated to match the background of the icon
 
 Here are the changes:
 
@@ -167,12 +167,12 @@ The `assets` asset group lazily fetches application assets that tend to be large
 
 If you build and deploy the application at this time:
 
-* It will work great on Android devices
-* It will get the following scores in Lighthouse:
-   * **Performance:** 95
-   * **Progressive Web App:** 100
-   * **Best Practices:** 100 
-* It will only sorta/kinda behave on iOS
+- It will work great on Android devices
+- It will get the following scores in Lighthouse:
+  - **Performance:** 95
+  - **Progressive Web App:** 100
+  - **Best Practices:** 100
+- It will only sorta/kinda behave on iOS
 
 Enter <a href="https://developers.google.com/web/updates/2018/07/pwacompat" target="_blank">PWACompat</a>. Follow the instuctions on that page to add this to your application. It involves addimg a `script` tag after the Web App Manifest is loaded. At this time, the markup looks like this:
 
@@ -192,9 +192,9 @@ It should be noted that PWACompat <a href="https://medium.com/@firt/you-shouldnt
 
 Do the following:
 
-* commit all changes in git
-* `npm run build:prod`
-* `firebase deploy`
+- commit all changes in git
+- `npm run build:prod`
+- `firebase deploy`
 
 You should be able to open the app on a web-browser on your Android or iOS device. On Android you will be prompted to install the app. On iOS you will have to it your self via the "Share" button. Once it is installed to your desktop, you should be able to launch it on either platform and get an experience that is just like the Hybrid Mobile app we developed.
 

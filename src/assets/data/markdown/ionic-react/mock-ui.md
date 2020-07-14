@@ -155,7 +155,7 @@ Let's walk through the changes that need to be made to the `CurrentWeather.tsx` 
 
 - change the `IonTitle` to "Current Weather"
 - remove the current contents defined for the `IonContent` (do not remove the `IonContent` tags themselves)
-- import the iconPaths as such `import { iconPaths  } from "../util";`
+- import the iconPaths as such `import { iconPaths } from "../util";`
 - add a couple of hooks to set the data as such:
 
 ```TypeScript
@@ -172,7 +172,7 @@ const CurrentWeather: React.FC = () => {
         <div className="information">
           <kws-temperature class="primary-value" scale="F" temperature={temperature}></kws-temperature>
         </div>
-        <kws-condition condition={condition} ref={ref}></kws-condition> 
+        <kws-condition condition={condition} ref={ref}></kws-condition>
 ```
 
 Note that the class for `kws-temperature` is set using `class` just like in normal HTML and not using the usual React `className` hack-around. That is because this is a custom element and neither a standard HTML element nor a React component.

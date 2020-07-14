@@ -96,4 +96,3 @@ You will, of course, need to import the `LoadingController` and inject it into y
 ## Conclusion
 
 This general pattern is often used when displaying overlay elements in Ionic Angular applications.
-

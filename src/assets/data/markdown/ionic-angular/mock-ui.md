@@ -19,7 +19,7 @@ The service we just created references several image assets, but these assets to
 1. Remove the `images.zip` file
 1. Find the favicon.png file and move it into `src/assets/icon`
 
-## Mock Up the Tea Display 
+## Mock Up the Tea Display
 
 Let's mock up how the components will be used in each page. This allows us to test out exactly what our data should look like and also allows us to concentrate on the styling without worrying about other moving parts. This is a common technique used when laying out the interface for an application.
 
@@ -222,19 +222,22 @@ Now that we have a list of teas, we need to figure out how to display this infor
 Add the folllowing mark-up to the `ion-content` section of `src/app/tea/tea.page.html`:
 
 ```html
- 16   <ion-list>
- 17     <ion-item *ngFor="let tea of teaData">
- 18       <ion-card>
- 19         <ion-img [src]="tea.image"></ion-img>
- 20         <ion-card-header>
- 21           <ion-card-title>{{tea.name}}</ion-card-title>
- 22         </ion-card-header>
- 23         <ion-card-content>
- 24           {{tea.description}}
- 25         </ion-card-content>
- 26       </ion-card>
- 27     </ion-item>
- 28   </ion-list>
+16
+<ion-list>
+  17
+  <ion-item *ngFor="let tea of teaData">
+    18
+    <ion-card>
+      19 <ion-img [src]="tea.image"></ion-img> 20
+      <ion-card-header>
+        21 <ion-card-title>{{tea.name}}</ion-card-title> 22
+      </ion-card-header>
+      23 <ion-card-content> 24 {{tea.description}} 25 </ion-card-content> 26
+    </ion-card>
+    27
+  </ion-item>
+  28
+</ion-list>
 ```
 
 This creates a list of cards. Angular's `ngFor` structural directive to render the sample template for each item in the `teaData` collection. That looks pretty good, at least when viewed at a phone resolution.
@@ -357,24 +360,27 @@ This test shows the single array being expanded into an array of two child array
 
 **Note:** this is quick and dirty. It also does not belong here. It belongs in a reusable service. But we have not learned about that yet. We can refactor later.
 
-Now that we have our matrix, let's create the grid. Let's set up Chrome to emulate an iPad Pro in landscape. We know we want four columns on a wide screen like this, and that the grid by default supports 12 columns. That means that for a wide screen such as this, each column should take up three place. So let's lay that out in the markup.  Replace the list in `src/app/tea/tea.page.html` with this:
+Now that we have our matrix, let's create the grid. Let's set up Chrome to emulate an iPad Pro in landscape. We know we want four columns on a wide screen like this, and that the grid by default supports 12 columns. That means that for a wide screen such as this, each column should take up three place. So let's lay that out in the markup. Replace the list in `src/app/tea/tea.page.html` with this:
 
 ```html
-  <ion-grid>
-    <ion-row *ngFor="let teaRow of teaMatrix" class="ion-justify-content-center ion-align-items-stretch">
-      <ion-col *ngFor="let tea of teaRow" size="3">
-        <ion-card>
-          <ion-img [src]="tea.image"></ion-img>
-          <ion-card-header>
-            <ion-card-title>{{tea.name}}</ion-card-title>
-          </ion-card-header>
-          <ion-card-content>
-            {{tea.description}}
-          </ion-card-content>
-        </ion-card>
-      </ion-col>
-    </ion-row>
-  </ion-grid>
+<ion-grid>
+  <ion-row
+    *ngFor="let teaRow of teaMatrix"
+    class="ion-justify-content-center ion-align-items-stretch"
+  >
+    <ion-col *ngFor="let tea of teaRow" size="3">
+      <ion-card>
+        <ion-img [src]="tea.image"></ion-img>
+        <ion-card-header>
+          <ion-card-title>{{tea.name}}</ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+          {{tea.description}}
+        </ion-card-content>
+      </ion-card>
+    </ion-col>
+  </ion-row>
+</ion-grid>
 ```
 
 This loops through the rows and for each row displays a column for each tea in that row. That looks great on a iPad Pro, though the cards are all different sizes and look a little crowded. We can fix that with some simple CSS in `app/src/tea/tea.page.scss`:
@@ -400,7 +406,7 @@ But there is one last thing. This will always display four columns, which will l
 Change the `ion-col` properties as such:
 
 ```html
-      <ion-col *ngFor="let tea of teaRow" size="12" size-md="6" size-xl="3">
+<ion-col *ngFor="let tea of teaRow" size="12" size-md="6" size-xl="3"></ion-col>
 ```
 
 Now as you change the type of device that is being emulated, the layout adapts accordingly.
@@ -408,4 +414,3 @@ Now as you change the type of device that is being emulated, the layout adapts a
 ## Conclusion
 
 In this lab you learned how to mock up the UI to ensure it looks the way you want it to look. Make sure you have a look at your app in both light and dark mode. Next we will look at how to get real data.
-

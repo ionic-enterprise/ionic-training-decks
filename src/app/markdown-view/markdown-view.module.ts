@@ -6,8 +6,6 @@ import { MarkdownViewComponent } from './markdown-view.component';
 @NgModule({
   declarations: [MarkdownViewComponent],
   exports: [MarkdownViewComponent],
-  imports: [
-    CommonModule
-  ]
+  imports: [CommonModule],
 })
-export class MarkdownViewModule { }
+export class MarkdownViewModule {}

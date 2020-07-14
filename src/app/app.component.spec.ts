@@ -8,7 +8,10 @@ import { RouterTestingModule } from '@angular/router/testing';
 import { AppComponent } from './app.component';
 import { createPlatformMock } from '@test/mocks';
 import { MenuItemsService, ApplicationService } from '@app/core';
-import { createMenuItemsServiceMock, createAppliationServiceMock } from '@app/core/testing';
+import {
+  createMenuItemsServiceMock,
+  createAppliationServiceMock,
+} from '@app/core/testing';
 
 describe('AppComponent', () => {
   let originalSplashScreen;
@@ -23,11 +26,14 @@ describe('AppComponent', () => {
       declarations: [AppComponent],
       schemas: [CUSTOM_ELEMENTS_SCHEMA],
       providers: [
-        { provide: ApplicationService, useFactory: createAppliationServiceMock },
+        {
+          provide: ApplicationService,
+          useFactory: createAppliationServiceMock,
+        },
         { provide: MenuItemsService, useFactory: createMenuItemsServiceMock },
-        { provide: Platform, useFactory: createPlatformMock }
+        { provide: Platform, useFactory: createPlatformMock },
       ],
-      imports: [RouterTestingModule.withRoutes([])]
+      imports: [RouterTestingModule.withRoutes([])],
     }).compileComponents();
   }));
 
@@ -55,7 +61,7 @@ describe('AppComponent', () => {
         tick();
         expect(Plugins.StatusBar.setStyle).toHaveBeenCalledTimes(1);
         expect(Plugins.StatusBar.setStyle).toHaveBeenCalledWith({
-          style: StatusBarStyle.Light
+          style: StatusBarStyle.Light,
         });
       }));
 
@@ -105,11 +111,23 @@ describe('AppComponent', () => {
       await menuItems.courses();
       expect(fixture.componentInstance.appPages).toEqual([
         { title: 'Getting Started', url: '/folder/0', icon: 'funny-face' },
-        { title: 'Ionic / Angular / Cordova', url: '/folder/1', icon: 'logo-angular' },
-        { title: 'PWA / Ionic / Angular / Cordova', url: '/folder/2', icon: 'logo-pwa' },
-        { title: 'Ionic / React / Capacitor', url: '/folder/3', icon: 'logo-react' },
+        {
+          title: 'Ionic / Angular / Cordova',
+          url: '/folder/1',
+          icon: 'logo-angular',
+        },
+        {
+          title: 'PWA / Ionic / Angular / Cordova',
+          url: '/folder/2',
+          icon: 'logo-pwa',
+        },
+        {
+          title: 'Ionic / React / Capacitor',
+          url: '/folder/3',
+          icon: 'logo-react',
+        },
         { title: 'A Simple git Workflow', url: '/folder/4', icon: 'reader' },
-        { title: 'References', url: '/folder/5', icon: 'reader' }
+        { title: 'References', url: '/folder/5', icon: 'reader' },
       ]);
     });
   });
@@ -118,7 +136,7 @@ describe('AppComponent', () => {
     {
       title: 'Getting Started',
       file: 'getting-started',
-      icon: 'funny-face'
+      icon: 'funny-face',
     },
     {
       title: 'Ionic / Angular / Cordova',
@@ -128,13 +146,13 @@ describe('AppComponent', () => {
       pages: [
         {
           title: 'Get Started',
-          file: 'start'
+          file: 'start',
         },
         {
           title: 'On Push Change Detection',
-          file: 'change-detection'
-        }
-      ]
+          file: 'change-detection',
+        },
+      ],
     },
     {
       title: 'PWA / Ionic / Angular / Cordova',
@@ -144,32 +162,32 @@ describe('AppComponent', () => {
       pages: [
         {
           title: 'Host the Application',
-          file: 'host'
+          file: 'host',
         },
         {
           title: 'Add the PWA Goodies',
-          file: 'pwa'
+          file: 'pwa',
         },
         {
           title: 'PWA Links',
-          file: 'links'
-        }
-      ]
+          file: 'links',
+        },
+      ],
     },
     {
       title: 'Ionic / React / Capacitor',
       folder: 'ionic-react-capacitor',
       file: 'intro',
       icon: 'logo-react',
-      pages: []
+      pages: [],
     },
     {
       title: 'A Simple git Workflow',
-      file: 'simple-git-workflow'
+      file: 'simple-git-workflow',
     },
     {
       title: 'References',
-      file: 'references'
-    }
+      file: 'references',
+    },
   ];
 });

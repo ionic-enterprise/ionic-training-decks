@@ -1,6 +1,7 @@
 # Lab: Access Native APIs
 
 There are serveral ways to access native functionality from your Ionic Framework application:
+
 - Use a Capacitor API
 - Use a Capacitor Plugin
 - Use a Cordova Plugin
@@ -30,7 +31,7 @@ We will use the `SplashScreen` and `StatusBar` API objects in our AppComponent, 
 ```TypeScript
   let originalSplashScreen: any;
   let originalStatusBar: any;
- 
+
   beforeEach(async(() => {
     originalStatusBar = Plugins.StatusBar;
     originalSplashScreen = Plugins.SplashScreen;
@@ -78,7 +79,6 @@ With Capacitor, we do not have to wait for the Cordova `platformReady` event, so
 
 The behavior should be such that when the app is running in a hybrid mobile context it dismisses the splash screen. Further, when it is running on Android it styles the status bar. When it is not running in a hybrid mobile context, then it does neither. The new `initialization` tests should look like this.
 
-
 ```TypeScript
   describe('initialization', () => {
     let platform: Platform;
@@ -121,7 +121,7 @@ The behavior should be such that when the app is running in a hybrid mobile cont
   });
 ```
 
-### Then Code 
+### Then Code
 
 **Challenge:** now that you have failing tests, modify the `AppComponent` such that the tests pass. The completed `AppComponent` can be found online, but try to complete the challenge without looking.
 
@@ -145,10 +145,8 @@ import { AppRoutingModule } from './app-routing.module';
   declarations: [AppComponent],
   entryComponents: [],
   imports: [BrowserModule, IonicModule.forRoot(), AppRoutingModule],
-  providers: [
-    { provide: RouteReuseStrategy, useClass: IonicRouteStrategy }
-  ],
-  bootstrap: [AppComponent]
+  providers: [{ provide: RouteReuseStrategy, useClass: IonicRouteStrategy }],
+  bootstrap: [AppComponent],
 })
 export class AppModule {}
 ```

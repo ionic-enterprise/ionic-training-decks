@@ -1,5 +1,8 @@
 import { fakeAsync, TestBed, tick } from '@angular/core/testing';
-import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
+import {
+  HttpClientTestingModule,
+  HttpTestingController,
+} from '@angular/common/http/testing';
 
 import { MenuItemsService } from './menu-items.service';
 import { MenuItem } from '@app/models';
@@ -8,7 +11,7 @@ describe('MenuItemsService', () => {
   let httpTestingController: HttpTestingController;
   beforeEach(() => {
     TestBed.configureTestingModule({
-      imports: [HttpClientTestingModule]
+      imports: [HttpClientTestingModule],
     });
     httpTestingController = TestBed.inject(HttpTestingController);
   });
@@ -41,7 +44,7 @@ describe('MenuItemsService', () => {
     pages: [
       {
         title: 'Getting Started',
-        file: 'getting-started'
+        file: 'getting-started',
       },
       {
         title: 'Ionic / Angular / Cordova',
@@ -50,21 +53,21 @@ describe('MenuItemsService', () => {
         pages: [
           {
             title: 'Get Started',
-            file: 'start'
+            file: 'start',
           },
           {
             title: 'Unit Tests',
-            file: 'unit-tests'
+            file: 'unit-tests',
           },
           {
             title: 'Switch Scale',
-            file: 'ionic-storage'
+            file: 'ionic-storage',
           },
           {
             title: 'On Push Change Detection',
-            file: 'change-detection'
-          }
-        ]
+            file: 'change-detection',
+          },
+        ],
       },
       {
         title: 'PWA / Ionic / Angular / Cordova',
@@ -73,17 +76,17 @@ describe('MenuItemsService', () => {
         pages: [
           {
             title: 'Host the Application',
-            file: 'host'
+            file: 'host',
           },
           {
             title: 'Add the PWA Goodies',
-            file: 'pwa'
+            file: 'pwa',
           },
           {
             title: 'PWA Links',
-            file: 'links'
-          }
-        ]
+            file: 'links',
+          },
+        ],
       },
       {
         title: 'Ionic / React / Capacitor',
@@ -92,34 +95,34 @@ describe('MenuItemsService', () => {
         pages: [
           {
             title: 'Get Started',
-            file: 'start'
+            file: 'start',
           },
           {
             title: 'Unit Tests',
-            file: 'unit-tests'
+            file: 'unit-tests',
           },
           {
             title: 'Style the App',
-            file: 'style'
+            file: 'style',
           },
           {
             title: 'Add Loading Indicator',
-            file: 'loading-indicator'
+            file: 'loading-indicator',
           },
           {
             title: 'Switch Scale',
-            file: 'toggle-scale'
-          }
-        ]
+            file: 'toggle-scale',
+          },
+        ],
       },
       {
         title: 'A Simple git Workflow',
-        file: 'simple-git-workflow'
+        file: 'simple-git-workflow',
       },
       {
         title: 'References',
-        file: 'references'
-      }
-    ]
+        file: 'references',
+      },
+    ],
   };
 });

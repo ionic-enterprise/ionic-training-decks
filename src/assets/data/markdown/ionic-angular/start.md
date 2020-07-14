@@ -8,8 +8,7 @@ In this lab, you will:
 
 ## Overview
 
-The Ionic command line is the main tool used to develop Ionic applications. This tool allows you to generate new applications, add features to application, build the application, interact with Appflow and many other tasks. The command line also wraps and extends
-several other command lines such as the Cordova or Capacitor command lines, the Angular command line, etc.
+The Ionic command line is the main tool used to develop Ionic applications. This tool allows you to generate new applications, add features to application, build the application, interact with Appflow and many other tasks. The command line also wraps and extends several other command lines such as the Cordova or Capacitor command lines, the Angular command line, etc.
 
 If you type `ionic --help` at the command line you get a list of the available top level commands that can be run via the CLI. These commands are broken into two sections: Global Commands and Project Commands. Global Commands can be run from anywhere where as Project Commands
 can only be run from an Ionic project directory. Common top level commands include start, info, generate, and serve. We wil learn more about these commands as we use them.
@@ -56,6 +55,52 @@ In a nutshell:
 - `ionic serve` finds the first unused port >= 8100 and passes that to the Angular CLI with some other options
 
 In either case, the Angular CLI does all the heavy lifting, so use whichever command you want to use. Personally, I use `npm start` because it take less typing and thought on my part.
+
+## Enforce Consistent Styling
+
+<a href="https://prettier.io/" target="_blank">Prettier</a> is an excellent tool that you can use to keep the formatting of your code consistent and clean. We highly suggest you use a tool such as this. Whether your are a lone developer or part of a team, using a tool such as Prettier means that you do not have to think about the formatting of your code. Better yet, you do not run into "formatting wars" between developers.
+
+Prettier itself is an opinionated code formatter, and Ionic has its own opinions on how it is best configured, so let's install a package that provides both Prettier and Ionic's configuration. We will also install <a href="https://www.npmjs.com/package/husky" target="_blank">husky</a> and <a href="https://www.npmjs.com/package/pretty-quick" target="_blank">pretty-quick</a>. This will allow us to set up a commit hook to make sure Prettier is run with each commit. After that we don't have to waste brain cycles thinking about code formatting ever again.
+
+```bash
+$ npm install -D @ionic/prettier-config husky prettier pretty-quick
+```
+
+Modify your `package.json` file. I suggest moving the `description` up to the top and giving it a reasonable value, and then adding the Prettier config portion to the bottom. For example:
+
+```json
+{
+  "name": "tea-taster",
+  "description": "Tea Tasting Notes",
+  "version": "0.0.1",
+  "author": "Ionic Framework",
+  "homepage": "https://ionicframework.com/",
+  "scripts": {
+    ...
+  },
+  "private": true,
+  "dependencies": {
+    ...
+  },
+  "devDependencies": {
+    ...
+  },
+  "prettier": "@ionic/prettier-config",
+  "husky": {
+    "hooks": {
+      "pre-commit": "pretty-quick --staged"
+    }
+  }
+}
+```
+
+Finally, make sure all of our source is formatted properly.
+
+```bash
+$ npx prettier --write src
+```
+
+At this point all of the source should be formatting properly and will remain so automatically with each commit.
 
 ## Conclusion
 

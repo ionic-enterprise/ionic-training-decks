@@ -27,9 +27,9 @@ But now if as you navigate the application you will notice that the pages do not
 
 ## Explicitly Calling Change Detection
 
-**Do not actually do this!!** This is just something you *could* do, but there is a better way...
+**Do not actually do this!!** This is just something you _could_ do, but there is a better way...
 
-We *could* change the pages to explicitly call the change detection when the data comes back: 
+We _could_ change the pages to explicitly call the change detection when the data comes back:
 
 **`weather-page-base.ts`**
 
@@ -132,7 +132,7 @@ Finally, the getting of the data is turned into an Observable pipeline
   }
 ```
 
-Depending on how you had coded your base class before, the creation of the loading indicator may not be in its own method. For referenence, here is my `showLoading()` method: 
+Depending on how you had coded your base class before, the creation of the loading indicator may not be in its own method. For referenence, here is my `showLoading()` method:
 
 ```TypeScript
   private async showLoading() {

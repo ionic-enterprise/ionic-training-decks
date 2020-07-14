@@ -268,7 +268,6 @@ import { createWeatherServiceMock } from '@app/services/testing';
 
 **Challenge:** figure out how to accomlish this, make sure you can still do an `npm run build` when you are done
 
-
 ## Conclusion
 
 In the last two labs, we have learned how to abstract the logic to get data into a service and then how to use that service within our pages. Be sure to commit your changes.

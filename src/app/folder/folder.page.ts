@@ -8,7 +8,7 @@ import { PageMenuComponent } from '@app/page-menu/page-menu.component';
 @Component({
   selector: 'app-folder',
   templateUrl: './folder.page.html',
-  styleUrls: ['./folder.page.scss']
+  styleUrls: ['./folder.page.scss'],
 })
 export class FolderPage implements OnInit {
   private courses: Array<MenuItem>;
@@ -28,7 +28,7 @@ export class FolderPage implements OnInit {
     private activatedRoute: ActivatedRoute,
     private menuItems: MenuItemsService,
     private navController: NavController,
-    private popoverController: PopoverController
+    private popoverController: PopoverController,
   ) {}
 
   async ngOnInit() {
@@ -43,7 +43,7 @@ export class FolderPage implements OnInit {
     const menu = await this.popoverController.create({
       component: PageMenuComponent,
       event: evt,
-      componentProps: { menuItems: this.section.pages.map(p => p.title) }
+      componentProps: { menuItems: this.section.pages.map(p => p.title) },
     });
     await menu.present();
     const res = await menu.onWillDismiss();
@@ -66,7 +66,10 @@ export class FolderPage implements OnInit {
   private handlePageParameter(): MenuItem {
     const param = this.activatedRoute.snapshot.paramMap.get('page');
     const idx = parseInt(param, 10);
-    if (param && (!this.section.pages || idx >= this.section.pages.length || isNaN(idx))) {
+    if (
+      param &&
+      (!this.section.pages || idx >= this.section.pages.length || isNaN(idx))
+    ) {
       this.errorMessage = 'Page number is invalid';
       return;
     }

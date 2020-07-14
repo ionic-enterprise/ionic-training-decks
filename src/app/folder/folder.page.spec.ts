@@ -9,7 +9,7 @@ import {
   createActivatedRouteMock,
   createOverlayElementMock,
   createOverlayControllerMock,
-  createNavControllerMock
+  createNavControllerMock,
 } from '@test/mocks';
 import { PageMenuComponent } from '@app/page-menu/page-menu.component';
 
@@ -26,9 +26,13 @@ describe('FolderPage', () => {
       providers: [
         { provide: ActivatedRoute, useFactory: createActivatedRouteMock },
         { provide: MenuItemsService, useFactory: createMenuItemsServiceMock },
-        { provide: PopoverController, useFactory: () => createOverlayControllerMock('PopoverController', popover) },
-        { provide: NavController, useFactory: createNavControllerMock }
-      ]
+        {
+          provide: PopoverController,
+          useFactory: () =>
+            createOverlayControllerMock('PopoverController', popover),
+        },
+        { provide: NavController, useFactory: createNavControllerMock },
+      ],
     }).compileComponents();
 
     const activatedRoute = TestBed.inject(ActivatedRoute);
@@ -49,8 +53,12 @@ describe('FolderPage', () => {
     describe('with a section and a page', () => {
       beforeEach(async () => {
         const activatedRoute = TestBed.inject(ActivatedRoute);
-        (activatedRoute.snapshot.paramMap.get as any).withArgs('section').and.returnValue('2');
-        (activatedRoute.snapshot.paramMap.get as any).withArgs('page').and.returnValue('0');
+        (activatedRoute.snapshot.paramMap.get as any)
+          .withArgs('section')
+          .and.returnValue('2');
+        (activatedRoute.snapshot.paramMap.get as any)
+          .withArgs('page')
+          .and.returnValue('0');
         fixture.detectChanges();
       });
 
@@ -82,7 +90,9 @@ describe('FolderPage', () => {
     describe('with a page outside of range', () => {
       beforeEach(async () => {
         const activatedRoute = TestBed.inject(ActivatedRoute);
-        (activatedRoute.snapshot.paramMap.get as any).withArgs('section').and.returnValue('2');
+        (activatedRoute.snapshot.paramMap.get as any)
+          .withArgs('section')
+          .and.returnValue('2');
         (activatedRoute.snapshot.paramMap.get as any)
           .withArgs('page')
           .and.returnValue(testItems[2].pages.length.toString());
@@ -121,8 +131,12 @@ describe('FolderPage', () => {
     describe('with a page that is not a number', () => {
       beforeEach(async () => {
         const activatedRoute = TestBed.inject(ActivatedRoute);
-        (activatedRoute.snapshot.paramMap.get as any).withArgs('section').and.returnValue('2');
-        (activatedRoute.snapshot.paramMap.get as any).withArgs('page').and.returnValue('fred');
+        (activatedRoute.snapshot.paramMap.get as any)
+          .withArgs('section')
+          .and.returnValue('2');
+        (activatedRoute.snapshot.paramMap.get as any)
+          .withArgs('page')
+          .and.returnValue('fred');
         fixture.detectChanges();
       });
 
@@ -158,8 +172,12 @@ describe('FolderPage', () => {
     describe('with a page number on a section without pages', () => {
       beforeEach(async () => {
         const activatedRoute = TestBed.inject(ActivatedRoute);
-        (activatedRoute.snapshot.paramMap.get as any).withArgs('section').and.returnValue('4');
-        (activatedRoute.snapshot.paramMap.get as any).withArgs('page').and.returnValue('0');
+        (activatedRoute.snapshot.paramMap.get as any)
+          .withArgs('section')
+          .and.returnValue('4');
+        (activatedRoute.snapshot.paramMap.get as any)
+          .withArgs('page')
+          .and.returnValue('0');
         fixture.detectChanges();
       });
 
@@ -195,8 +213,12 @@ describe('FolderPage', () => {
     describe('with a section and no page', () => {
       beforeEach(async () => {
         const activatedRoute = TestBed.inject(ActivatedRoute);
-        (activatedRoute.snapshot.paramMap.get as any).withArgs('section').and.returnValue('3');
-        (activatedRoute.snapshot.paramMap.get as any).withArgs('page').and.returnValue(null);
+        (activatedRoute.snapshot.paramMap.get as any)
+          .withArgs('section')
+          .and.returnValue('3');
+        (activatedRoute.snapshot.paramMap.get as any)
+          .withArgs('page')
+          .and.returnValue(null);
         fixture.detectChanges();
       });
 
@@ -228,8 +250,12 @@ describe('FolderPage', () => {
     describe('with a section without pages and no page', () => {
       beforeEach(async () => {
         const activatedRoute = TestBed.inject(ActivatedRoute);
-        (activatedRoute.snapshot.paramMap.get as any).withArgs('section').and.returnValue('4');
-        (activatedRoute.snapshot.paramMap.get as any).withArgs('page').and.returnValue(null);
+        (activatedRoute.snapshot.paramMap.get as any)
+          .withArgs('section')
+          .and.returnValue('4');
+        (activatedRoute.snapshot.paramMap.get as any)
+          .withArgs('page')
+          .and.returnValue(null);
         fixture.detectChanges();
       });
 
@@ -261,8 +287,12 @@ describe('FolderPage', () => {
     describe('with a section that is not a number', () => {
       beforeEach(async () => {
         const activatedRoute = TestBed.inject(ActivatedRoute);
-        (activatedRoute.snapshot.paramMap.get as any).withArgs('section').and.returnValue('bob');
-        (activatedRoute.snapshot.paramMap.get as any).withArgs('page').and.returnValue('0');
+        (activatedRoute.snapshot.paramMap.get as any)
+          .withArgs('section')
+          .and.returnValue('bob');
+        (activatedRoute.snapshot.paramMap.get as any)
+          .withArgs('page')
+          .and.returnValue('0');
         fixture.detectChanges();
       });
 
@@ -298,8 +328,12 @@ describe('FolderPage', () => {
     describe('with a section that is out of range', () => {
       beforeEach(async () => {
         const activatedRoute = TestBed.inject(ActivatedRoute);
-        (activatedRoute.snapshot.paramMap.get as any).withArgs('section').and.returnValue(testItems.length.toString());
-        (activatedRoute.snapshot.paramMap.get as any).withArgs('page').and.returnValue('0');
+        (activatedRoute.snapshot.paramMap.get as any)
+          .withArgs('section')
+          .and.returnValue(testItems.length.toString());
+        (activatedRoute.snapshot.paramMap.get as any)
+          .withArgs('page')
+          .and.returnValue('0');
         fixture.detectChanges();
       });
 
@@ -335,7 +369,9 @@ describe('FolderPage', () => {
     describe('on the last page of a section', () => {
       beforeEach(async () => {
         const activatedRoute = TestBed.inject(ActivatedRoute);
-        (activatedRoute.snapshot.paramMap.get as any).withArgs('section').and.returnValue('1');
+        (activatedRoute.snapshot.paramMap.get as any)
+          .withArgs('section')
+          .and.returnValue('1');
         (activatedRoute.snapshot.paramMap.get as any)
           .withArgs('page')
           .and.returnValue((testItems[1].pages.length - 1).toString());
@@ -347,7 +383,12 @@ describe('FolderPage', () => {
       });
 
       it('does not construct prev', () => {
-        expect(component.prev).toEqual(['/', 'folder', '1', (testItems[1].pages.length - 2).toString()]);
+        expect(component.prev).toEqual([
+          '/',
+          'folder',
+          '1',
+          (testItems[1].pages.length - 2).toString(),
+        ]);
       });
 
       it('disables only the foreward button', () => {
@@ -358,10 +399,14 @@ describe('FolderPage', () => {
 
   describe('show menu', () => {
     beforeEach(async () => {
-      popover.onWillDismiss.and.returnValue(Promise.resolve({ data: undefined, role: 'backdrop' }));
+      popover.onWillDismiss.and.returnValue(
+        Promise.resolve({ data: undefined, role: 'backdrop' }),
+      );
       const activatedRoute = TestBed.inject(ActivatedRoute);
       const menuItems = TestBed.inject(MenuItemsService);
-      (activatedRoute.snapshot.paramMap.get as any).withArgs('section').and.returnValue('1');
+      (activatedRoute.snapshot.paramMap.get as any)
+        .withArgs('section')
+        .and.returnValue('1');
       fixture.detectChanges();
       await menuItems.courses();
     });
@@ -375,24 +420,38 @@ describe('FolderPage', () => {
         component: PageMenuComponent,
         event: evt,
         componentProps: {
-          menuItems: ['Get Started', 'Unit Tests', 'Switch Scale', 'On Push Change Detection']
-        }
+          menuItems: [
+            'Get Started',
+            'Unit Tests',
+            'Switch Scale',
+            'On Push Change Detection',
+          ],
+        },
       });
     });
 
     it('navigates to the chosen page', async () => {
       const evt = new Event('click');
       const navController = TestBed.inject(NavController);
-      popover.onWillDismiss.and.returnValue(Promise.resolve({ data: 2, role: 'select' }));
+      popover.onWillDismiss.and.returnValue(
+        Promise.resolve({ data: 2, role: 'select' }),
+      );
       await component.showMenu(evt);
       expect(navController.navigateRoot).toHaveBeenCalledTimes(1);
-      expect(navController.navigateRoot).toHaveBeenCalledWith(['/', 'folder', '1', '2']);
+      expect(navController.navigateRoot).toHaveBeenCalledWith([
+        '/',
+        'folder',
+        '1',
+        '2',
+      ]);
     });
 
     it('does not navigate if a menu item was not selected', async () => {
       const evt = new Event('click');
       const navController = TestBed.inject(NavController);
-      popover.onWillDismiss.and.returnValue(Promise.resolve({ data: 2, role: 'somethingElse' }));
+      popover.onWillDismiss.and.returnValue(
+        Promise.resolve({ data: 2, role: 'somethingElse' }),
+      );
       await component.showMenu(evt);
       expect(navController.navigateRoot).not.toHaveBeenCalled();
     });
@@ -401,7 +460,7 @@ describe('FolderPage', () => {
   const testItems = [
     {
       title: 'Getting Started',
-      file: 'getting-started'
+      file: 'getting-started',
     },
     {
       title: 'Ionic / Angular / Cordova',
@@ -410,21 +469,21 @@ describe('FolderPage', () => {
       pages: [
         {
           title: 'Get Started',
-          file: 'start'
+          file: 'start',
         },
         {
           title: 'Unit Tests',
-          file: 'unit-tests'
+          file: 'unit-tests',
         },
         {
           title: 'Switch Scale',
-          file: 'ionic-storage'
+          file: 'ionic-storage',
         },
         {
           title: 'On Push Change Detection',
-          file: 'change-detection'
-        }
-      ]
+          file: 'change-detection',
+        },
+      ],
     },
     {
       title: 'PWA / Ionic / Angular / Cordova',
@@ -433,17 +492,17 @@ describe('FolderPage', () => {
       pages: [
         {
           title: 'Host the Application',
-          file: 'host'
+          file: 'host',
         },
         {
           title: 'Add the PWA Goodies',
-          file: 'pwa'
+          file: 'pwa',
         },
         {
           title: 'PWA Links',
-          file: 'links'
-        }
-      ]
+          file: 'links',
+        },
+      ],
     },
     {
       title: 'Ionic / React / Capacitor',
@@ -452,33 +511,33 @@ describe('FolderPage', () => {
       pages: [
         {
           title: 'Get Started',
-          file: 'start'
+          file: 'start',
         },
         {
           title: 'Unit Tests',
-          file: 'unit-tests'
+          file: 'unit-tests',
         },
         {
           title: 'Style the App',
-          file: 'style'
+          file: 'style',
         },
         {
           title: 'Add Loading Indicator',
-          file: 'loading-indicator'
+          file: 'loading-indicator',
         },
         {
           title: 'Switch Scale',
-          file: 'toggle-scale'
-        }
-      ]
+          file: 'toggle-scale',
+        },
+      ],
     },
     {
       title: 'A Simple git Workflow',
-      file: 'simple-git-workflow'
+      file: 'simple-git-workflow',
     },
     {
       title: 'References',
-      file: 'references'
-    }
+      file: 'references',
+    },
   ];
 });

@@ -2,9 +2,9 @@
 
 In this lab, you will learn how to:
 
-* Run the existing suite of unit tests
-* Structure Unit Tests
-* Add component unit tests
+- Run the existing suite of unit tests
+- Structure Unit Tests
+- Add component unit tests
 
 ## Run the Tests
 

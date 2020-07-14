@@ -2,10 +2,10 @@
 
 In this lab, you will learn how to:
 
-* Run the end-to-end tests
-* Configure the testing environment
-* Create page objects
-* Write end-to-end tests
+- Run the end-to-end tests
+- Configure the testing environment
+- Create page objects
+- Write end-to-end tests
 
 ## Running End-to-end Tests
 
@@ -23,7 +23,7 @@ The tests should fail with the following error:
 
 This is because we have changed the application but have not updated the default end-to-end test that was generated when we created our project. Let's fix this now.
 
-- Open  `e2e/src/app.e2e-spec.ts`
+- Open `e2e/src/app.e2e-spec.ts`
 - Change 'Tab One' to 'Current Weather'
 - Save the change and re-run the end-to-end tests
 
@@ -47,7 +47,7 @@ This environment files will contain the base URL that will be used when retrievi
 
 #### Update `angular.json`
 
-### Run Tests 
+### Run Tests
 
 Now that the environment has been created, the NPM scripts need to be updated to use the new testing configuration. Make the following change to the `e2e` script in your `package.json` file:
 

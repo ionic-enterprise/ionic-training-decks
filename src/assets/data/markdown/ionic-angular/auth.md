@@ -1,6 +1,5 @@
-
 # Lab: Handle Authentication
- 
+
 In this lab you will learn how to:
 
 Notes for slides:
@@ -52,7 +51,7 @@ import { Subject, Observable } from 'rxjs';
 import { User } from '@app/models';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class IdentityService {
   private key = 'auth-token';
@@ -131,59 +130,73 @@ describe('IdentityService', () => {
 ### Init
 
 ```typescript
-    it('gets the stored token', async () => {
-      await service.init();
-      expect(Plugins.Storage.get).toHaveBeenCalledTimes(1);
-      expect(Plugins.Storage.get).toHaveBeenCalledWith({ key: 'auth-token' });
-    });
+it('gets the stored token', async () => {
+  await service.init();
+  expect(Plugins.Storage.get).toHaveBeenCalledTimes(1);
+  expect(Plugins.Storage.get).toHaveBeenCalledWith({ key: 'auth-token' });
+});
 ```
 
 #### If a Token Exists
 
 ```typescript
-    describe('if there is a token', () => {
-      beforeEach(() => {
-        (Plugins.Storage.get as any).and.returnValue({ value: '3884915llf950' });
-      });
-    });
+describe('if there is a token', () => {
+  beforeEach(() => {
+    (Plugins.Storage.get as any).and.returnValue({ value: '3884915llf950' });
+  });
+});
 ```
 
 ```typescript
-      it('assigns the token', async ()=>{
-        await service.init();
-        expect(service.token).toEqual('3884915llf950');
-      });
+it('assigns the token', async () => {
+  await service.init();
+  expect(service.token).toEqual('3884915llf950');
+});
 ```
 
 ```typescript
-      it('gets the current user', async () => {
-        await service.init();
-        const req = httpTestController.expectOne(`${environment.dataService}/users/current`);
-        expect(req.request.method).toEqual('GET');
-        httpTestController.verify();
-      });
+it('gets the current user', async () => {
+  await service.init();
+  const req = httpTestController.expectOne(
+    `${environment.dataService}/users/current`,
+  );
+  expect(req.request.method).toEqual('GET');
+  httpTestController.verify();
+});
 ```
 
 ```typescript
-      it('assigns the user', async () => {
-        await service.init();
-        const req = httpTestController.expectOne(`${environment.dataService}/users/current`);
-        req.flush({ id: 42, firstName: 'Joe', lastName: 'Tester', email: 'test@test.org' });
-        expect(service.user).toEqual({ id: 42, firstName: 'Joe', lastName: 'Tester', email: 'test@test.org' });
-      });
+it('assigns the user', async () => {
+  await service.init();
+  const req = httpTestController.expectOne(
+    `${environment.dataService}/users/current`,
+  );
+  req.flush({
+    id: 42,
+    firstName: 'Joe',
+    lastName: 'Tester',
+    email: 'test@test.org',
+  });
+  expect(service.user).toEqual({
+    id: 42,
+    firstName: 'Joe',
+    lastName: 'Tester',
+    email: 'test@test.org',
+  });
+});
 ```
 
 #### If a Token Does Not Exist
 
 ```typescript
-    describe('if there is not a token', () => {
-      it('does not get the current user', async () => {
-        await service.init();
-        httpTestController.verify();
-        expect(service.token).toBeUndefined();
-        expect(service.user).toBeUndefined();
-      });
-    });
+describe('if there is not a token', () => {
+  it('does not get the current user', async () => {
+    await service.init();
+    httpTestController.verify();
+    expect(service.token).toBeUndefined();
+    expect(service.user).toBeUndefined();
+  });
+});
 ```
 
 ### Set
@@ -191,40 +204,65 @@ describe('IdentityService', () => {
 Step 1 - set the user
 
 ```typescript
-    it('sets the user', () => {
-      service.set({ id: 42, firstName: 'Joe', lastName: 'Tester', email: 'test@test.org' }, '19940059fkkf039');
-      expect(service.user).toEqual({ id: 42, firstName: 'Joe', lastName: 'Tester', email: 'test@test.org' });
-    });
+it('sets the user', () => {
+  service.set(
+    { id: 42, firstName: 'Joe', lastName: 'Tester', email: 'test@test.org' },
+    '19940059fkkf039',
+  );
+  expect(service.user).toEqual({
+    id: 42,
+    firstName: 'Joe',
+    lastName: 'Tester',
+    email: 'test@test.org',
+  });
+});
 ```
 
 Step 2 - set the token
 
 ```typescript
-    it('sets the token', () => {
-      service.set({ id: 42, firstName: 'Joe', lastName: 'Tester', email: 'test@test.org' }, '19940059fkkf039');
-      expect(service.token).toEqual('19940059fkkf039');
-    });
+it('sets the token', () => {
+  service.set(
+    { id: 42, firstName: 'Joe', lastName: 'Tester', email: 'test@test.org' },
+    '19940059fkkf039',
+  );
+  expect(service.token).toEqual('19940059fkkf039');
+});
 ```
 
 Step 3 - save the token
 
 ```typescript
-    it('saves the token in storage', async ()=>{
-      await service.set({id: 42, firstName: 'Joe', lastName: 'Tester', email: 'test@test.org'}, '19940059fkkf039');
-      expect(Plugins.Storage.set).toHaveBeenCalledTimes(1);
-      expect(Plugins.Storage.set).toHaveBeenCalledWith({ key: 'auth-token', value: '19940059fkkf039' });
-    });
+it('saves the token in storage', async () => {
+  await service.set(
+    { id: 42, firstName: 'Joe', lastName: 'Tester', email: 'test@test.org' },
+    '19940059fkkf039',
+  );
+  expect(Plugins.Storage.set).toHaveBeenCalledTimes(1);
+  expect(Plugins.Storage.set).toHaveBeenCalledWith({
+    key: 'auth-token',
+    value: '19940059fkkf039',
+  });
+});
 ```
 
 Step 4 - emits changed
 
 ```typescript
-    it('emits the change', async () => {
-      let user: User;
-      service.changed.subscribe(u => (user = u));
-      await service.set({ id: 42, firstName: 'Joe', lastName: 'Tester', email: 'test@test.org' }, '19940059fkkf039');
-      expect(user).toEqual({ id: 42, firstName: 'Joe', lastName: 'Tester', email: 'test@test.org' });
-    });
+it('emits the change', async () => {
+  let user: User;
+  service.changed.subscribe(u => (user = u));
+  await service.set(
+    { id: 42, firstName: 'Joe', lastName: 'Tester', email: 'test@test.org' },
+    '19940059fkkf039',
+  );
+  expect(user).toEqual({
+    id: 42,
+    firstName: 'Joe',
+    lastName: 'Tester',
+    email: 'test@test.org',
+  });
+});
 ```
 
 ### Clear
@@ -232,50 +270,53 @@ Step 4 - emits changed
 Test Setup:
 
 ```typescript
-  describe('clear', () => {
-    beforeEach(async () => {
-      await service.set({ id: 42, firstName: 'Joe', lastName: 'Tester', email: 'test@test.org' }, '19940059fkkf039');
-    });
+describe('clear', () => {
+  beforeEach(async () => {
+    await service.set(
+      { id: 42, firstName: 'Joe', lastName: 'Tester', email: 'test@test.org' },
+      '19940059fkkf039',
+    );
   });
+});
 ```
 
 Step 1 - clear the user
 
 ```typescript
-    it('clears the user', () => {
-      service.clear();
-      expect(service.user).toBeUndefined();
-    });
+it('clears the user', () => {
+  service.clear();
+  expect(service.user).toBeUndefined();
+});
 ```
 
 Step 2 - clear the token
 
 ```typescript
-    it('clears the token', () => {
-      service.clear();
-      expect(service.token).toBeUndefined();
-    });
+it('clears the token', () => {
+  service.clear();
+  expect(service.token).toBeUndefined();
+});
 ```
 
 Step 3 - clear the storage
 
 ```typescript
-    it('clears the storage', async () => {
-      await service.clear();
-      expect(Plugins.Storage.remove).toHaveBeenCalledTimes(1);
-      expect(Plugins.Storage.remove).toHaveBeenCalledWith({ key: 'auth-token' });
-    });
+it('clears the storage', async () => {
+  await service.clear();
+  expect(Plugins.Storage.remove).toHaveBeenCalledTimes(1);
+  expect(Plugins.Storage.remove).toHaveBeenCalledWith({ key: 'auth-token' });
+});
 ```
 
 Step 4 - emit undefined
 
 ```typescript
-    it('emits empty', async () => {
-      let user: User = { ...service.user };
-      service.changed.subscribe(u => (user = u));
-      await service.clear();
-      expect(user).toBeUndefined();
-    });
+it('emits empty', async () => {
+  let user: User = { ...service.user };
+  service.changed.subscribe(u => (user = u));
+  await service.clear();
+  expect(user).toBeUndefined();
+});
 ```
 
 ### Hookup
@@ -289,7 +330,12 @@ $ ionic g s services/http-interceptors/auth-interceptor --skipTests
 ```typescript
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { HttpEvent, HttpInterceptor, HttpHandler, HttpRequest } from '@angular/common/http';
+import {
+  HttpEvent,
+  HttpInterceptor,
+  HttpHandler,
+  HttpRequest,
+} from '@angular/common/http';
 
 import { IdentityService } from '../identity/identity.service';
 
@@ -297,12 +343,15 @@ import { IdentityService } from '../identity/identity.service';
 export class AuthInterceptor implements HttpInterceptor {
   constructor(private identity: IdentityService) {}
 
-  intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
+  intercept(
+    req: HttpRequest<any>,
+    next: HttpHandler,
+  ): Observable<HttpEvent<any>> {
     if (this.requestRequiresToken(req) && this.identity.token) {
       req = req.clone({
         setHeaders: {
-          Authorization: 'Bearer ' + this.identity.token
-        }
+          Authorization: 'Bearer ' + this.identity.token,
+        },
       });
     }
     return next.handle(req);
@@ -341,7 +390,7 @@ export function createIdentityServiceMock() {
   const mock = jasmine.createSpyObj('IdentityService', {
     init: Promise.resolve(),
     set: Promise.resolve(),
-    clear: Promise.resolve()
+    clear: Promise.resolve(),
   });
   mock.changed = new Subject<User>();
   return mock;
@@ -441,7 +490,7 @@ import { Observable, EMPTY } from 'rxjs';
 import { IdentityService } from '../identity/identity.service';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class AuthenticationService {
   constructor(private http: HttpClient, private identity: IdentityService) {}
@@ -460,7 +509,10 @@ export class AuthenticationService {
 
 ```typescript
 import { TestBed } from '@angular/core/testing';
-import { HttpTestingController, HttpClientTestingModule } from '@angular/common/http/testing';
+import {
+  HttpTestingController,
+  HttpClientTestingModule,
+} from '@angular/common/http/testing';
 
 import { AuthenticationService } from './authentication.service';
 import { IdentityService } from '../identity/identity.service';
@@ -473,7 +525,9 @@ describe('AuthenticationService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [HttpClientTestingModule],
-      providers: [{ provide: IdentityService, useFactory: createIdentityServiceMock }]
+      providers: [
+        { provide: IdentityService, useFactory: createIdentityServiceMock },
+      ],
     });
     httpTestingController = TestBed.inject(HttpTestingController);
     service = TestBed.inject(AuthenticationService);
@@ -492,102 +546,118 @@ describe('AuthenticationService', () => {
 ### login
 
 ```typescript
-    it('POSTs the login', () => {
-      service.login('thank.you@forthefish.com', 'solongDude').subscribe();
-      const req = httpTestingController.expectOne(`${environment.dataService}/login`);
-      expect(req.request.method).toEqual('POST');
-      req.flush({});
-      httpTestingController.verify();
-    });
+it('POSTs the login', () => {
+  service.login('thank.you@forthefish.com', 'solongDude').subscribe();
+  const req = httpTestingController.expectOne(
+    `${environment.dataService}/login`,
+  );
+  expect(req.request.method).toEqual('POST');
+  req.flush({});
+  httpTestingController.verify();
+});
 ```
 
 ```typescript
-    it('passes the credentials in the body', () => {
-      service.login('thank.you@forthefish.com', 'solongDude').subscribe();
-      const req = httpTestingController.expectOne(`${environment.dataService}/login`);
-      expect(req.request.body).toEqual({
-        username: 'thank.you@forthefish.com',
-        password: 'solongDude'
-      });
-      req.flush({});
-      httpTestingController.verify();
-    });
+it('passes the credentials in the body', () => {
+  service.login('thank.you@forthefish.com', 'solongDude').subscribe();
+  const req = httpTestingController.expectOne(
+    `${environment.dataService}/login`,
+  );
+  expect(req.request.body).toEqual({
+    username: 'thank.you@forthefish.com',
+    password: 'solongDude',
+  });
+  req.flush({});
+  httpTestingController.verify();
+});
 ```
 
 ```typescript
-    describe('on success', () => {
-      let response: any;
-      beforeEach(() => {
-        response = {
-          success: true,
-          token: '48499501093kf00399sg',
-          user: {
-            id: 42,
-            firstName: 'Douglas',
-            lastName: 'Adams',
-            email: 'thank.you@forthefish.com'
-          }
-        };
-      });
-    });
+describe('on success', () => {
+  let response: any;
+  beforeEach(() => {
+    response = {
+      success: true,
+      token: '48499501093kf00399sg',
+      user: {
+        id: 42,
+        firstName: 'Douglas',
+        lastName: 'Adams',
+        email: 'thank.you@forthefish.com',
+      },
+    };
+  });
+});
 ```
 
 ```typescript
-      it('resolves true', fakeAsync(() => {
-        service.login('thank.you@forthefish.com', 'solongDude').subscribe(r => expect(r).toEqual(true));
-        const req = httpTestingController.expectOne(`${environment.dataService}/login`);
-        req.flush(response);
-        tick();
-        httpTestingController.verify();
-      }));
+it('resolves true', fakeAsync(() => {
+  service
+    .login('thank.you@forthefish.com', 'solongDude')
+    .subscribe(r => expect(r).toEqual(true));
+  const req = httpTestingController.expectOne(
+    `${environment.dataService}/login`,
+  );
+  req.flush(response);
+  tick();
+  httpTestingController.verify();
+}));
 ```
 
 ```typescript
-      it('sets the identity', () => {
-        service.login('thank.you@forthefish.com', 'solongDude').subscribe();
-        const req = httpTestingController.expectOne(`${environment.dataService}/login`);
-        req.flush(response);
-        httpTestingController.verify();
-        expect(identity.set).toHaveBeenCalledTimes(1);
-        expect(identity.set).toHaveBeenCalledWith(
-          {
-            id: 42,
-            firstName: 'Douglas',
-            lastName: 'Adams',
-            email: 'thank.you@forthefish.com'
-          },
-          '48499501093kf00399sg'
-        );
-      });
+it('sets the identity', () => {
+  service.login('thank.you@forthefish.com', 'solongDude').subscribe();
+  const req = httpTestingController.expectOne(
+    `${environment.dataService}/login`,
+  );
+  req.flush(response);
+  httpTestingController.verify();
+  expect(identity.set).toHaveBeenCalledTimes(1);
+  expect(identity.set).toHaveBeenCalledWith(
+    {
+      id: 42,
+      firstName: 'Douglas',
+      lastName: 'Adams',
+      email: 'thank.you@forthefish.com',
+    },
+    '48499501093kf00399sg',
+  );
+});
 ```
 
 ```typescript
-    describe('on failure', () => {
-      let response: any;
-      beforeEach(() => {
-        response = { success: false };
-      });
-    });
+describe('on failure', () => {
+  let response: any;
+  beforeEach(() => {
+    response = { success: false };
+  });
+});
 ```
 
 ```typescript
-      it('resolves false', fakeAsync(() => {
-        service.login('thank.you@forthefish.com', 'solongDude').subscribe(r => expect(r).toEqual(false));
-        const req = httpTestingController.expectOne(`${environment.dataService}/login`);
-        req.flush(response);
-        tick();
-        httpTestingController.verify();
-      }));
+it('resolves false', fakeAsync(() => {
+  service
+    .login('thank.you@forthefish.com', 'solongDude')
+    .subscribe(r => expect(r).toEqual(false));
+  const req = httpTestingController.expectOne(
+    `${environment.dataService}/login`,
+  );
+  req.flush(response);
+  tick();
+  httpTestingController.verify();
+}));
 ```
 
 ```typescript
-      it('does not set the identity', () => {
-        service.login('thank.you@forthefish.com', 'solongDude').subscribe();
-        const req = httpTestingController.expectOne(`${environment.dataService}/login`);
-        req.flush(response);
-        httpTestingController.verify();
-        expect(identity.set).not.toHaveBeenCalledTimes(1);
-      });
+it('does not set the identity', () => {
+  service.login('thank.you@forthefish.com', 'solongDude').subscribe();
+  const req = httpTestingController.expectOne(
+    `${environment.dataService}/login`,
+  );
+  req.flush(response);
+  httpTestingController.verify();
+  expect(identity.set).not.toHaveBeenCalledTimes(1);
+});
 ```
 
 ### logout
@@ -602,14 +672,16 @@ describe('AuthenticationService', () => {
 ```
 
 ```typescript
-    it('clears the identity', fakeAsync(() => {
-      const identity = TestBed.inject(IdentityService);
-      service.logout().subscribe();
-      const req = httpTestingController.expectOne(`${environment.dataService}/logout`);
-      req.flush({});
-      tick();
-      expect(identity.clear).toHaveBeenCalledTimes(1);
-    }));
+it('clears the identity', fakeAsync(() => {
+  const identity = TestBed.inject(IdentityService);
+  service.logout().subscribe();
+  const req = httpTestingController.expectOne(
+    `${environment.dataService}/logout`,
+  );
+  req.flush({});
+  tick();
+  expect(identity.clear).toHaveBeenCalledTimes(1);
+}));
 ```
 
 ### Create a Mock Factory
@@ -620,7 +692,7 @@ import { EMPTY } from 'rxjs';
 export function createAuthenticationServiceMock() {
   return jasmine.createSpyObj('AuthenticationService', {
     login: EMPTY,
-    logout: EMPTY
+    logout: EMPTY,
   });
 }
 ```
@@ -634,32 +706,39 @@ Remember to add to `src/app/services/testing/ts`
 Add a utilitly function to clean a button:
 
 ```typescript
-  function click(button: HTMLIonButtonElement) {
-    const event = new Event('click');
-    button.dispatchEvent(event);
-    fixture.detectChanges();
-  }
+function click(button: HTMLIonButtonElement) {
+  const event = new Event('click');
+  button.dispatchEvent(event);
+  fixture.detectChanges();
+}
 ```
 
 ```typescript
-    it('performs a login on clicked', () => {
-      const authenticationService = TestBed.inject(AuthenticationService);
-      setInputValue(email, 'test@test.com');
-      setInputValue(password, 'password');
-      click(button);
-      expect(authenticationService.login).toHaveBeenCalledTimes(1);
-      expect(authenticationService.login).toHaveBeenCalledWith('test@test.com', 'password');
-    });
+it('performs a login on clicked', () => {
+  const authenticationService = TestBed.inject(AuthenticationService);
+  setInputValue(email, 'test@test.com');
+  setInputValue(password, 'password');
+  click(button);
+  expect(authenticationService.login).toHaveBeenCalledTimes(1);
+  expect(authenticationService.login).toHaveBeenCalledWith(
+    'test@test.com',
+    'password',
+  );
+});
 ```
 
 ```typescript
-    it('sets an error message if the login failed', ()=>{
-      const authenticationService = TestBed.inject(AuthenticationService);
-      const  errorDiv: HTMLDivElement = fixture.nativeElement.querySelector('.error-message');
-      (authenticationService.login as any).and.returnValue(of(false));
-      click(button);
-      expect(errorDiv.textContent.trim()).toEqual('Invalid e-mail address or password');
-    });
+it('sets an error message if the login failed', () => {
+  const authenticationService = TestBed.inject(AuthenticationService);
+  const errorDiv: HTMLDivElement = fixture.nativeElement.querySelector(
+    '.error-message',
+  );
+  (authenticationService.login as any).and.returnValue(of(false));
+  click(button);
+  expect(errorDiv.textContent.trim()).toEqual(
+    'Invalid e-mail address or password',
+  );
+});
 ```
 
 The final code and markup should look like this:
@@ -691,11 +770,16 @@ The final code and markup should look like this:
 This is a temporary change for testing. We will eventually move the logout and do more with it. We won't unit test it yet, but we will need to provide the mock to prevent our existing tests from failing.
 
 ```typescript
-    TestBed.configureTestingModule({
-      declarations: [TeaPage],
-      imports: [IonicModule],
-      providers: [{ provide: AuthenticationService, useFactory: createAuthenticationServiceMock }]
-    }).compileComponents();
+TestBed.configureTestingModule({
+  declarations: [TeaPage],
+  imports: [IonicModule],
+  providers: [
+    {
+      provide: AuthenticationService,
+      useFactory: createAuthenticationServiceMock,
+    },
+  ],
+}).compileComponents();
 ```
 
 Inject the authentication service and create a simple logout method.

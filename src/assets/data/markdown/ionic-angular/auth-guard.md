@@ -1,6 +1,5 @@
-
 # Lab: Authentication Guard
- 
+
 In this lab you will learn how to protect your routes with an Authentication Guard
 
 ## Create the Guard
@@ -22,7 +21,7 @@ import { Injectable } from '@angular/core';
 import { CanActivate } from '@angular/router';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class AuthGuardService implements CanActivate {
   constructor() {}
@@ -55,8 +54,8 @@ describe('AuthGuardService', () => {
     TestBed.configureTestingModule({
       providers: [
         { provide: IdentityService, useFactory: createIdentityServiceMock },
-        { provide: NavController, useFactory: createNavControllerMock }
-      ]
+        { provide: NavController, useFactory: createNavControllerMock },
+      ],
     });
     service = TestBed.inject(AuthGuardService);
   });
@@ -74,25 +73,24 @@ We will use the presence of a token to signify that a person is currently logged
 When the user is logged in, the guard should not navigate and should return `true`.
 
 ```typescript
-  describe('when logged in', () => {
-    beforeEach(()=>{
-      const identity = TestBed.inject(IdentityService);
-      (identity as any).token = '294905993';
-    });
-    it('does not navigate', () => {
-      const navController = TestBed.inject(NavController);
-      service.canActivate();
-      expect(navController.navigateRoot).not.toHaveBeenCalled();
-    });
-
-    it('returns true', () => {
-      expect(service.canActivate()).toEqual(true);
-    });
+describe('when logged in', () => {
+  beforeEach(() => {
+    const identity = TestBed.inject(IdentityService);
+    (identity as any).token = '294905993';
   });
+  it('does not navigate', () => {
+    const navController = TestBed.inject(NavController);
+    service.canActivate();
+    expect(navController.navigateRoot).not.toHaveBeenCalled();
+  });
+
+  it('returns true', () => {
+    expect(service.canActivate()).toEqual(true);
+  });
+});
 ```
 
 The cast to `any` on `identity` is required because in the real service this property is read-only. With the mock it is not, but `identity` is typed as the actual service, not the mock.
-
 
 Add those tests within the `describe` and then write the code that satisfies them.
 
@@ -101,18 +99,18 @@ Add those tests within the `describe` and then write the code that satisfies the
 When the user is not logged in, the guard should navigate to the login page and should return `false`.
 
 ```typescript
-  describe('when not logged in', () => {
-    it('navigates to the login page', () => {
-      const navController = TestBed.inject(NavController);
-      service.canActivate();
-      expect(navController.navigateRoot).toHaveBeenCalledTimes(1);
-      expect(navController.navigateRoot).toHaveBeenCalledWith(['/', 'login']);
-    });
-
-    it('returns false', () => {
-      expect(service.canActivate()).toEqual(false);
-    });
+describe('when not logged in', () => {
+  it('navigates to the login page', () => {
+    const navController = TestBed.inject(NavController);
+    service.canActivate();
+    expect(navController.navigateRoot).toHaveBeenCalledTimes(1);
+    expect(navController.navigateRoot).toHaveBeenCalledWith(['/', 'login']);
   });
+
+  it('returns false', () => {
+    expect(service.canActivate()).toEqual(false);
+  });
+});
 ```
 
 We do not need a `beforeEach` in this case because the default state of the mock is to not have a `token`.
@@ -134,13 +132,13 @@ const routes: Routes = [
   {
     path: '',
     component: TeaPage,
-    canActivate: [AuthGuardService]
-  }
+    canActivate: [AuthGuardService],
+  },
 ];
 
 @NgModule({
   imports: [RouterModule.forChild(routes)],
-  exports: [RouterModule]
+  exports: [RouterModule],
 })
 export class TeaPageRoutingModule {}
 ```

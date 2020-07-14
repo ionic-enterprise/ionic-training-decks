@@ -33,8 +33,8 @@ export class Auth0Service extends IonicAuth {
 
 Back in our Auth0 Project, we also need to add our web address to:
 
-* `Authorized Callback URLs` - `http://localhost:8100/login`
-* `Allowed Web Origins` - `http://localhost:8100`
-* `Allowed Logout URLs` - `http://localhost:8100/logout`
+- `Authorized Callback URLs` - `http://localhost:8100/login`
+- `Allowed Web Origins` - `http://localhost:8100`
+- `Allowed Logout URLs` - `http://localhost:8100/logout`
 
 We can now run our application using `ionic serve` and in the browser we will be able to successfully login with Auth0.

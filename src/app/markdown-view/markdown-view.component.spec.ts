@@ -9,8 +9,8 @@ describe('MarkdownViewComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ MarkdownViewComponent ],
-      imports: [IonicModule.forRoot()]
+      declarations: [MarkdownViewComponent],
+      imports: [IonicModule.forRoot()],
     }).compileComponents();
 
     fixture = TestBed.createComponent(MarkdownViewComponent);
