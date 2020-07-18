@@ -10,66 +10,41 @@ In this lab, you will learn how to:
 
 ## Getting Started
 
-- The API we use requires an API key. A key will be provided for this class. However, this key will be deleted after the class is over
-- If you would like to use your own key, go to <a href="https://openweathermap.org/" target="_blank">OpenWeatherMap.org</a> and sign up for a free account. You can then generate an API key for your own use
-- Use `ionic g service services/weather/weather` to generate a new service
-- Remember to add the new service to the services barrel file
+- Use `ionic g service services/tea/tea` to generate a new service called `TeaService`
+- Add the new service to the services barrel file
 
 ## Inject the HTTP Client
 
-The generated `weather` service is just a shell for an injectable class. We need to provide the details. The primary purpose of this service will be to get JSON data from the API via HTTP, so we will need to inject Angular's HTTP client service. Dependency injection in Angular is handled via the constructor. Inject the HTTP client, creating a `private` reference to it.
+The generated service is just a shell for an injectable class. We need to provide the details. The primary purpose of this service will be to get JSON data from the API via HTTP, so we will need to inject Angular's HTTP client service. Dependency injection in Angular is handled via the constructor. Inject the HTTP client, creating a `private` reference to it.
+
+While we are in there, let's also create stubs for the methods we are going to need.
 
 ```TypeScript
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { EMPTY, Observable } from 'rxjs';
+
+import { Tea } from '@app/models';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
-export class WeatherService {
+export class TeaService {
   constructor(private http: HttpClient) {}
+
+  getAll(): Observable<Array<Tea>> {
+    return EMPTY;
+  }
+
+  get(id: number): Observable<Tea> {
+    return EMPTY;
+  }
 }
 ```
 
-### Basic Configuration
+Angular's <a href="https://angular.io/api/common/http/HttpClient" target="_blank">HttpClient</a> service is very flexible and has several options for working with RESTful data. We will not go into full details, as that could be a full course on its own. You have already seen a couple of cases where we use the POST verb to log in and out of the application. In this service we will only be using GET verb to retrieve data.
 
-Let's add some basic configuration data. Have a look at the <a href="https://openweathermap.org/api" target="_blank">Open Weather Map API</a> documentation. You will see that the various endpoints:
-
-- All start with: `https://api.openweathermap.org/data/2.5`
-- Can take several formats for location (we will use latitude/longitude)
-- All take an `appid` parameter with the API key (this is less obvious)
-
-#### Environments
-
-For this application, all API traffic is going to go through `https://api.openweathermap.org/data/2.5`. It is common for applications to use different APIs for development and production, so let's setup this application to support that contingency from the start.
-
-Define the following values in `src/environments/environment.ts` and `src/environments/environment.prod.ts`:
-
-- baseUrl: 'https://api.openweathermap.org/data/2.5'
-- appId: 'Whatever your APP ID is...'
-
-Be sure to preserve the `production: true|false` flag in each file.
-
-_Note:_ is a real app, you might want to protect your app ID more, at least if that app's code is stored in a publically available repo. Securing that data is beyond the scope of this course.
-
-#### Location Data
-
-The first version of the app will use a hardcoded location. I am using Madison, WI, USA because that is where the Ionic HQ is located, but you should use something closer to your home. You can use a website such as <a href="https://www.latlong.net/" target="_blank">LatLong.net</a> to find the coordinates of your city.
-
-Add the coordinates you would like to use as private data in the `src/app/services/weather/weather.service.ts` service. My private data looks like this:
-
-```TypeScript
-  private latitude = 43.073051;
-  private longitude = -89.401230;
-```
-
-## Getting the Data
-
-Angular's <a href="https://angular.io/api/common/http/HttpClient" target="_blank">HttpClient</a> service is very flexible and has several options for working with RESTful data. We will not go into full details, as that could be a full course on its own. For the purposes of this course, we will only be using GET verb to retrieve data.
-
-### Test Setup
-
-If you are not still running the unit tests, be sure and start them. You should see one test failing. That is the test for this service, and it is failing because the test does not know how to inject the `HttpClient`. The `@angular/common/http/testing` library will be used to mock the `HttpClient` for our tests. Some simple setup will fix that.
+You should see one test failing. That is the test for this service, and it is failing because the test does not know how to inject the `HttpClient`. The `@angular/common/http/testing` library will be used to mock the `HttpClient` for our tests. Some simple setup will fix that.
 
 ```TypeScript
 import { TestBed } from '@angular/core/testing';
@@ -79,346 +54,246 @@ import {
 } from '@angular/common/http/testing';
 
 import { environment } from '../../../environments/environment';
-import { WeatherService } from './weather.service';
+import { TeaService } from './tea.service';
 
-describe('WeatherService', () => {
+describe('TeaService', () => {
   let httpTestingController: HttpTestingController;
+  let service: TeaService;
+
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [HttpClientTestingModule]
     });
     httpTestingController = TestBed.inject(HttpTestingController);
+    service = TestBed.inject(TeaService);
   });
 
   it('should be created', () => {
-    const service: WeatherService = TestBed.inject(WeatherService);
     expect(service).toBeTruthy();
   });
 });
 ```
 
-**Note:** The test may have been generated with a `TestBed.get()` call. If so, change that to the now preferred `TestBed.inject()`.
+## Getting the Data
 
-Don't worry about the fact that we are currently getting a `HttpTestingController` and not using it. We will address that next.
+### Initialize the Test Data
 
-### Get the Current Weather
+We are going to need some test data. For our application, the data we get back from the server looks like the test data that we provided for the page, only it does not have an image assciated with it. Let's initialize an array of teas called `expectedTeas` using that data.
 
-#### Test First
+We can then use `expectedTeas` to manufacture a set of `resultTeas` by deleting the `image`. The `resultTeas` will be the result of our API call.
 
-We need to get the current weather using an URL similar to the following: `https://api.openweathermap.org/data/2.5/weather?lat=43.073051&lon=-89.40123&appid=something`. Let's create a test for that:
-
-```
-  describe('current', () => {
-    it('gets the data from the server', () => {
-      const service: WeatherService = TestBed.inject(WeatherService);
-      service.current().subscribe();
-      const req = httpTestingController.expectOne(
-        `${environment.baseUrl}/weather?lat=43.073051&lon=-89.40123&appid=${
-          environment.appId
-        }`
-      );
-      expect(req.request.method).toEqual('GET');
-      httpTestingController.verify();
-    });
+```typescript
+function initializeTestData() {
+  expectedTeas = [
+    {
+      id: 1,
+      name: 'Green',
+      image: 'assets/img/green.jpg',
+      description: 'Green tea description.',
+    },
+    {
+      id: 2,
+      name: 'Black',
+      image: 'assets/img/black.jpg',
+      description: 'Black tea description.',
+    },
+    {
+      id: 3,
+      name: 'Herbal',
+      image: 'assets/img/herbal.jpg',
+      description: 'Herbal Infusion description.',
+    },
+    {
+      id: 4,
+      name: 'Oolong',
+      image: 'assets/img/oolong.jpg',
+      description: 'Oolong tea description.',
+    },
+    {
+      id: 5,
+      name: 'Dark',
+      image: 'assets/img/dark.jpg',
+      description: 'Dark tea description.',
+    },
+    {
+      id: 6,
+      name: 'Puer',
+      image: 'assets/img/puer.jpg',
+      description: 'Puer tea description.',
+    },
+    {
+      id: 7,
+      name: 'White',
+      image: 'assets/img/white.jpg',
+      description: 'White tea description.',
+    },
+    {
+      id: 8,
+      name: 'Yellow',
+      image: 'assets/img/yellow.jpg',
+      description: 'Yellow tea description.',
+    },
+  ];
+  resultTeas = expectedTeas.map((t: Tea) => {
+    const tea = { ...t };
+    delete tea.image;
+    return tea;
   });
-```
-
-#### Write the Code
-
-The basic format for such a `get()` call is: `get(url: string): Observable<any>`, so a basic method that returns this data looks like this:
-
-```TypeScript
-  current(): Observable<any> {
-    return this.http.get(
-      `${environment.baseUrl}/weather?lat=${this.latitude}&lon=${
-        this.longitude
-      }&appid=${environment.appId}`);
-  }
-```
-
-**Hints:**
-
-- You will need to import `Observable` from `rxjs` at the top of your file.
-- You will also to `import { environment } from '@env/environment';`
-
-### Add the Other Methods
-
-Add two additional methods: one called `forecast` that gets the forecast data from the `forecast` endpoint (5 day / 3 hour forecast) and one called `uvIndex` that gets the UV Index data from the `uvi` endpoint (UV Index). **Hint:** Have a look at the <a href="https://openweathermap.org/api" target="_blank">Open Weather Map API Docs</a> for more information on the endpoints. The format of the `forecast` and `uvIndex` methods will be basically the same at this point other than the name of the endpoint.
-
-**Be sure the first create tests, then write code.**
-
-**Extra Credit:** There seems to be a pattern here that you could abstract out into a `private` method.
-
-## Transforming the Data
-
-Now we are retrieving data, but we need to transform it into a format that our application can use.
-
-### Current Weather
-
-Review the <a href="https://openweathermap.org/current#current_JSON" target="_blank">API docs</a> and have a look at our `Weather` model. We need grab the following data:
-
-- **temperature** - Available as part of `main.temp`
-- **condition** - This is the `weather.id`, but because `weather` is an array of objects, we will use the `id` from the first object in the array (`weather[0].id`)
-- **date** - This is available from `dt`; note that the date is Unix UTC, which is specified in seconds whereas JavaScript uses milliseconds
-
-First we create a test that exercises the transform:
-
-```TypeScript
-    it('transforms the data', () => {
-      const service: WeatherService = TestBed.inject(WeatherService);
-      let weather: Weather;
-      service.current().subscribe(w => (weather = w));
-      const req = httpTestingController.expectOne(
-        `${environment.baseUrl}/weather?lat=43.073051&lon=-89.40123&appid=${
-          environment.appId
-        }`
-      );
-      req.flush({
-        weather: [
-          {
-            id: 300
-          },
-          {
-            id: 420
-          }
-        ],
-        main: {
-          temp: 280.32
-        },
-        dt: 1485789600
-      });
-      httpTestingController.verify();
-      expect(weather).toEqual({
-        temperature: 280.32,
-        condition: 300,
-        date: new Date(1485789600 * 1000)
-      });
-    });
-```
-
-**Challenge**: write the code to satisfy the test
-
-**Hints:**
-
-- Observables in rxjs can be piped through a whole host of operators. One of the most useful is `map` which is used to map one object to another. The basic syntax is: `this.http.get(url).pipe(map((res: any) => someTransform(res)));`
-- You will need to import some stuff from a couple of different ES6 modules at the top of your file.
-- The `map` function is in the `rxjs/operators` module.
-- Change the return type of `current()` to `Observable<Weather>` (that is, use our model instead of `any`)
-- Create a private method called `unpackWeather(res: any): Weather` that transforms the data from the raw result to a `Weather` object
-- Append the `pipe` to the `get()` call as such: `.pipe(map((res: any) => this.unpackWeather(res)));`
-
-When you are done, your code should look something functionally equivalent to this (the code itself will be significantly different if you did the Extra Credit above):
-
-```TypeScript
-  current(): Observable<Weather> {
-    return this.http
-      .get(
-        `${environment.baseUrl}/weather?lat=${this.latitude}&lon=${
-          this.longitude
-        }&appid=${environment.appId}`
-      )
-      .pipe(map(res => this.unpackWeather(res)));
-  }
-
-  ...
-
-  private unpackWeather(res: any): Weather {
-    return {
-      // add code to transform the data here...
-    };
-  }
-```
-
-### Forecast
-
-Transforming the forecast data is more complex. We need to go through the `list` and create an array of forecasts for each individual day. I am going to give you the test and the code for that. Try walking through it as you copy it in to understand how it is working. Have a look at the <a href="https://openweathermap.org/forecast5#JSON" target="_blank">response data structure</a> and compare it to how we are processing it here.
-
-**Test**
-
-```TypeScript
-    it('transforms the data', () => {
-      const service: WeatherService = TestBed.inject(WeatherService);
-      let forecast: Forecast;
-      service.forecast().subscribe(f => (forecast = f));
-      const req = httpTestingController.expectOne(
-        `${environment.baseUrl}/forecast?lat=43.073051&lon=-89.40123&appid=${
-          environment.appId
-        }`
-      );
-      req.flush({
-        list: [
-          {
-            dt: 1485799200,
-            main: {
-              temp: 283.76
-            },
-            weather: [
-              {
-                id: 800
-              }
-            ]
-          },
-          {
-            dt: 1485810000,
-            main: {
-              temp: 282.56
-            },
-            weather: [
-              {
-                id: 800
-              }
-            ]
-          },
-          {
-            dt: 1485820800,
-            main: {
-              temp: 282.3
-            },
-            weather: [
-              {
-                id: 800
-              }
-            ]
-          },
-          {
-            dt: 1485896400,
-            main: {
-              temp: 280.3
-            },
-            weather: [
-              {
-                id: 340
-              }
-            ]
-          },
-          {
-            dt: 1485907200,
-            main: {
-              temp: 279.42
-            },
-            weather: [
-              {
-                id: 342
-              }
-            ]
-          },
-        ]
-      });
-      httpTestingController.verify();
-      expect(forecast).toEqual([[
-        {
-        temperature: 283.76,
-        condition: 800,
-        date: new Date(1485799200 * 1000)
-      },
-        {
-        temperature: 282.56,
-        condition: 800,
-        date: new Date(1485810000 * 1000)
-      },
-        {
-        temperature: 282.3,
-        condition: 800,
-        date: new Date(1485820800 * 1000)
-      }
-      ],
-      [
-        {
-        temperature: 280.3,
-        condition: 340,
-        date: new Date(1485896400 * 1000)
-      },
-        {
-        temperature: 279.42,
-        condition:342,
-        date: new Date(1485907200 * 1000)
-      },
-      ]]);
-    });
-```
-
-**Transform Function**
-
-```TypeScript
-  private unpackForecast(res: any): Forecast {
-    let currentDay: Array<Weather>;
-    let prevDate: number;
-    const forecast: Forecast = [];
-
-    res.list.forEach(item => {
-      const w = this.unpackWeather(item);
-      if (w.date.getDate() !== prevDate) {
-        prevDate = w.date.getDate();
-        currentDay = [];
-        forecast.push(currentDay);
-      }
-      currentDay.push(w);
-    });
-
-    return forecast;
-  }
-```
-
-**Challenge:** Now that you have the transform, apply it in your `forecast()` method. Remember that you should change the return type - specifically, the type is currently `Observable<any>` but `any` is far too broad, we can narrow that down.
-
-### UV Index
-
-Here is the model we have for the UV index:
-
-```TypeScript
-export interface UVIndex {
-  value: number,
-  riskLevel: number
 }
 ```
 
-The <a href="https://openweathermap.org/api/uvi" target="_blank">response data</a> is very simple. There is only one property returned that is useful to us. That is the `value` property.
+Call this function from the main `beforeEach()`.
 
-- **value** - Use the `value` from the HTTP result
-- **riskLevel** - This level should be calculated by us based on the `value`:
-  - 0 - `value` < 3
-  - 1 - `value` >= 3 and < 6
-  - 2 - `value` >= 6 and < 8
-  - 3 - `value` >= 8 and < 11
-  - 4 - `value` >= 11
+### Get all of the teas
 
-**Challenge:** Test and code the UV transform.
+Create a `describe` for the "get all" functionality. All of our tests for that logic will go there.
 
-- The test will follow the same basic pattern as the other "transforms the data" tests
-- The "flush" data will look something like this: `{ value: 3 }`
-- The "expected" data will look something like this: `{ value: 3, riskLevel: 1 }`
-- The transform should be similar to the other transforms.
-- The code is cleaner if you write a private method to calculate the risk level.
+#### Test #1 - Getting Data from the Correct Endpoint
 
-One way to write that test is to create a testng template and feed an array of value to the test template as such:
-
-```TypeScript
-    [
-      { value: 0, riskLevel: 0 },
-      { value: 2.9, riskLevel: 0 },
-      { value: 3, riskLevel: 1 },
-      { value: 5.9, riskLevel: 1 },
-      { value: 6, riskLevel: 2 },
-      { value: 7.9, riskLevel: 2 },
-      { value: 8, riskLevel: 3 },
-      { value: 10.9, riskLevel: 3 },
-      { value: 11, riskLevel: 4 },
-      { value: 18, riskLevel: 4 }
-    ].forEach(test =>
-      it(`transforms the data (value: ${test.value})`, () => {
-        const service: WeatherService = TestBed.inject(WeatherService);
-        let uvIndex: UVIndex;
-        service.uvIndex().subscribe(i => (uvIndex = i));
-        const req = httpTestingController.expectOne(
-          `${environment.baseUrl}/uvi?lat=43.073051&lon=-89.40123&appid=${environment.appId}`
-        );
-        req.flush({ value: test.value });
-        expect(uvIndex).toEqual({ value: test.value, riskLevel: test.riskLevel });
-        httpTestingController.verify();
-      })
-    );
+```typescript
+it('gets the tea categories', () => {
+  service.getAll().subscribe();
+  const req = httpTesetingController.expectOne(
+    `${environment.dataService}/tea-categories`,
+  );
+  expect(req.request.method).toEqual('GET');
+  httpTesetingController.verify();
+});
 ```
+
+Write the minimal code required to make that test pass.
+
+#### Test #2 - Convert the Data
+
+The backend team has not quite figured out how they want to supply the pictures yet, so we will just hook them up based on the ID for now. We have already defined what the API result set looks like and what we expect out of the service.
+
+```typescript
+it('adds an image to each', () => {
+  let teas: Array<Tea>;
+  service.getAll().subscribe(t => (teas = t));
+  const req = httpTesetingController.expectOne(
+    `${environment.dataService}/tea-categories`,
+  );
+  req.flush(resultTeas);
+  httpTesetingController.verify();
+  expect(teas).toEqual(expectedTeas);
+});
+```
+
+In our code, we can define an array of images.
+
+```typescript
+  private images: Array<string> = [
+    'green',
+    'black',
+    'herbal',
+    'oolong',
+    'dark',
+    'puer',
+    'white',
+    'yellow',
+  ];
+```
+
+We can then use the Array `map` operator to convert the individual teas, and the RxJS `map` operator to convert the output of the Observable.
+
+```typescript
+  getAll(): Observable<Array<Tea>> {
+    return this.http.get(`${environment.dataService}/tea-categories`).pipe(
+      map((teas: Array<any>) =>
+        teas.map(t => ({
+          ...t,
+          image: `assets/img/${this.images[t.id - 1]}.jpg`,
+        })),
+      ),
+    );
+  }
+```
+
+### Get one of the teas
+
+The backend has an endpoint that just gets a specific tea category
+
+#### Test #1 - Getting Data from the Correct Endpoint
+
+```typescript
+it('gets the specific tea category', () => {
+  service.get(4).subscribe();
+  const req = httpTesetingController.expectOne(
+    `${environment.dataService}/tea-categories/4`,
+  );
+  expect(req.request.method).toEqual('GET');
+  httpTesetingController.verify();
+});
+```
+
+Write the minimal code required to make that test pass.
+
+#### Test #2 - Convert the Data
+
+The backend team has not quite figured out how they want to supply the pictures yet, so we will just hook them up based on the ID for now. We have already defined what the API result set looks like and what we expect out of the service.
+
+```typescript
+it('adds an image to the category', () => {
+  let tea: Tea;
+  service.get(4).subscribe(t => (tea = t));
+  const req = httpTesetingController.expectOne(
+    `${environment.dataService}/tea-categories/4`,
+  );
+  req.flush(resultTeas[3]);
+  httpTesetingController.verify();
+  expect(tea).toEqual(expectedTeas[3]);
+});
+```
+
+Write the minimal code required to make that test pass.
+
+### Refactor
+
+The code that you have for each of these methods probably looks pretty similar to each other:
+
+```typescript
+  getAll(): Observable<Array<Tea>> {
+    return this.http.get(`${environment.dataService}/tea-categories`).pipe(
+      map((teas: Array<any>) =>
+        teas.map(t => ({
+          ...t,
+          image: `assets/img/${this.images[t.id - 1]}.jpg`,
+        })),
+      ),
+    );
+  }
+
+  get(id: number): Observable<Tea> {
+    return this.http
+      .get(`${environment.dataService}/tea-categories/${id}`)
+      .pipe(
+        map((tea: any) => ({
+          ...tea,
+          image: `assets/img/${this.images[tea.id - 1]}.jpg`,
+        })),
+      );
+  }
+```
+
+Some of this is exected since it is a fairly common pattern that is being followed. However, the code that converts from the API data to the `Tea` model by adding an `image` property could be abstracted out to a private method. Do that. When done, your methods should look more like this:
+
+```typescript
+  getAll(): Observable<Array<Tea>> {
+    return this.http
+      .get(`${environment.dataService}/tea-categories`)
+      .pipe(map((teas: Array<any>) => teas.map(t => this.convert(t))));
+  }
+
+  get(id: number): Observable<Tea> {
+    return this.http
+      .get(`${environment.dataService}/tea-categories/${id}`)
+      .pipe(map((tea: any) => this.convert(tea)));
+  }
+```
+
+Make sure your tests are still passing.
 
 ## Conclusion
 
-Congratulations. You have learned how to craft a service that gets data and encapsulates some of the business logic of your application.
+You have created a service to get the tea data from the server and convert it to the model we use within the application. We will use the data in the next lab.
