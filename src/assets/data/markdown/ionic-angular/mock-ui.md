@@ -257,7 +257,7 @@ We currently have a list of X number of teas (currently 8, but once we start get
 First create a test for this in `src/app/tea/tea.page.spec.ts`:
 
 ```TypeScript
-  describe('initializetion', () => {
+  describe('initialization', () => {
     it('makes a tea matrix', () => {
       expect(component.teaMatrix).toEqual([
         [

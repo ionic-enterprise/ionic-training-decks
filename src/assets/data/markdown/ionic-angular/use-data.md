@@ -1,66 +1,31 @@
 # Lab: Use the Data
 
-In this lab you will learn how to:
+In this lab you will:
 
-- Inject a service into your pages
-- Diagnose errors that occur while you are developing your application
+- Inject a service into your main page
 - Retrieve real data from the service, replacing the mock data
 
 ## Injector Error
 
-Start by injecting the `WeatherService` into the `current-weather` page.
+Start by injecting the `TeaService` into the `tea` page.
 
 ```TypeScript
-import { WeatherService } from '@app/services';
+import { TeaService } from '@app/services';
 
 ...
 
   constructor(
-    public iconMap: IconMapService,
-    private weather: WeatherService
+    private auth: AuthenticationService,
+    private teaService: TeaService
   ) {}
 ```
 
-When you run the application after this change, though, you should get an error like the following in the _console_ and in your _test runner_:
-
-```
-Error: StaticInjectorError(AppModule)[HttpClient]:
-  StaticInjectorError(Platform: core)[HttpClient]:
-    NullInjectorError: No provider for HttpClient!
-```
-
-**Note:** You may have to restart the dev server to see the error.
-
-What is going on with the application is that `HttpClient` is injected into the `WeatherService` service, but the `HttpClient` service has not been provided anywhere so the application does not know how to inject it. You need to modify the `AppModule` to import the `HttpClientModule` as such:
-
-```TypeScript
-import { HttpClientModule } from '@angular/common/http';
-
-...
-
-@NgModule({
-  ...
-  imports: [
-    BrowserModule,
-    HttpClientModule,
-    IonicModule.forRoot(),
-    AppRoutingModule
-  ],
-  ...
-})
-export class AppModule {}
-```
-
-Save those changes and check your application - the error should be gone there. We will tackle the issue in the tests next by mocking the service.
-
-**Note:** You may have to restart the dev server to see the error go away.
-
 ## Mock the Service
 
-Another problem is that the test for the `CurrentWeatherPage` has started failing because the `TestBed` does not know how to inject the `HttpClient`. This situation will be handled somewhat differently:
+One problem we see right away is that the test for the `TeaPage` has started failing because the `TestBed` does not know how to inject the `HttpClient`. The real issue, though is that are are tring to inject the real `TeaService`.
 
-1. We are testing the page in isolation, so we should create a mock object for the weather service.
-1. We need to provide the mock weather service to the test.
+1. We are testing the page in isolation, so we should create a mock object for the tea service.
+1. We need to provide the mock tea service to the test.
 
 I prefer to keep my mocks along side my services. This has a couple of benefits:
 
@@ -69,30 +34,20 @@ I prefer to keep my mocks along side my services. This has a couple of benefits:
 
 ### Create the Mock Service Factory
 
-The factory creates a jasmine spy matching the API for the service. In the case of the weather service, each method returns an `EMPTY` observable by default.
+The factory creates a jasmine spy matching the API for the service. In the case of the tea service, each method returns an `EMPTY` observable by default.
 
-**`src/app/services/weather/weather.service.mock.ts`**
+**`src/app/services/tea/tea.service.mock.ts`**
 
 ```TypeScript
 import { EMPTY } from 'rxjs';
-import { WeatherService } from './weather.service';
+import { TeaService } from './tea.service';
 
-export function createWeatherServiceMock() {
-  return jasmine.createSpyObj<WeatherService>('WeatherService', {
-    current: EMPTY,
-    forecast: EMPTY,
-    uvIndex: EMPTY
+export function createTeaServiceMock() {
+  return jasmine.createSpyObj<TeaService>('TeaService', {
+    getAll: EMPTY,
+    get: EMPTY,
   });
 }
-```
-
-Creating this file may cause the `npm start` build to begin failing as it tries to include the mock. Add the `**/*.mock.js` files to the exclusions in `tsconfig.app.json`
-
-```JSON
-  "exclude": [
-    "**/*.mock.ts",
-    "**/*.spec.ts"
-  ]
 ```
 
 ### Inject the Mock Service
@@ -102,12 +57,23 @@ The mock can either be manually created and injecting via `useValue` or we can p
 ```TypeScript
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [CurrentWeatherPage],
+      declarations: [TeaPage],
+      imports: [IonicModule],
       providers: [
-        { provide: WeatherService, useFactory: createWeatherServiceMock }
+        {
+          provide: AuthenticationService,
+          useFactory: createAuthenticationServiceMock,
+        },
+        {
+          provide: TeaService,
+          useFactory: createTeaServiceMock,
+        },
       ],
-      schemas: [CUSTOM_ELEMENTS_SCHEMA]
     }).compileComponents();
+
+    fixture = TestBed.createComponent(TeaPage);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
   }));
 ```
 
@@ -118,155 +84,206 @@ There are two lifecycle events that are good candidates for getting data:
 - `ngOnInit` - Angular lifecycle event, fired when a component is instantiated
 - `ionViewDidEnter` - Ionic lifecycle event, fired each time a page is visited
 
-In our application, we want to get new data each time the page is visited. The natural place to do this is the `ionViewDidEnter()` lifecycle event.
+In our application, we want really only need to grab the data once, when the page is first loaded. The `ngOnInit` event is the best place for that.
+
+Let's start by cleaning up the `TeaPage` a little:
+
+- refactor `listToMatrix` to take a single array of teas and return a matrix of teas
+- change the code that calls it to compensate for the change, your tests should still work
+- change the class declaration for the page to add `implements OnInit`
+- add an empty `ngOnInit()` method
+- finally, remove the private `teaData` object and the `this.listToMatrix()` call in the constructor
+
+That last item broke your tests. That is fine. We will fix that. If you did everything correctly, your code should now look something like this:
+
+```typescript
+import { Component, OnInit } from '@angular/core';
+import { Tea } from '@app/models';
+import { AuthenticationService, TeaService } from '@app/services';
+import { take } from 'rxjs/operators';
+
+@Component({
+  selector: 'app-tea',
+  templateUrl: 'tea.page.html',
+  styleUrls: ['tea.page.scss'],
+})
+export class TeaPage implements OnInit {
+  teaMatrix: Array<Array<Tea>> = [];
+
+  constructor(
+    private auth: AuthenticationService,
+    private teaService: TeaService,
+  ) {}
+
+  ngOnInit() {}
+
+  logout() {
+    this.auth.logout().pipe(take(1)).subscribe();
+  }
+
+  private listToMatrix(teas: Array<Tea>): Array<Array<Tea>> {
+    const matrix = [];
+    let row = [];
+    teas.forEach(t => {
+      row.push(t);
+      if (row.length === 4) {
+        matrix.push(row);
+        row = [];
+      }
+    });
+
+    if (row.length) {
+      matrix.push(row);
+    }
+
+    return matrix;
+  }
+}
+```
 
 ### Test First
 
-We have some new functionallity to cover. That functionallity is "entering the page", and the requirements are "it gets the current weather" and "it displays the the weather." Let's create some tests that express these requirements:
+First remove the "makes a tea matrix" test. We will certainly be making one, but we will be doing so based on the data fetched from the backend API, not from the hard coded data we had before.
 
-```TypeScript
-  describe('entering the page', () => {
-    it('gets the current weather', () => {
-      const weather =  TestBed.inject(WeatherService);
-      component.ionViewDidEnter();
-      expect(weather.current).toHaveBeenCalledTimes(1);
-    });
+For the new functionality, we want to test the following:
 
-    it('displays the current weather', () => {
-      const weather = TestBed.inject(WeatherService);
-      (weather.current as any).and.returnValue(
-        of({
-          temperature: 280.32,
-          condition: 300,
-          date: new Date(1485789600 * 1000)
-        })
-      );
-      component.ionViewDidEnter();
-      fixture.detectChanges();
-      const t = fixture.debugElement.query(By.css('kws-temperature'));
-      expect(t).toBeTruthy();
-    });
-  });
+- it fetches the teas
+- it makes an empty matrix if there are no teas
+- it makes an X by 4 matrix when their are teas (use a multiple of 4 and a non-multiple of 4)
+
+In order to do this, we will have to move where we do the `fixture.detectChanges();` call. This will have to be moved to the tests after the return value of the `getAll()` mock is set up.
+
+The intial shell for the tests will then look like this:
+
+```typescript
+it('should create', () => {
+  fixture.detectChanges();
+  expect(component).toBeTruthy();
+});
+
+describe('initializetion', () => {
+  it('gets the teas', () => {});
+
+  it('creates an empty matrix if there is no tea', () => {});
+
+  it('creates a 1x4 matrix for 4 teas', () => {});
+
+  it('creates a 2x4 matrix with two empty spots in the last row for 6 teas', () => {});
+});
 ```
 
-**Note:** You will need to add `import { of } from 'rxjs';` and `import { By } from '@angular/platform-browser';` to the top of your test file.
+Let's fill in the tests one at a time and create the code.
 
-Once you get those test written, they should be failing. Let's talk about the strategy of those tests a bit before moving on to writing the code.
+#### Get the Teas
 
-### Modify the Code
+```typescript
+it('gets the teas', () => {
+  const teaService = TestBed.inject(TeaService);
+  fixture.detectChanges();
+  expect(teaService.getAll).toHaveBeenCalledTimes(1);
+});
+```
 
-```TypeScript
-  ionViewDidEnter() {
-    this.weather.current().subscribe(w => (this.currentWeather = w));
+Write the minimal code in `ngOnInit()` in order to make the test pass.
+
+#### Initialize an Empty Matrix for No Tea
+
+```typescript
+it('creates an empty matrix if there is no tea', () => {
+  const teaService = TestBed.inject(TeaService);
+  (teaService.getAll as any).and.returnValue(of([]));
+  fixture.detectChanges();
+  expect(component.teaMatrix).toEqual([]);
+});
+```
+
+This test likely already passes. If not, fix your code so it does.
+
+#### Initialize a 1x4 Matrix for Four Teas
+
+```typescript
+it('creates a 1x4 matrix for 4 teas', () => {
+  const teaService = TestBed.inject(TeaService);
+  (teaService.getAll as any).and.returnValue(
+    of([
+      {
+        id: 1,
+        name: 'Green',
+        image: 'assets/img/green.jpg',
+        description: 'Green tea description.',
+      },
+      {
+        id: 2,
+        name: 'Black',
+        image: 'assets/img/black.jpg',
+        description: 'Black tea description.',
+      },
+      {
+        id: 3,
+        name: 'Herbal',
+        image: 'assets/img/herbal.jpg',
+        description: 'Herbal Infusion description.',
+      },
+      {
+        id: 4,
+        name: 'Oolong',
+        image: 'assets/img/oolong.jpg',
+        description: 'Oolong tea description.',
+      },
+    ]),
+  );
+  fixture.detectChanges();
+  expect(component.teaMatrix).toEqual([
+    [
+      {
+        id: 1,
+        name: 'Green',
+        image: 'assets/img/green.jpg',
+        description: 'Green tea description.',
+      },
+      {
+        id: 2,
+        name: 'Black',
+        image: 'assets/img/black.jpg',
+        description: 'Black tea description.',
+      },
+      {
+        id: 3,
+        name: 'Herbal',
+        image: 'assets/img/herbal.jpg',
+        description: 'Herbal Infusion description.',
+      },
+      {
+        id: 4,
+        name: 'Oolong',
+        image: 'assets/img/oolong.jpg',
+        description: 'Oolong tea description.',
+      },
+    ],
+  ]);
+});
+```
+
+write the code required to get this to pass. You will need to add a `map` to the observable pipeline that is returned by the `getAll()`, use a call to `this.listToMatrix()` to transform the data, `subscribe()` to the observable, and assign the `this.teaMatrix` appropriately.
+
+#### Initialize a 1x4 Matrix for Four Teas
+
+This test is really just a copy of the prior test with two more teas. The output should have two rows in the matix with the second row consisting of the two extra teas. Creation of this test is left as an exercise to the reader.
+
+This test should pass. If it does not, figure out what is wrong and fix it.
+
+#### Completed Code
+
+When you are done, your `ngOnInit()` method should look something like this:
+
+```typescript
+  ngOnInit() {
+    this.teaService
+      .getAll()
+      .pipe(map(t => this.listToMatrix(t)))
+      .subscribe(m => (this.teaMatrix = m));
   }
 ```
-
-Finally, `currentWeather` can just be left declared but unassigned. Remove the mock data that is currently assigned to it.
-
-```TypeScript
-  currentWeather: Weather;
-```
-
-**Challenge:** Make similar modifications to the `forecast` and `uv-index` tests and pages. Here are some possible tests to use:
-
-#### `forecast.page.spec.ts`
-
-```TypeScript
-  describe('entering the page', () => {
-    it('gets the forecast', () => {
-      const weather = TestBed.inject(WeatherService);
-      component.ionViewDidEnter();
-      expect(weather.forecast).toHaveBeenCalledTimes(1);
-    });
-
-    it('shows the forecast items', () => {
-      const weather = TestBed.inject(WeatherService);
-      (weather.forecast as any).and.returnValue(
-        of([
-          [
-            {
-              temperature: 300,
-              condition: 200,
-              date: new Date(2018, 8, 19)
-            }
-          ],
-          [
-            {
-              temperature: 265,
-              condition: 601,
-              date: new Date(2018, 8, 20)
-            }
-          ],
-          [
-            {
-              temperature: 293,
-              condition: 800,
-              date: new Date(2018, 8, 21)
-            }
-          ]
-        ])
-      );
-      component.ionViewDidEnter();
-      fixture.detectChanges();
-      const f = fixture.debugElement.queryAll(By.css('kws-daily-forecast'));
-      expect(f.length).toEqual(3);
-    });
-  });
-```
-
-#### `uv-index.page.spec.ts`
-
-```TypeScript
-  describe('entering the page', () => {
-    beforeEach(() => {
-      const weather = TestBed.inject(WeatherService);
-      (weather.uvIndex as any).and.returnValue(
-        of({
-          value: 3.5,
-          riskLevel: 1
-        })
-      );
-    });
-
-    it('gets the UV index', () => {
-      const weather = TestBed.inject(WeatherService);
-      component.ionViewDidEnter();
-      expect(weather.uvIndex).toHaveBeenCalledTimes(1);
-    });
-
-    it('displays the UV index', () => {
-      component.ionViewDidEnter();
-      fixture.detectChanges();
-      const el = fixture.debugElement.query(By.css('kws-uv-index'));
-      expect(el).toBeTruthy();
-    });
-
-    it('displays the appropriate description', () => {
-      component.ionViewDidEnter();
-      fixture.detectChanges();
-      const el = fixture.debugElement.query(By.css('.description'));
-      expect(el.nativeElement.textContent).toContain('Stay in the shade');
-    });
-  });
-```
-
-## Extra Credit
-
-Have a look at the ES6 imports in our page tests where we are bringing in the service and the factory for its mock:
-
-```TypeScript
-import { WeatherService } from '@app/services';
-import { createWeatherServiceMock } from '@app/services/weather/weather.service.mock';
-```
-
-The service is imported from a barrel file in the `services` base folder, but if the mock factory is broght in via a full path. If we later refactor the directory structure this will become a maintenance problem. It would be nice if we could do this:
-
-```TypeScript
-import { WeatherService } from '@app/services';
-import { createWeatherServiceMock } from '@app/services/testing';
-```
-
-**Challenge:** figure out how to accomlish this, make sure you can still do an `npm run build` when you are done
 
 ## Conclusion
 
