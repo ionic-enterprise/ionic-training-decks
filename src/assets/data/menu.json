@@ -52,16 +52,12 @@
           "file": "use-data"
         },
         {
-          "title": "Add Loading Indicator",
-          "file": "loading-indicator"
+          "title": "Details Page",
+          "file": "details-page"
         },
         {
-          "title": "Create a Generic Base Class",
-          "file": "base-class"
-        },
-        {
-          "title": "Switch Scale",
-          "file": "ionic-storage"
+          "title": "Tabbed Navigation",
+          "file": "tabbed-navigation"
         },
         {
           "title": "On Push Change Detection",
