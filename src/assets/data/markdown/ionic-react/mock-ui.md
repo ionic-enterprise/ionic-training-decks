@@ -21,24 +21,31 @@ const App: React.FC = () => (
     <IonReactRouter>
       <IonTabs>
         <IonRouterOutlet>
-          <Route path="/current-weather" component={CurrentWeatherPage} exact={true} />
-          <Route path="/forecast" component={ForecastPage} exact={true} />
-          <Route path="/forecast/details" component={Details} />
-          <Route path="/uv-index" component={Tab3} />
-          <Route path="/" render={() => <Redirect to="/current-weather" />} exact={true} />
+          <Route
+            path="/current-weather"
+            component={CurrentWeather}
+            exact={true}
+          />
+          <Route path="/forecast" component={Forecast} exact={true} />
+          <Route path="/uv-index" component={UVIndex} />
+          <Route
+            path="/"
+            render={() => <Redirect to="/current-weather" />}
+            exact={true}
+          />
         </IonRouterOutlet>
-        <IonTabBar slot="bottom">
-          <IonTabButton tab="tab1" href="/current-weather">
-            <IonIcon icon={flash} />
-            <IonLabel>Tab One</IonLabel>
+        <IonTabBar color="primary" slot="bottom">
+          <IonTabButton tab="current-weather" href="/current-weather">
+            <IonIcon icon={triangle} />
+            <IonLabel>Tab 1</IonLabel>
           </IonTabButton>
-          <IonTabButton tab="tab2" href="/forecast">
-            <IonIcon icon={apps} />
-            <IonLabel>Tab Two</IonLabel>
+          <IonTabButton tab="forecast" href="/forecast">
+            <IonIcon icon={ellipse} />
+            <IonLabel>Tab 2</IonLabel>
           </IonTabButton>
-          <IonTabButton tab="tab3" href="/uv-index">
-            <IonIcon icon={send} />
-            <IonLabel>Tab Three</IonLabel>
+          <IonTabButton tab="uv-index" href="/uv-index">
+            <IonIcon icon={square} />
+            <IonLabel>Tab 3</IonLabel>
           </IonTabButton>
         </IonTabBar>
       </IonTabs>
@@ -51,9 +58,9 @@ In the `App.test.tsx` file, there is a test for the tab labels. It looks like th
 
 ```TypeScript
 it.each([
-  [0, "Tab One"],
-  [1, "Tab Two"],
-  [2, "Tab Three"]
+  [0, "Tab 1"],
+  [1, "Tab 2"],
+  [2, "Tab 3"]
 ])("contains the proper text for tab %i", (tab, text) => {
   const { container } = render(<App />);
   expect(
@@ -168,9 +175,9 @@ const CurrentWeather: React.FC = () => {
         <kws-condition condition={condition} ref={ref}></kws-condition> 
 ```
 
-Note that the class for `kws-temperature` is set using `class` just like in normal HTML and not using the usual React `className` hack-around. That is because this is a custom element and not either a standard HTML element or a React component.
+Note that the class for `kws-temperature` is set using `class` just like in normal HTML and not using the usual React `className` hack-around. That is because this is a custom element and neither a standard HTML element nor a React component.
 
-Also note the "ref" bit on the `kws-condition`. That is necessary because we need to pass the `iconPaths` object to the web component. However, React doesn't particularily work well with standard web components and will only pass the a string to the property, so instead, we will get a ref to the element and then we will use the Effect hook to set the property as such:
+Also note the "ref" bit on the `kws-condition`. That is necessary because we need to pass the `iconPaths` object to the web component. However, React doesn't particularily work well with standard web components and will only pass this as an attribute (that is, using a string), so instead we will get a ref to the element and then we will use the Effect hook to set the property as such:
 
 ```TypeScript
 import React, { useEffect, useRef, useState } from 'react';
@@ -240,7 +247,7 @@ Restart the dev server after making this change.
 
 #### Styles
 
-We now see the page with the current weather information on it, but it could use some formatting. Let's add the following to the `theme/styles.css` file:
+We now see the page with the current weather information on it, but it could use some formatting. Let's add the following to the `src/theme/styles.css` file:
 
 ```css
 kws-condition {
@@ -258,12 +265,6 @@ It would also be nice if the text were centered and the page padded, so let's ad
 At this point, the `CurrentWeather.css` file no longer serves a purpose. You can remove its reference from `CurrentWeather.tsx` and delete the file.
 
 ### Forecast
-
-#### Cleanup
-
-The current `Forecast.tsx` file has some cruft left over from the starter that demonstrates navigating to a child `Details.tsx` page. Let's start by removing all of that so we have nothing within the `IonContent` node. The route for the "Details" page is defined in `App.tsx`. You will need to remove the reference from there as well.
-
-Remove any unused references in the `Forecast.tsx` file as well.
 
 #### Models
 
@@ -460,16 +461,20 @@ And some data that defines the descriptions we will show:
       'Bright surfaces, such as sand, water and snow, will increase UV exposure.',
     'Stay in the shade near midday when the sun is strongest. If outdoors, wear sun protective clothing, ' +
       'a wide-brimmed hat, and UV-blocking sunglasses. Generously apply broad spectrum SPF 30+ sunscreen every 2 hours, ' +
-      'even on cloudy days, and after swimming or sweating. Bright surfaces, such as sand, water and snow, will increase UV exposure.',
-    'Reduce time in the sun between 10 a.m. and 4 p.m. If outdoors, seek shade and wear sun protective clothing, a wide-brimmed hat, ' +
-      'and UV-blocking sunglasses. Generously apply broad spectrum SPF 30+ sunscreen every 2 hours, even on cloudy days, ' +
-      'and after swimming or sweating. Bright surfaces, such sand, water and snow, will increase UV exposure.',
-    'Minimize sun exposure between 10 a.m. and 4 p.m. If outdoors, seek shade and wear sun protective clothing, a wide-brimmed hat, ' +
-      'and UV-blocking sunglasses. Generously apply broad spectrum SPF 30+ sunscreen every 2 hours, even on cloudy days, and after ' +
-      'swimming or sweating. Bright surfaces, such as sand, water and snow, will increase UV exposure.',
-    'Try to avoid sun exposure between 10 a.m. and 4 p.m. If outdoors, seek shade and wear sun protective clothing, a wide-brimmed hat, ' +
-      'and UV-blocking sunglasses. Generously apply broad spectrum SPF 30+ sunscreen every 2 hours, even on cloudy days, ' +
-      'and after swimming or sweating. Bright surfaces, such as sand, water and snow, will increase UV exposure.'
+      'even on cloudy days, and after swimming or sweating. Bright surfaces, such as sand, water and snow, ' +
+      'will increase UV exposure.',
+    'Reduce time in the sun between 10 a.m. and 4 p.m. If outdoors, seek shade and wear sun protective clothing, ' +
+      'a wide-brimmed hat, and UV-blocking sunglasses. Generously apply broad spectrum SPF 30+ sunscreen every 2 hours, ' +
+      'even on cloudy days, and after swimming or sweating. Bright surfaces, such sand, water and snow, ' +
+      'will increase UV exposure.',
+    'Minimize sun exposure between 10 a.m. and 4 p.m. If outdoors, seek shade and wear sun protective clothing, ' +
+      'a wide-brimmed hat, and UV-blocking sunglasses. Generously apply broad spectrum SPF 30+ sunscreen every 2 hours, ' +
+      'even on cloudy days, and after swimming or sweating. Bright surfaces, such as sand, water and snow, ' +
+      'will increase UV exposure.',
+    'Try to avoid sun exposure between 10 a.m. and 4 p.m. If outdoors, seek shade and wear sun protective clothing, ' +
+      'a wide-brimmed hat, and UV-blocking sunglasses. Generously apply broad spectrum SPF 30+ sunscreen every 2 hours, ' +
+      'even on cloudy days, and after swimming or sweating. Bright surfaces, such as sand, water and snow, ' +
+      'will increase UV exposure.',
   ];
 ```
 

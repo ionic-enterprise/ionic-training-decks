@@ -53,27 +53,6 @@ Sometimes tests logically belong grouped together. For example, tests that exerc
 
 The `App.test.tsx` test does not require any setup or teardown code. We will add tests later that require this, and will revisit setup and teardown code at that time.
 
-### Simplify the "renders without crashing" Test
-
-Install the <a href="https://testing-library.com/docs/react-testing-library/intro" target="_blank">React Testing Library</a> to help us simplify our testing. 
-
-```
-npm i @testing-library/react -D
-```
-
-Import the renderer from this library into the `App.test.tsx` file and use it to simplify the current test:
-
-```TypeScript
-import React from 'react';
-import { render } from '@testing-library/react';
-import App from './App';
-
-it('renders without crashing', () => {
-  const { container } = render(<App />);
-  expect(container.innerHTML).toBeTruthy();
-})
-```
-
 ### Test the Tabs
 
 We can query the DOM in order to make sure the component is rendering correctly.
@@ -89,9 +68,9 @@ If we have a test that is highly repetative using the same logic across differin
 
 ```TypeScript
 it.each([
-  [0, 'Tab One'],
-  [1, 'Tab Two'],
-  [2, 'Tab Three']
+  [0, 'Tab 1'],
+  [1, 'Tab 2'],
+  [2, 'Tab 3']
 ])('contains the proper text for tab %i', (tab, text) => {
   const { container } = render(<App />);
   expect(container.querySelectorAll('ion-tab-button')[tab as number].textContent).toEqual(text);
@@ -109,7 +88,7 @@ it('renders consistently', () => {
 });
 ```
 
-When the tests run, if a change is made that changes the way your component renders, this test will fail. If the change is due intentional, there are a couple of ways to update the snapshots:
+When the tests run, if a change is made that changes the way your component renders, this test will fail. If the change is intentional, there are a couple of ways to update the snapshots:
 
 - If you are using the VSCode Jest plugin, it will display a toast asking you if you would like to update the snapshots
 - If you are running the tests interactively, pressing `u` will update the snapshots

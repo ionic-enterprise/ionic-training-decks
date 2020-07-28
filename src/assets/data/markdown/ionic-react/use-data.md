@@ -5,23 +5,48 @@ In this lab you will learn how to:
 - Import a service into your pages
 - Retrieve real data from the service, replacing the mock data
 
+## Update the App Test
+
+The app test will render the Current Weather page. If the rendering gets far enough along, the test may make an actual call to the backend service. We don't want that, so let's circumvent that possibility by mocking the weather service in `App.test.tsx` as such:
+
+```typescript
+import { weather } from './util';
+
+let spy: any;
+beforeAll(() => {
+  spy = jest.spyOn(weather, 'current').mockImplementation(() =>
+    Promise.resolve({
+      temperature: 280.32,
+      condition: 300,
+      date: new Date(1485789600 * 1000),
+    } as any),
+  );
+});
+
+afterAll(() => spy.mockReset());
+```
+
+Now if `weather.current()` is called it will not do any harm.
+
 ## Current Weather Page
 
 The changes required to use the weather service in the `CurrentWeatherPage.tsx` file are pretty straight forward:
 
 First we need to import the service itself: `import { iconPaths, weather } from '../util';`
 
-Next we need to call the service and set the state. We will use the `IonViewWillEnter` lifecycle hook to perform the actual work, but first we have to modify our state hooks a bit by removing the initial value assignment and grabbing a reference to the returned setter function:
+Next we need to call the service and set the state. We will use the `IonViewWillEnter` lifecycle hook to perform the actual work, but first we have to modify our state hooks a bit by removing the initial value assignment, typing it,  and grabbing a reference to the returned setter function:
 
 ```TypeScript
-  const [temperature, setTemperature] = useState();
-  const [condition, setCondition] = useState();
+  const [temperature, setTemperature] = useState<number>();
+  const [condition, setCondition] = useState<number>();
 ```
+
+Removing the initial value will cause the bound web component to show "Unknown" if we have not gotten any weather data yet. Usually this will not be noticable, but it may be in a slow network (or no network) situation. We need to type the hooks, however, because TypeScript can no longer infer the type from context.
 
 Now we can add the `IonViewWillEnter` lifecycle hook:
 
 ```TypeScript
-  useIonViewWillEnter(async ()=>{
+  useIonViewWillEnter(async ()=> {
     const res = await weather.current();
     setTemperature(res.temperature);
     setCondition(res.condition);
@@ -38,15 +63,15 @@ import React, { useRef, useState, useEffect } from 'react';
 import { iconPaths, weather } from '../util';
 
 const CurrentWeatherPage: React.FC = () => {
-  const [temperature, setTemperature] = useState();
-  const [condition, setCondition] = useState();
+  const [temperature, setTemperature] = useState<number>();
+  const [condition, setCondition] = useState<number>();
   const ref = useRef(null);
 
   useEffect(() => {
     (ref.current as any)!.iconPaths = iconPaths;
   });
 
-  useIonViewWillEnter(async ()=>{
+  useIonViewWillEnter(async ()=> {
     const res = await weather.current();
     setTemperature(res.temperature);
     setCondition(res.condition);
@@ -71,8 +96,6 @@ const CurrentWeatherPage: React.FC = () => {
 
 export default CurrentWeatherPage;
 ```
-
-Your snapshot test is probably failing at this point, so regenerate your snapshot. Don't worry about the fact that we are using the real data at this point. The data will not be fetched before the snapshot.
 
 ## Forecast and UV Index
 

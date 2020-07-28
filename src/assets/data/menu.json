@@ -120,12 +120,16 @@
           "file": "use-data"
         },
         {
-          "title": "The Capacitor Workflow",
-          "file": "capacitor"
-        },
-        {
           "title": "Add Loading Indicator",
           "file": "loading-indicator"
+        },
+        {
+          "title": "Add Platforms",
+          "file": "platforms"
+        },
+        {
+          "title": "Use Native APIs",
+          "file": "native-apis"
         },
         {
           "title": "Switch Scale",

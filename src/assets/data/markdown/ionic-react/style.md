@@ -45,33 +45,13 @@ You can use our <a href="https://ionicframework.com/docs/theming/color-generator
 - Change the `Primary` color to `#085a9e`
 - Change the `Secondary` color to `#f4a942`
 
-In both cases, the `-shade` and `-tint` variants were automatically calculated. Have a look at those values by clicking on the `Primary` and `Secondary` colors. Save the changes.
-
-Look at the `src/app/variables.css` file and verify that the changes have been saved.
-
-```css
-/** primary **/
---ion-color-primary: #085a9e;
---ion-color-primary-rgb: 8, 90, 158;
---ion-color-primary-contrast: #ffffff;
---ion-color-primary-contrast-rgb: 255, 255, 255;
---ion-color-primary-shade: #074f8b;
---ion-color-primary-tint: #216ba8;
-
-/** secondary **/
---ion-color-secondary: #f4a942;
---ion-color-secondary-rgb: 244, 169, 66;
---ion-color-secondary-contrast: #000000;
---ion-color-secondary-contrast-rgb: 0, 0, 0;
---ion-color-secondary-shade: #d7953a;
---ion-color-secondary-tint: #f5b255;
-```
+In both cases, the `-shade` and `-tint` variants were automatically calculated. Copy the `--ion-color-primary` and `--ion-color-secondary` family of colors from the `CSS Variables` portion of the color generator and paste them into the `src/app/variables.css` file, relacing the values that exist there for those variables.
 
 ## Apply Colors
 
 Right now, most of the application is sky blue. That is because most of the components in the application are using the default background color. To change this, specify the `Primary` color for the tab bar and each page's header.
 
-- Add `color="primary"` in the `ion-tab-bar` in `src/app/tabs/tabs.page.html`
+- Add `color="primary"` in the `IonTabBar` in `src/App.tsx`
 - Add the following styling to the `styles.css` file
 
 ```css
@@ -82,6 +62,12 @@ ion-toolbar {
 ```
 
 This shows two different ways to apply the color to a component. The `color="primary"` was used on the `ion-tab-bar` because it is less work for the one tab bar that we have. The Custom CSS Property values were set for the `ion-toolbar` to avoid having to add `color="primary"` to the tollbar in every page of our application. In many cases it is better to use the `color` property as it will fully apply all related shades and tints as needed.
+
+The snapshot test should be failing at this point. Let's update the snapshot:
+
+- Kill the existing test run
+- `npm run test:upd`
+- `npm test`
 
 ## Conclusion
 

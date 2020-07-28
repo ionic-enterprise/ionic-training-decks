@@ -28,11 +28,17 @@ There is a method in the library called `defineCustomElements()` that needs to b
 import React from 'react';
 import ReactDOM from 'react-dom';
 import App from './App';
+import * as serviceWorker from './serviceWorker';
 
-import { defineCustomElements } from 'kws-weather-widgets/loader';
+import{ defineCustomElements} from 'kws-weather-widgets/loader'
 
 ReactDOM.render(<App />, document.getElementById('root'));
-defineCustomElements(window);
+defineCustomElements();
+
+// If you want your app to work offline and load faster, you can change
+// unregister() to register() below. Note this comes with some pitfalls.
+// Learn more about service workers: https://bit.ly/CRA-PWA
+serviceWorker.unregister();
 ```
 
 There are a couple more tricks we will need to employ when using this web component library within a React application, but we will cross that bridge when we come to it.

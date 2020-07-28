@@ -15,7 +15,7 @@ The service that we are using to get weather data has a free tier, but that tier
 - Go to <a href="https://openweathermap.org/" target="_blank">OpenWeatherMap.org</a> and sign up for a free account, then generate an API key for yourself
 - Use the key that has been supplied for this class (this key will be deleted at some point in the future)
 
-We will be creating a "service" class that fetches the data from the weather API and transforms the data into models that are suitable for use within our application. Refer to the <a href="https://openweathermap.org/api" target="_blank">API docs<a/> for details on the weather service API.
+We will be creating a "service" class that fetches the data from the weather API and transforms the data into models that are suitable for use within our application. Refer to the <a href="https://openweathermap.org/api" target="_blank">API docs</a> for details on the weather service API.
 
 ## Create a Service
 
@@ -59,32 +59,21 @@ Our test now looks like this:
 import { weather } from './weather';
 
 describe('weather service', () => {
-  let spy: any;
-  beforeEach(() => {
-    spy = jest.spyOn(window, 'fetch').mockImplementation(() =>
-      Promise.resolve({
-        json: () => Promise.resolve()
-      } as any)
-    );
-  });
-
-  afterEach(() => spy.mockReset());
-
   it('exists', () => {
     expect(weather).toBeTruthy();
   });
 
   describe('current weather', () => {
-      let spy: any;
-      beforeEach(() => {
-        spy = jest.spyOn(window, 'fetch').mockImplementation(() =>
-          Promise.resolve({
-            json: () => Promise.resolve(currentWeather)
-          } as any)
-        );
-      });
+    let spy: any;
+    beforeEach(() => {
+      spy = jest.spyOn(window, 'fetch').mockImplementation(() =>
+        Promise.resolve({
+          json: () => Promise.resolve(currentWeather)
+        } as any)
+      );
+    });
 
-      afterEach(() => spy.mockReset());
+    afterEach(() => spy.mockReset());
   });
 });
 
@@ -116,7 +105,7 @@ Let's create a test for each requirement.
     await weather.current();
     expect(window.fetch).toHaveBeenCalledTimes(1);
     expect(window.fetch).toHaveBeenCalledWith(
-      'https://api.openweathermap.org/data/2.5/weather?lat=43.073051&lon=-89.40123&appid=357d7d7f94bf6a9b04b534db299a1a3b'
+      'https://api.openweathermap.org/data/2.5/weather?lat=43.073051&lon=-89.40123&appid=CHANGEME'
     );
   });
 
@@ -281,7 +270,7 @@ describe('forecast', () => {
     await weather.forecast();
     expect(window.fetch).toHaveBeenCalledTimes(1);
     expect(window.fetch).toHaveBeenCalledWith(
-      'https://api.openweathermap.org/data/2.5/forecast?lat=43.073051&lon=-89.40123&appid=357d7d7f94bf6a9b04b534db299a1a3b'
+      'https://api.openweathermap.org/data/2.5/forecast?lat=43.073051&lon=-89.40123&appid=CHANGEME'
     );
   });
 
@@ -388,20 +377,7 @@ const forecast = {
 
 ### Code Second
 
-Satisfying the first test is easy, especially with the pattern we have already created:
-
-```TypeScript
-  async forecast(): Promise<WeeklyForecast> {
-    const data = await this.fetchData('forecast');
-    return this.unpackForecast(data);
-  }
-  ...
-    private unpackForecast(data: any): WeeklyForecast {
-    return data;
-  }
-```
-
-To satisfy the second test, we need to flesh out the `unpackForecast()` method:
+We will follow the same pattern already established, but furst we need to flesh out the `unpackForecast()` method:
 
 ```TypeScript
   private unpackForecast(data: any): WeeklyForecast {
@@ -422,6 +398,8 @@ To satisfy the second test, we need to flesh out the `unpackForecast()` method:
     return forecast;
   }
 ```
+
+Now write the rest of the code.
 
 ## UV Index
 
@@ -461,7 +439,7 @@ describe('UV index', () => {
     await weather.uvIndex();
     expect(window.fetch).toHaveBeenCalledTimes(1);
     expect(window.fetch).toHaveBeenCalledWith(
-      'https://api.openweathermap.org/data/2.5/uvi?lat=43.073051&lon=-89.40123&appid=357d7d7f94bf6a9b04b534db299a1a3b'
+      'https://api.openweathermap.org/data/2.5/uvi?lat=43.073051&lon=-89.40123&appid=CHANGEME'
     );
   });
 
