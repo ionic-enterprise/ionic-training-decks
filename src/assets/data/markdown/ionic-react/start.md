@@ -2,24 +2,59 @@
 
 In this lab, you will:
 
-- Start a new Ionic React application
-- Add some code formatting tooling
-- Restructure the starter for our base application
+- Use the CLI to create a starter application
+- Learn some Ionic CLI commands
 - Build and run the starter application
 
-## Start Here
+## Overview
 
-The Ionic CLI includes a command called `start` that we can use to bootstrap an application. The `start` command will use a basic starter application as its starting point. It is best to begin with the starter that most closely resembles the type of application we would like to create. In our case, we want a basic tabs based application, so we will use the `tabs` starter.
+THe Ionic command line is the main tool used to develop Ionic applications. This tool allows you to generate new applications, built the application, interact with Appflow and many other tasks. The command line also wraps and extends other command lines such as the Capacitor command line, react-scripts command line, etc.
+
+If you type `ionic --help` at the command line you get a list of the available top level commands that can be run via the CLI. These commands are broken into two sections: Global Commands and Project Commands. Global Commands can be run from anywhere where as the Project Commands can only be run from an Ionic project directory. Common top level commands include `start`, `info`, `generate`, and `serve`. We will learn more about these commands as we use them.
+
+## Create the Application
+
+The first thing we will use the Ionic CLI for is to start a new application. Type `ionic start --help` to get some instructions on how the `start` command works as well as some examples on how to use it. Notice that it has two basic modes of operation. You can either enter the command with a complete set of options, at which point the start operation will run all of the way through without asking questions, or you can supply a partial set of options, and the `start` command will prompt you for the information that it needs. If you just type `ionic start`, it will prompt for all of the information.
+
+Lets start our application via whichever technique you prefer:
+
+1. At the command line, change directories to a starting directory. I prefer `~/Projects/Training`
+2. Enter the following command: `ionic start tea-taster blank --type=react`
+3. Alternatively, you could just enter `ionic start` and let the command line ask you for what it needs
+
+**Example**
 
 ```bash
-$ ionic start ionic-weather tabs --type=react --capacitor
-$ cd ionic-weather
-$ npm start
+$ cd ~/Projects/Training
+$ ionic start tea-taster blank --type=react
 ```
+
+Let's look at some of these options more closely:
+
+- The forth option, `blank`, tells Ionic to use the `blank` starter. We have three basic starters: `blank`, `tabs`, and `sidemenu`. The main difference is the main style of navigation.
+- The `--type` option specifies the type of application to create. Options include `angular`, `react`, `ionic-angular`, and `ionic1`. The `ionic-angular` type is an Ionic v3 application.
+
+Once the application has been generated, let's start the development server:
+
+```bash
+$ cd tea-taster
+$ ionic serve
+```
+
+## Side Note: `ionic serve` vs. `npm start`
+
+You may be used to using `npm start` to start an application. That works, but it is different. The application, for all intents and purposes, is a React application and was generated using Create React App with some extra Ionic spices, so all of the base Create React App application scripts are there.
+
+In a nutshell:
+
+- `npm start` uses Create React App directly calling `react-scripts start` without any options, which always tries to use port 3000
+- `ionic serve` finds the first unused port >= 8100 and passes that to Create React App with some other options
+
+In either case, Create React App does all the heavy lifting, so use whichever the command you want to use. Personally, I prefer `npm start` because it takes less typing and thought on my part.
 
 ## Enforce Consistent Styling
 
-<a href="https://prettier.io/" target="_blank">Prettier</a> is an excellent tool that you can use to keep the formatting of your code consistent and clean. We highly suggest you use a tool such as this. Whether your are a lone developer or part of a team, using a tool such as Prettier means that you do not have to think about the formatting of your code. Better yet, you do not run into "formatting wars" between developers.
+<a href="https://prettier.io/" target="_blank">Prettier</a> is an excellent tool that you can use to keep the formatting of your code consistent and clean. We highly suggest you use a tool such as this. Whether you're a lone developer or part of a team, using a tool such as Prettier means that you do not have to think about the formatting of your code. Better yet, you do not run into "formatting wars" between developers.
 
 Prettier itself is an opinionated code formatter, and Ionic has its own opinions on how it is best configured, so let's install a package that provides both Prettier and Ionic's configuration. We will also install <a href="https://www.npmjs.com/package/husky" target="_blank">husky</a> and <a href="https://www.npmjs.com/package/pretty-quick" target="_blank">pretty-quick</a>. This will allow us to set up a commit hook to make sure Prettier is run with each commit. After that we don't have to waste brain cycles thinking about code formatting ever again.
 
@@ -31,8 +66,8 @@ Modify your `package.json` file. I suggest moving the `description` up to the to
 
 ```json
 {
-  "name": "ionic-weather",
-  "description": "A personal weather application",
+  "name": "tea-taster",
+  "description": "Tea Tasting Notes",
   "version": "0.0.1",
   "author": "Ionic Framework",
   "homepage": "https://ionicframework.com/",
@@ -63,71 +98,6 @@ $ npx prettier --write src
 
 At this point all of the source should be formatting properly and will remain so automatically with each commit.
 
-##  Redo the Routes
-
-Navigate around the current app. Notice that the routes are not very descriptive within the context of our application. This won't matter at all for a hybrid native app, but if we are going to do anything like deploy this as a PWA or implement deep linking at some point, it would be better to have meaningful route names. We will make the following changes:
-
-- `tab1` => `current-weather`
-- `tab2` => `forecast`
-- `tab3` => `uv-index`
-
-All of these changes are in the `src/App.tsx` file. Open it up and give it a shot. Here is what needs to be changed for `tab1` but I leave it to you to figure out the other two.
-
-```diff
-@@ -7,7 +7,7 @@ import {
-   IonRouterOutlet,
-   IonTabBar,
-   IonTabButton,
--  IonTabs
-+  IonTabs,
- } from '@ionic/react';
- import { IonReactRouter } from '@ionic/react-router';
- import { ellipse, square, triangle } from 'ionicons/icons';
-@@ -39,13 +39,13 @@ const App: React.FC = () => (
-     <IonReactRouter>
-       <IonTabs>
-         <IonRouterOutlet>
--          <Route path="/tab1" component={Tab1} exact={true} />
-+          <Route path="/current-weather" component={Tab1} exact={true} />
-           <Route path="/tab2" component={Tab2} exact={true} />
-           <Route path="/tab3" component={Tab3} />
--          <Route path="/" render={() => <Redirect to="/tab1" />} exact={true} />
-+          <Route path="/" render={() => <Redirect to="/current-weather" />} exact={true} />
-         </IonRouterOutlet>
-         <IonTabBar slot="bottom">
--          <IonTabButton tab="tab1" href="/tab1">
-+          <IonTabButton tab="current-weather" href="/current-weather">
-             <IonIcon icon={triangle} />
-             <IonLabel>Tab 1</IonLabel>
-           </IonTabButton>
-```
-
-## Rename the Page Components
-
-The page components still have really bad names (`Tab1`, `Tab2`, `Tab3`). These should be changed as such:
-
-- `Tab1` => `CurrentWeather`
-- `Tab2` => `Forecast`
-- `Tab3` => `UVIndex`
-
-Here are the steps required:
-
-1. Rename the files under `src/pages`
-1. Change the component names used in each of the `src/pages/*.tsx` files
-1. In the same files, change the CSS file imports based on the file renames
-1. Change the imports and component names used in the `src/App.tsx` file
-
-## Side Note: `ionic serve` vs. `npm start`
-
-You may be used to using `npm start` to start an application. That works, but it is different. The application is for all intents and purposes a React application and was generated using the Create React App starter with some extra Ionic spices, so all of the base Create React App configuration is there.
-
-In a nutshell:
-
-- `npm start` uses the React Scripts CLI directly calling `react-scripts start` without any options, which tries to use port 3000 by default, though if port 3000 is used it will ask to use a different port
-- `ionic serve` finds the first unused port >= 8100 and sets that as the PORT before calling `react-scripts start`
-
-In either case, react-scripts does all the heavy lifting, so use whichever command you want to use. Personally, I use `npm start` because it take less typing and thought on my part.
-
 ## Conclusion
 
-Congratulations on creating your `@ionic/react` application. Be sure to commit all of your changes. Next we will explore unit tests and discuss how they can help us in our development lifecycle.
+Congratulations on creating your `@ionic/react` application. Next we will explore unit tests and discuss how they can help us in our development lifecycle.
