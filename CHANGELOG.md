@@ -1,3 +1,12 @@
+## [2.2.3](https://github.com/ionic-team/ionic-training-decks/compare/v2.2.2...v2.2.3) (2020-07-31)
+
+
+### Features
+
+* **react:** update the existing React training ([64208ad](https://github.com/ionic-team/ionic-training-decks/commit/64208adec5dffd635171b052ca3d098a9f4c2766))
+
+
+
 ## [2.2.2](https://github.com/ionic-team/ionic-training-decks/compare/v2.2.1...v2.2.2) (2020-06-30)
 
 
