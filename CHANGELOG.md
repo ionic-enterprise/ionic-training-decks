@@ -1,3 +1,12 @@
+## [2.2.5](https://github.com/ionic-team/ionic-training-decks/compare/v2.2.4...v2.2.5) (2020-08-06)
+
+
+### Bug Fixes
+
+* **react:** fix the loading indicator instructions ([73e7eec](https://github.com/ionic-team/ionic-training-decks/commit/73e7eec682ee65006c0af06e6568cba8103ffd3e))
+
+
+
 ## [2.2.4](https://github.com/ionic-team/ionic-training-decks/compare/v2.2.3...v2.2.4) (2020-08-06)
 
 
