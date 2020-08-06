@@ -130,7 +130,11 @@ export const iconPaths = {
 };
 ```
 
-Also create an `index.ts` barrel file for this folder.
+Also create an `index.ts` barrel file for this folder as such:
+
+```typescript
+export * from './iconPaths';
+```
 
 ## Install the Images
 
@@ -296,13 +300,19 @@ import { Forecast } from './forecast';
 export type WeeklyForecast = Array<Forecast>;
 ```
 
-Remember to create a barrel file for this folder.
+Remember to create a barrel file for this folder (`src/models/index.ts`) as such:
+
+```typescript
+export * from './forecast';
+export * from './weather';
+export * from './weekly-forecast';
+```
 
 #### Daily Forecast Component
 
 Since we are going to have to pass objects to a HTML standard web component (not a React component), we are going to have to use that `ref` trick several times. This will be easiest if we take the HTML standard web component and wrap it with a React component.
 
-Create a `src/compnents/DailyForecast.tsx` file. Its contents will look like this:
+Create a `src/components/DailyForecast.tsx` file. Its contents will look like this:
 
 ```TypeScript
 import React, { useRef, useEffect } from 'react';
@@ -375,7 +385,7 @@ The final code should look something like this:
 import React, { useState } from 'react';
 import { IonContent, IonHeader, IonItem, IonList, IonPage, IonTitle, IonToolbar } from '@ionic/react';
 
-import DailyForecast from '../components';
+import DailyForecast from '../components/DailyForecast';
 
 const ForecastPage: React.FC = () => {
   const [forecast] = useState([
