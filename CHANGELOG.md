@@ -1,3 +1,12 @@
+## [2.2.4](https://github.com/ionic-team/ionic-training-decks/compare/v2.2.3...v2.2.4) (2020-08-06)
+
+
+### Bug Fixes
+
+* **react:** clarify some bits on mocking the UI ([d3c048b](https://github.com/ionic-team/ionic-training-decks/commit/d3c048ba25769487803467e793f90d4df26fcd82))
+
+
+
 ## [2.2.3](https://github.com/ionic-team/ionic-training-decks/compare/v2.2.2...v2.2.3) (2020-07-31)
 
 
