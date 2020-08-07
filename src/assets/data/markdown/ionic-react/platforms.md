@@ -42,21 +42,26 @@ Notice that on iOS the status bar text is black and hard to read on the dark blu
 
 The app runs fine on our devices, but the splash screen and icon are just the Capacitor defaults. Let's fix that now.
 
-For this application, please download the following images. You will need to create a `resources` directory and place then there.
+For this application: 
+
+1. create a `resources/` directory 
+1. download the following images
+1. place the images in the `resources` directory
 
 - <a download href="/assets/images/icon.png">icon.png</a>
 - <a download href="/assets/images/splash.png">splash.png</a>
 
-To generate the required resources and copy them to the native projects, use the following commands:
+To generate the required resources and have them copied to the native projects, use the following commands:
 
 ```bash
+$ npm i -g cordova-res
 $ cordova-res ios --skip-config --copy
 $ cordova-res android --skip-config --copy
 ```
 
-If you do not have `cordova-res` installed on your system, you can install it via `npm i -g cordova-res`.
+The "npm install" command is only required if you do not currently have `cordova-res` installed.
 
-Try it out again. You should see the updated icon and splash screen.
+Rebuild the application and run it on a device. You should see the updated icon and splash screen.
 
 **Note:** iOS has a bug having nothing to do with Capactor where it is overly agressive on caching the splash screen image. You may need to delete the app, reboot the device, and then try again in order to see the correct splash screen.
 
