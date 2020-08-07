@@ -1,3 +1,13 @@
+## [2.2.6](https://github.com/ionic-team/ionic-training-decks/compare/v2.2.5...v2.2.6) (2020-08-07)
+
+
+### Bug Fixes
+
+* **react:** clarify some parts of the platforms ([e405525](https://github.com/ionic-team/ionic-training-decks/commit/e405525a981e50fae379fddda0f54cb8db650e70))
+* **react:** clarify the remaining labs ([5857e5f](https://github.com/ionic-team/ionic-training-decks/commit/5857e5feb5341f8ba810ea1811f49f7bb7ce9a72))
+
+
+
 ## [2.2.5](https://github.com/ionic-team/ionic-training-decks/compare/v2.2.4...v2.2.5) (2020-08-06)
 
 
