@@ -1,3 +1,12 @@
+## [2.2.7](https://github.com/ionic-team/ionic-training-decks/compare/v2.2.6...v2.2.7) (2020-08-07)
+
+
+### Bug Fixes
+
+* **react:** remove paragraph that we are not doing ([8c9cae3](https://github.com/ionic-team/ionic-training-decks/commit/8c9cae3881ba480638928b3e7313698097d0773a))
+
+
+
 ## [2.2.6](https://github.com/ionic-team/ionic-training-decks/compare/v2.2.5...v2.2.6) (2020-08-07)
 
 
