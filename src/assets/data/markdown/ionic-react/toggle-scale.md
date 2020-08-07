@@ -4,9 +4,13 @@ Not all users measure temperature using the same scale. Let's allow the user to 
 
 ## Settings Service
 
-First we need a service to store the data. This will be a very simple service that uses Capacitor's Storage API. Create a `util/settings.ts` file. Be sure to add it to the `util/index.ts` file as well.
+First we need a service to store the data. This will be a very simple service that uses Capacitor's Storage API.
 
-Here is the shell of the service.
+1. create a `src/util/settings.ts` file (initial contents are below)
+1. create a `src/util/settings.test.ts` file (initial contents are below)
+1. add an export of the `settings.ts` file in the `src/util/index.ts` file
+
+Here is the shell of the service:
 
 ```TypeScript
 import { Plugins } from '@capacitor/core';
@@ -56,7 +60,7 @@ describe('settings service', () => {
 
 ### Set Scale
 
-Add the follow tests within the "set scale" `describe()`:
+Add the follow tests within the "set scale" `describe()` in `src/util/settings.test.ts`:
 
 ```typescript
     it('sets the value to C', () => {
@@ -74,11 +78,11 @@ Add the follow tests within the "set scale" `describe()`:
 
 You should have two failing tests at this point. If you do not, then restart the test server.
 
-Now write the code required to make those tests pass.
+Now write the code required in `src/util/settings.ts` to make those tests pass.
 
 ### Get Scale
 
-Add the follow tests within the "get scale" `describe()`:
+Add the follow tests within the "get scale" `describe()` in `src/util/settings.test.ts`:
 
 ```typescript
     it('gets the scale', async () => {
@@ -101,21 +105,21 @@ Add the follow tests within the "get scale" `describe()`:
   });
 ```
 
-Now write the code required to make those tests pass. Note the last three test cases. The implication here is that the default scale is 'F' if it is otherwise unspecified.
+Now write the code required in `src/util/settings.ts` to make those tests pass. Note the last three test cases. The implication here is that the default scale is 'F' if it is otherwise unspecified.
 
 
 ## Change the Pages
 
-Only two pages show the temperature: Current Weather and Forecast, so only two pages need to read use the scale.
+Only two pages show the temperature: Current Weather and Forecast, so only two pages need to read the scale setting.
 
 ### Forecast
 
 The changes for the `ForeccastPage` are pretty straight forward:
 
-1. Import the `settings` service along with the other ones: `import { settings, weather } from '../util';`
+1. Import the `settings` service from `../util`: `import { settings, weather } from '../util';`
 1. Create a state hook for the scale: `const [scale, setScale] = useState<string>();`
 1. In the `useIonViewWillEnter()` callback, set the scale: `setScale(await settings.getScale());`
-1. When rendering the page, use the scale from the state: `<DailyForecast scale={scale} forecast={f}></DailyForecast>`
+1. When rendering the page, use the scale from the state instead of the previously hard coded value: `<DailyForecast scale={scale} forecast={f}></DailyForecast>`
 
 
 ### Current Weather
@@ -129,7 +133,7 @@ First, though, make very similar changes as to what we need for the `ForecastPag
 1. In the `useIonViewWillEnter()` callback, set the scale: `setScale(await settings.getScale());`
 1. When rendering the page, use the scale from the state: `<kws-temperature class="primary-value" scale={scale} temperature={temperature}></kws-temperature`
 
-We want the user to be able to change the scale when they click on the temperature. Create a method that does that:
+We want the user to be able to change the scale when they click on the temperature. Create a function that does that:
 
 ```TypeScript
   const toggleScale = () => {
@@ -139,7 +143,7 @@ We want the user to be able to change the scale when they click on the temperatu
   }
 ```
 
-We also would like the cursor to change to a pointer when they are in the web so user knows that they can click there. Create a style for that:
+We also would like the cursor to change to a pointer when they are in the web so the user knows that they can click there. Create a style for that:
 
 ```TypeScript
   const cursorPointer = {
