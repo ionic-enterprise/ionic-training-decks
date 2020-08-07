@@ -36,7 +36,10 @@ Note that we not need the `npx` part here because this command is automatically 
 
 To run on a device or an emulator, use `npx cap open android` or `npx cap open ios` to open the proper IDE and then run anywhere you want to from there.
 
-Notice that on iOS the status bar text is black and hard to read on the dark blue background. On Android, the status bar is black. The Android specs say it should be a different color than the application's header, but it would be nice if it was closer to the color of the application header. We will fix that stuff next.
+```bash
+$ npx cap open android
+$ npx cap open ios
+```
 
 ## Update Icon and Splash Screen
 
