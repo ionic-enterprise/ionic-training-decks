@@ -11,7 +11,8 @@ First, mock the Capacitor `Geolocation` API in `src/util/weather.test.ts`:
 ```TypeScript
 import { Plugins } from '@capacitor/core';
 ...
-describe('weather service', () => 
+describe('weather service', () => }
+  // -- Begin Copying Here
   beforeEach(() => {
     (Plugins.Geolocation.getCurrentPosition as any) = jest.fn(() =>
       Promise.resolve({ coords: { latitude: 42.123, longitude: -73.4242 } })
@@ -19,6 +20,7 @@ describe('weather service', () =>
   });
 
   afterEach(() => (Plugins.Geolocation.getCurrentPosition as any).mockRestore());
+  // -- End Copying Here
 
   it('exists', () => {
     expect(weather).toBeTruthy();

@@ -18,9 +18,11 @@ import { Plugins } from '@capacitor/core';
 const { Storage } = Plugins;
 
 class SettingsService {
-  setScale(value: string): Promise<void> {}
+  async setScale(value: string): Promise<void> {}
 
-  async getScale(): Promise<string> {}
+  async getScale(): Promise<string> {
+    return '';
+  }
 }
 
 export const settings = new SettingsService();
@@ -80,6 +82,8 @@ You should have two failing tests at this point. If you do not, then restart the
 
 Now write the code required in `src/util/settings.ts` to make those tests pass.
 
+If you get stuck at all, be sure to have a look at the <a href="https://capacitorjs.com/docs/apis/storage" target="_blank">Storage API Documentation</a>.
+
 ### Get Scale
 
 Add the follow tests within the "get scale" `describe()` in `src/util/settings.test.ts`:
@@ -102,11 +106,11 @@ Add the follow tests within the "get scale" `describe()` in `src/util/settings.t
       const res = await settings.getScale();
       expect(res).toEqual(expected);
     });
-  });
 ```
 
 Now write the code required in `src/util/settings.ts` to make those tests pass. Note the last three test cases. The implication here is that the default scale is 'F' if it is otherwise unspecified.
 
+If you get stuck at all, be sure to have a look at the <a href="https://capacitorjs.com/docs/apis/storage" target="_blank">Storage API Documentation</a>.
 
 ## Change the Pages
 
