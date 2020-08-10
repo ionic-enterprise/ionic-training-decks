@@ -57,7 +57,7 @@
         },
         {
           "title": "Switch Scale",
-          "file": "ionic-storage"
+          "file": "toggle-scale"
         },
         {
           "title": "On Push Change Detection",
