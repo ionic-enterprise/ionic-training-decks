@@ -3,8 +3,9 @@
 In this lab, you will learn how to:
 
 - Setup support for CI, code coverage, and snapshots
-- Create and use mock objects
-- Structure Unit Tests
+- Run the existing suite of unit tests
+- Structure unit tests
+- Write tests for the Home Page
 
 ## Setup CI, Coverage, and Snapshot Support
 
@@ -14,12 +15,12 @@ If you would like to run tests once without the watch, you can do something like
 
 ### `package.json`
 
-I suggest adding addition test script configurations in the `package.json` file as such:
+I suggest adding additional test script configurations in the `package.json` file as such:
 
 - `test` - use the default configuration, re-run the tests as changes are made
 - `test:ci` - use the default configuration, run the tests once and exit
 - `test:cov` - collect and report code coverage information, run the tests once and exit
-- `test:upd` - re-generate snapshots, run the tests once and exit
+- `test:upd` - regenerate snapshots, run the tests once and exit
 
 ```JSON
   "scripts": {
@@ -35,22 +36,22 @@ I suggest adding addition test script configurations in the `package.json` file 
 
 ## Run the Tests
 
-With our current configuration, there are four convient ways to run the tests:
+With our current configuration, there are four convenient ways to run the tests:
 
 - `npm test` - runs the tests and waits for changes. This is the default and should be used for most development.
-- `npm test:ci` - runs the tests and exits. This is intended for use on your CI/CD server but is also useful for cases where you want to run the tests once.
-- `npm test:cov` - runs the tests and collects coverage information. This is intended for use on your CI/CD server but is also useful for cases where you want to identity non-tested areas.
-- `npm test:upd` - runs the tests and re-record failed snapshots. This is intended for use when you want to assert the output of components.
+- `npm run test:ci` - runs the tests and exits. This is intended for use on your CI/CD server but is also useful for cases where you want to run the tests once.
+- `npm run test:cov` - runs the tests and collects coverage information. This is intended for use on your CI/CD server but is also useful for cases where you want to identify non-tested areas.
+- `npm run test:upd` - runs the tests and regenerate failed snapshots. This is intended for use when component markup is modified and you have tests that assert against the composition of components.
 
 Type `npm test` and verify that the tests run.
 
-### The Jest VSCode Extension
+### Jest VSCode Extension
 
 If you are using Visual Studio Code as your editor, a [Jest extension](https://github.com/jest-community/vscode-jest) exists that will -- among other things -- automatically run the tests for you and report on the status.
 
-## Test Structure
+## Structuring Unit Tests
 
-The basic Jest test structure is a single file with setup and teardown code and individual test cases. Jest also supports grouping test cases together in nested block, which allows you to group tests together by functionality.
+The Jest test structure calls for a single file with setup and teardown code and individidual test cases to be created per project file. Jest also supports grouping test cases together in nested blocks, which allows you to group tests together by functionality.
 
 ### Setup and Teardown
 
@@ -68,18 +69,29 @@ Sometimes tests logically belong grouped together. For example, tests that exerc
 - they can be nested inside of another group
 - they can have their own setup and teardown routines which are run in addition to the setup and teardown of the file or enclosing groups
 
-## Testing the Home Page Component
+### Side Note: Where to place test files?
 
-The application is not very complex in it's current state. It contains three React components: `<App />`, `<Home />`, and `<ExploreContainer />`. Let's create test casess for our `<Home />` component.
+There are three popularized ways to organize test files in Jest:
+
+- Putting all your test code into a neatly organized `__tests__` directory at the root of the project
+- Putting test code for a given folder within a `__tests__` subfolder.
+- Putting your test code next to the files they are testing.
+
+Use whichever method works best for you and your team. Personally, I prefer to put test code next to the files they are testing. This keeps project structures flatter and easier to visibly scan and allows me to easily see which files have tests written for them, and which files have yet to have tests written against them.
+
+## Write tests for the Home Page
+
+The application is not very complex in it's current state; it currently contains three components:
+
+- `<App />`
+- `<Home />`
+- `<ExploreContainer />`
+
+Let's write some test cases for our `<Home />` component.
 
 ### `Home.test.tsx`
 
-Start by creating a new file, `Home.test.tsx`, in the `src/pages` folder. The typical convention is to place test files in the same folder the code file being tested. Alternatively, it's not uncommon for projects to create `__tests__` folders to hold test files.
-
-I prefer keeping test files side-by-side with the files they aim to test:
-
-- This keeps project structures flatter and easier to visibly scan.
-- This allows me to easily see which files have tests written for them, and which files have yet to have tests written against them.
+Start by creating a new file, `Home.test.tsx`, in the `src/pages` folder.
 
 After creating `Home.test.tsx`, add the required imports and insert a `describe` block where we can group our tests.
 
@@ -93,13 +105,15 @@ describe('<Home />', () => {
 });
 ```
 
+### Side Note: React Testing Library
+
+The application is bundled with <a href="https://testing-library.com/docs/react-testing-library/intro" target="_blank"> React Testing Library</a>, which provides a set of light-weight utility functions to test React components in a way that encourages better testing practices. Instead of dealing with instances of rendered React components, tests will work with actual DOM nodes providing more confidence that your application will work in the way a real user would interact with it.
+
 ### Setup and Teardown Code
 
 The tests we'll be creating for `Home.test.tsx` will not require any setup or teardown code. We will add tests later that require this, and will revisit setup and teardown code at that time.
 
-The `App.test.tsx` test does not require any setup or teardown code. We will add tests later that require this, and will revisit setup and teardown code at that time.
-
-### Test Header Text
+### Test Header Text Value
 
 By default, our Home page has it's header text set to "Blank". We can query the DOM in order to make sure that our header text is rendering correctly.
 
@@ -109,7 +123,7 @@ it('displays the header', () => {
   expect(container).toHaveTextContent('Blank');
 ```
 
-### Snapshot Tests
+### Add Snapshot Test
 
 We can also create snapshots of the component under specific conditions and compare them as we modify the application. Add a test like this to your file:
 
