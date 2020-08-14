@@ -19,14 +19,13 @@ _Note:_ this could also be modelled via composition, which may have some advanta
 The base class will be based on the code for one of the other pages. Either "Current Weather" or "Forecast" makes the most sense because they are almost identical. The UV index page, on the other hand, has some extra code that we do not need. Also note that our tests currently exist in the individual page classes. Let's leave them there.
 
 1. `ionic g class weather-page-base/weather-page-base --skipTests`
-1. Make the class generic: `export class WeatherPageBase<T> {`
 1. Copy the body of the `CurrentWeatherPage` class to `WeatherPageBase`
+1. Make the class generic: `export class WeatherPageBase<T> {`
 1. Fix the syntax errors:
    1. Change the data property (`currentWeather: Weather;`)
       1. The name is too specific, make it more generic, like `data`
       1. The type is too specific, it should be `T`
    1. Fix the constructor
-      1. The `IconMapService` is bound in the template and thus not needed here, remove it
       1. The `LoadingController` must be imported
       1. This class will not know which method in `WeatherService` to call, so pass in a method signature instead like this: `private fetch: () => Observable<T>`
    1. Fix the methods - there are a few syntax errors, let's see what you can make of them
@@ -37,7 +36,7 @@ Try the base class in one page before implementing it in all of the pages. It ma
 
 1. `import { WeatherPageBase } from '../weather-page-base/weather-page-base';`
 1. `export class CurrentWeatherPage extends WeatherPageBase<Weather> {`
-1. Remove the `currentWeather` property, and all of the methods other than the constructor.
+1. Remove the `currentWeather` and `icons` property, and all of the methods other than the constructor.
 1. Update the HTML file to use the generic property name (`data`) for the data instead of `currentWeather`
 1. `LoadingController`, and `WeatherService` still need to be injected, but no longer should be declared private
 1. The constructor needs to call `super()`
@@ -49,7 +48,7 @@ Hmmm, that gives an interesting error in the console. Now that we are here, let'
 
 ## Apply the Change to the Other Pages
 
-Now that this is working, make similar changes to the other pages.
+Now that this is working, make similar changes to the other pages.  On the `UVIndexPage`, you will need to be sure to keep the stuff that is not defined in the base class.
 
 ## Conclusion
 

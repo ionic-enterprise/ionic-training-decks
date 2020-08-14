@@ -66,7 +66,7 @@ Type `npm test` and verify that the tests run.
 
 ### Use Mock Objects
 
-- remove the existing spy variables
+- remove the existing spy variables and their initialization
 - import the platform mock factory: `import { createPlatformMock } from '../../test/mocks';`
 - provide the `StatusBar` and `SplashScreen` via a factory: `{ provide: StatusBar, useFactory: () => jasmine.createSpyObj<StatusBar>('StatusBar', ['styleDefault']) }`
 - provide the `Platform` via the factory: `{ provide: Platform, useFactory: createPlatformMock }`

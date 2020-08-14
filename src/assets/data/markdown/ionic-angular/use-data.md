@@ -11,12 +11,11 @@ In this lab you will learn how to:
 Start by injecting the `WeatherService` into the `current-weather` page.
 
 ```TypeScript
-import { WeatherService } from '@app/services';
+import { WeatherService } from '@app/core';
 
 ...
 
   constructor(
-    public iconMap: IconMapService,
     private weather: WeatherService
   ) {}
 ```
@@ -71,7 +70,7 @@ I prefer to keep my mocks along side my services. This has a couple of benefits:
 
 The factory creates a jasmine spy matching the API for the service. In the case of the weather service, each method returns an `EMPTY` observable by default.
 
-**`src/app/services/weather/weather.service.mock.ts`**
+**`src/app/core/weather/weather.service.mock.ts`**
 
 ```TypeScript
 import { EMPTY } from 'rxjs';
@@ -111,6 +110,24 @@ The mock can either be manually created and injecting via `useValue` or we can p
   }));
 ```
 
+### Extra Credit
+
+Have a look at the ES6 imports added for what we just did. They will look something like this:
+
+```TypeScript
+import { WeatherService } from '@app/core';
+import { createWeatherServiceMock } from '@app/core/weather/weather.service.mock';
+```
+
+The service is imported from a barrel file in the `core` base folder, but if the mock factory is broght in via a full path. If we later refactor the directory structure this will become a maintenance problem. It would be nice if we could do this:
+
+```TypeScript
+import { WeatherService } from '@app/core';
+import { createWeatherServiceMock } from '@app/core/testing';
+```
+
+**Challenge:** figure out how to accomlish this, make sure you can still do an `npm run build` when you are done
+
 ## Using the Data
 
 There are two lifecycle events that are good candidates for getting data:
@@ -126,13 +143,7 @@ We have some new functionallity to cover. That functionallity is "entering the p
 
 ```TypeScript
   describe('entering the page', () => {
-    it('gets the current weather', () => {
-      const weather =  TestBed.inject(WeatherService);
-      component.ionViewDidEnter();
-      expect(weather.current).toHaveBeenCalledTimes(1);
-    });
-
-    it('displays the current weather', () => {
+    beforeEach(() => {
       const weather = TestBed.inject(WeatherService);
       (weather.current as any).and.returnValue(
         of({
@@ -141,6 +152,15 @@ We have some new functionallity to cover. That functionallity is "entering the p
           date: new Date(1485789600 * 1000)
         })
       );
+    });
+
+    it('gets the current weather', () => {
+      const weather =  TestBed.inject(WeatherService);
+      component.ionViewDidEnter();
+      expect(weather.current).toHaveBeenCalledTimes(1);
+    });
+
+    it('displays the current weather', () => {
       component.ionViewDidEnter();
       fixture.detectChanges();
       const t = fixture.debugElement.query(By.css('kws-temperature'));
@@ -151,7 +171,7 @@ We have some new functionallity to cover. That functionallity is "entering the p
 
 **Note:** You will need to add `import { of } from 'rxjs';` and `import { By } from '@angular/platform-browser';` to the top of your test file.
 
-Once you get those test written, they should be failing. Let's talk about the strategy of those tests a bit before moving on to writing the code.
+Once you get those test written, the first one should be failing. The `kws-temperature` component renders async outside of Angular's lifecycle, so we are not able to query it further in this test. The tests for the other pages will be stronger since in those cases we _do_ have items we can query that run within Angular's lifecycle.
 
 ### Modify the Code
 
@@ -167,19 +187,13 @@ Finally, `currentWeather` can just be left declared but unassigned. Remove the m
   currentWeather: Weather;
 ```
 
-**Challenge:** Make similar modifications to the `forecast` and `uv-index` tests and pages. Here are some possible tests to use:
+**Challenge:** Make similar modifications to the `forecast` and `uv-index` tests and pages. Here are some possible tests to use, remember to add the imports and set up the `TestBed` to provide the `WeatherService`:
 
 #### `forecast.page.spec.ts`
 
 ```TypeScript
   describe('entering the page', () => {
-    it('gets the forecast', () => {
-      const weather = TestBed.inject(WeatherService);
-      component.ionViewDidEnter();
-      expect(weather.forecast).toHaveBeenCalledTimes(1);
-    });
-
-    it('shows the forecast items', () => {
+    beforeEach(() => {
       const weather = TestBed.inject(WeatherService);
       (weather.forecast as any).and.returnValue(
         of([
@@ -206,6 +220,15 @@ Finally, `currentWeather` can just be left declared but unassigned. Remove the m
           ]
         ])
       );
+    });
+
+    it('gets the forecast', () => {
+      const weather = TestBed.inject(WeatherService);
+      component.ionViewDidEnter();
+      expect(weather.forecast).toHaveBeenCalledTimes(1);
+    });
+
+    it('shows the forecast items', () => {
       component.ionViewDidEnter();
       fixture.detectChanges();
       const f = fixture.debugElement.queryAll(By.css('kws-daily-forecast'));
@@ -249,25 +272,6 @@ Finally, `currentWeather` can just be left declared but unassigned. Remove the m
     });
   });
 ```
-
-## Extra Credit
-
-Have a look at the ES6 imports in our page tests where we are bringing in the service and the factory for its mock:
-
-```TypeScript
-import { WeatherService } from '@app/services';
-import { createWeatherServiceMock } from '@app/services/weather/weather.service.mock';
-```
-
-The service is imported from a barrel file in the `services` base folder, but if the mock factory is broght in via a full path. If we later refactor the directory structure this will become a maintenance problem. It would be nice if we could do this:
-
-```TypeScript
-import { WeatherService } from '@app/services';
-import { createWeatherServiceMock } from '@app/services/testing';
-```
-
-**Challenge:** figure out how to accomlish this, make sure you can still do an `npm run build` when you are done
-
 
 ## Conclusion
 

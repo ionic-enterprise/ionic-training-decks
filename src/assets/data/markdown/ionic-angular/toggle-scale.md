@@ -10,7 +10,7 @@ The user may prefer the see the temperature in Celcius rather than Fahrenheit. W
 
 This service will save and retrieve/cache the user preference data.
 
-Using the CLI, create a service called `services/user-preferences/user-preferences`. Type `ionic generate --help` if you need some help with how to do this.
+Using the CLI, create a service called `core/user-preferences/user-preferences`. Type `ionic generate --help` if you need some help with how to do this.
 
 ### Test Setup
 
@@ -25,13 +25,16 @@ import { UserPreferencesService } from './user-preferences.service';
 describe('UserPreferencesService', () => {
   let value: string | undefined | null;
   let originalStorage: any;
+  let service: UserPreferencesService;
+
   beforeEach(() => {
     TestBed.configureTestingModule({});
-    originalStorage = Plugins.Storage; 
+    originalStorage = Plugins.Storage;
     Plugins.Storage = jasmine.createSpyObj('Storage', {
       get: Promise.resolve({ value }),
-      set: Promise.resolve()
+      set: Promise.resolve(),
     });
+    service = TestBed.inject(UserPreferencesService);
   });
 
   afterEach(() => {
@@ -39,7 +42,6 @@ describe('UserPreferencesService', () => {
   });
 
   it('should be created', () => {
-    const service: UserPreferencesService = TestBed.inject(UserPreferencesService);
     expect(service).toBeTruthy();
   });
 
@@ -82,12 +84,11 @@ I will provide the requirements one by one as tests.
 
 If you get stuck at all, be sure to have a look at the <a href="https://capacitorjs.com/docs/apis/storage" target="_blank">Storage API Documentation</a>.
 
-**`setScale()`**
+#### `setScale()`
 
 ```typescript
     ['F', 'C'].forEach(value => {
       it(`sets the value to ${value}`, () => {
-        const service: UserPreferencesService = TestBed.inject(UserPreferencesService);
         service.setScale(value);
         expect(Plugins.Storage.set).toHaveBeenCalledTimes(1);
         expect(Plugins.Storage.set).toHaveBeenCalledWith({ key: 'scale', value });
@@ -99,13 +100,12 @@ You should have two failing tests at this point. If you do not, then restart the
 
 Now write the code required in `src/app/user-preferences/user-preferences.service.ts` to make those tests pass.
 
-**`getScale()`**
+#### `getScale()`
 
 Requirement 1: Get the value from storage
 
 ```TypeScript
     it('gets the scale', async () => {
-      const service: UserPreferencesService = TestBed.inject(UserPreferencesService);
       await service.getScale();
       expect(Plugins.Storage.get).toHaveBeenCalledTimes(1);
       expect(Plugins.Storage.get).toHaveBeenCalledWith({ key: 'scale' });
@@ -119,7 +119,6 @@ Requirement 2: Return the value
 ```TypeScript
     ['F', 'C'].forEach(value => {
       it(`gets the scale: ${value}`, async () => {
-        const service: UserPreferencesService = TestBed.inject(UserPreferencesService);
         (Plugins.Storage.get as any).and.returnValue(Promise.resolve({ value }));
         const res = await service.getScale();
         expect(res).toEqual(value);
@@ -132,7 +131,6 @@ Requirement 3: Defaults to 'F'
 ```TypeScript
     ['', null, undefined].forEach(value => {
       it(`gets the scale: ${value}`, async () => {
-        const service: UserPreferencesService = TestBed.inject(UserPreferencesService);
         (Plugins.Storage.get as any).and.returnValue(Promise.resolve({ value }));
         const res = await service.getScale();
         expect(res).toEqual('F');

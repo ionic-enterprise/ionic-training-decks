@@ -16,6 +16,52 @@ npm i
 ionic serve
 ```
 
+## Enforce Consistent Styling
+
+<a href="https://prettier.io/" target="_blank">Prettier</a> is an excellent tool that you can use to keep the formatting of your code consistent and clean. We highly suggest you use a tool such as this. Whether your are a lone developer or part of a team, using a tool such as Prettier means that you do not have to think about the formatting of your code. Better yet, you do not run into "formatting wars" between developers.
+
+Prettier itself is an opinionated code formatter, and Ionic has its own opinions on how it is best configured, so let's install a package that provides both Prettier and Ionic's configuration. We will also install <a href="https://www.npmjs.com/package/husky" target="_blank">husky</a> and <a href="https://www.npmjs.com/package/pretty-quick" target="_blank">pretty-quick</a>. This will allow us to set up a commit hook to make sure Prettier is run with each commit. After that we don't have to waste brain cycles thinking about code formatting ever again.
+
+```bash
+$ npm install -D @ionic/prettier-config husky prettier pretty-quick
+```
+
+Modify your `package.json` file. I suggest moving the `description` up to the top and giving it a reasonable value, and then adding the Prettier config portion to the bottom. For example:
+
+```json
+{
+  "name": "ionic-weather",
+  "description": "A personal weather application",
+  "version": "0.0.1",
+  "author": "Ionic Framework",
+  "homepage": "https://ionicframework.com/",
+  "scripts": {
+    ...
+  },
+  "private": true,
+  "dependencies": {
+    ...
+  },
+  "devDependencies": {
+    ...
+  },
+  "prettier": "@ionic/prettier-config",
+  "husky": {
+    "hooks": {
+      "pre-commit": "pretty-quick --staged"
+    }
+  }
+}
+```
+
+Finally, make sure all of our source is formatted properly.
+
+```bash
+$ npx prettier --write src
+```
+
+At this point all of the source should be formatting properly and will remain so automatically with each commit.
+
 ## Side Note: `ionic serve` vs. `npm start`
 
 You may be used to using `npm start` to start an application. That works, but it is different. The application is for all intents and purposes an Angular application and was generated using the standard Angular schematics with some extra Ionic spices, so all of the base Angular CLI application scripts are there.

@@ -63,6 +63,7 @@ With Capacitor, we do not have to wait for the Cordova `platformReady` event, so
 **Remove these tests:**
 
 ```TypeScript
+  describe('initialization', () => {
     it('waits for the platform to be ready', () => {
       TestBed.createComponent(AppComponent);
       expect(platform.ready).toHaveBeenCalledTimes(1);
@@ -81,6 +82,7 @@ With Capacitor, we do not have to wait for the Cordova `platformReady` event, so
       await platform.ready();
       expect(splashScreen.hide).toHaveBeenCalledTimes(1);
     });
+  });
 ```
 
 The behavior should be such that when the app is running in a hybrid mobile conext it dismisses the splash screen and styles the status bar. When it is not, then it does neither. The new `initialization` tests should look like this.
@@ -132,12 +134,22 @@ The behavior should be such that when the app is running in a hybrid mobile cone
 
 **Challenge:** now that you have failing tests, modify the `AppComponent` such that the tests pass. The completed `AppComponent` is included at the bottom of this page if you get stuck, but try to complete the challenge without looking.
 
-### Android Status Bar Background Color
+Your code will look something like this:
+
+```typescript
+  initializeApp() {
+    if (this.platform.is('hybrid')) {
+      // Do the things!
+    }
+  }
+```
+
+### Extra Credit: Android Status Bar Background Color
 
 On Android, it is common with apps such as this to style the background of the status bar to be a color that is just slightly different from the color of the application's header. Since we are using `--ion-color-primary` for that, using `--ion-color-primary-shade` is a good option. Let's do that.
 
 1. Add two `describe()` sections within the "in a hybrid mobile context" section. One for when we are running on Android and one for when we re not.
-1. When we are running on Android, verify that `Plugin.StatusBar.setBackgroundColor` has been called once with the correct parameters.
+1. When we are running on Android, verify that `Plugin.StatusBar.setBackgroundColor` has been called once with `{ color: '#value'}` where `#value` is the value of `--ion-color-primary-shade`.
 1. When we are not running on Android, verify that `Plugin.StatusBar.setBackgroundColor` has not been called.
 1. When we are not running in a hybrid context at all, verify that `Plugin.StatusBar.setBackgroundColor` has not been called.
 
@@ -148,7 +160,7 @@ Once you have the tests in place, the one verifying the call of `setBackgroundCo
 - You will need to add `setBackgroundColor` to the `Plugins.StatusBar` mock where it is created.
 - Links to the Capacitor API docs are above, use them to determine what needs to be passed to `setBackgroundColor()`.
 - The Platform service's `is()` method is used to determine what platform you are running on.
-- Setting the value of `--ion-color-primary-shade` for the test setup can be done via `document.documentElement.style.setProperty('--ion-color-primary-shade', ' #ff0000');` (the extra space simulates how the value commonly comes back due to formatting in the file that sets it, so it needs to be trimmed upon reading)
+- For the test, it would be best to control the value of `--ion-color-primary-shade`. Setting it to a known value in the test setup can be done via `document.documentElement.style.setProperty('--ion-color-primary-shade', ' #ff0000');` (the extra space simulates how the value commonly comes back due to formatting in the file that sets it, so it needs to be trimmed upon reading)
 - Getting the vaule of `--ion-color-primary-shade` within the component code can be accomplished via code similar to the following snippet:
 
 ```JavaScript
@@ -164,7 +176,7 @@ Right now, the application gives us the weather for a specific location. It woul
 
 #### Create the Coordinate Model
 
-Add another model called `Coordinate`:
+Add another model under `src/app/models` called `Coordinate`:
 
 ```TypeScript
 export interface Coordinate {
@@ -173,11 +185,11 @@ export interface Coordinate {
 }
 ```
 
-**Hint:** Add it in the model folder in its own file.
+**Hint:** Remember to add it to the models barrel file as well.
 
 #### Create the Location Service
 
-1. Using the CLI, generate a service called `location` in the `services/location` directory.
+1. Using the CLI, generate a service called `location` in the `core/location` directory.
 1. Add the stub for a single method that will get the current location.
 
 ```TypeScript
@@ -201,7 +213,7 @@ Let's write some tests and code.
 
 ##### Step 1: Call the Geolocation API
 
-**`location.service.spec.ts`**
+###### `location.service.spec.ts`
 
 ````TypeScript
 ...
@@ -238,7 +250,7 @@ import { Plugins } from '@capacitor/core';
 });
 ````
 
-**`location.service.ts`**
+###### `location.service.ts`
 
 ```TypeScript
 import { Injectable } from '@angular/core';
@@ -262,7 +274,7 @@ export class LocationService {
 
 ##### Step 2: Return the Unpacked Value
 
-**`location.service.spec.ts`**
+###### `location.service.spec.ts`
 
 ```TypeScript
     it('resolves the coordinates', async () => {
@@ -271,13 +283,13 @@ export class LocationService {
     });
 ```
 
-**`location.service.ts`**
+###### `location.service.ts`
 
 ```TypeScript
   async current(): Promise<Coordinate> {
     const { Geolocation } = Plugins;
-    const loc = await Geolocation.getCurrentPosition();
-    return { latitude: loc.coords.latitude, longitude: loc.coords.longitude };
+    const { coords } = await Geolocation.getCurrentPosition();
+    return { latitude: coords.latitude, longitude: coords.longitude };
   }
 ```
 
@@ -295,7 +307,7 @@ Our basic requirements are:
 
 ##### Step 0 - Create and Use a Mock Location Service Factory
 
-**`src/app/services/location/location.service.mock.ts`**
+###### `src/app/core/location/location.service.mock.ts`
 
 ```TypeScript
 import { LocationService } from './location.service';
@@ -307,11 +319,17 @@ export function createLocationServiceMock() {
 }
 ```
 
-**`weather.service.spec.ts`**
+###### `weather.service.spec.ts`
+
+In the weather service test, provide the `LocationService` using the mock and set it up to return a latitude and longitude. Be sure to change the latitude and longitude constants to be different from what you currently have hard coded in the service. This will cause _a lot_ of tests to fail, which is good. **This will help ensure that you ultimatly are using the coordinates from your `LocationService`.**
 
 ```TypeScript
 import { createLocationServiceMock } from '../location/location.service.mock';
 import { LocationService } from '../location/location.service';
+...
+describe('WeatherService', () => {
+  const latitude = 42.731338;
+  const longitude = -88.314159;
 ...
   beforeEach(() => {
     TestBed.configureTestingModule({
@@ -321,16 +339,19 @@ import { LocationService } from '../location/location.service';
       ]
     });
     httpTestingController = TestBed.inject(HttpTestingController);
+    service = TestBed.inject(WeatherService);
     const location = TestBed.inject(LocationService);
     (location.current as any).and.returnValue(
-      Promise.resolve({ latitude: 42.731338, longitude: -88.314159 })
+      Promise.resolve({ latitude, longitude })
     );
   });
 ```
 
 ##### Step 1 - Get the Current Location
 
-**`weather.service.spec.ts`**
+###### `weather.service.spec.ts`
+
+Add tests that verify that we are indeed getting the current location. Here is an example for the `WeatherService` `current()` method.  Be sure to also create similar tests for `forecast()` and `uvIndex()`.
 
 ```TypeScript
   describe('current', () => {
@@ -344,24 +365,7 @@ import { LocationService } from '../location/location.service';
   });
 ```
 
-Create similar tests for `forecast` and `uvIndex`.
-
-**`weather.service.ts`**
-
-Getting the above test to pass is a matter of injecting the service and calling the `current()` method in the correct spot(s). Doing so is left as an exercise for you to complete. **Note:** we do not need to do anything with the result at this time. We just need to get the test to pass.
-
-##### Step 2 - Use the Current Location
-
-**`weather.service.spec.ts`**
-
-We are already have tests verifying the HTTP call and return. Update those tests to ensure that the returned location is used in the HTTP call.
-
-This requires two changes to the tests:
-
-1. Use Angular's `fakeAsync()` zone and a `tick()` call so the location Promise gets resolved.
-1. Modify the values used for the `lat` and `lon` parameters in the URL.
-
-Updating the tests accordingly is left as an exercise for you.
+We are already have tests verifying the HTTP call and return value. These tests will need to be updated to use Angular's `fakeAsync()` zone and a `tick()` call so the location Promise gets resolved.
 
 **Hint:** Here is the general pattern:
 
@@ -380,13 +384,18 @@ import { fakeAsync, TestBed, tick } from '@angular/core/testing';
 ...
 ```
 
-Remember to change the expected `lat` and `lon` values passed to those resolved by the location service mock. Be sure to make these changes to `current`, `forecast`, and `uvIndex`.
 
-**`weather.service.ts`**
+###### `weather.service.ts`
 
-Make the changes to the `WeatherService` in order to to make those tests pass.
+You should now have serveral failing tests. Getting the tests to pass is a matter of doing the following:
 
-**Hint:** Recall this pattern from when we talked about combining Observables and Promises:
+- Inject the `LocationService` in the `WeatherService`'s constructor.
+- Call the `LocationService`'s `current()` method in the correct spot(s).
+- Pass the location coordinates to the method that gets the data .
+
+**Hint #1:** You will need to convert the output of the `LocationService` from a `Promise` to an `Observable` and then pipe in through the `flatMap` operator.
+
+**Hint #2:** Recall this pattern from when we talked about combining Observables and Promises:
 
 ```TypeScript
 function getSomeData (): Observable<ChildDataType> {
@@ -409,7 +418,7 @@ Once this is complete, you should be able to remove the following code from the 
 
 ## The AppComponent
 
-Just in case you got stuck, here is the `AppComponent` code:
+Just in case you got stuck on the `AppComponent` refactoring, here is the `AppComponent` code:
 
 ```TypeScript
 import { Component } from '@angular/core';

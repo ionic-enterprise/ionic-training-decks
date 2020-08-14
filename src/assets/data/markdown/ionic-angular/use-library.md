@@ -97,6 +97,8 @@ Some analysis and thouht is required at this point. It is generally best to do t
 1. Install and test one package (or set of packages) at a time
 1. Commit after each successful install so you always have a fall-back point
 
+**Note:** if you are lucky enough to need a major Angular upgrade, the Angular team has a <a href="https://update.angular.io/" target = "_blank">really cool tool</a> to help with that. 
+
 Let's walk through this process together in class.
 
 ## Conclusion

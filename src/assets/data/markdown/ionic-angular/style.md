@@ -44,7 +44,7 @@ Go to our <a href="https://ionicframework.com/docs/theming/color-generator" targ
 
 - Go to the Online Color Generator
 - Change the `Primary` color to `#085a9e`
-- Replace the `Primary` set of colors to the `:root` section in the `src/theme/variables.scss` file
+- Replace the `Primary` set of colors in the `:root` section in the `src/theme/variables.scss` file
 
 
 ```scss
@@ -60,7 +60,7 @@ The `src/theme/variables.scss` file also contains the color scheme for "dark mod
 
 - Go to the Online Color Generator
 - Change the `Primary` color to `#424242`
-- Replace the `Primary` set of colors to the `:root` section in the `src/theme/variables.scss` file
+- Replace the `Primary` set of colors in the dark theme `body` section in the `src/theme/variables.scss` file
 
 ```scss
   --ion-color-primary: #424242;

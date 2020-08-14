@@ -12,8 +12,8 @@ In this lab, you will learn how to:
 
 - The API we use requires an API key. A key will be provided for this class. However, this key will be deleted after the class is over
 - If you would like to use your own key, go to <a href="https://openweathermap.org/" target="_blank">OpenWeatherMap.org</a> and sign up for a free account. You can then generate an API key for your own use
-- Use `ionic g service services/weather/weather` to generate a new service
-- Remember to add the new service to the services barrel file
+- Use `ionic g service core/weather/weather` to generate a new service
+- Remember to create a barrel file for `core` add the new service to it
 
 ## Inject the HTTP Client
 
@@ -56,7 +56,7 @@ _Note:_ is a real app, you might want to protect your app ID more, at least if t
 
 The first version of the app will use a hardcoded location. I am using Madison, WI, USA because that is where the Ionic HQ is located, but you should use something closer to your home. You can use a website such as <a href="https://www.latlong.net/" target="_blank">LatLong.net</a> to find the coordinates of your city.
 
-Add the coordinates you would like to use as private data in the `src/app/services/weather/weather.service.ts` service. My private data looks like this:
+Add the coordinates you would like to use as private data in the `src/app/core/weather/weather.service.ts` service. My private data looks like this:
 
 ```TypeScript
   private latitude = 43.073051;
@@ -82,24 +82,29 @@ import { environment } from '../../../environments/environment';
 import { WeatherService } from './weather.service';
 
 describe('WeatherService', () => {
+  const latitude = 43.073051;
+  const longitude = -89.401230;
+
   let httpTestingController: HttpTestingController;
+  let service: WeatherService;
+
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [HttpClientTestingModule]
     });
     httpTestingController = TestBed.inject(HttpTestingController);
+    service: WeatherService = TestBed.inject(WeatherService);
   });
 
   it('should be created', () => {
-    const service: WeatherService = TestBed.inject(WeatherService);
     expect(service).toBeTruthy();
   });
 });
 ```
 
-**Note:** The test may have been generated with a `TestBed.get()` call. If so, change that to the now preferred `TestBed.inject()`.
-
 Don't worry about the fact that we are currently getting a `HttpTestingController` and not using it. We will address that next.
+
+The latitude and longitude values should be the same as was hard coded in the service. We will need to use those in the URLs for the tests.
 
 ### Get the Current Weather
 
@@ -113,7 +118,7 @@ We need to get the current weather using an URL similar to the following: `https
       const service: WeatherService = TestBed.inject(WeatherService);
       service.current().subscribe();
       const req = httpTestingController.expectOne(
-        `${environment.baseUrl}/weather?lat=43.073051&lon=-89.40123&appid=${
+        `${environment.baseUrl}/weather?lat=${latitude}&lon=${longitude}&appid=${
           environment.appId
         }`
       );
@@ -169,7 +174,7 @@ First we create a test that exercises the transform:
       let weather: Weather;
       service.current().subscribe(w => (weather = w));
       const req = httpTestingController.expectOne(
-        `${environment.baseUrl}/weather?lat=43.073051&lon=-89.40123&appid=${
+        `${environment.baseUrl}/weather?lat=${latitude}&lon=${longitude}&appid=${
           environment.appId
         }`
       );
@@ -241,7 +246,7 @@ Transforming the forecast data is more complex. We need to go through the `list`
       let forecast: Forecast;
       service.forecast().subscribe(f => (forecast = f));
       const req = httpTestingController.expectOne(
-        `${environment.baseUrl}/forecast?lat=43.073051&lon=-89.40123&appid=${
+        `${environment.baseUrl}/forecast?lat=${latitude}&lon=${longitude}&appid=${
           environment.appId
         }`
       );
@@ -410,7 +415,9 @@ One way to write that test is to create a testng template and feed an array of v
         let uvIndex: UVIndex;
         service.uvIndex().subscribe(i => (uvIndex = i));
         const req = httpTestingController.expectOne(
-          `${environment.baseUrl}/uvi?lat=43.073051&lon=-89.40123&appid=${environment.appId}`
+          `${environment.baseUrl}/uvi?lat=${latitude}&lon=${longitude}&appid=${
+            environment.appId
+          }`
         );
         req.flush({ value: test.value });
         expect(uvIndex).toEqual({ value: test.value, riskLevel: test.riskLevel });

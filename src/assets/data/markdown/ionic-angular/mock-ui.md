@@ -4,7 +4,7 @@ It is often desirable to lay out the user interface without worrying about how t
 
 In this lab, you will learn how to:
 
-- Create a simple service
+- Define some environment data
 - Install assets that can be used by your application
 - Model the data
 - Mock up the user interface
@@ -50,49 +50,28 @@ Change it such that the tabs use the following icons and labels:
   - **Icon:** sunny
   - **Label:** UV Index
 
-## Create a Required Service
+## Define the Icon Asset Paths 
 
-In order to allow each application to define its own weather condition images and where they exist, this library uses a specific map object. Let's just create that as a service so it can easily be injected where needed.
+In order to allow each application to define its own weather condition images and where they exist, this library uses a specific map object. Let's just create that object in our `environment` files to make it readily available where needed.
 
-```bash
-$ ionic generate service services/icon-map/icon-map
-```
-
-If you do a `git status` at this point, you should see a new directory was created for services:
-
-```bash
-$ git status
-On branch master
-Untracked files:
-  (use "git add <file>..." to include in what will be committed)
-
-	src/app/services/
-
-nothing added to commit but untracked files present (use "git add" to track)
-```
-
-The `src/services/icon-map/icon-map.service.ts` file needs to be modified to look like this:
+Add an `icons` object to the `environment` object defined in `src/environments/environment.ts` and `src/environments/environment.prod.ts`. Here is an example:
 
 ```TypeScript
-import { Injectable } from '@angular/core';
-
-@Injectable({
-  providedIn: 'root'
-})
-export class IconMapService {
-  sunny = 'assets/images/sunny.png';
-  cloudy = 'assets/images/cloudy.png';
-  lightRain = 'assets/images/light-rain.png';
-  shower = 'assets/images/shower.png';
-  sunnyThunderStorm = 'assets/images/partial-tstorm.png';
-  thunderStorm = 'assets/images/tstorm.png';
-  fog = 'assets/images/fog.png';
-  snow = 'assets/images/snow.png';
-  unknown = 'assets/images/dunno.png';
-}
+export const environment = {
+  production: false,
+  icons: {
+    sunny: 'assets/images/sunny.png',
+    cloudy: 'assets/images/cloudy.png',
+    lightRain: 'assets/images/light-rain.png',
+    shower: 'assets/images/shower.png',
+    sunnyThunderStorm: 'assets/images/partial-tstorm.png',
+    thunderStorm: 'assets/images/tstorm.png',
+    fog: 'assets/images/fog.png',
+    snow: 'assets/images/snow.png',
+    unknown: 'assets/images/dunno.png',
+  },
+};
 ```
-
-This could have also been created as an object that we just import into each place it is required, but I like letting the injection engine manage it. To each their own.
 
 ## Install the Images
 
@@ -126,8 +105,8 @@ export interface Weather {
 Before we get into the next section, let's make TypeScript module resolution a bit easier to deal with. If we don't do this, we could end up with a lot of code that looks like this:
 
 ```TypeScript
-import { BarService } from '../../services/bar/bar.service';
-import { FooService } from '../../services/foo/foo.service';
+import { BarService } from '../../core/bar/bar.service';
+import { FooService } from '../../core/foo/foo.service';
 import { Weather } from '../../models/weather';
 import { environment } from '../../../environments/environment';
 ```
@@ -135,7 +114,7 @@ import { environment } from '../../../environments/environment';
 The relative paths are obnoxious. They are also a maintenance headache as the application grows since you may need to adjust them as services and components are reorganized into different subdirectories over time. It would be better if our code could look like this:
 
 ```TypeScript
-import { BarService, FooService } from '@app/services';
+import { BarService, FooService } from '@app/core';
 import { Weather } from '@app/models';
 import { environment } from '@env/environment';
 ```
@@ -158,13 +137,7 @@ This tells TypeScript exactly which directory, relative to the `baseUrl`, to use
 
 #### Barrel Files
 
-We will group all of our services in a single `index.ts` file within the `services` folder. Similarily, we will group all of our models together via a similar file.
-
-**`src/app/services/index.ts`**
-
-```TypeScript
-export * from './icon-map/icon-map.service';
-```
+We will group all of our models in a single `index.ts` file within the `models` folder. Similarily, we will group all of our services together via a similar file once we start creating services.
 
 **`src/app/models/index.ts`**
 
@@ -176,38 +149,42 @@ The files are very redundant right now, but as the app grows this will keep our 
 
 ### Current Weather
 
-- Inject the `IconMapService`
+- Get the icon paths from the environment
 - Create a `Weather` object with data
 
 ```TypeScript
 import { Component } from '@angular/core';
 
-import { IconMapService } from '@app/services';
-import { Weather } from '@app/models'
+import { environment } from '@env/environment';
+import { Weather } from '@app/models';
 
 @Component({
   selector: 'app-current-weather',
   templateUrl: 'current-weather.page.html',
-  styleUrls: ['current-weather.page.scss']
+  styleUrls: ['current-weather.page.scss'],
 })
 export class CurrentWeatherPage {
+  icons = environment.icons;
   currentWeather: Weather = {
     temperature: 302,
-    condition: 200
+    condition: 200,
   };
 
-  constructor(public iconMap: IconMapService) { }
+  constructor() {}
 }
 ```
 
 Use the weather components in the `src/app/current-weather/current-weather.page.html` view.
+
+- Replace the contents of the `ion-content` element as shown
+- Add the `ion-padding` and `ion-text-center` classes as shown
 
 ```html
 <ion-content class="ion-padding ion-text-center" [fullscreen]="true">
   <div class="information">
     <kws-temperature class="primary-value" scale="F" temperature="{{currentWeather?.temperature}}"></kws-temperature>
   </div>
-  <kws-condition [condition]="currentWeather?.condition" [iconPaths]="iconMap"></kws-condition>
+  <kws-condition [condition]="currentWeather?.condition" [iconPaths]="icons"></kws-condition>
 </ion-content>
 ```
 
@@ -246,8 +223,8 @@ At this point, set up some simple sample data (three days worth should be fine),
 ```TypeScript
 import { Component } from '@angular/core';
 
+import { environment } from '@env/environment';
 import { Forecast } from '@app/models';
-import { IconMapService } from '@app/services'
 
 @Component({
   selector: 'app-forecast',
@@ -255,6 +232,7 @@ import { IconMapService } from '@app/services'
   styleUrls: ['forecast.page.scss']
 })
 export class ForecastPage {
+  icons = environment.icons;
   forecast: Forecast = [
     [
       {
@@ -279,7 +257,7 @@ export class ForecastPage {
     ]
   ];
 
-  constructor(public iconMap: IconMapService) {}
+  constructor() {}
 }
 ```
 
@@ -297,7 +275,7 @@ export class ForecastPage {
 <ion-content [fullscreen]="true">
   <ion-list>
     <ion-item *ngFor="let f of forecast">
-      <kws-daily-forecast scale="F" [forecasts]="f" [iconPaths]="iconMap"></kws-daily-forecast>
+      <kws-daily-forecast scale="F" [forecasts]="f" [iconPaths]="icons"></kws-daily-forecast>
     </ion-item>
   </ion-list>
 </ion-content>
@@ -402,6 +380,13 @@ export class UvIndexPage {
 ## Fix the Tests
 
 There is a problem with the tests now. The problem is that we added custom elements to the HTML templates but we are not using the CUSTOM_ELEMENTS_SCHEMA in the tests. They also do not need the `forRoot()` portion on the `IonicModule` import. Update the module accordingly.
+
+## Remove the `ExploreContainerComponent`
+
+The `ExploreContainerComponent` is no longer required. Let's completely remove it from our source.
+
+- Remove the `explore-container` folder (`rm -rf src/app/explore-container` for example)
+- Find and remove all references to `ExploreContainerComponentModule` in the code
 
 ## Conclusion
 

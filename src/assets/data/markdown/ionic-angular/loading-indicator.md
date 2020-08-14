@@ -4,7 +4,9 @@ In this lab, you will learn how to use overlay component. Specifically the Loadi
 
 ## Test First
 
-The LoadingController follows a pattern that is common in Ionic for type of components called "overlays." The mock package that is supplied with this project contains two mocks we can use to test any overlay component: `createOverlayControllerMock()` which mocks the controller and `createOverlayElementMock()` which mocks the element created by the overlay controller.
+In this lab, you will modify the tests and the code for the `current-weather`, `forecast`, and `uv-index` pages to use the `LoadingController` to create, present, and eventually dismiss a loading indicator. Similar changes will be made to each page and its test.
+
+The `LoadingController` follows a pattern that is common in the Ionic Framework for a type of component called "overlays." The mock package that is supplied with this project contains two mocks we can use to test any overlay component: `createOverlayControllerMock()` which mocks the controller and `createOverlayElementMock()` which mocks the element created by the overlay controller.
 
 The mocks can be set up like such:
 
@@ -28,51 +30,49 @@ The mocks can be set up like such:
   }));
 ```
 
-The test tests should look something like this. Note that the two existing tests are changed to use `async/await`:
+The test tests should look something like this. Note that the two existing tests are changed to use `fakeAsync` and `tick()`, both of which need to be imported from `@angular/core/testing`. The two test cases that need to be added are "displays a loading indicator" and "dismisses the loading indicator":
 
 ```TypeScript
   describe('entering the page', () => {
-    it('displays a loading indicator', async () => {
-      const loadingController = TestBed.inject(LoadingController);
-      await component.ionViewDidEnter();
-      expect(loadingController.create).toHaveBeenCalledTimes(1);
-      expect(loading.present).toHaveBeenCalledTimes(1);
-    });
-
-    it('gets the current weather', async () => {
-      const weather = TestBed.inject(WeatherService);
-      await component.ionViewDidEnter();
-      expect(weather.current).toHaveBeenCalledTimes(1);
-    });
-
-    it('displays the current weather', async () => {
-      const weather = TestBed.inject(WeatherService);
-      weather.current.and.returnValue(
-        of({
-          temperature: 280.32,
-          condition: 300,
-          date: new Date(1485789600 * 1000)
-        })
-      );
-      await component.ionViewDidEnter();
-      fixture.detectChanges();
-      await new Promise(resolve => setTimeout(() => resolve()));
-      const t = fixture.debugElement.query(By.css('kws-temperature'));
-      expect(t).toBeTruthy();
-    });
-
-    it('dismisses the loading indicator', async () => {
+    beforeEach(() => {
       const weather = TestBed.inject(WeatherService);
       (weather.current as any).and.returnValue(
         of({
           temperature: 280.32,
           condition: 300,
-          date: new Date(1485789600 * 1000)
-        })
+          date: new Date(1485789600 * 1000),
+        }),
       );
-      await component.ionViewDidEnter();
-      expect(loading.dismiss).toHaveBeenCalledTimes(1);
     });
+
+    it('displays a loading indicator', fakeAsync(() => {
+      const loadingController = TestBed.inject(LoadingController);
+      component.ionViewDidEnter();
+      tick();
+      expect(loadingController.create).toHaveBeenCalledTimes(1);
+      expect(loading.present).toHaveBeenCalledTimes(1);
+    }));
+
+    it('gets the current weather', fakeAsync(() => {
+      const weather = TestBed.inject(WeatherService);
+      component.ionViewDidEnter();
+      tick();
+      expect(weather.current).toHaveBeenCalledTimes(1);
+    }));
+
+    it('displays the current weather', fakeAsync(() => {
+      component.ionViewDidEnter();
+      tick();
+      fixture.detectChanges();
+      const t = fixture.debugElement.query(By.css('kws-temperature'));
+      expect(t).toBeTruthy();
+    }));
+
+    it('dismisses the loading indicator', fakeAsync(() => {
+      component.ionViewDidEnter();
+      tick();
+      expect(loading.dismiss).toHaveBeenCalledTimes(1);
+    }));
   });
 ```
 

@@ -61,36 +61,9 @@ Rather than explicitly kicking off a change detection cycle, we will use the `as
 - it automatically manages the subscription, including unsubscribing when necessary
 - it is compatible with OnPush change detection in that it will kick off a change detection cycle when necesssary
 
-### Clean up the Tests
-
-First we will need to clean up the page tests. Several of them use `async/await` because of the loading indicator using promises. We will be modifying this whole workflow to be part of an `Observable` pipeline, so `async/await` will no longer be appropriate. Instead, use the `fakeAsync()` zone and `tick()` as such (**note** you do not need to change the "user preferences" related tests):
-
-**`async/await` Test**
-
-```TypeScript
-    it('displays a loading indicator', async () => {
-      const loadingController = TestBed.inject(LoadingController);
-      await component.ionViewDidEnter();
-      expect(loadingController.create).toHaveBeenCalledTimes(1);
-      expect(loading.present).toHaveBeenCalledTimes(1);
-    });
-```
-
-**`fakeAsync` Zone Test**
-
-```TypeScript
-    it('displays a loading indicator', fakeAsync(() => {
-      const loadingController = TestBed.inject(LoadingController);
-      component.ionViewDidEnter();
-      tick();
-      expect(loadingController.create).toHaveBeenCalledTimes(1);
-      expect(loading.present).toHaveBeenCalledTimes(1);
-    }));
-```
-
 ### Change the Code
 
-**`src/app/weather-page-base/weather-page-base.ts`**
+#### `src/app/weather-page-base/weather-page-base.ts`
 
 The bulk of the changes are in the base class
 
