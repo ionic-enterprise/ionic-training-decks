@@ -1,3 +1,18 @@
+## [2.2.8](https://github.com/ionic-team/ionic-training-decks/compare/v2.2.7...v2.2.8) (2020-08-17)
+
+
+### Bug Fixes
+
+* **react:** clarify the settings service creation ([1c828d5](https://github.com/ionic-team/ionic-training-decks/commit/1c828d59d835dcd5cc86aa6566a762b26e25c76f))
+
+
+### Features
+
+* **angular:** clean up the training ([5ca9061](https://github.com/ionic-team/ionic-training-decks/commit/5ca9061f6061aef1d703e965faee4e2b4baffd15))
+* **angular:** use Capacitor Storage API ([168fc84](https://github.com/ionic-team/ionic-training-decks/commit/168fc8447c42734c27765ea0113860f72b08b91d))
+
+
+
 ## [2.2.7](https://github.com/ionic-team/ionic-training-decks/compare/v2.2.6...v2.2.7) (2020-08-07)
 
 
