@@ -93,7 +93,7 @@ describe('WeatherService', () => {
       imports: [HttpClientTestingModule]
     });
     httpTestingController = TestBed.inject(HttpTestingController);
-    service: WeatherService = TestBed.inject(WeatherService);
+    service = TestBed.inject(WeatherService);
   });
 
   it('should be created', () => {
@@ -115,7 +115,6 @@ We need to get the current weather using an URL similar to the following: `https
 ```
   describe('current', () => {
     it('gets the data from the server', () => {
-      const service: WeatherService = TestBed.inject(WeatherService);
       service.current().subscribe();
       const req = httpTestingController.expectOne(
         `${environment.baseUrl}/weather?lat=${latitude}&lon=${longitude}&appid=${
@@ -170,7 +169,6 @@ First we create a test that exercises the transform:
 
 ```TypeScript
     it('transforms the data', () => {
-      const service: WeatherService = TestBed.inject(WeatherService);
       let weather: Weather;
       service.current().subscribe(w => (weather = w));
       const req = httpTestingController.expectOne(
@@ -242,7 +240,6 @@ Transforming the forecast data is more complex. We need to go through the `list`
 
 ```TypeScript
     it('transforms the data', () => {
-      const service: WeatherService = TestBed.inject(WeatherService);
       let forecast: Forecast;
       service.forecast().subscribe(f => (forecast = f));
       const req = httpTestingController.expectOne(
@@ -411,7 +408,6 @@ One way to write that test is to create a testng template and feed an array of v
       { value: 18, riskLevel: 4 }
     ].forEach(test =>
       it(`transforms the data (value: ${test.value})`, () => {
-        const service: WeatherService = TestBed.inject(WeatherService);
         let uvIndex: UVIndex;
         service.uvIndex().subscribe(i => (uvIndex = i));
         const req = httpTestingController.expectOne(
