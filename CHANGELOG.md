@@ -1,3 +1,12 @@
+## [2.2.10](https://github.com/ionic-team/ionic-training-decks/compare/v2.2.9...v2.2.10) (2020-09-02)
+
+
+### Bug Fixes
+
+* **get-data:** use the TypeScript path mapping ([62c75d4](https://github.com/ionic-team/ionic-training-decks/commit/62c75d4b33bea0674c377975ac54ede5f7326027))
+
+
+
 ## [2.2.9](https://github.com/ionic-team/ionic-training-decks/compare/v2.2.8...v2.2.9) (2020-09-02)
 
 
