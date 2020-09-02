@@ -78,7 +78,7 @@ import {
   HttpTestingController
 } from '@angular/common/http/testing';
 
-import { environment } from '../../../environments/environment';
+import { environment } from '@env/environment';
 import { WeatherService } from './weather.service';
 
 describe('WeatherService', () => {
