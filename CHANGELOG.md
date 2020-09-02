@@ -1,3 +1,12 @@
+## [2.2.9](https://github.com/ionic-team/ionic-training-decks/compare/v2.2.8...v2.2.9) (2020-09-02)
+
+
+### Bug Fixes
+
+* **get-data:** clean up the initial test creation ([97ab963](https://github.com/ionic-team/ionic-training-decks/commit/97ab963cbf9f0461681b316a8399c33ecc1183b2))
+
+
+
 ## [2.2.8](https://github.com/ionic-team/ionic-training-decks/compare/v2.2.7...v2.2.8) (2020-08-17)
 
 
