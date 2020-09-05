@@ -198,6 +198,26 @@
       ]
     },
     {
+      "title": "Cordova to Capacitor",
+      "folder": "cordova-to-capacitor",
+      "file": "intro",
+      "icon": "logo-capacitor",
+      "pages": [
+        {
+          "title": "Create a Cordova Application",
+          "file": "cordova"
+        },
+        {
+          "title": "Convert to Capacitor",
+          "file": "capacitor"
+        },
+        {
+          "title": "Cleanup",
+          "file": "cleanup"
+        }
+      ]
+    },
+    {
       "title": "A Simple git Workflow",
       "file": "simple-git-workflow",
       "icon": "git-branch"
