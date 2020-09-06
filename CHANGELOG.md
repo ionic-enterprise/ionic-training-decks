@@ -1,3 +1,12 @@
+# [2.3.0](https://github.com/ionic-team/ionic-training-decks/compare/v2.2.10...v2.3.0) (2020-09-06)
+
+
+### Features
+
+* **capacitor:** add converting from Cordova to Capacitor ([4949c24](https://github.com/ionic-team/ionic-training-decks/commit/4949c24e9ad3903938ed81fd78d428d606c1a28b))
+
+
+
 ## [2.2.10](https://github.com/ionic-team/ionic-training-decks/compare/v2.2.9...v2.2.10) (2020-09-02)
 
 
