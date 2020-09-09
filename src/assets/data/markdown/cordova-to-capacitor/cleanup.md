@@ -252,6 +252,35 @@ While you are in there, find the build script. I like to add a `cap copy` comman
     "build": "ng build && cap copy",
 ```
 
+### Modify the `capacitor.config.json` File
+
+Remember all of those preferences that were copied over when we initially added the Capacitor integration? They look like this in the `capacitor.config.json` file:
+
+```JSON
+  "cordova": {
+    "preferences": {
+      "ScrollEnabled": "false",
+      "BackupWebStorage": "none",
+      "SplashMaintainAspectRatio": "true",
+      "FadeSplashScreenDuration": "300",
+      "SplashShowOnlyFirstTime": "false",
+      "SplashScreen": "screen",
+      "SplashScreenDelay": "3000"
+    }
+  }
+```
+
+Since we were able to remove all of the Cordova plugins in this project, we don't need any of those any more. So let's just remove the preferences but leave the actual object in the JSON in case we need them for a new plugin we add later.
+
+```JSON
+  "cordova": {
+    "preferences": {
+    }
+  }
+```
+
+**Note:** In your own project, you may still need some preferences based on which Cordova plugins you still have left.
+
 ### Remove Unused Files
 
 At this point, you no longer need any of the Cordova related files or folders in your project. You can remove all of the following:

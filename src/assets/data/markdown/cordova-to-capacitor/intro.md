@@ -2,7 +2,7 @@
 
 Converting a Cordova application to a Capacitor application is a multi-step process, but each step is relatively small and the bulk of the work is scripted, which means you just need to run a few commands to be off and running.
 
-There are two main phases of any convertion from Cordova to Capacitor: Basic Configuration and Project Cleanup.
+There are two main phases of any conversion from Cordova to Capacitor: Basic Configuration and Project Cleanup.
 
 ## Phase 1: Basic Configuration
 
