@@ -1,3 +1,12 @@
+## [2.3.1](https://github.com/ionic-team/ionic-training-decks/compare/v2.3.0...v2.3.1) (2020-09-09)
+
+
+### Features
+
+* **capacitor:** add missing section ([1123c2b](https://github.com/ionic-team/ionic-training-decks/commit/1123c2bfca73949a4e66e4d908beff2c07f8f2bf))
+
+
+
 # [2.3.0](https://github.com/ionic-team/ionic-training-decks/compare/v2.2.10...v2.3.0) (2020-09-06)
 
 
