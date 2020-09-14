@@ -160,7 +160,10 @@ export class RatingComponent implements ControlValueAccessor {
 
   constructor() {}
 
+  /* tslint:disable:variable-name */
   onChange = (_rating: number) => {};
+  /* tslint:endable:variable-name */
+
   onTouched = () => {};
 
   writeValue(rating: number): void {
@@ -200,8 +203,8 @@ import { RatingComponent } from './rating.component';
 })
 class TestHostComponent {
   disabled = false;
-  rating: number = 1;
-  changed: number = 0;
+  rating = 1;
+  changed = 0;
   onChange() {
     this.changed++;
   }
