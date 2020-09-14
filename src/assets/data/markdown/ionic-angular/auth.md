@@ -1,4 +1,4 @@
-# Lab: Handle Authentication
+# Lab: Authenticate the User
 
 In this lab you will add learn how to:
 

@@ -1,4 +1,4 @@
-# Lab: Authentication Guard
+# Lab: Guard the Routes
 
 In this lab you will learn how to protect your routes with an Authentication Guard
 

@@ -1,4 +1,4 @@
-# Lab: Tabbed Navigation
+# Lab: Add Application Tabs
 
 In this lab you will:
 

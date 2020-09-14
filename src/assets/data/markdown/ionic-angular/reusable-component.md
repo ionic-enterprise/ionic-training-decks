@@ -1,4 +1,4 @@
-# Lab: Create a Reusable Component
+# Lab: Create a Rating Component
 
 In this lab you will:
 
