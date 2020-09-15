@@ -1,3 +1,10 @@
+## [3.0.1](https://github.com/ionic-team/ionic-training-decks/compare/v3.0.0...v3.0.1) (2020-09-15)
+
+### Bug Fixes
+
+- **angular:** remove linting errors from examples ([863d64a](https://github.com/ionic-team/ionic-training-decks/commit/863d64aa2a5456ca297a132918f1baa6d08c5547))
+- **angular:** update the icon files ([85948ed](https://github.com/ionic-team/ionic-training-decks/commit/85948ede120c061acbf8448f806360c255dd7214))
+
 # [3.0.0](https://github.com/ionic-team/ionic-training-decks/compare/v2.3.1...v3.0.0) (2020-09-14)
 
 ### Features
