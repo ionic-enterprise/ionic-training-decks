@@ -47,7 +47,16 @@ This step takes about 15-30 minutes for simple projects but can take significant
 
 We will dive into this step in more detail in its own section of this walkthrough.
 
-**Important:** Your project may run just fine after the first phase, but you should still have a look at this phase. There are important steps here that will allow you to take full advantage of using Capacitor as your native layer.
+**Important:** A project may run just fine after the first phase, but you should still have a look at the second phase. There are important steps here that will allow you to take full advantage of using Capacitor as your native layer.
+
+## About the Tutorial
+
+For this tutorial, we will:
+
+- Create a very simple Cordova application
+- Install and Configure Capacitor in the simple Cordova application
+- Perform the project cleanup
+
+We suggest that you follow this process once just to get your bearings before trying this with your own application.
 
 Use the navigation items in the header to see each of these phases in detail.
-

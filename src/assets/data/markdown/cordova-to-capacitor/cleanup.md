@@ -43,9 +43,9 @@ beforeEach(async(() => {
     providers: [
       {
         provide: Platform,
-        useFactory: () => jasmine.createSpyObj('Platform', { is: false })
-      }
-    ]
+        useFactory: () => jasmine.createSpyObj('Platform', { is: false }),
+      },
+    ],
   }).compileComponents();
 }));
 
@@ -72,7 +72,9 @@ describe('initialization', () => {
     it('styles the status bar', () => {
       TestBed.createComponent(AppComponent);
       expect(Plugins.StatusBar.setStyle).toHaveBeenCalledTimes(1);
-      expect(Plugins.StatusBar.setStyle).toHaveBeenCalledWith({ style: StatusBarStyle.Light });
+      expect(Plugins.StatusBar.setStyle).toHaveBeenCalledWith({
+        style: StatusBarStyle.Light,
+      });
     });
 
     it('hides the splash screen', () => {
@@ -119,7 +121,7 @@ import { Plugins, StatusBarStyle } from '@capacitor/core';
 @Component({
   selector: 'app-root',
   templateUrl: 'app.component.html',
-  styleUrls: ['app.component.scss']
+  styleUrls: ['app.component.scss'],
 })
 export class AppComponent {
   constructor(private platform: Platform) {
@@ -295,4 +297,8 @@ $ rm -rf platforms plugins config.xml
 
 ## Conclusion
 
-Your application has been fully converted to Capacitor at this point. You may or may not still be including some Cordova plugins, but Capacitor is the only system being used to build your iOS and Android applications for this project.
+The application has been fully converted to Capacitor at this point.
+
+In your own project, you may or may not still be including some Cordova plugins, but Capacitor is the only system being used to build the iOS and Android applications. You may also have various native interactions such as Push Notifications that need some special attention. Please see one of our other more targeted guides for those types of situation.
+
+If you have further questions, please be sure to contact us so we can discuss setting up some advisory sessions to discuss any challenges you may be experiencing.

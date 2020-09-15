@@ -1,6 +1,6 @@
 # Create a Cordova App
 
-You presumably already have a Cordova based application that you want to convert, and you can use that if you wish. We suggest doing this walkthrough on a simple starter application first, though, just to get your feet wet. Then, once you have been through the process once, you will have all of the tools you need in order to perform these steps on your own projects.
+Let's create a very simple Cordova application to use for this tutorial. This application will just be one of Ionic's starter applications with the minimal Cordova plugins included.
 
 ```bash
 $ ionic start cor-to-cap blank --type=angular --cordova
@@ -24,4 +24,3 @@ $ ionic cordova platform add android
 ```
 
 We now have a fully functional, though minimal, Cordova application. In the next section, we will perform phase one of our conversion: installing and configuring Capacitor.
-
