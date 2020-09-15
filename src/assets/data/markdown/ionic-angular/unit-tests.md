@@ -72,7 +72,7 @@ The current `app.component.spec.ts` file has some issues:
 
 ### Use Mock Objects
 
-I favor the use of centralized factory functions to create mocks whenever it makes sense. This allows me to use a consistently defined mock throughout the tests in my application and reduces maintenance costs. For this application, I provide a set of centralized mock factories. <a download href="/assets/packages/angular/test.zip">Download the zip file</a> and unpack it in the root of the project creating a `test` folder.
+I favor the use of centralized factory functions to create mocks whenever it makes sense. This allows me to use a consistently defined mock throughout the tests in my application and reduces maintenance costs. For this application, I provide a set of centralized mock factories. <a download href="/assets/packages/ionic-angular/test.zip">Download the zip file</a> and unpack it in the root of the project creating a `test` folder.
 
 Once that is in place, perform the following tasks:
 
