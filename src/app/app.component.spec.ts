@@ -1,5 +1,5 @@
 import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
-import { async, fakeAsync, TestBed, tick } from '@angular/core/testing';
+import { fakeAsync, TestBed, tick, waitForAsync } from '@angular/core/testing';
 import { Plugins, StatusBarStyle } from '@capacitor/core';
 
 import { Platform } from '@ionic/angular';
@@ -14,28 +14,35 @@ import {
 } from '@app/core/testing';
 
 describe('AppComponent', () => {
-  let originalSplashScreen;
-  let originalStatusBar;
+  let originalSplashScreen: any;
+  let originalStatusBar: any;
 
-  beforeEach(async(() => {
-    originalSplashScreen = Plugins.SplashScreen;
-    originalStatusBar = Plugins.StatusBar;
-    Plugins.StatusBar = jasmine.createSpyObj('StatusBar', ['setStyle']);
-    Plugins.SplashScreen = jasmine.createSpyObj('SplashScreen', ['hide']);
-    TestBed.configureTestingModule({
-      declarations: [AppComponent],
-      schemas: [CUSTOM_ELEMENTS_SCHEMA],
-      providers: [
-        {
-          provide: ApplicationService,
-          useFactory: createAppliationServiceMock,
-        },
-        { provide: MenuItemsService, useFactory: createMenuItemsServiceMock },
-        { provide: Platform, useFactory: createPlatformMock },
-      ],
-      imports: [RouterTestingModule.withRoutes([])],
-    }).compileComponents();
-  }));
+  beforeEach(
+    waitForAsync(() => {
+      originalSplashScreen = Plugins.SplashScreen;
+      originalStatusBar = Plugins.StatusBar;
+      Plugins.StatusBar = jasmine.createSpyObj('StatusBar', ['setStyle']);
+      Plugins.SplashScreen = jasmine.createSpyObj('SplashScreen', ['hide']);
+      TestBed.configureTestingModule({
+        declarations: [AppComponent],
+        schemas: [CUSTOM_ELEMENTS_SCHEMA],
+        providers: [
+          {
+            provide: ApplicationService,
+            useFactory: createAppliationServiceMock,
+          },
+          { provide: MenuItemsService, useFactory: createMenuItemsServiceMock },
+          { provide: Platform, useFactory: createPlatformMock },
+        ],
+        imports: [RouterTestingModule.withRoutes([])],
+      }).compileComponents();
+    }),
+  );
+
+  afterEach(() => {
+    Plugins.SplashScreen = originalSplashScreen;
+    Plugins.StatusBar = originalStatusBar;
+  });
 
   it('should create the app', async () => {
     const fixture = TestBed.createComponent(AppComponent);
@@ -67,7 +74,7 @@ describe('AppComponent', () => {
 
       it('does not register for updates', fakeAsync(() => {
         const application = TestBed.inject(ApplicationService);
-        const fixture = TestBed.createComponent(AppComponent);
+        TestBed.createComponent(AppComponent);
         expect(application.registerForUpdates).not.toHaveBeenCalled();
         tick();
         expect(application.registerForUpdates).not.toHaveBeenCalled();
@@ -89,7 +96,7 @@ describe('AppComponent', () => {
 
       it('registers for updates', fakeAsync(() => {
         const application = TestBed.inject(ApplicationService);
-        const fixture = TestBed.createComponent(AppComponent);
+        TestBed.createComponent(AppComponent);
         expect(application.registerForUpdates).not.toHaveBeenCalled();
         tick();
         expect(application.registerForUpdates).toHaveBeenCalledTimes(1);

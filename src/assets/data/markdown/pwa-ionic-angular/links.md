@@ -6,6 +6,7 @@ The labs that we have done show how to use the same code base to create both a t
 
 - <a href="https://jakearchibald.github.io/isserviceworkerready/" target="_blank">Is Service Worker Ready?</a> - Spoiler: yes. Mostly. At least until you get to "Background Sync"
 - <a href="https://medium.com/@firt/progressive-web-apps-on-ios-are-here-d00430dee3a7" target="_blank">PWAs on iOS</a> - explains the quirks, based on iOS 11.3, but much of this is still valid on iOS 12
+- <a href="https://firt.dev/ios-14" target="_blank">PWAs on iOS 14</a> - a more up to date state of things, whereas the prior article will let you know the experience of your users who are on older versions
 - <a href="https://developers.google.com/web/progressive-web-apps/" target="_blank">Google Developers - PWAs</a> - good general information about all things PWA
 - <a href="https://whatwebcando.today/" target="_blank">What Web Can Do Today</a>
 - <a href="https://caniuse.com/" target="_blank">Can I Use ...?</a>

@@ -1,12 +1,25 @@
 # Lab: Host the Application
 
-The Ionic Weather application has been written as a hybrid mobile application, but we have also taken care to make sure it will still work in our development environment, which is web-based. Therefore it is very easy to run the application as a web app. In order to do this, it will need to be hosted somewhere. One of the easiest ways to do that is to use Firebase hosting.
+The Tea Taster application has been written as a hybrid mobile application, but we have also taken care to make sure it will still work in our development environment, which is web-based. This was done through a combination of using Capacitor Plugin APIs, which often support both mobile and web, and Ionic's `Platform` service to detect the current platform in cases where the APIs did not support the web. Therefore it is very easy to run the application as a web app.
+
+In order to properly run our application as a web app it will need to be hosted somewhere. One of the easiest ways to do that is to use Firebase hosting.
 
 In this lab you will learn:
 
 - How to build your application as a web application
 - How to host your application on Firebase
 - How to run Lighthouse audits on your app
+
+## Clone the Application
+
+If you participated in the three-day Ionic Angular Framework training, then you should already have a copy of the application on your machine. If you do not already have the application, you will need to follow these steps:
+
+1. Clone the repository: <a href="https://github.com/ionic-team/tea-taster-angular" target"\_blank">https://github.com/ionic-team/tea-taster-angular</a>
+1. `cd tea-taster-angular`
+1. `npm i`
+1. `npm run build`
+1. `npx cap sync`
+1. `git remote remove origin`
 
 ## Building the Application for the Web
 
@@ -18,8 +31,8 @@ Since this is something that will be done often, and I suggest adding it as a sc
 
 ```JSON
   "scripts": {
-    "build": "ng build",
-    "build:prod": "ng build --prod",
+    "build": "ng build && cap copy",
+    "build:prod": "ng build --prod && cap copy",
     "e2e": "ng e2e",
     "lint": "ng lint",
     "ng": "ng",
@@ -36,11 +49,12 @@ Now running `npm run build:prod` will result in a build that is ready to be serv
 
 As the PWA is developed, it will need to be hosted. Firebase is one hosting option that exists. It is used for this course because it is easy to set up and use, and because Google offers a generous free tier that will easily cover our needs.
 
-- If you do not already have a Firebase account, create one here: https://firebase.google.com/
-- Go to the console and add a project: https://console.firebase.google.com/
-  - Call the project `ionic-weather`
+- If you do not already have a Firebase account, create one here: <a href="https://firebase.google.com/" target="_blank">https://firebase.google.com/</a>
+- Go to the console and add a project: <a href="https://console.firebase.google.com/" target="_blank">https://console.firebase.google.com/</a>
+  - Call the project `tea-taster-training`
   - Firebase will generate a project ID for you
   - Use the default settings
+  - If asked about Firebase Analytics, you can turn it off
   - Accept the terms and conditions
   - Click `Create project`
 
@@ -67,24 +81,24 @@ The deploy process should look something like this:
 ```
 $ firebase deploy
 
-=== Deploying to 'ionic-weather-1792a'...
+=== Deploying to 'tea-taster-training'...
 
 i  deploying hosting
-i  hosting[ionic-weather-1792a]: beginning deploy...
-i  hosting[ionic-weather-1792a]: found 901 files in www
-✔  hosting[ionic-weather-1792a]: file upload complete
-i  hosting[ionic-weather-1792a]: finalizing version...
-✔  hosting[ionic-weather-1792a]: version finalized
-i  hosting[ionic-weather-1792a]: releasing new version...
-✔  hosting[ionic-weather-1792a]: release complete
+i  hosting[tea-taster-training]: beginning deploy...
+i  hosting[tea-taster-training]: found 1375 files in www
+✔  hosting[tea-taster-training]: file upload complete
+i  hosting[tea-taster-training]: finalizing version...
+✔  hosting[tea-taster-training]: version finalized
+i  hosting[tea-taster-training]: releasing new version...
+✔  hosting[tea-taster-training]: release complete
 
 ✔  Deploy complete!
 
-Project Console: https://console.firebase.google.com/project/ionic-weather-1792a/overview
-Hosting URL: https://ionic-weather-1792a.firebaseapp.com
+Project Console: https://console.firebase.google.com/project/tea-taster-training/overview
+Hosting URL: https://tea-taster-training.web.app
 ```
 
-Open an Icognito window and go to the specified `Hosting URL`.
+Open an Icognito window and go to the specified `Hosting URL` (**note:** your hosting URL will be different than mine).
 
 ## Running Lighthouse Audits
 

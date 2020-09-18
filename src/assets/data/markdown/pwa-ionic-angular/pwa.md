@@ -44,7 +44,7 @@ When you are comlpete, the `firebase.json` file should look something like this:
     ],
     "headers": [
       {
-        "source": "ngsw-worker.js.js",
+        "source": "ngsw-worker.js",
         "headers": [
           {
             "key": "Cache-Control",
@@ -84,13 +84,13 @@ This command did several things:
 Out of the box, this provides almost everything we need for our app to be served as a PWA. We need to adjust a few things:
 
 - All of the icons are the Angular logo
-- The application name is incorrect in the `src/manifest.json` file
+- The application name is incorrect in the `src/manifest.webmanifest` file
 
 Now is a good time to add the new files to our git repo and commit the other changes.
 
 ### Install Our Icons
 
-<a download href="/assets/images/icons.zip">Download our icons</a> and unpack the zip file under `src/assets`, replacing the files in the `icons` folder.
+<a download href="/assets/packages/ionic-angular/icons.zip">Download our icons</a> and unpack the zip file under `src/assets`, replacing the files in the `icons` folder.
 
 **Note:** the specifics on doing this depends on the type of machine you are using. On a Mac:
 
@@ -118,16 +118,16 @@ index 97f0552..6bf1d68 100644
  {
 -  "name": "app",
 -  "short_name": "app",
-+  "name": "Ionic Weather",
-+  "short_name": "IonicWeather",
++  "name": "Tea Taster",
++  "short_name": "TeaTaster",
    "theme_color": "#1976d2",
 -  "background_color": "#fafafa",
-+  "background_color": "#f4a942",
++  "background_color": "#f1ebe1",
 ```
 
 ## Configure the Service Worker
 
-The current version of the service worker does not need to be configured. It currently does exactly what we need right out of the box. Here is the default configuration:
+The current version of the service worker does not need to be configured. It currently does exactly what we need right out of the box. Here is the default configuration defined in `ngsw-config.json`:
 
 ```JSON
 {
@@ -165,25 +165,20 @@ The `assets` asset group lazily fetches application assets that tend to be large
 
 ## Handle iOS Quirks (Sort Of...)
 
-If you build and deploy the application at this time:
+If you do a production build and deploy the application at this time:
 
 - It will work great on Android devices
 - It will get the following scores in Lighthouse:
   - **Performance:** 95
   - **Progressive Web App:** 100
   - **Best Practices:** 100
-- It will only sorta/kinda behave on iOS
+- It will mostly behave on iOS
 
 Enter <a href="https://developers.google.com/web/updates/2018/07/pwacompat" target="_blank">PWACompat</a>. Follow the instuctions on that page to add this to your application. It involves addimg a `script` tag after the Web App Manifest is loaded. At this time, the markup looks like this:
 
 ```HTML
-    <link rel="manifest" href="manifest.json" />
-        <script
-      async
-      src="https://cdn.jsdelivr.net/npm/pwacompat@2.0.8/pwacompat.min.js"
-      integrity="sha384-uONtBTCBzHKF84F6XvyC8S0gL8HTkAPeCyBNvfLfsqHh+Kd6s/kaS4BdmNQ5ktp1"
-      crossorigin="anonymous"
-    ></script>
+    <link rel="manifest" href="manifest.webmanifest" />
+    <script async src="https://unpkg.com/pwacompat" crossorigin="anonymous"></script>
 ```
 
 It should be noted that PWACompat <a href="https://medium.com/@firt/you-shouldnt-use-chrome-s-pwacompat-library-in-your-progressive-web-apps-6b3496faab62" target="_blank">has its detractors</a> so you should evaluate its use on a case by case basis, but for our current appliation it will work wonderfully. That is probably also the case for most applications.
