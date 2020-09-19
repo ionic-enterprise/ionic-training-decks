@@ -18,24 +18,23 @@ The App Component is currently using Cordova plugins and Ionic Native Community 
 - <a href="https://capacitorjs.com/docs/apis/splash-screen" target="_blank">Splash Screen API</a>
 - <a href="https://capacitorjs.com/docs/apis/status-bar" target="_blank">Status Bar API</a>
 
+**Note:** we will remove any interaction with the Status Bar because, in our case, Capacitor will just "do the right thing" by default. That is, if the device is in dark mode it will use `StatusBarStyle.Dark` and if the device is in light mode it will use `StatusBarStyle.Light`. That works great for us, but if your own apps have different needs you may need to switch up the styling accordingly.
+
 ### Test First
 
 The Capacitor APIs are defined on the `Plugin` object from `@capacitor/core` so we will need to import it in our `src/app/app.component.spec.ts` file. We should also remove the `@ionic/native` related ES6 imports.
 
 ```TypeScript
-import { Plugins, StatusBarStyle } from '@capacitor/core';
+import { Plugins } from '@capacitor/core';
 ```
 
-We will use the `SplashScreen` and `StatusBar` API objects in our AppComponent, so we should create mocks for them in our test file. We should also remove the mocks for the existing `StatusBar` and `SplashScreen` services. When we are done, the test setup and teardown should look like this.
+We will use the `SplashScreen` API object in our AppComponent, so we will create a mock for it in our test file. We should also remove the mocks for the existing `StatusBar` and `SplashScreen` services. When we are done, the test setup and teardown should look like this.
 
 ```TypeScript
   let originalSplashScreen: any;
-  let originalStatusBar: any;
 
   beforeEach(async(() => {
-    originalStatusBar = Plugins.StatusBar;
     originalSplashScreen = Plugins.SplashScreen;
-    Plugins.StatusBar = jasmine.createSpyObj('StatusBar', ['setStyle']);
     Plugins.SplashScreen = jasmine.createSpyObj('SplashScreen', ['hide']);
     TestBed.configureTestingModule({
       declarations: [AppComponent],
@@ -47,7 +46,6 @@ We will use the `SplashScreen` and `StatusBar` API objects in our AppComponent, 
   }));
 
   afterEach(() => {
-    Plugins.StatusBar = originalStatusBar;
     Plugins.SplashScreen = originalSplashScreen;
   });
 ```
@@ -79,7 +77,7 @@ With Capacitor, we do not have to wait for the Cordova `platformReady` event, so
   });
 ```
 
-The behavior should be such that when the app is running in a hybrid mobile context it dismisses the splash screen. Further, when it is running on Android it styles the status bar. When it is not running in a hybrid mobile context, then it does neither. The new `initialization` tests should look like this.
+The behavior should be such that when the app is running in a hybrid mobile context it dismisses the splash screen. When it is not running in a hybrid mobile context does not do anything. The new `initialization` tests should look like this.
 
 ```TypeScript
   describe('initialization', () => {
@@ -93,12 +91,6 @@ The behavior should be such that when the app is running in a hybrid mobile cont
         (platform.is as any).withArgs('hybrid').and.returnValue(true);
       });
 
-      it('styles the status bar', () => {
-        TestBed.createComponent(AppComponent);
-        expect(Plugins.StatusBar.setStyle).toHaveBeenCalledTimes(1);
-        expect(Plugins.StatusBar.setStyle).toHaveBeenCalledWith({ style: StatusBarStyle.Dark });
-      });
-
       it('hides the splash screen', () => {
         TestBed.createComponent(AppComponent);
         expect(Plugins.SplashScreen.hide).toHaveBeenCalledTimes(1);
@@ -108,11 +100,6 @@ The behavior should be such that when the app is running in a hybrid mobile cont
     describe('in a web context', () => {
       beforeEach(() => {
         (platform.is as any).withArgs('hybrid').and.returnValue(false);
-      });
-
-      it('does not style the status bar', () => {
-        TestBed.createComponent(AppComponent);
-        expect(Plugins.StatusBar.setStyle).not.toHaveBeenCalled();
       });
 
       it('does not hide the splash screen', () => {
@@ -131,13 +118,13 @@ Tips:
 
 1. Remove the code that injects the `StatusBar` and `SplashScreen` services
 1. Remove the ES6 imports for those same services
-1. Add ES6 imports of `Plugins` and `StatusBarStyle` from `@capacitor/core`
+1. Add ES6 imports of `Plugins` from `@capacitor/core`
 1. Modify `initializeApp()` to implement logic like the following:
 
 ```typescript
   initializeApp() {
     if (this.platform.is('hybrid')) {
-      const { SplashScreen, StatusBar } = Plugins;
+      const { SplashScreen } = Plugins;
       // Use a combination of the tests and the API docs (linked above)
       // to complete this code...
     }
