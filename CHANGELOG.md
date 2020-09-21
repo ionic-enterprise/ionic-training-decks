@@ -1,3 +1,15 @@
+# [3.1.0](https://github.com/ionic-team/ionic-training-decks/compare/v3.0.1...v3.1.0) (2020-09-21)
+
+### Bug Fixes
+
+- **angular:** do not style the Status Bar ([970fe9d](https://github.com/ionic-team/ionic-training-decks/commit/970fe9d3a361edb2de17e12dbaaa7e5f6552a675))
+- **app:** fix lint errors ([8f3af84](https://github.com/ionic-team/ionic-training-decks/commit/8f3af841db467c01a9fdf4341db7ff61f736ce51))
+- **capacitor:** fix up the wording on the conversion labs ([bdc1371](https://github.com/ionic-team/ionic-training-decks/commit/bdc137177329997f71d680acf4c8ef5e4d7b2bc7))
+
+### Features
+
+- **angluar-pwa:** update for the tea app ([54ee244](https://github.com/ionic-team/ionic-training-decks/commit/54ee2440acc9f483e3aaff6fbf5529f9e363c205))
+
 ## [3.0.1](https://github.com/ionic-team/ionic-training-decks/compare/v3.0.0...v3.0.1) (2020-09-15)
 
 ### Bug Fixes
