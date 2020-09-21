@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { IonicModule, PopoverController, NavController } from '@ionic/angular';
 import { RouterModule, ActivatedRoute } from '@angular/router';
 import { FolderPage } from './folder.page';
@@ -16,33 +16,35 @@ import { PageMenuComponent } from '@app/page-menu/page-menu.component';
 describe('FolderPage', () => {
   let component: FolderPage;
   let fixture: ComponentFixture<FolderPage>;
-  let popover;
+  let popover: HTMLIonPopoverElement;
 
-  beforeEach(async(() => {
-    popover = createOverlayElementMock('Popover');
-    TestBed.configureTestingModule({
-      declarations: [FolderPage],
-      imports: [IonicModule, MarkdownViewModule, RouterModule.forRoot([])],
-      providers: [
-        { provide: ActivatedRoute, useFactory: createActivatedRouteMock },
-        { provide: MenuItemsService, useFactory: createMenuItemsServiceMock },
-        {
-          provide: PopoverController,
-          useFactory: () =>
-            createOverlayControllerMock('PopoverController', popover),
-        },
-        { provide: NavController, useFactory: createNavControllerMock },
-      ],
-    }).compileComponents();
+  beforeEach(
+    waitForAsync(() => {
+      popover = createOverlayElementMock('Popover');
+      TestBed.configureTestingModule({
+        declarations: [FolderPage],
+        imports: [IonicModule, MarkdownViewModule, RouterModule.forRoot([])],
+        providers: [
+          { provide: ActivatedRoute, useFactory: createActivatedRouteMock },
+          { provide: MenuItemsService, useFactory: createMenuItemsServiceMock },
+          {
+            provide: PopoverController,
+            useFactory: () =>
+              createOverlayControllerMock('PopoverController', popover),
+          },
+          { provide: NavController, useFactory: createNavControllerMock },
+        ],
+      }).compileComponents();
 
-    const activatedRoute = TestBed.inject(ActivatedRoute);
-    (activatedRoute.snapshot.paramMap.get as any).and.returnValue('1');
-    const menuItems = TestBed.inject(MenuItemsService);
-    (menuItems.courses as any).and.returnValue(Promise.resolve(testItems));
+      const activatedRoute = TestBed.inject(ActivatedRoute);
+      (activatedRoute.snapshot.paramMap.get as any).and.returnValue('1');
+      const menuItems = TestBed.inject(MenuItemsService);
+      (menuItems.courses as any).and.returnValue(Promise.resolve(testItems));
 
-    fixture = TestBed.createComponent(FolderPage);
-    component = fixture.componentInstance;
-  }));
+      fixture = TestBed.createComponent(FolderPage);
+      component = fixture.componentInstance;
+    }),
+  );
 
   it('should create', () => {
     fixture.detectChanges();
@@ -399,7 +401,7 @@ describe('FolderPage', () => {
 
   describe('show menu', () => {
     beforeEach(async () => {
-      popover.onWillDismiss.and.returnValue(
+      (popover.onWillDismiss as any).and.returnValue(
         Promise.resolve({ data: undefined, role: 'backdrop' }),
       );
       const activatedRoute = TestBed.inject(ActivatedRoute);
@@ -433,7 +435,7 @@ describe('FolderPage', () => {
     it('navigates to the chosen page', async () => {
       const evt = new Event('click');
       const navController = TestBed.inject(NavController);
-      popover.onWillDismiss.and.returnValue(
+      (popover.onWillDismiss as any).and.returnValue(
         Promise.resolve({ data: 2, role: 'select' }),
       );
       await component.showMenu(evt);
@@ -449,7 +451,7 @@ describe('FolderPage', () => {
     it('does not navigate if a menu item was not selected', async () => {
       const evt = new Event('click');
       const navController = TestBed.inject(NavController);
-      popover.onWillDismiss.and.returnValue(
+      (popover.onWillDismiss as any).and.returnValue(
         Promise.resolve({ data: 2, role: 'somethingElse' }),
       );
       await component.showMenu(evt);
