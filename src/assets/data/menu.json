@@ -1,88 +1,177 @@
 {
   "pages": [
     {
+      "name": "getting-started",
       "title": "Getting Started",
       "file": "getting-started",
-      "icon": "logo-ionic"
+      "icon": "rocket"
     },
     {
-      "title": "Ionic & Angular",
-      "folder": "ionic-angular",
-      "file": "intro",
-      "icon": "logo-angular",
-      "pages": [
+      "name": "framework",
+      "title": "Ionic Framework",
+      "icon": "logo-ionic",
+      "tabs": [
         {
-          "title": "Getting Started",
-          "file": "start"
+          "name": "ionic-angular",
+          "title": "Angular",
+          "folder": "ionic-angular",
+          "icon": "logo-angular",
+          "pages": [
+            {
+              "title": "Introduction",
+              "file": "intro"
+            },
+            {
+              "title": "Getting Started",
+              "file": "start"
+            },
+            {
+              "title": "Unit Tests",
+              "file": "unit-tests"
+            },
+            {
+              "title": "Add Platforms",
+              "file": "platforms"
+            },
+            {
+              "title": "Use Native APIs",
+              "file": "native-apis"
+            },
+            {
+              "title": "Mock Up the Interface",
+              "file": "mock-ui"
+            },
+            {
+              "title": "Login Page",
+              "file": "login-page"
+            },
+            {
+              "title": "Identity",
+              "file": "identity"
+            },
+            {
+              "title": "Authentication",
+              "file": "auth"
+            },
+            {
+              "title": "Guards",
+              "file": "auth-guard"
+            },
+            {
+              "title": "Get Data",
+              "file": "get-data"
+            },
+            {
+              "title": "Use the Data",
+              "file": "use-data"
+            },
+            {
+              "title": "Details Page",
+              "file": "details-page"
+            },
+            {
+              "title": "Reusable Component",
+              "file": "reusable-component"
+            },
+            {
+              "title": "Tabbed Navigation",
+              "file": "tabbed-navigation"
+            },
+            {
+              "title": "The Notes Feature",
+              "file": "notes-feature"
+            },
+            {
+              "title": "About Page",
+              "file": "about-page"
+            }
+          ]
         },
         {
-          "title": "Unit Tests",
-          "file": "unit-tests"
-        },
-        {
-          "title": "Add Platforms",
-          "file": "platforms"
-        },
-        {
-          "title": "Use Native APIs",
-          "file": "native-apis"
-        },
-        {
-          "title": "Mock Up the Interface",
-          "file": "mock-ui"
-        },
-        {
-          "title": "Login Page",
-          "file": "login-page"
-        },
-        {
-          "title": "Identity",
-          "file": "identity"
-        },
-        {
-          "title": "Authentication",
-          "file": "auth"
-        },
-        {
-          "title": "Guards",
-          "file": "auth-guard"
-        },
-        {
-          "title": "Get Data",
-          "file": "get-data"
-        },
-        {
-          "title": "Use the Data",
-          "file": "use-data"
-        },
-        {
-          "title": "Details Page",
-          "file": "details-page"
-        },
-        {
-          "title": "Reusable Component",
-          "file": "reusable-component"
-        },
-        {
-          "title": "Tabbed Navigation",
-          "file": "tabbed-navigation"
-        },
-        {
-          "title": "The Notes Feature",
-          "file": "notes-feature"
-        },
-        {
-          "title": "About Page",
-          "file": "about-page"
+          "name": "ionic-react",
+          "title": "Ionic & React",
+          "folder": "ionic-react",
+          "icon": "logo-react",
+          "pages": [
+            {
+              "title": "Introduction",
+              "file": "intro"
+            },
+            {
+              "title": "Getting Started",
+              "file": "start"
+            },
+            {
+              "title": "Unit Tests",
+              "file": "unit-tests"
+            },
+            {
+              "title": "Add Platforms",
+              "file": "platforms"
+            },
+            {
+              "title": "Use Native APIs",
+              "file": "native-apis"
+            },
+            {
+              "title": "Mock Up the Interface",
+              "file": "mock-ui"
+            },
+            {
+              "title": "Login Page",
+              "file": "login-page"
+            },
+            {
+              "title": "Authentication",
+              "file": "auth"
+            },
+            {
+              "title": "State Management",
+              "file": "state-management"
+            },
+            {
+              "title": "Get Data",
+              "file": "get-data"
+            },
+            {
+              "title": "Use the Data",
+              "file": "use-data"
+            },
+            {
+              "title": "Details Page",
+              "file": "details-page"
+            },
+
+            {
+              "title": "Reusable Component",
+              "file": "resuable-component"
+            },
+            {
+              "title": "Tabbed Navigation",
+              "file": "tabbed-navigation"
+            },
+            {
+              "title": "The Notes Feature",
+              "file": "notes-feature"
+            },
+            {
+              "title": "About Page",
+              "file": "about-page"
+            }
+          ]
         }
       ]
     },
     {
+      "name": "pwa-ionic-angular",
       "title": "PWA - Ionic & Angular",
       "folder": "pwa-ionic-angular",
-      "file": "intro",
       "icon": "logo-pwa",
       "pages": [
+        {
+          "title": "Introduction",
+          "file": "intro"
+        },
         {
           "title": "Host the Application",
           "file": "host"
@@ -98,80 +187,15 @@
       ]
     },
     {
-      "title": "Ionic & React",
-      "folder": "ionic-react",
-      "file": "intro",
-      "icon": "logo-react",
-      "pages": [
-        {
-          "title": "Getting Started",
-          "file": "start"
-        },
-        {
-          "title": "Unit Tests",
-          "file": "unit-tests"
-        },
-        {
-          "title": "Add Platforms",
-          "file": "platforms"
-        },
-        {
-          "title": "Use Native APIs",
-          "file": "native-apis"
-        },
-        {
-          "title": "Mock Up the Interface",
-          "file": "mock-ui"
-        },
-        {
-          "title": "Login Page",
-          "file": "login-page"
-        },
-        {
-          "title": "Authentication",
-          "file": "auth"
-        },
-        {
-          "title": "State Management",
-          "file": "state-management"
-        },
-        {
-          "title": "Get Data",
-          "file": "get-data"
-        },
-        {
-          "title": "Use the Data",
-          "file": "use-data"
-        },
-        {
-          "title": "Details Page",
-          "file": "details-page"
-        },
-
-        {
-          "title": "Reusable Component",
-          "file": "resuable-component"
-        },
-        {
-          "title": "Tabbed Navigation",
-          "file": "tabbed-navigation"
-        },
-        {
-          "title": "The Notes Feature",
-          "file": "notes-feature"
-        },
-        {
-          "title": "About Page",
-          "file": "about-page"
-        }
-      ]
-    },
-    {
+      "name": "identity-vault-angular",
       "title": "Identity Vault",
       "folder": "identity-vault-angular",
-      "file": "intro",
       "icon": "lock-closed",
       "pages": [
+        {
+          "title": "Introduction",
+          "file": "intro"
+        },
         {
           "title": "The Base Application",
           "file": "base"
@@ -195,11 +219,15 @@
       ]
     },
     {
+      "name": "auth-connect-angular",
       "title": "Auth Connect",
       "folder": "auth-connect-angular",
-      "file": "intro",
       "icon": "people",
       "pages": [
+        {
+          "title": "Introduction",
+          "file": "intro"
+        },
         {
           "title": "The Base Application",
           "file": "base"
@@ -227,11 +255,15 @@
       ]
     },
     {
+      "name": "cordova-to-capacitor",
       "title": "Cordova to Capacitor",
       "folder": "cordova-to-capacitor",
-      "file": "intro",
       "icon": "logo-capacitor",
       "pages": [
+        {
+          "title": "Introduction",
+          "file": "intro"
+        },
         {
           "title": "Create a Cordova Application",
           "file": "cordova"
@@ -247,11 +279,13 @@
       ]
     },
     {
+      "name": "git-workflow",
       "title": "A Simple git Workflow",
       "file": "simple-git-workflow",
       "icon": "git-branch"
     },
     {
+      "name": "appendix",
       "title": "References",
       "file": "references",
       "icon": "book"
