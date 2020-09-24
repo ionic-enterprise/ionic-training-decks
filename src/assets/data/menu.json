@@ -112,16 +112,28 @@
           "file": "unit-tests"
         },
         {
-          "title": "Style the App",
-          "file": "style"
+          "title": "Add Platforms",
+          "file": "platforms"
         },
         {
-          "title": "Use a Component Library",
-          "file": "use-library"
+          "title": "Use Native APIs",
+          "file": "native-apis"
         },
         {
           "title": "Mock Up the Interface",
           "file": "mock-ui"
+        },
+        {
+          "title": "Login Page",
+          "file": "login-page"
+        },
+        {
+          "title": "Authentication",
+          "file": "auth"
+        },
+        {
+          "title": "State Management",
+          "file": "state-management"
         },
         {
           "title": "Get Data",
@@ -132,20 +144,25 @@
           "file": "use-data"
         },
         {
-          "title": "Add Loading Indicator",
-          "file": "loading-indicator"
+          "title": "Details Page",
+          "file": "details-page"
+        },
+
+        {
+          "title": "Reusable Component",
+          "file": "resuable-component"
         },
         {
-          "title": "Add Platforms",
-          "file": "platforms"
+          "title": "Tabbed Navigation",
+          "file": "tabbed-navigation"
         },
         {
-          "title": "Use Native APIs",
-          "file": "native-apis"
+          "title": "The Notes Feature",
+          "file": "notes-feature"
         },
         {
-          "title": "Switch Scale",
-          "file": "toggle-scale"
+          "title": "About Page",
+          "file": "about-page"
         }
       ]
     },
