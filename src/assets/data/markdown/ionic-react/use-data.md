@@ -2,111 +2,294 @@
 
 In this lab you will learn how to:
 
-- Import a service into your pages
-- Retrieve real data from the service, replacing the mock data
+- Create a custom React hook to abstract logic from components
+- Use lifecycle events to retrieve data upon entering a page
 
-## Update the App Test
+## Overview
 
-The app test will render the Current Weather page. If the rendering gets far enough along, the test may make an actual call to the backend service. We don't want that, so let's circumvent that possibility by mocking the weather service in `App.test.tsx` as such:
+With our tea data service singleton built and tested, it's time to replace our mock tea data with the real deal.
 
-```typescript
-import { weather } from './util';
+We could simply make calls to the tea singleton from our `<TeaList />` component, but we'd have to have the component call the identity singleton to obtain the current user's authorization token. That...doesn't feel right. Not to mention that it adds additional business logic to our component which we should always try to avoid.
 
-let spy: any;
-beforeAll(() => {
-  spy = jest.spyOn(weather, 'current').mockImplementation(() =>
-    Promise.resolve({
-      temperature: 280.32,
-      condition: 300,
-      date: new Date(1485789600 * 1000),
-    } as any),
-  );
+A better approach would be to <a href="https://reactjs.org/docs/hooks-custom.html" target="_target">build our own React hook</a> that orchestrates the steps required to fetch the data from the server and returns it back to `<TeaList />`.
+
+## Writing a Custom Hook
+
+Create a new file `src/tea/useTeaCategories.ts` and scaffold the file like so:
+
+```TypeScript
+import { useState } from 'react';
+import IdentitySingleton from '../auth/Identity';
+import TeaCategoriesSingleton from './TeaCategories';
+import { Tea } from '../models';
+
+export const useTeaCategories = () => {
+  const identity = IdentitySingleton.getInstance();
+  const teaCategories = TeaCategoriesSingleton.getInstance();
+  const [error, setError] = useState<string>('');
+
+  const getCategories = async (): Promise<Array<Tea | undefined>> => {
+    return [];
+  };
+
+  const getCategory = async (id: number): Promise<Tea | undefined> => {
+    return { id: 1, description: '', image: '', name: '' };
+  };
+
+  return { error, getCategories, getCategory };
+};
+```
+
+Our hook has the following responsibilities for the application:
+
+- Obtain the current user's authorization token
+- Return data from our data service
+- Retain the most recent error message, should a service call fail
+
+### `@testing-library/react-hooks`
+
+Before we can test our hook, we need to add another dependency to our application. Open a terminal and change directories to the root of the application. Then run the following command:
+
+```bash
+$ npm install @testing-library/react-hooks
+```
+
+If you currently have your tests running, terminate the process and start run it again after the dependency has been added.
+
+### Test First
+
+Create a new file in our tea feature folder named `useTeaCategories.test.ts` and populate it with the following code:
+
+```TypeScript
+import { renderHook, act, cleanup } from '@testing-library/react-hooks';
+import { useTeaCategories } from './useTeaCategories';
+import IdentitySingleton, { Identity } from '../auth/Identity';
+import TeaCategoriesSingleton, { TeaCategories } from './TeaCategories';
+import { Tea } from '../models';
+
+const mockToken = '3884915llf950';
+
+describe('useTeaCategories', () => {
+  let identity: Identity;
+  let teaCategories: TeaCategories;
+
+  beforeEach(() => {
+    identity = IdentitySingleton.getInstance();
+    identity['_token'] = mockToken;
+    teaCategories = TeaCategoriesSingleton.getInstance();
+    teaCategories.get = jest.fn();
+    teaCategories.getAll = jest.fn();
+  });
+
+  describe('get all tea categories', () => {
+    it('returns an array of Tea', async () => {
+      teaCategories.getAll = jest.fn(() => Promise.resolve([]));
+      let teas: Array<Tea> | undefined;
+      const { result } = renderHook(() => useTeaCategories());
+      await act(async () => {
+        teas = await result.current.getCategories();
+      });
+      expect(teas).toEqual([]);
+    });
+
+    it('sets an error if there is a failure', async () => {
+      const expected = 'Uh-oh, something went wrong!';
+      teaCategories.getAll = jest.fn(() => {
+        throw new Error('Uh-oh, something went wrong!');
+      });
+      const { result } = renderHook(() => useTeaCategories());
+      await act(async () => {
+        await result.current.getCategories();
+      });
+      expect(result.current.error).toEqual(expected);
+    });
+  });
+
+  describe('get a specific tea category', () => {
+    it('returns a Tea object', async () => {
+      const expected = { id: 1, name: '', description: '', image: '' };
+      teaCategories.get = jest.fn(() => Promise.resolve(expected));
+      let tea: Tea | undefined;
+      const { result } = renderHook(() => useTeaCategories());
+      await act(async () => {
+        tea = await result.current.getCategory(2);
+      });
+      expect(tea).toEqual(expected);
+    });
+
+    it('sets an error if there is a failure', async () => {
+      const expected = 'Uh-oh, something went wrong!';
+      teaCategories.get = jest.fn(() => {
+        throw new Error('Uh-oh, something went wrong!');
+      });
+      const { result } = renderHook(() => useTeaCategories());
+      await act(async () => {
+        await result.current.getCategory(1);
+      });
+      expect(result.current.error).toEqual(expected);
+    });
+  });
+
+  afterEach(() => {
+    cleanup();
+    jest.restoreAllMocks();
+  });
 });
-
-afterAll(() => spy.mockReset());
 ```
 
-Now if `weather.current()` is called it will not do any harm.
+The tests should break, which means it's time to implement some code!
 
-## Current Weather Page
+### Then Code
 
-The changes required to use the weather service in the `CurrentWeatherPage.tsx` file are pretty straight forward:
-
-First we need to import the service itself: `import { iconPaths, weather } from '../util';`
-
-Next we need to call the service and set the state. We will use the `IonViewWillEnter` lifecycle hook to perform the actual work, but first we have to modify our state hooks a bit by removing the initial value assignment, typing it,  and grabbing a reference to the returned setter function:
+Update `useTeaCategories.ts` so that our methods will pass our tests:
 
 ```TypeScript
-  const [temperature, setTemperature] = useState<number>();
-  const [condition, setCondition] = useState<number>();
+  ...
+  const getCategories = async (): Promise<Array<Tea> | undefined> => {
+    try {
+      return await teaCategories.getAll(identity.token || '');
+    } catch (error) {
+      setError(error.message);
+    }
+  };
+
+  const getCategory = async (id: number): Promise<Tea | undefined> => {
+    try {
+      return await teaCategories.get(id, identity.token || '');
+    } catch (error) {
+      setError(error.message);
+    }
+  };
+  ...
 ```
 
-Removing the initial value will cause the bound web component to show "Unknown" if we have not gotten any weather data yet. Usually this will not be noticable, but it may be in a slow network (or no network) situation. We need to type the hooks, however, because TypeScript can no longer infer the type from context.
+Not too bad, huh? Our hook acts as a proxy between components and our data service singletons. Many third party libraries provide hooks that act as proxies around their APIs. In fact, the Capacitor community has built <a href="https://github.com/capacitor-community/react-hooks" target="_blank"> a collection of hooks</a> for Capacitor Plugin APIs!
 
-Now we can add the `IonViewWillEnter` lifecycle hook:
+## Displaying Tea Categories
+
+There are two lifecycle events that are good candidates for getting our data:
+
+- `useEffect` - React Hook that can fire initialization logic upon mounting of a component
+- `ionViewWillEnter` - Ionic Framework lifecycle event fired each time a page is navigated to
+
+Because the Ionic Framework manages the lifetime of a page, certain React events might not fire when you expect them to. If we used `useEffect` to fire our page's intiialization logic, it will fire the first time the tea page is displayed, but if we navigate away from it the component may stick around in the DOM; meaning the logic is only run once. This would mean that our list of tea categories could get pretty stale pretty quickly!
+
+Sounds like `ionViewWillEnter` is the better option. The <a href="https://ionicframework.com/docs/react/lifecycle#guidance-for-each-lifecycle-method" target="_blank">Ionic Framework React documentation agrees</a>!
+
+Let's start by cleaning up `<TeaList />` a bit:
+
+1. Refactor `listToMatrix` to take a single array of teas and return a matrix of teas
+2. Update the code that calls it to compensate for the change
+3. Update the test `makes a tea matrix` to compensate for the change
+4. Finally, move the `teaData` constant to `TeaList.test.tsx` and update the matrix test accordingly
+
+The last item broke your application; it now fails to compile. That's OK - we will fix that.
+
+Once complete your `<TeaList>` component should look something like this:
 
 ```TypeScript
-  useIonViewWillEnter(async ()=> {
-    const res = await weather.current();
-    setTemperature(res.temperature);
-    setCondition(res.condition);
-  });
-```
+export const listToMatrix = (teas: Array<Tea>): Array<Array<Tea>> => {
+  let teaMatrix: Array<Array<Tea>> = [];
 
-Make sure you import that hook from `@ionic/react`.
-
-The complete code should look something like this:
-
-```TypeScript
-import { IonContent, IonHeader, IonPage, IonTitle, IonToolbar, useIonViewWillEnter } from '@ionic/react';
-import React, { useRef, useState, useEffect } from 'react';
-import { iconPaths, weather } from '../util';
-
-const CurrentWeatherPage: React.FC = () => {
-  const [temperature, setTemperature] = useState<number>();
-  const [condition, setCondition] = useState<number>();
-  const ref = useRef(null);
-
-  useEffect(() => {
-    (ref.current as any)!.iconPaths = iconPaths;
+  let row: Array<Tea> = [];
+  teas.forEach(tea => {
+    row.push(tea);
+    if (row.length === 4) {
+      teaMatrix.push(row);
+      row = [];
+    }
   });
 
-  useIonViewWillEnter(async ()=> {
-    const res = await weather.current();
-    setTemperature(res.temperature);
-    setCondition(res.condition);
-  });
+  if (row.length) teaMatrix.push(row);
 
+  return teaMatrix;
+};
+
+const TeaList: React.FC = () => {
+  ...
   return (
     <IonPage>
-      <IonHeader>
-        <IonToolbar>
-          <IonTitle>Current Weather</IonTitle>
-        </IonToolbar>
-      </IonHeader>
-      <IonContent className="ion-text-center ion-padding">
-        <div className="information">
-          <kws-temperature class="primary-value" scale="F" temperature={temperature}></kws-temperature>
-        </div>
-        <kws-condition condition={condition} ref={ref}></kws-condition>
+      ...
+      <IonContent>
+        ...
+        <IonGrid className="tea-grid">
+          {listToMatrix(teaData).map((row, idx) => (
+            <IonRow
+              key={idx}
+              className="ion-justify-content-center ion-align-items-stretch">
+              {row.map(tea => (
+                ...
+              ))}
+            </IonRow>
+          ))}
+        </IonGrid>
       </IonContent>
     </IonPage>
   );
 };
 
-export default CurrentWeatherPage;
+export default TeaList;
 ```
 
-## Forecast and UV Index
+### Ionic Lifecycle Hooks
 
-At this point, you should be able to make similar modifications to the other two pages. Go ahead and give it a shot.
+Ionic Framework lifecycle events are available for use as convenient React Hooks, bundled within `@ionic/react`. Each lifecycle event hook is exported using React Hook naming conventions, so we'll need to import `useIonViewWillEnter`.
 
-One hint: the foreast state hook requires some typing and should be initialized with an empty array:
+Update your `<TeaList />` with the following new code:
 
 ```TypeScript
-const [forecast, setForecast] = useState<WeeklyForecast>([]);
+...
+const TeaList: React.FC = () => {
+  ...
+  const { getCategories, error } = useTeaCategories();
+  const [teaCategories, setTeaCategories] = useState<Array<Tea>>([]);
+  ...
+  useIonViewWillEnter(async () => {
+    const categories = await getCategories();
+    setTeaCategories(categories || []);
+  }, []);
+  ...
+};
+...
 ```
+
+Don't forget to import `useTeaCategories` and `useIonViewWillEnter`!
+
+### Update the User Interface
+
+Now we have a stateful component variable that holds our tea categories so we can toss the reference to our no longer existing `teaData` variable. We also are grabbing `error` from `useTeaCategories` so we can show application users a different experience if something happens to go wrong with our data service. Add the following to the `return` block of `<TeaList />`:
+
+```TypeScript
+...
+const TeaList: React.FC = () => {
+ ...
+  return (
+    <IonPage>
+      <IonHeader>
+        ...
+      </IonHeader>
+      <IonContent>
+        ...
+        <IonGrid className="tea-grid">
+          {error ? (
+            //Todo: Fill this in
+          ) : (
+            //Todo: Fill this in
+          )}
+          ...
+        </IonGrid>
+      </IonContent>
+    </IonPage>
+  );
+};
+...
+```
+
+**Challenge:** Complete the user interface:
+
+1. If an error exists, place it inside a row containing a full width column. To be consistent, it should also use the same styling errors on the login page have.
+2. If an error doesn't exist, we should render the responsive grid.
 
 ## Conclusion
 
-In the last two labs, we have learned how to abstract the logic to get data into a service and then how to use that service within our pages. Be sure to commit your changes.
+Your application finally has a list of tea categories coming from a real-live data service! In the process, you learned how to create a custom React Hook and a bit about the Ionic Page Lifecycle. Next we'll create a detail page for singular tea categories.

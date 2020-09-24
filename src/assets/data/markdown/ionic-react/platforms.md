@@ -1,73 +1,125 @@
-# Lab: Using Capacitor
+# Lab: Add Capacitor Platforms
 
-## Update the Config
+In this lab, you will learn how to:
 
-Modify the `capacitor.config.json` file. At this time, you should change the following two items:
+- Update the application's Capacitor configuration
+- Add the iOS and Android platforms to the application
+- Build and run the application on both platforms
+- Update the application's splash screen and application icon
 
-- `appId` - this needs to be unique within the app stores, and is typically your company's URL with the app name in reverse order, like `com.acme.tntroadrunner`. For the purpose of this course, I will just use `com.kensodemann.myweather`
-- `appName` - this is the name that will display under the icon. For the purpose of this course, I will just use "My Weather"
+## Overview
 
-## Install Platforms
+Capacitor is the cross-platform native runtime that allows us to run our Ionic Framework application across iOS, Android, and the web with the same code base. As part of initializing our application through the Ionic CLI, our project is already configured to use Capacitor; as a reminder, the Ionic CLI wraps the Capacitor command line.
 
-We want to build for two platforms: Android and iOS. Install both of those platforms now (note: I am assuming you are developing on a Mac, if not that is OK, just get one 😂, well..., or only do the Android bit, whichever you find best)
+We will add both iOS and Android platforms to our application. Note that this will add the Android Studio and Xcode projects to source control. This allows us to easily edit native configuration and add custom native code to Capacitor projects.
 
-Run the following two commands:
+## Update the Configuration
 
-- `npx cap add android`
-- `npx cap add ios`
+When a platform is added or updated to a Capacitor project, information in `capacitor.config.json` is used to generate some information within the project files. Some of this information should be changed up front:
 
-**Note:** If you get an error like "Capacitor could not find the web assets directory" then run `npm run build` and re-try the command.
+- The `appId` should be changed to something unique like `com.mycompany.teataster`
+- `appName` should be changed to the application's display name
 
-The `npx` command is one you may not have used much before. Basically, it will use your current NPM environment to run the command that follows it.
+**Example:**
 
-Those commands installed a couple of libraries and constructed the project directories for iOS and Android. Go ahead and have a look at the changes, then commit them.
-
-## Update the Build Script
-
-Capacitor applications consist of a web application wrapped in a native application and run inside a webview. The current `npm run build` command will only run the web build. Once it is complete we need to copy it to the native projects. To do that manually, we can run `npx cap copy` after the `npm run build` completes. If we do that, though, there are times that we will probably forget to do it. It would be better to update the "build" script in the `package.json` to just do it for us.
-
-The build script currently looks like this: `"build": "react-scripts build",`
-
-Change the build script to look like this: `"build": "react-scripts build && cap copy",`
-
-Note that we not need the `npx` part here because this command is automatically run within the current NPM environment.
-
-## Run on Devices
-
-To run on a device or an emulator, use `npx cap open android` or `npx cap open ios` to open the proper IDE and then run anywhere you want to from there.
-
-```bash
-$ npx cap open android
-$ npx cap open ios
+```xml
+{
+  "appId": "com.mycompany.teataster",
+  "appName": "Tea Tasting Notes",
+  "bundledWebRuntime": false,
+  "npmClient": "npm",
+  "webDir": "build",
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 0
+    }
+  },
+  "cordova": {}
+}
 ```
 
-## Update Icon and Splash Screen
+Make similar changes to your application.
 
-The app runs fine on our devices, but the splash screen and icon are just the Capacitor defaults. Let's fix that now.
+## Add the Android and iOS Platforms
 
-For this application: 
+Before adding any Capacitor platforms, we need to ensure that the application has been built. Capacitor copies the `webDir` folder set in `capacitor.config.json` into platform project folders -- if the directory does not exist the attempt to add the platform will fail.
 
-1. create a `resources/` directory 
-1. download the following images
-1. place the images in the `resources` directory
+Let's build the application:
+
+```bash
+$ npm run build
+```
+
+Notice that the `build` folder has been created. Now open `.gitignore`, notice that `/build` is ignored when committing files to source control. When you first pull a Capacitor project from source control, don't forget to build it otherwise you won't be able to run on Android or iOS!
+
+Go ahead and add both the Android and iOS platforms:
+
+```bash
+$ ionic cap add android
+$ ionic cap add ios
+```
+
+Once the platforms are added, open the native projects, each in their own IDE.
+
+```bash
+$ ionic cap open android
+$ ionic cap open ios
+```
+
+**Note:** You need to have Android Studio installed if you want to build on Android. Likewise, you'll need to be using a Mac that has Xcode properly installed in order to build for iOS.
+
+## Update the Splash Screen and Application Icon
+
+The application should have its own splash screen and icon rather than using the default that Ionic supplies for you. Ionic provides a service that will take two source image files and create all of the resources that the application will require.
+
+Remember to follow these guidelines when designing your splash screen and icon:
+
+- Keep the images simple and clear
+- You can supply source images in any of these formats: `.png`, `.psd`, `.ai`
+- Icon: At least 1024x1024 pixels; the image dimensions should be square
+- Splashscreen: At least 2732x2732 pixels with a simple image that is centered and no bigger than 1200x1200 pixels to faciliate reasonable display on all devices
+
+For this application, download the following images and place them in a directory named `resources` in the root of your project:
 
 - <a download href="/assets/images/icon.png">icon.png</a>
 - <a download href="/assets/images/splash.png">splash.png</a>
 
-To generate the required resources and have them copied to the native projects, use the following commands:
+To generate the required resources and copy them to the native projects, use the following commands:
 
 ```bash
-$ npm i -g cordova-res
 $ cordova-res ios --skip-config --copy
 $ cordova-res android --skip-config --copy
 ```
 
-The "npm install" command is only required if you do not currently have `cordova-res` installed.
+These commands will use the source images to produce all of the various images required by the native projects and then copy them to the proper locations.
 
-Rebuild the application and run it on a device. You should see the updated icon and splash screen.
+## Optional: Live Reload
 
-**Note:** iOS has a bug having nothing to do with Capactor where it is overly agressive on caching the splash screen image. You may need to delete the app, reboot the device, and then try again in order to see the correct splash screen.
+Now that the projects are set up and building properly, you can make use of Capacitor's "live reload" feature if you would like to. Live reload allows you to run the application on your device and will re-build and reload the application as you develop. This is similar to `ionic serve`, but is running the application on device instead of the browser.
+
+```bash
+$ ionic cap run android --livereload --external
+$ ionic cap run ios --livereload --external
+```
+
+## Optional: Update NPM Scripts
+
+I like to have my build do a copy for me. For this reason, I do a `cap copy` with every build. This ensures my native projects are always up to date with the latest changes made.
+
+I suggest modifying the `build` script in `package.json` like so:
+
+```JSON
+  "scripts": {
+    "build": "react-scripts build && cap copy",
+    "eject": "react-scripts eject",
+    "start": "react-scripts start",
+    "test": "react-scripts test",
+    "test:ci": "export CI=true; react-scripts test",
+    "test:cov": "export CI=true; react-scripts test --coverage",
+    "test:upd": "export CI=true; react-scripts test --updateSnapshot"
+  },
+```
 
 ## Conclusion
 
-You have now integrated your application with Capacitor and can now build it for native platforms.
+In this lab we learned how to configure our Capacitor project, add iOS and Android platforms, and how to build the application for those platforms. Next we will learn how to access native functionality with our application.
