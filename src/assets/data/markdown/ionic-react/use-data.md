@@ -2,294 +2,131 @@
 
 In this lab you will learn how to:
 
-- Create a custom React hook to abstract logic from components
-- Use lifecycle events to retrieve data upon entering a page
+- Retrieve real data from the service, replacing the mock data
+- Mock hooks that are used in components
 
 ## Overview
 
-With our tea data service singleton built and tested, it's time to replace our mock tea data with the real deal.
+With our custom tea hook built and tested, it's time to replace our mock tea data with the real deal.
 
-We could simply make calls to the tea singleton from our `<TeaList />` component, but we'd have to have the component call the identity singleton to obtain the current user's authorization token. That...doesn't feel right. Not to mention that it adds additional business logic to our component which we should always try to avoid.
-
-A better approach would be to <a href="https://reactjs.org/docs/hooks-custom.html" target="_target">build our own React hook</a> that orchestrates the steps required to fetch the data from the server and returns it back to `<TeaList />`.
-
-## Writing a Custom Hook
-
-Create a new file `src/tea/useTeaCategories.ts` and scaffold the file like so:
-
-```TypeScript
-import { useState } from 'react';
-import IdentitySingleton from '../auth/Identity';
-import TeaCategoriesSingleton from './TeaCategories';
-import { Tea } from '../models';
-
-export const useTeaCategories = () => {
-  const identity = IdentitySingleton.getInstance();
-  const teaCategories = TeaCategoriesSingleton.getInstance();
-  const [error, setError] = useState<string>('');
-
-  const getCategories = async (): Promise<Array<Tea | undefined>> => {
-    return [];
-  };
-
-  const getCategory = async (id: number): Promise<Tea | undefined> => {
-    return { id: 1, description: '', image: '', name: '' };
-  };
-
-  return { error, getCategories, getCategory };
-};
-```
-
-Our hook has the following responsibilities for the application:
-
-- Obtain the current user's authorization token
-- Return data from our data service
-- Retain the most recent error message, should a service call fail
-
-### `@testing-library/react-hooks`
-
-Before we can test our hook, we need to add another dependency to our application. Open a terminal and change directories to the root of the application. Then run the following command:
-
-```bash
-$ npm install @testing-library/react-hooks
-```
-
-If you currently have your tests running, terminate the process and start run it again after the dependency has been added.
-
-### Test First
-
-Create a new file in our tea feature folder named `useTeaCategories.test.ts` and populate it with the following code:
-
-```TypeScript
-import { renderHook, act, cleanup } from '@testing-library/react-hooks';
-import { useTeaCategories } from './useTeaCategories';
-import IdentitySingleton, { Identity } from '../auth/Identity';
-import TeaCategoriesSingleton, { TeaCategories } from './TeaCategories';
-import { Tea } from '../models';
-
-const mockToken = '3884915llf950';
-
-describe('useTeaCategories', () => {
-  let identity: Identity;
-  let teaCategories: TeaCategories;
-
-  beforeEach(() => {
-    identity = IdentitySingleton.getInstance();
-    identity['_token'] = mockToken;
-    teaCategories = TeaCategoriesSingleton.getInstance();
-    teaCategories.get = jest.fn();
-    teaCategories.getAll = jest.fn();
-  });
-
-  describe('get all tea categories', () => {
-    it('returns an array of Tea', async () => {
-      teaCategories.getAll = jest.fn(() => Promise.resolve([]));
-      let teas: Array<Tea> | undefined;
-      const { result } = renderHook(() => useTeaCategories());
-      await act(async () => {
-        teas = await result.current.getCategories();
-      });
-      expect(teas).toEqual([]);
-    });
-
-    it('sets an error if there is a failure', async () => {
-      const expected = 'Uh-oh, something went wrong!';
-      teaCategories.getAll = jest.fn(() => {
-        throw new Error('Uh-oh, something went wrong!');
-      });
-      const { result } = renderHook(() => useTeaCategories());
-      await act(async () => {
-        await result.current.getCategories();
-      });
-      expect(result.current.error).toEqual(expected);
-    });
-  });
-
-  describe('get a specific tea category', () => {
-    it('returns a Tea object', async () => {
-      const expected = { id: 1, name: '', description: '', image: '' };
-      teaCategories.get = jest.fn(() => Promise.resolve(expected));
-      let tea: Tea | undefined;
-      const { result } = renderHook(() => useTeaCategories());
-      await act(async () => {
-        tea = await result.current.getCategory(2);
-      });
-      expect(tea).toEqual(expected);
-    });
-
-    it('sets an error if there is a failure', async () => {
-      const expected = 'Uh-oh, something went wrong!';
-      teaCategories.get = jest.fn(() => {
-        throw new Error('Uh-oh, something went wrong!');
-      });
-      const { result } = renderHook(() => useTeaCategories());
-      await act(async () => {
-        await result.current.getCategory(1);
-      });
-      expect(result.current.error).toEqual(expected);
-    });
-  });
-
-  afterEach(() => {
-    cleanup();
-    jest.restoreAllMocks();
-  });
-});
-```
-
-The tests should break, which means it's time to implement some code!
-
-### Then Code
-
-Update `useTeaCategories.ts` so that our methods will pass our tests:
-
-```TypeScript
-  ...
-  const getCategories = async (): Promise<Array<Tea> | undefined> => {
-    try {
-      return await teaCategories.getAll(identity.token || '');
-    } catch (error) {
-      setError(error.message);
-    }
-  };
-
-  const getCategory = async (id: number): Promise<Tea | undefined> => {
-    try {
-      return await teaCategories.get(id, identity.token || '');
-    } catch (error) {
-      setError(error.message);
-    }
-  };
-  ...
-```
-
-Not too bad, huh? Our hook acts as a proxy between components and our data service singletons. Many third party libraries provide hooks that act as proxies around their APIs. In fact, the Capacitor community has built <a href="https://github.com/capacitor-community/react-hooks" target="_blank"> a collection of hooks</a> for Capacitor Plugin APIs!
-
-## Displaying Tea Categories
+## Displaying the Teas
 
 There are two lifecycle events that are good candidates for getting our data:
 
 - `useEffect` - React Hook that can fire initialization logic upon mounting of a component
 - `ionViewWillEnter` - Ionic Framework lifecycle event fired each time a page is navigated to
 
-Because the Ionic Framework manages the lifetime of a page, certain React events might not fire when you expect them to. If we used `useEffect` to fire our page's intiialization logic, it will fire the first time the tea page is displayed, but if we navigate away from it the component may stick around in the DOM; meaning the logic is only run once. This would mean that our list of tea categories could get pretty stale pretty quickly!
+We only want to fetch our tea data once per user session, it doesn't change often enough that we should fetch it each time the user navigates to our tea page. That said, it looks like `useEffect` is the correct choice for this situation. If we were loading data that updated more frequently, such as user comments or the delivery status of a package we ordered online, we would want to use `ionViewWillEnter`.
 
-Sounds like `ionViewWillEnter` is the better option. The <a href="https://ionicframework.com/docs/react/lifecycle#guidance-for-each-lifecycle-method" target="_blank">Ionic Framework React documentation agrees</a>!
+### Refactor
 
-Let's start by cleaning up `<TeaList />` a bit:
+Let's start by cleaning up `TeaPage.tsx` a bit. Make the following changes:
 
 1. Refactor `listToMatrix` to take a single array of teas and return a matrix of teas
-2. Update the code that calls it to compensate for the change
+2. Update the component template that calls `listToMatrix` to compensate for the change
 3. Update the test `makes a tea matrix` to compensate for the change
-4. Finally, move the `teaData` constant to `TeaList.test.tsx` and update the matrix test accordingly
+4. Finally, move the `teaData` constant to `TeaList.test.tsx`, rename it to `mockTeas` and fix the `makes a tea matrix` test accordingly.
 
 The last item broke your application; it now fails to compile. That's OK - we will fix that.
 
-Once complete your `<TeaList>` component should look something like this:
+### Mocking `useTea`
+
+We need to remove the reference to our hard-coded tea data and replace it with the data returned from the `getTeas` function exposed by our `useTea` hook.
+
+In the spirit of TDD, we're going to start with our test file. We don't actually have to modify any of our existing tests, but we do need to mock the `useTea` hook.
+
+Open up the test file and add the following code:
+
+**`src/tea/TeaPage.test.tsx`**
 
 ```TypeScript
-export const listToMatrix = (teas: Array<Tea>): Array<Array<Tea>> => {
-  let teaMatrix: Array<Array<Tea>> = [];
+import React from 'react';
+...
+jest.mock('./useTea', () => ({
+  useTea: () => ({
+    getTeas: jest.fn(() => Promise.resolve(mockTeas)),
+    getTeaById: jest.fn(),
+  }),
+}));
 
-  let row: Array<Tea> = [];
-  teas.forEach(tea => {
-    row.push(tea);
-    if (row.length === 4) {
-      teaMatrix.push(row);
-      row = [];
-    }
+const mockTeas: Array<Tea> = [ ... ];
+
+describe('<TeaPage />', () => {
+  ...
+});
+```
+
+This doesn't have any impact on our tests yet; they still fail and the application does too because `teaData` is no longer defined in `TeaPage.tsx`.
+
+### Fetching the Data
+
+We know we want to use a `useEffect()` to run logic when the tea page component mounts, and we know that we want that logic to fetch the tea data, so let's set that up:
+
+**`src/tea/TeaPage.tsx`**
+
+```TypeScript
+...
+import { useTea } from './useTea';
+...
+const TeaPage: React.FC = () => {
+  const { getTeas } = useTea();
+  ...
+
+  useEffect(() => {
+    const init = async () => await getTeas());
+    init();
+  }, [getTeas]);
+
+  const handleLogout = async () => {
+    ...
+  };
+
+  return (...);
+};
+export default TeaPage;
+```
+
+Notice the way that we're telling the `useEffect` to run only once. Instead of telling the `useEffect` to only run once on mount using an empty dependency list (`[]`) we're saying "run this effect when `getTeas` changes". Since the function `getTeas` never changes, the `useEffect` is only called once - when the tea page component mounts. We could use an empty dependency list and our application would work, but it's not the correct way to manage `useEffect` dependencies.
+
+Now that our `useEffect()` is partially complete, I leave it up to you to add a `useState` to set the contents of `await getTeas()` to, and bind the state within `listToMatrix`.
+
+**Challenge:** Finish implementing the `init` function and bind the list of teas to the template.
+
+Once complete, you should notice that our tests are throwing an error:
+
+```bash
+Warning: An update to TeaPage inside a test was not wrapped in act(...).
+```
+
+That's because our component is updated after it was rendered. So far, we've been wrapping some tests in an `await wait()` and haven't really dug into _why_ we're doing it. It's to prevent errors like the one above; React Testing Library knows when our components re-render, and throws an error letting us know. Adding `await wait(() => { ...our assertion... })` waits until the component re-renders to the point that our assertion passes, otherwise it times out after a few seconds. `wait()` actually wraps our code inside an `act()` call, so that's how we'll resolve the error for our tests:
+
+**`src/tea/TeaPage.test.tsx`**
+
+```TypeScript
+...
+describe('<TeaPage />', () => {
+  it('displays the header', async () => {
+    const { container } = render(<TeaPage />);
+    await wait(() => expect(container).toHaveTextContent(/Tea/));
   });
 
-  if (row.length) teaMatrix.push(row);
+  it('renders consistently', async () => {
+    const { asFragment } = render(<TeaPage />);
+    await wait(() => expect(asFragment()).toMatchSnapshot());
+  });
 
-  return teaMatrix;
-};
-
-const TeaList: React.FC = () => {
-  ...
-  return (
-    <IonPage>
-      ...
-      <IonContent>
-        ...
-        <IonGrid className="tea-grid">
-          {listToMatrix(teaData).map((row, idx) => (
-            <IonRow
-              key={idx}
-              className="ion-justify-content-center ion-align-items-stretch">
-              {row.map(tea => (
-                ...
-              ))}
-            </IonRow>
-          ))}
-        </IonGrid>
-      </IonContent>
-    </IonPage>
-  );
-};
-
-export default TeaList;
+  describe('initialization', () => {
+    ...
+  });
+});
 ```
 
-### Ionic Lifecycle Hooks
+That will fix our test cases. Don't forget to update your snapshots!
 
-Ionic Framework lifecycle events are available for use as convenient React Hooks, bundled within `@ionic/react`. Each lifecycle event hook is exported using React Hook naming conventions, so we'll need to import `useIonViewWillEnter`.
+### Side-note: Reference Material
 
-Update your `<TeaList />` with the following new code:
-
-```TypeScript
-...
-const TeaList: React.FC = () => {
-  ...
-  const { getCategories, error } = useTeaCategories();
-  const [teaCategories, setTeaCategories] = useState<Array<Tea>>([]);
-  ...
-  useIonViewWillEnter(async () => {
-    const categories = await getCategories();
-    setTeaCategories(categories || []);
-  }, []);
-  ...
-};
-...
-```
-
-Don't forget to import `useTeaCategories` and `useIonViewWillEnter`!
-
-### Update the User Interface
-
-Now we have a stateful component variable that holds our tea categories so we can toss the reference to our no longer existing `teaData` variable. We also are grabbing `error` from `useTeaCategories` so we can show application users a different experience if something happens to go wrong with our data service. Add the following to the `return` block of `<TeaList />`:
-
-```TypeScript
-...
-const TeaList: React.FC = () => {
- ...
-  return (
-    <IonPage>
-      <IonHeader>
-        ...
-      </IonHeader>
-      <IonContent>
-        ...
-        <IonGrid className="tea-grid">
-          {error ? (
-            //Todo: Fill this in
-          ) : (
-            //Todo: Fill this in
-          )}
-          ...
-        </IonGrid>
-      </IonContent>
-    </IonPage>
-  );
-};
-...
-```
-
-**Challenge:** Complete the user interface:
-
-1. If an error exists, place it inside a row containing a full width column. To be consistent, it should also use the same styling errors on the login page have.
-2. If an error doesn't exist, we should render the responsive grid.
+I strongly urge you to read <a href="https://overreacted.io/a-complete-guide-to-useeffect/" target="_blank">A Complete Guide to useEffect</a> by Dan Abramov at a later time. It's a comprehensive guide to the `useEffect()` hook and answers several questions, including "How do I correctly fetch data inside useEffect?".
 
 ## Conclusion
 
-Your application finally has a list of tea categories coming from a real-live data service! In the process, you learned how to create a custom React Hook and a bit about the Ionic Page Lifecycle. Next we'll create a detail page for singular tea categories.
+Your application finally has a list of tea categories coming from a real-live data service! In the process, you learned how to create a custom React Hook and a bit about the Ionic Page Lifecycle. Next we'll create a detail page for each tea.

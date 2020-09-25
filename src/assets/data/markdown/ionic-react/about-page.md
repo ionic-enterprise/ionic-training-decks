@@ -76,44 +76,44 @@ Here is the full test file for `About.test.tsx`:
 
 ```TypeScript
 import React from 'react';
-import { render, fireEvent } from '@testing-library/react';
-import About from './About';
-import { AuthContext } from '../auth/AuthContext';
-jest.mock('react-router', () => {
-  const actual = jest.requireActual('react-router');
-  return {
-    ...actual,
-    useHistory: () => ({ replace: jest.fn() }),
-  };
-});
+import { cleanup, render } from '@testing-library/react';
+import { ionFireEvent as fireEvent } from '@ionic/react-test-utils';
+import AboutPage from './AboutPage';
 
-const logoutSpy = jest.fn();
-const tree = (
-  <AuthContext.Provider
-    value={{
-      login: jest.fn(),
-      isAuthenticated: false,
-      user: undefined,
-      logout: logoutSpy,
-    }}>
-    <About />
-  </AuthContext.Provider>
-);
+jest.mock('../core/auth', () => ({
+  useAuthentication: () => ({
+    logout: mockLogout,
+  }),
+}));
+jest.mock('react-router', () => ({
+  useHistory: () => ({
+    replace: jest.fn(),
+  }),
+}));
 
-describe('<About />', () => {
+let mockLogout = jest.fn(() => Promise.resolve());
+
+describe('<AboutPage />', () => {
+  beforeEach(() => (mockLogout = jest.fn(() => Promise.resolve())));
+
   it('renders consistently', () => {
-    const { asFragment } = render(<About />);
+    const { asFragment } = render(<AboutPage />);
     expect(asFragment).toMatchSnapshot();
   });
 
   describe('sign out button', () => {
     it('signs the user out', async () => {
       let button: HTMLIonButtonElement;
-      const { container } = render(tree);
+      const { container } = render(<AboutPage />);
       button = container.querySelector('ion-button')!;
       fireEvent.click(button);
-      expect(logoutSpy).toHaveBeenCalledTimes(1);
+      expect(mockLogout).toHaveBeenCalledTimes(1);
     });
+  });
+
+  afterEach(() => {
+    cleanup();
+    jest.restoreAllMocks();
   });
 });
 ```
