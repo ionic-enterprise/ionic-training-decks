@@ -16,12 +16,41 @@ There are several ways Capacitor can access native functionality:
 - Installing and using Cordova plugins
 - Creating custom Capacitor plugins within native platform projects
 
-We're going to make use of the out-of-the-box Capacitor APIs to access native functionality. Specifically, we'll introduce logic in the application to style the status bar if, and only if, the application is being run on an Android device. In order to do this, we'll make use of the Platform API provided by the Ionic Framework to detect the platform the application is running on, then use Capacitor's Status Bar API to set the status bar style.
+We will make use of the out-of-the-box Capacitor APIs throughout this training to access native functionality.
 
-- <a href="https://capacitorjs.com/docs/apis/status-bar" target="_blank">Status Bar API</a>
+## The Splash Screen
+
+By default, new Capacitor applications are set to automatically hide the application splash screen once the application is in a runnable state. In some cases it makes sense to run some startup logic before the splash screen is hidden. For example, you may want to conditionally determine the first page the user sees depending on if their user session is still valid. In that case, it makes sense to run the logic before dismissing the splash screen.
+
+We'll eventually implement that scenario. For now, we will update the Capacitor configuration to prevent the splash screen from automatically hiding, and then use the Capacitor Splash Screen API to hide the splash screen from our application code.
+
+- <a href="https://capacitorjs.com/docs/apis/splash-screen" target="_blank">Splash Screen API</a>
+
+## Platform Specific Logic
+
+The application we will be building is to work across iOS, Android, and web platforms. This presents a challenge as the web does not have an implementation for splash screens! Luckily, the Ionic Framework comes equipped with functionality that allows us to derive the currently running platform context at runtime, allowing developers to write code that targets specific platforms.
+
 - <a href="https://ionicframework.com/docs/react/platform" target="_blank">Platform API</a>
 
-This logic will run on the initialization of our `<App />` component.
+## Programmatically Hide the Splash Screen
+
+### Capacitor Configuration
+
+Our first step will be to modify `capacitor.config.json` such that the splash screen will not automatically hide upon application launch:
+
+**`capacitor.config.json`**
+
+```JSON
+{
+  ...
+  "plugins": {
+    "SplashScreen": {
+      "launchAutoHide": false
+    }
+  },
+  ...
+}
+```
 
 ## Style the Status Bar
 
