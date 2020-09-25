@@ -36,7 +36,7 @@ Let's take a look at some of these options more closely:
 - The forth option `blank` tells the Ionic CLI to use the `blank` starter template. The Ionic CLI has three basic starter templates: `blank`, `tabs`, and `sidemenu`. The main difference between them is the main style of navigation.
 - The `--type` option specifies the type of Ionic Framework application to create. Options include `angular`, `react`, `ionic-angular`, and `ionic1`.
 
-**Note:** The `ionic-angular` and `ionic1` options will generate an Ionic Framework v3 or Ionic Framework v1 application respectively. Those versions of the Ionic Framework are deprecated and are no longer supported, so pick those options at your own risk!
+**Note:** The `ionic-angular` and `ionic1` options will generate an Ionic Framework v3 or Ionic Framework v1 application respectively. Those versions of the Ionic Framework are no longer supported, so pick those options at your own risk!
 
 Once the application has been generated, let's start the development server:
 
@@ -95,6 +95,8 @@ Modify your `package.json` file. I suggest moving the `description` up to the to
   }
 }
 ```
+
+**Note:** Throughout the training portions of code examples will be snipped and replaced with `...` (ellipsis). This is done for brevity and to better focus on actionable areas.
 
 Finally, let's make sure all of our source is formatted properly:
 

@@ -11,7 +11,7 @@ In this lab, you will learn how to:
 
 The application is configured to use [Jest](https://jestjs.io) as it's testing framework and runner. <a href="https://testing-library.com/docs/react-testing-library/intro" target="_blank"> React Testing Library</a> is bundled with our application, which is used to facilitate testing React components.
 
-You may be used to testing React components with Enzyme. React Testing Library is similar, but instead of dealing with instances of rendered React components, tests work with actual DOM nodes. We will learn how to use React Testing Library as we write unit tests.
+You may be used to testing React components with Enzyme. React Testing Library is similar but tests against actual DOM nodes, instead of dealing with instances of rendered React components. We will learn how to use React Testing Library as we write unit tests.
 
 The `npm test` script will run all of our tests and then watch for changes to the code.
 
@@ -45,7 +45,7 @@ With our updated configuration, there are four convenient ways to run the tests:
 - `npm test` - Runs the tests and waits for changes. This is the default and should be used for most development.
 - `npm run test:ci` - Runs the tests and exits. This is intended for use on your CI/CD server but is also useful for cases where you want to run the tests once.
 - `npm run test:cov` - Runs the tests and collects coverage information. This is intended for use on your CI/CD server but is also useful for cases where you want to identify non-tested areas.
-- `npm run test:upd` - Runs the tests and regenerate failed snapshots. This is intended for use when component markup is modified and you have tests that assert against the composition of components.
+- `npm run test:upd` - Runs the tests and regenerates failed snapshots. This is intended for use when component markup is modified and you have tests that assert against the composition of components.
 
 Enter `npm test` and verify that the tests run.
 
@@ -77,13 +77,13 @@ Some important aspects of a `describe()` group are:
 
 ### Side Note: Where to place test files?
 
-Jest is relatively un-opinionated on where test files are placed in your project. There are three popularized ways to organize test files in Jest:
+Jest allows multiple ways to organize test files in relation to your project:
 
 - Place all test files into a `__tests__` directory at the root of the project
 - Place test files for a given folder within a `__tests__` subfolder
 - Place test files next to the project files they test
 
-I prefer to put test files next to the files they are testing. This keeps my project structure flat and allows me to easily see which project files have test files written for them, and which do not.
+I prefer to put test files next to the project files they test. This keeps my project structure flat and allows me to easily identify which files have tests written for them and which do not.
 
 ## Write tests for the Home Page
 
@@ -111,7 +111,7 @@ describe('<Home />', () => {
 });
 ```
 
-### Test Header Text Value
+### Test the Header
 
 By default, our Home page has it's header text set to "Blank". We can query the DOM in order to make sure that our header text is rendering correctly:
 
@@ -119,7 +119,7 @@ By default, our Home page has it's header text set to "Blank". We can query the 
 describe('<Home />', () => {
   it('displays the header', () => {
     const { container } = render(<Home />);
-    expect(container).toHaveTextContent('Blank');
+    expect(container).toHaveTextContent(/Blank/);
   });
 });
 ```
