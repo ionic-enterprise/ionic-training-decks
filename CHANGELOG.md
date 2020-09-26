@@ -1,3 +1,9 @@
+## [4.0.1](https://github.com/ionic-team/ionic-training-decks/compare/v4.0.0...v4.0.1) (2020-09-26)
+
+### Bug Fixes
+
+- **nav:** redirect to first page ([bb2c68e](https://github.com/ionic-team/ionic-training-decks/commit/bb2c68ec337673895a7a3f8ba47e5e029dd0f0cf))
+
 # [4.0.0](https://github.com/ionic-team/ionic-training-decks/compare/v3.1.0...v4.0.0) (2020-09-26)
 
 ### Features
