@@ -89,7 +89,7 @@
         },
         {
           "name": "ionic-react",
-          "title": "Ionic & React",
+          "title": "React",
           "folder": "ionic-react",
           "icon": "logo-react",
           "pages": [

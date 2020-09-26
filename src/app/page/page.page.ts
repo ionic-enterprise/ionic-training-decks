@@ -13,6 +13,7 @@ import { PageMenuComponent } from '@app/page-menu/page-menu.component';
 export class PagePage implements OnInit {
   private sectionParam: string;
   private tabParam: string;
+  private pageIdx: number;
   private section: MenuItem;
   private page: MenuItem;
 
@@ -32,41 +33,23 @@ export class PagePage implements OnInit {
   ) {}
 
   async ngOnInit() {
-    this.sectionParam = this.activatedRoute.snapshot.paramMap.get('section');
-    this.tabParam = this.activatedRoute.snapshot.paramMap.get('tabName');
-    const pageParam = this.activatedRoute.snapshot.paramMap.get('page');
-    const pageIdx = pageParam && parseInt(pageParam, 10);
+    this.getNavParams();
+    this.getPages();
 
-    this.section = this.menuItems.page(this.sectionParam, this.tabParam);
-    this.page = this.menuItems.page(this.sectionParam, this.tabParam, pageIdx);
-
-    if (this.page && this.page.file) {
-      this.title = this.page.title;
-      this.file = this.page.file;
-      this.folder = this.menuItems.folder(
-        this.sectionParam,
-        this.tabParam,
-        pageIdx,
-      );
+    if (this.hasFile()) {
+      this.setPageProperties();
     } else {
-      this.title = 'Invalid Page';
-      this.errorMessage = 'Page does not exist';
+      if (!this.pageParamExists() && this.hasPages()) {
+        this.navController.navigateRoot(
+          this.menuItems.redirectUrl(this.sectionParam, this.tabParam),
+        );
+      } else {
+        this.showErrorMessage();
+      }
     }
 
-    if (this.section && this.section.pages && this.section.pages.length) {
-      const newPage = pageIdx || pageIdx === 0 ? pageIdx + 1 : 0;
-      this.next =
-        newPage < this.section.pages.length
-          ? this.menuItems.url(this.sectionParam, this.tabParam, newPage)
-          : undefined;
-      if (pageIdx) {
-        this.prev = this.menuItems.url(
-          this.sectionParam,
-          this.tabParam,
-          pageIdx - 1,
-        );
-      }
-      this.disableMenu = false;
+    if (this.hasPages()) {
+      this.setupNavigation();
     }
   }
 
@@ -86,5 +69,64 @@ export class PagePage implements OnInit {
       );
       this.navController.navigateRoot(url);
     }
+  }
+
+  private hasFile(): boolean {
+    return !!(this.page && this.page.file);
+  }
+
+  private hasPages(): boolean {
+    return !!(this.section && this.section.pages && this.section.pages.length);
+  }
+
+  private getNavParams() {
+    this.sectionParam = this.activatedRoute.snapshot.paramMap.get('section');
+    this.tabParam = this.activatedRoute.snapshot.paramMap.get('tabName');
+    const pageParam = this.activatedRoute.snapshot.paramMap.get('page');
+    this.pageIdx = pageParam && parseInt(pageParam, 10);
+  }
+
+  private getPages() {
+    this.section = this.menuItems.page(this.sectionParam, this.tabParam);
+    this.page = this.menuItems.page(
+      this.sectionParam,
+      this.tabParam,
+      this.pageIdx,
+    );
+  }
+
+  private setPageProperties() {
+    this.title = this.page.title;
+    this.file = this.page.file;
+    this.folder = this.menuItems.folder(
+      this.sectionParam,
+      this.tabParam,
+      this.pageIdx,
+    );
+  }
+
+  private showErrorMessage() {
+    this.title = 'Invalid Page';
+    this.errorMessage = 'Page does not exist';
+  }
+
+  private setupNavigation() {
+    const newPage = this.pageParamExists() ? this.pageIdx + 1 : 0;
+    this.next =
+      newPage < this.section.pages.length
+        ? this.menuItems.url(this.sectionParam, this.tabParam, newPage)
+        : undefined;
+    if (this.pageIdx) {
+      this.prev = this.menuItems.url(
+        this.sectionParam,
+        this.tabParam,
+        this.pageIdx - 1,
+      );
+    }
+    this.disableMenu = false;
+  }
+
+  private pageParamExists(): boolean {
+    return !!(this.pageIdx || this.pageIdx === 0);
   }
 }
