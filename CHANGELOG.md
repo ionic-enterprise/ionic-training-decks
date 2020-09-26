@@ -1,3 +1,10 @@
+# [4.0.0](https://github.com/ionic-team/ionic-training-decks/compare/v3.1.0...v4.0.0) (2020-09-26)
+
+### Features
+
+- **app:** add tabs to the courses ([b061f31](https://github.com/ionic-team/ionic-training-decks/commit/b061f314aac4433d99d74756a8b697c6f25a3e43))
+- **react:** update to use the tea-taster project ([b5ee2c8](https://github.com/ionic-team/ionic-training-decks/commit/b5ee2c82c2a85c6c8f3060f3a1505a0c4c00c225))
+
 # [3.1.0](https://github.com/ionic-team/ionic-training-decks/compare/v3.0.1...v3.1.0) (2020-09-21)
 
 ### Bug Fixes
