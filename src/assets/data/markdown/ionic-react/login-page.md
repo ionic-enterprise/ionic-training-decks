@@ -2,6 +2,7 @@
 
 In this lab, you will learn how to:
 
+- Add forms to a React project
 - Create new pages for the application
 - Add additional routes to the application's router
 - Handle and test Ionic Framework component events
@@ -10,24 +11,47 @@ In this lab, you will learn how to:
 
 Most applications have more than one page. Our application will eventually have several; let's start by adding a login page.
 
-## TODO
+## Additional Dependencies
 
-- Have user install `npm i react-hook-form`
-- Have user install `npm i mutationobserver-shim`
+In this training, we will use [React Hook Form](https://react-hook-form.com/) as our form library of choice. It is lightweight library that provides us with easy-to-use validation and integrates well with Ionic Framework input components.
+
+Terminate `ionic serve` and `npm test` scripts, then run the following terminal command:
+
+```bash
+$ npm install react-hook-form mutationobserver-shim
+```
+
+This will install React Hook Form and a helper dependency needed to test the library.
+
+Speaking of testing, let's add a dependency that will help us test Ionic Framework components. Certain Ionic Framework components contain attributes/events that React Testing Library isn't aware of.
+
+<a href="https://github.com/ionic-team/ionic-react-test-utils" target="_blank">Ionic React Test Utils</a> is a set of helper methods that makes our tests aware of these attributes and events.
+
+Install it with the following terminal command:
+
+```bash
+$ npm install @ionic/react-test-utils
+```
+
+Finally, open `src/setupTests.ts` and add the following lines of code:
+
+**`src/setupTests.ts`**
+
+```TypeScript
+require('mutationobserver-shim');
+import { mockIonicReact } from '@ionic/react-test-utils';
+mockIonicReact();
+```
+
+Once complete, run `ionic serve` and `npm test` again and move onto the next section.
 
 ## The Login Page
 
 ### Create Folder and Files
 
-Add a new folder within `src` called `login`. Within that folder, let's create the component file, the test file, and CSS file for our login page:
+Add a new feature folder `src/login`. Inside that folder add two files for the component and the test file: `LoginPage.tsx` and `LoginPage.test.tsx`.
 
-- `Login.tsx`
-- `Login.test.tsx`
-- `Login.css`
-
-Scaffold the page so that it has the same design as our teas page, but without the `IonGrid`:
-
-**`src/login/Login.tsx`**
+Next, copy the code snippet below and paste it into `LoginPage.tsx`:
 
 ```TypeScript
 import React from 'react';
@@ -39,7 +63,7 @@ import {
   IonToolbar,
 } from '@ionic/react';
 
-const Login: React.FC = () => {
+const LoginPage: React.FC = () => {
   return (
     <IonPage>
       <IonHeader>
@@ -58,13 +82,13 @@ const Login: React.FC = () => {
   );
 };
 
-export default Login;
+export default LoginPage;
 ```
 
-**Challenge:** Set up `Login.test.tsx` with tests to verify:
+**Challenge:** Set up `LoginPage.test.tsx` with tests to verify:
 
-1. `<Login />` displays a header with the text "Login"
-2. `<Login />` renders consistently
+1. `<LoginPage />` displays a header with the text "Login"
+2. `<LoginPage />` renders consistently
 
 ### Add Routing
 
@@ -72,7 +96,7 @@ To make our login page accessible, we need to add an entry to the `IonReactRoute
 
 ```TypeScript
 ...
-import Login from './login/Login';
+import LoginPage from './login/LoginPage';
 ...
 const App: React.FC = () => {
   ...
@@ -80,8 +104,8 @@ const App: React.FC = () => {
     <IonApp>
       <IonReactRouter>
         <IonRouterOutlet>
-          <Route path="/login" component={Login} exact={true} />
-          <Route path="/tea" component={TeaList} exact={true} />
+          <Route path="/login" component={LoginPage} exact={true} />
+          <Route path="/tea" component={TeaPage} exact={true} />
           <Route exact path="/" render={() => <Redirect to="/tea" />} />
         </IonRouterOutlet>
       </IonReactRouter>
@@ -92,11 +116,13 @@ const App: React.FC = () => {
 export default App;
 ```
 
-Let's make sure this works by changing the route in our browser to http://localhost:8100/login if you are running the application using `ionic serve` or http://localhost:3000/login if you are running it using `ng start`. There's not much to see, but we can see that the route is actually working.
+Let's make sure this works by changing the route in our browser to http://localhost:8100/login. There's not much to see, but we can see that the route is actually working.
 
 ### Mock the User Interface
 
 Let's mock up what we would like the login page to look like. We know we are going to need a form in which to enter an e-mail address and a password along with a button to press when the user is ready to sign in, so let's start there:
+
+**`src/login/LoginPage.tsx`**
 
 ```JSX
 <IonPage>
@@ -129,7 +155,7 @@ Let's mock up what we would like the login page to look like. We know we are goi
 </IonPage>
 ```
 
-Well, that's a start, but let's pretty it up a bit. First, let's use the "floating" style labels like this: `<IonLabel position="floating">Some Label</IonLabel>`. Nice!
+Well, that's a start, but let's pretty it up a bit. First, let's use the "floating" style labels like this: `<IonLabel position="floating">Some Label</IonLabel>`.
 
 We should also give the inputs an `id`, a `name`, and a `type`:
 
@@ -150,7 +176,6 @@ The password field now shows markers instead of the actual text being typed in. 
 
 Finally, let's add the "Sign In" button. Ideally it should:
 
-- Have an `id`
 - Take up the whole screen width
 - Have a sign-in icon to go along with the text
 
@@ -158,18 +183,18 @@ Finally, let's add the "Sign In" button. Ideally it should:
 
 Take a few minutes to check out the site. The icon we're going to use is `log-in-outline`.
 
-In the last lab we learned that Create React App encourages us to import image assets in our TypeScript files. Ionicons provides us with exports for each icon that we can import into `Login.tsx`. Add the following import:
+In the last lab we learned that Create React App encourages us to import image assets in our TypeScript files. Ionicons provides us with exports for each icon that we can import into `LoginPage.tsx`. Add the following import:
 
 ```TypeScript
 import { logInOutline } from 'ionicons/icons';
 ```
 
-With that taken care of, let's update the `<IonFooter>` portion of the component like so:
+With that taken care of, let's update the `<IonFooter>` portion of the page like so:
 
 ```JSX
 <IonFooter>
   <IonToolbar>
-    <IonButton id="signin-button" expand="full">
+    <IonButton expand="full">
       Sign In
       <IonIcon slot="end" icon={logInOutline} />
     </IonButton>
@@ -179,162 +204,215 @@ With that taken care of, let's update the `<IonFooter>` portion of the component
 
 ## Form Handling
 
-With our layout mocked, we can start building out functionality for the form. We know we're going to need to hold the state of our form's e-mail address and password fields and a function that handles pressing the button. Let's set those up:
+With our layout mocked, we can start building out functionality for the form.
+
+### Binding the Data
+
+First, let's import the `useForm` hook and `Controller` component made available from the `react-hook-form` dependency:
+
+**`src/login/LoginPage.tsx`**
 
 ```TypeScript
-import React, { useState } from 'react';
+import React from 'react';
 ...
-const Login: React.FC = () => {
-  const [email, setEmail] = useState<string>('');
-  const [password, setPassword] = useState<string>('');
+import { useForm, Controller } from 'react-hook-form';
+import { logInOutline } from 'ionicons/icons';
+...
+```
 
-  const signIn = () => {
-    console.log(email, password);
-  };
+The `useForm` hook allows us to create a context for our login form, and provides many values we'll want to take advantage of. `Controller` makes non-standard input fields (such as `IonInput`) interoperable with React Form Hook.
+
+Within our `LoginPage` component, let's establish a context for the form and pull out properties that will:
+
+- Handle form submission
+- Register inputs to our form
+- Obtain information about our form
+- Provide any form errors
+
+We'll also specify that we want our form to be validated when any inputs are changed:
+
+```TypeScript
+...
+const LoginPage: React.FC = () => {
+  const { handleSubmit, control, formState, errors } = useForm({
+    mode: 'onChange'
+  });
 
   return (
     ...
   );
 };
-
-export default Login;
+export default LoginPage;
 ```
 
-We're making use of React's <a href="https://reactjs.org/docs/hooks-state.html" target="_blank">State Hook</a> to manage the state of our component's input fields. Throughout this course, we're going to use different React Hooks to make our life easier. In fact, we've already used the `useEffect` React Hook to run initialization logic on our `<App />` component!
-
-`useState` returns an array where the first entry is the variable that holds data, and the second entry is a "setter" function that is used to update the variable. You can type the shape of data you want the variable to hold, and set a default value through the function's first argument.
-
-### Binding Input Fields
-
-Let's make use of our "setter" functions to update `email` and `password` when those input fields are changed. Update the `<form>` portion of your template to match below:
+Next we will make use of the `Controller` component. Modify the `<form>` of the page component like so:
 
 ```JSX
+...
 <form>
   <IonList>
     <IonItem>
       <IonLabel position="floating">E-Mail Address</IonLabel>
-      <IonInput
-        onIonChange={e => setEmail(e.detail.value!)}
+      <Controller
+        render={({ onChange, value }) => (
+          <IonInput
+            id="email-input"
+            onIonChange={(e: any) => onChange(e.detail.value!)}
+            value={value}
+          />
+        )}
+        control={control}
         name="email"
-        type="email"
-        id="email-input"
-        required
+        rules={{
+          required: true,
+          pattern: {
+            value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i,
+            message: 'invalid email address',
+          },
+        }}
+        defaultValue={''}
       />
     </IonItem>
     <IonItem>
       <IonLabel position="floating">Password</IonLabel>
-      <IonInput
-        onIonChange={e => setPassword(e.detail.value!)}
+      <Controller
+        render={({ onChange, value }) => (
+          <IonInput
+            id="password-input"
+            onIonChange={(e: any) => onChange(e.detail.value!)}
+            value={value}
+            type="password"
+          />
+        )}
+        control={control}
         name="password"
-        type="password"
-        id="password-input"
-        required
+        rules={{ required: true }}
+        defaultValue={''}
       />
     </IonItem>
   </IonList>
 </form>
+...
 ```
 
-That's it. The React State Hook does most of the legwork for us, keeping our component's code nice and tidy.
+There is quite a bit going on here, so let's break it down:
 
-### Ionic React Test Utils
+- We use the `Controller` component to define the parameters of our input fields, such as their default values and validation logic
+- The `render` prop of the `Controller` component allows us to utilize Ionic Framework components within React Form Hook's library
+- The `onIonChange` event handles the changing of the input fields; in our cases we will delegate that responsibility to the `Controller` component
 
-Before moving on with our login page, let's take a detour to add a dependency that will help us test Ionic Framework components. Certain Ionic Framework components contain attributes and/or events that Jest and React Testing Library aren't aware of (yet).
+React Form Hook's `Controller` component can take some getting used to. However, the pattern you see above is safe to use when building your own forms outside of this training.
 
-<a href="https://github.com/ionic-team/ionic-react-test-utils" target="_blank">Ionic React Test Utils</a> is a set of helper methods that makes Jest and React Testing Library aware of these attributes and events.
-
-Terminate any running processes and run the following command in the terminal:
-
-```bash
-$ npm install @ionic/react-test-utils
-```
-
-Open up `src/setupTests.ts` and add the following lines:
-
-```TypeScript
-import { mockIonicReact } from '@ionic/react-test-utils';
-mockIonicReact();
-```
-
-Once complete, we can run our serve and test commands again and return to completing our login page.
+And of course, I recommend taking a look through the [React Form Hook Controller documentation](https://react-hook-form.com/api#Controller).
 
 ### Disabling the Sign In Button
 
-Users interacting with our application shouldn't be able to press the "Sign In" button if the form is invalid, don't you agree?
+Application users should not be able to click the "Sign In" button if the form itself is not valid. Also, when the user does click on the button our page should do something. What that _something_ is currently is undefined, but we will bind the event so it is ready once we do define what it should do.
 
 #### Test First
 
-Let's use tests to define when the "Sign In" button should be enabled or disabled:
+We need to do some cleanup in our test file for the login page. React Hook Form runs asynchronously which is going to cause our current tests to fail. This can be fixed by making the tests `async` and using the `wait` utility provided by React Testing Library. Update the existing tests:
+
+**`src/login/LoginPage.test.tsx`**
 
 ```TypeScript
 import React from 'react';
-import { render } from '@testing-library/react';
+import { render, wait } from '@testing-library/react';
+import LoginPage from './LoginPage';
+
+describe('<LoginPage />', () => {
+  it('displays the header', async () => {
+    const { container } = render(<LoginPage />);
+    await wait(() => expect(container).toHaveTextContent(/Login/));
+  });
+
+  it('renders consistently', async () => {
+    const { asFragment } = render(<LoginPage />);
+    await wait(() => expect(asFragment()).toMatchSnapshot());
+  });
+});
+```
+
+Now let's use our tests to define when the button should be enabled and disabled:
+
+```TypeScript
+import React from 'react';
+import { render, wait, waitForElement } from '@testing-library/react';
 import { ionFireEvent as fireEvent } from '@ionic/react-test-utils';
-import Login from './Login';
+import LoginPage from './LoginPage';
 
-describe('<Login />', () => {
-  it('displays the header', () => {
-    const { container } = render(<Login />);
-    expect(container).toHaveTextContent('Login');
-  });
-
-  it('renders consistently', () => {
-    const { asFragment } = render(<Login />);
-    expect(asFragment()).toMatchSnapshot();
-  });
-
+describe('<LoginPage />', () => {
+  ...
   describe('sign in button', () => {
-    let button: HTMLIonButtonElement;
-    let email: HTMLIonInputElement;
-    let password: HTMLIonInputElement;
-
-    beforeEach(() => {
-      const { container } = render(<Login />);
-      button = container.querySelector('ion-button')!;
-      email = container.querySelector('#email-input') as HTMLIonInputElement;
-      password = container.querySelector('#password-input') as HTMLIonInputElement;
-    });
-
     it('starts disabled', async () => {
+      const { container } = render(<LoginPage />);
+      const button = await waitForElement(
+        () => container.querySelector('ion-button')! as HTMLIonButtonElement,
+      );
       expect(button.disabled).toBeTruthy();
     });
 
-    it('is disabled with just an e-mail address', () => {
-      fireEvent.ionChange(email, 'test@test.com');
+    it('is disabled with just an e-mail address', async () => {
+      const { container } = render(<LoginPage />);
+      const [button, email] = await waitForElement(() => [
+        container.querySelector('ion-button')! as HTMLIonButtonElement,
+        container.querySelector('#email-input')! as HTMLIonInputElement,
+      ]);
+      await wait(() => fireEvent.ionChange(email, 'test@test.com'));
       expect(button.disabled).toBeTruthy();
     });
 
-    it('is disabled with just a password', () => {
-      // TODO: Fill this in
+    it('is disabled with just a password', async () => {
+      const { container } = render(<LoginPage />);
+      const [button, password] = await waitForElement(() => [
+        container.querySelector('ion-button')! as HTMLIonButtonElement,
+        container.querySelector('#password-input')! as HTMLIonInputElement,
+      ]);
+      await wait(() => fireEvent.ionChange(password, 'P@ssword123'));
+      expect(button.disabled).toBeTruthy();
     });
 
-    it('is enabled with both an email address and a password', () => {
-      // TODO: Fill this in
+    it('is enabled with both an email address and a password', async () => {
+      const { container } = render(<LoginPage />);
+      const [button, email, password] = await waitForElement(() => [
+        container.querySelector('ion-button')! as HTMLIonButtonElement,
+        container.querySelector('#email-input')! as HTMLIonInputElement,
+        container.querySelector('#password-input')! as HTMLIonInputElement,
+      ]);
+      await wait(() => {
+        fireEvent.ionChange(email, 'test@test.com');
+        fireEvent.ionChange(password, 'P@ssword123');
+      });
+      expect(button.disabled).toBeFalsy();
     });
   });
 });
 ```
 
-**Challenge:** Fill out the logic for the last two tests. Remember, your tests should be failing at this point!
+Additionally, React Testing Library has utilities to wait for an element to exist within the DOM, which is what we used above.
 
 #### Then Code
 
-Let's go ahead and add the logic to determine whether our "Sign In" button should be enabled or disabled. We'll also wire up the `onClick` event to the `signIn` function we created earlier:
+Let's go ahead and add the logic to determine whether our "Sign In" button should be enabled or disabled. We'll also wire up the `onClick` event of the button - for now we will just have it log the input data to the console:
+
+**`src/login/LoginPage.tsx`**
+
+We'll also wire up the `onClick` event to the `signIn` function we created earlier:
 
 ```JSX
 ...
-<IonButton
-  id="signin-button"
-  expand="full"
-  onClick={() => signIn()}
-  disabled={!email.length || !password.length}>
-  Sign In
-  <IonIcon slot="end" icon={logInOutline} />
-</IonButton>
+  <IonButton
+    expand="full"
+    disabled={!formState.isValid}
+    onClick={handleSubmit(data => console.log(data))}
+  >
+    Sign In
+    <IonIcon slot="end" icon={logInOutline} />
+  </IonButton>
 ...
 ```
 
-Now we're cooking! Update your snapshots and then your tests should pass. If we play around with the form in Chrome we can see that our input values are logged to the console when the "Sign In" button is pressed.
+Now we're cooking! If we play around with the form in Chrome we can see that our input values are logged to the console when the "Sign In" button is pressed.
 
 ### Error Handling
 
