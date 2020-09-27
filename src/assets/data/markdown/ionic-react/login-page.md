@@ -300,6 +300,7 @@ There is quite a bit going on here, so let's break it down:
 - We use the `Controller` component to define the parameters of our input fields, such as their default values and validation logic
 - The `render` prop of the `Controller` component allows us to utilize Ionic Framework components within React Form Hook's library
 - The `onIonChange` event handles the changing of the input fields; in our cases we will delegate that responsibility to the `Controller` component
+- Input validation rules are set on the `rules` prop of the `Controller` component
 
 React Form Hook's `Controller` component can take some getting used to. However, the pattern you see above is safe to use when building your own forms outside of this training.
 
@@ -426,159 +427,85 @@ Specifically, it would be nice if we could tell the user that:
 
 #### Test First
 
-First let's write tests to define when each error message should be displayed:
+First let's use our tests to define when the error messages should be displayed:
+
+**`src/login/LoginPage.test.tsx`**
 
 ```TypeScript
-...
-describe('<Login />', () => {
+describe('<LoginPage />', () => {
   ...
   describe('error messages', () => {
-      let errorDiv: HTMLDivElement;
-      let email: HTMLIonInputElement;
-      let password: HTMLIonInputElement;
+    it('starts with no error message', async () => {
+      const { container } = render(<LoginPage />);
+      const errorDiv = await waitForElement(
+        () => container.querySelector('.error-message')!,
+      );
+      expect(errorDiv.textContent).toEqual('');
+    });
 
-      beforeEach(() => {
-        const { container } = render(<Login />);
-        email = container.querySelector('#email-input') as HTMLIonInputElement;
-        password = container.querySelector(
-          '#password-input',
-        ) as HTMLIonInputElement;
-        errorDiv = container.querySelector('.error-message') as HTMLDivElement;
-      });
-
-      it('displays an error message if the e-mail address is dirty and empty', () => {
-        const error = 'E-Mail Address is required';
+    it('dsiplays an error message if the e-mail address is dirty and empty', async () => {
+      const expected = /E-Mail Address is required/;
+      const { container } = render(<LoginPage />);
+      const [errorDiv, email] = await waitForElement(() => [
+        container.querySelector('.error-message')!,
+        container.querySelector('#email-input')! as HTMLIonInputElement,
+      ]);
+      await wait(() => {
         fireEvent.ionChange(email, 'test@test.com');
         fireEvent.ionChange(email, '');
-        expect(errorDiv.textContent!.trim()).toEqual(error);
       });
-
-      it('displays an error message if the e-mail address has an invalid format', () => {
-        const error = 'E-Mail Address must have a valid format';
-        // TODO: Fill this in
-      });
-
-      it('clears the error message when the e-mail address has an valid format', () => {
-        const error = '';
-        // TODO: Fill this in
-      });
-
-      it('displays an error message if the password is dirty and empty', () => {
-        const error = 'Password is required';
-        // TODO: Fill this in
-      });
+      expect(errorDiv).toHaveTextContent(expected);
     });
+
+    it('displays an error messae if the e-mail address has an invalid format', async () => {
+      const expected = /E-Mail Address must have a valid format/;
+      // Fill in this test.
+    });
+
+    it('displays an error message if the password is dirty and empty', async () => {
+      const expected = /Password is required/;
+      // Fill in this test.
+    });
+  });
 });
 ```
 
-**Challenge:** Fill in the logic for the remaining tests.
+**Challenge:** Fill in the remaining tests.
 
 #### Then Code
 
-We want some kind of "listener" that can validate `email` and `password` when they change. The React <a href="https://reactjs.org/docs/hooks-effect.html" target="_blank">Effect Hook</a> was built for just this type of use-case! So far we leveraged `useEffect` to run component startup logic, but we haven't learned _how_ it actually works:
+Now let's update the form. Add the following block of code after the closing `IonList` tag and before the closing `form` tag:
 
-`useEffect` can be used to listen to any set of objects and run code when any of those objects change. That is the purpose of the second argument - it's a list of objects to listen to. If we pass in an empty array, `useEffect` listens to the component and will run code when the component initializes.
+**`src/login/LoginPage.tsx`**
 
-Let's add an effect that will set the error based on any broken validation rules and display the error in our template. We'll also add a pair of "dirty flags" to track if the user has modified either field:
-
-```TypeScript
+```JSX
 ...
-const Login: React.FC = () => {
-  const [dirtyEmail, setDirtyEmail] = useState<boolean>(false);
-  const [dirtyPassword, setDirtyPassword] = useState<boolean>(false);
-  const [error, setError] = useState<string>('');
-  ...
-    useEffect(() => {
-    if (dirtyEmail && !email.length)
-      return setError('E-Mail Address is required');
+    </IonList>
 
-    if (dirtyEmail && !email.match(/\S+@\S+\.\S+/))
-      return setError('E-Mail Address must have a valid format');
+    <div className="error-message">
+      <div>
+        {errors.email?.type === 'required' &&
+          'E-Mail Address is required'}
+      </div>
+      <div>
+        {errors.email?.type === 'pattern' && errors.email.message}
+      </div>
+      <div>
+        {errors.password?.type === 'required' && 'Password is required'}
+      </div>
+    </div>
 
-    if (dirtyPassword && !password.length)
-      return setError('Password is required');
-
-    return setError('');
-  }, [email, password, dirtyEmail, dirtyPassword]);
-
-  return (
-    ...
-    <form>
-      ...
-    </form>
-    <div className="error-message">{error}</div>
-    ...
-  );
-};
+  </form>
 ...
 ```
-
-By combining `useEffect` and `useState` we were able to roll our own client-side form validation without any third-party libraries!
-
-Now we need a way to set the dirty flags once an input has been modified, and we need to make sure that users cannot press the "Sign In" button while an error is present. Let's add that code in:
-
-```TypeScript
-...
-const Login: React.FC = () => {
-  ...
-  const onEmailChange = (email: string) => {
-    setDirtyEmail(true);
-    setEmail(email);
-  };
-
-  const onPasswordChange = (password: string) => {
-    setDirtyPassword(true);
-    setPassword(password);
-  };
-  ...
-  return (
-    ...
-    <form>
-      <IonList>
-        <IonItem>
-          <IonLabel position="floating">E-Mail Address</IonLabel>
-          <IonInput
-            onIonChange={e => onEmailChange(e.detail.value!)}
-            name="email"
-            type="email"
-            id="email-input"
-            required
-          />
-        </IonItem>
-        <IonItem>
-          <IonLabel position="floating">Password</IonLabel>
-          <IonInput
-            onIonChange={e => onPasswordChange(e.detail.value!)}
-            name="password"
-            type="password"
-            id="password-input"
-            required
-          />
-        </IonItem>
-      </IonList>
-    </form>
-    ...
-    <IonButton
-      id="signin-button"
-      expand="full"
-      onClick={() => signIn()}
-      disabled={error.length > 0 || !email.length || !password.length}>
-      Sign In
-      <IonIcon slot="end" icon={logInOutline} />
-    </IonButton>
-    ...
-  );
-});
-...
-```
-
-All of our tests should pass, and don't forget to update your snapshot.
 
 ## Global Error Styling
 
 Our error messages are now displaying when a user breaks any of our rules, but it could look nicer. Since this is not the only page where we could potentially want to display error messages, let's add styling we can use across the application when we want to display an error message.
 
 Create a new file in `src/theme` called `global.css` and add the following CSS class definition:
+
+**`src/theme/global.css`**
 
 ```CSS
 .error-message {
@@ -600,8 +527,6 @@ const App: React.FC = () => {
 
 export default App;
 ```
-
-Update your snapshot then we're done with this lab.
 
 ## Conclusion
 
