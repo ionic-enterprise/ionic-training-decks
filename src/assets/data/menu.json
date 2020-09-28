@@ -122,6 +122,10 @@
               "file": "login-page"
             },
             {
+              "title": "Identity",
+              "file": "identity"
+            },
+            {
               "title": "Authentication",
               "file": "auth"
             },
