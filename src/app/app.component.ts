@@ -1,8 +1,9 @@
 import { Component, OnInit } from '@angular/core';
-import { Platform } from '@ionic/angular';
+import { NavController, Platform } from '@ionic/angular';
 import { Plugins, StatusBarStyle } from '@capacitor/core';
 
 import { MenuItemsService, ApplicationService } from '@app/core';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-root',
@@ -16,6 +17,7 @@ export class AppComponent implements OnInit {
   constructor(
     private applicationService: ApplicationService,
     private menuItems: MenuItemsService,
+    private navController: NavController,
     private platform: Platform,
   ) {
     this.initializeApp();
@@ -33,19 +35,21 @@ export class AppComponent implements OnInit {
   }
 
   async ngOnInit() {
-    this.loadCourses();
-    const path = window.location.pathname.split('folder/')[1];
-    if (path !== undefined) {
-      this.selectedIndex = parseInt(path, 10);
+    this.appPages = [...this.menuItems.mainMenu];
+    const course = this.getCourseFromPath();
+    this.selectedIndex = this.appPages.findIndex(x => x.name === course);
+    if (this.selectedIndex < 0) {
+      this.selectedIndex = 0;
+      this.navController.navigateRoot(this.appPages[0].url);
     }
   }
 
-  private async loadCourses() {
-    this.appPages = (await this.menuItems.courses()).map((x, idx) => ({
-      title: x.title,
-      url: `/folder/${idx}`,
-      icon: x.icon || 'reader',
-    }));
+  private getCourseFromPath(): string {
+    const path = window.location.pathname.split('course/')[1];
+    if (path) {
+      return path.split('/')[0];
+    }
+    return '';
   }
 
   private styleByMode() {

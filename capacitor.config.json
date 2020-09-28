@@ -1,6 +1,6 @@
 {
   "appId": "io.ionic.trainingdecks",
-  "appName": "ionic-training-decks",
+  "appName": "Ionic Training Labs",
   "bundledWebRuntime": false,
   "npmClient": "npm",
   "webDir": "www",

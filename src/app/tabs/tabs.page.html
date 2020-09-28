@@ -1,0 +1,8 @@
+<ion-tabs>
+  <ion-tab-bar slot="bottom">
+    <ion-tab-button *ngFor="let tab of section.tabs" [tab]="tab.name">
+      <ion-label>{{ tab.title }}</ion-label>
+      <ion-icon [name]="tab.icon || 'document'"></ion-icon>
+    </ion-tab-button>
+  </ion-tab-bar>
+</ion-tabs>

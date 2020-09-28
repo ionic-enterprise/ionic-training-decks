@@ -32,6 +32,8 @@ pre {
   border-radius: 8px;
   background: #363636;
   color: #ffffff;
-  // background: var(--ion-color-medium);
-  // color: var(--ion-color-medium-contrast);
+}
+
+.error-message {
+  color: var(--ion-color-danger);
 }
