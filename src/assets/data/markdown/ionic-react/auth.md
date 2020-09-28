@@ -84,7 +84,7 @@ describe('AuthService', () => {
 });
 ```
 
-Alrighty, we are set to start implementing.
+Finally, update the barrel file (`src/core/services/index.ts`).
 
 ### Login
 
@@ -129,7 +129,7 @@ describe('AuthService', () => {
 Next, we need to create describe blocks for each branch: when a user is successful in signing in, and when a user is unsuccessful in signing in:
 
 ```TypeScript
-  ...
+    ...
     it('POSTs the login', async () => {
       ...
     });
@@ -166,16 +166,87 @@ Next, we need to create describe blocks for each branch: when a user is successf
         expect(res).toBeFalsy();
       });
     });
+    ...
+```
+
+Now let's wire up the function.
+
+#### Then Code
+
+Fill in the `login()` method of the `AuthService`:
+
+**`src/core/services/AuthService.ts`**
+
+```TypeScript
+...
+
+export class AuthService {
+  ...
+  async login(username: string, password: string): Promise<boolean> {
+    const url = `${process.env.REACT_APP_DATA_SERVICE}/login`;
+    const { data } = await Axios.post(url, { username, password });
+
+    if (!data.success) return false;
+
+    IdentityService.getInstance().set(data.user, data.token);
+    return true;
+  }
+  ...
+}
+```
+
+### Logout
+
+The `logout()` method needs to POST to the logout endpoint and then clear the identity information.
+
+#### Test First
+
+Let's fill out our test cases for `logout()`:
+
+**`src/core/services/AuthService.test.ts`**
+
+```TypeScript
+  ...
+  describe('logout', () => {
+    beforeEach(() => {
+      (Axios.post as any) = jest.fn(() => Promise.resolve());
+      IdentityService.getInstance().clear = jest.fn(() => Promise.resolve());
+    });
+
+    it('POSTs the logout', async () => {
+      const url = `${process.env.REACT_APP_DATA_SERVICE}/logout`;
+      await authService.logout();
+      expect(Axios.post).toHaveBeenCalledTimes(1);
+      expect(Axios.post).toHaveBeenCalledWith(url);
+    });
+
+    it('clears the identity', async () => {
+      await authService.logout();
+      expect(IdentityService.getInstance().clear).toHaveBeenCalledTimes(1);
+    });
+  });
   ...
 ```
 
 #### Then Code
 
-### Logout
+Implementing the `logout()` method is fairly straight forward:
 
-#### Test First
+**`src/core/services/AuthService.ts`**
 
-#### Then Code
+```TypeScript
+...
+
+export class AuthService {
+  ...
+  async logout(): Promise<void> {
+    const url = `${process.env.REACT_APP_DATA_SERVICE}/logout`;
+    await Axios.post(url);
+    IdentityService.getInstance().clear();
+  }
+  ...
+}
+```
 
 ## Conclusion
 
