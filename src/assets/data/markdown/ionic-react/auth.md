@@ -218,17 +218,39 @@ Our application users can be in one of three states, signed in (authenticated), 
 
 ### Actions
 
-Next we'll define actions that can be dispatched as part of authentication state. We'll need one for logging out, logging in, logging in successfully, and logging in unsuccessfully. Add the following code to `AuthContext.tsx`:
+Next we'll define actions that can be dispatched as part of authentication state. We'll need one for logging out, logging in successfully, and logging in unsuccessfully. Add the following code to `AuthContext.tsx`:
 
 ```TypeScript
 export type AuthAction =
-  | { type: 'LOGIN' }
   | { type: 'LOGOUT' }
   | { type: 'LOGIN_SUCCESS'; user: User }
   | { type: 'LOGIN_FAILURE'; error: any };
 ```
 
-Any properties after `type` are
+Any properties after `type` are known as an action's payload.
+
+### Reducer
+
+With our state and actions defined, we can now create a reducer function that will update our authentication state. Add the following function to `AuthContext.tsx`:
+
+```TypeScript
+export const authReducer = (state: AuthState = initialState, action: AuthAction) => {
+  switch (action.type) {
+    case 'LOGIN_SUCCESS':
+      return { ...state, status: 'authenticated', user: action.user };
+    case 'LOGIN_FAILURE':
+      return { ...state, status: 'unauthenticated', error: action.error };
+    case 'LOGOUT':
+      return { ...state, status: 'unauthenticated', user: undefined, error: undefined };
+    default:
+      return state;
+  }
+};
+```
+
+With that we have our building blocks of state management, but we don't have a way to access it across our application's components. Let's go ahead and build a context that will do just that.
+
+### Context
 
 ---
 
