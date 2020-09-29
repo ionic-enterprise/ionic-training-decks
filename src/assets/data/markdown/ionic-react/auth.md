@@ -3,51 +3,31 @@
 In this lab, you will learn how to:
 
 - POST data to an API endpoint
-- Use React Context to provide data across components
+- Build state management for authentication
+- Share data across the application
 - Create custom React hooks
 
 ## Overview
 
-In the last lab, we created a service that stores information about the currently signed in user (including their authorization token). But how do we get that token in the first place? How do we relay the authentication status to our components?
+In the last lab, we created a service that stores information about the currently signed in user, but we are missing a way to obtain this information in the first place.
+
+Like our `IdentityService` we will build a singleton class for authentication which will contain login and logout functionality. Then we will use state management to make the authentication endpoints and identity information available across the application.
+
+### State Management
+
+React provides the tools to implement state management out-of-the-box. However, this is not the only way to achieve state management in React. Several battle-tested and hardened libraries exist for state management, such as <a href="https://redux.js.org/" target="_blank">Redux</a> or <a href="https://mobx.js.org/README.html" target="_blank">MobX</a>.
+
+We'll isolate our state management in such a way that it can be easily replaced by another state management solution, if you so wish to use a third-party library to manage state. No hard feelings!
+
+To best accomodate this, we will <a href="https://reactjs.org/docs/hooks-custom.html" target="_blank">build our own React hook</a> that will invoke our state management solution. This way calls to state management are abstracted away from components.
 
 ## Authentication Service
 
-Start out by adding two files to `src/core/services`: `AuthService.ts` and `AuthService.test.ts`.
+First, we need to create a service for authentication. Since we covered this in the last lab, this portion will simply be a copy-and-paste job.
 
-### Interface Setup
+Add two files to `src/core/services`: `AuthService.ts` and `AuthService.test.ts`.
 
-`AuthService` needs two methods; `login` and `logout`. Add the following code to `AuthService.ts`:
-
-**`src/core/services/AuthService.ts`**
-
-```TypeScript
-import Axios from 'axios';
-import { IdentityService } from './IdentityService';
-import { User } from '../models';
-
-export class AuthService {
-  private static instance: AuthService | undefined;
-
-  private constructor() {}
-
-  public static getInstance(): AuthService {
-    if (!AuthService.instance) {
-      AuthService.instance = new AuthService();
-    }
-    return AuthService.instance;
-  }
-
-  async login(email: string, password: string): Promise<boolean> {
-    return false;
-  }
-
-  async logout(): Promise<void> {}
-}
-```
-
-Note that we will be making use of our `IdentityService` to store or clear identity information after login/logout. We'll also be pulling in the default instance of `Axios` since we won't have an authorization token at this point.
-
-Now let's scaffold the test file:
+### Test First
 
 **`src/core/services/AuthService.test.ts`**
 
@@ -76,30 +56,6 @@ describe('AuthService', () => {
     expect(authService).toBeDefined();
   });
 
-  describe('login', () => {});
-
-  describe('logout', () => {});
-
-  afterEach(() => jest.restoreAllMocks());
-});
-```
-
-Finally, update the barrel file (`src/core/services/index.ts`).
-
-### Login
-
-Our `login()` method needs to make a POST request that returns a token and a `User` object representing the signed in user. We should also make sure that we account for failed sign in attempts!
-
-#### Test First
-
-First let's ensure that our `login()` method makes a POST request to the correct URL. For that we will need to mock Axios's `post` method. Modify the test file with the following changes:
-
-**`src/core/services/AuthService.test.ts`**
-
-```TypeScript
-...
-describe('AuthService', () => {
-  ...
   describe('login', () => {
     beforeEach(() => {
       (Axios.post as any) = jest.fn(() =>
@@ -121,18 +77,7 @@ describe('AuthService', () => {
       expect(Axios.post).toHaveBeenCalledTimes(1);
       expect(Axios.post).toHaveBeenCalledWith(url, credentials);
     });
-  });
-  ...
-});
-```
 
-Next, we need to create describe blocks for each branch: when a user is successful in signing in, and when a user is unsuccessful in signing in:
-
-```TypeScript
-    ...
-    it('POSTs the login', async () => {
-      ...
-    });
     describe('on success', () => {
       it('sets the user and token in the identity service', async () => {
         await authService.login('test@test.com', 'P@assword');
@@ -166,47 +111,8 @@ Next, we need to create describe blocks for each branch: when a user is successf
         expect(res).toBeFalsy();
       });
     });
-    ...
-```
+  });
 
-Now let's wire up the function.
-
-#### Then Code
-
-Fill in the `login()` method of the `AuthService`:
-
-**`src/core/services/AuthService.ts`**
-
-```TypeScript
-...
-
-export class AuthService {
-  ...
-  async login(username: string, password: string): Promise<boolean> {
-    const url = `${process.env.REACT_APP_DATA_SERVICE}/login`;
-    const { data } = await Axios.post(url, { username, password });
-
-    if (!data.success) return false;
-
-    IdentityService.getInstance().set(data.user, data.token);
-    return true;
-  }
-  ...
-}
-```
-
-### Logout
-
-The `logout()` method needs to POST to the logout endpoint and then clear the identity information.
-
-#### Test First
-
-Let's fill out our test cases for `logout()`:
-
-**`src/core/services/AuthService.test.ts`**
-
-```TypeScript
-  ...
   describe('logout', () => {
     beforeEach(() => {
       (Axios.post as any) = jest.fn(() => Promise.resolve());
@@ -225,28 +131,106 @@ Let's fill out our test cases for `logout()`:
       expect(IdentityService.getInstance().clear).toHaveBeenCalledTimes(1);
     });
   });
-  ...
+
+  afterEach(() => jest.restoreAllMocks());
+});
 ```
 
-#### Then Code
+Note that we will be making use of our `IdentityService` to store or clear identity information after login/logout. We'll also be pulling in the default instance of `Axios` since we won't have an authorization token at this point.
 
-Implementing the `logout()` method is fairly straight forward:
+### Then Code
 
 **`src/core/services/AuthService.ts`**
 
 ```TypeScript
-...
+import Axios from 'axios';
+import { IdentityService } from './IdentityService';
 
 export class AuthService {
-  ...
+  private static instance: AuthService | undefined;
+
+  private constructor() {}
+
+  public static getInstance(): AuthService {
+    if (!AuthService.instance) {
+      AuthService.instance = new AuthService();
+    }
+    return AuthService.instance;
+  }
+
+  async login(username: string, password: string): Promise<boolean> {
+    const url = `${process.env.REACT_APP_DATA_SERVICE}/login`;
+    const { data } = await Axios.post(url, { username, password });
+
+    if (!data.success) return false;
+
+    IdentityService.getInstance().set(data.user, data.token);
+    return true;
+  }
+
   async logout(): Promise<void> {
     const url = `${process.env.REACT_APP_DATA_SERVICE}/logout`;
     await Axios.post(url);
     IdentityService.getInstance().clear();
   }
-  ...
 }
 ```
+
+Finally, update the barrel file (`src/core/services/index.ts`).
+
+## Building State Management
+
+At a high level, building state management in React consists of the following pieces:
+
+- The <a href="https://reactjs.org/docs/context.html" target="_blank">React Context API</a>
+- The <a href="https://reactjs.org/docs/hooks-reference.html#usereducer" target="_blank">`useReducer` hook</a>
+
+Create a new folder `src/core/auth`. Inside this folder, create three files: `AuthContext.tsx`, `AuthContext.test.tsx` and `index.ts`.
+
+**Note:** We're going to place a lot of functionality into these files. It would be best practice to split them up into smaller, more manageable files. In order to keep our state management portable to other state management solutions, we'll break the rules this once.
+
+### Auth State
+
+A good place to start is to define the authentication state that we want to share across the application. We'll want to track the authentication status of the current user, and if available, their user profile information. Open `AuthContext.tsx` and define the state like so:
+
+**`src/core/auth/AuthContext.tsx`**
+
+```TypeScript
+import React from 'react';
+import { User } from '../models';
+
+type AuthStatus = 'pending' | 'authenticated' | 'error';
+
+export interface AuthState {
+  status: AuthStatus;
+  user: User | undefined;
+  error: any | undefined;
+}
+
+const initialState: AuthState = {
+  status: 'pending',
+  user: undefined,
+  error: undefined,
+};
+```
+
+Our application users can be in one of three states, signed in (authenticated), signed out (unauthenticated), or undetermined while we see if they have a token stored on device (pending). It's always good form to provide a property for errors as part of state, in the unforeseen circumstance that something goes wrong we can handle it.
+
+### Actions
+
+Next we'll define actions that can be dispatched as part of authentication state. We'll need one for logging out, logging in, logging in successfully, and logging in unsuccessfully. Add the following code to `AuthContext.tsx`:
+
+```TypeScript
+export type AuthAction =
+  | { type: 'LOGIN' }
+  | { type: 'LOGOUT' }
+  | { type: 'LOGIN_SUCCESS'; user: User }
+  | { type: 'LOGIN_FAILURE'; error: any };
+```
+
+Any properties after `type` are
+
+---
 
 ## Conclusion
 
