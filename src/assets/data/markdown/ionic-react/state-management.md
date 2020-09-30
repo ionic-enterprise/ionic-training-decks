@@ -2,157 +2,230 @@
 
 In this lab, you will learn how to:
 
-- Use the React Context API to share global state between components
-- Redirect unauthenticated users away from protected routes
-- Mock and test React Contexts and conditional navigation
+- Build state management for authentication
+- Share data across the application
 
 ## Overview
 
-Now that our application has a way to manage authentication, we need a way to relay this information to our components. We could directly call our business logic from our components but that presents a few problems:
+In the last lab, we created a service that stores information about the currently signed in user, but we are missing a way to share this information with the application.
 
-1. Components become tightly coupled to business logic
-2. Explicitly passing props down several levels of the component tree
+Not only do we need to share the information, but we also manage the state of it so that the application know when a user signs in, signs out, etc.
 
-React Context provides a way for us to <a href="https://reactjs.org/docs/context.html" target="_blank">share data across a component tree</a> without manually passing it through props. It also allows us to decouple our components from our business logic. It's a win-win!
+### State Management
 
-We're going to create a React Context to manage our authentication state. With it, we'll force unauthenticated users to our login page, and only allow authenticated users access to our tea page. We'll also use it to integrate sign in and sign out functionality within our components.
+React provides the tools to implement state management out-of-the-box. However, this is not the only way to achieve state management in React. Several battle-tested and hardened libraries exist for state management, such as <a href="https://redux.js.org/" target="_blank">Redux</a> or <a href="https://mobx.js.org/README.html" target="_blank">MobX</a>.
 
-### `!important;` About State Management
+We will use React's built-in mechanisms to achieve state management. This paradigm lends itself nicely to building state management at the feature level without having to maintain one giant state tree.
 
-There are countless ways to incorporate state management into a React application. Using a third party library, such as <a href="https://redux.js.org/" target="_blank">Redux</a> and <a href="https://mobx.js.org/README.html" target="_blank">MobX</a>, is a very common way React applications incorporate state management. Additionally, you could create your own flavor of state management using capabilities React provides out-of-the-box.
+As we implement state management we will be sure to build it in such a way that it can be easily ported to another state management library.
 
-This training uses a very light-weight state management mechanism (React Contexts only) by design. The topic of state management, and the various ways it can be achieved in a React application, is too broad of a topic to cover in this training. Instead, it is recommended to lift-and-shift the end product of this lab into your state management solution of choice.
+## Building State Management
 
-## Defining the State
+At a high level, building state management in React consists of these two pieces:
 
-Before jumping into the Context API, we should first define what pieces of state we'll want to make globally available to our application. We'll want to know if the current user is authenticated, information about the user (provided they are signed in), and ways to sign a user in, and sign a user out.
+- The <a href="https://reactjs.org/docs/context.html" target="_blank">React Context API</a>
+- The <a href="https://reactjs.org/docs/hooks-reference.html#usereducer" target="_blank">`useReducer` hook</a>
 
-Create a new file in our `src/models` folder named `AuthState.ts`:
+Create a new folder `src/core/auth`. Inside this folder, create three files: `AuthContext.tsx`, `AuthContext.test.tsx` and `index.ts`.
+
+**Note:** We're going to place a lot of functionality into these files. It would be best practice to split them up into smaller, more manageable files. In order to keep our state management portable to other state management solutions, we'll break the rules this once.
+
+### Auth State
+
+A good place to start is to define the authentication state that we want to share across the application. We'll want to track the authentication status of the current user, and if available, their user profile information. Open `AuthContext.tsx` and define the state like so:
+
+**`src/core/auth/AuthContext.tsx`**
 
 ```TypeScript
-import { User } from './User';
+import React from 'react';
+import { User } from '../models';
+
+type AuthStatus = 'pending' | 'authenticated' | 'error';
 
 export interface AuthState {
-  isAuthenticated: boolean;
+  status: AuthStatus;
   user: User | undefined;
-  login: () => Promise<void>;
-  logout: () => Promise<void>;
+  error: any | undefined;
 }
-```
-
-Note that while not _technically_ part of the authentication state, we need to add function definitions to our `AuthState` to share them across the application.
-
-Add `AuthState` to the models barrel file before moving onto the next section.
-
-## Creating the Context
-
-Create a file `src/auth/AuthContext.tsx`:
-
-```TypeScript
-import React, { createContext, useState, useEffect } from 'react';
-import AuthSingleton from './Authentication';
-import IdentitySingleton from './Identity';
-import { AuthState } from '../models';
 
 const initialState: AuthState = {
-  isAuthenticated: false,
+  status: 'pending',
   user: undefined,
-  login: () => Promise.resolve(),
-  logout: () => Promise.resolve(),
-};
-
-export const AuthContext = createContext<AuthState>(initialState);
-
-export const AuthProvider: React.FC = ({ children }) => {
-  const authentication = AuthSingleton.getInstance();
-  const identity = IdentitySingleton.getInstance();
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
-
-  useEffect(() => {
-    const initializeIdentity = async () => { };
-    initializeIdentity();
-  }, [identity]);
-
-  const login = async (username: string, password: string) => { };
-
-  const logout = async () => {};
-
-  const value: AuthState = {
-    isAuthenticated,
-    user: identity.user,
-    login,
-    logout,
-  };
-
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  error: undefined,
 };
 ```
 
-Let's break down what this file is doing before we write test cases and implement the missing functionality:
+Our application users can be in one of three states, signed in (authenticated), signed out (unauthenticated), or undetermined while we see if they have a token stored on device (pending). It's always good form to provide a property for errors as part of state, in the unforeseen circumstance that something goes wrong we can handle it.
 
-1. In order to create a context, we need to provide an initial value for the state
-2. We create the context - `AuthContext` - which our components can use to access our state
-3. We create a component `<AuthProvider />`; children of this component can access `AuthContext`
-4. The `value` prop on `<AuthContext.Provider />` contains the state we wish to share across the application
+### Actions
 
-### Initialization Code
+Next we'll define actions that can be dispatched as part of authentication state. We'll need one for logging out, logging in successfully, and logging in unsuccessfully. Add the following code to `AuthContext.tsx`:
 
-Note the `useEffect` hook in `AuthProvider`. This will be where we place logic that attempts to automatically sign the user in, provided there is a stored authorization token.
+```TypeScript
+export type AuthAction =
+  | { type: 'LOGOUT' }
+  | { type: 'LOGIN_SUCCESS'; user: User }
+  | { type: 'LOGIN_FAILURE'; error: any };
+```
 
-#### Test First
+Any properties after `type` are known as an action's payload.
 
-Create a new file `src/auth/AuthContext.test.tsx` and scaffold it with the following code:
+### Reducer
+
+With our state and actions defined, we can now create a reducer function that will update our authentication state. Add the following function to `AuthContext.tsx`:
+
+```TypeScript
+export const authReducer = (
+  state: AuthState = initialState,
+  action: AuthAction
+): AuthState => {
+  switch (action.type) {
+    case 'LOGIN_SUCCESS':
+      return { ...state, status: 'authenticated', user: action.user };
+    case 'LOGIN_FAILURE':
+      return { ...state, status: 'unauthenticated', error: action.error };
+    case 'LOGOUT':
+      return { ...state, status: 'unauthenticated', user: undefined, error: undefined };
+    default:
+      return state;
+  }
+};
+```
+
+With that we have our building blocks of state management, but we don't have a way to access it across our application's components. Let's go ahead and build a context that will do just that.
+
+### Context
+
+The last piece to build out for our authentication state management is a Context. A <a href="https://reactjs.org/docs/context.html" target="_blank">React Context</a> is a set of values that can be shared across components and other pieces of functionality, such as custom hooks. Context consists of two pieces:
+
+- The Context object; when React renders a component that subscribes to this Context object it will read the current value from the closest `Provider` above it in the component tree
+- Every Context object comes with a Provider React component that allows consuming components to subscribe to context changes via a `value` prop
+
+Let's get started by scaffolding out the context. At the end of your `AuthContext.tsx` file, add the following code:
+
+```TypeScript
+export const AuthContext = createContext<{
+  state: typeof initialState;
+  dispatch: (action: AuthAction) => void;
+}>({
+  state: initialState,
+  dispatch: () => {},
+});
+
+export const AuthProvider: React.FC = ({ children }) => {
+  const [state, dispatch] = useReducer(reducer, initialState);
+
+  return (
+    <AuthContext.Provider value={{ state, dispatch }}>
+      {state.status === 'pending' ? <div>Loading...</div> : children}
+    </AuthContext.Provider>
+  );
+};
+```
+
+And with that, we've put a system in place that is capable of sharing authentication state across the application! Now we need to wire it in.
+
+## Wiring Up the Auth Context
+
+### Wrapping `<App />`
+
+We want our authentication state to be shared across the entire application. In order to do so, we need to wrap our `<App />` component with our `<AuthProvider />`.
+
+Add a new file `src/ProvidedApp.tsx` and fill it with the following:
+
+**`src/ProvidedApp.tsx`**
+
+```TypeScript
+import React from 'react';
+import App from './App';
+import { AuthProvider } from './core/auth';
+
+const ProvidedApp: React.FC = () => (
+  <AuthProvider>
+    <App />
+  </AuthProvider>
+);
+export default ProvidedApp;
+```
+
+We're wrapping our main application component with `<AuthProvider>` in order to share the state with the entire application. Having a file like this is helpful, as it's common for React apps to have several Contexts each with their own Providers. We _won't_ adding additional "slices" of state in this application, but you may encounter something like this in the wild:
+
+```JSX
+<DatabaseProvider value={{connectionString: process.env.REACT_APP_DB_STRING}}>
+  <AuthProvider>
+    <AnalyticsProvider>
+      <App />
+    </AnalyticsProvider>
+  </AuthProvider>
+</DatabaseProvider>
+```
+
+Now there's one last place we need to adjust before we can see the fruits of our labor: `src/index.tsx`. What this file does is a bit out-of-scope for this course, but essentially it grabs a DOM element and inserts whatever you consider the root component of your application into it. Now that we want `<ProvidedApp />` to be our root component, we need to make that intent clear:
+
+**`src/index.tsx`**
+
+```TypeScript
+import React from 'react';
+import ReactDOM from 'react-dom';
+import ProvidedApp from './ProvidedApp';
+import * as serviceWorker from './serviceWorker';
+
+ReactDOM.render(<ProvidedApp />, document.getElementById('root'));
+
+// If you want your app to work offline and load faster, you can change
+// unregister() to register() below. Note this comes with some pitfalls.
+// Learn more about service workers: https://bit.ly/CRA-PWA
+serviceWorker.unregister();
+```
+
+Head over to Chrome and take a look at your application. You should see an empty screen with the text _Loading..._ which means our authentication state's `status` is pending (which is what we wanted). It's working!
+
+### Getting the Authentication Status
+
+Let's turn our attention to writing logic that will determine the authentication status of the current application user.
+
+In order to test our state, we'll need to provide a mock component that can reflect changes made to the Context.
+
+Open up `AuthContext.test.tsx` and add the following code:
+
+**`src/core/auth/AuthContext.test.tsx`**
 
 ```TypeScript
 import React, { useContext } from 'react';
-import { render, waitForElement, cleanup, fireEvent, wait } from '@testing-library/react';
-import AuthSingleton, { Authentication } from './Authentication';
-import IdentitySingleton, { Identity } from './Identity';
+import { render, cleanup, wait } from '@testing-library/react';
 import { AuthContext, AuthProvider } from './AuthContext';
 
-const mockToken = '3884915llf950';
-const mockUser = {
-  id: 42,
-  firstName: 'Joe',
-  lastName: 'Tester',
-  email: 'test@test.org',
-};
-
-const MockAuthConsumer: React.FC = () => {
-  const { isAuthenticated, user, login, logout } = useContext(AuthContext);
+const MockConsumer: React.FC = () => {
+  const { state } = useContext(AuthContext);
 
   return (
     <div>
-      <div data-testid="auth">{isAuthenticated.toString()}</div>
-      <div data-testid="user">{JSON.stringify(user)}</div>
-      <button onClick={() => login('test@test.com', 'test')}>Login</button>
-      <button onClick={() => logout()}>Logout</button>
+      <div data-testid="status">{state.status}</div>
+      <div data-testid="error">{state.error}</div>
+      <div data-testid="user">{JSON.stringify(state.user)}</div>
     </div>
   );
 };
 
-const tree = (
+const ComponentTree = (
   <AuthProvider>
-    <MockAuthConsumer />
+    <MockConsumer />
   </AuthProvider>
 );
+```
 
+Our test cases will use `<MockConsumer />` to validate against. We'll be rendering `<ComponentTree />` in our tests though, otherwise we won't get access to `AuthProvider`.
+
+Let's start by writing a test case asserting that we should see the loading text, and eventually it should go away:
+
+```TypeScript
+...
 describe('<AuthProvider />', () => {
-  let auth: Authentication;
-  let identity: Identity;
-
-  beforeEach(() => {
-    auth = AuthSingleton.getInstance();
-    identity = IdentitySingleton.getInstance();
-    identity.initialize = jest.fn(() => Promise.resolve());
-    auth.login = jest.fn(() => Promise.resolve({ token: mockToken, user: mockUser }));
+  it('displays the loader when initializing', async () => {
+    const { container } = render(ComponentTree);
+    expect(container).toHaveTextContent(/Loading.../);
+    await wait(() => expect(container).not.toHaveTextContent(/Loading.../));
   });
-
-  describe('initialization', () => { });
-
-  describe('login', () => { });
-
-  describe('logout', () => { });
 
   afterEach(() => {
     cleanup();
@@ -161,350 +234,141 @@ describe('<AuthProvider />', () => {
 });
 ```
 
-Note `MockAuthConsumer` and `tree`. Those are two React components we are creating in order to test `AuthProvider`. React Testing Library tests against the DOM, so we need a test component that reflects the state we want to test. In the `afterEach` block, we use `cleanup` to unmount the component tree created during each test, and make use of Jest's `restoreAllMocks` utility function to restore all our mocks before each test.
+We want `AuthProvider` to run initialization logic that calls `IdentityService.init()` and updates the state accordingly. If there is a token stored on device, we want to set the authentication status to `authenticated` and set the user's profile in state. Conversely, if we don't find a token on device we want to set the status to `unauthenticated`.
 
-Inside the `initialization` describe block, add the following code:
-
-```TypeScript
-  ...
-  describe('initialization', () => {
-    it('initializes the identity singleton', async () => {
-      const { getByTestId } = render(tree);
-      await waitForElement(() => getByTestId('auth'));
-      expect(identity.initialize).toHaveBeenCalledTimes(1);
-    });
-
-    describe('if a token is stored', () => {
-      beforeEach(() => {
-        jest.spyOn(identity, 'token', 'get').mockImplementation(() => mockToken);
-        jest.spyOn(identity, 'user', 'get').mockImplementation(() => mockUser);
-      });
-
-      it('sets the user', async () => {
-        const { getByTestId } = render(tree);
-        const element = await waitForElement(() => getByTestId('user'));
-        expect(element.textContent).toBe(JSON.stringify(mockUser));
-      });
-
-      it('sets isAuthenticated to true', async () => {
-        const { getByTestId } = render(tree);
-        const element = await waitForElement(() => getByTestId('auth'));
-        expect(element.textContent).toBe('true');
-      });
-    });
-
-    describe('if a token is not stored', () => {
-      beforeEach(() => {
-        jest.spyOn(identity, 'token', 'get').mockImplementation(() => undefined);
-        jest.spyOn(identity, 'user', 'get').mockImplementation(() => undefined);
-      });
-
-      it('does not set the user', async () => {
-        const { getByTestId } = render(tree);
-        const element = await waitForElement(() => getByTestId('user'));
-        expect(element.textContent).toBe('');
-      });
-
-      it('retains the initial isAuthenticated value', async () => {
-        const { getByTestId } = render(tree);
-        const element = await waitForElement(() => getByTestId('auth'));
-        expect(element.textContent).toBe('false');
-      });
-    });
-  });
-  ...
-```
-
-Note how we're using elements rendered on `MockAuthConsumer` to check if initialization logic has run.
-
-#### Then Code
-
-**Challenge:** Implement the `initializeIdentity` function inside the `useEffect` of `AuthProvider`.
-
-### Login
-
-The `login` method we want to expose across the application should:
-
-- Make a call to the authentication singleton and obtain the signed in user's token and user information
-- Set the token and user information in our identity singleton
-- Update the `isAuthenticated` boolean
-- Throw an error if signing in was unsuccessful
-
-#### Test First
-
-Add the following code inside the `login` describe block:
+Start by writing test cases for the branch where a token is available:
 
 ```TypeScript
-  ...
-  describe('login', () => {
-    it('calls the authentication singleton', async () => {
-      const { getByText } = render(tree);
-      const element = await waitForElement(() => getByText('Login'));
-      fireEvent.click(element);
-      await wait(() => expect(auth.login).toHaveBeenCalledTimes(1));
-    });
-
-    describe('on success', () => {
-      it('sets the token and user information', async () => {
-        const { getByText, getByTestId } = render(tree);
-        const loginElement = await waitForElement(() => getByText('Login'));
-        const userElement = await waitForElement(() => getByTestId('user'));
-        fireEvent.click(loginElement);
-        await wait(() => expect(userElement.textContent).toBe(JSON.stringify(mockUser)));
-      });
-
-      it('sets isAuthenticated to true', async () => {
-        const { getByText, getByTestId } = render(tree);
-        const loginElement = await waitForElement(() => getByText('Login'));
-        const authElement = await waitForElement(() => getByTestId('auth'));
-        fireEvent.click(loginElement);
-        await wait(() => expect(authElement.textContent).toBe('true'));
-      });
-    });
-
-    describe('on failure', () => {
-      beforeEach(() => {
-        jest.spyOn(auth, 'login').mockImplementation(() => {
-          throw new Error('Failed to log in. Please try again.');
-        });
-      });
-
-      it('throws an error', async () => {
-        const { getByTestId } = render(tree);
-        await waitForElement(() => getByTestId('user'));
-        await wait(() => expect(auth.login).toThrowError('Failed to log in. Please try again.'));
-      });
-    });
-  });
-  ...
-```
-
-#### Then Code
-
-**Challenge:** Implement the `login` method of `AuthProvider`.
-
-### Logout
-
-The `logout` method we want to expose across the application should:
-
-- Make a call to the authentication singleton to sign the user out
-- Clear the token and user information in our identity singleton
-- Update the `isAuthenticated` boolean
-
-#### Test First
-
-Add the following code inside the `logout` describe block:
-
-```TypeScript
-  ...
-  describe('logout', () => {
-    beforeEach(() => {
-      auth.logout = jest.fn(() => Promise.resolve());
-      identity.clear = jest.fn(() => Promise.resolve());
-    });
-
-    it('calls the authentication singleton', async () => {
-      const { getByText } = render(tree);
-      const element = await waitForElement(() => getByText('Logout'));
-      fireEvent.click(element);
-      await wait(() => expect(auth.logout).toHaveBeenCalledTimes(1));
-    });
-
-    it('clears the token and user calling the identity singleton', async () => {
-      const { getByText } = render(tree);
-      const element = await waitForElement(() => getByText('Logout'));
-      fireEvent.click(element);
-      await wait(() => expect(identity.clear).toHaveBeenCalledTimes(1));
-    });
-
-    it('sets isAuthenticated to false', async () => {
-      const { getByText, getByTestId } = render(tree);
-      const loginElement = await waitForElement(() => getByText('Login'));
-      const logoutElement = await waitForElement(() => getByText('Logout'));
-      const authElement = await waitForElement(() => getByTestId('auth'));
-      fireEvent.click(loginElement);
-      await wait(() => expect(authElement.textContent).toBe('true'));
-      fireEvent.click(logoutElement);
-      await wait(() => expect(authElement.textContent).toBe('false'));
-    });
-  });
-  ...
-```
-
-#### Then Code
-
-**Challenge:** Implement the `logout` method of `AuthProvider`.
-
-## Conditional Routing
-
-Since we need access to our context in order to control routing, we need to wrap the contents of our `<App />` component with `<AuthProvider />`. Open `src/App.tsx` and update it like so:
-
-```TypeScript
-import React, { useEffect } from 'react';
+import React, { useContext } from 'react';
 ...
-import { AuthProvider } from './auth/AuthContext';
-...
-const App: React.FC = () => {
-  ...
 
-  return (
-    <AuthProvider>
-      <IonApp>
-        <IonReactRouter>
-          <IonRouterOutlet>
-            <Route exact path="/login" component={Login} />
-            <Route exact path="/tea" component={TeaList} />
-            <Route exact path="/" render={() => <Redirect to="/login" />} />
-          </IonRouterOutlet>
-        </IonReactRouter>
-      </IonApp>
-    </AuthProvider>
-  );
+const mockUser: User = {
+  id: 42,
+  firstName: 'Joe',
+  lastName: 'Tester',
+  email: 'test@test.org',
 };
 
-export default App;
+describe('<AuthProvider />', () => {
+  let identityService: IdentityService;
+
+  beforeEach(() => {
+    identityService = IdentityService.getInstance();
+    identityService.init = jest.fn(() => Promise.resolve());
+  });
+  ...
+  describe('when a token is stored', () => {
+    beforeEach(() => {
+      identityService['_user'] = mockUser;
+      identityService['_token'] = '3884915llf950';
+    });
+
+    it('sets the status to authenticated', async () => {
+      const { getByTestId } = render(ComponentTree);
+      const status = await waitForElement(() => getByTestId('status'));
+      expect(status.textContent).toEqual('authenticated');
+    });
+
+    it('sets the user profile', async () => {
+      const { getByTestId } = render(ComponentTree);
+      const user = await waitForElement(() => getByTestId('user'));
+      expect(user.textContent).toEqual(JSON.stringify(mockUser));
+    });
+  });
+  ...
+});
 ```
 
-Note that the routing has been updated so that when the application launches it loads the login page. That's the desired behavior if the current user of the application does not have an authorization token stored, but what if they do?
+Let's make our tests pass. Open `AuthContext.tsx` and make the following changes:
 
-That scenario will be handled on the login page itself. We will listen for changes to our context's `isAuthenticated` value using a `useEffect`. Once the application determines the user is authenticated we'll replace the login page with our tea page.
-
-Open `src/login/Login.tsx` and make the following modifications:
+**`src/core/auth/AuthContext.tsx`**
 
 ```TypeScript
-import React, { useState, useEffect, useContext } from 'react';
-import { useHistory } from 'react-router';
+import React, { createContext, useEffect, useReducer } from 'react';
 ...
+export const AuthProvider: React.FC = ({ children }) => {
+  const [state, dispatch] = useReducer(reducer, initialState);
+  const identityService = IdentityService.getInstance();
 
-const Login: React.FC = () => {
-  const { isAuthenticated } = useContext(AuthContext);
-  const history = useHistory();
+  useEffect(() => {
+    const init = async () => {
+      await identityService.init();
+      if (identityService.token)
+        return dispatch({ type: 'LOGIN_SUCCESS', user: identityService.user! });
+    };
+    init();
+  }, [identityService]);
+
+  return (
+    ...
+  );
+};
+```
+
+Our test "displays a loader when initializing" fails. This is because we don't have a condition for unauthenticated users. Let's fix that.
+
+Head back to `AuthContext.test.tsx` and let's add the branch where a token is not available:
+
+**`src/core/auth/AuthContext.test.tsx`**
+
+```TypeScript
+...
+describe('<AuthProvider />', () => {
+  ...
+  describe('when a token is not stored', () => {
+    beforeEach(() => {
+      identityService['_user'] = undefined;
+      identityService['_token'] = undefined;
+    });
+
+    it('sets the status to unauthenticated', async () => {
+      const { getByTestId } = render(ComponentTree);
+      const status = await waitForElement(() => getByTestId('status'));
+      expect(status.textContent).toEqual('unauthenticated');
+    });
+
+    it('does not set the user profile', async () => {
+      const { getByTestId } = render(ComponentTree);
+      const user = await waitForElement(() => getByTestId('user'));
+      expect(user.textContent).toEqual('');
+    });
+  });
+  ...
+});
+```
+
+Now all we need to do is add an `else` clause to the `useEffect` created in `AuthContext.tsx`:
+
+**`src/core/auth/AuthContext.tsx`**
+
+```TypeScript
   ...
   useEffect(() => {
-    if(isAuthenticated) history.replace('/tea');
-  }, [isAuthenticated, history]);
+    const init = async () => {
+      await identityService.init();
+      if (identityService.token)
+        return dispatch({ type: 'LOGIN_SUCCESS', user: identityService.user! });
+      else return dispatch({ type: 'LOGOUT' });
+    };
+    init();
+  }, [identityService]);
   ...
-  return (
-    ...
-  );
-};
-export default Login;
 ```
 
-This is where I find the real power in React Hooks. It doesn't matter _what_ updates `isAuthenticated`, as long as the user is on the login page and `isAuthenticated` becomes `true` it will redirect. This covers both the already signed-in user and just signing-in user cases.
+All our tests now pass! Reload the application on Chrome and you'll this this logic come to life. It's quick, but you'll notice that _Loading..._ displays before transitioning to our tea page.
 
-## Login Button
+Now open the app on a device. You'll notice that _Loading..._ isn't shown, instead we go straight to the tea page once the splash screen hides. Tying back to our lab on native APIs, we are only hiding the splash screen when the `<App />` component is rendered; therefore mobile users will not see the _Loading..._ text. That's pretty cool!
 
-The next step is to wire up the sign in button in our `<Login />` component to call the `login` method made available through the authentication context.
+## Reference Articles
 
-### Test First
+State management is a massive topic to cover, it could honestly be it's own training! The way we implemented it using just React was derived from articles written by <a href="https://kentcdodds.com/blog/" target="_blank">Kent C. Dodds</a>, a thought leader in the React framework space:
 
-We needed to create a nested test component that asserted tests for our `AuthProvider` component. For components consuming a context, the inverse is also true; we'll need to create a test component that wraps `<Login />` in order to spy on the context.
+- <a href="https://kentcdodds.com/blog/application-state-management-with-react" target="_blank">Application State Management with React</a>
+- <a href="https://kentcdodds.com/blog/how-to-use-react-context-effectively" target="_blank">How to use React Context Effectively</a>
+- <a href="https://kentcdodds.com/blog/authentication-in-react-applications" target="_blank">Authentication in React Applications</a>
 
-Open `src/login/Login.test.tsx` and add the following code after the import block:
-
-```TypeScript
-import { AuthContext } from '../auth/AuthContext';
-
-const loginSpy = jest.fn();
-const tree = (
-  <AuthContext.Provider
-    value={{
-      login: loginSpy,
-      isAuthenticated: false,
-      user: undefined,
-      logout: jest.fn(),
-    }}>
-    <Login />
-  </AuthContext.Provider>
-);
-```
-
-Let's update the setup code for the `sign in button` describe block so that we render the `tree` instead of just the `<Login />` component:
-
-```TypeScript
-    ...
-    beforeEach(() => {
-      const { container } = render(tree);
-      ...
-    });
-    ...
-```
-
-Our test component tree will let us spy on `login`, making sure that `<Login />` calls it. Add the following test to the `sign in button` describe block:
-
-```TypeScript
-    ...
-    it('signs the user in', async () => {
-      fireEvent.ionChange(email, 'test@test.com');
-      fireEvent.ionChange(password, 'P@ssword123');
-      fireEvent.click(button);
-      expect(loginSpy).toHaveBeenCalledTimes(1);
-    });
-    ...
-```
-
-### Then Code
-
-**Challenge:** Modify the `signIn` method in `src/login/Login.tsx` so it calls the `login` method from our authentication context. Catch any errors and set it's `message` property to the login page's `error` property.
-
-## Logout Button
-
-Our application actually _doesn't_ have any visual cue to sign out, does it? But we know we'll want one, it'll be part of our tea page, and it will be a button. That's a good enough start!
-
-### Test First
-
-Open `src/tea/TeaList.test.tsx` and modify the file like so:
-
-```TypeScript
-...
-import { AuthContext } from '../auth/AuthContext';
-jest.mock('react-router', () => {
-  const actual = jest.requireActual('react-router');
-  return {
-    ...actual,
-    useHistory: () => ({ replace: jest.fn() }),
-  };
-});
-
-const logoutSpy = jest.fn();
-const tree = (
-  <AuthContext.Provider
-    value={{
-      login: jest.fn(),
-      isAuthenticated: false,
-      user: undefined,
-      logout: logoutSpy,
-    }}>
-    <TeaList />
-  </AuthContext.Provider>
-);
-...
-describe('<TeaList />', () => {
-  ...
-  describe('sign out button', () => {
-    it('signs the user out', async () => {
-      let button: HTMLIonButtonElement;
-      const { container } = render(tree);
-      button = container.querySelector('ion-button')!;
-      fireEvent.click(button);
-      expect(logoutSpy).toHaveBeenCalledTimes(1);
-    });
-  });
-});
-```
-
-### Then Code
-
-**Challenge:** Have a look at the <a href="https://ionicframework.com/docs/api/toolbar" target="_blank">Ionic Toolbar</a> documentation and add a button in the `end` slot. Use the `logOutOutline` icon and wire the button up to the following method:
-
-```TypeScript
-const handleLogout = async () => {
-  await logout();
-  history.replace('/login');
-};
-```
+I strongly urge you to read these articles to gain a deeper understanding of the concepts covered in this lab.
 
 ## Conclusion
 
-Our application now authenticates using a live data service and has protected routes! Take a minute to test out what you've accomplished so far. Next, we're going to replace our mock tea data with real data.
+Congratulations, you've built out state management! Next, we'll further utilize this state to implement sign in/sign out functionality and protect routes from unauthorized users.
