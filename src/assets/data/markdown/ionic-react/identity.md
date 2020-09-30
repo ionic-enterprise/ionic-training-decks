@@ -510,4 +510,4 @@ We won't make use of this HTTP interceptor for `IdentityService` but it will be 
 
 ## Conclusion
 
-Our app can now handle identity and authorization! In the next lab we will work on authenticating application users.
+Our app can now handle identity and authorization! In the next lab we will work on making this information available using state management.
