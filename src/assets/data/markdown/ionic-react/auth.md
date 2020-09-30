@@ -166,6 +166,18 @@ export class AuthService {
 
 Finally, update the barrel file (`src/core/services/index.ts`).
 
+## `useAuthentication` Hook
+
+### Building a Custom Hook
+
+### Signing In
+
+### Signing Out
+
+## Protecting our Routes
+
+### `ProtectedRoute` Component
+
 ## Conclusion
 
 Now we have two singletons that connect to data services. Next, we're going to use them to derive application state and control routing.
