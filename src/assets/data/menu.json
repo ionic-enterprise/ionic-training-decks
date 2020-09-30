@@ -126,12 +126,12 @@
               "file": "identity"
             },
             {
-              "title": "Authentication",
-              "file": "auth"
-            },
-            {
               "title": "State Management",
               "file": "state-management"
+            },
+            {
+              "title": "Authentication",
+              "file": "auth"
             },
             {
               "title": "Get Data",
