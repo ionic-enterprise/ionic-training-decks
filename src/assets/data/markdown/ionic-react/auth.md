@@ -193,8 +193,9 @@ import { AuthService } from '../services';
 
 export const useAuthentication = () => {
   const authService = AuthService.getInstance();
+  const identityService = IdentityService.getInstance();
 
-  const login = async (): Promise<void> => {};
+  const login = async (username: string, password: string): Promise<void> => {};
   const logout = async (): Promise<void> => {};
 
   return {
@@ -207,26 +208,68 @@ export const useAuthentication = () => {
 };
 ```
 
-We are going to proxy each property of our authentication state so it is available through `useAuthentication()`. This is another technique to isolate our state management solution from components and other bits of code.
+Let's scaffold the test file as well:
+
+**`src/core/auth/useAuthentication.test.tsx`**
+
+```TypeScript
+import React from 'react';
+import { renderHook, act, cleanup } from '@testing-library/react-hooks';
+import { useAuthentication } from './useAuthentication';
+import { AuthProvider } from './AuthContext';
+import { AuthService, IdentityService } from '../services';
+import { User } from '../models';
+
+const wrapper = ({ children }: any) => <AuthProvider>{children}</AuthProvider>;
+
+const mockUser: User = {
+  id: 42,
+  firstName: 'Joe',
+  lastName: 'Tester',
+  email: 'test@test.org',
+};
+
+describe('useAuthentication', () => {
+  let authService: AuthService;
+  let identityService: IdentityService;
+
+  beforeEach(() => {
+    authService = AuthService.getInstance();
+    identityService = IdentityService.getInstance();
+    identityService.init = jest.fn();
+  });
+
+  afterEach(() => {
+    cleanup();
+    jest.restoreAllMocks();
+  });
+});
+```
+
+Make note of `wrapper`. We need a way to gain access to `AuthContext`, so we create a component wherein the children are wrapped by `<AuthProvider />`.
 
 ### Proxing State
 
-Let's go ahead and proxy our state through the hook. Update `useAuthentication()` like so:
+We are going to proxy each property of our authentication state so it is available through `useAuthentication()`. This is another technique to isolate our state management solution from components and other bits of code.
+
+**`src/core/auth/useAuthentication.tsx`**
 
 ```TypeScript
 import { useContext } from 'react';
 import { AuthContext } from '.';
-import { AuthService } from '../services';
+import { AuthService, IdentityService } from '../services';
 
 export const useAuthentication = () => {
   const authService = AuthService.getInstance();
+  const identityService = IdentityService.getInstance();
+
   const { state, dispatch } = useContext(AuthContext);
 
   if (state === undefined) {
     throw new Error('useAuthentication must be used with an AuthProvider');
   }
 
-  const login = async (): Promise<void> => {};
+  const login = async (username: string, password: string): Promise<void> => {};
   const logout = async (): Promise<void> => {};
 
   return {
@@ -241,17 +284,151 @@ export const useAuthentication = () => {
 
 We make use of the `useContext()` hook in order to get a reference of `AuthContext`. There's also a check in place to make sure no one calls this hook if they are not a child component of `AuthProvider`, which is good form.
 
-### Signing In
+### Login
 
-1. test
-2. implement method
-3. update login
+Our `login()` function needs to do the following:
+
+- Call `AuthService.login()` with a username and password
+- Dispatch `LOGIN_SUCCESS` if the user successfully signed in, or `LOGIN_FAILURE` if the user was unsuccessful
+
+#### Test First
+
+Let's start by writing our test cases. Add a describe block for login:
+
+**`src/core/auth/useAuthentication.test.tsx`**
+
+```TypeScript
+...
+describe('useAuthentication', () => {
+  ...
+  describe('login', () => {
+    beforeEach(() => {
+      authService.login = jest.fn(() => {
+        identityService['_user'] = mockUser;
+        return Promise.resolve(true);
+      });
+      identityService['_user'] = undefined;
+      identityService['_token'] = undefined;
+    });
+
+    describe('on success', () => {
+      it('sets the status to authenticated', async () => {
+        const { result, waitForNextUpdate } = renderHook(
+          () => useAuthentication(),
+          { wrapper },
+        );
+        await waitForNextUpdate();
+        await act(() => result.current.login('test@test.com', 'P@ssword'));
+        expect(result.current.status).toEqual('authenticated');
+      });
+
+      it('sets the user on successful login', async () => {
+        const { result, waitForNextUpdate } = renderHook(
+          () => useAuthentication(),
+          { wrapper },
+        );
+        await waitForNextUpdate();
+        identityService['_user'] = mockUser;
+        await act(() => result.current.login('test@test.com', 'P@ssword'));
+        expect(result.current.user).toEqual(mockUser);
+      });
+    });
+
+    describe('on failure', () => {
+      beforeEach(() => {
+        authService.login = jest.fn(() => Promise.resolve(false));
+      });
+
+      it('sets the error', async () => {
+        const { result, waitForNextUpdate } = renderHook(
+          () => useAuthentication(),
+          { wrapper },
+        );
+        await waitForNextUpdate();
+        await act(() => result.current.login('test@test.com', 'P@ssword'));
+        expect(result.current.error).toBeDefined();
+      });
+    });
+  });
+  ...
+});
+```
+
+#### Then Code
+
+First we need to check and see if `AuthService.login()` returns true or false, then we can dispatch the appropriate action accordingly:
+
+**`src/core/auth/useAuthentication.tsx`**
+
+```TypeScript
+...
+export const useAuthentication = () => {
+  ...
+  const login = async (username: string, password: string): Promise<void> => {
+    const isSuccessful = await authService.login(username, password);
+    if (isSuccessful)
+      return dispatch({ type: 'LOGIN_SUCCESS', user: identityService.user! });
+    return dispatch({
+      type: 'LOGIN_FAILURE',
+      error: new Error('Unable to log in, please try again'),
+    });
+  };
+  ...
+};
+
+```
 
 ### Signing Out
 
-1. implement method
-2. test
-3. update tea page
+`logout()` is much simpler to test and implement - all it needs to do is call `AuthService.logout()` and dispatch the `LOGOUT` action.
+
+#### Test First
+
+Place the following describe block in the test file:
+
+**`src/core/auth/useAuthentication.test.tsx`**
+
+```TypeScript
+describe('logout', () => {
+  beforeEach(() => {
+    identityService['_user'] = mockUser;
+    authService.logout = jest.fn(() => {
+      identityService['_user'] = undefined;
+      return Promise.resolve();
+    });
+  });
+
+  it('sets the status to unauthenticated', async () => {
+    const { result, waitForNextUpdate } = renderHook(
+      () => useAuthentication(),
+      { wrapper },
+    );
+    await waitForNextUpdate();
+    await act(() => result.current.login('test@test.com', 'P@ssword'));
+    await act(() => result.current.logout());
+    expect(result.current.status).toEqual('unauthenticated');
+  });
+
+  it('sets the user to undefined', async () => {
+    const { result, waitForNextUpdate } = renderHook(
+      () => useAuthentication(),
+      { wrapper },
+    );
+    await waitForNextUpdate();
+    await act(() => result.current.login('test@test.com', 'P@ssword'));
+    await act(() => result.current.logout());
+    expect(result.current.user).not.toBeDefined();
+  });
+});
+```
+
+In order to properly test `logout()` our tests first need to be in a state where the user has signed in.
+
+#### Then Code
+
+**Challenge:** Implement `logout()` such that the tests pass.
+
+## Updating the UI
 
 ## Protecting our Routes
 
