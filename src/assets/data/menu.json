@@ -12,7 +12,7 @@
       "icon": "logo-ionic",
       "tabs": [
         {
-          "name": "ionic-angular",
+          "name": "angular",
           "title": "Angular",
           "folder": "ionic-angular",
           "icon": "logo-angular",
@@ -88,7 +88,7 @@
           ]
         },
         {
-          "name": "ionic-react",
+          "name": "react",
           "title": "React",
           "folder": "ionic-react",
           "icon": "logo-react",
@@ -163,98 +163,203 @@
               "file": "about-page"
             }
           ]
+        },
+        {
+          "name": "vue",
+          "title": "Vue",
+          "folder": "noimp",
+          "icon": "logo-vue",
+          "pages": [
+            {
+              "title": "Introduction",
+              "file": "vue"
+            }
+          ]
         }
       ]
     },
     {
-      "name": "pwa-ionic-angular",
-      "title": "PWA - Ionic & Angular",
-      "folder": "pwa-ionic-angular",
+      "name": "pwa",
+      "title": "Progressive Web Apps",
       "icon": "logo-pwa",
-      "pages": [
+      "tabs": [
         {
-          "title": "Introduction",
-          "file": "intro"
+          "name": "angular",
+          "title": "Angular",
+          "folder": "pwa-ionic-angular",
+          "icon": "logo-angular",
+          "pages": [
+            {
+              "title": "Introduction",
+              "file": "intro"
+            },
+            {
+              "title": "Host the Application",
+              "file": "host"
+            },
+            {
+              "title": "Add the PWA Goodies",
+              "file": "pwa"
+            },
+            {
+              "title": "PWA Links",
+              "file": "links"
+            }
+          ]
         },
         {
-          "title": "Host the Application",
-          "file": "host"
+          "name": "react",
+          "title": "React",
+          "folder": "noimp",
+          "icon": "logo-react",
+          "pages": [
+            {
+              "title": "Introduction",
+              "file": "react"
+            }
+          ]
         },
         {
-          "title": "Add the PWA Goodies",
-          "file": "pwa"
-        },
-        {
-          "title": "PWA Links",
-          "file": "links"
+          "name": "vue",
+          "title": "Vue",
+          "folder": "noimp",
+          "icon": "logo-vue",
+          "pages": [
+            {
+              "title": "Introduction",
+              "file": "vue"
+            }
+          ]
         }
       ]
     },
     {
-      "name": "identity-vault-angular",
+      "name": "identity-vault",
       "title": "Identity Vault",
-      "folder": "identity-vault-angular",
       "icon": "lock-closed",
-      "pages": [
+      "tabs": [
         {
-          "title": "Introduction",
-          "file": "intro"
+          "name": "angular",
+          "title": "Angular",
+          "folder": "identity-vault-angular",
+          "icon": "logo-angular",
+          "pages": [
+            {
+              "title": "Introduction",
+              "file": "intro"
+            },
+            {
+              "title": "The Base Application",
+              "file": "base"
+            },
+            {
+              "title": "Identity Service",
+              "file": "identity-service"
+            },
+            {
+              "title": "Make it Work in the Browser",
+              "file": "browser-service"
+            },
+            {
+              "title": "Add Biometrics to Login",
+              "file": "biometrics"
+            },
+            {
+              "title": "Customize the PIN Dialog",
+              "file": "custom-pin"
+            }
+          ]
         },
         {
-          "title": "The Base Application",
-          "file": "base"
+          "name": "react",
+          "title": "React",
+          "folder": "noimp",
+          "icon": "logo-react",
+          "pages": [
+            {
+              "title": "Introduction",
+              "file": "react"
+            }
+          ]
         },
         {
-          "title": "Identity Service",
-          "file": "identity-service"
-        },
-        {
-          "title": "Make it Work in the Browser",
-          "file": "browser-service"
-        },
-        {
-          "title": "Add Biometrics to Login",
-          "file": "biometrics"
-        },
-        {
-          "title": "Customize the PIN Dialog",
-          "file": "custom-pin"
+          "name": "vue",
+          "title": "Vue",
+          "folder": "noimp",
+          "icon": "logo-vue",
+          "pages": [
+            {
+              "title": "Introduction",
+              "file": "vue"
+            }
+          ]
         }
       ]
     },
     {
-      "name": "auth-connect-angular",
+      "name": "auth-connect",
       "title": "Auth Connect",
-      "folder": "auth-connect-angular",
       "icon": "people",
-      "pages": [
+      "tabs": [
         {
-          "title": "Introduction",
-          "file": "intro"
+          "name": "angular",
+          "title": "Angular",
+          "folder": "auth-connect-angular",
+          "icon": "logo-angular",
+          "pages": [
+            {
+              "title": "Introduction",
+              "file": "intro"
+            },
+            {
+              "title": "The Base Application",
+              "file": "base"
+            },
+            {
+              "title": "Auth0 Configuration",
+              "file": "auth0-setup"
+            },
+            {
+              "title": "Authentication Service",
+              "file": "authentication-service"
+            },
+            {
+              "title": "Login Page",
+              "file": "login-page"
+            },
+            {
+              "title": "Home Page",
+              "file": "home-page"
+            },
+            {
+              "title": "Run in Browser",
+              "file": "configure-browser"
+            }
+          ]
         },
         {
-          "title": "The Base Application",
-          "file": "base"
+          "name": "react",
+          "title": "React",
+          "folder": "noimp",
+          "icon": "logo-react",
+          "pages": [
+            {
+              "title": "Introduction",
+              "file": "react"
+            }
+          ]
         },
         {
-          "title": "Auth0 Configuration",
-          "file": "auth0-setup"
-        },
-        {
-          "title": "Authentication Service",
-          "file": "authentication-service"
-        },
-        {
-          "title": "Login Page",
-          "file": "login-page"
-        },
-        {
-          "title": "Home Page",
-          "file": "home-page"
-        },
-        {
-          "title": "Run in Browser",
-          "file": "configure-browser"
+          "name": "vue",
+          "title": "Vue",
+          "folder": "noimp",
+          "icon": "logo-vue",
+          "pages": [
+            {
+              "title": "Introduction",
+              "file": "vue"
+            }
+          ]
         }
       ]
     },
