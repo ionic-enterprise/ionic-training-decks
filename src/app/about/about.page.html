@@ -1,0 +1,43 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
+    <ion-title>About</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-text-center ion-padding">
+  <div class="ion-text-center">
+    <ion-icon name="school" color="primary"></ion-icon>
+    <h1>Ionic Training Labs</h1>
+  </div>
+
+  <ion-list>
+    <ion-list-header>Versions</ion-list-header>
+    <ion-item>
+      <ion-label>Application</ion-label>
+      <ion-note slot="end">{{ applicationVersion }}</ion-note>
+    </ion-item>
+    <ion-item>
+      <ion-label>Ionic Framework</ion-label>
+      <ion-note slot="end">{{ frameworkVersion }}</ion-note>
+    </ion-item>
+    <ion-item>
+      <ion-label>Capacitor</ion-label>
+      <ion-note slot="end">{{ capacitorVersion }}</ion-note>
+    </ion-item>
+
+    <ion-list-header>Authors</ion-list-header>
+    <ion-item>
+      <ion-label><a href="mailto:support@ionic.io">{{ author }}</a></ion-label>
+    </ion-item>
+    <ion-item>
+      <ion-label
+        ><a href="https://ionicframework.com/enterprise"
+          >Visit us on the web</a
+        ></ion-label
+      >
+    </ion-item>
+  </ion-list>
+</ion-content>
