@@ -430,7 +430,97 @@ In order to properly test `logout()` our tests first need to be in a state where
 
 ## Updating the UI
 
+Now that our hook is complete, it's start to let our pages consume it. We'll start off by wiring up the login page, then add the ability to sign out from the tea page.
+
+### Wiring up Login
+
+Open `src/login/LoginPage.tsx` and take a look at the button that handles submission. Currently, it only prints out the form data to the console - and the data isn't typed either!
+
+Let's type our form data. Make the following modifications where we destructure `useForm()`:
+
+**`src/login/LoginPage.tsx`**
+
+```TypeScript
+...
+const LoginPage: React.FC = () => {
+  const { handleSubmit, control, formState, errors } = useForm<{
+    email: string;
+    password: string;
+  }>({
+    mode: 'onChange',
+  });
+  ...
+};
+export default LoginPage;
+```
+
+Now we need to import our `useAuthentication()` hook so that we can call our login function:
+
+```TypeScript
+...
+const LoginPage: React.FC = () => {
+  const { login } = useAuthentication();
+  const { handleSubmit, control, formState, errors } = useForm<{...}>({...});
+
+  const handleLogin = async (data: { email: string; password: string }) => {
+    await login(data.email, data.password);
+  };
+
+  return (
+    ...
+    <IonButton
+      expand="full"
+      disabled={!formState.isValid}
+      onClick={handleSubmit(data => handleLogin(data))}
+    >
+      Sign In
+      <IonIcon slot="end" icon={logInOutline} />
+    </IonButton>
+    ...
+  );
+};
+export default LoginPage;
+```
+
+Finally, we want to redirect the user to the tea page after they have signed in. However, if the sign in failed, we should also print the `error` from `useAuthentication()`. To programmatically redirect the user, we will need to pull in the `useHistory()` hook provided by React Router.
+
+Make the following changes:
+
+```TypeScript
+...
+import { useHistory } from 'react-router';
+
+const LoginPage: React.FC = () => {
+  const { login, status, error } = useAuthentication();
+  const history = useHistory();
+  ...
+
+  useEffect(() => {
+    status === 'authenticated' && history.replace('/tea');
+  }, [status, history]);
+
+  return (
+    ...
+    <div className="error-message">
+      ...
+      <div>
+        {errors.password?.type === 'required' && 'Password is required'}
+      </div>
+      {error && <div>{error.message}</div>}
+    </div>
+    ...
+  );
+};
+export default LoginPage;
+```
+
+Go ahead and change your browser's URL to http://localhost:8100/login and test this out!
+
+### Adding Logout
+
 ## Protecting our Routes
+
+There's one problem left: unauthenticated users can still view the tea page. Ideally, they should be redirected to the login page. Let's fix that.
 
 ### `ProtectedRoute` Component
 
