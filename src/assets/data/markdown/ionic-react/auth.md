@@ -518,12 +518,138 @@ Go ahead and change your browser's URL to http://localhost:8100/login and test t
 
 ### Adding Logout
 
+Our application doesn't have a visual cue to sign out, but we know we'll want one. For now, we'll add it to the header of the tea page.
+
+Let's go ahead and write the logic to handle signing out:
+
+**`src/tea/TeaPage.tsx`**
+
+```TypeScript
+...
+import { useHistory } from 'react-router';
+import { useAuthentication } from '../core/auth';
+...
+
+const TeaPage: React.FC = () => {
+  const { logout } = useAuthentication();
+  const history = useHistory();
+
+  const handleLogout = async () => {
+    await logout();
+    history.replace('/login');
+  };
+
+  return (...);
+};
+export default TeaPage;
+```
+
+**Challenge:** Have a look at the <a href="https://ionicframework.com/docs/api/toolbar" target="_blank">IonToolbar</a> documentation and add a button in the end slot. Use the `logOutOutline` icon and wire the button up to `handleLogout`.
+
 ## Protecting our Routes
 
-There's one problem left: unauthenticated users can still view the tea page. Ideally, they should be redirected to the login page. Let's fix that.
+Now we can sign in and out of our application, but there is one problem left. Unauthenticated users can still view the tea page. Ideally, they should be redirected to the login page to login first.
+
+There's a few ways we could approach this. We could use `useAuthentication()` to check the authentication `status` on the tea page, and navigate the user to the login page if they aren't signed in - but that won't scale as we add more pages to our application. We could check the status on the main `<App />` component and redirect the user to the login page there - but that would cause unneccesary component re-renders.
+
+Take a look at this route we have in place in `App.tsx`:
+
+```JSX
+<Route exact path="/" render={() => <Redirect to="/tea" />} />
+```
+
+What if we "extended" the `Route` component and added in logic to check the user's current authentication status?
 
 ### `ProtectedRoute` Component
 
+Start by creating a new file in `src/core/auth` named `ProtectedRoute.tsx`:
+
+**`src/core/auth/ProtectedRoute.tsx`**
+
+```TypeScript
+import React from 'react';
+import { Route, Redirect, RouteProps } from 'react-router';
+import { useAuthentication } from './useAuthentication';
+
+export const ProtectedRoute: React.FC = () => {
+  const { status } = useAuthentication();
+
+  return <Route render={() => <Redirect to="/login" />} />;
+};
+```
+
+Here we are getting the current authentication `status` of the user and using `render` to redirect them to the login page, satisfying the case where the user is unauthenticated.
+
+The `Route` component can take in additional props; if we want to treat our `ProtectedRoute` component as if it extends `Route` we should accomodate those props too:
+
+```TypeScript
+...
+export const ProtectedRoute: React.FC<RouteProps> = ({ ...rest }) => {
+  const { status } = useAuthentication();
+
+  return <Route {...rest} render={() => <Redirect to="/login" />} />;
+};
+```
+
+We'll use the spread operator to set the `rest` of props passed in to `ProtectedRoute` on the inner `Route` component, which makes our component comparable to subclassing in OOP (i.e., `ProtectedRoute extends Route`).
+
+Now we just need a way to render pages when the user is authenticated. We should create a prop named `component`:
+
+```TypeScript
+...
+interface ProtectedRouteProps extends RouteProps {
+  component: React.ComponentType<any>;
+}
+
+export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
+  component: Component,
+  ...rest
+}) => {
+  const { status } = useAuthentication();
+
+  return <Route {...rest} render={(props) =>
+    status === 'authenticated' ? <Component {...props} /> : <Redirect to="/login" />
+  } />;
+};
+```
+
+Don't forget to update the barrel file for `src/core/auth` and let's start using the component.
+
+### Using `ProtectedRoute`
+
+Using our `ProtectedRoute` component is trivial, it's a drop-in replacement for `Route`.
+
+Open `src/App.tsx` and add the import for `ProtectedRoute` then replace the `Route` component for the `/tea` path with the following line:
+
+```JSX
+<ProtectedRoute path="/tea" component={TeaPage} exact={true} />
+```
+
+Your `App` template should look like this once complete:
+
+**`src/App.tsx`**
+
+```TypeScript
+const App: React.FC = () => {
+ ...
+  return (
+    <IonApp>
+      <IonReactRouter>
+        <IonRouterOutlet>
+          <Route path="/login" component={LoginPage} exact={true} />
+          <ProtectedRoute path="/tea" component={TeaPage} exact={true} />
+          <Route exact path="/" render={() => <Redirect to="/tea" />} />
+        </IonRouterOutlet>
+      </IonReactRouter>
+    </IonApp>
+  );
+};
+
+export default App;
+```
+
+That's literally it. Head to Chrome, sign out of the application you have to and try to navigate to the tea page by modifying the URL bar. We'll always be taken to the login page unless we are logged in.
+
 ## Conclusion
 
-Now we have two singletons that connect to data services. Next, we're going to use them to derive application state and control routing.
+Congratulations, your application has been hooked up for authentication! Along the way you've learned about state management, singletons, custom React hooks, the React Context API and a little bit about reusable components. Next we will swap our mock tea data with real data from the back end.
