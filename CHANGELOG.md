@@ -1,3 +1,11 @@
+## [4.0.2](https://github.com/ionic-team/ionic-training-decks/compare/v4.0.1...v4.0.2) (2020-10-02)
+
+### Features
+
+- **about:** add an about page ([26657ef](https://github.com/ionic-team/ionic-training-decks/commit/26657ef1071da8f9867178cb33d94771cc0ffa3e))
+- **app:** install the deploy plugin ([0a9a95b](https://github.com/ionic-team/ionic-training-decks/commit/0a9a95b614bacb8d80f4fbccdf7999d15524a6bf))
+- **vue:** add placeholders for trainings that are still in development ([f96f55d](https://github.com/ionic-team/ionic-training-decks/commit/f96f55d6c7a9f91377d119f8bd637a70f6528968))
+
 ## [4.0.1](https://github.com/ionic-team/ionic-training-decks/compare/v4.0.0...v4.0.1) (2020-09-26)
 
 ### Bug Fixes
