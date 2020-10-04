@@ -5,7 +5,6 @@ In this lab, you will learn how to:
 - Use environment variables to configure dynamic values
 - Use the Capacitor Storage API
 - Implement the singleton pattern to create shared class instances
-- Intercept outgoing HTTP requests with Axios
 
 ## Overview
 
@@ -453,61 +452,6 @@ it('clears the storage', async () => {
 });
 ```
 
-## HTTP Interceptor
-
-Remember the amount of code we had to write in order to make the network request for the current application user? If not, here's a reminder:
-
-```TypeScript
-private async fetchUser(token: string): Promise<User> {
-  const headers = { Authorization: 'Bearer ' + token };
-  const url = `${process.env.REACT_APP_DATA_SERVICE}/users/current`;
-  const { data } = await Axios.get(url, { headers });
-  return data;
-}
-```
-
-If we had to write this once or twice it wouldn't be so bad, but we have a back end data service that requires authorization for most of it's API endpoints.
-
-Axios allows us to intercept outgoing and incoming network calls and make modifications to them. That is extremely helpful when making multiple API calls to the same back end.
-
-### Axios Instance
-
-Axios allows the ability to create instances of the main `Axios` class. We will do this to create an instance that works for our back end service API. It will do the following:
-
-- Set the base URL of relative paths
-- Inject the authorization header into outgoing requests
-- Throw an error if no token is found
-- Trim the response object to just return the data portion
-
-Create a new file `src/core/apiInstance.ts` and write the following code:
-
-**`src/core/apiInstance.ts`**
-
-```TypeScript
-import Axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
-import { IdentityService } from './services/IdentityService';
-
-const apiInstance = Axios.create({
-  baseURL: process.env.REACT_APP_DATA_SERVICE,
-});
-
-apiInstance.interceptors.request.use((config: AxiosRequestConfig) => {
-  const token = IdentityService.getInstance().token;
-  if (!token)
-    throw new Error('This operation requires authorization, please sign in.');
-  config.headers.Authorization = `Bearer ${token}`;
-  return config;
-});
-
-apiInstance.interceptors.response.use(
-  (response: AxiosResponse) => response.data,
-);
-
-export default apiInstance;
-```
-
-We won't make use of this HTTP interceptor for `IdentityService` but it will be handy once we start fetching real tea data in future labs.
-
 ## Conclusion
 
-Our app can now handle identity and authorization! In the next lab we will work on making this information available using state management.
+Our app can now handle identity and authorization! In the next lab we will work on authentication and making this information available using state management.
