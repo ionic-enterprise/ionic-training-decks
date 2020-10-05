@@ -33,14 +33,13 @@ Axios allows the ability to create instances of the main `Axios` class. We will 
 - Set the base URL of relative paths
 - Inject the authorization header into outgoing requests
 - Throw an error if no token is found
-- Trim the response object to just return the data portion
 
 Create a new file `src/core/apiInstance.ts` and write the following code:
 
 **`src/core/apiInstance.ts`**
 
 ```TypeScript
-import Axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
+import Axios, { AxiosRequestConfig } from 'axios';
 import { IdentityService } from './services/IdentityService';
 
 const apiInstance = Axios.create({
@@ -54,10 +53,6 @@ apiInstance.interceptors.request.use((config: AxiosRequestConfig) => {
   config.headers.Authorization = `Bearer ${token}`;
   return config;
 });
-
-apiInstance.interceptors.response.use(
-  (response: AxiosResponse) => response.data,
-);
 
 export default apiInstance;
 ```
@@ -113,13 +108,7 @@ import { renderHook, act, cleanup } from '@testing-library/react-hooks';
 import apiInstance from '../core/apiInstance';
 import { Tea } from '../shared/models';
 
-const mockTeaData = // TODO: Copy the contents of teaData from TeaPage.tsx into this variable
-
 describe('useTea', () => {
-  beforeEach(() => {
-    apiInstance.get = jest.fn();
-  });
-
   describe('get all teas', () => { });
 
   describe('get a specific tea', () => { });
@@ -131,39 +120,112 @@ describe('useTea', () => {
 });
 ```
 
-Once you've finished copying over the contents of `teaData` from `TeaPage.tsx` move onto the next section.
+### Setup the Test Data
+
+We are going to need some test data that represents a successful response back from the endpoints. For our application, the data we get back looks like the test data we provided for the tea page, only it does not have an image associated with it. Let's initialize an array of `Tea` called `expectedTeas` using that data. Then, we can use `expectedTeas` to manufacture a set of `resultTeas` by deleting the `image` property. `resultTeas` will be the result of our API call. Place this code above `describe('useTea', () => { ...})`:
+
+```TypeScript
+const expectedTeas = [
+  {
+    id: 1,
+    name: 'Green',
+    image: 'green.jpg',
+    description: 'Green tea description.',
+  },
+  {
+    id: 2,
+    name: 'Black',
+    image: 'black.jpg',
+    description: 'Black tea description.',
+  },
+  {
+    id: 3,
+    name: 'Herbal',
+    image: 'herbal.jpg',
+    description: 'Herbal Infusion description.',
+  },
+  {
+    id: 4,
+    name: 'Oolong',
+    image: 'oolong.jpg',
+    description: 'Oolong tea description.',
+  },
+  {
+    id: 5,
+    name: 'Dark',
+    image: 'dark.jpg',
+    description: 'Dark tea description.',
+  },
+  {
+    id: 6,
+    name: 'Puer',
+    image: 'puer.jpg',
+    description: 'Puer tea description.',
+  },
+  {
+    id: 7,
+    name: 'White',
+    image: 'white.jpg',
+    description: 'White tea description.',
+  },
+  {
+    id: 8,
+    name: 'Yellow',
+    image: 'yellow.jpg',
+    description: 'Yellow tea description.',
+  },
+];
+
+const resultTeas = () => {
+  return expectedTeas.map((t: Tea) => {
+    const tea = { ...t };
+    delete tea.image;
+    return tea;
+  });
+};
+```
 
 ### Getting all the Teas
 
-Our `getTeas` function needs to make a request to our back end service to retrieve all the teas. Let's go ahead and write our test case for this function:
+Let's place some setup logic for our "get all teas" tests in `useTea.test.tsx`:
 
 **`src/tea/useTea.test.tsx`**
 
 ```TypeScript
-...
+  ...
   describe('useTea', () => {
-    ...
     describe('get all teas', () => {
       beforeEach(() => {
-        (apiInstance.get as any) = jest.fn(() => Promise.resolve(mockTeaData));
-      });
-
-      it('returns an array of Tea', async () => {
-        let teas: Array<Tea> = [];
-        const { result } = renderHook(() => useTea());
-        await act(async () => {
-          teas = await result.current.getTeas();
-        });
-        expect(teas).toEqual(mockTeaData);
+        (apiInstance.get as any) = jest.fn(() =>
+          Promise.resolve({ data: resultTeas() }),
+        );
       });
     });
   });
-...
+  ...
 ```
 
-Now let's move to the hook file and implement the function.
+Next we'll write a test case making sure that `getTeas` makes a network request to our endpoint:
 
-First, we need to pull in a reference to our HTTP interceptor and use it to make a GET request:
+```TypeScript
+  ...
+  describe('get all teas', () => {
+    beforeEach(() => {
+      ...
+    });
+
+    it('gets the teas', async () => {
+      const { result } = renderHook(() => useTea());
+      await act(async () => {
+        await result.current.getTeas();
+      });
+      expect(apiInstance.get).toHaveBeenCalledTimes(1);
+    });
+  });
+  ...
+```
+
+Let's make this test pass. First, we need to pull in a reference to our HTTP interceptor and use it to make a GET request:
 
 **`src/tea/useTea.tsx`**
 
@@ -175,99 +237,182 @@ export const useTea = () => {
 
   const getTeas = async (): Promise<Array<Tea>> => {
     const url = `${process.env.REACT_APP_DATA_SERVICE}/tea-categories`;
-    return await apiInstance.get(url);
+    const { data } =  await apiInstance.get(url);
   };
   ...
 });
 ```
 
-The interceptor does a lot of the heavy lifting here! This is a perfectly valid function, however, since we want to run this function on initialization of our tea page, we'll notice one of two things:
+Now let's write a test to ensure that `getTeas()` will add images to each tea item:
 
-1. If we do not make `getTeas` a dependency of the tea page's `useEffect`, React will throw a warning
-2. If we do make `getTeas` a dependency of the tea page's `useEffect`, `getTeas` will run within an infinite loop
-
-The proper way to approach these things is to wrap the function within the `useCallback()` hook. `useCallback()` will memoize the function so that it is only run if any of it's dependencies change:
+**`src/tea/useTea.test.tsx`**
 
 ```TypeScript
-const [query, query] = useState('react');
-const getByQyery = useCallback(() => { return getDataByQuery(query); }, [query]);
+...
+describe('get all teas', () => {
+  ...
+  it('adds an image to each tea item', async () => {
+    let teas: Array<Tea> = [];
+    const { result } = renderHook(() => useTea());
+    await act(async () => {
+      teas = await result.current.getTeas();
+    });
+    expect(teas).toEqual(expectedTeas);
+  });
+});
+...
 ```
 
-The block above will only invoke `getByQuery` whenever it's dependency `query` changes. For our case, we don't have any dependencies, so we can use an empty bracket. Update `getTeas` to match the following:
+Let's add images to each tea item:
 
 **`src/tea/useTea.tsx`**
 
 ```TypeScript
-import { useCallback } from 'react';
+import apiInstance from '../core/apiInstance';
 ...
+
+const images: Array<string> = [
+  'green',
+  'black',
+  'herbal',
+  'oolong',
+  'dark',
+  'puer',
+  'white',
+  'yellow',
+];
+
 export const useTea = () => {
-  const getTeas = useCallback(async (): Promise<Tea[]> => {
+  const getTeas = async (): Promise<Array<Tea>> => {
     const url = `${process.env.REACT_APP_DATA_SERVICE}/tea-categories`;
-    return await apiInstance.get(url);
-  }, []);
-  ...
+    const { data } = await apiInstance.get(url);
+    return data.map((tea: Tea) => ({
+      ...tea,
+      image: require(`../assets/images/${images[tea.id - 1]}.jpg`),
+    }));
+  };
+
+  const getTeaById = async (id: number): Promise<Tea | undefined> => {
+    ...
+  };
+
+  return { getTeas, getTeaById };
 };
 ```
 
-The use of `useCallback` will ensure that we don't run into either scenario above. Save and our test case passes!
+Our tests should now pass, but there's still one thing left to do. We want to wrap `getTeas` in a `useCallback` hook:
 
-#### Side-note: Reference Material
+```TypeScript
+const getTeas = useCallback(async (): Promise<Tea[]> => {
+  const url = `${process.env.REACT_APP_DATA_SERVICE}/tea-categories`;
+  const { data } = await apiInstance.get(url);
+  return data.map((tea: Tea) => ({
+    ...tea,
+    image: require(`../assets/images/${images[tea.id - 1]}.jpg`),
+  }));
+}, []);
+```
 
-I strongly urge you to bookmark <a href="https://overreacted.io/a-complete-guide-to-useeffect/" target="_blank">A Complete Guide to useEffect</a> by Dan Abramov to read at a later time. It's a comprehensive guide to the `useEffect()` hook and answers several questions, including "How do I correctly fetch data inside useEffect?".
+This will prevent the function from being run multiple times if it's used as part of the dependencies of a `useEffect()`, i.e. `useEffect(() => { getTeas(); }, [getTeas])`.
 
 ### Getting a Specific Tea
 
-Like `getTeas`, we only have one test case to write for `getTeaById`. Fill in the "get a specific tea" describe block with the following:
+Start by filling out the describe block for "get a specific tea":
 
 **`src/tea/useTeas.test.tsx`**
 
 ```TypeScript
 ...
-describe('get a specific tea', () => {
-  beforeEach(() => {
-    (apiInstance.get as any) = jest.fn(() => Promise.resolve(mockTeaData[3]));
-  });
-
-  it('returns a Tea object', async () => {
-    let tea: Tea | undefined = undefined;
-    const { result } = renderHook(() => useTea());
-    await act(async () => {
-      tea = await result.current.getTeaById(4);
+describe('useTea', () => {
+  ...
+  describe('get a specific tea', () => {
+     beforeEach(() => {
+      (apiInstance.get as any) = jest.fn(() =>
+        Promise.resolve({ data: resultTeas()[0] }),
+      );
     });
-    expect(tea).toEqual(mockTeaData[3]);
+
+    it('gets the specific tea', async () => {
+      const { result } = renderHook(() => useTea());
+      await act(async () => {
+        await result.current.getTeaById(4);
+      });
+      expect(apiInstance.get).toHaveBeenCalledTimes(1);
+    });
+
+    it('adds an image to the Tea object', async () => {
+      let tea: Tea | undefined = undefined;
+      const { result } = renderHook(() => useTea());
+      await act(async () => {
+        tea = await result.current.getTeaById(4);
+      });
+      expect(tea).toEqual(expectedTeas[0]);
+    });
   });
+  ...
 });
-...
 ```
 
-Implementing `getTeaById` **does not** require a `useEffect`:
+**Challenge:** Your next challenge is to implement `getTeaById()` to make the tests pass:
+
+1. The URL will be `${process.env.REACT_APP_DATA_SERVICE}/tea-categories/${id}`
+2. The method **does not** get wrapped in a `useCallback()`.
+
+The reason why we don't use `useCallback()` for `getTeaById()` is because it doesn't maintain the state of `id`. We expect some other actor to manage that value for us; it falls on the responsiblity of that actor take this function and manage this dependency.
+
+### Refactor
+
+The code that you have for each method probably looks pretty similar to each other:
+
+```TypeScript
+const getTeas = useCallback(async (): Promise<Tea[]> => {
+  const url = `${process.env.REACT_APP_DATA_SERVICE}/tea-categories`;
+  const { data } = await apiInstance.get(url);
+  return data.map((tea: Tea) => ({
+    ...tea,
+    image: require(`../assets/images/${images[tea.id - 1]}.jpg`),
+  }));
+}, []);
+
+const getTeaById = async (id: number): Promise<Tea | undefined> => {
+  const url = `${process.env.REACT_APP_DATA_SERVICE}/tea-categories/${id}`;
+  const { data } = await apiInstance.get(url);
+  return {
+    ...data,
+    image: require(`../assets/images/${images[data.id - 1]}.jpg`),
+  };
+};
+```
+
+Let's refactor the common bits out:
 
 **`src/tea/useTea.tsx`**
 
 ```TypeScript
 ...
 export const useTea = () => {
-  ...
+  const getTeas = useCallback(async (): Promise<Tea[]> => {
+    const url = `${process.env.REACT_APP_DATA_SERVICE}/tea-categories`;
+    const { data } = await apiInstance.get(url);
+    return data.map((item: any) => fromJsonToTea(item));
+  }, []);
+
   const getTeaById = async (id: number): Promise<Tea | undefined> => {
     const url = `${process.env.REACT_APP_DATA_SERVICE}/tea-categories/${id}`;
-    // TODO: Make a GET request to the endpoint using the interceptor
+    const { data } = await apiInstance.get(url);
+    return fromJsonToTea(data);
   };
-  ...
+
+  const fromJsonToTea = (obj: any): Tea => {
+    return {
+      ...obj,
+      image: require(`../assets/images/${images[obj.id - 1]}.jpg`),
+    };
+  };
+
+  return { getTeas, getTeaById };
 };
 ```
-
-**Challenge:** Finish the `getTeaById` implementation and make the test pass.
-
-You may be wondering why we don't wrap this function in a `useCallback()` hook. This function has a dependency on `id`, so shouldn't we be implementing the function like this?
-
-```TypeScript
-const getTeaById = useCallback(async (id: number) => {
-  const url = `${process.env.REACT_APP_DATA_SERVICE}/tea-categories/${id}`;
-  return await apiInstance.get(url);
-}, [id]);
-```
-
-This doesn't work because `useTea()` doesn't maintain the state of `id`. We expect some other actor to manage that value for us. It falls on the responsiblity of that actor take this function and memoize it, if they so wish. With `getTeas`, we used `useCallback()` as a way for React to know that this function's dependencies will not change, therefore it should not be invoked upon component re-renders. Since `id` _can_ change, it would be up to the caller to determine when to let React know when it's OK to invoke the method.
 
 ## Conclusion
 
