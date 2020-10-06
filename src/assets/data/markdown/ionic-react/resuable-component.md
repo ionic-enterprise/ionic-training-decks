@@ -2,65 +2,114 @@
 
 In this lab you will:
 
-- Create a shared feature folder
-- Add a reusable component to the feature folder
+- Create a reusable component
 - Use the component in the details page
 
 ## Overview
 
-It's fairly common for front-end applications to consist of parts and modules that can be applied to multiple features of an application. Shared functionality is often generalized, exposing events and hooks that each consumer is required to implement to their specific specification.
+It's fairly common for front-end applications to consist of parts and modules that can be applied to multiple features of an application. Shared functionality is often generalized, exposing events and hooks that each consumer is allowed to implement to their specific specification.
 
-We're going to build a reusable ratings component. This component will allow an application user to supply a rating from 0-5 and emit an event when the action is performed. Our details page will handle the event, obtaining the rating number from the component and using it to update our tea categories data set.
+We're going to build a reusable ratings component. This component will allow an application user to supply a rating from 0-5 and emit an event when the action is performed. Our details page will handle the event, obtaining the rating number from the component and use it to update our tea data set.
 
 ## Shared Components Feature Folder
 
-Start by creating a new folder in `src/` named `components` and add a file named `index.ts` inside of it.Create a subfolder inside called `components`. This barrel file will export any shared components created while developing the application.
+Start by creating a new folder in `src/shared` named `components` and add a barrel file within it. This barrel file will export any shared components to be used across the application.
 
-## Create `<Rating />` Component
+## Create the Rating Component
 
-Create a new subfolder `src/components/rating`. Inside this folder, create and scaffold the following files:
+Let's create a subfolder within `src/shared/components` called `rating`. Inside this folder, create the following files: `Rating.tsx`, `Rating.test.tsx`, and `Rating.css`.
 
-- `Rating.tsx` - do the minimum required to export a `<Rating />` component; **do not** create a default export
-- `Rating.test.tsx` - create the initial describe block for the component and add a snapshot test to ensure it `renders consistently`
-- `Rating.css` - just create this file, no action needed yet
+Fill `Rating.tsx` with the following boilerplate code:
 
-Add the `<Rating />` component under the description paragraph in `<TeaDetails />`:
+**`src/shared/components/rating/Rating.tsx`**
+
+```TypeScript
+import React from 'react';
+
+import './Rating.css';
+
+export const Rating: React.FC = () => {
+  return <div>Rating</div>;
+};
+```
+
+Now let's shell out the test file:
+
+**`src/shared/components/rating/Rating.test.tsx`**
+
+```TypeScript
+import React from 'react';
+import { cleanup, render } from '@testing-library/react';
+import { Rating } from './Rating';
+
+describe('<Rating />', () => {
+  it('renders consistently', () => {
+    const { asFragment } = render(<Rating />);
+    expect(asFragment()).toMatchSnapshot();
+  });
+
+  afterEach(() => {
+    cleanup();
+    jest.restoreAllMocks();
+  });
+});
+```
+
+We'll leave `Rating.css` alone for now, finally add your export statement to the shared components' barrel file:
+
+**`src/shared/components/index.ts`**
+
+```TypeScript
+export * from './rating/Rating';
+```
+
+Before we do anything else, let's add our component to the tea details page:
+
+**`src/tea/details/TeaDetailsPage.tsx`**
 
 ```TypeScript
 ...
-import { Rating } from '../../components';
+import { Rating } from '../../shared/components';
 ...
-const TeaDetails: React.FC<TeaDetailsProps> = ({ match }) => {
+const TeaDetailsPage: React.FC = () => {
   ...
   return (
     ...
-    <p>{teaCategory?.description}</p>
-    <Rating />
+    <div className="ion-padding">
+      <div className="ion-justify-content-center">
+        <IonImg src={tea?.image} />
+      </div>
+      <h1>{tea?.name}</h1>
+      <p>{tea?.description}</p>
+      <Rating />
+    </div>
     ...
   );
 };
-export default TeaDetails;
+export default TeaDetailsPage;
 ```
 
-Confirm that your component displays under the tea category description. It's not very interactive at this point; let's fix that.
+Confirm that your component displays under the tea description. Once it does, move onto the next section.
 
-## Build `<Rating />` Component
+## Build the Rating Component
 
-### Build the Template
+### Writing the Template
 
-Return to `src/components/rating/Rating.tsx` and let's update the template to display a row of five stars:
+Let's update the rating component to display a row of five stars:
+
+**`src/shared/components/rating/Rating.tsx`**
 
 ```TypeScript
 import React from 'react';
 import { IonIcon } from '@ionic/react';
 import { star } from 'ionicons/icons';
 
-import
+import './Rating.css';
 
 export const Rating: React.FC = () => {
   return (
     <div className="rating">
-      {[1, 2, 3, 4, 5].map((n, idx) => (
+      {[1, 2, 3, 4, 5].map((_, idx) => (
         <IonIcon key={idx} icon={star} />
       ))}
     </div>
@@ -68,12 +117,14 @@ export const Rating: React.FC = () => {
 };
 ```
 
-Next, add a stateful property named `rating` to the component and give it an initial value greater than zero but less than 5. Change the component markup so that the number of filled in stars matches the initial rating and the rest are outlined stars:
+**Challenge:** Using `useState` add a property `rating` to the component. Give it an inital value greater than zero but less than 5.
+
+Next, change the component's markup so that the number of filled in starts matches the initial rating and the rest are outlined stars:
 
 ```TypeScript
     ...
-      {[1, 2, 3, 4, 5].map((n, idx) => (
-        <IonIcon key={idx} icon={n <= rating ? star : starOutline} />
+      {[1, 2, 3, 4, 5].map((num, idx) => (
+        <IonIcon key={idx} icon={num <= rating ? star : starOutline} />
       ))}
     ...
 };
@@ -83,11 +134,11 @@ Finally, add an `onClick` handler that will change the rating when the user clic
 
 ```TypeScript
     ...
-      {[1, 2, 3, 4, 5].map((n, idx) => (
+      {[1, 2, 3, 4, 5].map((num, idx) => (
         <IonIcon
           key={idx}
-          icon={n <= rating ? star : starOutline}
-          onClick={() => setRating(n)}
+          icon={num <= rating ? star : starOutline}
+          onClick={() => setRating(num)}
         />
       ))}
     ...
@@ -97,9 +148,9 @@ Try clicking different rating values. So far so good!
 
 ### Styling the Component
 
-The rating component works well but the stars are a _little_ small and close together, especially for people with larger hands. Let's apply a little styling to make the experience better.
+The rating component works well but the stars are a _little_ small and close together, especially for people with larger hands. Let's apply a little styling to make the experience better:
 
-Add the following to `src/components/rating/Rating.css`:
+**`src/shared/components/rating/Rating.css`**:
 
 ```CSS
 .rating ion-icon {
@@ -113,21 +164,18 @@ Now it's much easier for users to change the rating of the tea category!
 
 ### Component Props
 
-The `<Rating />` component visually looks good, but it's not very useful for components that want to use it (such as `<TeaDetails />`). It would be great if the consumer had the following capabilities:
+Visually the rating component looks good, but it's not very useful to the components consuming it. It would be great if the consumer was able to:
 
 - Supply an initial rating value
 - Run a method when the rating changes
-- Determine if the component is enabled/disabled
+- Allow the component to be disabled
 
-Component props were touched upon building the `TeaDetailsProps` interface. We will leverage component props to enhance the rating component's functionality.
+We can achieve this by creating a set of props specific to our rating component. We've kind of done this before when building the `ProtectedRoute`. This time, we won't be extending any existing prop definition, we'll be creating our own:
 
-Update `src/components/rating/Rating.tsx` to match the following:
+**`src/shared/components/rating/Rating.tsx`**
 
 ```TypeScript
-import React, { useState } from 'react';
-import { IonIcon } from '@ionic/react';
-import { star, starOutline } from 'ionicons/icons';
-
+...
 import './Rating.css';
 
 interface RatingProps {
@@ -139,73 +187,107 @@ interface RatingProps {
 export const Rating: React.FC<RatingProps> = ({
   initialRating = 0,
   disabled = false,
-  onRatingChange,
+  onRatingChange
 }) => {
   const [rating, setRating] = useState<number>(0);
 
-  useEffect(() => setRating(initialRating), [initialRating]);
+  ...
+};
+```
 
-  const handleRatingChange = (rating: number) => {
-    //TODO: Fill this in
-  };
+The only prop that the consumer _needs_ to provide is `onRatingChange`. We'll supply default values for the optional props `initialRating` and `disabled`.
 
-  return (
+With our props defined, let's update the component to use them. First, we need a `useEffect()` that will update our rating when `initialRating` updates:
+
+```TypeScript
+...
+useEffect(() => setRating(initialRating), [initialRating]);
+...
+```
+
+Next, we'll want to establish a handler that will both update our rating state and invoke `onRatingChange()` passing in the updated rating value:
+
+```TypeScript
+...
+const handleRatingChange = (rating: number) => { };
+
+return (
     <div className="rating">
-      {[1, 2, 3, 4, 5].map((n, idx) => (
+      {[1, 2, 3, 4, 5].map((num, idx) => (
         <IonIcon
-          aria-label={`Rate ${n} stars`}
-          key={idx}
-          icon={n <= rating ? star : starOutline}
-          onClick={() => handleRatingChange(n)}
+          ...
+          onClick={() => handleRatingChange(num)}
         />
       ))}
     </div>
   );
-};
+);
 ```
 
-Let's break down the updated code for the `<Rating />` component:
+**Challenge:** Fill in `handleRatingChange`.
 
-- We declared an interface for the component named `RatingProps`. For a better development experience, we only require the consumer to supply a function for `onRatingChange`.
-- If `initialRating` and/or `disabled` is not provided as part of the props, we default them to `0` and `false` respectively.
-- Each `IonIcon` is given an `aria-label`. This will be helpful for accessibility (screen readers).
-- When the user clicks on a rating icon, we call `handleRatingChange`. Eventually this will call the `onRatingChange` prop.
+Then, we'll add an `aria-label` property to `IonIcon`. This will be helpful for accessibility:
 
-Now we need to write some unit tests before we complete the implementation of the code.
+```TypeScript
+...
+<IonIcon
+  aria-label={`Rate ${num} stars`}
+  key={idx}
+  icon={num <= rating ? star : starOutline}
+  onClick={() => handleRatingChange(num)}
+/>
+...
+```
 
-#### Test First
+Finally, let's update the markup to accomodate the case where the component is disabled:
 
-Open up `src/components/rating/Rating.test.tsx`. You should notice that your `renders consistently` test has an error. That's OK, let's remove the entire test. Instead, we will create two different snapshot tests, one for when the `<Rating />` component is enabled, and one when it's disabled. Replace your existing code file with the following contents:
+```JSX
+...
+<div className="rating" style={{ opacity: disabled ? 0.25 : 1 }}>
+  {[1, 2, 3, 4, 5].map((num, idx) => (
+    <IonIcon
+      aria-label={`Rate ${num} stars`}
+      key={idx}
+      icon={num <= rating ? star : starOutline}
+      onClick={() => !disabled && handleRatingChange(num)}
+    />
+  ))}
+</div>
+...
+```
+
+At this point both running processes - `ionic serve` and `npm test` - should be showing errors. In the spirit of test-driven-development, we'll fix (and add) our tests first.
+
+### Test First
+
+You should notice that your "renders consistently" test has a syntax error. That's OK, let's remove the entire test. In it's place we will create two different snapshot tests, one for when the component is enabled and one when it's disabled:
+
+**`src/shared/components/rating/Rating.test.tsx`**
 
 ```TypeScript
 import React from 'react';
-import { render } from '@testing-library/react';
 import { ionFireEvent as fireEvent } from '@ionic/react-test-utils';
-import { Rating } from './Rating';
+...
 
 describe('<Rating />', () => {
-
   describe('when enabled', () => { });
 
   describe('when disabled', () => { });
 
   afterEach(() => {
-    cleanup();
-    jest.restoreAllMocks();
+    ...
   });
 });
 ```
 
-Go ahead and fill the `when enabled` describe block with the following:
+Fill out the `when enabled` describe block with the following:
 
 ```TypeScript
   ...
   describe('when enabled', () => {
     let props: any;
 
-    beforeEach(() => {
-      props = { onRatingChange: jest.fn() };
-    });
+    beforeEach(() => (props = { onRatingChange: jest.fn() }));
 
     it('renders consistently', () => {
       const { asFragment } = render(<Rating {...props} />);
@@ -235,7 +317,7 @@ Go ahead and fill the `when enabled` describe block with the following:
   ...
 ```
 
-Go ahead and fill in the `when disabled` block:
+And the "when disabled" block:
 
 ```TypeScript
   ...
@@ -267,80 +349,67 @@ Go ahead and fill in the `when disabled` block:
   ...
 ```
 
-Note that `getByLabelText` can retrieve elements based on the value of their `aria-label` property. Pretty neat! You should also take a look in `src/components/rating/__snapshots__/Rating.test.tsx.snap` to see the two separate snapshots written.
+Note that `getByLabelText` can retrieve elements based on the value of their `aria-label` property. Pretty neat! All the tests should now pass.
 
-#### Then Code
+### Then Code
 
-In order to get these tests to pass, add the following changes to `Rating.tsx`:
+To fix our `ionic serve` process, add an `onRatingChange` prop to the `<Rating />` component in `TeaDetailsPage.tsx`:
 
-First, fill in `handleRatingChange()`:
+**`src/tea/details/TeaDetailsPage.tsx`**
 
-```TypeScript
-  ...
-  const handleRatingChange = (rating: number) => {
-    setRating(rating);
-    onRatingChange(rating);
-  };
-  ...
+```JSX
+...
+<Rating onRatingChange={() => { }}/>
+...
 ```
-
-Then, update the component template:
-
-```TypeScript
-    ...
-    <div className="rating" style={{ opacity: disabled ? 0.25 : 1 }}>
-      {[1, 2, 3, 4, 5].map((n, idx) => (
-        <IonIcon
-          aria-label={`Rate ${n} stars`}
-          key={idx}
-          icon={n <= rating ? star : starOutline}
-          onClick={() => !disabled && handleRatingChange(n)}
-        />
-      ))}
-    </div>
-    ...
-```
-
-All the tests should now pass and our shared component is ready for use!
 
 ## Save the Rating
 
-We need to modify the tea category data service to both save and retrieve the rating for each tea category. Our backend API does not currently support the rating on a tea, so we will store this data locally using the Capacitor Storage API.
+We need a way to save and retrieve the rating of each tea. Our back end service does not currently support tea ratings, so we will store this data locally using the Capacitor Storage API.
 
-Our tasks to solution this will include:
+To integrate the rating feature within our data set we have to:
 
-- Adding an optional `rating` property to the `Tea` model
-- Modifying the data service to get the rating
-- Adding a `save()` method to the data service that will save the rating
-- Adding a `saveRating()` method to the `useTeaCategories` hook for our components
+- Add an optional `rating` property to the `Tea` model
+- Modify `useTea` to get the rating
+- Add a `saveRating()` method to `useTea` to set the rating
 
 ### Update the Model
 
-Update `src/models/Tea.ts` and add the following property:
+The first step is easy, let's update the shared `Tea` model:
+
+**`src/shared/models/Tea.ts`**
 
 ```TypeScript
+export interface Tea {
+  id: number;
+  name: string;
+  description: string;
+  image: string;
   rating?: number;
+}
 ```
 
 ### Get the Rating
 
-#### Test First
+Let's add ratings to each of the `expectedTeas` tea items in `useTea.test.tsx` like so:
 
-Open up `src/tea/TeaCategories.test.ts`. In the `expectedTeas` array, add a rating to each like so:
+**`src/tea/useTea.test.tsx`**
 
 ```TypeScript
-  {
-    id: 1,
-    name: 'Green',
-    image: 'green.jpg',
-    description: 'Green tea description.',
-    rating: 4
-  },
+...
+{
+  id: 1,
+  name: 'Green',
+  image: 'green.jpg',
+  description: 'Green tea description.',
+  rating: 4,
+},
+...
 ```
 
-For some of them, use zero. This will be the default value for tea categories that do not yet have a rating.
+For some of the items, make the rating zero. This will be the default value for teas that do not yet have a rating.
 
-The rating is not part of the data coming back from our API, so the result set that we expect back from the API should not include it. Update `resultTeas` so it deletes the `rating` like is done for `image`:
+The rating is not part of the data coming back from the back end, so the result set that we expect back from the API should not include it. Update `resultTeas` so it deletes the `rating` property like we do for `image:
 
 ```TypeScript
 const resultTeas = () => {
@@ -353,86 +422,137 @@ const resultTeas = () => {
 };
 ```
 
-Then update the setup and teardown code in order to mock the `Storage` Capacitor API. When mocking the `get()` function, the return values will need to match however you set the ratings in the test data:
+Then update the setup code in order to mock the `Storage` Capacitor API. When mocking the `get()` function, the return values will need to match however you set the ratings in the test data:
+
+**`src/tea/useTea.test.tsx`**
 
 ```TypeScript
-  ...
-  beforeEach(() => {
-    ...
-      (Plugins.Storage.get as any) = jest.fn(({ key }: { key: string }) => {
+...
+describe('useTea', () => {
+   beforeEach(() => {
+    (Plugins.Storage.get as any) = jest.fn(({ key }: { key: string }) => {
       switch (key) {
         case 'rating1':
-          return Promise.resolve({ value: 4 });
+          return Promise.resolve({ value: 1 });
         // Repeat for all expectedTeas with a non-zero rating.
         // The key is `rating${id}`
         default:
           return Promise.resolve();
       }
     });
-    (Plugins.Storage.set as any) = jest.fn();
+  });
+
+  describe('get all teas', () => {
+    ...
   });
   ...
-  afterEach(() => jest.restoreAllMocks());
-  ...
+});
 ```
 
-#### Then Code
+At this point you should have failing tests. Let's update `useTea` to make them pass. First update `fromJsonToTea` to make it asyncrhonous and have it grab the rating from storage:
 
-At this point you should have two failing tests. We need to update the code in `src/tea/TeaCategories.ts` to make them pass.
-
-The first step is to make our private method `fromJsonToTea` asyncrhonous and have it grab the rating from storage:
+**`src/tea/useTea.tsx`**
 
 ```TypeScript
   ...
-  private async fromJsonToTea(obj: any): Promise<Tea> {
+  const fromJsonToTea = async (obj: any): Promise<Tea> => {
     const { Storage } = Plugins;
     const rating = await Storage.get({ key: `rating${obj.id}` });
     return {
       ...obj,
-      image: require(`../assets/images/${this.images[obj.id - 1]}.jpg`),
+      image: require(`../assets/images/${images[obj.id - 1]}.jpg`),
       rating: parseInt(rating?.value || '0', 10),
     };
-  }
+  };
   ...
 ```
 
-But this makes `getAll()` and `get()` unhappy. The `get()` method can be easily fixed by placing an `await` keyword as part of the return statement:
+We're not done yet; right now `getTeas()` and `getTeaById()` will return unresolved Promises as their `rating` property. Not cool. We can easily fix `getByTeaById()` by adding an `await` keyword as part of the return statement:
 
 ```TypeScript
-    return await this.fromJsonToTea(body);
+...
+const getTeaById = useCallback(async (id: number): Promise<Tea> => {
+  const url = `${process.env.REACT_APP_DATA_SERVICE}/tea-categories/${id}`;
+  const { data } = await apiInstance.get(url);
+  return await fromJsonToTea(data);
+}, []);
+...
 ```
 
-Fixing `getAll()` is a bit trickier. We still need to add the `async` keyword to our return statement, but we need to asynchronous our `map()` call and place it inside `Promise.all()` so that we return resolved tea items instead of an array of pending Promises:
+Fixing `getTeas()` is a bit trickier. We still need to add the `async` keyword to our return statement, but we need to asynchronize our `map()` call and place it inside `Promise.all()` so that we return resolved tea items instead of an array of pending Promises:
 
 ```TypeScript
-    return await Promise.all(
-      body.map(async (item: any) => await this.fromJsonToTea(item)),
-    );
+...
+const getTeas = useCallback(async (): Promise<Tea[]> => {
+  const url = `${process.env.REACT_APP_DATA_SERVICE}/tea-categories`;
+  const { data } = await apiInstance.get(url);
+  return await Promise.all(
+    data.map(async (item: any) => await fromJsonToTea(item)),
+  );
+}, []);
+...
 ```
 
-Here is the full code for each of the methods:
-
-```TypeScript
-  async getAll(token: string): Promise<Array<Tea>> {
-    const url = `${process.env.REACT_APP_DATA_SERVICE}/tea-categories`;
-    const body = await this.request(url, token);
-    return await Promise.all(
-      body.map(async (item: any) => await this.fromJsonToTea(item)),
-    );
-  }
-
-  async get(id: number, token: string): Promise<Tea | undefined> {
-    const url = `${process.env.REACT_APP_DATA_SERVICE}/tea-categories/${id}`;
-    const body = await this.request(url, token);
-    return await this.fromJsonToTea(body);
-  }
-```
-
-Your tests should now pass!
+Now all our tests pass.
 
 ### Saving to Storage
 
-Saving is pretty straightforward. Our `save()` method will take a full `Tea` model but we will only save the rating, since the tea category itself is currently read-only.
+Saving is pretty straightforward. Our `saveTea()` method will take a full `Tea` model but we will only save the rating, since the tea item itself is currently read-only.
+
+Start by adding the describe block for "save tea":
+
+**`src/tea/useTea.test.tsx`**
+
+```TypeScript
+...
+describe('useTea', () => {
+  ...
+  describe('get a specific tea', () => {
+    ...
+  });
+
+  describe('save tea', () => {
+    beforeEach(() => (Plugins.Storage.set) = jest.fn());
+
+    it('saves the rating', async () => {
+      const tea = { ...expectedTeas[4] };
+      tea.rating = 4
+      const { result } = renderHook(() => useTea());
+      await act(async () => {
+        await result.current.saveTea(tea);
+      });
+      expect(Plugins.Storage.set).toHaveBeenCalledTimes(1);
+      expect(Plugins.Storage.set).toHaveBeenCalledWith({
+        key: 'rating5',
+        value: '4',
+      });
+    });
+  });
+  ...
+});
+```
+
+Let's make this test pass. Add a new method `saveTea()` to the `useTea` hook:
+
+**`src/tea/useTea.tsx`**
+
+```TypeScript
+...
+export const useTea = () => {
+  ...
+  const saveTea = async (tea: Tea): Promise<void> => {
+    const { Storage } = Plugins;
+    return Storage.set({
+      key: `rating${tea.id}`,
+      value: tea.rating?.toString() || '0',
+    });
+  };
+  ...
+  return { getTeas, getTeaById, saveTea };
+};
+```
+
+---
 
 #### Test First
 
@@ -473,79 +593,31 @@ Add the following method to our `TeaCategories` class:
 
 Save and your test should now pass. One more step before we add it to the details page.
 
-### Update the Hook
+## Modify the Details Page
 
-Recall that we have a custom React Hook named `useTeaCategories` where we place all of our tea data service logic. We'll be adding a new method called `save()` to this hook.
+One more item before we finish the lab: we need to provide props to the `<Rating />` component in our details page. On rating change, we'll call `saveTea()` to save the rating to storage:
 
-#### Test First
-
-Let's go ahead and write a describe block for our new hook functionality. Open `src/tea/useTeaCategories.test.ts` and modify the test suite to include a describe block for saving a tea category:
-
-```TypeScript
-  ...
-  describe('saves a tea category', () => {
-    it('stores a rating for a specific tea category', async () => {
-      const tea = {
-        id: 1,
-        name: 'Green',
-        description: '',
-        image: '',
-        rating: 2,
-      };
-      teaCategories.save = jest.fn(() => Promise.resolve());
-      const { result } = renderHook(() => useTeaCategories());
-      await act(async () => {
-        await result.current.save(tea);
-      });
-      expect(teaCategories.save).toHaveBeenCalledTimes(1);
-    });
-  });
-  ...
-  afterEach(() => {
-    ...
-  });
-```
-
-#### Then Code
-
-Update `src/tea/useTeaCategories.ts` so that it has a `save` function and return it along with the other properties already returned by the hook:
+**`src/tea/details/TeaDetailsPage.tsx`**
 
 ```TypeScript
 ...
-export const useTeaCategories = () => {
+const TeaDetailsPage: React.FC = () => {
   ...
-  const save = async (tea: Tea): Promise<void> => {
-    return await teaCategories.save(tea);
-  };
-
-  return { error, getCategories, getCategory, save };
-};
-```
-
-Now we can add it to our detail page!
-
-## Details Page Modifications
-
-Head back over to `src/tea/details/TeaDetails.tsx`. In this file we'll add `save` to our list of variables destructured from `useTeaCategories()` and add props to where we render the `<Rating />` component:
-
-```TypeScript
-...
-const TeaDetails: React.FC<TeaDetailsProps> = ({ match }) => {
-  const { getCategory, save } = useTeaCategories();
+  const { getTeaById, saveTea } = useTea();
   ...
   return (
     ...
     <Rating
-      onRatingChange={rating => save({ ...teaCategory!, rating })}
-      initialRating={teaCategory?.rating}
-      disabled={!teaCategory}
+      initialRating={tea?.rating}
+      disabled={!tea}
+      onRatingChange={rating => saveTea({ ...tea!, rating })}
     />
     ...
   );
 };
-export default TeaDetails;
+export default TeaDetailsPage;
 ```
 
 ## Conclusion
 
-Congratulations! You have created and consumed your first reusable component. Up next we will add tabbed navigation to our application.
+Congratulations! You have created and consumed your first (true) reusable component. Up next we will add tabbed navigation to our application.
