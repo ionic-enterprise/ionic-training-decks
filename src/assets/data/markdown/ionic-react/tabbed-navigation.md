@@ -3,7 +3,6 @@
 In this lab you will:
 
 - Scaffold additional application pages
-- Create a component to protect authenticated routes
 - Create a tab-based navigation component and add it to your application
 - Rework the routing so the pages draw in the router outlet for the tabs
 
@@ -17,25 +16,17 @@ This application will have a small number of distinct pages, so tab-based naviga
 
 ### Create Additional Pages
 
-If we are going to have multiple tabs, we are going to need a place to navigate to. For now, we will just navigate to some blank starter pages. Let's go ahead and create those now.
+If we are going to have multiple tabs, we are going to need places to navigate to. Add two new folders, `src/about` and `src/tasting-notes`.
 
-Add a new folder `src/about`. In this folder create a file for a component named `<About />`, the test file for this component, and a CSS file for this component.
+Within `src/about` add two new files: `AboutPage.tsx` and `AboutPage.test.tsx`.
 
-Add the following code to shell out the `<About />` component:
+**`src/about/AboutPage.tsx`**
 
 ```TypeScript
 import React from 'react';
-import {
-  IonContent,
-  IonHeader,
-  IonPage,
-  IonTitle,
-  IonToolbar,
-} from '@ionic/react';
+import { IonPage, IonHeader, IonTitle, IonToolbar, IonContent } from '@ionic/react';
 
-import './About.css';
-
-const About: React.FC = () => {
+const AboutPage: React.FC = () => {
   return (
     <IonPage>
       <IonHeader>
@@ -53,51 +44,25 @@ const About: React.FC = () => {
     </IonPage>
   );
 };
-export default About;
+export default AboutPage;
 ```
 
-Add a snapshot test to `About.test.tsx` to ensure it renders consistently.
-
-Now create a new folder `src/tasting-notes` and do the same for a component named `<TastingNotes />`. Add code to `src/tasting-notes/TastingNotes.tsx` to shell it out. Add a snapshot test to the tasting notes test file.
-
-### Protected Route Component
-
-Right now our application has no means to prevent users from navigating to the tea or details page if they have not signed in. Serve the application and give it a try. We should fix that before adding any additional pages to the application.
-
-Unfortuantely, React Router doesn't provide a component that only renders a component if the user is authenticated. The good news is that the `<Route />` component is composable, meaning we can create our own protected route implementation.
-
-Create a new file in `src/components` named `ProtectedRoute.tsx` and fill it with the following:
+**`src/about/AboutPage.test.tsx`**
 
 ```TypeScript
-import React, { useContext } from 'react';
-import { Route, Redirect, RouteProps } from 'react-router';
-import { AuthContext } from '../auth/AuthContext';
+import React from 'react';
+import { render } from '@testing-library/react';
+import AboutPage from './AboutPage';
 
-interface ProtectedRouteProps extends RouteProps {
-  component: React.ComponentType<any>;
-}
-
-export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
-  component: Component,
-  ...rest
-}) => {
-  const { isAuthenticated } = useContext(AuthContext);
-
-  return ( <Route {...rest} render={props =>
-    isAuthenticated ? <Component {...props} /> : <Redirect to="/login" />
-  } />);
-};
+describe('<AboutPage />', () => {
+  it('renders consistently', () => {
+    const { asFragment } = render(<AboutPage />);
+    expect(asFragment).toMatchSnapshot();
+  });
+});
 ```
 
-`<ProtectedRoute />` satisfies the following requirements:
-
-- It has the same API as `<Route />`
-- It renders a `<Route />` and passes all the props through to it
-- It checks to see if the user is authenticated.
-  - If they are, it renders the `component` prop.
-  - Otherwise, it redirects the user to the login page.
-
-Add this export to the barrel file in `src/components`.
+Now create two new files within `src/tasting-notes`: `TastingNotesPage.tsx` and `TastingNotesPage.test.tsx` and shell out these files the way we did for the about page. The page's component name should be `TastingNotesPage`.
 
 ## Tab-Based Navigation
 
@@ -116,35 +81,33 @@ We can leverage the `<IonTabs />` component in such a way that will define the r
 
 Take a moment to look at the <a href="https://ionicframework.com/docs/api/tabs" target="_blank">Ionic Tabs documentation</a> and familiarize yourself with the components used in the creation of a tab bar.
 
-Create a new file `src/components/Tabs.tsx` and fill it in with the following code:
+Create a new file `src/Tabs.tsx` and fill it in with the following code:
 
 ```TypeScript
 import React from 'react';
+import { RouteComponentProps } from 'react-router';
 import { IonRouterOutlet, IonTabBar, IonTabs } from '@ionic/react';
 
-export const Tabs: React.FC<RouteComponentProps> = ({ match }) => (
+const Tabs: React.FC<RouteComponentProps> = ({ match }) => (
   <IonTabs>
-    <IonRouterOutlet>
-    </IonRouterOutlet>
-    <IonTabBar slot="bottom">
-    </IonTabBar>
+    <IonRouterOutlet></IonRouterOutlet>
+    <IonTabBar slot="bottom"></IonTabBar>
   </IonTabs>
 );
+export default Tabs;
 ```
-
-Add `<Tabs />` to the `src/components` barrel file.
 
 ### Routes
 
 Open `App.tsx` and replace the routes inside `<IonRouterOutlet>` with the following:
 
 ```JSX
-<Route exact path="/login" component={Login} />
+<Route exact path="/login" component={LoginPage} />
 <ProtectedRoute path="/tabs" component={Tabs} />
 <Route exact path="/" render={() => <Redirect to="/login" />} />
 ```
 
-Serve the application and sign out if you are signed in. Replace the `/login` portion of the URL so that it is just `/` (our default route). Our `<ProtectedRoute />` component takes you straight to the login page. Nice! Sign in, then change the URL so that the path is `/tabs`. You should see any empty-ish screen.
+Sign out of the application if you are signed in. Replace the `/login` portion of the URL so that it is just `/` (our default route). Sign in, then change the URL so that the path is `/tabs`. You should see any empty-ish screen.
 
 We want to move all routes so that authenticated (protected) paths begin with `/tabs`:
 
@@ -158,10 +121,10 @@ Now open `Tabs.tsx` back up so we can add our tab-based routes. Place the follow
 
 ```JSX
 <Route exact path={match.url} render={() => <Redirect to={`${match.url}/tea`} />} />
-<ProtectedRoute exact path={`${match.url}/tea`} component={TeaList} />
-<ProtectedRoute exact path={`${match.url}/about`} component={About} />
-<ProtectedRoute exact path={`${match.url}/tasting-notes`} component={TastingNotes} />
-<ProtectedRoute path={`${match.url}/tea/details/:id`} component={TeaDetails} />
+<ProtectedRoute exact path={`${match.url}/tea`} component={TeaPage} />
+<ProtectedRoute exact path={`${match.url}/about`} component={AboutPage} />
+<ProtectedRoute exact path={`${match.url}/tasting-notes`} component={TastingNotesPage} />
+<ProtectedRoute path={`${match.url}/tea/details/:id`} component={TeaDetailsPage} />
 ```
 
 An Ionic Framework application can have multiple `<IonRouterOutlet />` components:
@@ -175,6 +138,8 @@ Oh yeah, we also added our new pages - and each route is protected!
 ### Tab Bar
 
 Now it's time to fill out the `<IonTabBar />` component:
+
+**`src/Tabs.tsx`**
 
 ```JSX
 ...
@@ -197,14 +162,14 @@ Now it's time to fill out the `<IonTabBar />` component:
 
 Our application now has tab-based navigation! Go ahead and switch back and forth between tabs.
 
-Click the Tea tab and click any of the cards. Oops...
+Click the tea tab and click any of the cards. Oops...
 
 ## Navigation Cleanup
 
 There's two places we need to cleanup navigation, it's not such a heavy lift.
 
-1. Open `src/tea/list/TeaList.tsx` and edit `/tea/details/${id}` to be `/tabs/tea/details/${id}`.
-2. Open `src/login/Login.tsx` and edit `/tea` to be `/tabs`.
+1. Open `src/tea/TeaPage.tsx` and edit `/tea/details/${id}` to be `/tabs/tea/details/${id}`.
+2. Open `src/login/LoginPage.tsx` and edit `/tea` to be `/tabs`.
 
 _Now_ we have fully functioning tab-based navigation!
 
