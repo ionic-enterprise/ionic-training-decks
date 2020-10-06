@@ -356,9 +356,7 @@ describe('useTea', () => {
 **Challenge:** Your next challenge is to implement `getTeaById()` to make the tests pass:
 
 1. The URL will be `${process.env.REACT_APP_DATA_SERVICE}/tea-categories/${id}`
-2. The method **does not** get wrapped in a `useCallback()`.
-
-The reason why we don't use `useCallback()` for `getTeaById()` is because it doesn't maintain the state of `id`. We expect some other actor to manage that value for us; it falls on the responsiblity of that actor take this function and manage this dependency.
+2. Wrap the function in a `useCallback()`.
 
 ### Refactor
 
@@ -374,14 +372,14 @@ const getTeas = useCallback(async (): Promise<Tea[]> => {
   }));
 }, []);
 
-const getTeaById = async (id: number): Promise<Tea | undefined> => {
+const getTeaById = useCallback(async (id: number): Promise<Tea> => {
   const url = `${process.env.REACT_APP_DATA_SERVICE}/tea-categories/${id}`;
   const { data } = await apiInstance.get(url);
   return {
     ...data,
     image: require(`../assets/images/${images[data.id - 1]}.jpg`),
   };
-};
+}, []);
 ```
 
 Let's refactor the common bits out:
