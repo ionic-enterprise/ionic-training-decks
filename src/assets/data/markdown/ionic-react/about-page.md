@@ -11,25 +11,26 @@ Every good app gives credit where credit is due. We will use a traditional "Abou
 
 ## About Page
 
-The about page will use properties from `package.json` to display in an `IonList`. The full code for `src/about/About.tsx` can be found below:
+The about page will use properties from `package.json` to display in an `IonList`. The full code for the `AboutPage.tsx` can be found below:
+
+**`src/about/AboutPage.tsx`**
 
 ```TypeScript
 import React from 'react';
 import {
-  IonContent,
+  IonPage,
   IonHeader,
+  IonTitle,
+  IonToolbar,
+  IonContent,
   IonItem,
   IonLabel,
   IonList,
   IonNote,
-  IonPage,
-  IonTitle,
-  IonToolbar,
 } from '@ionic/react';
 import { author, name, description, version } from '../../package.json';
-import './About.css';
 
-const About: React.FC = () => {
+const AboutPage: React.FC = () => {
   return (
     <IonPage>
       <IonHeader>
@@ -65,7 +66,7 @@ const About: React.FC = () => {
     </IonPage>
   );
 };
-export default About;
+export default AboutPage;
 ```
 
 ## Move the Logout Logic
@@ -74,46 +75,48 @@ Currently, the way an application user would sign out is through the tea listing
 
 Here is the full test file for `About.test.tsx`:
 
+**`src/about/AboutPage.test.tsx`**
+
 ```TypeScript
 import React from 'react';
-import { render, fireEvent } from '@testing-library/react';
-import About from './About';
-import { AuthContext } from '../auth/AuthContext';
-jest.mock('react-router', () => {
-  const actual = jest.requireActual('react-router');
-  return {
-    ...actual,
-    useHistory: () => ({ replace: jest.fn() }),
-  };
-});
+import { cleanup, render } from '@testing-library/react';
+import { ionFireEvent as fireEvent } from '@ionic/react-test-utils';
+import AboutPage from './AboutPage';
 
-const logoutSpy = jest.fn();
-const tree = (
-  <AuthContext.Provider
-    value={{
-      login: jest.fn(),
-      isAuthenticated: false,
-      user: undefined,
-      logout: logoutSpy,
-    }}>
-    <About />
-  </AuthContext.Provider>
-);
+jest.mock('../core/auth', () => ({
+  useAuthentication: () => ({
+    logout: mockLogout,
+  }),
+}));
+jest.mock('react-router', () => ({
+  useHistory: () => ({
+    replace: jest.fn(),
+  }),
+}));
 
-describe('<About />', () => {
+let mockLogout = jest.fn(() => Promise.resolve());
+
+describe('<AboutPage />', () => {
+  beforeEach(() => (mockLogout = jest.fn(() => Promise.resolve())));
+
   it('renders consistently', () => {
-    const { asFragment } = render(<About />);
+    const { asFragment } = render(<AboutPage />);
     expect(asFragment).toMatchSnapshot();
   });
 
   describe('sign out button', () => {
     it('signs the user out', async () => {
       let button: HTMLIonButtonElement;
-      const { container } = render(tree);
+      const { container } = render(<AboutPage />);
       button = container.querySelector('ion-button')!;
       fireEvent.click(button);
-      expect(logoutSpy).toHaveBeenCalledTimes(1);
+      expect(mockLogout).toHaveBeenCalledTimes(1);
     });
+  });
+
+  afterEach(() => {
+    cleanup();
+    jest.restoreAllMocks();
   });
 });
 ```
