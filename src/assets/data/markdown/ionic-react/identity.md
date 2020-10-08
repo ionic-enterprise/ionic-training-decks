@@ -230,7 +230,6 @@ Start `ionic serve` and `npm test` again. Return to `IdentityService.test.ts` so
 ```TypeScript
 import { Plugins } from '@capacitor/core';
 import Axios from 'axios';
-jest.mock('axios');
 import { User } from '../models';
 import { IdentityService } from './IdentityService';
 

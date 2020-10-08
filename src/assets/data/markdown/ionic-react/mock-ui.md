@@ -77,7 +77,6 @@ export * from './Tea';
 ```
 
 The files in our `models` folder are pretty redundant at this moment, but as the application grows this will help keep our import statements from getting out of hand.
-index.
 
 ### The Tea Page
 
@@ -156,12 +155,16 @@ Finally, update `src/tea/TeaPage.test.tsx`:
 describe('<TeaPage />', () => {
   it('displays the header', () => {
     const { container } = render(<TeaPage />);
-    expect(container).toHaveTextContent('Tea');
+    expect(container).toHaveTextContent(/Tea/);
   });
   ...
 ```
 
+You may need to stop and restart `npm test` a few times for it to unlink the old `Home.test.tsx` file.
+
 **Challenge:** Update the header text in the `TeaPage` component such that the modified test no longer fails.
+
+During this training, your snapshot tests will periodically fail as we update components. That's OK and makes sense - we are modifying our components so they shouldn't be matching existing snapshots. Remember to update your snapshots whenever the snapshot tests fail by pressing `u` in the terminal hosting `npm test`.
 
 #### Mock the Data
 
@@ -344,7 +347,9 @@ export const listToMatrix = (): Array<Array<Tea>> => {
 ...
 ```
 
-Like our mock data this piece of logic doesn't belong here, but we can refactor later on. Go ahead and update the unit test so it passes.
+Like our mock data this piece of logic doesn't belong here, but we can refactor later on.
+
+**Challenge:** Go ahead and update the unit test so it passes.
 
 Now that we can have our matrix, let's create the grid. **Set up Chrome to emulate an iPad Pro in landscape mode.** We know we want 4 columns on a wide screen like this, and we know that the grid by default supports 12 columns. That means for a wide screen like this each column should take up 3 columns.
 
@@ -375,6 +380,8 @@ Replace the existing `<IonList />` with the following code:
 ```
 
 This code loops through the rows of the matrix and displays a column for each tea in that row. That looks great on an iPad Pro, although the cards are all different sizes and the rows are a bit crowded. Let's fix that with some simple CSS in `TeaPage.css`:
+
+**`src/tea/TeaPage.css`**
 
 ```CSS
 ion-card {

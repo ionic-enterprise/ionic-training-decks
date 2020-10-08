@@ -106,6 +106,7 @@ Then let's shell out the test file:
 import React from 'react';
 import { renderHook, act, cleanup } from '@testing-library/react-hooks';
 import apiInstance from '../core/apiInstance';
+import { useTea } from './useTea';
 import { Tea } from '../shared/models';
 
 describe('useTea', () => {
@@ -200,7 +201,6 @@ Let's place some setup logic for our "get all teas" tests in `useTea.test.tsx`:
           Promise.resolve({ data: resultTeas() }),
         );
       });
-      expect(apiInstance.get).toHaveBeenCalledTimes(1);
     });
   });
   ...
@@ -237,7 +237,7 @@ import { Tea } from '../shared/models';
 export const useTea = () => {
 
   const getTeas = async (): Promise<Array<Tea>> => {
-    const url = `${process.env.REACT_APP_DATA_SERVICE}/tea-categories`;
+    const url = `/tea-categories`;
     const { data } =  await apiInstance.get(url);
   };
   ...
@@ -356,32 +356,8 @@ describe('useTea', () => {
 
 **Challenge:** Your next challenge is to implement `getTeaById()` to make the tests pass:
 
-1. The URL will be `${process.env.REACT_APP_DATA_SERVICE}/tea-categories/${id}`
-2. Wrap the function in a `useCallback()`.
-
-Implementing `getTeaById` **does not** require a `useEffect`:
-
-**`src/tea/useTea.tsx`**
-
-```TypeScript
-const getTeas = useCallback(async (): Promise<Tea[]> => {
-  const url = `${process.env.REACT_APP_DATA_SERVICE}/tea-categories`;
-  const { data } = await apiInstance.get(url);
-  return data.map((tea: Tea) => ({
-    ...tea,
-    image: require(`../assets/images/${images[tea.id - 1]}.jpg`),
-  }));
-}, []);
-
-const getTeaById = useCallback(async (id: number): Promise<Tea> => {
-  const url = `${process.env.REACT_APP_DATA_SERVICE}/tea-categories/${id}`;
-  const { data } = await apiInstance.get(url);
-  return {
-    ...data,
-    image: require(`../assets/images/${images[data.id - 1]}.jpg`),
-  };
-}, []);
-```
+1. The URL will be `/tea-categories/${id}`
+2. Wrap the function in a `useCallback()`
 
 Let's refactor the common bits out:
 
@@ -391,16 +367,16 @@ Let's refactor the common bits out:
 ...
 export const useTea = () => {
   const getTeas = useCallback(async (): Promise<Tea[]> => {
-    const url = `${process.env.REACT_APP_DATA_SERVICE}/tea-categories`;
+    const url = `/tea-categories`;
     const { data } = await apiInstance.get(url);
     return data.map((item: any) => fromJsonToTea(item));
   }, []);
 
-  const getTeaById = async (id: number): Promise<Tea | undefined> => {
-    const url = `${process.env.REACT_APP_DATA_SERVICE}/tea-categories/${id}`;
+  const getTeaById = useCallback(async (id: number): Promise<Tea | undefined> => {
+    const url = `/tea-categories/${id}`;
     const { data } = await apiInstance.get(url);
     return fromJsonToTea(data);
-  };
+  }, []);
 
   const fromJsonToTea = (obj: any): Tea => {
     return {
