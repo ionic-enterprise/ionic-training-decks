@@ -9,7 +9,7 @@ In this lab, you will learn how to:
 
 ## Overview
 
-Capacitor is the cross-platform native runtime that allows us to run our Ionic Framework application across iOS, Android, and the web with the same code base. As part of initializing our application through the Ionic CLI, our project is already configured to use Capacitor; as a reminder, the Ionic CLI wraps the Capacitor command line.
+Capacitor is the cross-platform native runtime that allows us to run our Ionic Framework application across iOS, Android, and the web with the same code base. As part of initializing our application through the Ionic CLI, our project is already configured to use Capacitor. As a reminder, the Ionic CLI wraps the Capacitor command line.
 
 We will add both iOS and Android platforms to our application. Note that this will add the Android Studio and Xcode projects to source control. This allows us to easily edit native configuration and add custom native code to Capacitor projects.
 
@@ -81,8 +81,8 @@ Remember to follow these guidelines when designing your splash screen and icon:
 
 For this application, download the following images and place them in a directory named `resources` in the root of your project:
 
-- <a download href="/assets/images/icon.png">icon.png</a>
-- <a download href="/assets/images/splash.png">splash.png</a>
+- <a download href="/assets/packages/ionic-react/icon.png">icon.png</a>
+- <a download href="/assets/packages/ionic-react/splash.png">splash.png</a>
 
 To generate the required resources and copy them to the native projects, use the following commands:
 

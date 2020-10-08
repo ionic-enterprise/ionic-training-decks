@@ -122,12 +122,16 @@
               "file": "login-page"
             },
             {
-              "title": "Authentication",
-              "file": "auth"
+              "title": "Identity",
+              "file": "identity"
             },
             {
               "title": "State Management",
               "file": "state-management"
+            },
+            {
+              "title": "Authentication",
+              "file": "auth"
             },
             {
               "title": "Get Data",

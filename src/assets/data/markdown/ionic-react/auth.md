@@ -2,577 +2,657 @@
 
 In this lab, you will learn how to:
 
-- Use environment variables to configure dynamic values
-- Interact with HTTP-based data services
-- Implement the singleton pattern to create shared class instances
+- POST data to an API endpoint
+- Create custom React hooks
+- Guard routes from unauthorized users
 
 ## Overview
 
-Our application has a login page but it doesn't do much; we don't have a way to allow users to sign in or sign out, nor do we have a way to retrieve information on the user currently interacting with the application. Luckily, we have a data service we can plug into that provides these pieces of functionality.
+The final piece of our user journey is authentication. We need to provide a mechanism for users to sign in and out of our application. To do so, we'll create a new singleton class for authentication (containing login/logout functionality) then expose it to our components through our own custom hook. The hook will also interact with the authentication state created in the previous lab.
 
-There are two conceptual pieces to authentication:
+At the end of this lab, you will have your own application specific hook that wraps up all the functionality we've built out for identity and authentication in a nice tidy package. It's pretty cool, so let's get started!
 
-1. Managing the authentication and unauthentication of all application users
-2. Managing the status and state of the current application user
+## Authentication Service
 
-Following the Single Responsibility Principle, we should have one class that implements functionality that is applicable to all users (Authentication) and one class that implements functionality that is only applicable to the current user (Identity).
+First, we need to create a service for authentication. Since we covered this in a previous lab, this portion will simply be a copy-and-paste job.
 
-### Side Note: Singleton Pattern
+Add two files to `src/core/services`: `AuthService.ts` and `AuthService.test.ts`.
 
-It's incredibly common for web and mobile applications to use a shared single instance of classes that provides functionality with data services or other APIs. This is known as the singleton pattern, and it works really well!
+### Test First
 
-Some frameworks provide a mechanism that will provision singleton instances of classes for you. React does not. I've seen React projects export a new instance of a class to share a single class instance like this `export default new MyClass();`, or mix "business logic" with components or React hooks.
-
-I prefer explicitly implementing the singleton pattern the way it would be written in other languages. I find that it makes the intent of the code clearer to other developers.
-
-## Create the User Model
-
-It would be practical to begin by modeling the shape of what a signed in user should look like in our application.
-
-Add a new file `src/models/User.ts`:
+**`src/core/services/AuthService.test.ts`**
 
 ```TypeScript
-export interface User {
-  id: number;
-  firstName: string;
-  lastName: string;
-  email: string;
-}
-```
-
-**Challenge:** Add our `User` interface to the `models` barrel file.
-
-## Set Up the Environment
-
-Many applications have the need to modify values that effect the way the application behaves at runtime. Such values are known as environment variables, and are typically different values based on which environment context is running.
-
-Our application will make use of environment variables to store the URL of our data service.
-
-Create a new file at the root of the project and name it `.env`:
-
-```bash
-REACT_APP_DATA_SERVICE=https://cs-demo-api.herokuapp.com
-```
-
-Our application will only have one environment context to run in but if we had dedicated development and production environments, we would add additional files `.env.production` and `.env.development` to the root of our application.
-
-## Identity Singleton
-
-Start by creating a new folder named `auth` within our `src` folder. We'll keep all authentication-based files here. Inside `src/auth`, create `Identity.ts` and `Identity.test.ts`.
-
-Our identity data service will be responsible for the following functionality:
-
-- Storing the current user's authorization token using <a href="https://capacitorjs.com/docs/apis/storage" target="_blank">Capacitor's Storage API</a>.
-- Getting/setting the current user's authorization token and user object.
-- Attempt to automatically sign the user in using the stored authorization token.
-- Clearing the current user's in-memory authorization token and user object, and removing the current user's stored authorization token.
-
-Open `Identity.ts` so we can scaffold the identity class and complete the singleton implementation:
-
-```TypeScript
-import { Plugins } from '@capacitor/core';
+import Axios from 'axios';
+jest.mock('axios');
+import { IdentityService } from './IdentityService';
 import { User } from '../models';
+import { AuthService } from './AuthService';
 
-export class Identity {
-  private _key = 'auth-token';
-  private _token: string | undefined = undefined;
-  private _user: User | undefined = undefined;
-
-    get token(): string | undefined {
-    return this._token;
-  }
-
-  get user(): User | undefined {
-    return this._user;
-  }
-
-  async initialize(): Promise<void> {
-    // TODO: Implement
-  }
-
-  async set(user: User, token: string): Promise<void> {
-    // TODO: Implement
-  }
-
-  async clear(): Promise<void> {
-    // TODO: Implement
-  }
-
-}
-
-export default class IdentitySingleton {
-  private static instance: Identity | undefined = undefined;
-
-  static getInstance(): Identity {
-    if(this.instance === undefined) this.instance = new Identity();
-    return this.instance;
-  }
-}
-
-```
-
-### Initializing the User
-
-To provide our application's users with a great user experience, our application will attempt to automatically log users in if an authorization token is found on device. If an authorization token can be found, we'll make a call out to an API endpoint `/users/current` to retrieve the current user's information. Once that data is obtained, we'll set our `token` and `user` properties.
-
-#### Test First
-
-Open up `Identity.test.ts`. We're going to do some test setup first; defining mocks, writing setup/teardown code and making sure that our singleton implementation works:
-
-```TypeScript
-import { Plugins } from '@capacitor/core';
-import IdentitySingleton, { Identity } from './Identity';
-
-const mockToken = '3884915llf950';
-const mockUser = {
+const mockUser: User = {
   id: 42,
   firstName: 'Joe',
   lastName: 'Tester',
   email: 'test@test.org',
 };
 
-describe('Identity', () => {
-  let identity: Identity;
+describe('AuthService', () => {
+  let authService: AuthService;
 
   beforeEach(() => {
-    identity = IdentitySingleton.getInstance();
-    identity['_token'] = undefined;
-    identity['_user'] = undefined;
-    (Plugins.Storage as any) = jest.fn();
-    (Plugins.Storage.get as any) = jest.fn();
-    (Plugins.Storage.set as any) = jest.fn();
-    (Plugins.Storage.remove as any) = jest.fn();
+    authService = AuthService.getInstance();
   });
 
-  it('should use the singleton instance', () => {
-    expect(identity).toBeDefined();
+  it('should use a single instance', () => {
+    expect(authService).toBeDefined();
   });
 
-  afterEach(() => {
-    (Plugins.Storage as any).mockRestore();
-    (Plugins.Storage.get as any).mockRestore();
-    (Plugins.Storage.set as any).mockRestore();
-    (Plugins.Storage.remove as any).mockRestore();
-  });
-});
-```
-
-Ensure that this test passes. Once verified, add a new `describe` block after the singleton test for the `initialize` function:
-
-```TypeScript
-  ...
-  describe('initialize', () => {
-     beforeEach(() => {
-      (window.fetch as any) = jest.fn(() => {
-        return Promise.resolve({
-          json: () => Promise.resolve(mockUser)
-        });
-      });
-    });
-
-    afterEach(() => {
-      (window.fetch as any).mockRestore();
-    });
-  });
-  ...
-```
-
-Our `initialize` function needs to make a network request to fetch the current user's information. There's a million different HTTP networking libraries available but we'll make use of `window.fetch` since it's available out-of-the-box with JavaScript.
-
-First, we need to ensure that we can are looking in the proper place for our token. Place this test in between the setup and teardown code written for the `initialize` describe block:
-
-```TypeScript
-    ...
-    it('gets the stored token', async () => {
-      (Plugins.Storage.get as any).mockImplementation(() =>
-        Promise.resolve({ value: mockToken })
-      );
-      await identity.initialize();
-      expect(Plugins.Storage.get).toHaveBeenCalledTimes(1);
-      expect(Plugins.Storage.get).toHaveBeenCalledWith({ key: 'auth-token' });
-    });
-    ...
-```
-
-Next, we'll write tests covering the path where an authorization token is available in device storage. These tests should be placed under the test we just added:
-
-```TypeScript
-    ...
-    describe('if a token exists', () => {
-      beforeEach(() => {
-        (Plugins.Storage.get as any).mockImplementation(() =>
-          Promise.resolve({ value: mockToken }),
-        );
-      });
-
-      it('assigns the token', async () => {
-        await identity.initialize();
-        expect(identity.token).toEqual(mockToken);
-      });
-
-      it('gets the current user', async () => {
-        await identity.initialize();
-        expect(window.fetch).toHaveBeenCalledTimes(1);
-        expect(identity.user).toEqual(mockUser);
-      });
-
-      it('assigns the current user', async () => {
-        await identity.initialize();
-        expect(identity.user).toEqual(mockUser);
-      });
-    });
-    ...
-```
-
-Note how we're mocking the `Storage` API before each test to return our desired value. We're also mocking our network connection in the second test to simulate the response we'd expect the network to return.
-
-Finally, we'll move onto the path where an authorization token is not available on device:
-
-```TypeScript
-    ...
-    describe('if there is not a token', () => {
-      beforeEach(() => {
-        (Plugins.Storage.get as any).mockImplementation(() =>
-          Promise.resolve({ value: null }),
-        );
-      });
-
-      it('does not get the current user', async () => {
-        await identity.initialize();
-        expect(identity.token).toBeUndefined();
-        expect(identity.user).toBeUndefined();
-      });
-    });
-    ...
-```
-
-It's important to keep the two paths in separate describe blocks as they each require different setup code. Now we have all the tests we need for `initialize`, and they're all failing, so it's time to code!
-
-#### Then Code
-
-Head over to `Identity.ts` and let's implement `initialize`:
-
-```TypeScript
-...
-export class Identity {
-  private _key = 'auth-token';
-  private _token: string | undefined = undefined;
-  private _user: User | undefined = undefined;
-
-    get token(): string | undefined {
-    return this._token;
-  }
-
-  get user(): User | undefined {
-    return this._user;
-  }
-
-  async initialize(): Promise<void> {
-   const { Storage } = Plugins;
-   const { value } = await Storage.get({ key: this._key });
-
-   if (!value) return;
-
-   this._token = value;
-   this._user = await this.fetchUser(this._token);
-  }
-
-  async set(user: User, token: string): Promise<void> {
-    // TODO: Implement
-  }
-
-  async clear(): Promise<void> {
-    // TODO: Implement
-  }
-
-  /**
-   * This fetches user information and parses it into a User object.
-   * @param token Authorization token
-   * @returns {Promise<User>} The authenticated user's information.
-   */
-  private async fetchUser(token: string): Promise<User> {
-    const headers = { Authorization: 'Bearer ' + token };
-    const url = `${process.env.REACT_APP_DATA_SERVICE}/users/current`;
-    const response = await fetch(url, { headers });
-    const { id, firstName, lastName, email } = await response.json();
-    return { id, firstName, lastName, email };
-  }
-
-}
-...
-```
-
-There's quite a bit that goes on in making the network request and casting the response into a `User` object. This makes it a good candidate for a private method. Let's break down what it's doing:
-
-1. The authorization header is generated which is needed to obtain the user's information
-2. The API endpoint to retrieve the user's information is constructed using our environment variable
-3. A GET request is made to the constructed URL with headers provided in the `options` parameter
-4. The JSON response body is deconstructed to obtain the values we need for a `User` object
-5. TypeScript asserts that we are returning a `User` object based on the object being returned
-
-### Setting the User and Storing the Token
-
-The `initialize` function takes care of the case when the user has already established their identity within our application. We need a way to set the identity after the user has signed in using the login page.
-
-#### Test First
-
-Open `Identity.test.ts` and add the following test cases under the `initialize` describe block:
-
-```TypeScript
-    ...
-    describe('set', () => {
-      beforeEach(() => {
-        (Plugins.Storage.set as any).mockImplementation(() => Promise.resolve());
-      });
-
-      it('sets the user', async () => {
-        await identity.set(mockUser, mockToken);
-        expect(identity.user).toEqual(mockUser);
-      });
-
-      it('sets the token', async () => {
-        await identity.set(mockUser, mockToken);
-        expect(identity.token).toEqual(mockToken);
-      });
-
-      it('saves the token in storage', async () => {
-        await identity.set(mockUser, mockToken);
-        expect(Plugins.Storage.set).toHaveBeenCalledTimes(1);
-        expect(Plugins.Storage.set).toHaveBeenCalledWith({
-          key: 'auth-token',
-          value: mockToken,
-        });
-      });
-    });
-    ...
-```
-
-That's all we need to cover for the `set` method, so let's go ahead and implement this method.
-
-#### Then Code
-
-**Challenge:** Implement the `set` method of `Identity`.
-
-### Clearing the User
-
-The last piece to the identity data service class is to provide the ability to clear the application user's data, both in-memory and on device.
-
-#### Test First
-
-After the describe block for the `set` method, add the following:
-
-```TypeScript
-  ...
-  describe('clear', () => {
-    beforeEach(async () => {
-      await identity.set(mockUser, mockToken);
-      (Plugins.Storage.remove as any).mockImplementation(() =>
-        Promise.resolve(),
-      );
-    });
-
-    it('clears the user', async () => {
-      await identity.clear();
-      expect(identity.user).toBeUndefined();
-    });
-
-    it('clears the token', async () => {
-      await identity.clear();
-      expect(identity.token).toBeUndefined();
-    });
-
-    it('clears the token in storage', async () => {
-      await identity.clear();
-      expect(Plugins.Storage.remove).toHaveBeenCalledTimes(1);
-      expect(Plugins.Storage.remove).toHaveBeenCalledWith({
-        key: 'auth-token',
-      });
-    });
-  });
-  ...
-```
-
-You know the drill, failing tests means it's time to code.
-
-#### Then Code
-
-**Challenge:** Implement the `clear` method of the `Identity` class.
-
-## Authentication Singleton
-
-Inside of `src/auth` create two new files, `Authentication.ts` and `Authentication.test.ts`.
-
-Our authentication data service will be responsible for communicating with the data service's login and logout endpoints.
-
-Open `Authentication.ts` so we can scaffold the authentication class:
-
-**Challenge:** Implement the Singleton pattern, exporting a class named `AuthSingleton`.
-
-### Login
-
-The `login` method will submit the user's inputted e-mail address and password to the authentication data service by making a `POST` request to the `/login` endpoint.
-
-#### Test First
-
-We'll begin by scaffolding out our test file and adding our singleton assertion test:
-
-```TypeScript
-import AuthSingleton, { Authentication } from './Authentication';
-
-describe('Authentication', () => {
-  let auth: Authentication;
-
-  beforeEach(() => {
-    auth = AuthSingleton.getInstance();
-    (window.fetch as any) = jest.fn();
-  });
-
-  it('should use the singleton instance', () => {
-    expect(auth).toBeDefined();
-  });
-
-  afterEach(() => {
-    (window.fetch as any).mockRestore();
-  });
-});
-```
-
-Next, add a describe block after the singleton test for the `login` method and assert that it will make a network request:
-
-```TypeScript
-  ...
   describe('login', () => {
-    const mockSuccessResponse = {
-      token: '3884915llf950',
-      user: {
-        id: 42,
-        firstName: 'Joe',
-        lastName: 'Tester',
-        email: 'test@test.com',
-      },
-      success: true,
-    };
-
     beforeEach(() => {
-      (window.fetch as any) = jest.fn(() => {
-        return Promise.resolve({
-          json: () => Promise.resolve(mockSuccessResponse),
-        });
-      });
+      (Axios.post as any) = jest.fn(() =>
+        Promise.resolve({
+          data: {
+            token: '3884915llf950',
+            user: mockUser,
+            success: true,
+          },
+        }),
+      );
+      IdentityService.getInstance().set = jest.fn(() => Promise.resolve());
     });
 
     it('POSTs the login', async () => {
-      await auth.login('test@test.com', 'password');
-      expect(window.fetch).toHaveBeenCalledTimes(1);
+      const url = `${process.env.REACT_APP_DATA_SERVICE}/login`;
+      const credentials = { username: 'test@test.com', password: 'P@assword' };
+      await authService.login(credentials.username, credentials.password);
+      expect(Axios.post).toHaveBeenCalledTimes(1);
+      expect(Axios.post).toHaveBeenCalledWith(url, credentials);
     });
-  });
-  ...
-```
 
-Note that a mock object has been created that represents what a successful sign in response looks like. We'll use it to test the success path. Add the following describe block and accompanying tests after `it('POSTs the login')`:
-
-```TypeScript
-    ...
     describe('on success', () => {
-      it('returns the token and user object', async () => {
-        const result = await auth.login('test@test.com', 'password');
-        expect(result).toEqual({ token: result.token, user: result.user });
+      it('sets the user and token in the identity service', async () => {
+        await authService.login('test@test.com', 'P@assword');
+        expect(IdentityService.getInstance().set).toHaveBeenCalledTimes(1);
+        expect(IdentityService.getInstance().set).toHaveBeenCalledWith(
+          mockUser,
+          '3884915llf950',
+        );
+      });
+
+      it('return true', async () => {
+        const res = await authService.login('test@test.com', 'P@assword');
+        expect(res).toBeTruthy();
       });
     });
-    ...
-```
 
-Our last set of tests will test the path of a failed response. We'll create a describe block for this path after the success describe block and establish setup code that will create a mock representation of a failed sign in attempt:
-
-```TypeScript
-    ...
     describe('on failure', () => {
       beforeEach(() => {
-        (window.fetch as any) = jest.fn(() => {
-          return Promise.resolve({
-            json: () => Promise.resolve({ success: false }),
-          });
-        });
+        (Axios.post as any) = jest.fn(() =>
+          Promise.resolve({ data: { success: false } }),
+        );
       });
 
-      it('throws an error', async () => {
-        const expectedErrorMsg = 'Failed to log in. Please try again.';
-        try {
-          await auth.login('test@test.com', 'password');
-          expect(true).toBeFalsy();
-        } catch (error) {
-          expect(error.message).toBe(expectedErrorMsg);
-        }
+      it('does not set the user and token in the identity service', async () => {
+        await authService.login('test@test.com', 'P@assword');
+        expect(IdentityService.getInstance().set).toHaveBeenCalledTimes(0);
+      });
+
+      it('returns false', async () => {
+        const res = await authService.login('test@test.com', 'P@assword');
+        expect(res).toBeFalsy();
       });
     });
-    ...
-```
+  });
 
-With our tests failing let's implement this method.
-
-#### Then Code
-
-Notice that the authentication service will still return a successful response in the event the e-mail address/password combination does not sign a user in. Instead, it will return `{success: false}`. We should use this to our advantage while implementing the `login` method:
-
-```TypeScript
-  ...
-  async login(
-    username: string,
-    password: string,
-  ): Promise<{ token: string; user: User }> {
-    const url = `${process.env.REACT_APP_DATA_SERVICE}/login`;
-    const options = {
-      headers: { 'Content-Type': 'application/json' },
-      method: 'POST',
-      body: JSON.stringify({ username, password }),
-    };
-    const response = await fetch(url, options);
-    const body = await response.json();
-
-    if (!body.success) {
-      throw Error('Failed to log in. Please try again.');
-    }
-
-    const token = body.token;
-    const { id, firstName, lastName, email } = body.user;
-    return { token, user: { id, firstName, lastName, email } };
-  }
-  ...
-```
-
-### Logout
-
-The `logout` method will also make a `POST` request, this time to the `/logout` endpoint.
-
-#### Test First
-
-Under the `login` describe block, create one for `logout`. We'll mock the expected sign out response object and write a test to ensure that we are posting to the sign out endpoint.
-
-```TypeScript
-  ...
   describe('logout', () => {
     beforeEach(() => {
-      (window.fetch as any) = jest.fn(() => {
-        return Promise.resolve({
-          json: () => Promise.resolve({}),
-        });
-      });
+      (Axios.post as any) = jest.fn(() => Promise.resolve());
+      IdentityService.getInstance().clear = jest.fn(() => Promise.resolve());
     });
 
     it('POSTs the logout', async () => {
-      await auth.logout();
-      expect(window.fetch).toHaveBeenCalledTimes(1);
+      const url = `${process.env.REACT_APP_DATA_SERVICE}/logout`;
+      await authService.logout();
+      expect(Axios.post).toHaveBeenCalledTimes(1);
+      expect(Axios.post).toHaveBeenCalledWith(url);
+    });
+
+    it('clears the identity', async () => {
+      await authService.logout();
+      expect(IdentityService.getInstance().clear).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  afterEach(() => jest.restoreAllMocks());
+});
+```
+
+Note that we will be making use of our `IdentityService` to store or clear identity information after login/logout.
+
+### Then Code
+
+**`src/core/services/AuthService.ts`**
+
+```TypeScript
+import Axios from 'axios';
+import { IdentityService } from './IdentityService';
+
+export class AuthService {
+  private static instance: AuthService | undefined;
+
+  private constructor() {}
+
+  public static getInstance(): AuthService {
+    if (!AuthService.instance) {
+      AuthService.instance = new AuthService();
+    }
+    return AuthService.instance;
+  }
+
+  async login(username: string, password: string): Promise<boolean> {
+    const url = `${process.env.REACT_APP_DATA_SERVICE}/login`;
+    const { data } = await Axios.post(url, { username, password });
+
+    if (!data.success) return false;
+
+    IdentityService.getInstance().set(data.user, data.token);
+    return true;
+  }
+
+  async logout(): Promise<void> {
+    const url = `${process.env.REACT_APP_DATA_SERVICE}/logout`;
+    await Axios.post(url);
+    IdentityService.getInstance().clear();
+  }
+}
+```
+
+Finally, update the barrel file (`src/core/services/index.ts`).
+
+## `useAuthentication` Hook
+
+Before we get into building the hook, we need to add an additional dependencies to our project. Terminate `ionic serve` and `npm test` and add the following dependencies:
+
+```bash
+$ npm install @testing-library/react-hooks
+$ npm install --save-dev react-test-renderer
+```
+
+This is a set of additional tools that will help us test React hooks. Once complete, restart `ionic serve` and `npm test`.
+
+### Interface Setup
+
+Add two additional files to `src/core/auth`: `useAuthentication.tsx` and `useAuthentication.test.tsx`. Update the folder's `index.ts` to `export * from './useAuthentication.tsx`.
+
+Place the following scaffolding code in `useAuthentication.tsx`:
+
+**`src/core/auth/useAuthentication.tsx`**
+
+```TypeScript
+import { AuthService } from '../services';
+
+export const useAuthentication = () => {
+  const authService = AuthService.getInstance();
+  const identityService = IdentityService.getInstance();
+
+  const login = async (username: string, password: string): Promise<void> => {};
+  const logout = async (): Promise<void> => {};
+
+  return {
+    status: undefined,
+    user: undefined,
+    error: undefined,
+    login,
+    logout,
+  };
+};
+```
+
+Let's scaffold the test file as well:
+
+**`src/core/auth/useAuthentication.test.tsx`**
+
+```TypeScript
+import React from 'react';
+import { renderHook, act, cleanup } from '@testing-library/react-hooks';
+import { useAuthentication } from './useAuthentication';
+import { AuthProvider } from './AuthContext';
+import { AuthService, IdentityService } from '../services';
+import { User } from '../models';
+
+const wrapper = ({ children }: any) => <AuthProvider>{children}</AuthProvider>;
+
+const mockUser: User = {
+  id: 42,
+  firstName: 'Joe',
+  lastName: 'Tester',
+  email: 'test@test.org',
+};
+
+describe('useAuthentication', () => {
+  let authService: AuthService;
+  let identityService: IdentityService;
+
+  beforeEach(() => {
+    authService = AuthService.getInstance();
+    identityService = IdentityService.getInstance();
+    identityService.init = jest.fn();
+  });
+
+  afterEach(() => {
+    cleanup();
+    jest.restoreAllMocks();
+  });
+```
+
+Make note of `wrapper`. We need a way to gain access to `AuthContext`, so we create a component wherein the children are wrapped by `<AuthProvider />`.
+
+### Proxing State
+
+We are going to proxy each property of our authentication state so it is available through `useAuthentication()`. This is another technique to isolate our state management solution from components and other bits of code.
+
+**`src/core/auth/useAuthentication.tsx`**
+
+```TypeScript
+import { useContext } from 'react';
+import { AuthContext } from '.';
+import { AuthService, IdentityService } from '../services';
+
+export const useAuthentication = () => {
+  const authService = AuthService.getInstance();
+  const identityService = IdentityService.getInstance();
+
+  const { state, dispatch } = useContext(AuthContext);
+
+  if (state === undefined) {
+    throw new Error('useAuthentication must be used with an AuthProvider');
+  }
+
+  const login = async (username: string, password: string): Promise<void> => {};
+  const logout = async (): Promise<void> => {};
+
+  return {
+    status: state.status,
+    user: state.user,
+    error: state.error,
+    login,
+    logout,
+  };
+};
+```
+
+We make use of the `useContext()` hook in order to get a reference of `AuthContext`. There's also a check in place to make sure no one calls this hook if they are not a child component of `AuthProvider`, which is good form.
+
+### Login
+
+Our `login()` function needs to do the following:
+
+- Call `AuthService.login()` with a username and password
+- Dispatch `LOGIN_SUCCESS` if the user successfully signed in, or `LOGIN_FAILURE` if the user was unsuccessful
+
+- The <a href="https://reactjs.org/docs/context.html" target="_blank">React Context API</a>
+- The <a href="https://reactjs.org/docs/hooks-reference.html#usereducer" target="_blank">`useReducer` hook</a>
+
+Let's start by writing our test cases. Add a describe block for login:
+
+**`src/core/auth/useAuthentication.test.tsx`**
+
+```TypeScript
+...
+describe('useAuthentication', () => {
+  ...
+  describe('login', () => {
+    beforeEach(() => {
+      authService.login = jest.fn(() => {
+        identityService['_user'] = mockUser;
+        return Promise.resolve(true);
+      });
+      identityService['_user'] = undefined;
+      identityService['_token'] = undefined;
+    });
+
+    describe('on success', () => {
+      it('sets the status to authenticated', async () => {
+        const { result, waitForNextUpdate } = renderHook(
+          () => useAuthentication(),
+          { wrapper },
+        );
+        await waitForNextUpdate();
+        await act(() => result.current.login('test@test.com', 'P@ssword'));
+        expect(result.current.status).toEqual('authenticated');
+      });
+
+      it('sets the user on successful login', async () => {
+        const { result, waitForNextUpdate } = renderHook(
+          () => useAuthentication(),
+          { wrapper },
+        );
+        await waitForNextUpdate();
+        identityService['_user'] = mockUser;
+        await act(() => result.current.login('test@test.com', 'P@ssword'));
+        expect(result.current.user).toEqual(mockUser);
+      });
+    });
+
+    describe('on failure', () => {
+      beforeEach(() => {
+        authService.login = jest.fn(() => Promise.resolve(false));
+      });
+
+      it('sets the error', async () => {
+        const { result, waitForNextUpdate } = renderHook(
+          () => useAuthentication(),
+          { wrapper },
+        );
+        await waitForNextUpdate();
+        await act(() => result.current.login('test@test.com', 'P@ssword'));
+        expect(result.current.error).toBeDefined();
+      });
     });
   });
   ...
+});
 ```
+
+Now let's wire up the function.
 
 #### Then Code
 
-**Challenge:** Implement the `logout` method.
+First we need to check and see if `AuthService.login()` returns true or false, then we can dispatch the appropriate action accordingly:
 
-Take note that the only option required in the `fetch` request is `{ method: 'POST' }`.
+**`src/core/auth/useAuthentication.tsx`**
+
+```TypeScript
+...
+export const useAuthentication = () => {
+  ...
+  const login = async (username: string, password: string): Promise<void> => {
+    const isSuccessful = await authService.login(username, password);
+    if (isSuccessful)
+      return dispatch({ type: 'LOGIN_SUCCESS', user: identityService.user! });
+    return dispatch({
+      type: 'LOGIN_FAILURE',
+      error: new Error('Unable to log in, please try again'),
+    });
+  };
+  ...
+};
+```
+
+### Signing Out
+
+`logout()` is much simpler to test and implement - all it needs to do is call `AuthService.logout()` and dispatch the `LOGOUT` action.
+
+The `logout()` method needs to POST to the logout endpoint and then clear the identity information.
+
+#### Test First
+
+Place the following describe block in the test file:
+
+**`src/core/auth/useAuthentication.test.tsx`**
+
+```TypeScript
+describe('logout', () => {
+  beforeEach(() => {
+    identityService['_user'] = mockUser;
+    authService.logout = jest.fn(() => {
+      identityService['_user'] = undefined;
+      return Promise.resolve();
+    });
+  });
+
+  it('sets the status to unauthenticated', async () => {
+    const { result, waitForNextUpdate } = renderHook(
+      () => useAuthentication(),
+      { wrapper },
+    );
+    await waitForNextUpdate();
+    await act(() => result.current.login('test@test.com', 'P@ssword'));
+    await act(() => result.current.logout());
+    expect(result.current.status).toEqual('unauthenticated');
+  });
+
+  it('sets the user to undefined', async () => {
+    const { result, waitForNextUpdate } = renderHook(
+      () => useAuthentication(),
+      { wrapper },
+    );
+    await waitForNextUpdate();
+    await act(() => result.current.login('test@test.com', 'P@ssword'));
+    await act(() => result.current.logout());
+    expect(result.current.user).not.toBeDefined();
+  });
+});
+```
+
+In order to properly test `logout()` our tests first need to be in a state where the user has signed in.
+
+#### Then Code
+
+**Challenge:** Implement `logout()` such that the tests pass.
+
+## Updating the UI
+
+Now that our hook is complete, it's start to let our pages consume it. We'll start off by wiring up the login page, then add the ability to sign out from the tea page.
+
+### Wiring up Login
+
+Open `src/login/LoginPage.tsx` and take a look at the button that handles submission. Currently, it only prints out the form data to the console - and the data isn't typed either!
+
+Let's type our form data. Make the following modifications where we destructure `useForm()`:
+
+**`src/login/LoginPage.tsx`**
+
+```TypeScript
+...
+const LoginPage: React.FC = () => {
+  const { handleSubmit, control, formState, errors } = useForm<{
+    email: string;
+    password: string;
+  }>({
+    mode: 'onChange',
+  });
+  ...
+};
+export default LoginPage;
+```
+
+Now we need to import our `useAuthentication()` hook so that we can call our login function:
+
+```TypeScript
+...
+const LoginPage: React.FC = () => {
+  const { login } = useAuthentication();
+  const { handleSubmit, control, formState, errors } = useForm<{...}>({...});
+
+  const handleLogin = async (data: { email: string; password: string }) => {
+    await login(data.email, data.password);
+  };
+
+  return (
+    ...
+    <IonButton
+      expand="full"
+      disabled={!formState.isValid}
+      onClick={handleSubmit(data => handleLogin(data))}
+    >
+      Sign In
+      <IonIcon slot="end" icon={logInOutline} />
+    </IonButton>
+    ...
+  );
+};
+export default LoginPage;
+```
+
+Finally, we want to redirect the user to the tea page after they have signed in. However, if the sign in failed, we should also print the `error` from `useAuthentication()`. To programmatically redirect the user, we will need to pull in the `useHistory()` hook provided by React Router.
+
+Make the following changes:
+
+```TypeScript
+...
+import { useHistory } from 'react-router';
+
+const LoginPage: React.FC = () => {
+  const { login, status, error } = useAuthentication();
+  const history = useHistory();
+  ...
+
+  useEffect(() => {
+    status === 'authenticated' && history.replace('/tea');
+  }, [status, history]);
+
+  return (
+    ...
+    <div className="error-message">
+      ...
+      <div>
+        {errors.password?.type === 'required' && 'Password is required'}
+      </div>
+      {error && <div>{error.message}</div>}
+    </div>
+    ...
+  );
+};
+export default LoginPage;
+```
+
+Go ahead and change your browser's URL to http://localhost:8100/login and test this out!
+
+### Adding Logout
+
+Our application doesn't have a visual cue to sign out, but we know we'll want one. For now, we'll add it to the header of the tea page.
+
+Let's go ahead and write the logic to handle signing out:
+
+**`src/tea/TeaPage.tsx`**
+
+```TypeScript
+...
+import { useHistory } from 'react-router';
+import { useAuthentication } from '../core/auth';
+...
+
+const TeaPage: React.FC = () => {
+  const { logout } = useAuthentication();
+  const history = useHistory();
+
+  const handleLogout = async () => {
+    await logout();
+    history.replace('/login');
+  };
+
+  return (...);
+};
+export default TeaPage;
+```
+
+**Challenge:** Have a look at the <a href="https://ionicframework.com/docs/api/toolbar" target="_blank">IonToolbar</a> documentation and add a button in the end slot. Use the `logOutOutline` icon and wire the button up to `handleLogout`.
+
+## Protecting our Routes
+
+Now we can sign in and out of our application, but there is one problem left. Unauthenticated users can still view the tea page. Ideally, they should be redirected to the login page to login first.
+
+There's a few ways we could approach this. We could use `useAuthentication()` to check the authentication `status` on the tea page, and navigate the user to the login page if they aren't signed in - but that won't scale as we add more pages to our application. We could check the status on the main `<App />` component and redirect the user to the login page there - but that would cause unneccesary component re-renders.
+
+Take a look at this route we have in place in `App.tsx`:
+
+```JSX
+<Route exact path="/" render={() => <Redirect to="/tea" />} />
+```
+
+What if we "extended" the `Route` component and added in logic to check the user's current authentication status?
+
+### `ProtectedRoute` Component
+
+Start by creating a new file in `src/core/auth` named `ProtectedRoute.tsx`:
+
+**`src/core/auth/ProtectedRoute.tsx`**
+
+```TypeScript
+import React from 'react';
+import { Route, Redirect, RouteProps } from 'react-router';
+import { useAuthentication } from './useAuthentication';
+
+export const ProtectedRoute: React.FC = () => {
+  const { status } = useAuthentication();
+
+  return <Route render={() => <Redirect to="/login" />} />;
+};
+```
+
+Here we are getting the current authentication `status` of the user and using `render` to redirect them to the login page, satisfying the case where the user is unauthenticated.
+
+The `Route` component can take in additional props; if we want to treat our `ProtectedRoute` component as if it extends `Route` we should accomodate those props too:
+
+```TypeScript
+...
+export const ProtectedRoute: React.FC<RouteProps> = ({ ...rest }) => {
+  const { status } = useAuthentication();
+
+  return <Route {...rest} render={() => <Redirect to="/login" />} />;
+};
+```
+
+We'll use the spread operator to set the `rest` of props passed in to `ProtectedRoute` on the inner `Route` component, which makes our component comparable to subclassing in OOP (i.e., `ProtectedRoute extends Route`).
+
+Now we just need a way to render pages when the user is authenticated. We should create a prop named `component`:
+
+```TypeScript
+...
+interface ProtectedRouteProps extends RouteProps {
+  component: React.ComponentType<any>;
+}
+
+export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
+  component: Component,
+  ...rest
+}) => {
+  const { status } = useAuthentication();
+
+  return <Route {...rest} render={(props) =>
+    status === 'authenticated' ? <Component {...props} /> : <Redirect to="/login" />
+  } />;
+};
+```
+
+Don't forget to update the barrel file for `src/core/auth` and let's start using the component.
+
+### Using `ProtectedRoute`
+
+Using our `ProtectedRoute` component is trivial, it's a drop-in replacement for `Route`.
+
+Open `src/App.tsx` and add the import for `ProtectedRoute` then replace the `Route` component for the `/tea` path with the following line:
+
+```JSX
+<ProtectedRoute path="/tea" component={TeaPage} exact={true} />
+```
+
+Your `App` template should look like this once complete:
+
+**`src/App.tsx`**
+
+```TypeScript
+const App: React.FC = () => {
+ ...
+  return (
+    <IonApp>
+      <IonReactRouter>
+        <IonRouterOutlet>
+          <Route path="/login" component={LoginPage} exact={true} />
+          <ProtectedRoute path="/tea" component={TeaPage} exact={true} />
+          <Route exact path="/" render={() => <Redirect to="/tea" />} />
+        </IonRouterOutlet>
+      </IonReactRouter>
+    </IonApp>
+  );
+};
+
+export default App;
+```
+
+That's literally it. Head to Chrome, sign out of the application you have to and try to navigate to the tea page by modifying the URL bar. We'll always be taken to the login page unless we are logged in.
 
 ## Conclusion
 
-Now we have two singletons that connect to data services. Next, we're going to use them to derive application state and control routing.
+Congratulations, your application has been hooked up for authentication! Along the way you've learned about state management, singletons, custom React hooks, the React Context API and a little bit about reusable components. Next we will swap our mock tea data with real data from the back end.
