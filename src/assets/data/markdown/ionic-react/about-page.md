@@ -11,7 +11,9 @@ Every good app gives credit where credit is due. We will use a traditional "Abou
 
 ## About Page
 
-The about page will use properties from `package.json` to display in an `IonList`. The full code for `src/about/About.tsx` can be found below:
+The about page will use properties from `package.json` to display in an `IonList`. The full code for `src/about/AboutPage.tsx` can be found below:
+
+**`src/about/AboutPage.tsx`**
 
 ```TypeScript
 import React from 'react';
@@ -27,7 +29,6 @@ import {
   IonToolbar,
 } from '@ionic/react';
 import { author, name, description, version } from '../../package.json';
-import './About.css';
 
 const About: React.FC = () => {
   return (
@@ -72,7 +73,9 @@ export default About;
 
 Currently, the way an application user would sign out is through the tea listing page. Once a user has logged in, it's doubtful that they'll want to log out. It makes more sense to put that functionality on a page like "My Account" or "My Profile". We don't have one of those pages, so this page will do for now.
 
-Here is the full test file for `About.test.tsx`:
+Here is the full test file for `AboutPage.test.tsx`:
+
+**`src/about/AboutPage.test.tsx`**
 
 ```TypeScript
 import React from 'react';
@@ -118,7 +121,7 @@ describe('<AboutPage />', () => {
 });
 ```
 
-I leave it to you to move the proper code from `TeaList` to the about page and then clean up any unused items.
+I leave it to you to move the proper code from `TeaPage` to the about page and then clean up any unused items.
 
 ## Conclusion
 
