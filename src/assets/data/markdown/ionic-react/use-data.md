@@ -73,7 +73,7 @@ const TeaPage: React.FC = () => {
   ...
 
   useEffect(() => {
-    const init = async () => await getTeas());
+    const init = async () => await getTeas();
     init();
   }, [getTeas]);
 

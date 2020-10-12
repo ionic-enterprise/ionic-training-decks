@@ -267,7 +267,7 @@ Next we will make use of the `Controller` component. Modify the `<form>` of the 
           required: true,
           pattern: {
             value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i,
-            message: 'invalid email address',
+            message: 'E-Mail Address must have a valid format',
           },
         }}
         defaultValue={''}
@@ -457,7 +457,7 @@ describe('<LoginPage />', () => {
       expect(errorDiv).toHaveTextContent(expected);
     });
 
-    it('displays an error messae if the e-mail address has an invalid format', async () => {
+    it('displays an error message if the e-mail address has an invalid format', async () => {
       const expected = /E-Mail Address must have a valid format/;
       // Fill in this test.
     });
@@ -516,6 +516,8 @@ Create a new file in `src/theme` called `global.css` and add the following CSS c
 ```
 
 For this style to be applied across the application we need to import the file into `App.tsx`:
+
+**`src/App.tsx`**
 
 ```TypeScript
 ...

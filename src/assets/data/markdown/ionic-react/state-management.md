@@ -40,7 +40,7 @@ A good place to start is to define the authentication state that we want to shar
 import React from 'react';
 import { User } from '../models';
 
-type AuthStatus = 'pending' | 'authenticated' | 'error';
+type AuthStatus = 'pending' | 'authenticated' | 'unauthenticated';
 
 export interface AuthState {
   status: AuthStatus;
@@ -75,7 +75,7 @@ Any properties after `type` are known as an action's payload.
 With our state and actions defined, we can now create a reducer function that will update our authentication state. Add the following function to `AuthContext.tsx`:
 
 ```TypeScript
-export const authReducer = (
+const reducer = (
   state: AuthState = initialState,
   action: AuthAction
 ): AuthState => {

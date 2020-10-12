@@ -472,7 +472,7 @@ We're not done yet; right now `getTeas()` and `getTeaById()` will return unresol
 ```TypeScript
 ...
 const getTeaById = useCallback(async (id: number): Promise<Tea> => {
-  const url = `${process.env.REACT_APP_DATA_SERVICE}/tea-categories/${id}`;
+  const url = `/tea-categories/${id}`;
   const { data } = await apiInstance.get(url);
   return await fromJsonToTea(data);
 }, []);
@@ -484,7 +484,7 @@ Fixing `getTeas()` is a bit trickier. We still need to add the `async` keyword t
 ```TypeScript
 ...
 const getTeas = useCallback(async (): Promise<Tea[]> => {
-  const url = `${process.env.REACT_APP_DATA_SERVICE}/tea-categories`;
+  const url = `/tea-categories`;
   const { data } = await apiInstance.get(url);
   return await Promise.all(
     data.map(async (item: any) => await fromJsonToTea(item)),
