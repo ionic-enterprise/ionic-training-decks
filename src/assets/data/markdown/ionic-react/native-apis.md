@@ -190,7 +190,7 @@ describe('<App />', () => {
     });
 
     describe('in an iOS context', () => {
-      beforeEach(() => (isPlatform as any).mockImplementation(() => false));
+      beforeEach(() => (isPlatform as any).mockImplementation(() => true));
       ...
       afterEach(() => (isPlatform as any).mockRestore());
     });

@@ -28,7 +28,7 @@ I suggest adding additional test script configurations in the `package.json` fil
 
 ```json
   "scripts": {
-    "build": "react-scripts test",
+    "build": "react-scripts build",
     "eject": "react-scripts eject",
     "start": "react-scripts start",
     "test": "react-scripts test",

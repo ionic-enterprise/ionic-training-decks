@@ -133,9 +133,7 @@ Open `TeaDetailsPage.tsx` and make the following adjustments:
 ```TypeScript
 import React from 'react';
 import { useParams } from 'react-router';
-import {
-  ...
-} from '@ionic/react';
+import { ... } from '@ionic/react';
 
 const TeaDetailsPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();

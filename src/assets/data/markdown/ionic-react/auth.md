@@ -24,7 +24,6 @@ Add two files to `src/core/services`: `AuthService.ts` and `AuthService.test.ts`
 
 ```TypeScript
 import Axios from 'axios';
-jest.mock('axios');
 import { IdentityService } from './IdentityService';
 import { User } from '../models';
 import { AuthService } from './AuthService';
@@ -243,6 +242,7 @@ describe('useAuthentication', () => {
     cleanup();
     jest.restoreAllMocks();
   });
+});
 ```
 
 Make note of `wrapper`. We need a way to gain access to `AuthContext`, so we create a component wherein the children are wrapped by `<AuthProvider />`.

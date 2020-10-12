@@ -138,24 +138,24 @@ import { TastingNote } from '../shared/models';
 
 export const useTastingNotes = () => {
   const getNotes = useCallback(async (): Promise<Array<TastingNote>> => {
-    const url = `${process.env.REACT_APP_DATA_SERVICE}/user-tasting-notes`;
+    const url = `/user-tasting-notes`;
     const { data } = await apiInstance.get(url);
     return data;
   }, []);
 
   const getNoteById = useCallback(async (id: number): Promise<TastingNote> => {
-    const url = `${process.env.REACT_APP_DATA_SERVICE}/user-tasting-notes/${id}`;
+    const url = `/user-tasting-notes/${id}`;
     const { data } = await apiInstance.get(url);
     return data;
   }, []);
 
   const deleteNote = async (id: number): Promise<void> => {
-    const url = `${process.env.REACT_APP_DATA_SERVICE}/user-tasting-notes/${id}`;
+    const url = `/user-tasting-notes/${id}`;
     await apiInstance.delete(url);
   };
 
   const saveNote = async (note: TastingNote) => {
-    let url = `${process.env.REACT_APP_DATA_SERVICE}/user-tasting-notes`;
+    let url = `/user-tasting-notes`;
     if (note.id) url += `/${note.id}`;
     await apiInstance.post(url, note);
   };
@@ -200,7 +200,7 @@ describe('<TastingNoteEditor />', () => {
 
 ```TypeScript
 import React from 'react';
-import { IonContent, IonFooter, IonHeader } from '@ionic/react';
+import { IonContent, IonFooter, IonHeader, IonTitle, IonToolbar } from '@ionic/react';
 
 const TastingNoteEditor: React.FC = () => {
   return (
@@ -257,12 +257,21 @@ Since we have an optional prop, we should update our test file so that it genera
 **`src/tasting-note/editor/TastingNoteEditor.test.tsx`**
 
 ```TypeScript
+...
+const mockNote = {
+  id: 4,
+  brand: 'Lipton',
+  name: 'Yellow Label',
+  notes: 'Overly acidic, highly tannic flavor',
+  rating: 1,
+  teaCategoryId: 3,
+};
+
 describe('<TastingNoteEditor />', () => {
   let component: any;
   let mockDismiss = jest.fn();
 
   beforeEach(() => (component = <TastingNoteEditor onDismiss={mockDismiss} />));
-
 
   describe('save', () => {
     it('renders consistently', async () => {
@@ -281,6 +290,7 @@ describe('<TastingNoteEditor />', () => {
       await wait(() => expect(asFragment()).toMatchSnapshot());
     });
   });
+  ...
 ```
 
 ### Hooking Up the Modal
@@ -766,6 +776,23 @@ const mockNotes: Array<TastingNote> = [
     notes: 'Overly acidic, highly tannic flavor',
     rating: 1,
     teaCategoryId: 3,
+  },
+];
+
+const mockTeas = [
+  {
+    id: 7,
+    name: 'White',
+    image: 'assets/img/white.jpg',
+    description: 'White tea description.',
+    rating: 5,
+  },
+  {
+    id: 8,
+    name: 'Yellow',
+    image: 'assets/img/yellow.jpg',
+    description: 'Yellow tea description.',
+    rating: 3,
   },
 ];
 
