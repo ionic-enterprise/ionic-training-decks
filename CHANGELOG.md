@@ -1,3 +1,9 @@
+## [4.0.5](https://github.com/ionic-team/ionic-training-decks/compare/v4.0.4...v4.0.5) (2020-10-13)
+
+### Bug Fixes
+
+- **docs:** misc. code and typo fixes ([8aaa79c](https://github.com/ionic-team/ionic-training-decks/commit/8aaa79c1740cc7e5b2acae0d6ddea6a2446378c6))
+
 ## [4.0.4](https://github.com/ionic-team/ionic-training-decks/compare/v4.0.3...v4.0.4) (2020-10-08)
 
 ## 4.0.3 (2020-10-08)
