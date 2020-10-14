@@ -101,8 +101,12 @@ For this application:
 
 - create a `resources` directory at the root level of the application (`mkdir resources`)
 - download the following images to the newly created `resources` directory
-- <a download href="/assets/packages/ionic-angular/icon.png">icon.png</a>
-- <a download href="/assets/packages/ionic-angular/splash.png">splash.png</a>
+  - <a download href="/assets/packages/ionic-angular/icon.png">icon.png</a>
+  - <a download href="/assets/packages/ionic-angular/splash.png">splash.png</a>
+- create an `android` directory under the `resources` directory (`mkdir resources/android`)
+- download the following images to the newly created `resources/android` directory
+  - <a download href="/assets/packages/ionic-angular/icon-background.png">icon-background.png</a>
+  - <a download href="/assets/packages/ionic-angular/icon-foreground.png">icon-foreground.png</a>
 
 To generate the required resources and copy them to the native projects, use the following commands:
 
