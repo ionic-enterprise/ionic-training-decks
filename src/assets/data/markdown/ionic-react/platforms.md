@@ -84,6 +84,11 @@ For this application, download the following images and place them in a director
 - <a download href="/assets/packages/ionic-react/icon.png">icon.png</a>
 - <a download href="/assets/packages/ionic-react/splash.png">splash.png</a>
 
+Create an `android` directory under the `resources` directory. Download the following images to the newly created `resources/android` directory:
+
+- <a download href="/assets/packages/ionic-react/icon-background.png">icon-background.png</a>
+- <a download href="/assets/packages/ionic-react/icon-foreground.png">icon-foreground.png</a>
+
 To generate the required resources and copy them to the native projects, use the following commands:
 
 ```bash
