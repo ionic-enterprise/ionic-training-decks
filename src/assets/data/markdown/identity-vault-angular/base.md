@@ -1,6 +1,6 @@
 # Lab: The Base Application
 
-This training starts with an Ionic Framework application that uses `@ionic/storage` to store the current authentication token in a local storage mechanism. This is a common paradigm used in web applications. For hybrid mobile applications, however, we can go a step further and store the token in a secure storage area, and also lock the token behind biometric or PIN based security.
+This training starts with an Ionic Framework application that uses the Capacitor Storage API to store the current authentication token. This is a common paradigm used in web applications. For hybrid mobile applications, however, we can go a step further and store the token in a secure storage area. We can also lock the token behind biometric or PIN based security.
 
 ## Getting Started
 
@@ -8,15 +8,16 @@ These instrctions assume that you have a reasonable development environment set 
 
 To get started, perform the following actions within a working folder:
 
-- `git clone https://github.com/ionic-team/iv-training-starter.git`
-- `cd iv-training-starter`
+- `git clone https://github.com/ionic-team/tea-taster-angular.git`
+- `cd tea-taster-angular`
 - `npm i`
 - `npm run build`
-- `npx cap update` - this may take a while
-- `npm run build`
+- `npx cap sync` - this may take a while
 - `npm start` - to run in the browser
 
 To build for installation on a device, use `npx cap open android` or `npx cap open ios`. This will open the project in the appropriate IDE. From there you can build the native application and install it on your device.
+
+**Note:** If you recently participated in the Ionic Framework training, this repo is the end result of that training, so you can use your existing codebase if you wish. You can start with a clean slate following the instructions above.
 
 ## General Architecture
 
@@ -30,91 +31,87 @@ The `IdentityService` defines the identity of the currently logged in user inclu
 
 ##### Construction
 
-This service is registered with the dependency injection engine such that it is availale to the whole application. All of the data controlled by this service is private. Consumers must interact with the data via the public methods. A `changed` subject is created so other parts of the application can know when the user has changed, allowing then to requery data as needed.
+This service is registered with the dependency injection engine such that it is availale to the whole application. All of the data controlled by this service is private. Consumers must interact with the data via the getters. A `changed` subject is created so other parts of the application can know when the user has changed, allowing then to requery data as needed.
 
 ```TypeScript
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class IdentityService {
-  private tokenKey = 'auth-token';
-  private token: string;
-  private user: User;
+  private key = 'auth-token';
+  /* tslint:disable:variable-name */
+  private _changed: Subject<User>;
+  private _token: string;
+  private _user: User;
+  /* tslint:enable:variable-name */
 
-  changed: Subject<User>;
+  get changed(): Observable<User> {
+    return this._changed.asObservable();
+  }
 
-  constructor(private http: HttpClient, private storage: Storage) {
-    this.changed = new Subject();
+  get token(): string {
+    return this._token;
+  }
+
+  get user(): User {
+    return this._user;
+  }
+
+  constructor(private http: HttpClient) {
+    this._changed = new Subject();
   }
   ...
-}
 ```
+
+##### `init()` - Get the Current User
+
+Our API has a `users/current` endpoint that returns the `User` that is assciated with whichever authentication token is sent in the request. The `init()` method determines if the application has a stored token, and if so it gets the user information associated with that token.
+
+```TypeScript
+  async init(): Promise<void> {
+    const { Storage } = Plugins;
+    const res = await Storage.get({ key: this.key });
+    this._token = res && res.value;
+    if (this._token) {
+      this.http
+        .get<User>(`${environment.dataService}/users/current`)
+        .pipe(take(1))
+        .subscribe(u => (this._user = u));
+    }
+  }
+```
+
+This allows our application to retrieve information about the currently logged in user after a restart. This method is called as part of the application bootstrap workflow.
 
 ##### `set()` - Set the Current User and Token
 
-The `set()` method takes a `User` object and a token. The `User` object is cached locally and the token is stored in a local storage mechanism. The `changed` subject is also fired. This method should be called as part of the login workflow.
+The `set()` method takes a `User` object and a token. The `User` object is cached locally and the token is stored via the Capacitor Storage API. The `changed` subject is also fired. This method is called as part of the login workflow.
 
 ```TypeScript
   async set(user: User, token: string): Promise<void> {
-    this.user = user;
-    await this.setToken(token);
-    this.changed.next(this.user);
+    this._user = user;
+    this._token = token;
+    const { Storage } = Plugins;
+    await Storage.set({ key: this.key, value: token });
+    this._changed.next(user);
   }
 ```
 
-##### `get()` - Get the Current User
+##### `clear()` - Remove the User and the Token
 
-Our API has a `users/current` endpoint that returns the `User` that is assciated with whichever authentication token is sent in the request. Our application will then do one of the following with any `get()` call:
-
-- A `User` will already be cached (either from a `set()` call or a prior `get()` call), that user will be returned
-- A `User` is not cached so we make an API call to get the user, in which case:
-  - An HTTP interceptor applies the currently stored token
-  - The call returns the user associated with that token and the user is cached
-  - If a token does not exist or is invalid, a 401 is generated by the API
+The user and the token are removed from memory and from Capacitor Storage.
 
 ```TypeScript
-  get(): Observable<User> {
-    if (!this.user) {
-      return this.http
-        .get<User>(`${environment.dataService}/users/current`)
-        .pipe(tap(u => (this.user = u)));
-    } else {
-      return of(this.user);
-    }
+  async clear(): Promise<void> {
+    this._user = undefined;
+    this._token = undefined;
+    const { Storage } = Plugins;
+    await Storage.remove({ key: this.key });
+    this._changed.next();
   }
 ```
 
-This allows our application to retrieve information about the currently logged in user after a restart. This method could be called as part of the bootstrap workflow or at any other time that data about the currently logged in user is required.
-
-##### `getToken()` - Get the Current Token
-
-The `getToken()` method returns the currently set token. If no token is currently set, it attempts to retrieve a token from a local storage mechanism.
-
-```TypeScript
-  async getToken(): Promise<string> {
-    if (!this.token) {
-      await this.storage.ready();
-      this.token = await this.storage.get(this.tokenKey);
-    }
-    return this.token;
-  }
-```
-
-This method is most commonly used whenever an HTTP call is made so the token can be added to the headers of the call. In this application, the logic that performs that action has been abstracted into an HTTP interceptor.
-
-##### `remove()` - Remove the User and the Token
-
-The user and the token are removed from memory and from the local storage mechanism.
-
-```TypeScript
-  async remove(): Promise<void> {
-    this.user = undefined;
-    await this.setToken('');
-    this.changed.next(this.user);
-  }
-```
-
-This method should be called as part of the login workflow.
+This method is called as part of the logout workflow.
 
 #### AuthenticationService
 
@@ -122,24 +119,18 @@ The `AuthenticationService` handles the POSTs to the login and logout endpoints.
 
 ### HTTP Interceptors
 
-Two HTTP interceptors are used by the authentication workflow. One interceptor adds the authentication token to outgoing requests that require a token. The other interceptor redirects the application to the login page when requests fail with a 401 error.
+Two HTTP interceptors are used by the authentication workflow. The `AuthInterceptor` adds the authentication token to outgoing requests if they require a token. The `UnauthInterceptor` redirects the application to the login page when requests fail with a 401 error.
 
-#### AuthInterceptor
+### Auth Guard
 
-This interceptor adds the authentication token to the outgoing requests that require a token. For this application, that is every request that is not itself the `login` request.
-
-#### UnauthInterceptor
-
-This interceptor handles 401 errors, which are returned if the user is not logged in. It handles this situation by redirecting the application to the login page.
+This application uses an Route Guard to ensure that the user is logged in before accessing any routes other than the login page route. See `src/app/core/auth-guard/auth-guard.service.ts` for details.
 
 ### Application Workflow
 
 #### Startup
 
-Upon starting up, the application attempts to load the `TeaCategoriesPage`. Three scenarios are possible at this point:
+The `IdentityService` initialization has been added to the `APP_INITIALIZER`, ensuring that if a token exists it will be obtained before attempting to load any route. The application attempts to load the `TeaPage`. If there was no token stored from a previous login, then the Auth Guard will redirect the application to the `LoginPage` instead.
 
-- A valid token has been stored from a previous session
-- A token has been stored from a previous session but is no longer valid
-- A token has not been stored from a previous session
+#### Execution
 
-In the first scenario, the `TeaCategoriesPage` successfully loads the tea categories and the use can continue using the application. In the last two scenarios, the API will return a 401 error, the `UnauthInterceptor will kick in, and the user will be redirected to the login page.
+The `AppComponent` subscribes to the `IdentityService` `changed` Observable. If the identity changes, the application will automatically redirect to either the `LoginPage` or the `TeaPage` depeding on the value emitted by the Observable.

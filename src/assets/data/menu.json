@@ -253,12 +253,12 @@
               "file": "base"
             },
             {
-              "title": "Identity Service",
-              "file": "identity-service"
+              "title": "Install Identity Vault",
+              "file": "install"
             },
             {
-              "title": "Make it Work in the Browser",
-              "file": "browser-service"
+              "title": "Identity Service",
+              "file": "identity-service"
             },
             {
               "title": "Add Biometrics to Login",
@@ -267,6 +267,10 @@
             {
               "title": "Customize the PIN Dialog",
               "file": "custom-pin"
+            },
+            {
+              "title": "Other Configurations",
+              "file": "other-options"
             }
           ]
         },
