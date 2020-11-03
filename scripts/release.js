@@ -10,7 +10,15 @@ const rimraf = require('rimraf');
 const semver = require('semver');
 
 const rootDir = path.join(__dirname, '../');
-const SEMVER_INCREMENTS = ['patch', 'minor', 'major', 'prepatch', 'preminor', 'premajor', 'prerelease'];
+const SEMVER_INCREMENTS = [
+  'patch',
+  'minor',
+  'major',
+  'prepatch',
+  'preminor',
+  'premajor',
+  'prerelease',
+];
 
 function runTasks(oldVersion, inc) {
   const newVersion = semver.inc(oldVersion, inc);
@@ -23,34 +31,50 @@ function runTasks(oldVersion, inc) {
             {
               title: 'Checking Git Status',
               task: async () => {
-                const { stdout } = await execa('git', ['status', '--porcelain']);
+                const { stdout } = await execa('git', [
+                  'status',
+                  '--porcelain',
+                ]);
                 if (stdout !== '') {
-                  throw new Error('Unclean working tree. Commit or stash changes first.');
+                  throw new Error(
+                    'Unclean working tree. Commit or stash changes first.',
+                  );
                 }
-              }
+              },
             },
             {
               title: 'Checking Current Branch',
               task: async () => {
-                const { stdout } = await execa('git', ['symbolic-ref', '--short', 'HEAD']);
-                if (stdout !== 'master') {
-                  throw new Error('Not on `master` branch.');
+                const { stdout } = await execa('git', [
+                  'symbolic-ref',
+                  '--short',
+                  'HEAD',
+                ]);
+                if (stdout !== 'main') {
+                  throw new Error('Not on `main` branch.');
                 }
-              }
+              },
             },
             {
               title: 'Checking Remote History',
               task: async () => {
-                const { stdout } = await execa('git', ['rev-list', '--count', '--left-only', '@{u}...HEAD']);
+                const { stdout } = await execa('git', [
+                  'rev-list',
+                  '--count',
+                  '--left-only',
+                  '@{u}...HEAD',
+                ]);
                 if (stdout !== '0') {
-                  throw new Error('Remote history differ. Please pull changes.');
+                  throw new Error(
+                    'Remote history differ. Please pull changes.',
+                  );
                 }
-              }
-            }
+              },
+            },
           ],
-          { concurrent: true }
+          { concurrent: true },
         );
-      }
+      },
     },
     {
       title: 'Cleaning',
@@ -63,15 +87,15 @@ function runTasks(oldVersion, inc) {
               resolve();
             }
           });
-        })
+        }),
     },
     {
       title: 'Installing',
-      task: () => execa('npm', ['install'], { cwd: rootDir })
+      task: () => execa('npm', ['install'], { cwd: rootDir }),
     },
     {
       title: 'Test Build',
-      task: () => execa('npm', ['run', 'build'], { cwd: rootDir })
+      task: () => execa('npm', ['run', 'build'], { cwd: rootDir }),
     },
     {
       title: 'Testing',
@@ -80,48 +104,51 @@ function runTasks(oldVersion, inc) {
           [
             {
               title: 'Unit Tests',
-              task: () => execa('npm', ['run', 'test:ci'], { cwd: rootDir })
+              task: () => execa('npm', ['run', 'test:ci'], { cwd: rootDir }),
             },
             {
               title: 'Lint',
-              task: () => execa('npm', ['run', 'lint'], { cwd: rootDir })
-            }
+              task: () => execa('npm', ['run', 'lint'], { cwd: rootDir }),
+            },
           ],
-          { concurrent: true }
-        )
+          { concurrent: true },
+        ),
     },
     {
       title: 'Bumping',
-      task: () => execa('npm', ['run', 'bump', inc], { cwd: rootDir })
+      task: () => execa('npm', ['run', 'bump', inc], { cwd: rootDir }),
     },
     {
       title: 'Generating Changelog',
-      task: () => execa('npm', ['run', 'changelog'], { cwd: rootDir })
+      task: () => execa('npm', ['run', 'changelog'], { cwd: rootDir }),
     },
     {
       title: 'Updating package-lock.json via install',
-      task: () => execa('npm', ['install'], { cwd: rootDir })
+      task: () => execa('npm', ['install'], { cwd: rootDir }),
     },
     {
       title: 'Committing',
-      task: () => execa('git', ['commit', `-am chore(release): release ${newVersion}`], { cwd: rootDir })
+      task: () =>
+        execa('git', ['commit', `-am chore(release): release ${newVersion}`], {
+          cwd: rootDir,
+        }),
     },
     {
       title: 'Tagging',
-      task: () => execa('git', ['tag', `v${newVersion}`], { cwd: rootDir })
+      task: () => execa('git', ['tag', `v${newVersion}`], { cwd: rootDir }),
     },
     {
       title: 'Pushing to Github',
-      task: () => execa('git', ['push', '--follow-tags'], { cwd: rootDir })
+      task: () => execa('git', ['push', '--follow-tags'], { cwd: rootDir }),
     },
     {
       title: 'Production Build',
-      task: () => execa('npm', ['run', 'build'], { cwd: rootDir })
+      task: () => execa('npm', ['run', 'build'], { cwd: rootDir }),
     },
     {
       title: 'Deploying',
-      task: () => execa('firebase', ['deploy'], { cwd: rootDir })
-    }
+      task: () => execa('firebase', ['deploy'], { cwd: rootDir }),
+    },
   ]);
 
   return tasks.run();
@@ -132,7 +159,9 @@ function releaseUI() {
   const oldVersion = pkg.version;
 
   console.log(
-    `\nPrepare to release a new version of ${chalk.bold.magenta(pkg.name)} ${chalk.dim(`(${oldVersion})`)}\n`
+    `\nPrepare to release a new version of ${chalk.bold.magenta(
+      pkg.name,
+    )} ${chalk.dim(`(${oldVersion})`)}\n`,
   );
 
   const prompts = [
@@ -143,18 +172,18 @@ function releaseUI() {
       pageSize: SEMVER_INCREMENTS.length,
       choices: SEMVER_INCREMENTS.map(inc => ({
         name: `${inc}   ${prettyVersionDiff(oldVersion, inc)}`,
-        value: inc
-      }))
+        value: inc,
+      })),
     },
     {
       type: 'confirm',
       name: 'confirm',
       message: answers => {
-        return `Are you sure you want to bump the version from ${chalk.cyan(oldVersion)} to ${chalk.cyan(
-          semver.inc(oldVersion, answers.inc)
-        )}?`;
-      }
-    }
+        return `Are you sure you want to bump the version from ${chalk.cyan(
+          oldVersion,
+        )} to ${chalk.cyan(semver.inc(oldVersion, answers.inc))}?`;
+      },
+    },
   ];
 
   return inquirer
