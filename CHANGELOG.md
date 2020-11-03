@@ -1,3 +1,15 @@
+# [4.1.0](https://github.com/ionic-team/ionic-training-decks/compare/v4.0.2...v4.1.0) (2020-11-03)
+
+### Bug Fixes
+
+- **docs:** misc. code and typo fixes ([8aaa79c](https://github.com/ionic-team/ionic-training-decks/commit/8aaa79c1740cc7e5b2acae0d6ddea6a2446378c6))
+- **framework:** generate Android adaptive icons ([#41](https://github.com/ionic-team/ionic-training-decks/issues/41)) ([f6d07a1](https://github.com/ionic-team/ionic-training-decks/commit/f6d07a1f83ae4c6aa5f5052a93543b92d59bc51e))
+
+### Features
+
+- **identity-vault:** update the IV Angular labs for the tea taster app ([75111ec](https://github.com/ionic-team/ionic-training-decks/commit/75111ec061477c83fcc6ad525bf302831e77337c))
+- **react:** cleanup the training flow ([#38](https://github.com/ionic-team/ionic-training-decks/issues/38)) ([1eb2839](https://github.com/ionic-team/ionic-training-decks/commit/1eb2839dbef867bb07f808e86fd438b96870a067))
+
 ## [4.0.5](https://github.com/ionic-team/ionic-training-decks/compare/v4.0.4...v4.0.5) (2020-10-13)
 
 ### Bug Fixes
