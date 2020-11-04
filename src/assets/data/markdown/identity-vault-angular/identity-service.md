@@ -460,7 +460,9 @@ From here, we have the tests we need in place in order to properly change the co
 ```typescript
   async canActivate(): Promise<boolean> {
     if (!this.identity.token) {
-      await this.identity.restoreSession();
+      try {
+        await this.identity.restoreSession();
+      } catch (e) {}
     }
 
 
@@ -471,6 +473,8 @@ From here, we have the tests we need in place in order to properly change the co
     return false;
   }
 ```
+
+Note the `try ... catch` block. If there is some sort of exception trying to unlock the vault, we will end up with no token set and will redirect to the login screen. This is what we want rather than never returning and leaving the user in limbo.
 
 ## The Auth Interceptor
 
