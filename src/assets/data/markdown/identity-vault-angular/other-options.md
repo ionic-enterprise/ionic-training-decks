@@ -98,6 +98,8 @@ This can be used for multiple different scenarios. For example, let's say that u
 
 ## Conclusion
 
+If you have a look at the end code in the [Identity Vault branch](https://github.com/ionic-team/tea-taster-angular/tree/feature/identity-vault) you will see that we have implemented some of what was discussed here. We have done that for demo puroses only. It is not a perscribed workflow, but one that you can use as a starting point for your own.
+
 Please play around with some of these options and see how they work within the training application. Note that the approach taken here is not the only valid approach to take. Rather, it is the approach that works for _this_ application. It is a common approach that will work in many instsances, but there are areas in the workflow that you may want to change in your own application.
 
 Please remember that we are here to advise you in this and other implementation details of your application. If you do not have advisory hours on your contract, please let us know. We will be happy to work with you to provide you with options that make sense for your situation.
