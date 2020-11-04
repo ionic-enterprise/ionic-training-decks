@@ -1,3 +1,10 @@
+## [4.1.1](https://github.com/ionic-team/ionic-training-decks/compare/v4.1.0...v4.1.1) (2020-11-04)
+
+### Bug Fixes
+
+- **vault:** add a note about the final version of the IV demo ([fef9b05](https://github.com/ionic-team/ionic-training-decks/commit/fef9b05834c1266ee78adab9074f4f824ed96185))
+- **vault:** wrap guard in try ... catch ([dbac525](https://github.com/ionic-team/ionic-training-decks/commit/dbac5258092954101bcb29ed2d0c9c22e7282b10))
+
 # [4.1.0](https://github.com/ionic-team/ionic-training-decks/compare/v4.0.2...v4.1.0) (2020-11-03)
 
 ### Bug Fixes
