@@ -1,6 +1,6 @@
-# Create a Cordova App
+# Create an Apache Cordova App
 
-Let's create a very simple Cordova application to use for this tutorial. This application will just be one of Ionic's starter applications with the minimal Cordova plugins included.
+Let's create a very simple Ionic Framework based Apache Cordova application to use for this tutorial. This application will just be one of Ionic's starter applications with the minimal Cordova plugins included.
 
 ```bash
 $ ionic start cor-to-cap blank --type=angular --cordova

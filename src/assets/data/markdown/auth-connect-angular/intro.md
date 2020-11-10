@@ -4,4 +4,4 @@ This training demonstrates how to integrate Auth Connect within an Ionic Framewo
 
 - Do some cool things
 
-It is assumed that before taking this training you have a general understanding of how to build a hybrid mobile application using the Ionic Framework with Angular and either Cordova or Capacitor. This training uses Capacitor, but a deep understanding of Capacitor itself is not required.
+It is assumed that before taking this training you have a general understanding of how to build a hybrid mobile application using the Ionic Framework with Angular and either Apache Cordova or Capacitor. This training uses Capacitor, but a deep understanding of Capacitor itself is not required.

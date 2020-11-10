@@ -88,7 +88,7 @@ Before taking this step, make sure you have `cordova-res` installed globally by 
 $ npm i -g cordova-res
 ```
 
-`cordova-res` is a tool that is used to create icon and splash screen images. Despite the name, it can be used both with Cordova and Capacitor applications.
+`cordova-res` is a tool that is used to create icon and splash screen images. Despite the name, it can be used both with Apache Cordova and Capacitor applications.
 
 The application should have its own splash screen and icon rather than using the default that Ionic supplies for you. Ionic provides a service that will take two source image files and create all of the resources that your application will require. Follow these guidelines:
 
