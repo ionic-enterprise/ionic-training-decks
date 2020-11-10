@@ -167,12 +167,20 @@
         {
           "name": "vue",
           "title": "Vue",
-          "folder": "noimp",
+          "folder": "ionic-vue",
           "icon": "logo-vue",
           "pages": [
             {
               "title": "Introduction",
-              "file": "vue"
+              "file": "intro"
+            },
+            {
+              "title": "Getting Started",
+              "file": "start"
+            },
+            {
+              "title": "More Coming Soon...",
+              "file": "construction"
             }
           ]
         }
