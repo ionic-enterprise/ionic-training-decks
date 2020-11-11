@@ -1,3 +1,14 @@
+## [4.1.2](https://github.com/ionic-team/ionic-training-decks/compare/v4.1.1...v4.1.2) (2020-11-11)
+
+### Bug Fixes
+
+- **angular:** create new tea page rather than rename ([a16cb8d](https://github.com/ionic-team/ionic-training-decks/commit/a16cb8da5a0c76fea9222b008b32d9111c151324))
+- **cordova:** use Apache Cordova name as appropriate ([75cfac0](https://github.com/ionic-team/ionic-training-decks/commit/75cfac03794c2a6fba56de00d91c7404aa7508a6))
+
+### Features
+
+- **vue:** document app generation ([d9f2e41](https://github.com/ionic-team/ionic-training-decks/commit/d9f2e4185f1e47f4b40d935c31ab6fafc3c322bb))
+
 ## [4.1.1](https://github.com/ionic-team/ionic-training-decks/compare/v4.1.0...v4.1.1) (2020-11-04)
 
 ### Bug Fixes
