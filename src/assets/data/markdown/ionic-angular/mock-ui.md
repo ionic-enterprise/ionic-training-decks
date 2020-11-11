@@ -109,50 +109,25 @@ Open the `tsconfig.app.json` file and modify the `exclude` section as such:
 
 ### The Tea Page
 
-#### Rename the Home Page
+#### Replacing the Home Page
 
-Our app currently has a page called `home`, but we want to display several types of teas on it. Let's rename that page so we can find it more easily as this application grows. This is a two part operation:
+Our app currently has a page called `home`, but we want to display several types of teas on it. Let's replace that page so we can find it more easily as this application grows. This is a three part operation:
 
-1. move the files
-1. rename the objects
+1. create the tea page
+1. fix the routing
+1. remove the home page
 
-##### Move the Files
+##### Create the Tea Page
+
+The Ionic CLI can be used to generate the new page for us. It will create all of the files we need as well as create a default route for the new page.
 
 ```bash
-$ git mv src/app/home src/app/tea
-$ git mv src/app/tea/home.page.ts src/app/tea/tea.page.ts
-$ etc...
+ionic generate page tea
 ```
 
-Using `git mv` to move the files ensures they are tracked properly in `git`. You could also do the renaming via your IDE. Do whatever works best for you.
+##### Fix the Routing
 
-##### Rename the Objects
-
-All of the TypeScript files in `src/app/tea` contain path references to the old `home` files. They also contain object names such as `HomePage`, `HomePageModule`, and `HomePageRoutingModule`. Fix the file path references and change the objects names to be `TeaPage`, `TeaPageModule`, and `TeaPageRoutingModule`.
-
-Based on dependencies, the best order to modify these files is:
-
-- `src/app/tea/tea.page.ts`
-- `src/app/tea/tea-routing.module.ts`
-- `src/app/tea/tea.module.ts`
-- `src/app/tea/tea.page.spec.ts`
-
-As an example, here is what the `src/app/tea/tea.page.ts` file should look like when you are done:
-
-```TypeScript
-import { Component } from '@angular/core';
-
-@Component({
-  selector: 'app-tea',
-  templateUrl: 'tea.page.html',
-  styleUrls: ['tea.page.scss']
-})
-export class TeaPage {
-  constructor() {}
-}
-```
-
-Finally, change the main routing module to have a `tea` route instead of a `home` route.
+We no longer need the "home" route, so remove it, leaving only the "tea" route. The root path redirect will also need to change. When you are done, the `src/app/app-routing.module.ts` file should look something like this:
 
 ```typescript
 import { NgModule } from '@angular/core';
@@ -170,6 +145,14 @@ const routes: Routes = [
   },
 ];
 ...
+```
+
+##### Remove the Home Page
+
+We no longer have any routes pointing to the home page. We should get rid of it.
+
+```bash
+$ rm -rf src/app/home
 ```
 
 #### Mock the Data
@@ -403,9 +386,7 @@ Now that we have our matrix, let's create the grid. **Set up Chrome to emulate a
         <ion-card-header>
           <ion-card-title>{{tea.name}}</ion-card-title>
         </ion-card-header>
-        <ion-card-content>
-          {{tea.description}}
-        </ion-card-content>
+        <ion-card-content> {{tea.description}} </ion-card-content>
       </ion-card>
     </ion-col>
   </ion-row>
