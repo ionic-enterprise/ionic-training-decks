@@ -1,3 +1,9 @@
+## [4.1.4](https://github.com/ionic-team/ionic-training-decks/compare/v4.1.3...v4.1.4) (2020-11-13)
+
+### Bug Fixes
+
+- **angular:** and a conclusion to the login page lab ([ef62011](https://github.com/ionic-team/ionic-training-decks/commit/ef62011a86f546848fb02fa7fe6ad7fd822a597c))
+
 ## [4.1.3](https://github.com/ionic-team/ionic-training-decks/compare/v4.1.2...v4.1.3) (2020-11-13)
 
 ### Bug Fixes
