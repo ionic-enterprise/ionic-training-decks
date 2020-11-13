@@ -375,17 +375,13 @@ Now let's update the form. Add the following to the lower portion of the form, a
     <div *ngIf="emailInput.errors.email">
       E-Mail Address must have a valid format
     </div>
-    <div *ngIf="emailInput.errors.required">
-      E-Mail Address is required
-    </div>
+    <div *ngIf="emailInput.errors.required">E-Mail Address is required</div>
   </div>
 
   <div
     *ngIf="passwordInput.invalid && (passwordInput.dirty || passwordInput.touched)"
   >
-    <div *ngIf="passwordInput.errors.required">
-      Password is required
-    </div>
+    <div *ngIf="passwordInput.errors.required">Password is required</div>
   </div>
 </div>
 ```
@@ -398,3 +394,7 @@ That is helpful, but a little styling will make it look better. Since this is no
   color: var(--ion-color-danger, #ff0000);
 }
 ```
+
+## Conclusion
+
+We now have a (mostly) funcitonal login page. The only problems are that we have to manually navigate to it, and it doesn't actuall perform the login. Before we fix that far we are going to need to need to create a couple of services. We will do that next.
