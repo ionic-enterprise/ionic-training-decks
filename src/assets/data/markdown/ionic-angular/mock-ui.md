@@ -115,7 +115,7 @@ Our app currently has a page called `home`, but we want to display several types
 
 1. create the tea page
 1. fix the routing
-1. remove the home page
+1. remove the home page (delayed for later)
 
 ##### Create the Tea Page
 
@@ -145,14 +145,6 @@ const routes: Routes = [
   },
 ];
 ...
-```
-
-##### Remove the Home Page
-
-We no longer have any routes pointing to the home page. We should get rid of it.
-
-```bash
-$ rm -rf src/app/home
 ```
 
 #### Mock the Data
@@ -235,7 +227,9 @@ We do not have a connection to a back end service to get any data for our applic
 
 Now that we have a list of teas, we need to figure out how to display this information. One component that seems natural is to use a <a href="https://ionicframework.com/docs/api/card" target="_blank">card</a> to display each tea in the list. Let's see how that looks.
 
-In `src/app/tea/tea.page.html` replace the `#content` `div` with the following markup:
+Before doing this, use your browser's dev-tools to emulate an iPhone.
+
+In `src/app/tea/tea.page.html` place the following inside of the `ion-content`:
 
 ```html
 <ion-list>
@@ -251,7 +245,34 @@ In `src/app/tea/tea.page.html` replace the `#content` `div` with the following m
 </ion-list>
 ```
 
-This creates a list of cards. Angular's `ngFor` structural directive to render the sample template for each item in the `teaData` collection. That looks pretty good, at least when viewed at a phone resolution, but what about other form factors?
+This creates a list of cards. Angular's `ngFor` structural directive to render the sample template for each item in the `teaData` collection. That looks pretty good, at least when viewed at a phone resolution, but what about other form factors? Those do not look quite as nice. We will fix that shortly, but first go back to an iPhone form factor.
+
+If you look closely, though, we lost the "Large Title" scolling effect we had on the "Home" page. Have a look at the HTML for the "Home" page. There are a few key items we need to bring over:
+
+- the `[translucent]="true"` property binding in the `ion-header`
+- the `[fullscreen]="true"` property binding in the `ion-content`
+- the second `ion-header` embedded in the `ion-content`
+
+Copy all of that over to the tea page, and change the titles as needed. When you are done, your markup should look something like this:
+
+```html
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-title>Teas</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <ion-header collapse="condense">
+    <ion-toolbar>
+      <ion-title size="large">Teas</ion-title>
+    </ion-toolbar>
+  </ion-header>
+  ...
+</ion-content>
+```
+
+Now the "Large Title" scrolling effect for iOS should have returned. Give it a try. Note that if you switch to an Android device and reload so you are using Material Design styling that you no longer have the effect. That is because this is not part of the Material Design specification. This is an example of the adaptive styling that you can have for each platform with the Ionic UI Framework. The app adapts and looks correct on each platform.
 
 ## Make a Responsive Grid
 
@@ -420,6 +441,16 @@ Change the `ion-col` properties as such:
 ```
 
 Now as you change the type of device that is being emulated, the layout adapts accordingly.
+
+## Final Cleanup - Remove the Home Page
+
+We no longer have any routes pointing to the home page. We should get rid of it.
+
+```bash
+$ rm -rf src/app/home
+```
+
+Or "right-click | Delete" from your IDE if you are using the Windows Command Prompt and not a unix-style shell.
 
 ## Conclusion
 
