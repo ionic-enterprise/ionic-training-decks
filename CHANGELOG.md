@@ -1,3 +1,9 @@
+## [4.1.3](https://github.com/ionic-team/ionic-training-decks/compare/v4.1.2...v4.1.3) (2020-11-13)
+
+### Bug Fixes
+
+- **angular:** bring in the Large Title from HomePage to TeaPage ([ef2709f](https://github.com/ionic-team/ionic-training-decks/commit/ef2709f04d698cb03f27362169af1a410b9e9a93))
+
 ## [4.1.2](https://github.com/ionic-team/ionic-training-decks/compare/v4.1.1...v4.1.2) (2020-11-11)
 
 ### Bug Fixes
