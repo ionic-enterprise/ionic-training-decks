@@ -183,6 +183,10 @@
               "file": "unit-tests"
             },
             {
+              "title": "Add Platforms",
+              "file": "platforms"
+            },
+            {
               "title": "More Coming Soon...",
               "file": "construction"
             }
