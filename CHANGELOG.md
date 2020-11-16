@@ -1,3 +1,15 @@
+## [4.1.5](https://github.com/ionic-team/ionic-training-decks/compare/v4.1.4...v4.1.5) (2020-11-16)
+
+### Bug Fixes
+
+- **angular:** query the DOM in the test ([4b9f936](https://github.com/ionic-team/ionic-training-decks/commit/4b9f93694e7b97c78a06c6927eb1a34efafc6852))
+
+### Features
+
+- **vue:** add Capacitor platforms ([a4ac32e](https://github.com/ionic-team/ionic-training-decks/commit/a4ac32eb05d53c3d70bb4689d95a602bdd605911))
+- **vue:** add unit testing labs ([9c34ce1](https://github.com/ionic-team/ionic-training-decks/commit/9c34ce10ba0650f93ea83aaad3dd92844cfb82a4))
+- **vue:** mock the UI ([a5cb854](https://github.com/ionic-team/ionic-training-decks/commit/a5cb85449d07e3c87d0992d6dca8487133f6603a))
+
 ## [4.1.4](https://github.com/ionic-team/ionic-training-decks/compare/v4.1.3...v4.1.4) (2020-11-13)
 
 ### Bug Fixes
