@@ -21,7 +21,7 @@ The service we just created references several image assets, but these assets to
 
 ## Mock Up the Tea Display
 
-Let's mock up how the components will be used in each page. This allows us to test out exactly what our data should look like and also allows us to concentrate on the styling without worrying about other moving parts. This is a common technique used when laying out the interface for an application.
+Let's mock up how the Ionic components will be used in the tea page. This allows us to test out exactly what our data should look like and also allows us to concentrate on the styling without worrying about other moving parts. This is a common technique used when laying out the interface for an application.
 
 ### Tea Model
 
@@ -397,10 +397,7 @@ Now that we have our matrix, let's create the grid. **Set up Chrome to emulate a
 
 ```html
 <ion-grid>
-  <ion-row
-    *ngFor="let teaRow of teaMatrix"
-    class="ion-justify-content-center ion-align-items-stretch"
-  >
+  <ion-row *ngFor="let teaRow of teaMatrix" class="ion-align-items-stretch">
     <ion-col *ngFor="let tea of teaRow" size="3">
       <ion-card>
         <ion-img [src]="tea.image"></ion-img>

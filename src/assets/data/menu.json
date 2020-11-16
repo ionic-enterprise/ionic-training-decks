@@ -187,6 +187,10 @@
               "file": "platforms"
             },
             {
+              "title": "Mock Up the Interface",
+              "file": "mock-ui"
+            },
+            {
               "title": "More Coming Soon...",
               "file": "construction"
             }
