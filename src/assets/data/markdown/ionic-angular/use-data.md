@@ -266,34 +266,10 @@ it('displays a 1x4 matrix for 4 teas', () => {
     ]),
   );
   fixture.detectChanges();
-  expect(component.teaMatrix).toEqual([
-    [
-      {
-        id: 1,
-        name: 'Green',
-        image: 'assets/img/green.jpg',
-        description: 'Green tea description.',
-      },
-      {
-        id: 2,
-        name: 'Black',
-        image: 'assets/img/black.jpg',
-        description: 'Black tea description.',
-      },
-      {
-        id: 3,
-        name: 'Herbal',
-        image: 'assets/img/herbal.jpg',
-        description: 'Herbal Infusion description.',
-      },
-      {
-        id: 4,
-        name: 'Oolong',
-        image: 'assets/img/oolong.jpg',
-        description: 'Oolong tea description.',
-      },
-    ],
-  ]);
+  const rows = fixture.debugElement.queryAll(By.css('ion-row'));
+  expect(rows.length).toEqual(1);
+  const cols = rows[0].queryAll(By.css('ion-col'));
+  expect(cols.length).toEqual(4);
 });
 ```
 
