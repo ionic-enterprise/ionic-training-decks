@@ -86,6 +86,8 @@ describe('AuthenticationService', () => {
 });
 ```
 
+**Note:** This is just a template to get you started. As you go through this, you will need to do some things on your own, such as importing various objects and operators from the appropriate libraryes (often `@angular/core/testing` or `rxjs/operators`). This is something you have done before. You can use your editor's automatic import feature or you can manually add the import, however, you will not be told when you need them. This is an item that you will have to start figuring out as if you were working on your own application at this time.
+
 ### login
 
 Let's build up the login on step at a time following TDD. With each code pair, add the first set of code within the `describe('login', ...)` and add the second set of code within the `login()` method in the newly generated service.
