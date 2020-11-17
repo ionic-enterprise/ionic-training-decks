@@ -1,3 +1,13 @@
+## [4.1.6](https://github.com/ionic-team/ionic-training-decks/compare/v4.1.5...v4.1.6) (2020-11-17)
+
+### Bug Fixes
+
+- **angular:** fix file name path ([b5de05d](https://github.com/ionic-team/ionic-training-decks/commit/b5de05d886ffa51b1d51be7b130f349b8504e1e5))
+
+### Features
+
+- **vue:** restrict the transform for test some more ([e59e704](https://github.com/ionic-team/ionic-training-decks/commit/e59e70451c008d40f83c0c9e86b03cf0d8de53bc))
+
 ## [4.1.5](https://github.com/ionic-team/ionic-training-decks/compare/v4.1.4...v4.1.5) (2020-11-16)
 
 ### Bug Fixes
