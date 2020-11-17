@@ -1,3 +1,9 @@
+## [4.1.7](https://github.com/ionic-team/ionic-training-decks/compare/v4.1.6...v4.1.7) (2020-11-17)
+
+### Bug Fixes
+
+- **angular:** add note about imports ([d4a4572](https://github.com/ionic-team/ionic-training-decks/commit/d4a457210efb515b0e0e8df472ecb255f2d7dba6))
+
 ## [4.1.6](https://github.com/ionic-team/ionic-training-decks/compare/v4.1.5...v4.1.6) (2020-11-17)
 
 ### Bug Fixes
