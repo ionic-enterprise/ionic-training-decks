@@ -74,14 +74,14 @@ Before we start coding our tests, we need to add one line to our `jest.config.js
 ```JavaScript
 module.exports = {
   preset: '@vue/cli-plugin-unit-jest/presets/typescript-and-babel',
-  transformIgnorePatterns: ["/node_modules/(?!\@ionic)"],
+  transformIgnorePatterns: ["/node_modules/(?!\@ionic/vue)"],
   transform: {
     '^.+\\.vue$': 'vue-jest'
   }
 }
 ```
 
-Note the <a href="https://jestjs.io/docs/en/tutorial-react-native#transformignorepatterns-customization" target="_blank">`transformIgnorePatterns`</a> line. This tells `jest` to transform any of the `@ionic` modules while continuing to ignore the rest of the items under `node_modules`.
+Note the <a href="https://jestjs.io/docs/en/tutorial-react-native#transformignorepatterns-customization" target="_blank">`transformIgnorePatterns`</a> line. This tells `jest` to transform any of the `@ionic/vue` modules while continuing to ignore the rest of the items under `node_modules`.
 
 ### App.vue
 
