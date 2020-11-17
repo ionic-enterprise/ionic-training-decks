@@ -504,10 +504,11 @@ Update the `src/app/app.component.ts` file. One way to accomplish this is the fo
 
 ```typescript
   initializeApp() {
-    this.platform.ready().then(() => {
-      this.statusBar.styleDefault();
-      this.splashScreen.hide();
-    });
+    if (this.platform.is('hybrid')) {
+      const { SplashScreen } = Plugins;
+      SplashScreen.hide();
+    }
+
     this.identity.changed.subscribe(u => {
       const route = u ? ['/'] : ['/', 'login'];
       this.navController.navigateRoot(route);
@@ -520,3 +521,5 @@ Update the `src/app/app.component.ts` file. One way to accomplish this is the fo
 ## Conclusion
 
 You have created a service that will store the information about the currently logged in user, but we have not provided a way for the user to actually authenticate with the API. That is what we will talk about next.
+
+**Note:** your application will not run at this time because we have not included the `HttpClientModule` in the base `app.module.ts` file. We will handle doing that as part of the next lab.

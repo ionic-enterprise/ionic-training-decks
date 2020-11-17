@@ -20,7 +20,7 @@ Be sure to add it to the `src/app/core/index.ts`.
 
 ### Interface Setup
 
-Just like the last time, we will start the actual coding by figuring out the initial shape of our API. Update `src/app/core/authentication/authentication.service.spec.ts` to contain the following methods:
+Just like the last time, we will start the actual coding by figuring out the initial shape of our API. Update `src/app/core/authentication/authentication.service.ts` to contain the following methods:
 
 ```typescript
 import { Injectable } from '@angular/core';
@@ -48,7 +48,7 @@ export class AuthenticationService {
 
 ### Test Setup
 
-With the initial shape of our API in place, we are better informed in how to set up our unit test. Let's do that now.
+With the initial shape of our API in place, we are better informed in how to set up our unit test. Let's do that now. Update `src/app/core/authentication/authentication.service.spec.ts` as follows:
 
 ```typescript
 import { TestBed } from '@angular/core/testing';
