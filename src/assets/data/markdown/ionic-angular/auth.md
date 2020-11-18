@@ -86,7 +86,7 @@ describe('AuthenticationService', () => {
 });
 ```
 
-**Note:** This is just a template to get you started. As you go through this, you will need to do some things on your own, such as importing various objects and operators from the appropriate libraryes (often `@angular/core/testing` or `rxjs/operators`). This is something you have done before. You can use your editor's automatic import feature or you can manually add the import, however, you will not be told when you need them. This is an item that you will have to start figuring out as if you were working on your own application at this time.
+**Note:** This is just a template to get you started. As you go through this, you will need to do some things on your own, such as importing various objects and operators from the appropriate libraries (often `@angular/core/testing` or `rxjs/operators`). You can use your editor's automatic import feature or you can manually add the import. You will not be told by the labs when you need them, but your editor will let you know. This is an item that you will have to start figuring out as if you were working on your own application at this time.
 
 ### login
 
@@ -219,7 +219,7 @@ it('sets the identity', () => {
 });
 ```
 
-This can be accomplished by using the `tap()` operator withing the observable pipeline.
+This can be accomplished by using the `tap()` operator within the observable pipeline.
 
 ```typescript
 .pipe(
