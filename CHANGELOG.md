@@ -1,3 +1,9 @@
+## [4.1.8](https://github.com/ionic-team/ionic-training-decks/compare/v4.1.7...v4.1.8) (2020-11-18)
+
+### Bug Fixes
+
+- **angular:** update spelling errors and wording ([0cbb798](https://github.com/ionic-team/ionic-training-decks/commit/0cbb798dd60b0637365308c2bbeae542caa239ac))
+
 ## [4.1.7](https://github.com/ionic-team/ionic-training-decks/compare/v4.1.6...v4.1.7) (2020-11-17)
 
 ### Bug Fixes
