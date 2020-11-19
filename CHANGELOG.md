@@ -1,3 +1,9 @@
+## [4.1.9](https://github.com/ionic-team/ionic-training-decks/compare/v4.1.8...v4.1.9) (2020-11-19)
+
+### Bug Fixes
+
+- **angular:** remove redundant instructions ([f57a104](https://github.com/ionic-team/ionic-training-decks/commit/f57a1046c016f8a9e091046b823ccebce4376350))
+
 ## [4.1.8](https://github.com/ionic-team/ionic-training-decks/compare/v4.1.7...v4.1.8) (2020-11-18)
 
 ### Bug Fixes
