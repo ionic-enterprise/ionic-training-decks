@@ -459,36 +459,7 @@ A text area for some free-form notes on the tea we just tasted:
 </ion-item>
 ```
 
-That looks good, but our tests are putting out some odd warnings now. Let's update `src/app/tasting-notes/tasting-note-editor/tasting-note-editor.component.spec.ts` so that it imports the proper modules:
-
-```typescript
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-import { FormsModule } from '@angular/forms';
-import { IonicModule } from '@ionic/angular';
-
-import { TastingNoteEditorComponent } from './tasting-note-editor.component';
-import { SharedModule } from '@app/shared';
-
-describe('TastingNoteEditorComponent', () => {
-  let component: TastingNoteEditorComponent;
-  let fixture: ComponentFixture<TastingNoteEditorComponent>;
-
-  beforeEach(async(() => {
-    TestBed.configureTestingModule({
-      declarations: [TastingNoteEditorComponent],
-      imports: [FormsModule, IonicModule, SharedModule],
-    }).compileComponents();
-
-    fixture = TestBed.createComponent(TastingNoteEditorComponent);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
-  }));
-
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-});
-```
+That looks pretty good so far.
 
 #### Hooking it Up
 

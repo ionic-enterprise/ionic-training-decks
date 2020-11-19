@@ -19,7 +19,7 @@ Once those pages have been generated, be sure to open each of their routing modu
 
 ```typescript
   {
-    path: ':id',
+    path: '',
     component: AboutPage,
     canActivate: [AuthGuardService],
   },
