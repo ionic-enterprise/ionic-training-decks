@@ -191,6 +191,10 @@
               "file": "mock-ui"
             },
             {
+              "title": "Login Page",
+              "file": "login-page"
+            },
+            {
               "title": "More Coming Soon...",
               "file": "construction"
             }

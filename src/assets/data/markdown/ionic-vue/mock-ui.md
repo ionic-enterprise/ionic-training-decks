@@ -154,12 +154,13 @@ As of this writing, we will need to start mounting this component with the `rout
 First, create a router object in a `beforeEach()`:
 
 ```typescript
-import { mount } from '@vue/test-utils';
+import { mount, VueWrapper } from '@vue/test-utils';
 import { createRouter, createWebHistory } from '@ionic/vue-router';
 import Tea from '@/views/Tea.vue';
 
 describe('Tea.vue', () => {
   let router: any;
+  let wrapper: VueWrapper<any>;
   beforeEach(async () => {
     router = createRouter({
       history: createWebHistory(process.env.BASE_URL),
@@ -167,20 +168,17 @@ describe('Tea.vue', () => {
     });
     router.push('/');
     await router.isReady();
+    wrapper = mount(Tea, {
+      global: {
+        plugins: [router],
+      },
+    });
   });
 ...
 });
 ```
 
-Then, everywhere that we are mounting the `Tea` component, do it like this:
-
-```typescript
-const wrapper = mount(Tea, {
-  global: {
-    plugins: [router],
-  },
-});
-```
+Then, remove everywhere else that we are current mounting the `Tea` component since we are doing it in the test setup.
 
 ### Mock the Data
 
@@ -307,11 +305,6 @@ Let's fill out the first test:
 
 ```typescript
 it('displays two rows', () => {
-  const wrapper = mount(Tea, {
-    global: {
-      plugins: [router],
-    },
-  });
   const rows = wrapper.findAllComponents('ion-grid ion-row');
   expect(rows).toHaveLength(2);
 });
@@ -360,22 +353,12 @@ Now let's display the columns properly, first updating the tests:
 
 ```typescript
 it('displays four columns in the first row', () => {
-  const wrapper = mount(Tea, {
-    global: {
-      plugins: [router],
-    },
-  });
   const rows = wrapper.findAllComponents('ion-grid ion-row');
   const cols = rows[0].findAllComponents('ion-col');
   expect(cols).toHaveLength(4);
 });
 
 it('displays three columns in the second row', () => {
-  const wrapper = mount(Tea, {
-    global: {
-      plugins: [router],
-    },
-  });
   const rows = wrapper.findAllComponents('ion-grid ion-row');
   const cols = rows[1].findAllComponents('ion-col');
   expect(cols).toHaveLength(3);
@@ -406,11 +389,6 @@ Now that we have the grid layed out, we can add our card template. We will just 
 import { Tea as TeaModel } from '@/models';
 ...
     it('displays the name in the title', () => {
-      const wrapper = mount(Tea, {
-        global: {
-          plugins: [router],
-        },
-      });
       const teas = wrapper.vm.teaData as Array<TeaModel>;
       const cols = wrapper.findAllComponents('ion-col');
       cols.forEach((c, idx) => {
@@ -420,11 +398,6 @@ import { Tea as TeaModel } from '@/models';
     });
 
     it('displays the description in the content', () => {
-      const wrapper = mount(Tea, {
-        global: {
-          plugins: [router],
-        },
-      });
       const teas = wrapper.vm.teaData as Array<TeaModel>;
       const cols = wrapper.findAllComponents('ion-col');
       cols.forEach((c, idx) => {

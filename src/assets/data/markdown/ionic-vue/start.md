@@ -89,6 +89,8 @@ $ npx prettier --write src
 
 At this point all of the source should be formatting properly and will remain so automatically with each commit.
 
+**Note:** the default eslint configuration does not at this time conflict with the `prettier` configuration. However, it is possible that some configurations may. If that is the case, you may want to look into using <a href="https://github.com/prettier/eslint-config-prettier" target="_blank">eslint-config-prettier</a> which will help make the two systems play nice together.
+
 ## Side Note: `ionic serve` vs. `npm run serve`
 
 You may be used to using `npm run serve` to start an application. That works, but it is different. The application is for all intents and purposes a Vue application and was generated using the standard Vue schematics with some extra Ionic spices, so all of the base Vue CLI application scripts are there.
