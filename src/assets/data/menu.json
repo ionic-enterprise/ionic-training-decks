@@ -195,6 +195,18 @@
               "file": "login-page"
             },
             {
+              "title": "Authentication Services",
+              "file": "auth-services"
+            },
+            {
+              "title": "Session State",
+              "file": "session-state"
+            },
+            {
+              "title": "Authentication Workflow",
+              "file": "auth-workflow"
+            },
+            {
               "title": "More Coming Soon...",
               "file": "construction"
             }

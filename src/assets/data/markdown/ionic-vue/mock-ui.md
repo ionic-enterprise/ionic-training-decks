@@ -24,7 +24,7 @@ The service we just created references several image assets, but these assets to
 Before we mock up the UI for the main page, let's define the data model for our teas:
 
 - Create a `src/models` folder
-- Add a `src/models/tea.ts` file
+- Add a `src/models/Tea.ts` file
 
 ```TypeScript
 export interface Tea {
@@ -38,7 +38,7 @@ export interface Tea {
 We will also create a barrel file for our models. This is a little redundant right now, but it will make our lives easier later. Create a `src/models/index.ts` file and export our Tea model there.
 
 ```typescript
-export * from './tea';
+export * from './Tea';
 ```
 
 ## Rename the Home Page

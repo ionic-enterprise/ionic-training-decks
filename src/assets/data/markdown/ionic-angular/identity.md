@@ -9,7 +9,7 @@ In this lab you will learn how to:
 
 ## Create the User Model
 
-The first thing we will need the model of the user. Create a `src/app/models/user.ts` file with the following contents:
+The first thing we will need to do is model the user. Create a `src/app/models/user.ts` file with the following contents:
 
 ```TypeScript
 export class User {
