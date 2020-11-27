@@ -26,6 +26,7 @@ import { flushPromises, mount, VueWrapper } from '@vue/test-utils';
 import { VuelidatePlugin } from '@vuelidate/core';
 import { createRouter, createWebHistory } from '@ionic/vue-router';
 import { createStore } from 'vuex';
+import { ActionTypes } from '@/store';
 import Login from '@/views/Login.vue';
 
 describe('Login.vue', () => {
@@ -67,7 +68,7 @@ Now we are ready to define the requirements via a set of tests:
       const button = wrapper.findComponent('[data-testid="signin-button"]');
       button.trigger('click');
       expect(store.dispatch).toHaveBeenCalledTimes(1);
-      expect(store.dispatch).toHaveBeenCalledWith('login', {
+      expect(store.dispatch).toHaveBeenCalledWith(ActionTypes.login, {
         email: 'test@test.com',
         password: 'test',
       });
@@ -100,6 +101,7 @@ First the one-liners:
 - add a place to display the message within the "error message" area: `<div v-if="errorMessage">{{ errorMessage }}</div>`
 - `import { useStore } from 'vuex';`
 - `import { useRouter } from 'vue-router';`
+- `import { ActionTypes } from '@/store';`
 - add a click event binding to the button: `@click="signinClicked"`
 
 Next, our `setup()` needs to grab the `router` and `store` and return them:
@@ -117,7 +119,7 @@ Finally, we need the method for our click binding:
 ```typescript
   methods: {
     async signinClicked() {
-      const result = await this.store.dispatch('login', {
+      const result = await this.store.dispatch(ActionTypes.login, {
         email: this.email,
         password: this.password,
       });
@@ -167,6 +169,8 @@ First, remember the changes we needed to make in the Login page in order to inje
 ```typescript
 import { createStore } from 'vuex'
 ...
+import { ActionTypes } from '@/store';
+...
 describe('Tea.vue' () => {
   let router: any;
   let store: any;
@@ -191,7 +195,7 @@ Next, express the requirement as a test.
     const button = wrapper.findComponent('[data-testid="logout-button"]');
     button.trigger('click');
     expect(store.dispatch).toHaveBeenCalledTimes(1);
-    expect(store.dispatch).toHaveBeenCalledWith('logout');
+    expect(store.dispatch).toHaveBeenCalledWith(ActionTypes.logout);
   });
 ```
 
@@ -371,7 +375,7 @@ You will need to update the headers.
 
 ```TypeScript
 import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
-import store from '@/store';
+import store, { MutationTypes } from '@/store';
 ```
 
 After the client is created, you will need to add the interceptors.
@@ -387,7 +391,7 @@ client.interceptors.request.use((config: AxiosRequestConfig) => {
 
 client.interceptors.response.use((res: AxiosResponse) => {
   if (res.status === 401) {
-    store.commit('CLEAR_SESSION');
+    store.commit(MutationTypes.CLEAR_SESSION);
   }
   return res;
 });
