@@ -209,31 +209,31 @@ We are currently performing the login and the logout, but we should also navigat
 
 ### Add Getters to the Store
 
-Before we do anything, let's add a getter for the session token and the user id to the store. This will allow us to refactor the structure of the state if we need to without breaking code in the rest of the application.
+Before we do anything, let's add a getter for the session token and the user id to the store. This will allow us to refactor the structure of the state if we need to without breaking code in the rest of the application. Since the `getters` are highly dependent on the shape of the state, we will define them in the `src/store/state.ts` file instead of their own file.
 
-```diff
---- a/src/store/index.ts
-+++ b/src/store/index.ts
-@@ -14,6 +14,10 @@ const state: State = {
-   session: null,
- };
- 
-+const getters = {
-+  sessionToken: (state: State) => state.session && state.session.token,
-+  userId: (state: State) => state.session && state.session.user.id,
-+}
-+
- export const mutations = {
-   CLEAR_SESSION: (state: State) => (state.session = null),
-   SET_SESSION: (state: State, session: Session) => (state.session = session),
-@@ -54,6 +58,7 @@ export const actions = {
- 
- export default createStore({
-   state,
-+  getters,
-   mutations,
-   actions,
-   strict: debug,
+In `src/store/state.ts`:
+
+```TypeScript
+export const getters = {
+  sessionToken: (state: State) => state.session && state.session.token,
+  userId: (state: State) => state.session && state.session.user.id,
+}
+```
+
+In `src/store/index.ts`
+
+```TypeScript
+...
+import { state, getters } from './state';
+...
+export default createStore({
+  state,
+  getters,
+  mutations,
+  actions,
+  strict: debug,
+  plugins: debug ? [createLogger()] : [],
+});
 ```
 
 ### Update the App Component

@@ -207,6 +207,10 @@
               "file": "auth-workflow"
             },
             {
+              "title": "Load the Teas",
+              "file": "load-teas"
+            },
+            {
               "title": "More Coming Soon...",
               "file": "construction"
             }
