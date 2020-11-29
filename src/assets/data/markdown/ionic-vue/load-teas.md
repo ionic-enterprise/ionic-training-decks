@@ -525,7 +525,7 @@ Finally, change the `expect()` calls to compare against the state insetad of the
 
 This applies to both the `name` and the `description` tests.
 
-Now we can go change `src/views/Tea.vue`. The only item defined in our `data()` function is the `teaData`, which we will now be getting from the Vuex store, so we can completely remove the `data()` function.
+Now we can go change `src/views/TeaList.vue`. The only item defined in our `data()` function is the `teaData`, which we will now be getting from the Vuex store, so we can completely remove the `data()` function.
 
 In our `computed` `teaRows()`, we need to get the data from the store's state now as such:
 

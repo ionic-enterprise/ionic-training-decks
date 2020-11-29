@@ -136,7 +136,7 @@ Give that a test with the devtools open. You should see the logging from the sto
 
 We can log in, but what about logging out? For now, we will add that to the Tea page.
 
-Let's add the actual button first. In `src/views/Tea.vue` add the following markup within the `ion-toolbar` that is in the header:
+Let's add the actual button first. In `src/views/TeaList.vue` add the following markup within the `ion-toolbar` that is in the header:
 
 ```HTML
         <ion-buttons slot="end">
@@ -171,7 +171,7 @@ import { createStore } from 'vuex'
 ...
 import { ActionTypes } from '@/store';
 ...
-describe('Tea.vue' () => {
+describe('TeaList.vue' () => {
   let router: any;
   let store: any;
   let wrapper: VueWrapper<any>;
@@ -328,7 +328,7 @@ import {
 } from 'vue-router';
 import store from '@/store'; 
 
-import Tea from '../views/Tea.vue'; 
+import TeaList from '../views/TeaList.vue'; 
 
 function checkAuthStatus(
   to: RouteLocationNormalized,
@@ -356,13 +356,13 @@ router.beforeEach(checkAuthStatus);
 export default router;
 ```
 
-Finally, mark the tea route as requiring authentication:
+Finally, mark the teas route as requiring authentication:
 
 ```TypeScript
   {
-    path: '/tea',
-    name: 'Tea',
-    component: Tea,
+    path: '/teas',
+    name: 'Teas',
+    component: TeaList,
     meta: { requiresAuth: true },
   },
 ```

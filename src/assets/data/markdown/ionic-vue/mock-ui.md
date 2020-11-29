@@ -43,10 +43,10 @@ export * from './Tea';
 
 ## Rename the Home Page
 
-We have done some work already with the Home page. Rather than start over, let's just rename that to be our Tea page. This is a multi-part process as follows:
+We have done some work already with the Home page. Rather than start over, let's just rename that to be our TeaList page. This is a multi-part process as follows:
 
-- Move the view file: `git mv src/views/Home.vue src/views/Tea.vue`
-- Move the test file: `git mv tests/unit/views/Home.spec.ts tests/unit/views/Tea.spec.ts`
+- Move the view file: `git mv src/views/Home.vue src/views/TeaList.vue`
+- Move the test file: `git mv tests/unit/views/Home.spec.ts tests/unit/views/TeaList.spec.ts`
 - Fix the routing.
 - Fix the tests.
 - Make minor updates to the code.
@@ -59,7 +59,7 @@ The routing is set up in `src/router/index.ts`. When we renamed the Vue file fro
 
 ```diff
 -import Home from '../views/Home.vue';
-+import Home from '../views/Tea.vue';
++import Home from '../views/TeaList.vue';
 ```
 
 In the long run, though, that would be confusing. While we are in there we should also update the routes so they are more descriptive for our application. We should also use a more descriptive name for the component.
@@ -68,21 +68,21 @@ In the long run, though, that would be confusing. While we are in there we shoul
  import { createRouter, createWebHistory } from '@ionic/vue-router';
  import { RouteRecordRaw } from 'vue-router';
 -import Home from '../views/Home.vue';
-+import Tea from '../views/Tea.vue';
++import TeaList from '../views/TeaList.vue';
 
  const routes: Array<RouteRecordRaw> = [
    {
      path: '/',
 -    redirect: '/home',
-+    redirect: '/tea',
++    redirect: '/teas',
    },
    {
 -    path: '/home',
 -    name: 'Home',
 -    component: Home,
-+    path: '/tea',
-+    name: 'Tea',
-+    component: Tea,
++    path: '/teas',
++    name: 'Tea List',
++    component: TeaList,
    },
  ];
 ```
@@ -93,7 +93,7 @@ Similar to the routes, all we _really_ need to do with the test is fix the impor
 
 ```diff
 -import Home from '@/views/Home.vue';
-+import Home from '@/views/Tea.vue';
++import Home from '@/views/TeaList.vue';
 ```
 
 However, our test still refers to our Tea view as "Home", and that will be confusing long term, so let's fix the test properly:
@@ -101,13 +101,13 @@ However, our test still refers to our Tea view as "Home", and that will be confu
 ```diff
  import { mount } from '@vue/test-utils';
 -import Home from '@/views/Home.vue';
-+import Tea from '@/views/Tea.vue';
++import TeaList from '@/views/TeaList.vue';
 
 -describe('Home.vue', () => {
-+describe('Tea.vue', () => {
++describe('TeaList.vue', () => {
    it('displays the title', () => {
 -    const wrapper = mount(Home);
-+    const wrapper = mount(Tea);
++    const wrapper = mount(TeaList);
      const titles = wrapper.findAllComponents('ion-title');
      expect(titles).toHaveLength(2);
      expect(titles[0].text()).toBe('Blank');
@@ -116,21 +116,21 @@ However, our test still refers to our Tea view as "Home", and that will be confu
 
    it('displays the default text', () => {
 -    const wrapper = mount(Home);
-+    const wrapper = mount(Tea);
++    const wrapper = mount(TeaList);
      const container = wrapper.find('#container');
      expect(container.text()).toContain('Ready to create an app?');
 ```
 
 ### Update the View
 
-There is not much to update in `src/views/Tea.vue`. We just need to update the name of the component to avoid future confusion:
+There is not much to update in `src/views/TeaList.vue`. We just need to update the name of the component to avoid future confusion:
 
 ```diff
  import { defineComponent } from 'vue';
 
  export default defineComponent({
 -  name: 'Home',
-+  name: 'Tea',
++  name: 'TeaList',
    components: {
      IonContent,
      IonHeader,
@@ -156,19 +156,19 @@ First, create a router object in a `beforeEach()`:
 ```typescript
 import { mount, VueWrapper } from '@vue/test-utils';
 import { createRouter, createWebHistory } from '@ionic/vue-router';
-import Tea from '@/views/Tea.vue';
+import TeaList from '@/views/TeaList.vue';
 
-describe('Tea.vue', () => {
+describe('TeaList.vue', () => {
   let router: any;
   let wrapper: VueWrapper<any>;
   beforeEach(async () => {
     router = createRouter({
       history: createWebHistory(process.env.BASE_URL),
-      routes: [{ path: '/', component: Tea }],
+      routes: [{ path: '/', component: TeaList }],
     });
     router.push('/');
     await router.isReady();
-    wrapper = mount(Tea, {
+    wrapper = mount(TeaList, {
       global: {
         plugins: [router],
       },

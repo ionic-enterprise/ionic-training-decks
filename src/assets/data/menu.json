@@ -211,6 +211,10 @@
               "file": "load-teas"
             },
             {
+              "title": "Tea Details Page",
+              "file": "details-page"
+            },
+            {
               "title": "More Coming Soon...",
               "file": "construction"
             }
