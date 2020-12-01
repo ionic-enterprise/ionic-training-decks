@@ -215,6 +215,14 @@
               "file": "details-page"
             },
             {
+              "title": "Reusable Component",
+              "file": "reusable-component"
+            },
+            {
+              "title": "Store the Tea Rating",
+              "file": "store-the-tea-rating"
+            },
+            {
               "title": "More Coming Soon...",
               "file": "construction"
             }
