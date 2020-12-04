@@ -404,17 +404,16 @@ And then `TeaDetails.vue` code changes that make this happen:
 +    },
 +  },
 +  created() {
-+    this.rating = this.tea.rating;
++    this.rating = this.tea?.rating;
++  },
++  watch: {
++    tea(newValue) {
++      this.rating = newValue?.rating;
++    },
 +  },
    setup() {
      const { params } = useRoute();
      const id = parseInt(params.id as string, 10);
-     const store = useStore();
-     const tea = store.getters.tea(id);
--    return { tea };
-+    return { store, tea };
-   },
- });
 ```
 
 ## Conclusion

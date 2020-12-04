@@ -223,6 +223,10 @@
               "file": "store-the-tea-rating"
             },
             {
+              "title": "Tabbed Navigation",
+              "file": "tabbed-navigation"
+            },
+            {
               "title": "More Coming Soon...",
               "file": "construction"
             }

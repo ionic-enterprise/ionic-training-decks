@@ -177,15 +177,14 @@ it('gets the tea', () => {
 });
 ```
 
-Add the following code do the object we pass to the `defineComponent()` call in `TeaDetails.vue`:
+Add the following code to the object we pass to the `defineComponent()` call in `TeaDetails.vue`:
 
 ```typescript
   setup() {
     const { params } = useRoute();
     const id = parseInt(params.id as string, 10);
     const store = useStore();
-    const tea = store.getters.tea(id);
-    return { tea };
+    return { id, store };
   },
 ```
 
@@ -193,15 +192,25 @@ You will also need to add a couple of imports within the `script` tag:
 
 ```typescript
 import { useRoute } from 'vue-router';
-import { useStore } from 'vuex';
+import { mapGetters, useStore } from 'vuex';
+```
+
+Then we need to add a couple of computed properties:
+
+```typescript
+  computed: {
+    ...mapGetters({ getTea: 'tea' }),
+    tea(): Tea {
+      return this.getTea(this.id);
+    },
+  },
 ```
 
 What are we doing here?
 
 - We grab the parameters from the route
 - Then we parse the `id` parameter into an integer (parameters are always strings otherwise)
-- We then get the tea from our store using the getter we just created
-- Finally, we return an object with the tea that we found, making it available to our component so we can bind it in the template
+- The computed properties map the getter we just created and then use it to ultimately return the tea we are looking for
 
 Our tests should be passing at this point. Switching back to them, we can add a couple more. We won't get too specific about how we render this in case we want to change things up in the future, but we will just add a couple of simple tests that show things are wired up correctly.
 
@@ -237,29 +246,6 @@ We should also style that image just a tad to make sure it is not too big:
     max-height: 512px;
   }
 </style>
-```
-
-## Reloading
-
-Try reloading the app while we are on the `TeaDetails` page. Sometimes it doesn't show anything. Recall that part of the `initialize` action is to dispatch a `loadTeas` action if we have a stored session. However we don't wait for that operation to complete before returning from our action.
-
-The easiest way to fix this is to change the `initialize` action to `await` the `loadTeas` action. Given how central this tea data is to all of our app and how quick it is to load, that may make sense.
-
-On the other hand, if loading those were slow we may want to look at more extreme measures. But, if we are not deploying this to the web and we are never deep linking this page but always coming to it from the `TeaList` page, then it is irrelevant.
-
-The point is that there is no one right answer. For our case, though, let's just await the load on initialize in our `src/store/actions.ts` file.
-
-```typescript
-  async [ActionTypes.initialize]({
-    commit,
-    dispatch,
-  }: ActionContext<State, State>): Promise<void> {
-    const session = await SessionService.get();
-    if (session) {
-      commit(MutationTypes.SET_SESSION, session);
-      await dispatch(ActionTypes.loadTeas);
-    }
-  },
 ```
 
 ## Conclusion
