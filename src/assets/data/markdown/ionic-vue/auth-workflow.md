@@ -1,8 +1,8 @@
-# Lab: Create the Authentication Workflow 
+# Lab: Create the Authentication Workflow
 
 So far, we have a couple of services that handle authentication and the storage of the session. We have also created a simple Vuex store that is managing the state of the session within our application. It is now time to put all of theses pieces together to create an authentication workflow.
 
-In this lab you will need to:
+state this lab you will need to:
 
 - Handle the Login
 - Handle the Logout
@@ -13,11 +13,9 @@ In this lab you will need to:
 
 When the user clicks on the "Sign On" button in the Login view, we need to dispatch the `login` action along with the credentials. If the login fails, we need to display an error message.
 
-The first thing we are going to need to do in the test is create a store that can be injected. For our purposes, all we really care about is that it has a mocked `dispatch()`. Here is the synposis of the changes to the setup code:
+The first thing we are going to need to do in the test is make sure our store is available. For our purposes, we also need to make sure it has a mocked `dispatch()`. Here is the synposis of the changes to the setup code:
 
-- import `flushPromises` and `createStore`
-- define a variable for the store
-- create the store
+- import `flushPromises` and our `store`
 - mock the `store.dispatch`
 - add `store` to the plugins when mounting the component
 
@@ -25,16 +23,13 @@ The first thing we are going to need to do in the test is create a store that ca
 import { flushPromises, mount, VueWrapper } from '@vue/test-utils';
 import { VuelidatePlugin } from '@vuelidate/core';
 import { createRouter, createWebHistory } from '@ionic/vue-router';
-import { createStore } from 'vuex';
-import { ActionTypes } from '@/store';
+import store from '@/store';
 import Login from '@/views/Login.vue';
 
 describe('Login.vue', () => {
   let router: any;
-  let store: any;
   let wrapper: VueWrapper<any>;
   beforeEach(async () => {
-    store = createStore({});
     store.dispatch = jest.fn().mockResolvedValue(true);
     router = createRouter({
       history: createWebHistory(process.env.BASE_URL),
@@ -55,42 +50,42 @@ describe('Login.vue', () => {
 Now we are ready to define the requirements via a set of tests:
 
 ```typescript
-  describe('clicking the sign on button', () => {
-    beforeEach(async () => {
-      wrapper.vm.$v.email.$model = 'test@test.com';
-      wrapper.vm.$v.password.$model = 'test';
-      wrapper.vm.email = wrapper.vm.$v.email.$model;
-      wrapper.vm.password = wrapper.vm.$v.password.$model;
-      await wrapper.vm.$nextTick();
-    });
+describe('clicking the sign on button', () => {
+  beforeEach(async () => {
+    wrapper.vm.$v.email.$model = 'test@test.com';
+    wrapper.vm.$v.password.$model = 'test';
+    wrapper.vm.email = wrapper.vm.$v.email.$model;
+    wrapper.vm.password = wrapper.vm.$v.password.$model;
+    await wrapper.vm.$nextTick();
+  });
 
-    it('dispatches the login action with the credentials', () => {
-      const button = wrapper.findComponent('[data-testid="signin-button"]');
-      button.trigger('click');
-      expect(store.dispatch).toHaveBeenCalledTimes(1);
-      expect(store.dispatch).toHaveBeenCalledWith(ActionTypes.login, {
-        email: 'test@test.com',
-        password: 'test',
-      });
-    });
-
-    it('does not show an error if the login succeeds', async () => {
-      const button = wrapper.findComponent('[data-testid="signin-button"]');
-      const msg = wrapper.find('[data-testid="message-area"]');
-      button.trigger('click');
-      await flushPromises();
-      expect(msg.text()).toBe('');
-    });
-
-    it('shows an error if the login fails', async () => {
-      (store.dispatch as any).mockResolvedValue(false);
-      const button = wrapper.findComponent('[data-testid="signin-button"]');
-      const msg = wrapper.find('[data-testid="message-area"]');
-      button.trigger('click');
-      await flushPromises();
-      expect(msg.text()).toBe('Invalid Email or Password. Please try again.');
+  it('dispatches the login action with the credentials', () => {
+    const button = wrapper.findComponent('[data-testid="signin-button"]');
+    button.trigger('click');
+    expect(store.dispatch).toHaveBeenCalledTimes(1);
+    expect(store.dispatch).toHaveBeenCalledWith('login', {
+      email: 'test@test.com',
+      password: 'test',
     });
   });
+
+  it('does not show an error if the login succeeds', async () => {
+    const button = wrapper.findComponent('[data-testid="signin-button"]');
+    const msg = wrapper.find('[data-testid="message-area"]');
+    button.trigger('click');
+    await flushPromises();
+    expect(msg.text()).toBe('');
+  });
+
+  it('shows an error if the login fails', async () => {
+    (store.dispatch as any).mockResolvedValue(false);
+    const button = wrapper.findComponent('[data-testid="signin-button"]');
+    const msg = wrapper.find('[data-testid="message-area"]');
+    button.trigger('click');
+    await flushPromises();
+    expect(msg.text()).toBe('Invalid Email or Password. Please try again.');
+  });
+});
 ```
 
 For the code, here are the pieces. It is up to you to find the correct spot in `src/views/Login.vue` to place each of these pieces.
@@ -99,31 +94,21 @@ First the one-liners:
 
 - add an `errorMessage` field to the data object
 - add a place to display the message within the "error message" area: `<div v-if="errorMessage">{{ errorMessage }}</div>`
-- `import { useStore } from 'vuex';`
-- `import { useRouter } from 'vue-router';`
-- `import { ActionTypes } from '@/store';`
+- `import { mapActions } from 'vuex';`
 - add a click event binding to the button: `@click="signinClicked"`
 
-Next, our `setup()` needs to grab the `router` and `store` and return them:
-
-```typescript
-  setup() {
-    const router = useRouter();
-    const store = useStore();
-    return { logInOutline, router, store };
-  },
-```
-
-Finally, we need the method for our click binding:
+Finally, we need to map our "login" action to a method in our component and write the `signinClicked()` method that we just bound to the button.
 
 ```typescript
   methods: {
+    ...mapActions(['login']),
     async signinClicked() {
-      const result = await this.store.dispatch(ActionTypes.login, {
+      const result = await this.login({
         email: this.email,
         password: this.password,
       });
       if (!result) {
+        this.password = '';
         this.errorMessage = 'Invalid Email or Password. Please try again.';
       }
     },
@@ -159,7 +144,7 @@ Then, were we define the component itself:
 ```TypeScript
   setup() {
     return { logOutOutline };
-  },  
+  },
 ```
 
 Now let's make that button actually do something. Specifically, let's make it log us out. Let's update the test to express that requirement.
@@ -167,16 +152,12 @@ Now let's make that button actually do something. Specifically, let's make it lo
 First, remember the changes we needed to make in the Login page in order to inject a store with a mocked `dispatch()`? Make those again here. The following snippet should refresh your memory a bit.
 
 ```typescript
-import { createStore } from 'vuex'
-...
-import { ActionTypes } from '@/store';
+import  store  from '@/store'
 ...
 describe('TeaList.vue' () => {
   let router: any;
-  let store: any;
   let wrapper: VueWrapper<any>;
   beforeEach(async () => {
-    store = createStore({});
     store.dispatch = jest.fn();
 ...
     wrapper = mount(Tea, {
@@ -195,7 +176,7 @@ Next, express the requirement as a test.
     const button = wrapper.findComponent('[data-testid="logout-button"]');
     button.trigger('click');
     expect(store.dispatch).toHaveBeenCalledTimes(1);
-    expect(store.dispatch).toHaveBeenCalledWith(ActionTypes.logout);
+    expect(store.dispatch).toHaveBeenCalledWith('logout');
   });
 ```
 
@@ -245,7 +226,7 @@ We will not _really_ test this, but we will need to modify the way the test is s
 ```TypeScript
 import { shallowMount, VueWrapper } from '@vue/test-utils';
 import { createRouter, createWebHistory } from '@ionic/vue-router';
-import { createStore } from 'vuex';
+import store from '@/store';
 
 import App from '@/App.vue';
 
@@ -253,11 +234,6 @@ describe('App.vue', () => {
   let router: any;
   let wrapper: VueWrapper<any>;
   beforeEach(async () => {
-    const store = createStore({
-      getters:{
-        userId: () => undefined
-      }
-    });
     router = createRouter({
       history: createWebHistory(process.env.BASE_URL),
       routes: [{ path: '/', component: App }],
@@ -321,14 +297,14 @@ First, let's write the guard itself. Add a `checkAuthStatus()` function to the t
 
 ```TypeScript
 import { createRouter, createWebHistory } from '@ionic/vue-router';
-import { 
+import {
   NavigationGuardNext,
   RouteRecordRaw,
   RouteLocationNormalized,
 } from 'vue-router';
-import store from '@/store'; 
+import store from '@/store';
 
-import TeaList from '../views/TeaList.vue'; 
+import TeaList from '../views/TeaList.vue';
 
 function checkAuthStatus(
   to: RouteLocationNormalized,
@@ -340,7 +316,7 @@ function checkAuthStatus(
     return next('/login');
   }
   next();
-}  
+}
 ```
 
 Next, after we create the router, call the guard for each route change (code given in context, only add the appropriate line in your own code).
@@ -369,13 +345,12 @@ Finally, mark the teas route as requiring authentication:
 
 ## Add Interceptors
 
-We need to intercept outgoing requests and add the token if we have one. We also need to take a look at responses coming back from the server, and if we get a 401 we need to clear our session data as it is invalid. Make the appropriate modifications to `src/services/api.ts`. 
+We need to intercept outgoing requests and add the token if we have one. We also need to take a look at responses coming back from the server, and if we get a 401 we need to clear our store state as it is invalid. Make the appropriate modifications to `src/services/api.ts`.
 
 You will need to update the headers.
 
 ```TypeScript
 import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
-import store, { MutationTypes } from '@/store';
 ```
 
 After the client is created, you will need to add the interceptors.
@@ -391,7 +366,7 @@ client.interceptors.request.use((config: AxiosRequestConfig) => {
 
 client.interceptors.response.use((res: AxiosResponse) => {
   if (res.status === 401) {
-    store.commit(MutationTypes.CLEAR_SESSION);
+    store.dispatch('clear');
   }
   return res;
 });

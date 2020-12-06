@@ -4,7 +4,6 @@ The application needs to know about the current state of the session. However, y
 
 In this lab you will learn how to create a basic Vuex store.
 
-
 ## Installation and Setup
 
 First we need the Vuex package:
@@ -18,7 +17,7 @@ Next, create a `src\store` folder and in there, create an `index.ts` file. Here 
 ```typescript
 import { createStore, createLogger } from 'vuex';
 
-const debug = process.env.NODE_ENV !== 'production';
+const debug = process.env.NODE_ENV === 'development';
 
 export default createStore({
   strict: debug,
@@ -33,9 +32,11 @@ Finally, use the store in our app. Add the following to the `src/main.ts` file:
 
 ## State
 
-The first thing we should do is define what our state looks like.  So far all we need is a session. Create a `src/store/state.ts` file with the following contents:
+The first thing we should do is define what our state looks like. So far all we need is a session. Create a `src/store/state.ts` file with the following contents:
 
 ```typescript
+import { Session } from '@/models';
+
 export interface State {
   session: Session | null;
 }
@@ -62,7 +63,7 @@ export default createStore({
 
 Mutations are functions that are used to modify the state. The mutations that you define are the only items within your systen that modify the store's state. They are syncronous, and thus rarely access anything other than the state. This makes the very easy to test. First, though, let's export the mutations as a object from our store so we can easily test them.
 
-In Vuex parlance, mutations are committed. They can be committed from anywhere in the code, but are most commonly committed from within the store, either fromk an action or from another mutation. At this time, we will have two mutations: SET_SESSION and CLEAR_SESSION.
+In Vuex parlance, mutations are committed. They can be committed from anywhere in the code, but are most commonly committed from within the store, either from an action or from another mutation.
 
 Create a `src/store/mutations.ts` file with the following contents:
 
@@ -70,20 +71,13 @@ Create a `src/store/mutations.ts` file with the following contents:
 import { State } from './state';
 import { Session } from '@/models';
 
-export enum MutationTypes {
-  CLEAR_SESSION = 'CLEAR_SESSION',
-  SET_SESSION = 'SET_SESSION',
-}
-
 export const mutations = {};
 ```
 
-Mutations are called via `store.commit('MUTATION_NAME')`. The enumeration is defined so we do not have to litter our code with "magic strings".
-
-Then add a `tests/unit/store/mutations.spec.ts` file that we will use to test our mutations.
+Then add a `tests/unit/store/mutations.spec.ts` file that we will use to test our mutations. At this time, our root state consists of our session, and the only things we will need to do to it are set it and clear it, so we will have two mutations: SET_SESSION and CLEAR_SESSION.
 
 ```typescript
-import { MutationTypes, mutations } from '@/store';
+import { mutations } from '@/store';
 import { Session } from '@/models';
 
 const session: Session = {
@@ -97,41 +91,39 @@ const session: Session = {
 };
 
 describe('root mutations', () => {
-  describe(MutationTypes.SET_SESSION, () => {});
+  describe('SET_SESSION', () => {});
 
-  describe(MutationTypes.CLEAR_SESSION, () => {});
+  describe('CLEAR_SESSION', () => {});
 });
 ```
 
 Let's create a test for the `SET_SESSION` mutation. Since mutations are just regular JavaScript functions we can easily test them by calling them directly:
 
 ```typescript
-describe(MutationTypes.SET_SESSION, () => {
+describe('SET_SESSION', () => {
   it('sets the session', () => {
-    const state = { teas: [] };
+    const state = { session: null };
     mutations.SET_SESSION(state, session);
-    expect(state).toEqual({ teas: [], session });
+    expect(state).toEqual({ session });
   });
 });
 ```
 
-The point of the `teas` on the state is just to show we don't touch other parts of the state. It is not actually something that is a part of our root state (yet). The code in `src/state/index.ts` that satisfies this is pretty easy. Notice that we also use the enumeration in order to name the function. This keeps the naming nice and tidy:
+The code in `src/state/mutations.ts` that satisfies this is pretty easy.
 
 ```typescript
 export const mutations = {
-  [MutationTypes.SET_SESSION]: (state: State, session: Session) => (state.session = session),
+  SET_SESSION: (state: State, session: Session) => (state.session = session),
 };
 ```
 
 **Code Challenge:** write the test and the code for the `CLEAR_SESSION` mutation. Have a look at the end of this lab if you run into issues or have questions.
 
-Finally, include the mutations in your store. We will also want to re-export the `MutationTypes` enumeration. We do this because we want the rest of the app to only have to access `@/store` and not have to know the details of how the store is organized:
+Finally, include the mutations in your store.
 
 ```typescript
 ...
 import { mutations } from './mutations';
-...
-export { MutationTypes } from './mutations';
 ...
 export default createStore({
   state,
@@ -150,23 +142,27 @@ Actions are similar to mutations, the differences being that:
 
 In Vuex parlance, actions are "dispatched" from other portions of your application in order to act upon the state.
 
-We will start with three distinct actions:
+We will start with four distinct actions at the root of our store:
 
 - login
 - logout
 - initialize
+- clear
+
+Notice that the first three are logically actions taken by the application as the user interacts with it. The last action (`clear`) it an action dispatched within the store itself to let the store know it should clear its data. There will be a similar in-store root action called `load` that will instruct certain store modules (not discussed yet) to load their data.
 
 First create a `tests/unit/store/actions.spec.ts` file with the following skeleton code:
 
 ```typescript
 import { ActionContext } from 'vuex';
-import { ActionTypes, actions } from '@/store';
+import { actions } from '@/store';
 import AuthenticationService from '@/services/AuthenticationService';
 import SessionService from '@/services/SessionService';
 import { Session } from '@/models';
 
 jest.mock('@/services/AuthenticationService');
 jest.mock('@/services/SessionService');
+
 const context: ActionContext<any, any> = {
   commit: jest.fn(),
   dispatch: jest.fn(),
@@ -189,11 +185,13 @@ const session: Session = {
 describe('root actions', () => {
   beforeEach(() => jest.resetAllMocks());
 
-  describe(ActionTypes.login, () => {});
+  describe('clear', () => {});
 
-  describe(ActionTypes.logout, () => {});
+  describe('login', () => {});
 
-  describe(ActionTypes.initialize, () => {});
+  describe('logout', () => {});
+
+  describe('initialize', () => {});
 });
 ```
 
@@ -204,41 +202,61 @@ import { ActionContext } from 'vuex';
 
 import AuthenticationService from '@/services/AuthenticationService';
 import SessionService from '@/services/SessionService';
-import TeaService from '@/services/TeaService';
 
 import { State } from './state';
-import { MutationTypes } from './mutations';
-
-export enum ActionTypes {
-  login = 'login',
-  logout = 'logout',
-  initialize = 'initialize',
-}
 
 export const actions = {
-  async [ActionTypes.login](
+  async login(
     { commit }: ActionContext<State, State>,
     credentials: { email: string; password: string },
   ): Promise<boolean> {
     return false;
   },
 
-  async [ActionTypes.logout]({ commit }: ActionContext<State, State>): Promise<void> {
+  async logout({ commit }: ActionContext<State, State>): Promise<void> {
     return undefined;
   },
 
-  async [ActionTypes.initialize]({ commit }: ActionContext<State, State>): Promise<void> {
+  async initialize({ commit }: ActionContext<State, State>): Promise<void> {
+    return undefined;
+  },
+
+  clear({ commit }: ActionContext<State, State>): void {
     return undefined;
   },
 };
 ```
 
+### Clear
+
+The `clear` action is easiest of the bunch so let's start there. Notice that it is not `async`. Actions can be syncronous. We will start by filling out the test:
+
+```TypeScript
+  describe('clear', () => {
+    it('commits CLEAR_SESSION', () => {
+      actions.clear(context);
+      expect(context.commit).toHaveBeenCalledTimes(1);
+      expect(context.commit).toHaveBeenCalledWith('CLEAR_SESSION');
+    });
+  });
+```
+
+The code for that is as simple as it sounds:
+
+```TypeScript
+  clear({ commit }: ActionContext<State, State>): void {
+    commit('CLEAR_SESSION');
+  },
+```
+
+Notice that just like mutations, actions are just JavaScript functions, so it is very easy to test them by calling them directly. The only thing that makes them harder than mutations is the amount of mocking that is often required.
+
 ### Logout
 
-The logout is the most straight forward, so let's start there. We need to handle the logout with our API, clear the session storage, and commit the clearing of the session within the state. Here is what those requirements look like expressed as tests:
+The logout is also fairly simple, so let's do that one next. We need to handle the logout with our API, clear the session storage, and dispatch the `clear` action. Here is what those requirements look like expressed as tests:
 
 ```typescript
-describe(ActionTypes.logout, () => {
+describe('logout', () => {
   it('logs out', async () => {
     await actions.logout(context);
     expect(AuthenticationService.logout).toHaveBeenCalledTimes(1);
@@ -249,15 +267,13 @@ describe(ActionTypes.logout, () => {
     expect(SessionService.clear).toHaveBeenCalledTimes(1);
   });
 
-  it('commits the CLEAR_SESSION mutation', async () => {
+  it('dispatches the clear action', async () => {
     await actions.logout(context);
-    expect(context.commit).toHaveBeenCalledTimes(1);
-    expect(context.commit).toHaveBeenCalledWith('CLEAR_SESSION');
+    expect(context.dispatch).toHaveBeenCalledTimes(1);
+    expect(context.dispatch).toHaveBeenCalledWith('clear');
   });
 });
 ```
-
-Notice that just like mutations, actions are just JavaScript functions, so it is very easy to test them by calling them directly. The only thing that makes them harder than mutations is the amount of mocking that is required.
 
 In the code, that translates to:
 
@@ -268,10 +284,10 @@ import SessionService from '@/services/SessionService';
 ...
 export const actions = {
 ...
-  async [ActionTypes.logout]({ commit }: ActionContext<State, State>): Promise<void> {
+  async logout({ dispatch }: ActionContext<State, State>): Promise<void> {
     await AuthenticationService.logout();
     await SessionService.clear();
-    commit('CLEAR_SESSION');
+    dispatch('clear');
   },
 ...
 };
@@ -282,7 +298,7 @@ export const actions = {
 The Login takes a little bit more work because the login itself may fail. We will build this one up a little at a time. First, though, is the fact that we need to call the authentication login correctly:
 
 ```typescript
-describe(ActionTypes.login, () => {
+describe('login', () => {
   const credentials = {
     email: 'test@test.com',
     password: 'thisisatest',
@@ -302,7 +318,7 @@ describe(ActionTypes.login, () => {
 The code in the action looks like this:
 
 ```typescript
-  async [ActionTypes.login](
+  async login(
     { commit }: ActionContext<State, State>,
     credentials: { email: string; password: string },
   ): Promise<boolean> {
@@ -375,7 +391,7 @@ The final set of tests are for the case when the login succeeds. This is basical
 The code for the action is pretty straight forward:
 
 ```typescript
-  async [ActionTypes.login](
+  async login(
     { commit }: ActionContext<State, State>,
     credentials: { email: string; password: string },
   ): Promise<boolean> {
@@ -383,7 +399,7 @@ The code for the action is pretty straight forward:
       credentials.email,
       credentials.password,
     );
-    if (response && response.success && response.user && response.token) {
+    if (response?.success && response?.user && response?.token) {
       SessionService.set(response.user, response.token);
       commit('SET_SESSION', {
         user: response.user,
@@ -394,7 +410,7 @@ The code for the action is pretty straight forward:
   },
 ```
 
-Note that anything unpacking and repacking the reponse is making sure we actually _have_ a response. Also, the `!!` syntax on the final like coerces the value to a boolean (just in case you have not seen that syntax before).
+Note that before unpacking the reponse is making sure we actually _have_ a response. Also, the `!!` syntax on the final line coerces the value to a boolean (just in case you have not seen that syntax before).
 
 ### Initialize
 
@@ -407,24 +423,33 @@ describe('initialize', () => {
     expect(SessionService.get).toHaveBeenCalledTimes(1);
   });
 
-  it('does not commit the session if there is not one', async () => {
-    await actions.initialize(context);
-    expect(context.commit).not.toHaveBeenCalled();
+  describe('without a stored session', () => {
+    it('does not commit the session', async () => {
+      await actions.initialize(context);
+      expect(context.commit).not.toHaveBeenCalled();
+    });
   });
 
-  it('commits the session if there is one', async () => {
-    (SessionService.get as any).mockResolvedValue(session);
-    await actions.initialize(context);
-    expect(context.commit).toHaveBeenCalledTimes(1);
-    expect(context.commit).toHaveBeenCalledWith('SET_SESSION', session);
+  describe('with a stored session', () => {
+    beforeEach(() => {
+      (SessionService.get as any).mockResolvedValue(session);
+    });
+
+    it('commits the session', async () => {
+      await actions.initialize(context);
+      expect(context.commit).toHaveBeenCalledTimes(1);
+      expect(context.commit).toHaveBeenCalledWith('SET_SESSION', session);
+    });
   });
 });
 ```
 
+The two inner `describe()`'s may seem like overkill now, but that will come in handy later. It is generally best to nest different routes through the code in their own `describe()`.
+
 The code for the action is then as follows:
 
 ```typescript
-  async [ActionTypes.initialize]({ commit }: ActionContext<State, State>): Promise<void> {
+  async initialize({ commit }: ActionContext<State, State>): Promise<void> {
     const session = await SessionService.get();
     if (session) {
       commit('SET_SESSION', session);
@@ -432,17 +457,17 @@ The code for the action is then as follows:
   },
 ```
 
-Finally, using the mutations as a model, add the actions to the store and re-export the `ActionTypes`.
+Finally, using the mutations as a model, add the actions to the store.
 
 ## Modules
 
 Notice that we did everything at the root level for within our store. As our application grows, we will want to look into using <a href="https://vuex.vuejs.org/guide/modules.html" target="_blank">modules</a>. However, we are currently dealing with a fairly core concept within our application so it makes sense that it should be defined at the root level.
 
-We aren't going to do anything here, I just wanted to make sure you were aware that these existed.
+We aren't going to do anything here, I just wanted to make sure you were aware that these existed. These will come into play as we expand our application. This is also the reason we have the `clear` action that currently just seems like an extra layer of abstraction.
 
 ## Initialize the Store
 
-We need to initialize the store, and thus load our session information if we have any, before we mount the application. We can do this in `src/main.ts` by adding a method that dispatches the initialize. We can then wait for it to finish just like we wait for the router to be ready before mounting the app.
+Before we mount the application we need to initialize the store and thus load our session information if we have any. We can do this in `src/main.ts` by adding a method that dispatches the initialize. We can then wait for it to finish just like we wait for the router to be ready before mounting the app.
 
 ```typescript
 function initializeStore(): Promise<void> {
@@ -467,15 +492,15 @@ All of the various pieces have now been assembled into a system that will handle
 By the way, here is the test and the code for the `CLEAR_SESSION` code challenge in case you need it:
 
 ```typescript
-describe(MutationTypes.CLEAR_SESSION, () => {
+describe('CLEAR_SESSION', () => {
   it('clears the session', () => {
-    const state = { teas: [], session };
+    const state = { session };
     mutations.CLEAR_SESSION(state);
-    expect(state).toEqual({ teas: [], session: null });
+    expect(state).toEqual({ session: null });
   });
 });
 ```
 
 ```typescript
-[MutationTypes.CLEAR_SESSION]: (state: State) => (state.session = null),
+CLEAR_SESSION: (state: State) => (state.session = null),
 ```

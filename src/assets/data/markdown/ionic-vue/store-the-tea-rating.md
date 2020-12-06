@@ -197,34 +197,25 @@ function unpackData(data: Array<RawData>): Promise<Array<Tea>> {
 
 ## Update the Store
 
-Our store needs to be updated to handle a rating change. This involves adding an action that can be dispatched by our pages as needed as well as a mutation that keeps the state consistent
+Our store needs to be updated to handle a rating change. This involves adding an action that can be dispatched by our pages as needed as well as a mutation that keeps the state consistent. Since this only applies to the teas, all of this will be namespaced to the `teas` module.
 
 ### Mutations
 
-The first thing we need is a mutation that updates the specific tea in our state. In the `src/store/mutations.ts` file, update the `MutationsType` to have a `SET_TEA_RATING` mutation and add a stub function for it:
+The first thing we need is a mutation that updates the specific tea in our state. In the `src/store/teas/mutations.ts` file add a stub function for a SET_RATING mutation:
 
 ```TypeScript
-export enum MutationTypes {
-  ...
-  SET_TEA_RATING = 'SET_TEA_RATING',
-}
-
 export const mutations = {
   ...
-  [MutationTypes.SET_TEA_RATING]: (
-    state: State,
-    payload: { id: number; rating: number }
-  ) => (state),
+  SET_RATING: (state: State, payload: { id: number; rating: number }) => (state),
 };
 ```
-
-The test for this in `tests/util/store/mutations.spec.ts` looks like this:
+The test for this in `tests/util/store/teas/mutations.spec.ts` looks like this:
 
 ```typescript
-describe(MutationTypes.SET_TEA_RATING, () => {
+describe('SET_RATING', () => {
   it('sets the specific tea', () => {
     const state = { teas, session };
-    mutations.SET_TEA_RATING(state, { ...teas[1], rating: 4 });
+    mutations.SET_RATING(state, { ...teas[1], rating: 4 });
     const expectedTeas = [...teas];
     expectedTeas[1] = { ...teas[1], rating: 4 };
     expect(state).toEqual({ teas: expectedTeas, session });
@@ -234,13 +225,10 @@ describe(MutationTypes.SET_TEA_RATING, () => {
 
 **Note:** the `teas` array is missing the `rating` for each tea. Fill add one for each item. Just make sure `teas[1]` has a rating other than 4.
 
-Filling out the body of the mutation in `src/store/mutations.ts` we get:
+Filling out the body of the mutation in `src/store/teas/mutations.ts` we get:
 
 ```TypeScript
-  [MutationTypes.SET_TEA_RATING]: (
-    state: State,
-    payload: { id: number; rating: number },
-  ) => {
+  SET_RATING: (state: State, payload: { id: number; rating: number })=> {
     const targetTea = state.teas.find(t => t.id === payload.id);
     if (targetTea) {
       targetTea.rating = payload.rating;
@@ -250,23 +238,15 @@ Filling out the body of the mutation in `src/store/mutations.ts` we get:
 
 ### Actions
 
-We will also need to add an action. We will call it the `rateTea` action. As a payload it will take the tea to rate as well as a value for the new rating. Let's create the skeleton for that in `src/store/actions.ts`.
+We will also need to add an action. We will call it the `rate` action. As a payload it will take the tea to rate as well as a value for the new rating. Let's create the skeleton for that in `src/store/teas/actions.ts`.
 
 ```TypeScript
 import { Tea } from '@/models';
 ...
-export enum ActionTypes {
-  login = 'login',
-  logout = 'logout',
-  loadTeas = 'loadTeas',
-  rateTea = 'rateTea',
-  initialize = 'initialize',
-}
-...
 export const actions = {
 ...
-  async [ActionTypes.rateTea](
-    { commit }: ActionContext<State, State>,
+  async rate(
+    { commit }: ActionContext<State, RootState>,
     payload: { tea: Tea; rating: number },
   ): Promise<void> {
     return undefined;
@@ -275,38 +255,38 @@ export const actions = {
 };
 ```
 
-Thinking about what this action needs to do, it needs to save the tea with the new rating, and it needs to commit the change to the store. Let's express those requirements as tests in `tests/unit/store/actions.spec.ts`.
+Thinking about what this action needs to do, it needs to save the tea with the new rating, and it needs to commit the change to the store. Let's express those requirements as tests in `tests/unit/store/teas/actions.spec.ts`.
 
 The first thing to note is that we have the same problem with the `teas` array that we had in the `mutations` test. Perform a similar update here by adding a `rating` to each tea in the array.
 
 ```TypeScript
-  describe(ActionTypes.rateTea, () => {
+  describe('rate', () => {
     it('saves the tea with the new rating', async () => {
-      await actions.rateTea(context, { tea: teas[1], rating: 5 });
+      await actions.rate(context, { tea: teas[1], rating: 5 });
       expect(TeaService.save).toHaveBeenCalledTimes(1);
       expect(TeaService.save).toHaveBeenCalledWith({...teas[1], rating: 5});
     });
 
     it('commits the SET_TEA_RATING mutation', async () => {
-      await actions.rateTea(context, { tea: teas[1], rating: 5 });
+      await actions.rate(context, { tea: teas[1], rating: 5 });
       expect(context.commit).toHaveBeenCalledTimes(1);
       expect(context.commit).toHaveBeenCalledWith(
-        MutationTypes.SET_TEA_RATING,
+        'SET_RATING',
         { id: teas[1].id, rating: 5 },
       );
     });
   });
 ```
 
-Then we can code this up safely in `src/store/actions.ts`.
+Then we can code this up safely in `src/store/teas/actions.ts`.
 
 ```TypeScript
-  async [ActionTypes.rateTea](
+  async rate(
     { commit }: ActionContext<State, State>,
     payload: { tea: Tea; rating: number },
   ): Promise<void> {
     TeaService.save({ ...payload.tea, rating: payload.rating });
-    commit(MutationTypes.SET_TEA_RATING, {
+    commit('SET_RATING', {
       id: payload.tea.id,
       rating: payload.rating,
     });
@@ -317,39 +297,7 @@ Then we can code this up safely in `src/store/actions.ts`.
 
 With all of that in place, the changes to the view are very straight forward and are concentrated solely on the user interaction with the page. Really, our only two requirements are that the rating is set properly when we navigate to the page and that any changes to the rating are saved.
 
-First, we will update the test setup a little in `tests/unit/views/TeaDetails.spec.ts`:
-
-```diff
-+import { ActionTypes } from '@/store';
-+import { Tea } from '@/models';
-
- describe('TeaDetails.vue', () => {
-   let router: any;
-   let store: any;
-   let wrapper: VueWrapper<any>;
-+  let tea: Tea;
-
-   beforeEach(async () => {
-+    tea = {
-+      id: 4,
-+      name: 'Purple Tea',
-+      description: 'Is this actually a thing?',
-+      image: '/assets/img/nope.jpg',
-+      rating: 2,
-+    };
-     store = createStore({});
-     store.dispatch = jest.fn();
-     store.getters = {
--      tea: jest.fn().mockReturnValue({
--        id: 4,
--        name: 'Purple Tea',
--        description: 'Is this actually a thing?',
--        image: '/assets/img/nope.jpg',
--      }),
-+      tea: jest.fn().mockReturnValue(tea),
-```
-
-At that point, we can create some tests that cover our use requirements:
+First, we will update the test `tests/unit/views/TeaDetails.spec.ts` to cover our requirements:
 
 ```TypeScript
   it('sets the rating based on the tea', () => {
@@ -361,7 +309,7 @@ At that point, we can create some tests that cover our use requirements:
     wrapper.setData({rating: 3});
     rating.trigger('click');
     expect(store.dispatch).toHaveBeenCalledTimes(1);
-    expect(store.dispatch).toHaveBeenCalledWith(ActionTypes.rateTea, {tea, rating: 3});
+    expect(store.dispatch).toHaveBeenCalledWith('teas/rate', {tea, rating: 3});
   });
 ```
 
@@ -387,7 +335,6 @@ And then `TeaDetails.vue` code changes that make this happen:
    IonToolbar,
  } from '@ionic/vue';
 
-+import { ActionTypes } from '@/store';
  import AppRating from '@/components/AppRating.vue';
 
  export default defineComponent({
@@ -396,8 +343,9 @@ And then `TeaDetails.vue` code changes that make this happen:
      };
    },
 +  methods: {
++    ...mapActions('teas', ['rate']),
 +    ratingClicked() {
-+      this.store.dispatch(ActionTypes.rateTea, {
++      this.rate({
 +        tea: this.tea,
 +        rating: this.rating,
 +      });

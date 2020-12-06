@@ -18,16 +18,14 @@ First the test in `tests/unit/views/TeaDetails.spec.ts`
 ```TypeScript
 import { mount, VueWrapper } from '@vue/test-utils';
 import { createRouter, createWebHistory } from '@ionic/vue-router';
-import { createStore } from 'vuex';
+import store from '@/store';
 import TeaDetails from '@/views/TeaDetails.vue';
 
 describe('TeaDetails.vue', () => {
   let router: any;
-  let store: any;
   let wrapper: VueWrapper<any>;
 
   beforeEach(async () => {
-    store = createStore({});
     store.dispatch = jest.fn();
     router = createRouter({
       history: createWebHistory(process.env.BASE_URL),
@@ -137,45 +135,41 @@ In other cases this is less important because you should always have a valid nav
 
 ## Display the Tea
 
-Now that we have the navigation in place, let's grab the tea and display it. The teas are currently in our state, so it makes sense to create a simple getter that will get the correct tea for us. Add that to the `getters` object in `src/store/state.ts`
+Now that we have the navigation in place, let's grab the tea and display it.
 
-```typescript
-tea: (state: State) => (id: number) => state.teas.find(t => t.id === id),
-```
-
-With that in place, we can noodle out what our main test setup in `tests/unit/view/TeaDetails.spec.ts` should look like. We know that we will need to do the following:
+First we need to noodle out what our main test setup in `tests/unit/view/TeaDetails.spec.ts` should look like. We know that we will need to do the following:
 
 - get the `id` parameter from our route
-- call the getter we just added to get our tea
+- call the `find` getter from the `teas` store module to find the proper tea
 
-Luckily, the `router` and `store` setup are already in our `beforeEach()`, so let's just modify it slightly to mock the proper getter in the store and to define the route properly when we create the router.
-
-```typescript
-store.getters = {
-  tea: jest.fn().mockReturnValue({
-    id: 4,
-    name: 'Purple Tea',
-    description: 'Is this actually a thing?',
-    image: '/assets/img/nope.jpg',
-  }),
-};
-router = createRouter({
-  history: createWebHistory(process.env.BASE_URL),
-  routes: [{ path: '/teas/tea/:id', component: TeaDetails }],
-});
-router.push('/teas/tea/4');
-```
-
-The `store.getters` bit is new, but with the router bits it is just a matter of changing the paths up a bit (they where just '/' prior to this).
-
-With that in place, let's create our first test. All we know right now is that we need to get the tea that is specified by the `id` that is in the route.
+Luckily, the `router` and `store` setup are already in our `beforeEach()`, so let's just modify it slightly to define the route properly when we create the router. We will also need to ensure our tea store has data we can find.
 
 ```typescript
-it('gets the tea', () => {
-  expect(store.getters.tea).toHaveBeenCalledTimes(1);
-  expect(store.getters.tea).toHaveBeenCalledWith(4);
-});
+...
+import { Tea } from '@/models';
+...
+  let tea: Tea;
+
+  beforeEach(async () => {
+    tea = {
+      id: 4,
+      name: 'Purple Tea',
+      description: 'Is this actually a thing?',
+      image: '/assets/img/nope.jpg',
+      rating: 2,
+    };
+    store.commit('teas/SET', [tea]);
+    ...
+    router = createRouter({
+      history: createWebHistory(process.env.BASE_URL),
+      routes: [{ path: '/teas/tea/:id', component: TeaDetails }],
+    });
+    router.push('/teas/tea/4');
+    ...
+  });
 ```
+
+**Note:** some of the above is new code and some is chaning existing code, so don't just copy-paste.
 
 Add the following code to the object we pass to the `defineComponent()` call in `TeaDetails.vue`:
 
@@ -183,8 +177,7 @@ Add the following code to the object we pass to the `defineComponent()` call in 
   setup() {
     const { params } = useRoute();
     const id = parseInt(params.id as string, 10);
-    const store = useStore();
-    return { id, store };
+    return { id };
   },
 ```
 
@@ -192,16 +185,16 @@ You will also need to add a couple of imports within the `script` tag:
 
 ```typescript
 import { useRoute } from 'vue-router';
-import { mapGetters, useStore } from 'vuex';
+import { mapGetters } from 'vuex';
 ```
 
 Then we need to add a couple of computed properties:
 
 ```typescript
   computed: {
-    ...mapGetters({ getTea: 'tea' }),
+    ...mapGetters('teas', ['find']),
     tea(): Tea {
-      return this.getTea(this.id);
+      return this.find(this.id);
     },
   },
 ```

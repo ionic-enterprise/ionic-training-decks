@@ -227,6 +227,10 @@
               "file": "tabbed-navigation"
             },
             {
+              "title": "The Notes Feature",
+              "file": "notes-feature"
+            },
+            {
               "title": "More Coming Soon...",
               "file": "construction"
             }

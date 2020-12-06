@@ -1,6 +1,10 @@
 # Lab: Load Teas
 
-In this lab, you will learn
+In this lab, you will learn:
+
+- how to create a basic HTTP service
+- how to add a module to the store
+- how to use the data in a view
 
 ## Create a TeaService
 
@@ -192,236 +196,276 @@ The same applies of this decide to shorten the property names in order to save o
 
 ## Add Teas to the Store
 
-The first (and currently _only_) place that we land after logging in needs these teas. Furthermore we know from our user stories that this data is pretty central to the rest of our app, so let's add it to the root level of our store. When adding an item to the store, we need to think about:
+In order to keep the store orrderly, we will add the teas as a namespaced module. This means that the in addition to the state, the getters, mutations, and actions are also all namespeced to the module. This makes the module self contained and easier to maintain.
 
-- How does this change the shape of the state?
-- What mutations are required?
-- What actions effect this part of the state?
+The one exception to the namespacing is that actions _can_ be marked as "root" actions. If we have an action called "drink", for example, we would normally have to dispatch it as such: `this.$store.dispatch('teas/drink')`. This would dispatch the "drink" action within the "teas" module.
+
+Now let's say we defined the action with `root: true`. If we do this we can dispatch the action as such: `this.$store.dispatch('drink')`. The result of this call is that the "drink" action is dispatched within any module that has the "drink" action defined with `{root: true}`. So if we also had the "drink" action defined as root in the "coffee" module then the "drink" action would execure in the "teas" module and the "coffee" module.
+
+With that in mind, we should think about the actions that may be common within the modules we have in our store. This allows us to define a consistent set of behaviors for our modules which makes it easier for developers to understand what is going on within the code.
+
+Here is what I see as some good candidates for a module that defines a collection of data:
+
+- load: Loads the data, could be root if we want the data to load globaly or namespaced if we want more control over the loading of the data
+- clear: Clears out the data, mostly likely this is always root
+- save: Save (create or update) an item of data, always namespaced
+- delete: Remove an item of data, always namespaced
+
+It then makes sense to have a set of mutations that mirror these actions to some degree. For example:
+
+- SET: sets the collection
+- CLEAR: empties the collection
+- MERGE: modify an item if it is already in the collection, otherwise add it
+- DELETE: remove the item from the collection
+
+We also need to take some time to think about:
+
+- the shape of our state
+- getters that may be required for our state
 
 ### State
 
-Updating `src/store/state.ts` is pretty straight forward:
+Create a `src/store/teas/state.ts` file with the following contents:
 
 ```TypeScript
-// Add this to the State interface
-  teas: Array<Tea>;
+import { Tea } from '@/models';
 
+export interface State {
+  list: Array<Tea>;
+}
 
-// Add this to the state object
-  teas: [],
+export const state: State = {
+  list: [],
+};
+
+export const getters = {
+  find: (state: State) => (id: number) => state.list.find(t => t.id === id),
+};
 ```
+
+Basically, we want a list of teas with a getter that allows us to find a specific tea. The reason we use `list` property name in the state is that when we add the module to our store it will be added as `teas` so the full path to the tea list then becomes `this.$store.state.teas.list`
 
 ### Mutations
 
-Thinking about the required mutations, this part of the state is very similar in needs to the `session`. It needs to be set when we get the data, and it needs to be cleared at appropriate times.
+Thinking about the required mutations, this part of the state is very similar in needs to the `session`. It needs to be set when we get the data, and it needs to be cleared at appropriate times. Since the module is namespaced, we can use very generic names. We will use `SET` and `CLEAR`.
 
-With that in mind, we start be adding a couple of values to our `MutationsTypes` enumeration in `src/store/mutations.ts`:
-
-```TypeScript
-export enum MutationTypes {
-  CLEAR_SESSION = 'CLEAR_SESSION',
-  CLEAR_TEAS = 'CLEAR_TEAS', // Add this...
-  SET_SESSION = 'SET_SESSION',
-  SET_TEAS = 'SET_TEAS', // Add this... 
-}
-```
-
-Then we can go about writing up our tests in `tests/unit/store/mutations.spec.ts`.
-
-The first thing we will need is some data to work with:
+We can go about writing up our tests in `tests/unit/store/teas/mutations.spec.ts`
 
 ```TypwScript
-import { Session, Tea } from '@/models';
-...
+import { mutations } from '@/store/teas/mutations';
+import { Tea } from '@/models';
+
 const teas: Array<Tea> = [
   {
     id: 1,
     name: 'Green',
     image: 'assets/img/green.jpg',
     description: 'Green tea description',
+    rating: 0,
   },
   {
     id: 2,
     name: 'Black',
     image: 'assets/img/black.jpg',
     description: 'A fully oxidized tea',
+    rating: 3,
   },
   {
     id: 3,
     name: 'Herbal',
     image: 'assets/img/herbal.jpg',
     description: 'Herbal infusions are not actually "tea"',
+    rating: 2,
   },
 ];
-```
 
-With that in place, we can write the actual tests:
-
-```TypeScript
-  describe('SET_TEAS', () => {
-    it('sets the teas', () => {
-      const state = { teas: [], session };
-      mutations.SET_TEAS(state, teas);
-      expect(state).toEqual({ teas, session });
-    });
-  });
-
-  describe('CLEAR_TEAS', () => {
+describe('tea mutations', () => {
+  describe('CLEAR_SESSION', () => {
     it('set the teas to an empty array', () => {
-      const state = { teas, session };
-      mutations.CLEAR_TEAS(state);
-      expect(state).toEqual({ teas: [], session });
+      const state = { list: teas };
+      mutations.CLEAR(state);
+      expect(state).toEqual({ list: [] });
     });
   });
+
+  describe('SET', () => {
+    it('sets the teas', () => {
+      const state = { list: [] };
+      mutations.SET(state, teas);
+      expect(state).toEqual({ list: teas });
+    });
+  });
+
+  describe('SET_RATING', () => {
+    it('sets the specific tea', () => {
+      const state = { list: teas };
+      mutations.SET_RATING(state, { id: teas[1].id, rating: 4 });
+      const expectedTeas = [...teas];
+      expectedTeas[1] = { ...teas[1], rating: 4 };
+      expect(state).toEqual({ list: expectedTeas });
+    });
+  });
+});
 ```
 
-**Challenge:** Based on the contents of the tests and the existing sesssion mutations, create the mutations for the teas.See the code at the conclusion of this lab if you get stuck.
+**Challenge:** Based on the contents of the tests and the existing session mutations, create the mutations for the teas. You will need to create a `src/store/teas/mutations.ts` file. See the code at the conclusion of this lab if you get stuck.
 
 ### Actions
 
-The actions are a little bit more involved, but we will start with just the basics, loading the tea.
+We need to think about the actions we need for the teas, and whether they should be namespaced or if they should be root level actions. Here are the actions we will need to take within this module:
 
-First, add a `loadTeas` to the `ActionType` in `src/store/actions.ts`.
+- load
+- clear
+
+Since the tea list page is the first page we go, and since there are user stories in the backlog where other pages will also need this data, it makes sense to load them data up front when the store dispatches the root-level "load".
+
+The "clear" should be root level in all of our modules so all data is cleared whenever the root level "clear" is dispatched.
+
+So both of these should be `root: true` acitons.
+
+We will start with the `clear` action since it is the easiest of the two. We can begin tackling this in the test (`tests/unit/store/teas/actions.spec.ts`).
 
 ```TypeScript
-  loadTeas = 'loadTeas',
+import { ActionContext } from 'vuex';
+import { actions } from '@/store/teas/actions';
+
+const context: ActionContext<any, any> = {
+  commit: jest.fn(),
+  dispatch: jest.fn(),
+  getters: {},
+  state: {},
+  rootGetters: {},
+  rootState: {},
+};
+
+describe('tea actions', () => {
+  beforeEach(() => jest.resetAllMocks());
+
+  describe('clear', () => {
+    it('commits CLEAR', () => {
+      actions.clear.handler(context);
+      expect(context.commit).toHaveBeenCalledTimes(1);
+      expect(context.commit).toHaveBeenCalledWith('CLEAR');
+    });
+  });
+});
 ```
 
-Now we can begin tackling this in the test (`tests/unit/store/actions.spec.ts`).
+With the test in place, we can now create the `src/store/teas/actions.ts` file with the following contents:
 
 ```TypeScript
+import { ActionContext } from 'vuex';
+
 import TeaService from '@/services/TeaService';
-import { Session, Tea } from '@/models';
+import { Tea } from '@/models';
+
+import { State } from './state';
+import { State as RootState } from '../state';
+
+export const actions = {
+  clear: {
+    root: true,
+    handler({ commit }: ActionContext<State, RootState>) {
+      commit('CLEAR');
+    },
+  },
+};
+```
+
+Notice the sort of odd syntax for the action. That is because we are defining this action with `root: true` so rather than just having a function we have an object with the `root: true` setting and a special function called `handler()` with the logic.
+
+Next we can add the tests that are required for the load action:
+
+```TypeScript
 ...
+import TeaService from '@/services/TeaService';
+import { Tea } from '@/models';
+
 jest.mock('@/services/TeaService');
-...
+
+const context: ActionContext<any, any> = {
+  commit: jest.fn(),
+  dispatch: jest.fn(),
+  getters: {},
+  state: {},
+  rootGetters: {},
+  rootState: {},
+};
+
 const teas: Array<Tea> = [
   {
     id: 1,
     name: 'Green',
     image: 'assets/img/green.jpg',
     description: 'Green teas have the oxidation process stopped.',
+    rating: 3,
   },
   {
     id: 2,
     name: 'Black',
     image: 'assets/img/black.jpg',
     description: 'A fully oxidized tea.',
+    rating: 2,
   },
   {
     id: 3,
     name: 'Herbal',
     image: 'assets/img/herbal.jpg',
     description: 'Herbal infusions are not actually tea.',
+    rating: 0,
   },
 ];
+
+describe('tea actions', () => {
 ...
-  describe(ActionTypes.loadTeas, () => {
+  describe('load', () => {
     beforeEach(() => {
       (TeaService.getAll as any).mockResolvedValue(teas);
     });
 
     it('gets the teas', async () => {
-      await actions.loadTeas(context);
+      await actions.load.handler(context);
       expect(TeaService.getAll).toHaveBeenCalledTimes(1);
     });
 
     it('commits the teas', async () => {
-      await actions.loadTeas(context);
+      await actions.load.handler(context);
       expect(context.commit).toHaveBeenCalledTimes(1);
-      expect(context.commit).toHaveBeenCalledWith(MutationTypes.SET_TEAS, teas);
+      expect(context.commit).toHaveBeenCalledWith('SET', teas);
     });
   });
+});
 
 ```
 
-The code that needs to be added to `src/store/actions.ts` is pretty straight forward and looks similar to some of the code we have already written. We just need to grab the teas and then commit them:
+Then we can add the `load` action itself. Remember that we want this to be a `root: true` action.
 
 ```TypeScript
-  async [ActionTypes.loadTeas]({
-    commit,
-  }: ActionContext<State, State>): Promise<void> {
-    const teas = await TeaService.getAll();
-    commit(MutationTypes.SET_TEAS, teas);
+  load: {
+    root: true,
+    async handler({ commit }: ActionContext<State, RootState>): Promise<void> {
+      const teas = await TeaService.getAll();
+      commit('SET', teas);
+    },
   },
 ```
 
-Now that the basics are in place, let's think about what we need to do with some of the other actions.
+#### Update the Root Actions
 
-- When we log in, we should load the teas to they are available to the rest of the application.
-- When we log out, we don't want the teas hanging out. Whoever logs in next may not have access to them.
-- When we initialize the app, we need to grab the teas if we are logged in.
+The root actions need to be modified to dispatch the `clear` and `load` actions at the appropriate times. We will need to update the following test and code files:
 
-One of the keys of the above is that neither the login nor the initialization should be slowed down by the loading of the teas, so we need to make sure we are not waiting for that action to complete.
+- `tests/unit/store/actions.spec.ts`
+- `src/store/actions.ts`
 
-#### Update the Logout Action
+##### Initialize Action
 
-Let's do the logout first, since that is easy.
-
-Change the "commits the CLEAR_SESSION" test to also include clearing the teas.
+The `initialize` action has two different cases: with a stored session and without a stored session. With a stored session we need to dispatch a `load` action. Without we do not.
 
 ```TypeScript
-    it('commits the CLEAR_SESSION and CLEAR_TEAS mutations', async () => {
-      await actions.logout(context);
-      expect(context.commit).toHaveBeenCalledTimes(2);
-      expect(context.commit).toHaveBeenCalledWith(MutationTypes.CLEAR_SESSION);
-      expect(context.commit).toHaveBeenCalledWith(MutationTypes.CLEAR_TEAS);
-    });
-```
-
-Modifying the code in `src/store/actions.ts` to satisfy this test is left as an exercise for the reader.
-
-#### Update the Login Action
-
-The login action has two different outcomes: the user can fail to login, or they can succeed. We only want to load the teas in the latter case. First, add a test within the "on failure" section of the test to ensure we don't do anything:
-
-```TypeScript
-      it('does not dispatch any further actions', async () => {
-        await actions.login(context, credentials);
-        expect(context.dispatch).not.toHaveBeenCalled();
-      });
-```
-
-That test will pass out of the box because, well, we weren't dispatching any further actions to begin with. So let's move on to the case where the user succeeds in logging in. In this case, we _do_ want to load the teas. Add the following test within the "on success" section of tests.
-
-```TypeScript
-      it(`dispatches the ${ActionTypes.loadTeas} action`, async () => {
-        await actions.login(context, credentials);
-        expect(context.dispatch).toHaveBeenCalledTimes(1);
-        expect(context.dispatch).toHaveBeenCalledWith(ActionTypes.loadTeas);
-      });
-```
-
-Now let's swtich over to the actions code and modify the login action to handle this. Add a `dispatch()` right after the commit of "SET_SESSION" as such:
-
-```TypeScript
-    if (response && response.success && response.user && response.token) {
-      SessionService.set(response.user, response.token);
-      commit(MutationTypes.SET_SESSION, {
-        user: response.user,
-        token: response.token,
-      });
-      dispatch(ActionTypes.loadTeas);
-    }
-```
-
-#### Update the Initialization Action
-
-Here was also have two conditions: we can start the app without a stored session or with a stored session. We only want to try to load the teas in the latter case. Let's refactor our tests to have "without a stored session" and "with a stored session" group of tests. The full refactoring with the "dispatch" tests is shown here.
-
-```TypeScript
-  describe(ActionTypes.initialize, () => {
-    it('gets the current session from storage', async () => {
-      await actions.initialize(context);
-      expect(SessionService.get).toHaveBeenCalledTimes(1);
-    });
-
+  describe('initialize', () => {
+    ...
     describe('without a stored session', () => {
-      it('does not commit the session if there is not one', async () => {
-        await actions.initialize(context);
-        expect(context.commit).not.toHaveBeenCalled();
-      });
-
+      ...
       it('does not dispatch any further actions', async () => {
         await actions.initialize(context);
         expect(context.dispatch).not.toHaveBeenCalled();
@@ -429,171 +473,126 @@ Here was also have two conditions: we can start the app without a stored session
     });
 
     describe('with a stored session', () => {
-      beforeEach(() => {
-        (SessionService.get as any).mockResolvedValue(session);
-      });
-
-      it('commits the session', async () => {
-        await actions.initialize(context);
-        expect(context.commit).toHaveBeenCalledTimes(1);
-        expect(context.commit).toHaveBeenCalledWith(
-          MutationTypes.SET_SESSION,
-          session,
-        );
-      });
-
-      it('dispatches a load of the teas', async () => {
+      ...
+      it('dispatches the load action', async () => {
         await actions.initialize(context);
         expect(context.dispatch).toHaveBeenCalledTimes(1);
-        expect(context.dispatch).toHaveBeenCalledWith(ActionTypes.loadTeas);
+        expect(context.dispatch).toHaveBeenCalledWith('load');
       });
     });
   });
 ```
 
-At this point, the "dispatches a load of the teas" test should be the only one failing. The code perform this is similar to the code for the login action. Adding it is left as an exercise for reader. Refer to the code in the "Conclusion" section if you get stuck or have problems.
+Update the code accordingly. You will need to:
 
-At this point, the store should be ready to go. Let's move on to the final stage of using the fetched teas in the page.
+- destructure the `dispatch` from the context (first argument for the action)
+- call the dispatch if we have a session
 
-## Updating the Tea Page
+##### Login Action
 
-The tea page will now get its data from our Vuex store rather than having it hard code inside of it, so the test should be changed to reflect that.
-
-First, defined a test set of teas on the store's state. Do this in the `beforeEach()` right after the `store.dispatch = jest.fn()` line.
-
-```TypeScript
-    store.state['teas'] = [
-      {
-        id: 1,
-        name: 'Green',
-        image: 'assets/img/green.jpg',
-        description: 'Green tea description.',
-      },
-      {
-        id: 2,
-        name: 'Black',
-        image: 'assets/img/black.jpg',
-        description: 'Black tea description.',
-      },
-      {
-        id: 3,
-        name: 'Herbal',
-        image: 'assets/img/herbal.jpg',
-        description: 'Herbal Infusion description.',
-      },
-      {
-        id: 4,
-        name: 'Oolong',
-        image: 'assets/img/oolong.jpg',
-        description: 'Oolong tea description.',
-      },
-      {
-        id: 5,
-        name: 'Dark',
-        image: 'assets/img/dark.jpg',
-        description: 'Dark tea description.',
-      },
-      {
-        id: 6,
-        name: 'Puer',
-        image: 'assets/img/puer.jpg',
-        description: 'Puer tea description.',
-      },
-      {
-        id: 7,
-        name: 'White',
-        image: 'assets/img/white.jpg',
-        description: 'White tea description.',
-      },
-    ];
-```
-
-Next, a couple of the tests have lines that get the list of teas from the component instance. They look like this:
+The `login` action also has two different cases: with a successful login and with a failed login.
 
 ```TypeScript
-    const teas = wrapper.vm.teaData as Array<TeaModel>;
+  describe('login', () => {
+    ...
+    describe('on failure', () => {
+      ...
+      it('does not dispatch any further actions', async () => {
+        await actions.login(context, credentials);
+        expect(context.dispatch).not.toHaveBeenCalled();
+      });
+      ...
+    });
+
+    describe('on success', () => {
+      ...
+      it(`dispatches the load action`, async () => {
+        await actions.login(context, credentials);
+        expect(context.dispatch).toHaveBeenCalledTimes(1);
+        expect(context.dispatch).toHaveBeenCalledWith('load');
+      });
+      ...
+    });
+  });
 ```
 
-Remove those lines, as we as where we import `Tea as TeaModel` at the top of the file.
+Update the code accordingly. You will need to:
 
-Finally, change the `expect()` calls to compare against the state insetad of the teas array that we are no longer grabbing. As a example:
+- destructure the `dispatch` from the context (first argument for the action)
+- call the dispatch if the login succeeded
 
-```diff
--    expect(title.text()).toBe(teas[idx].name);
-+    expect(title.text()).toBe(store.state.teas[idx].name);
-```
+##### Logout Action
 
-This applies to both the `name` and the `description` tests.
+The `logout` action is already dispatching the `clear` so we are good to go here.
 
-Now we can go change `src/views/TeaList.vue`. The only item defined in our `data()` function is the `teaData`, which we will now be getting from the Vuex store, so we can completely remove the `data()` function.
+### Putting it all Together
 
-In our `computed` `teaRows()`, we need to get the data from the store's state now as such:
-
-```diff
--    this.teaData.forEach(t => {
-+    this.store.state.teas.forEach(t => {
-```
-
-Finally, we need to make sure the store is available within our view, so import `useStore` a call it in our `setup()`:
+Each module in the store will have its own `index.ts` file. Create a `src/store/index.ts` file:
 
 ```TypeScript
-import { useStore } from 'vuex';
+import { state, getters } from './state';
+import { mutations } from './mutations';
+import { actions } from './actions';
+
+export default {
+  namespaced: true,
+  state,
+  getters,
+  mutations,
+  actions,
+};
+```
+
+Then add the module to `src/store/index.ts`:
+
+```TypeScript
 ...
-  setup() {
-    const store = useStore();
-    return { logOutOutline, store };
+import TeasModule from './teas';
+...
+export default createStore({
+  state,
+  getters,
+  mutations,
+  actions,
+  modules: {
+    teas: TeasModule,
   },
-```
+  strict: debug,
+  plugins: debug ? [createLogger()] : [],
+});
 
-All tests should be passing at this point and when we log in we should see the teas that we fetched from the backend API.
+```
 
 ## Conclusion
 
 Our store now contains tea information that we fetch from our HTTP backend, and our Tea view is using that data rather than hard coding its own data.
 
+Here are the samples for the code challenge, just in case you need to refer to them.
+
+### Mutations
+
+```TypeScript
+import { State } from './state';
+import { Tea } from '@/models';
+
+export const mutations = {
+  CLEAR: (state: State) => (state.list = []),
 Here are the samples for a couple of the code challenges, just in case you need to refer to them.
 
 ### Mutations
 
 ```TypeScript
-  [MutationTypes.CLEAR_TEAS]: (state: State) => (state.teas = []),
-  [MutationTypes.SET_TEAS]: (state: State, teas: Array<Tea>) =>
-    (state.teas = teas),
-```
+import { State } from './state';
+import { Tea } from '@/models';
 
-### Full Login and Initialization Actions
-
-```TypeScript
-  async [ActionTypes.login](
-    { commit, dispatch }: ActionContext<State, State>,
-    credentials: { email: string; password: string },
-  ): Promise<boolean> {
-    const response = await AuthenticationService.login(
-      credentials.email,
-      credentials.password,
-    );
-    if (response && response.success && response.user && response.token) {
-      SessionService.set(response.user, response.token);
-      commit(MutationTypes.SET_SESSION, {
-        user: response.user,
-        token: response.token,
-      });
-      dispatch(ActionTypes.loadTeas);
-    }
-    return !!response && response.success;
-  },
-
-...
-
-  async [ActionTypes.initialize]({
-    commit,
-    dispatch,
-  }: ActionContext<State, State>): Promise<void> {
-    const session = await SessionService.get();
-    if (session) {
-      commit(MutationTypes.SET_SESSION, session);
-      dispatch(ActionTypes.loadTeas);
+export const mutations = {
+  CLEAR: (state: State) => (state.list = []),
+  SET: (state: State, teas: Array<Tea>) => (state.list = teas),
+  SET_RATING: (state: State, payload: { id: number; rating: number }) => {
+    const targetTea = state.list.find(t => t.id === payload.id);
+    if (targetTea) {
+      targetTea.rating = payload.rating;
     }
   },
-
+};
 ```
