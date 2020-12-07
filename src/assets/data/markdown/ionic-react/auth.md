@@ -111,9 +111,10 @@ describe('AuthService', () => {
 
     it('POSTs the logout', async () => {
       const url = `${process.env.REACT_APP_DATA_SERVICE}/logout`;
+      const headers = { Authorization: 'Bearer undefined' };
       await authService.logout();
       expect(Axios.post).toHaveBeenCalledTimes(1);
-      expect(Axios.post).toHaveBeenCalledWith(url);
+      expect(Axios.post).toHaveBeenCalledWith(url, null, { headers });
     });
 
     it('clears the identity', async () => {
@@ -160,8 +161,11 @@ export class AuthService {
 
   async logout(): Promise<void> {
     const url = `${process.env.REACT_APP_DATA_SERVICE}/logout`;
-    await Axios.post(url);
-    IdentityService.getInstance().clear();
+    const headers = {
+      Authorization: `Bearer ${IdentityService.getInstance().token}`,
+    };
+    await Axios.post(url, null, { headers });
+    await IdentityService.getInstance().clear();
   }
 }
 ```
