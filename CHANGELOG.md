@@ -1,3 +1,32 @@
+## [4.1.10](https://github.com/ionic-team/ionic-training-decks/compare/v4.1.1...v4.1.10) (2020-12-07)
+
+### Bug Fixes
+
+- **angular:** add note about imports ([d4a4572](https://github.com/ionic-team/ionic-training-decks/commit/d4a457210efb515b0e0e8df472ecb255f2d7dba6))
+- **angular:** and a conclusion to the login page lab ([ef62011](https://github.com/ionic-team/ionic-training-decks/commit/ef62011a86f546848fb02fa7fe6ad7fd822a597c))
+- **angular:** bring in the Large Title from HomePage to TeaPage ([ef2709f](https://github.com/ionic-team/ionic-training-decks/commit/ef2709f04d698cb03f27362169af1a410b9e9a93))
+- **angular:** create new tea page rather than rename ([a16cb8d](https://github.com/ionic-team/ionic-training-decks/commit/a16cb8da5a0c76fea9222b008b32d9111c151324))
+- **angular:** fix file name path ([b5de05d](https://github.com/ionic-team/ionic-training-decks/commit/b5de05d886ffa51b1d51be7b130f349b8504e1e5))
+- **angular:** query the DOM in the test ([4b9f936](https://github.com/ionic-team/ionic-training-decks/commit/4b9f93694e7b97c78a06c6927eb1a34efafc6852))
+- **angular:** remove redundant instructions ([f57a104](https://github.com/ionic-team/ionic-training-decks/commit/f57a1046c016f8a9e091046b823ccebce4376350))
+- **angular:** update spelling errors and wording ([0cbb798](https://github.com/ionic-team/ionic-training-decks/commit/0cbb798dd60b0637365308c2bbeae542caa239ac))
+- **cordova:** use Apache Cordova name as appropriate ([75cfac0](https://github.com/ionic-team/ionic-training-decks/commit/75cfac03794c2a6fba56de00d91c7404aa7508a6))
+- **fw react:** add bearer token to logout ([#43](https://github.com/ionic-team/ionic-training-decks/issues/43)) ([516d5ec](https://github.com/ionic-team/ionic-training-decks/commit/516d5ec09f70023dcdc40d796eed1ac98d0cd237))
+- **vue:** create the root store in a more modular fashion ([fca1cef](https://github.com/ionic-team/ionic-training-decks/commit/fca1cef5bdf878d0ad580f428a334bff1ffd8e6d))
+
+### Features
+
+- **vue:** add Capacitor platforms ([a4ac32e](https://github.com/ionic-team/ionic-training-decks/commit/a4ac32eb05d53c3d70bb4689d95a602bdd605911))
+- **vue:** add reusable component ([3a12502](https://github.com/ionic-team/ionic-training-decks/commit/3a12502ce8d2060ef99a436e2c2034bd8ad29450))
+- **vue:** add the login page ([a7a1ec8](https://github.com/ionic-team/ionic-training-decks/commit/a7a1ec8886d5cecab35017080dbdf1b5709847df))
+- **vue:** add the login process ([645aada](https://github.com/ionic-team/ionic-training-decks/commit/645aada5291c7b0b05069a1478fc324984add878))
+- **vue:** add unit testing labs ([9c34ce1](https://github.com/ionic-team/ionic-training-decks/commit/9c34ce10ba0650f93ea83aaad3dd92844cfb82a4))
+- **vue:** details page ([ae18a5b](https://github.com/ionic-team/ionic-training-decks/commit/ae18a5be6de3103badc1bc22d804b4e70f46ea47))
+- **vue:** document app generation ([d9f2e41](https://github.com/ionic-team/ionic-training-decks/commit/d9f2e4185f1e47f4b40d935c31ab6fafc3c322bb))
+- **vue:** load the teas from the API ([58e3f23](https://github.com/ionic-team/ionic-training-decks/commit/58e3f236666e22086df8ccbb2feb00ff0f116e2b))
+- **vue:** mock the UI ([a5cb854](https://github.com/ionic-team/ionic-training-decks/commit/a5cb85449d07e3c87d0992d6dca8487133f6603a))
+- **vue:** restrict the transform for test some more ([e59e704](https://github.com/ionic-team/ionic-training-decks/commit/e59e70451c008d40f83c0c9e86b03cf0d8de53bc))
+
 ## [4.1.9](https://github.com/ionic-team/ionic-training-decks/compare/v4.1.8...v4.1.9) (2020-11-19)
 
 ### Bug Fixes
