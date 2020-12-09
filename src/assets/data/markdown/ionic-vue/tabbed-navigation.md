@@ -44,6 +44,33 @@ export default defineComponent({
 
 Adjust the name and the `ion-title` based on the page. Do not worry about adding routes for these pages yet. We will address that in a bit.
 
+Add a couple of simple tests for the views that were just created. Create them under `tests/unit/views` using the same naming convension that we have been using already. Use the following as a template. For the About page you can simplify that even further as we will not need to use the store in the About page.
+
+```TypeScript
+let tea: Tea;
+import { mount, VueWrapper } from '@vue/test-utils';
+import TastingNotes from '@/views/TastingNotes.vue';
+import store from '@/store';
+
+describe('TastingNotes.vue', () => {
+  let wrapper: VueWrapper<any>;
+
+  beforeEach(async () => {
+    store.dispatch = jest.fn();
+    wrapper = mount(TastingNotes, {
+      global: {
+        plugins: [store],
+      },
+    });
+  });
+
+  it('displays the title', () => {
+    const titles = wrapper.findAllComponents('ion-title');
+    expect(titles).toHaveLength(1);
+    expect(titles[0].text()).toBe('Tasting Notes');
+  });
+});
+```
 
 ## Tabs
 
