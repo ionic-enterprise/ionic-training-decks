@@ -139,7 +139,7 @@ This page will be rendered with a row of tabs on the bottom of the page. The top
 
 ### Update the Routes
 
-Have a look at the documentation on <a href="https://ionicframework.com/docs/vue/navigation#shared-urls-versus-nested-routes" target="_blank">Shared URLs vs. Nested Routes</a>. We currently have an example of using shared URLs in our routes. Have a look at the routes for the `TeaList` and the `TeaDetails` pages.
+Have a look at the documentation on <a href="https://ionicframework.com/docs/vue/navigation#shared-urls-versus-nested-routes" target="_blank">Shared URLs vs. Nested Routes</a>. We currently have an example of using shared URLs in our routes. This will <a href="https://ionicframework.com/docs/vue/navigation#child-routes-within-tabs" target="_blank">need to be modified into a child route</a> for the tabs based routing to work properly. Have a look at the routes for the `TeaList` and the `TeaDetails` pages.
 
 ```TypeScript
 const routes: Array<RouteRecordRaw> = [
@@ -193,12 +193,14 @@ const routes: Array<RouteRecordRaw> = [
         name: 'Tea List',
         component: () => import('@/views/TeaList.vue'),
         meta: { requiresAuth: true },
-      },
-      {
-        path: '/teas/tea/:id',
-        name: 'Tea Details',
-        component: () => import('@/views/TeaDetails.vue'),
-        meta: { requiresAuth: true },
+        children: [
+          {
+            path: 'tea/:id',
+            name: 'Tea Details',
+            component: () => import('@/views/TeaDetails.vue'),
+            meta: { requiresAuth: true },
+          },
+        ]
       },
       {
         path: 'tasting-notes',
@@ -222,11 +224,17 @@ A few things to note about this:
 - The main route (the one '/' redirects to) is now `/tabs/teas`.
 - The following routes are rendered in the main router outlet: `/login` and `/tabs/`.
 - The `/tabs/` route contins child (nested) routes, which per the docs requires a child router outlet in which to render the child pages. The `IonTabs` component in the `Tabs` page provides that.
-- The `Tea Details` and `Tea List` routes are still "shared URL" routes.
+- The `Tea Details` is now a child of the `Tea List` routes, though you do not need to add another `IonRouterOutlet` in this case as it will use the one that is part of the `IonTabs` component
 - The `TeaList` page is now lazy loaded, so it should not be imported at the top of the file.
 - The `Tabs` page is not lazy loaded, so it should be imported at the top of the file.
 
-After making these modifications, try the navigation in your app. Examine the DOM with the devtools and look for the child router outlet. Observe how the different pages are rendered within the DOM.
+You will also have to modify a couple of the pages to compensate for the change:
+
+- in `tests/unit/views/TeaList.spec.ts` find the 'goes to the tea details page when a tea card is clicked' test and change the expected route from `/teas/tea/4` to `/tabs/teas/tea/4`
+- modify the code in `src/views/TeaList.vue` accordingly
+- modify the `defaultHref` for the back button in the `TeaDetails` view to be `/tabs/teas`
+
+After making all of these modifications, try the navigation in your app. Examine the DOM with the devtools and look for the child router outlet. Observe how the different pages are rendered within the DOM.
 
 ## Conclusion
 
