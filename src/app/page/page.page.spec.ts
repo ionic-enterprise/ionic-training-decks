@@ -24,7 +24,11 @@ describe('PagePage', () => {
       popover = createOverlayElementMock('Popover');
       TestBed.configureTestingModule({
         declarations: [PagePage],
-        imports: [IonicModule, MarkdownViewModule, RouterModule.forRoot([])],
+        imports: [
+          IonicModule,
+          MarkdownViewModule,
+          RouterModule.forRoot([], { relativeLinkResolution: 'legacy' }),
+        ],
         providers: [
           { provide: ActivatedRoute, useFactory: createActivatedRouteMock },
           { provide: MenuItemsService, useFactory: createMenuItemsServiceMock },

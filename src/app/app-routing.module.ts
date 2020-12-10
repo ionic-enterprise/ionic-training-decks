@@ -30,6 +30,7 @@ const routes: Routes = [
     RouterModule.forRoot(routes, {
       preloadingStrategy: PreloadAllModules,
       paramsInheritanceStrategy: 'always',
+      relativeLinkResolution: 'legacy',
     }),
   ],
   exports: [RouterModule],
