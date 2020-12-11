@@ -350,7 +350,7 @@ We need to intercept outgoing requests and add the token if we have one. We also
 You will need to update the headers.
 
 ```TypeScript
-import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
+import axios, { AxiosRequestConfig } from 'axios';
 ```
 
 After the client is created, you will need to add the interceptors.
@@ -364,12 +364,15 @@ client.interceptors.request.use((config: AxiosRequestConfig) => {
   return config;
 });
 
-client.interceptors.response.use((res: AxiosResponse) => {
-  if (res.status === 401) {
-    store.dispatch('clear');
-  }
-  return res;
-});
+client.interceptors.response.use(
+  response  => response,
+  error => {
+    if (error.response.status === 401) {
+      store.dispatch('clear');
+    }
+    return Promise.reject(error);
+  },
+);
 ```
 
 ## Conclusion
