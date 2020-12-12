@@ -204,6 +204,10 @@ ion-icon {
   padding-right: 12px;
   color: gold;
 }
+
+ion-icon:last-child {
+  padding-right: 0px;
+}
 </style>
 ```
 

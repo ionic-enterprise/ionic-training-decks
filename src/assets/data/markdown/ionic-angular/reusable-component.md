@@ -88,9 +88,7 @@ First let's just get a row of five stars out there:
 
 ```html
 <div>
-  <span *ngFor="let n of [1, 2, 3, 4, 5]">
-    <ion-icon name="star"></ion-icon>
-  </span>
+  <ion-icon *ngFor="let n of [1, 2, 3, 4, 5]" name="star"></ion-icon>
 </div>
 ```
 
@@ -98,9 +96,10 @@ Next, add a `rating` property to the class and give it a value greather than zer
 
 ```html
 <div>
-  <span *ngFor="let n of [1, 2, 3, 4, 5]">
-    <ion-icon [name]="n > rating ? 'star-outline' : 'star'"></ion-icon>
-  </span>
+  <ion-icon
+    *ngFor="let n of [1, 2, 3, 4, 5]"
+    [name]="n > rating ? 'star-outline' : 'star'"
+  ></ion-icon>
 </div>
 ```
 
@@ -108,12 +107,11 @@ Finally, let's add a `click` handler that will change the rating as the user cli
 
 ```html
 <div>
-  <span *ngFor="let n of [1, 2, 3, 4, 5]">
-    <ion-icon
-      [name]="n <= rating ? 'star' : 'star-outline'"
-      (click)="rating = n"
-    ></ion-icon>
-  </span>
+  <ion-icon
+    *ngFor="let n of [1, 2, 3, 4, 5]"
+    [name]="n <= rating ? 'star' : 'star-outline'"
+    (click)="rating = n"
+  ></ion-icon>
 </div>
 ```
 
@@ -124,12 +122,14 @@ So far so good.
 So far this works well, but the stars are a little small and close together, especially for people with larger hands. Let's apply a little style to make that better. Add the following to `src/app/shared/rating/rating.component.scss`:
 
 ```scss
-:host {
-  ion-icon {
-    font-size: 24px;
-    padding-right: 12px;
-    color: gold;
-  }
+ion-icon {
+  font-size: 24px;
+  padding-right: 12px;
+  color: gold;
+}
+
+ion-icon:last-child {
+  padding-right: px;
 }
 ```
 
@@ -261,12 +261,11 @@ Open the `src/app/shared/rating/rating.component.html` file and change the `(cli
 
 ```html
 <div>
-  <span *ngFor="let n of [1, 2, 3, 4, 5]">
-    <ion-icon
-      [name]="n <= rating ? 'star' : 'star-outline'"
-      (click)="ratingClicked(n)"
-    ></ion-icon>
-  </span>
+  <ion-icon
+    *ngFor="let n of [1, 2, 3, 4, 5]"
+    [name]="n <= rating ? 'star' : 'star-outline'"
+    (click)="ratingClicked(n)"
+  ></ion-icon>
 </div>
 ```
 
