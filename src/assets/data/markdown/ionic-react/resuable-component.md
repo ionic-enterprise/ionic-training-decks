@@ -158,6 +158,10 @@ The rating component works well but the stars are a _little_ small and close tog
   padding-right: 0.5em;
   color: var(--ion-color-primary);
 }
+
+.rating ion-icon:last-child {
+  padding-right: 0px;
+}
 ```
 
 Now it's much easier for users to change the rating of the tea category!
