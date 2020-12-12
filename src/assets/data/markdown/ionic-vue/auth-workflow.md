@@ -234,6 +234,15 @@ describe('App.vue', () => {
   let router: any;
   let wrapper: VueWrapper<any>;
   beforeEach(async () => {
+    store.commit('SET_SESSION', {
+      token: '1234',
+      user: {
+        id: 14,
+        firstName: 'Tony',
+        lastName: 'Test',
+        email: 'tony@test.com',
+      }
+    });
     router = createRouter({
       history: createWebHistory(process.env.BASE_URL),
       routes: [{ path: '/', component: App }],
@@ -274,14 +283,22 @@ export default defineComponent({
 });
 ```
 
-Finally, we need to add a watch for the `userId`. The watch gets a new value and and old value, but we really only care about the new value.
+Finally, we need to navigate to either the root route or the login page under two conditions: the App component is mounted (meaning that the app is just starting up) or the `userId` changes (meaning that the user logged in, logged out, or the session was cleared because of a 401 error).
 
 ```typescript
 export default defineComponent({
   ...
+  methods: {
+    navigate(): void {
+      this.router.replace(this.userId ? '/' : '/login');
+    },
+  },
+  mounted() {
+    this.navigate();
+  },
   watch: {
-    userId(newValue) {
-      this.router.replace(newValue ? '/' : '/login');
+    userId() {
+      this.navigate();
     },
   },
 });

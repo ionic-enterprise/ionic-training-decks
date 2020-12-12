@@ -1209,6 +1209,20 @@ We will need to load that data upon entering the page. That means that the page 
     });
 ```
 
+Due to mounting the `App` component and then navigating to the `TastingNotes` component (see below), we also need to set a session. Otherwise the `App` component will try to navigate to the `Login` page.
+
+```TypeScript
+    store.commit('SET_SESSION', {
+      token: '1234',
+      user: {
+        id: 14,
+        firstName: 'Tony',
+        lastName: 'Test',
+        email: 'tony@test.com',
+      },
+    });
+```
+
 This event will be triggered from the `ionViewWillEnter()` lifecycle event. In order to trigger that event we need to navigate to the page but we need to do so within the context of an `ion-router-outlet`, so what we will do is wrap the `App` component, which contains said outlet, and use the router to navigate to our page.
 
 ```TypeScript
