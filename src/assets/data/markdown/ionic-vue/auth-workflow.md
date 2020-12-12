@@ -290,7 +290,13 @@ export default defineComponent({
   ...
   methods: {
     navigate(): void {
-      this.router.replace(this.userId ? '/' : '/login');
+      const currentPath = this.router.currentRoute.value.path;
+      const path = this.userId
+        ? currentPath !== '/login'
+          ? currentPath
+          : '/'
+        : '/login';
+      this.router.replace(path);
     },
   },
   mounted() {
