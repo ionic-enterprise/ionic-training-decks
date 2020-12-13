@@ -1030,16 +1030,36 @@ Test:
 Code:
 
 ```HTML
+<template>
+  ...
   <ion-footer>
     <ion-toolbar>
       <ion-button
         expand="full"
         data-testid="submit-button"
-        :disabled="!brand || !name || !teaCategoryId || !rating || !notes"
+        :disabled="!allowSubmit"
         >Add</ion-button
       >
     </ion-toolbar>
   </ion-footer>
+  ...
+</template>
+...
+<script lang="ts">
+...
+  computed: {
+    ...
+    allowSubmit(): boolean {
+      return !!(
+        this.brand &&
+        this.name &&
+        this.teaCategoryId &&
+        this.rating &&
+        this.notes
+      );
+    },
+    ...
+</script>
 ```
 
 ### Save and Close
@@ -1431,8 +1451,16 @@ So the add case has "Add New Tasting Note" where the update case just says "Tast
   <ion-title>{{ title }}</ion-title>
   ...
 </template>
-... computed: { ...mapState('teas', { teas: 'list', }), title(): string { return
-`${this.id ? '' : 'Add New '}Tasting Note`; }, }, ...
+...
+<script lang="ts">
+  ...
+    computed: {
+      ...
+      title(): string {
+        return `${this.noteId ? '' : 'Add New '}Tasting Note`;
+      },
+  ...
+</script>
 ```
 
 #### The Button Label
@@ -1491,6 +1519,31 @@ At that point, we can add a test. We will need to mount the component within our
     expect(modal.vm.rating).toEqual(5);
     expect(modal.vm.notes).toEqual('Smooth and peaty, the king of puer teas');
   });
+```
+
+We can then use the `created` lifecycle event to load the note and set the appropriate data items. This is done within the `script` tag in the `src/components/AppTastingNoteEditor.vue` file.
+
+```TypeScript
+...
+import { mapActions, mapGetters, mapState } from 'vuex';
+...
+  computed: {
+    ...mapState('teas', {
+      teas: 'list',
+    }),
+    ...mapGetters('tastingNotes', { findNote: 'find' }),
+...
+  created() {
+    if (this.noteId) {
+      const note = this.findNote(this.noteId);
+      this.brand = note?.brand;
+      this.name = note?.name;
+      this.teaCategoryId = note?.teaCategoryId;
+      this.rating = note?.rating;
+      this.notes = note?.notes;
+    }
+  },
+...
 ```
 
 #### Save the Note
