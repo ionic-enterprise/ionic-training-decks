@@ -115,7 +115,7 @@ At this point we can start creating the tests for the button. Note the special c
   });
 ```
 
-The web context test fails, or course, because our `sharingIsAvailable` computed property is just returning `true` all of the time. Let's fix that now:
+The web context test fails, of course, because our `sharingIsAvailable` computed property is just returning `true` all of the time. Let's fix that now:
 
 ```TypeScript
     sharingIsAvailable(): boolean {

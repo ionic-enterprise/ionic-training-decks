@@ -86,6 +86,10 @@
               "file": "style-the-app"
             },
             {
+              "title": "Social Sharing",
+              "file": "social-sharing"
+            },
+            {
               "title": "About Page",
               "file": "about-page"
             }
