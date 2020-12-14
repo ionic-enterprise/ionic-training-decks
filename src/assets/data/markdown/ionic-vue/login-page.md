@@ -13,24 +13,12 @@ First we will create a unit test for our new page. This test will have start wit
 
 ```typescript
 import { mount, VueWrapper } from '@vue/test-utils';
-import { createRouter, createWebHistory } from '@ionic/vue-router';
 import Login from '@/views/Login.vue';
 
 describe('Login.vue', () => {
-  let router: any;
   let wrapper: VueWrapper<any>;
   beforeEach(async () => {
-    router = createRouter({
-      history: createWebHistory(process.env.BASE_URL),
-      routes: [{ path: '/', component: Login }],
-    });
-    router.push('/');
-    await router.isReady();
-    wrapper = mount(Login, {
-      global: {
-        plugins: [router],
-      },
-    });
+    wrapper = mount(Login);
   });
 
   it('displays the title', () => {
@@ -166,54 +154,55 @@ import { VuelidatePlugin } from '@vuelidate/core';
 ...
     wrapper = mount(Login, {
       global: {
-        plugins: [router, VuelidatePlugin],
+        plugins: [VuelidatePlugin],
       },
     });
 ```
 
 ### Set up the Models
 
-We have two bits of information to get from the user. Their email address and their password. So let's create a `data()` object for those now.
+We have two bits of information to get from the user. Their email address and their password. So let's add `ref()` objects for those in our `setup()`. Be sure to import the `ref()` function.
 
 ```TypeScript
-export default defineComponent({
-  name: 'Login',
-  data() {
-    return {
-      email: '',
-      password: '',
-    };
-  },
+import { defineComponent, ref } from 'vue';
 ...
+export default defineComponent({
+...
+  setup() {
+    const email = ref('');
+    const password = ref('');
+
+    return { email, logInOutline, password };
+  }
 });
 ```
 
 Since Vuelidate works on the models, it makes sense that we will need to define our validations in a similar manner. So let's think about what validations may be required for each of these values. First, both values are required. Second, the `email` must have a valid email address format. Let's set those up.
 
 ```TypeScript
-import { email, required } from '@vuelidate/validators';
+...
+import { useVuelidate } from '@vuelidate/core';
+import { email as validEmail, required } from '@vuelidate/validators';
+...
 
 export default defineComponent({
-  name: 'Login',
-  data() {
-    return {
-      email: '',
-      password: '',
-    };
-  },
-  validations() {
-    return {
-      email: { email, required },
+...
+  setup() {
+    const email = ref('');
+    const password = ref('');
+
+    const rules = {
+      email: { validEmail, required },
       password: { required },
     };
-  },
-...
+    const v = useVuelidate(rules, { email, password });
+
+    return { email, logInOutline, password, v };
+  }
 });
 ```
 
-As you can see, setting up the validations for our view was very similar to how we set up the data model for our view. Not everything we have in the data model needs to be validated, but anything we are validating needs to be expressed as part of our data model.
-
-This configuration created an object for us called `$v` and we can have a look at it now by adding `<pre>{{ $v }}</pre>` at the end of the `ion-content` area of our Login page, right after the `ion-list` that contains our inputs. Do that now and have a look at it in the browser. You should see an object like this:
+This configuration exposed an object for us called `v` and we can have a look at it now by adding `<pre>{{ v }}</pre>` at the end of the `ion-content` area of our Login page, right after the `ion-list` that contains our inputs. Do that now and have a look at it in the browser. You should see an object like this:
 
 ```JSON
 {
@@ -270,7 +259,7 @@ Notice that the `email` and `password` objects both have a `$model` value. This 
   <ion-label position="floating">Email</ion-label>
   <ion-input
     type="email"
-    v-model.trim="$v.email.$model"
+    v-model.trim="v.email.$model"
     data-testid="email-input"
   ></ion-input>
 </ion-item>
@@ -279,7 +268,7 @@ Notice that the `email` and `password` objects both have a `$model` value. This 
   <ion-label position="floating">Password</ion-label>
   <ion-input
     type="password"
-    v-model.trim="$v.password.$model"
+    v-model.trim="v.password.$model"
     data-testid="password-input"
   ></ion-input>
 </ion-item>
@@ -299,10 +288,6 @@ Create a test that shows that our validations are set up properly by verifying t
 
 ```TypeScript
   it('displays messages as the user enters invalid data', async () => {
-    wrapper.vm.$v.email.$model = '';
-    wrapper.vm.$v.password.$model = '';
-    await wrapper.vm.$v.$reset();
-
     const email = wrapper.findComponent('[data-testid="email-input"]');
     const password = wrapper.findComponent('[data-testid="password-input"]');
     const msg = wrapper.find('[data-testid="message-area"]');
@@ -333,7 +318,7 @@ We can then fill in the `message-area` with some markup that processes our error
 
 ```html
 <div class="error-message ion-padding" data-testid="message-area">
-  <div v-for="(error, idx) of $v.$errors" :key="idx">
+  <div v-for="(error, idx) of v.$errors" :key="idx">
     {{ error.$property }}: {{ error.$message }}
   </div>
 </div>
@@ -357,10 +342,6 @@ We also need to disable the button until we have valid data that has been entere
 
 ```typescript
 it('has a disabled signin button until valid data is entered', async () => {
-  wrapper.vm.$v.email.$model = '';
-  wrapper.vm.$v.password.$model = '';
-  await wrapper.vm.$v.$reset();
-
   const button = wrapper.findComponent('[data-testid="signin-button"]');
   const email = wrapper.findComponent('[data-testid="email-input"]');
   const password = wrapper.findComponent('[data-testid="password-input"]');

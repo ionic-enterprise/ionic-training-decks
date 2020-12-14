@@ -623,7 +623,15 @@ The first thing we need to do is get a modal overlay hooked up for the "add a ne
 First we need to set up the test for the `TastingNotes` page view (`tests/unit/views/TastingNotes.spec.ts`).
 
 ```typescript
-// TODO: Fill this bit in after we figure out why the test is not working
+// TODO: This test is skipped for now. We need a testing mock for the modal controller within the framework
+describe.skip('adding a new note', () => {
+  it('displays the modal', async () => {
+    const button = wrapper.findComponent('[data-testid="add-note-button"]');
+    await button.trigger('click');
+    const modal = wrapper.findComponent('ion-modal');
+    expect(modal).toBeTruthy();
+  });
+});
 ```
 
 From here, the code and the markup in `src/views/TastingNotes.vue` are pretty easy:
@@ -721,19 +729,18 @@ Now that we can click on the FAB button and see the modal, let's start laying ou
     components: {
       // TODO: there are now component references missing, add them
     },
-    methods: {
-      cancel() {
-        console.log('close clicked');
-      },
-    },
     setup() {
-      return { close };
+      function cancel() {
+        console.log('close clicked');
+      }
+
+      return { cancel, close };
     },
   });
 </script>
 ```
 
-Let's start filling out the form. We already have one simple form. The `LoginPage`. It looks like over there we used a list of inputs. We will need something like that, so let's use that as a model for the first couple of input fields here. All of the following items will go inside the `ion-content` element. Be sure to update the components as usual, and also to add a `data()` method to the component definition.
+Let's start filling out the form. We already have one simple form. The `LoginPage`. It looks like over there we used a list of inputs. We will need something like that, so let's use that as a model for the first couple of input fields here. All of the following items will go inside the `ion-content` element. Be sure to update the components as usual, and also to add some ref objects for the data items that we are binding.
 
 ```html
 <template>
@@ -758,6 +765,8 @@ Let's start filling out the form. We already have one simple form. The `LoginPag
     // TODO: there are now component imports missing, add them
   } from '@ionic/vue';
   ...
+  import { defineComponent, ref } from 'vue';
+  ...
 
   export default defineComponent({
     ...
@@ -770,7 +779,14 @@ Let's start filling out the form. We already have one simple form. The `LoginPag
         brand: '',
       };
     },
-    ...
+    setup() {
+      const brand = ref('');
+      const name = ref('');
+
+      ...
+
+      return { brand, name, cancel, close };
+    },
   });
 </script>
 ```
@@ -843,15 +859,21 @@ Then we can switch back to `src/components/AppTastingNoteEditor.vue` and add the
 </template>
 
 <script lang="ts">
-  ...
-  import { mapState } from 'vuex';
-  ...
-    computed: {
-      ...mapState('teas', {
-        teas: 'list',
-      }),
+    ...
+    import { useStore } from 'vuex';
+    import { defineComponent, computed, ref } from 'vue';
+    ...
+    setup() {
+      ...
+      const teaCategoryId = ref<number>();
+      ...
+      const store = useStore();
+      const teas = computed(() => store.state.teas.list);
+      ...
+
+      return { brand, name, teaCategoryId, teas, cancel, close };
     },
-  ...
+  });
 </script>
 ```
 
@@ -868,15 +890,15 @@ Add a rating:
 </template>
 
 <script lang="ts">
-  ...
-    data() {
-      return {
-        ...
-        rating: 0,
-        ...
-      };
+    ...
+    setup() {
+      ...
+      const rating = ref(0);
+      ...
+
+      return { brand, name, rating, teaCategoryId, teas, cancel, close };
     },
-  ...
+  });
 </script>
 ```
 
@@ -897,15 +919,15 @@ And finally, add a text area for some free-form notes on the tea we just tasted:
 </template>
 
 <script lang="ts">
-  ...
-    data() {
-      return {
-        ...
-        notes: '',
-        ...
-      };
+    ...
+    setup() {
+      ...
+      const notes = ref('');
+      ...
+
+      return { brand, name, notes, rating, teaCategoryId, teas, cancel, close };
     },
-  ...
+  });
 </script>
 ```
 
@@ -917,15 +939,8 @@ Basically, every field is required. For the text fields we will add a validation
 
 First the test for the validation messages:
 
-**Note:** Skip this test for now. There appears to be some bugs with Vuelidate. This will need to be revisted in the future. Were this a production app I may look at other ways of displaying a message.
-
 ```TypeScript
   it.skip('displays messages as the user enters invalid data', async () => {
-    wrapper.vm.$v.brand.$model = '';
-    wrapper.vm.$v.name.$model = '';
-    wrapper.vm.$v.notes.$model = '';
-    await wrapper.vm.$v.$reset();
-
     const brand = wrapper.findComponent('[data-testid="brand-input"]');
     const name = wrapper.findComponent('[data-testid="name-input"]');
     const notes = wrapper.findComponent('[data-testid="notes-textbox"]');
@@ -964,29 +979,32 @@ First the test for the validation messages:
 
 In the `AppTastingNoteEditor.vue` file, we need to:
 
+- `import { useVuelidate } from '@vuelidate/core';`
 - `import { required } from '@vuelidate/validators';`
-- add a `validations()` method to the component definition
 - add a section to display the error messages
+- add the validation rules in the `setup()`
 
 Refer to the `Login.vue` file if you need a sample. I will provide a couple of the items here:
 
 ```HTML
-    <!--<div class="error-message ion-padding" data-testid="message-area">
+    <div class="error-message ion-padding" data-testid="message-area">
       <div v-for="(error, idx) of $v.$errors" :key="idx">
         {{ error.$property }}: {{ error.$message }}
       </div>
-    </div>-->
+    </div>
 ```
 
-**Note:** - the above markup is intentionally commented out for now. We are working through some Vuelidate bugs at the moment and will revisit this at a later date.
-
 ```TypeScript
-  validations() {
-    return {
-      brand: { required, $autoDirty: true },
-      name: { required, $autoDirty: true },
-      notes: { required, $autoDirty: true },
+  setup() {
+    ...
+    const rules = {
+      brand: { required },
+      name: { required },
+      notes: { required },
     };
+    const v = useVuelidate(rules, { brand, name, notes });
+    ...
+    return { brand, name, notes, rating, teaCategoryId, teas, cancel, close, v };
   },
 ```
 
@@ -1047,18 +1065,33 @@ Code:
 ...
 <script lang="ts">
 ...
-  computed: {
+  setup() {
     ...
-    allowSubmit(): boolean {
-      return !!(
-        this.brand &&
-        this.name &&
-        this.teaCategoryId &&
-        this.rating &&
-        this.notes
-      );
-    },
+    const allowSubmit = computed(
+      () =>
+        !!(
+          brand.value &&
+          name.value &&
+          notes.value &&
+          rating.value &&
+          teaCategoryId.value
+        ),
+    );
     ...
+    return {
+      brand,
+      name,
+      notes,
+      rating,
+      teaCategoryId,
+      teas,
+      allowSubmit,
+      cancel,
+      close,
+      v
+    };
+  },
+});
 </script>
 ```
 
@@ -1149,32 +1182,47 @@ You will need to do a little preliminary work:
 
 - add a `@click="submit"` button to the `submit-button` (you can you a different method name if you wish)
 - import the `modalController` from `@ionic/vue`
-- import the `mapActions` helper from `vuex`
 
-With that in place it is a matter of mapping the `tastingNotes/save` action and writing the methods that are bound to the click events.
+With that in place it is a matter of writing and exposing the functions that are bound to the click events. Note that for the cancle button, the function already exists, it just needs to be changed a little.
 
 ```TypeScript
-  methods: {
-    ...mapActions('tastingNotes', ['save']),
-    cancel() {
+  setup() {
+    ...
+    function cancel() {
       modalController.dismiss();
-    },
-    async submit() {
-      await this.save({
-        brand: this.brand,
-        name: this.name,
-        rating: this.rating,
-        teaCategoryId: this.teaCategoryId,
-        notes: this.notes,
+    }
+    ...
+    async function submit() {
+      await store.dispatch('tastingNotes/save', {
+        id: props.noteId,
+        brand: brand.value,
+        name: name.value,
+        rating: rating.value,
+        teaCategoryId: teaCategoryId.value,
+        notes: notes.value,
       });
       modalController.dismiss();
-    },
+    }
+    ...
+    return {
+      brand,
+      name,
+      notes,
+      rating,
+      teaCategoryId,
+      teas,
+      allowSubmit,
+      cancel,
+      submit,
+      close,
+      v
+    };
   },
 ```
 
 ## Listing the Tasting Notes
 
-We can now theoretically add tasting notes, but we don't really kno since we cannot see them. So now would be a good time to update the TastingNotes page view to display the notes that we have in the store.
+We can now theoretically add tasting notes, but we don't really know since we cannot see them. So now would be a good time to update the TastingNotes page view to display the notes that we have in the store.
 
 First, let update the test (`tests/unit/view/TastingNotes.spec.ts`) to include some notes. There is a lot going on here, so let's take it a bit at a time.
 
@@ -1398,8 +1446,6 @@ So what's giong on here?
 
 We can add notes, but it would also be good if we could update them.
 
-### Hook it Up
-
 ### Modify the Editor
 
 The editor component currently only handles creating new tasting note. We will also need to handle the case where we need to edit a tasting note. We could handle this by passing the whole tasting note, but let's just pass the note's ID. Since `id` is not a great name for a prop, let's use `noteId`
@@ -1453,13 +1499,29 @@ So the add case has "Add New Tasting Note" where the update case just says "Tast
 </template>
 ...
 <script lang="ts">
-  ...
-    computed: {
+    ...
+    setup() {
       ...
-      title(): string {
-        return `${this.noteId ? '' : 'Add New '}Tasting Note`;
-      },
-  ...
+      const title = computed(
+        () => `${props.noteId ? '' : 'Add New '}Tasting Note`,
+      );
+      ...
+      return {
+        brand,
+        name,
+        notes,
+        rating,
+        teaCategoryId,
+        teas,
+        allowSubmit,
+        title,
+        cancel,
+        submit,
+        close,
+        v
+      };
+    },
+  });
 </script>
 ```
 
@@ -1521,29 +1583,35 @@ At that point, we can add a test. We will need to mount the component within our
   });
 ```
 
-We can then use the `created` lifecycle event to load the note and set the appropriate data items. This is done within the `script` tag in the `src/components/AppTastingNoteEditor.vue` file.
+We can then add this directly to our `setup()` function. Note that `setup()` take two parameters. The first is our component's props, the second is the context. We have not been using either one, but now we will start to use the `props` parameter.
 
 ```TypeScript
-...
-import { mapActions, mapGetters, mapState } from 'vuex';
-...
-  computed: {
-    ...mapState('teas', {
-      teas: 'list',
-    }),
-    ...mapGetters('tastingNotes', { findNote: 'find' }),
-...
-  created() {
-    if (this.noteId) {
-      const note = this.findNote(this.noteId);
-      this.brand = note?.brand;
-      this.name = note?.name;
-      this.teaCategoryId = note?.teaCategoryId;
-      this.rating = note?.rating;
-      this.notes = note?.notes;
+  setup(props) {
+    ...
+    if (props.noteId) {
+      const note = store.getters['tastingNotes/find'](props.noteId);
+      brand.value = note?.brand;
+      name.value = note?.name;
+      teaCategoryId.value = note?.teaCategoryId;
+      rating.value = note?.rating;
+      notes.value = note?.notes;
     }
+
+    return {
+      brand,
+      name,
+      notes,
+      rating,
+      teaCategoryId,
+      teas,
+      allowSubmit,
+      title,
+      cancel,
+      submit,
+      close,
+      v
+    };
   },
-...
 ```
 
 #### Save the Note
@@ -1575,7 +1643,7 @@ Now go add and edit some tasting notes to make sure everything still passes.
 
 The final feature we will add is the ability to delete a note. We will keep this one simple and make it somewhat hidden so that it isn't too easy for a user to delete a note.
 
-We will use a contruct called a <a ref="" target="_blank">item sliding</a> to essentially "hide" the delete button behind the item. That way the user has to slide the item over in order to expose the button and do a delete.
+We will use a contruct called a <a href="https://ionicframework.com/docs/api/item-sliding" target="_blank">item sliding</a> to essentially "hide" the delete button behind the item. That way the user has to slide the item over in order to expose the button and do a delete.
 
 Using this results in a little be of rework in how the item is rendered and bound on the `TastingNotes` page:
 

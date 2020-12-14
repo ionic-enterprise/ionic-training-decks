@@ -13,7 +13,7 @@ Modify the application's `tsconfig.json` file to the code to resolve JSON files:
 ...
 ```
 
-This will allow us to read the `package.json` file and get some important informtion from it:
+This will allow us to read the `package.json` file and get some important informtion from it which we can then return via our `setup()` function. Note that there is no reason for this data to be reactive.
 
 ```html
 <template>
@@ -49,27 +49,21 @@ This will allow us to read the `package.json` file and get some important inform
 </template>
 
 <script lang="ts">
-import {
-  // Be sure to add the missing components here
-} from '@ionic/vue';
-import { defineComponent } from 'vue';
+  import // Be sure to add the missing components here
+  '@ionic/vue';
+  import { defineComponent } from 'vue';
 
-import { author, name, description, version } from '../../package.json';
+  import { author, description, name, version } from '../../package.json';
 
-export default defineComponent({
-  name: 'About',
-  components: {
-    // Be sure to add the missing components here
-  },
-  data() {
-    return {
-      author,
-      name,
-      description,
-      version,
-    };
-  },
-});
+  export default defineComponent({
+    name: 'About',
+    components: {
+      // Be sure to add the missing components here
+    },
+    setup() {
+      return { author, description, name, version };
+    },
+  });
 </script>
 ```
 
@@ -95,8 +89,9 @@ describe('About.vue', () => {
     store.dispatch = jest.fn();
     wrapper = mount(About, {
       global: {
-        plugins:[store]
-      }});
+        plugins: [store],
+      },
+    });
   });
 
   it('displays the title', () => {

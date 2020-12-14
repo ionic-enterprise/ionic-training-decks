@@ -22,24 +22,16 @@ The first thing we are going to need to do in the test is make sure our store is
 ```typescript
 import { flushPromises, mount, VueWrapper } from '@vue/test-utils';
 import { VuelidatePlugin } from '@vuelidate/core';
-import { createRouter, createWebHistory } from '@ionic/vue-router';
 import store from '@/store';
 import Login from '@/views/Login.vue';
 
 describe('Login.vue', () => {
-  let router: any;
   let wrapper: VueWrapper<any>;
   beforeEach(async () => {
     store.dispatch = jest.fn().mockResolvedValue(true);
-    router = createRouter({
-      history: createWebHistory(process.env.BASE_URL),
-      routes: [{ path: '/', component: Login }],
-    });
-    router.push('/');
-    await router.isReady();
     wrapper = mount(Login, {
       global: {
-        plugins: [router, store, VuelidatePlugin],
+        plugins: [store, VuelidatePlugin],
       },
     });
   });
@@ -52,11 +44,10 @@ Now we are ready to define the requirements via a set of tests:
 ```typescript
 describe('clicking the sign on button', () => {
   beforeEach(async () => {
-    wrapper.vm.$v.email.$model = 'test@test.com';
-    wrapper.vm.$v.password.$model = 'test';
-    wrapper.vm.email = wrapper.vm.$v.email.$model;
-    wrapper.vm.password = wrapper.vm.$v.password.$model;
-    await wrapper.vm.$nextTick();
+    const email = wrapper.findComponent('[data-testid="email-input"]');
+    const password = wrapper.findComponent('[data-testid="password-input"]');
+    await email.setValue('test@test.com');
+    await password.setValue('test');
   });
 
   it('dispatches the login action with the credentials', () => {
@@ -92,26 +83,32 @@ For the code, here are the pieces. It is up to you to find the correct spot in `
 
 First the one-liners:
 
-- add an `errorMessage` field to the data object
+- add an `errorMessage` ref object similar to the `email` and `password` objects, be sure to expose it at the bottom of the `setup()`
 - add a place to display the message within the "error message" area: `<div v-if="errorMessage">{{ errorMessage }}</div>`
-- `import { mapActions } from 'vuex';`
+- `import { useStore } from 'vuex';`
 - add a click event binding to the button: `@click="signinClicked"`
 
-Finally, we need to map our "login" action to a method in our component and write the `signinClicked()` method that we just bound to the button.
+Now we can update the `setup()` method to define and expose our click handler.
 
 ```typescript
-  methods: {
-    ...mapActions(['login']),
-    async signinClicked() {
-      const result = await this.login({
-        email: this.email,
-        password: this.password,
+  setup() {
+    ...
+    const errorMessage = ref('');
+
+    const store = useStore();
+    ...
+    async function signinClicked() {
+      const result = await store.dispatch('login', {
+        email: email.value,
+        password: password.value,
       });
       if (!result) {
-        this.password = '';
-        this.errorMessage = 'Invalid Email or Password. Please try again.';
+        password.value = '';
+        errorMessage.value = 'Invalid Email or Password. Please try again.';
       }
-    },
+    }
+
+    return { email, errorMessage, logInOutline, password, v, signinClicked };
   },
 ```
 
@@ -265,47 +262,44 @@ describe('App.vue', () => {
 In the code we first need to import a couple of items.
 
 ```typescript
-import { mapGetters } from 'vuex';
+import { computed, defineComponent, watch } from 'vue';
+import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 ```
 
-Then we need to make the `userId` and the `router` available and known to our component.
+At this point, we can get the router, the store, and a reactive reference to the `userId`. We then set up a `watchEffect` with the following logic:
+
+- if we have no `userId` go to the login page
+- if we have a `userId` go to the current route
+- if we have a `userId` but the current route is the login page, go to the root route
+
+The reason for that last bit if logic is to by-pass the login page if, for example, we have a link to it and are already logged in.
+
+Note the `{ immediate: true }` option on the `watch`. This ensures the watch is fired upon startup. Otherwise, it would only be fired on the first change, but we will have already loaded the session information as part of startup so we may then end up on the wrong page.
+
+We _could_ get around this by using a `watchEffect`, but that would fire any time any of the reactive dependencies of the callback changed, and we have two of them. The `userId` and the `router.currentRoute`. We _only_ want to fire this watch when the `uesrId` (and thus the session information) changes, not on every route change.
 
 ```typescript
 export default defineComponent({
   ...
-  computed: mapGetters(['userId']),
   setup() {
     const router = useRouter();
-    return { router };
-  },
-  ...
-});
-```
+    const store = useStore();
+    const userId = computed(() => store.getters.userId);
 
-Finally, we need to navigate to either the root route or the login page under two conditions: the App component is mounted (meaning that the app is just starting up) or the `userId` changes (meaning that the user logged in, logged out, or the session was cleared because of a 401 error).
-
-```typescript
-export default defineComponent({
-  ...
-  methods: {
-    navigate(): void {
-      const currentPath = this.router.currentRoute.value.path;
-      const path = this.userId
-        ? currentPath !== '/login'
-          ? currentPath
-          : '/'
-        : '/login';
-      this.router.replace(path);
-    },
-  },
-  mounted() {
-    this.navigate();
-  },
-  watch: {
-    userId() {
-      this.navigate();
-    },
+    watch(
+      userId,
+      () => {
+        const currentPath = router.currentRoute.value.path;
+        const path = userId.value
+          ? currentPath !== '/login'
+            ? currentPath
+            : '/'
+          : '/login';
+        router.replace(path);
+      },
+      { immediate: true },
+    );
   },
 });
 ```

@@ -12,7 +12,7 @@ While we are on the subject of plugins, Capacitor has been designed to also work
 
 ## Add a Button
 
-The first thing we will do is add a sharing button to the top of our `AppTastingNotes` modal component, to the left of the cancel button. We will also include stubs for the computed properties and methods that we need.
+The first thing we will do is add a sharing button to the top of our `AppTastingNotes` modal component, to the left of the cancel button. We will also include stubs for the computed properties and methods that we need. While we are in the `setup()` routine, let's reorganize the return object so like items are grouped together.
 
 ```html
 <template>
@@ -35,28 +35,38 @@ The first thing we will do is add a sharing button to the top of our `AppTasting
 <script lang="ts">
   ...
   import { close, shareOutline } from 'ionicons/icons';
-  ...
-    computed: {
-      ...
-      allowShare(): boolean {
-        return true;
-      },
-      ...
-      sharingIsAvailable(): boolean {
-        return true;
-      },
-      ...
-    }
-    methods: {
-      ...
-      async share(): Promise<void> {
-        return;
-      },
-      ...
-    }
-  ...
+    ...
     setup() {
-      return { close, shareOutline };
+      ...
+      const allowShare = computed( () => true);
+      const sharingIsAvailable = computed(() => true);
+      async function share() {
+        return;
+      }
+      ...
+      return {
+        brand,
+        name,
+        notes,
+        rating,
+        teaCategoryId,
+        v,
+
+        teas,
+        buttonLabel,
+        title,
+
+        allowSubmit,
+        cancel,
+        submit,
+
+        allowShare,
+        sharingIsAvailable,
+        share,
+
+        close,
+        shareOutline,
+      };
     },
   });
 </script>
@@ -118,9 +128,7 @@ At this point we can start creating the tests for the button. Note the special c
 The web context test fails, of course, because our `sharingIsAvailable` computed property is just returning `true` all of the time. Let's fix that now:
 
 ```TypeScript
-    sharingIsAvailable(): boolean {
-      return isPlatform('hybrid');
-    },
+const sharingIsAvailable = computed(() => isPlatform('hybrid'));
 ```
 
 ### Enable When Enough Information Exists
@@ -152,9 +160,9 @@ First we will test for it. This test belongs right after the `exists` test withi
 We can then enter the proper logic in the `allowShare` computed property:
 
 ```TypeScript
-    allowShare(): boolean {
-      return !!(this.brand && this.name && this.rating);
-    },
+const allowShare = computed(
+  () => !!(brand.value && name.value && rating.value),
+);
 ```
 
 ## Share the Note
@@ -196,15 +204,15 @@ Then we will add a test within the `share button` describe block.
 We can then add the code fill out the `share()` accordingly. You will also have to add a line importing the `Plugins` object from `@capacitor/core`:
 
 ```TypeScript
-    async share(): Promise<void> {
+    async function share() {
       const { Share } = Plugins;
       await Share.share({
-        title: `${this.brand}: ${this.name}`,
-        text: `I gave ${this.brand}: ${this.name} ${this.rating} stars on the Tea Taster app`,
+        title: `${brand.value}: ${name.value}`,
+        text: `I gave ${brand.value}: ${name.value} ${rating.value} stars on the Tea Taster app`,
         dialogTitle: 'Share your tasting note',
         url: 'https://tea-taster-training.web.app',
       });
-    },
+    }
 ```
 
 ## Conclusion
