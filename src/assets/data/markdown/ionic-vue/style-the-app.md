@@ -56,7 +56,7 @@ Move the following style from `src/App.vue` to the `src/theme/styles.css` file:
 
 ### Shadow DOM
 
-Most of the components in the Ionic Framework use <a href="https://developer.mozilla.org/en-US/docs/Web/Web_Components/Using_shadow_DOM" target="_blank">Shadow DOM</a>. This works very similar to the `scoped` discussion above, allowing the framework developers to apply styling to the individual components without having that styling bleed out into other components. This also you as a developer to use the component without having to worry about the details of the component's construction when styling your own application.
+Most of the components in the Ionic Framework use <a href="https://developer.mozilla.org/en-US/docs/Web/Web_Components/Using_shadow_DOM" target="_blank">Shadow DOM</a>. This works very similar to the `scoped` discussion above, allowing the framework developers to apply styling to the individual components without having that styling bleed out into other components. This also allows you as a developer to use the component without having to worry about the details of the component's construction when styling your own application.
 
 However, it also means that different techniques must be employed when styling these components. The authors of the components must provide you with a styling API that defines the ways in which they intend for you to be able to style these components. The two mechanisms that make this possible are `CSS Custom Properties` (also called `CSS Variables`) and `Shadow Parts`.
 
@@ -86,9 +86,9 @@ This will apply a 75% opacity to all buttons in the application. You probably wa
 
 ### Shadow Parts
 
-A newer specification is <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/::part">Shadow Parts</a>. This allows the component author to tag specific parts of the component as something you can apply styles to as if it were in the light DOM. This allows component developers to still restrict how a component can be styling without having to redefine all of the ways an underlying element can be styled via a CSS Custom Property.
+A newer specification is <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/::part">Shadow Parts</a>. This allows the component author to tag specific parts of the component as something you can apply styles to as if it were in the light DOM. This allows component developers to still restrict how a component can be styled without having to redefine all of the ways an underlying element can be styled via a CSS Custom Property.
 
-As a result, users of the component can still style the component in ways that they are used do styling things, while still being protected from the implementation details of how the component itself is renderred internally.
+As a result, users of the component can still style the component in ways that they are used do styling things, while still being protected from the implementation details of how the component itself is rendered internally.
 
 Have a look at the <a href="https://ionicframework.com/docs/api/select#css-shadow-parts">Shadow Parts of a Select</a>. Notice that the various parts of a select are abstracted into parts that you can access and style, but you do not have to worry about the details of exactly how the component itself was constructed.
 
