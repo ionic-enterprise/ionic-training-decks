@@ -167,6 +167,10 @@
               "file": "notes-feature"
             },
             {
+              "title": "Styles and Themes",
+              "file": "style-the-app"
+            },
+            {
               "title": "About Page",
               "file": "about-page"
             }
