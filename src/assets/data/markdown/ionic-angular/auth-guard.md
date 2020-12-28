@@ -19,6 +19,7 @@ The AuthGuard needs to implement the <a href="https://angular.io/api/router/CanA
 ```typescript
 import { Injectable } from '@angular/core';
 import { CanActivate } from '@angular/router';
+import { Observable, of } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
@@ -26,8 +27,8 @@ import { CanActivate } from '@angular/router';
 export class AuthGuardService implements CanActivate {
   constructor() {}
 
-  canActivate(): boolean {
-    return false;
+  canActivate(): Observable<boolean> {
+    return of(false);
   }
 }
 ```
@@ -36,35 +37,24 @@ export class AuthGuardService implements CanActivate {
 
 ### Configure the Testing Module
 
-We know that we are going to be checking to see if we have an identity and that we may have to navigate to the login page. So let's set up the module such that the `IdentityService` and `NavController` are both provided as mocks.
+We know that we are going to be checking to see if we have an identity and that we may have to navigate to the login page. So let's set up the module such that the `Store` and `NavController` are both provided as mocks by adding a `providers` array to the `TestBed.configureTestingModule()` call.
 
 ```typescript
-import { TestBed } from '@angular/core/testing';
-import { NavController } from '@ionic/angular';
-
-import { AuthGuardService } from './auth-guard.service';
-import { IdentityService } from '../identity/identity.service';
-import { createIdentityServiceMock } from '../identity/identity.service.mock';
+import { provideMockStore } from '@ngrx/store/testing';
+...
+import { AuthState, initialState } from '@app/store/reducers/auth/auth.reducer';
 import { createNavControllerMock } from '@test/mocks';
-
-describe('AuthGuardService', () => {
-  let service: AuthGuardService;
-
-  beforeEach(() => {
-    TestBed.configureTestingModule({
+import { AuthGuardService } from './auth-guard.service';
+...
       providers: [
-        { provide: IdentityService, useFactory: createIdentityServiceMock },
+        provideMockStore<{ auth: AuthState }>({
+          initialState: { auth: initialState },
+        }),
         { provide: NavController, useFactory: createNavControllerMock },
       ],
-    });
-    service = TestBed.inject(AuthGuardService);
-  });
-
-  it('should be created', () => {
-    expect(service).toBeTruthy();
-  });
-});
 ```
+
+As you go through the next steps, remember that you will need to expand your imports a bit from time to time.
 
 ### Step 1 - when logged in
 
@@ -75,24 +65,27 @@ When the user is logged in, the guard should not navigate and should return `tru
 ```typescript
 describe('when logged in', () => {
   beforeEach(() => {
-    const identity = TestBed.inject(IdentityService);
-    (identity as any).token = '294905993';
+    const store = TestBed.inject(Store) as MockStore;
+    store.overrideSelector(selectAuthToken, '294905993');
   });
-  it('does not navigate', () => {
+
+  it('does not navigate', done => {
     const navController = TestBed.inject(NavController);
-    service.canActivate();
-    expect(navController.navigateRoot).not.toHaveBeenCalled();
+    service.canActivate().subscribe(() => {
+      expect(navController.navigateRoot).not.toHaveBeenCalled();
+      done();
+    });
   });
 
   it('returns true', () => {
-    expect(service.canActivate()).toEqual(true);
+    let response: boolean;
+    service.canActivate().subscribe((r: boolean) => (response = r));
+    expect(response).toBe(true);
   });
 });
 ```
 
-The cast to `any` on `identity` is required because in the real service this property is read-only. With the mock it is not, but `identity` is typed as the actual service, not the mock.
-
-Add those tests within the `describe` and then write the code that satisfies them. In this case, you just have to flip the return value from `false` to `true` in `src/app/core/auth-guard/auth-guard.service.ts`.
+Add those tests within the main `describe` and then write the code that satisfies them. In this case, you just have to flip the return value from `false` to `true` in `src/app/core/auth-guard/auth-guard.service.ts`.
 
 ### Step 2 - when not logged in
 
@@ -100,31 +93,50 @@ When the user is not logged in, the guard should navigate to the login page and 
 
 ```typescript
 describe('when not logged in', () => {
-  it('navigates to the login page', () => {
+  beforeEach(() => {
+    const store = TestBed.inject(Store) as MockStore;
+    store.overrideSelector(selectAuthToken, '');
+  });
+
+  it('navigates to the login page', done => {
     const navController = TestBed.inject(NavController);
-    service.canActivate();
-    expect(navController.navigateRoot).toHaveBeenCalledTimes(1);
-    expect(navController.navigateRoot).toHaveBeenCalledWith(['/', 'login']);
+    service.canActivate().subscribe(() => {
+      expect(navController.navigateRoot).toHaveBeenCalledTimes(1);
+      expect(navController.navigateRoot).toHaveBeenCalledWith(['/', 'login']);
+      done();
+    });
   });
 
   it('returns false', () => {
-    expect(service.canActivate()).toEqual(false);
+    let response: boolean;
+    service.canActivate().subscribe((r: boolean) => (response = r));
+    expect(response).toBe(false);
   });
 });
 ```
 
-We do not need a `beforeEach` in this case because the default state of the mock is to not have a `token`.
-
 Add those tests within the `describe` and then write the code that satisfies them. In the end, your code will look _something_ like this:
 
 ```typescript
-  canActivate(): boolean {
-    if (this.identity.token) {
-      // code that satisfies the "logged in" tests here
-    }
-    // code that satisfies the "not logged in" tests here
+export class AuthGuardService implements CanActivate {
+  constructor(
+    // inject the store and nav controller here as private
+  ) {}
+
+  canActivate(): Observable<boolean> {
+    return this.store.pipe(
+      select(selectAuthToken),
+      take(1),
+      tap(token => {
+        // Logic to navigate to login page when appropriate goes here
+      }),
+      map(token => /* logic to map the result to "true" or "false" goes here */ ),
+    );
   }
+}
 ```
+
+Be sure to replace the comments with the actual logic... 🤓
 
 ## Hookup the Guard
 

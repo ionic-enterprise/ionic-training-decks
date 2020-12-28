@@ -152,6 +152,9 @@ const routes: Routes = [
 We do not have a connection to a back end service to get any data for our application. So for now we will just add some data directly to our page so we have something to work with. Just copy-paste the following into your `TeaPage` class.
 
 ```TypeScript
+...
+import { Tea } from '@app/models';
+...
   teaData: Array<Tea> = [
     {
       id: 1,
@@ -209,15 +212,6 @@ We do not have a connection to a back end service to get any data for our applic
         'delicate flavor that is sweet and fragrent. White tea should be steeped at lower temperatures for ' +
         'short periods of time.'
     },
-    {
-      id: 8,
-      name: 'Yellow',
-      image: 'assets/img/yellow.jpg',
-      description:
-        'A rare tea from China, yellow tea goes through a similar shortened oxidation process like green teas. ' +
-        'Yellow teas, however, do not have the grassy flavor that green teas tend to have. The leaves often ' +
-        'resemble the shoots of white teas, but are slightly oxidized.'
-    }
   ];
 ```
 
@@ -274,6 +268,20 @@ Copy all of that over to the tea page, and change the titles as needed. When you
 
 Now the "Large Title" scrolling effect for iOS should have returned. Give it a try. Note that if you switch to an Android device and reload so you are using Material Design styling that you no longer have the effect. That is because this is not part of the Material Design specification. This is an example of the adaptive styling that you can have for each platform with the Ionic UI Framework. The app adapts and looks correct on each platform.
 
+Let's also copy over a slightly modified version of the test for the title:
+
+```TypeScript
+...
+import { By } from '@angular/platform-browser';
+...
+  it('has the proper title', () => {
+    const titles = fixture.debugElement.queryAll(By.css('ion-title'));
+    expect(titles.length).toBe(2);
+    expect(titles[0].nativeElement.textContent.trim()).toBe('Teas');
+    expect(titles[1].nativeElement.textContent.trim()).toBe('Teas');
+  });
+```
+
 ## Make a Responsive Grid
 
 Our app looks good when viewed at a phone resolution, but if we modify Chrome to emulate some other form factor such as an iPad or iPad Pro, then it looks a little weird. The Cards are huge. It would be better if we could:
@@ -284,116 +292,113 @@ Our app looks good when viewed at a phone resolution, but if we modify Chrome to
 
 Enter the <a href="https://ionicframework.com/docs/layout/grid" target="_blank">responsive grid</a>. By default, the resonsive grid shows rows of 12 columns each. However, we want to show at most rows of four columns. Luckily, there are some simple mechanisms in place that will allow us to do that, but first let's message our data a little.
 
-We currently have a list of X number of teas (currently 8, but once we start getting data from a backend service it could really be any number). Let's begin by breaking that up into a matrix with 4 teas in each row.
+We currently have a list of X number of teas (currently 7, but once we start getting data from a backend service it could really be any number). Let's begin by breaking that up into a matrix with a maximum of 4 teas in each row. That means we will have two rows, the first with four columns and the second with three.
 
-First create a test for this in `src/app/tea/tea.page.spec.ts`:
+First let's set up the test data in `src/app/tea/tea.page.spec.ts`:
 
 ```TypeScript
-  describe('initialization', () => {
-    it('makes a tea matrix', () => {
-      expect(component.teaMatrix).toEqual([
-        [
-          {
-            id: 1,
-            name: 'Green',
-            image: 'assets/img/green.jpg',
-            description:
-              'Green teas have the oxidation process stopped very early on, leaving them with a very subtle flavor and ' +
-              'complex undertones. These teas should be steeped at lower temperatures for shorter periods of time.'
-          },
-          {
-            id: 2,
-            name: 'Black',
-            image: 'assets/img/black.jpg',
-            description:
-              'A fully oxidized tea, black teas have a dark color and a full robust and pronounced flavor. Blad teas tend ' +
-              'to have a higher caffeine content than other teas.'
-          },
-          {
-            id: 3,
-            name: 'Herbal',
-            image: 'assets/img/herbal.jpg',
-            description:
-              'Herbal infusions are not actually "tea" but are more accurately characterized as infused beverages ' +
-              'consisting of various dried herbs, spices, and fruits.'
-          },
-          {
-            id: 4,
-            name: 'Oolong',
-            image: 'assets/img/oolong.jpg',
-            description:
-              'Oolong teas are partially oxidized, giving them a flavor that is not as robust as black teas but also ' +
-              'not as suble as green teas. Oolong teas often have a flowery fragrance.'
-          }
-        ], [
-          {
-            id: 5,
-            name: 'Dark',
-            image: 'assets/img/dark.jpg',
-            description:
-              'From the Hunan and Sichuan provinces of China, dark teas are flavorful aged probiotic teas that steeps ' +
-              'up very smooth with slightly sweet notes.'
-          },
-          {
-            id: 6,
-            name: 'Puer',
-            image: 'assets/img/puer.jpg',
-            description:
-              'An aged black tea from china. Puer teas have a strong rich flavor that could be described as ' +
-              '"woody" or "peaty."'
-          },
-          {
-            id: 7,
-            name: 'White',
-            image: 'assets/img/white.jpg',
-            description:
-              'White tea is produced using very young shoots with no oxidation process. White tea has an extremely ' +
-              'delicate flavor that is sweet and fragrent. White tea should be steeped at lower temperatures for ' +
-              'short periods of time.'
-          },
-          {
-            id: 8,
-            name: 'Yellow',
-            image: 'assets/img/yellow.jpg',
-            description:
-              'A rare tea from China, yellow tea goes through a similar shortened oxidation process like green teas. ' +
-              'Yellow teas, however, do not have the grassy flavor that green teas tend to have. The leaves often ' +
-              'resemble the shoots of white teas, but are slightly oxidized.'
-          }
-        ]
-      ]);
+import { waitForAsync, ComponentFixture, TestBed } from '@angular/core/testing';
+...
+import { Tea } from '@app/models';
+
+describe('TeaPage', () => {
+  let component: TeaPage;
+  let fixture: ComponentFixture<TeaPage>;
+  let teas: Array<Tea>;
+
+  beforeEach(
+    waitForAsync(() => {
+      initializeTestData();
+      ...
+  });
+  ...
+  function initializeTestData() {
+    teas = [
+      // Remember those tea records we hard coded into the page?
+      // Copy those records here.
+    ];
+  }
+});
+```
+
+**Important:** If you look closely you will see that the test was generated with code that imported `async`, but I changed it to `waitForAsync`. The Angular team has deprecated `async` and will remove it in the future. However, our templates need to cover multiple versions of Angular, including versions that do not have `waitForAsync`, so you will need to make this change yourself in order to stay current.
+
+**Note:** The duplication of the data is annoying, but it is short-term. In the future, we will get the data from or backend, but we will still need the data in the test to feed our mock.
+
+There are two ways that we could go with the test for this:
+
+1. Figure out what the class needs to do to the data to produce a matrix of teas for the grid and test that.
+1. Test that the component renders the grid properly.
+
+The first set of tests would be testing an implementation detail, and therefor is not ideal. The second test more accurately reflects the requirement for the page from the user's perspective, and that is what is important, so we will write the test from the perspective. This also has the advantage of being a more robust test since the implementation details may change but the requirements for what we display to the user will likely stay the same.
+
+```TypeScript
+  describe('a grid of seven teas', () => {
+    let grid: DebugElement;
+    beforeEach(() => {
+      grid = fixture.debugElement.query(By.css('ion-grid'));
+    });
+
+    it('contains two rows', () => {
+      const rows = grid.queryAll(By.css('ion-row'));
+      expect(rows.length).toBe(2);
+    });
+
+    it('has four columns in the first row', () => {
+      const rows = grid.queryAll(By.css('ion-row'));
+      const cols = rows[0].queryAll(By.css('ion-col'));
+      expect(cols.length).toBe(4);
+    });
+
+    it('has three columns in the second row', () => {
+      const rows = grid.queryAll(By.css('ion-row'));
+      const cols = rows[1].queryAll(By.css('ion-col'));
+      expect(cols.length).toBe(3);
+    });
+
+    it('binds the card title to the tea name', () => {
+      const cols = grid.queryAll(By.css('ion-col'));
+      expect(cols.length).toBe(7);
+      cols.forEach((col, idx) => {
+        const title = col.query(By.css('ion-card-title'));
+        expect(title.nativeElement.textContent.trim()).toBe(teas[idx].name);
+      });
+    });
+
+    it('binds the card content to the tea description', () => {
+      const cols = grid.queryAll(By.css('ion-col'));
+      expect(cols.length).toBe(7);
+      cols.forEach((col, idx) => {
+        const title = col.query(By.css('ion-card-content'));
+        expect(title.nativeElement.textContent.trim()).toBe(teas[idx].description);
+      });
     });
   });
 ```
 
-This test shows the single array being expanded into an array of two child arrays, each of which are four teas long. Let's create the code to do that in `src/app/tea/tea.page.ts`:
+Turning our attention away from the test and back to the code, we can modify the page class by adding a "getter" that transforms our tea list into a matrix:
 
 ```TypeScript
-  teaMatrix: Array<Array<Tea>> = [];
-
-  constructor() {
-    this.listToMatrix();
-  }
-
-  private listToMatrix() {
+  get teaMatrix(): Array<Array<Tea>> {
+    const matrix: Array<Array<Tea>> = [];
     let row = [];
     this.teaData.forEach(t => {
       row.push(t);
       if (row.length === 4) {
-        this.teaMatrix.push(row);
+        matrix.push(row);
         row = [];
       }
     });
 
     if (row.length) {
-      this.teaMatrix.push(row);
+      matrix.push(row);
     }
+
+    return matrix;
   }
 ```
 
-**Note:** this is quick and dirty. It also does not belong here. It belongs in a reusable service. But we have not learned about that yet. We can refactor later if we want to.
-
-Now that we have our matrix, let's create the grid. **Set up Chrome to emulate an iPad Pro in landscape**. We know we want four columns on a wide screen like this, and that the grid by default supports 12 columns. That means that for a wide screen such as this, each column should take up three place. So let's lay that out in the markup. Replace the list in `src/app/tea/tea.page.html` with this:
+Now that we have our matrix, let's create the grid in our page's HTML template file. **Set up Chrome to emulate an iPad Pro in landscape**. We know we want four columns on a wide screen like this, and that the grid by default supports 12 columns. That means that for a wide screen such as this, each column should take up three place. So let's lay that out in the markup. Replace the list in `src/app/tea/tea.page.html` with this:
 
 ```html
 <ion-grid>
@@ -434,7 +439,9 @@ But there is one last thing. This will always display four columns, which will l
 Change the `ion-col` properties as such:
 
 ```html
-<ion-col *ngFor="let tea of teaRow" size="12" size-md="6" size-xl="3"></ion-col>
+<ion-col *ngFor="let tea of teaRow" size="12" size-md="6" size-xl="3">
+  ...
+</ion-col>
 ```
 
 Now as you change the type of device that is being emulated, the layout adapts accordingly.
@@ -451,4 +458,8 @@ Or "right-click | Delete" from your IDE if you are using the Windows Command Pro
 
 ## Conclusion
 
-In this lab you learned how to mock up the UI to ensure it looks the way you want it to look. Make sure you have a look at your app in both light and dark mode. Next we will look at how to get real data.
+In this lab you learned how to mock up the UI to ensure it looks the way you want it to look. Give it a try emulating various form factors and make sure it looks right. Then turn off the device emulation and see how it will look and behave in a desktop browser. Nice!!
+
+Make sure you have a look at your app in both light and dark mode.
+
+Next we will look at getting an authentication workflow in place so we can connect to our backend service and start using real data.

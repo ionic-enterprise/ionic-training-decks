@@ -84,6 +84,8 @@ Our rating component will just be a simple five-star rating system. The followin
 
 ### Build the Template
 
+**Note:** as we go through this, take the time at each step to see how this affects the display and behavior of the component on the page.
+
 First let's just get a row of five stars out there:
 
 ```html
@@ -98,7 +100,7 @@ Next, add a `rating` property to the class and give it a value greather than zer
 <div>
   <ion-icon
     *ngFor="let n of [1, 2, 3, 4, 5]"
-    [name]="n > rating ? 'star-outline' : 'star'"
+    [name]="n > (rating || 0) ? 'star-outline' : 'star'"
   ></ion-icon>
 </div>
 ```
@@ -109,7 +111,7 @@ Finally, let's add a `click` handler that will change the rating as the user cli
 <div>
   <ion-icon
     *ngFor="let n of [1, 2, 3, 4, 5]"
-    [name]="n <= rating ? 'star' : 'star-outline'"
+    [name]="n > (rating || 0) ? 'star' : 'star-outline'"
     (click)="rating = n"
   ></ion-icon>
 </div>
@@ -129,7 +131,7 @@ ion-icon {
 }
 
 ion-icon:last-child {
-  padding-right: px;
+  padding-right: 0px;
 }
 ```
 
@@ -186,7 +188,7 @@ Some of the ES6 imports are not used at this point, but we will add stuff later 
 Let's also scafold the test. This one will be a little more complex because we want to test out how the component behaves when it is used, so we will need to create a host component for our tests.
 
 ```typescript
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { waitForAsync, ComponentFixture, TestBed } from '@angular/core/testing';
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { IonicModule } from '@ionic/angular';
@@ -215,17 +217,19 @@ describe('RatingComponent', () => {
   let ratingEl: HTMLElement;
   let fixture: ComponentFixture<TestHostComponent>;
 
-  beforeEach(async(() => {
-    TestBed.configureTestingModule({
-      declarations: [RatingComponent, TestHostComponent],
-      imports: [FormsModule, IonicModule],
-    }).compileComponents();
+  beforeEach(
+    waitForAsync(() => {
+      TestBed.configureTestingModule({
+        declarations: [RatingComponent, TestHostComponent],
+        imports: [FormsModule, IonicModule],
+      }).compileComponents();
 
-    fixture = TestBed.createComponent(TestHostComponent);
-    hostComponent = fixture.componentInstance;
-    ratingEl = fixture.nativeElement.querySelector('app-rating');
-    fixture.detectChanges();
-  }));
+      fixture = TestBed.createComponent(TestHostComponent);
+      hostComponent = fixture.componentInstance;
+      ratingEl = fixture.nativeElement.querySelector('app-rating');
+      fixture.detectChanges();
+    }),
+  );
 
   it('should create', () => {
     expect(hostComponent).toBeTruthy();
@@ -263,7 +267,7 @@ Open the `src/app/shared/rating/rating.component.html` file and change the `(cli
 <div>
   <ion-icon
     *ngFor="let n of [1, 2, 3, 4, 5]"
-    [name]="n <= rating ? 'star' : 'star-outline'"
+    [name]="n > (rating || 0) ? 'star' : 'star-outline'"
     (click)="ratingClicked(n)"
   ></ion-icon>
 </div>
@@ -352,8 +356,11 @@ Our component is now ready for use.
 We need to modify the `TeaService` to both save and retrieve the rating for each tea. Our backend API does not currently support the rating on a tea, so we will store this data localy using the Capacitor Storage API. Our tasks for this will include:
 
 - Add an optional `rating` property to the `Tea` model
-- Modify the service to get the rating
-- Add a `save()` method to the service that will save the rating
+- Modify the tea service
+  - get the rating in the `getAll()`
+  - add a `save()` routine to save the rating
+- Update the store to handle the data flow
+- Modify the tea details page to dispatch an action to the store when the rating is changed
 
 ### Update the Model
 
@@ -363,9 +370,16 @@ Update `src/app/models/tea.ts` and add the following property:
   rating?: number;
 ```
 
-### Get the Rating
+### Update the Service
 
-#### Modify the Test Data
+We need to do two things in the service:
+
+- update the `getAll()` to include the rating
+- add a `save()` routine
+
+#### Update the `getAll()`
+
+##### Modify the Test Data
 
 In the `expectedTeas` array that is part of the `TeaService` test, add a rating to each tea as such:
 
@@ -392,7 +406,7 @@ resultTeas = expectedTeas.map((t: Tea) => {
 });
 ```
 
-#### Set up the Storage Mock
+##### Set up the Storage Mock
 
 We will use the Capacitor Storage API, so we will mock that. There are multiple ways that we could store the ratings. We will just go with the very simple strategy of using a key of `ratingX` where `X` is the `ID` of the tea.
 
@@ -405,6 +419,11 @@ let originalStorage: any;
 Then update the setup and teardown for the tests to initialize the behavior of the `Storage` mock. Where the return values are set up, they will need to match however you set up your test data above. Only the non-zero rated teas should be included. Note that `Plugins.Storage.get()` resolves a string value and not a number.
 
 ```typescript
+...
+import { Plugins } from '@capacitor/core';
+...
+let originalStorage: any;
+...
 beforeEach(() => {
   originalStorage = Plugins.Storage;
   Plugins.Storage = jasmine.createSpyObj('Storage', {
@@ -451,9 +470,11 @@ You will need to import `fakeAsync` and `tick`:
 import { fakeAsync, TestBed, tick } from '@angular/core/testing';
 ```
 
-#### Write the Code
+That test case should probably have a more generic name as well. Something like "transforms each tea".
 
-At this point, you should have two failing tests. Update the code in `src/app/core/tea/tea.service.ts` to make them pass.
+##### Write the Code
+
+At this point, you should have a failing test. Update the code in `src/app/core/tea/tea.service.ts` to make it pass.
 
 The first step is to make our private `convert()` method async and then grab the rating from storage:
 
@@ -469,41 +490,27 @@ The first step is to make our private `convert()` method async and then grab the
   }
 ```
 
-But that makes the `getAll()` and `get()` unhappy. The `get()` can be fixed by using the `switchMap()` RxJS operator in place of the `map()` operator.
-
-```typescript
-      .pipe(switchMap((tea: any) => this.convert(tea)));
-```
-
-The `getAll()` is a little trickier. We still need to use the `switchMap()` operator, but we also need to wrap the array mapping that calls `convert()` in a `Promise.all()` so the `switchMap()` just consumes a single promise and not an array opf them.
-
-```typescript
-        switchMap((teas: Array<any>) =>
-          Promise.all(teas.map(t => this.convert(t))),
-        ),
-```
-
-Here is the full code for each:
+But this makes our `getAll()` method unhappy. We are not returning an Observable of an array of promises of tea, but we want an array of teas, not just the promise of eventually getting tea. We can use a `mergeMap()` in conjunction with a `Promise.all()` to fix this:
 
 ```typescript
   getAll(): Observable<Array<Tea>> {
     return this.http
       .get(`${environment.dataService}/tea-categories`)
       .pipe(
-        switchMap((teas: Array<any>) =>
+        mergeMap((teas: Array<any>) =>
           Promise.all(teas.map(t => this.convert(t))),
         ),
       );
   }
-
-  get(id: number): Observable<Tea> {
-    return this.http
-      .get(`${environment.dataService}/tea-categories/${id}`)
-      .pipe(switchMap((tea: any) => this.convert(tea)));
-  }
 ```
 
-### Save the Rating
+Reading that code from the inside out:
+
+- `convert()` takes a raw tea and converts it to our model, but needs to do so async, so it returns a promise of that convertion
+- `Promise.all()` takes all of those promises of convertions and groups them into a single promise that resolvs to an array of teas once all of the inner promises resolve
+- `mergeMap()` converts that promise to an Observable and returns it instead of the original Observable from the HTTP call
+
+#### Save the Rating
 
 The save is relatively easy. It will take a full `Tea` model, but at this time the only thing it will do is save the rating since we do not allow the teas themselves to be changed.
 
@@ -538,115 +545,244 @@ The code to add to the `TeaService` in order to accomplish this is straight forw
 
 Be sure to update the mock factory for this service to reflect the new method.
 
-## Update the Details Page
+### Update the Store
 
-Now that the component is fully operational, let's update the `TeaDetailsPage` to use it properly rather than just the mock hookup we have now. The first thing we will need to do is add a method to save the rating when it changes.
+#### Actions
 
-### Test Modifications
+We will need a new action to signify that the user has changed the rating on a tea. Notice that it is tied to this page. Also notice that our `actions.ts` file is getting a little large. We may want to look at reorganizing how that is laid out at some point, but for now let's continue to run with the single file.
 
-In the page's test, we need to:
+```diff
+--- a/src/app/store/actions.ts
++++ b/src/app/store/actions.ts
+@@ -18,6 +18,10 @@ export enum ActionTypes {
+   LogoutFailure = '[Auth API] logout failure',
 
-- Add the `SharedModule` to the list of imports when configuring the `TestBed`
-- Add `rating` property and a test to show it is set on initialization
-- Add tests that show the change in rating is applied to the tea and saved
+   UnauthError = '[Auth API] unauthenticated error',
++
++  TeaDetailsChangeRating = '[Tea Details Page] change rating',
++  TeaDetailsChangeRatingSuccess = '[Data API] change rating success',
++  TeaDetailsChangeRatingFailure = '[Data API] change rating failure',
+ }
 
-Add the following test to the "initialization" test section:
+ export const initialize = createAction(ActionTypes.Initialize);
+@@ -59,3 +63,16 @@ export const logoutFailure = createAction(
+ );
 
-```typescript
-it('sets the rating', () => {
-  const route = TestBed.inject(ActivatedRoute);
-  const teaService = TestBed.inject(TeaService);
-  (teaService.get as any).and.returnValue(
-    of({
-      id: 42,
-      name: 'Yellow',
-      image: 'assets/img/yellow.jpg',
-      description: 'Yellow tea description.',
-      rating: 2,
-    }),
-  );
-  (route.snapshot.paramMap.get as any).and.returnValue('42');
-  fixture.detectChanges();
-  expect(component.rating).toEqual(2);
-});
+ export const unauthError = createAction(ActionTypes.UnauthError);
++
++export const teaDetailsChangeRating = createAction(
++  ActionTypes.TeaDetailsChangeRating,
++  props<{ tea: Tea; rating: number }>(),
++);
++export const teaDetailsChangeRatingSuccess = createAction(
++  ActionTypes.TeaDetailsChangeRatingSuccess,
++  props<{ tea: Tea }>(),
++);
++export const teaDetailsChangeRatingFailure = createAction(
++  ActionTypes.TeaDetailsChangeRatingFailure,
++  props<{ errorMessage: string }>(),
++);
 ```
 
-Also add a whole new section for testing a change to the rating:
+#### Reducer
 
-```typescript
-describe('rating changed', () => {
-  let teaService: TeaService;
+For the reducer we need to update the state with the updated tea if the rating change succeeded, and with the error message if it failed.
+
+The `src/app/store/reducers/data/data.reducer.spec.ts` file defines some test teas. Add a rating to each. Then add the following test cases. Note that we only need to handle the "success" and "failure" actions:
+
+```TypeScript
+  {
+    description: `${ActionTypes.TeaDetailsChangeRatingSuccess}: sets the rating for the tea`,
+    action: teaDetailsChangeRatingSuccess({ tea: {...teas[1], rating: 3} }),
+    begin: { teas },
+    end: { teas: [teas[0], { ...teas[1], rating: 3 }, teas[2]] },
+  },
+  {
+    description: `${ActionTypes.TeaDetailsChangeRatingFailure}: sets the error message`,
+    action: initialLoadFailure({ errorMessage: 'The save blew some chunks' }),
+    begin: { teas },
+    end: { teas, errorMessage: 'The save blew some chunks' },
+  },
+```
+
+Here is one way of doing that:
+
+```TypeScript
+  on(Actions.teaDetailsChangeRatingSuccess, (state, { tea }) => {
+    const teas = [...state.teas];
+    const idx = state.teas.findIndex(t => t.id === tea.id);
+    if (idx > -1) {
+      teas.splice(idx, 1, tea);
+    }
+    return { ...state, teas };
+  }),
+  on(Actions.teaDetailsChangeRatingFailure, (state, { errorMessage }) => ({
+    ...state,
+    errorMessage,
+  })),
+```
+
+#### Efffect
+
+The effect that we require is pretty straight forward:
+
+- save the tea
+- dispatch the next action based on whether or not the save succeeded
+
+```TypeScript
+  describe('teaRatingChanged$', () => {
+    it('save the tea', done => {
+      const teaService = TestBed.inject(TeaService);
+      actions$ = of(teaDetailsChangeRating({ tea: teas[1], rating: 5 }));
+      effects.teaRatingChanged$.subscribe(() => {
+        expect(teaService.save).toHaveBeenCalledTimes(1);
+        expect(teaService.save).toHaveBeenCalledWith({ ...teas[1], rating: 5 });
+        done();
+      });
+    });
+
+    describe('on success', () => {
+      it('dispatches tea rating change success', done => {
+        actions$ = of(teaDetailsChangeRating({ tea: teas[1], rating: 5 }));
+        effects.teaRatingChanged$.subscribe(newAction => {
+          expect(newAction).toEqual({
+            type: ActionTypes.TeaDetailsChangeRatingSuccess,
+            tea: { ...teas[1], rating: 5 },
+          });
+          done();
+        });
+      });
+    });
+
+    describe('on an exception', () => {
+      beforeEach(() => {
+        const teaService = TestBed.inject(TeaService);
+        (teaService.save as any).and.returnValue(
+          Promise.reject(new Error('private storage is blowing chunks?')),
+        );
+      });
+
+      it('dispatches tea rating change failure', done => {
+        actions$ = of(teaDetailsChangeRating({ tea: teas[1], rating: 5 }));
+        effects.teaRatingChanged$.subscribe(newAction => {
+          expect(newAction).toEqual({
+            type: ActionTypes.TeaDetailsChangeRatingFailure,
+            errorMessage: 'private storage is blowing chunks?',
+          });
+          done();
+        });
+      });
+    });
+  });
+```
+
+Here is the code:
+
+```TypeScript
+  teaRatingChanged$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(teaDetailsChangeRating),
+      mergeMap(action =>
+        from(
+          this.teaService.save({ ...action.tea, rating: action.rating }),
+        ).pipe(
+          map(() =>
+            teaDetailsChangeRatingSuccess({
+              tea: { ...action.tea, rating: action.rating },
+            }),
+          ),
+          catchError(err =>
+            of(
+              teaDetailsChangeRatingFailure({
+                errorMessage: err.message || 'Unknown error in rating save',
+              }),
+            ),
+          ),
+        ),
+      ),
+    ),
+  );
+```
+
+## Update the Details Page
+
+Now that everything is fully operational, let's update the `TeaDetailsPage` to use it properly rather than just the mock hookup we have now.
+
+### Grab the Current Rating
+
+The first thing we will need to do is get the current rating when we select the tea. We need to do this because we cannot just bind directly to `tea.rating` in our view. The component modifying that value would directly modify the state, and that is not allowed.
+
+Add a rating to our test tea and change the one spy we have to call through so the selector is operational for that test case (before it wasn't realy doing anything, we would could just spy on it').
+
+```TypeScript
+        rating: 4
+...
+     spyOn(store, 'select').and.callThrough();
+```
+
+Then add a test to verify the initialization of the rating value. Similar to the previously modified test, this is also in the "initialization" describe block
+
+```TypeScript
+    it('initializes the rating', () => {
+      fixture.detectChanges();
+      expect(component.rating).toBe(4);
+    });
+```
+
+Then in the code we can tap into the Observable pipeline and grab the rating:
+
+```TypeScript
+    this.tea$ = this.store
+      .select(selectTea, { id })
+      .pipe(tap(tea => (this.rating = tea && tea.rating)));
+```
+
+We can then bind the rating in the template:
+
+```HTML
+<app-rating [(ngModel)]="rating"></app-rating>
+```
+
+**Note:** this causes a couple of warnings in our test, but we can get around those by importing the `FormsModule` when we configure the test module.
+
+### Save the New Rating
+
+When the user clicks on the rating component, we need to dispatch the change to the store. Here is the test, code, and template markup change.
+
+```TypeScript
+describe('rating click', () => {
   beforeEach(() => {
-    const route = TestBed.inject(ActivatedRoute);
-    teaService = TestBed.inject(TeaService);
-    (teaService.get as any).and.returnValue(
-      of({
-        id: 42,
-        name: 'Yellow',
-        image: 'assets/img/yellow.jpg',
-        description: 'Yellow tea description.',
-      }),
-    );
-    (route.snapshot.paramMap.get as any).and.returnValue('42');
     fixture.detectChanges();
   });
 
-  it('updates the tea', () => {
-    component.rating = 4;
-    component.ratingChanged();
-    expect(component.tea).toEqual({
-      id: 42,
-      name: 'Yellow',
-      image: 'assets/img/yellow.jpg',
-      description: 'Yellow tea description.',
+  it('dispatches a rating change action', () => {
+    const tea = {
+      id: 7,
+      name: 'White',
+      description: 'Often looks like frosty silver pine needles',
+      image: 'imgs/white.png',
       rating: 4,
-    });
-  });
-
-  it('saves the change', () => {
-    component.rating = 4;
-    component.ratingChanged();
-    expect(teaService.save).toHaveBeenCalledTimes(1);
-    expect(teaService.save).toHaveBeenCalledWith({
-      id: 42,
-      name: 'Yellow',
-      image: 'assets/img/yellow.jpg',
-      description: 'Yellow tea description.',
-      rating: 4,
-    });
+    };
+    const store = TestBed.inject(Store);
+    spyOn(store, 'dispatch');
+    component.rating = 3;
+    component.changeRating(tea);
+    expect(store.dispatch).toHaveBeenCalledTimes(1);
+    expect(store.dispatch).toHaveBeenCalledWith(
+      teaDetailsChangeRating({ tea, rating: 3 }),
+    );
   });
 });
 ```
 
-### Page Modifications
-
-First add a property called `rating` of type `number`, then modify the `ngOnInit()` slightly so it gets set:
-
-```typescript
-  ngOnInit() {
-    const id = parseInt(this.route.snapshot.paramMap.get('id'), 10);
-    this.teaService.get(id).subscribe((t: Tea) => {
-      this.tea = t;
-      this.rating = t.rating;
-    });
-  }
+```TypeScript
+changeRating(tea: Tea) {
+  this.store.dispatch(teaDetailsChangeRating({ tea, rating: this.rating }));
+}
 ```
 
-Next add the `ratingChanged()` method. The code to satisfy the requirements expressed in the above tests is straight forward:
-
-```typescript
-  ratingChanged() {
-    if (this.tea) {
-      this.tea.rating = this.rating;
-      this.teaService.save(this.tea);
-    }
-  }
-```
-
-The bindings in the template also need to be modified.
-
-```html
-<app-rating [(ngModel)]="rating" (ngModelChange)="ratingChanged()"></app-rating>
+```HTML
+<app-rating [(ngModel)]="rating" (click)="changeRating(tea)"></app-rating>
 ```
 
 ## Conclusion

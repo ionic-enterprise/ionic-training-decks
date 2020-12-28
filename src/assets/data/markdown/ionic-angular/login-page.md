@@ -52,6 +52,28 @@ We see that a `login` route was automatically added for us. Let's see if that wo
 
 ## Mock the UI
 
+First we will add our "title test", but in this case we will only have the single title. There is no reason for the collapsible title on this page.
+
+We also added the `FormsModule` to the `TestBed` configuration. We don't need that now, but we will shortly.
+
+```TypeScript
+...
+import { FormsModule } from '@angular/forms';
+import { By } from '@angular/platform-browser';
+...
+      TestBed.configureTestingModule({
+        declarations: [LoginPage],
+        imports: [FormsModule, IonicModule],
+      }).compileComponents();
+...
+  it('displays the title properly', () => {
+    const title = fixture.debugElement.query(By.css('ion-title'));
+    expect(title.nativeElement.textContent.trim()).toBe('Login');
+  });
+```
+
+Notice that the test fails, but we are about to fix that.
+
 Let's mock up what we would like this page to look like. We know we are going to need a form in which to enter our e-mail and our password, along with a button to press when the user is ready to log in, so let's start by updating the `src/app/login/login.page.html` file.
 
 ```html
@@ -78,7 +100,7 @@ Let's mock up what we would like this page to look like. We know we are going to
 
 <ion-footer>
   <ion-toolbar>
-    <ion-button>Login</ion-button>
+    <ion-button>Sign In</ion-button>
   </ion-toolbar>
 </ion-footer>
 ```
@@ -121,38 +143,6 @@ Finally, the button. It really should:
 
 ## Form Handling
 
-### Fix the Test
-
-The test is already failing because we added an `ngForm` but did not add the `FormsModule` to the test file. Open `src/app/login/login.page.spec.ts` and add that now. You may as well also remove the `forRoot()` from the `IonicModule` import.
-
-```TypeScript
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-import { IonicModule } from '@ionic/angular';
-import { FormsModule } from '@angular/forms';
-
-import { LoginPage } from './login.page';
-
-describe('LoginPage', () => {
-  let component: LoginPage;
-  let fixture: ComponentFixture<LoginPage>;
-
-  beforeEach(async(() => {
-    TestBed.configureTestingModule({
-      declarations: [LoginPage],
-      imports: [FormsModule, IonicModule]
-    }).compileComponents();
-
-    fixture = TestBed.createComponent(LoginPage);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
-  }));
-
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-});
-```
-
 ### Set Up the Page Class
 
 For now the `LoginPage` class does not have to do much. It just needs to have a couple of properties to bind the input fields to and a handler for the button, though that handler will not really do anything yet.
@@ -180,6 +170,8 @@ export class LoginPage {
 ### Binding the Data
 
 Switch back to the test file. The bindings should be tested to make sure they are done correctly. Here are the tests for the Email Address input. Add these and then create similar tests for the password input. You will have to import `fakeAsync` and `tick` from `@angular/core/testing`.
+
+Notice how we are using the `nativeElement` along with standard JavaScript DOM APIs in these tests. We could have also used the `debugElement` and used its `.query(By.css(...))` syntax like before, and then gone down to the native element for the rest of the test. You can use whichever method you are most compfortable with combined with whatever is going to best meet the needs of your test. In these tests we need the HTML element, so I just went that route right away.
 
 ```TypeScript
   describe('email input binding', () => {
@@ -224,7 +216,30 @@ Here is the E-Mail Address input:
 ></ion-input>
 ```
 
-The password input is similar:
+The password input test and markup is similar:
+
+```TypeScript
+  describe('password input binding', () => {
+    it('updates the component model when the input changes', () => {
+      const input = fixture.nativeElement.querySelector('#password-input');
+      const event = new InputEvent('ionChange');
+
+      input.value = 'MyPas$Word';
+      input.dispatchEvent(event);
+      fixture.detectChanges();
+
+      expect(component.password).toEqual('MyPas$Word');
+    });
+
+    it('updates the input when the component model changes', fakeAsync(() => {
+      component.password = 'SomePassword';
+      fixture.detectChanges();
+      tick();
+      const input = fixture.nativeElement.querySelector('#password-input');
+      expect(input.value).toEqual('SomePassword');
+    }));
+  });
+```
 
 ```html
 <ion-input
@@ -397,4 +412,4 @@ That is helpful, but a little styling will make it look better. Since this is no
 
 ## Conclusion
 
-We now have a (mostly) funcitonal login page. The only problems are that we have to manually navigate to it, and it doesn't actuall perform the login. Before we fix that far we are going to need to need to create a couple of services. We will do that next.
+We now have a (mostly) funcitonal login page. The only problems are that we have to manually navigate to it, and it doesn't actually perform the login. Before we fix that far we are going to need to need to create a couple of services. We will do that next.

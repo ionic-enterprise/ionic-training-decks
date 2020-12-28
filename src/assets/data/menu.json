@@ -26,16 +26,12 @@
               "file": "start"
             },
             {
-              "title": "Unit Tests",
-              "file": "unit-tests"
-            },
-            {
               "title": "Add Platforms",
               "file": "platforms"
             },
             {
-              "title": "Use Native APIs",
-              "file": "native-apis"
+              "title": "Unit Testing Infrastucture",
+              "file": "unit-tests"
             },
             {
               "title": "Mock Up the Interface",
@@ -46,8 +42,16 @@
               "file": "login-page"
             },
             {
-              "title": "Identity",
-              "file": "identity"
+              "title": "Application State",
+              "file": "application-state"
+            },
+            {
+              "title": "Persist the Session",
+              "file": "persist"
+            },
+            {
+              "title": "Code Challenge",
+              "file": "code-challenge"
             },
             {
               "title": "Authentication",

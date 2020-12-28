@@ -25,6 +25,32 @@ Once those pages have been generated, be sure to open each of their routing modu
   },
 ```
 
+Also, open the test for each page and do the following:
+
+```diff
+--- a/src/app/about/about.page.spec.ts
++++ b/src/app/about/about.page.spec.ts
+@@ -1,4 +1,4 @@
+-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
++import { waitForAsync, ComponentFixture, TestBed } from '@angular/core/testing';
+ import { IonicModule } from '@ionic/angular';
+
+ import { AboutPage } from './about.page';
+@@ -7,10 +7,10 @@ describe('AboutPage', () => {
+   let component: AboutPage;
+   let fixture: ComponentFixture<AboutPage>;
+
+-  beforeEach(async(() => {
++  beforeEach(waitForAsync(() => {
+     TestBed.configureTestingModule({
+       declarations: [AboutPage],
+-      imports: [IonicModule.forRoot()],
++      imports: [IonicModule],
+     }).compileComponents();
+
+     fixture = TestBed.createComponent(AboutPage);
+```
+
 ## Tabs
 
 Tabs are one of two very common navigation syles within native applications. The other is side-menu navigation. A tabs navigation page will have a row of tabs either at the top or the bottom of the page. Each tab will contain a set of stacked pages. We have this stacked paradigm right now with the `TeaDetailsPage` rendering stacked on top of the `TeaPage`. This same idea carries over to tabbed navigation only each tab will have its own stack.
@@ -66,7 +92,7 @@ Modify `src/app/tabs/tabs.page.spec.ts` as such:
 
 ```typescript
 import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { waitForAsync, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { TabsPage } from './tabs.page';
 
@@ -74,7 +100,7 @@ describe('TabsPage', () => {
   let component: TabsPage;
   let fixture: ComponentFixture<TabsPage>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [TabsPage],
       schemas: [CUSTOM_ELEMENTS_SCHEMA],

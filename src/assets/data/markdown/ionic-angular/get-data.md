@@ -17,7 +17,16 @@ In this lab, you will learn how to:
 
 The generated service is just a shell for an injectable class. We need to provide the details. The primary purpose of this service will be to get JSON data from the API via HTTP, so we will need to inject Angular's HTTP client service. Dependency injection in Angular is handled via the constructor. Inject the HTTP client, creating a `private` reference to it.
 
-While we are in there, let's also create stubs for the methods we are going to need.
+While we are in there, let's also create a stub for the method we are going to need.
+
+**A note on method naming:** I generally use the same method names across all of my data services as such:
+
+- `getAll()` - get all items
+- `get(id)` - get a specific item
+- `save(obj)` - save and existing item or create add a new one, depending on whether an ID exists on the object or not, return the saved object
+- `delete(obj)` - delete the object
+
+These are the names and semantics I tend to use. The details here are not quite as important as making sure you come up with names and semantics that work for your application and then being consistent with them.
 
 ```TypeScript
 import { Injectable } from '@angular/core';
@@ -35,10 +44,6 @@ export class TeaService {
   getAll(): Observable<Array<Tea>> {
     return EMPTY;
   }
-
-  get(id: number): Observable<Tea> {
-    return EMPTY;
-  }
 }
 ```
 
@@ -53,7 +58,7 @@ import {
   HttpTestingController
 } from '@angular/common/http/testing';
 
-import { environment } from '../../../environments/environment';
+import { environment } from '@env/environment';
 import { TeaService } from './tea.service';
 
 describe('TeaService', () => {
@@ -76,19 +81,20 @@ describe('TeaService', () => {
 
 ## Getting the Data
 
+**Note:** this is just a reminder that as you go through these steps you _will_ need to adjust your imports, importing in new items that you are using and remove items that are no longer being used. In some cases, multiple modules will contain a thing with any given name. Make sure you are importing the correct one. If you are unsure, please be sure to ask.
+
 ### Initialize the Test Data
+
+**Scenario:** the API team is not sure exactly how they are going to provide image data. That is still being debated. But they are getting us the rest of the data, and the data is consistent with consistent IDs, so we can add our own images for the time being via our service.
 
 We are going to need some test data. For our application, the data we get back from the server looks like the test data that we provided for the page, only it does not have an image assciated with it. Let's initialize an array of teas called `expectedTeas` using that data.
 
-First, create `expectedTeas` and `resultTeas` variables within the main `describe()` for the test:
+First, create `expectedTeas` and `resultTeas` variables within the main `describe()` for the test (in the same area where the other variables are declared):
 
 ```typescript
-describe('TeaService', () => {
+...
   let expectedTeas: Array<Tea>;
   let resultTeas: Array<Tea>;
-  let httpTestingController: HttpTestingController;
-  let service: TeaService;
-
 ...
 ```
 
@@ -230,47 +236,9 @@ We can then use the Array `map` operator to convert the individual teas, and the
   }
 ```
 
-### Get one of the teas
-
-The backend has an endpoint that just gets a specific tea category. Create a `describe` for the "get" functionality. All of our tests for the `get()` requirements will go there.
-
-#### Test #1 - Getting Data from the Correct Endpoint
-
-```typescript
-it('gets the specific tea category', () => {
-  service.get(4).subscribe();
-  const req = httpTestingController.expectOne(
-    `${environment.dataService}/tea-categories/4`,
-  );
-  expect(req.request.method).toEqual('GET');
-  httpTestingController.verify();
-});
-```
-
-Write the minimal code required to make that test pass. This will be very similar to what you just did for the `getAll()` so I will not be giving you any code.
-
-#### Test #2 - Convert the Data
-
-The backend team has not quite figured out how they want to supply the pictures yet, so we will just hook them up based on the ID for now. We have already defined what the API result set looks like and what we expect out of the service.
-
-```typescript
-it('adds an image to the category', () => {
-  let tea: Tea;
-  service.get(4).subscribe(t => (tea = t));
-  const req = httpTestingController.expectOne(
-    `${environment.dataService}/tea-categories/4`,
-  );
-  req.flush(resultTeas[3]);
-  httpTestingController.verify();
-  expect(tea).toEqual(expectedTeas[3]);
-});
-```
-
-Write the minimal code required to make that test pass. Again, since this is so similar to what you did for the `getAll()` I will not be directly giving you any code here.
-
 ### Refactor
 
-The code that you have for each of these methods probably looks pretty similar to each other:
+The code that you have for this method looks like this:
 
 ```typescript
   getAll(): Observable<Array<Tea>> {
@@ -283,20 +251,11 @@ The code that you have for each of these methods probably looks pretty similar t
       ),
     );
   }
-
-  get(id: number): Observable<Tea> {
-    return this.http
-      .get(`${environment.dataService}/tea-categories/${id}`)
-      .pipe(
-        map((tea: any) => ({
-          ...tea,
-          image: `assets/img/${this.images[tea.id - 1]}.jpg`,
-        })),
-      );
-  }
 ```
 
-Some of this is repeated code is expected since it is a fairly common pattern that is being followed. However, the code that converts from the API data to the `Tea` model by adding an `image` property could be abstracted out to a private method. Do that. When done, your methods should look more like this:
+The problem here is that there is a lot for future you to parse when you come back to maintain this. The method is reponsible for more tha one thing: getting the data, and doing the convertion. Let's fix that by abstracting the code that does the convertion on a tea object into a local `convert()` method.
+
+When you are done, the code should look more like this:
 
 ```typescript
   getAll(): Observable<Array<Tea>> {
@@ -304,15 +263,17 @@ Some of this is repeated code is expected since it is a fairly common pattern th
       .get(`${environment.dataService}/tea-categories`)
       .pipe(map((teas: Array<any>) => teas.map(t => this.convert(t))));
   }
-
-  get(id: number): Observable<Tea> {
-    return this.http
-      .get(`${environment.dataService}/tea-categories/${id}`)
-      .pipe(map((tea: any) => this.convert(tea)));
-  }
 ```
 
-Make sure your tests are still passing.
+Make sure your tests are still passing. That makes it clear that we are grabbing the teas from the API and returning them after a mapping process. The details of that convertion then are left to the `convert()` method, and everything is tidy and is only responsible for one thing.
+
+The point of what we just did is that it is OK for things to get a little messy while you are working out exactly how it should work. However, before you call the code "done" you should clean it up to make it easier to maintain, and properly written unit tests will help you ensure you are doing that clean-up correctly.
+
+## Create a Mock Factory
+
+The last step, as always for our services, is to create a mock factory for our new service. Have a look at `src/app/core/authentication/authentication.service.mock.ts` and use it as a model to create your own `src/app/core/tea/tea.service.mock.ts` file.
+
+Remember to export the new factory from `src/app/core/testing.ts`.
 
 ## Conclusion
 

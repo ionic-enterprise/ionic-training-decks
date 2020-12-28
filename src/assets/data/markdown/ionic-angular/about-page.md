@@ -42,34 +42,34 @@ export class AboutPage implements OnInit {
 }
 ```
 
-```html
-<ion-header>
-  <ion-toolbar>
-    <ion-title>About Tea Taster</ion-title>
-  </ion-toolbar>
-</ion-header>
+In the template file for the about page, do the following:
 
-<ion-content class="ion-text-center ion-padding">
-  <ion-list>
-    <ion-list-header>About</ion-list-header>
-    <ion-item>
-      <ion-label>Name</ion-label>
-      <ion-note slot="end">{{name}}</ion-note>
-    </ion-item>
-    <ion-item>
-      <ion-label>Description</ion-label>
-      <ion-note slot="end">{{description}}</ion-note>
-    </ion-item>
-    <ion-item>
-      <ion-label>Version</ion-label>
-      <ion-note slot="end">{{version}}</ion-note>
-    </ion-item>
-    <ion-item>
-      <ion-label>Author</ion-label>
-      <ion-note slot="end">{{author}}</ion-note>
-    </ion-item>
-  </ion-list>
-</ion-content>
+- Change the title to "About Tea Taster"
+- Add the following classes to the `ion-content`:
+  - ion-text-center
+  - ion-padding
+- Add the following list markup within the `ion-content`
+
+```html
+<ion-list>
+  <ion-list-header>About</ion-list-header>
+  <ion-item>
+    <ion-label>Name</ion-label>
+    <ion-note slot="end">{{name}}</ion-note>
+  </ion-item>
+  <ion-item>
+    <ion-label>Description</ion-label>
+    <ion-note slot="end">{{description}}</ion-note>
+  </ion-item>
+  <ion-item>
+    <ion-label>Version</ion-label>
+    <ion-note slot="end">{{version}}</ion-note>
+  </ion-item>
+  <ion-item>
+    <ion-label>Author</ion-label>
+    <ion-note slot="end">{{author}}</ion-note>
+  </ion-item>
+</ion-list>
 ```
 
 ## Move the Logout Logic

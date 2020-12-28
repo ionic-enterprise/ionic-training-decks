@@ -1,11 +1,10 @@
-# Lab: Unit Tests
+# Lab: Unit Testing Infrastructure
 
 In this lab, you will learn how to:
 
 - Setup headless support for Chrome
 - Run the existing suite of unit tests
-- Create and use mock objects
-- Structure Unit Tests
+- Install some centralized mock factories
 
 ## Set Up Headless Chrome Support
 
@@ -62,39 +61,57 @@ With our current configuration, there are three convenient ways to run the tests
 
 Type `npm test` and verify that the tests run.
 
-## Refactor `app.component.spec.ts`
+## Update the `HomePage` Test
 
-The current `app.component.spec.ts` file has some issues:
+Let's add a simple test to the `HomePage` test. This test will:
 
-- I do not like the way the mocks are created
-- The "Platform Ready" handling awkward
-- There are several requirements being tested with a single test.
+- Use the `debugElement` to query the DOM for the `ion-title`
+- Peek at the `textContent` of the title's native element and make sure it is correct
 
-### Use Mock Objects
+This is a very simple test involving the page's DOM, but it will give you an idea of the types of DOM level testing we can do.
 
-I favor the use of centralized factory functions to create mocks whenever it makes sense. This allows me to use a consistently defined mock throughout the tests in my application and reduces maintenance costs. For this application, I provide a set of centralized mock factories. <a download href="/assets/packages/ionic-angular/test.zip">Download the zip file</a> and unpack it in the root of the project creating a `test` folder.
-
-Once that is in place, perform the following tasks:
-
-- remove the existing spy variables and their initialization
-- import the platform mock factory: `import { createPlatformMock } from '../../test/mocks';`
-- provide the `StatusBar` and `SplashScreen` via a factory: `{ provide: StatusBar, useFactory: () => jasmine.createSpyObj<StatusBar>('StatusBar', ['styleDefault']) }`
-- provide the `Platform` via the factory: `{ provide: Platform, useFactory: createPlatformMock }`
+Add the following to the `src/app/home/home.page.spec.ts` file:
 
 ```TypeScript
 ...
-import { AppComponent } from './app.component';
+import { By } from '@angular/platform-browser';
+...
+  it('displays the correct title', () => {
+    const titles = fixture.debugElement.queryAll(By.css('ion-title'));
+    expect(titles.length).toBe(2);
+    expect(titles[0].nativeElement.textContent.trim()).toBe('Blank');
+    expect(titles[1].nativeElement.textContent.trim()).toBe('Blank');
+  });
+```
+
+That new test case should go directly under the existing "should create" test case.
+
+While in this file, remove the `forRoot()` from the import of the `IonicModule` when the `TestBed` is configured. It is not required here.
+
+```diff
+-        imports: [IonicModule.forRoot()],
++        imports: [IonicModule],
+```
+
+You should be able to do this in any component or page test that you add to the project, though I will not remind you to do so each time. That will be up to you.
+
+## Install Mock Factories
+
+I favor the use of centralized factory functions to create mocks whenever it makes sense. This allows me to use a consistently defined mock throughout the tests in my application and reduces maintenance costs. For this application, I provide a set of centralized mock factories. <a download href="/assets/packages/ionic-angular/test.zip">Download the zip file</a> and unpack it in the root of the project creating a `test` folder.
+
+Once that is in place it is often used within the `TestBed` configuration in order to provide the mock object instead of the real object for various dependencies. For example:
+
+```TypeScript
+...
+import { SomeComponent } from './some.component';
 import { createPlatformMock } from '../../test/mocks';
 
-describe('AppComponent', () => {
+describe('SomeComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [AppComponent],
-      schemas: [CUSTOM_ELEMENTS_SCHEMA],
+      declarations: [SomeComponent],
       providers: [
-        { provide: StatusBar, useFactory: () => jasmine.createSpyObj<StatusBar>('StatusBar', ['styleDefault']) },
-        { provide: SplashScreen, useFactory: () => jasmine.createSpyObj<SplashScreen>('SplashScreen', ['hide']) },
         { provide: Platform, useFactory: createPlatformMock }
       ]
     }).compileComponents();
@@ -102,68 +119,6 @@ describe('AppComponent', () => {
 ...
 ```
 
-Next we will refactor the existing test as-is. This will just be an incremental improvement.
-
-- get the provided mock services. Example: `const platform = TestBed.inject(Platform);`
-- use the mocks just obtained and not the former mock objects
-
-```TypeScript
-  it('should initialize the app', async () => {
-    const platform = TestBed.inject(Platform);
-    const statusBar = TestBed.inject(StatusBar);
-    const splashScreen = TestBed.inject(SplashScreen);
-    TestBed.createComponent(AppComponent);
-    expect(platform.ready).toHaveBeenCalled();
-    await platform.ready();
-    expect(statusBar.styleDefault).toHaveBeenCalled();
-    expect(splashScreen.hide).toHaveBeenCalled();
-  });
-```
-
-The end result is that we are now using the standard `Platform` mock that we created to use throughout the application wherever we need to mock the `Platform` service. However, this test case still has problems: it is testing the whole initialization method and not individual requirements, and the matchers are too generic.
-
-The next step is to break the test down to a `describe()` for the feature (initialization), and an `it()` case per requirement.
-
-### Break-up the "should initialize the app" Test
-
-Tests should be structured by feature with a seperate `it()` function covering each requirement. Here is an example:
-
-```TypeScript
-describe('my-module', () => {
-  it('builds', () => {});
-
-  describe('feature 1', () => {
-    it('does something for requirement 1', () => {});
-    it('does something else for requirement 1', () => {});
-    it('does something for requirement 2', () => {});
-    it('does something for requirement 3', () => {});
-  });
-
-  describe('feature 2', () => {
-    ...
-  });
-});
-```
-
-_Note:_ it may take more than one `it()` to cover a requirement, but a single it should not itself try to test more than a single requirement.
-
-The current "should initialize the app" test violates that a bit. Let's refactor it into a structure like this (I'll give you the code for the first test to get started):
-
-```TypeScript
-describe('initialization', () => {
-  it('waits for the platform to be ready', () => {
-    const platform = TestBed.inject(Platform);
-    TestBed.createComponent(AppComponent);
-    expect(platform.ready).toHaveBeenCalledTimes(1);
-  });
-
-  it('sets the default status bar style when ready', async () => {});
-  it('hides the splash screen when ready', async () => {});
-});
-```
-
-Refactor the current test into these test cases and let's compare notes when you are done. Was there any repetative code that could perhaps be refactored?
-
 ## Conclusion
 
-In this lab we learned the basics of unit testing. We will apply what we learned here and expand upon it as we develop our application. Next we will take a peek at styling the application.
+In this lab we confiured our basic testin infrastructure and added a simple test. We will expand on our testing as we develop our application. As such, we will learn more unit testing techniques hand as we develop the code.

@@ -12,8 +12,9 @@ There are a couple of preliminary items that we need to get out of the way first
 
 - Create a data model
 - Create a data service that performs HTTP requests
+- Add the notes to the store
 
-These are a couple of things we have done multiple times now, so I will just give you the code to move things along. If you are still unsure on these items, though, please review the code that is provided here.
+These are a few things we have done multiple times now, so I will just give you the code to move things along. If you are still unsure on these items, though, please review the code that is provided here.
 
 ### The `TastingNotes` Model
 
@@ -67,17 +68,6 @@ describe('TastingNotesService', () => {
       service.getAll().subscribe();
       const req = httpTestingController.expectOne(
         `${environment.dataService}/user-tasting-notes`,
-      );
-      expect(req.request.method).toEqual('GET');
-      httpTestingController.verify();
-    });
-  });
-
-  describe('get', () => {
-    it('gets the specific note', () => {
-      service.get(4).subscribe();
-      const req = httpTestingController.expectOne(
-        `${environment.dataService}/user-tasting-notes/4`,
       );
       expect(req.request.method).toEqual('GET');
       httpTestingController.verify();
@@ -156,12 +146,6 @@ export class TastingNotesService {
     );
   }
 
-  get(id: number): Observable<TastingNote> {
-    return this.http.get<TastingNote>(
-      `${environment.dataService}/user-tasting-notes/${id}`,
-    );
-  }
-
   delete(id: number): Observable<void> {
     return this.http.delete<void>(
       `${environment.dataService}/user-tasting-notes/${id}`,
@@ -187,14 +171,578 @@ import { TastingNotesService } from './tasting-notes.service';
 export function createTastingNotesServiceMock() {
   return jasmine.createSpyObj<TastingNotesService>('TastingNotesService', {
     getAll: EMPTY,
-    get: EMPTY,
     delete: EMPTY,
     save: EMPTY,
   });
 }
 ```
 
-**Reminder:** update the `core` barrel files as well.
+**Important:** remember to update the `src/app/core/[index.ts|testing.ts]` files.
+
+### Store Updates
+
+There is nothing all that new to learn with the store modifications. We will follow the basic pattern we have laid out thus far where:
+
+- the page or component dispatches an action
+- that action generally sets a `loading` flag (think of it as a "busy state")
+- that action has an effect that performs some tasks
+  - if the task succeeds, an action is dispatched to clear loading flags and set the data
+  - if the task fails, an action is dispatched to clear loading flags and set an error message
+
+**Note:** for most of the store updates, it will be up to you to supply the updates to the `import`s in these files.
+
+#### Actions
+
+Add the following to the `ActionTypes`:
+
+```TypeScript
+  TeaDetailsChangeRating = '[Tea Details Page] change rating',
+  TeaDetailsChangeRatingSuccess = '[Data API] change rating success',
+  TeaDetailsChangeRatingFailure = '[Data API] change rating failure',
+
+  NotesPageLoaded = '[Notes Page] loaded',
+  NotesPageDataLoadedSuccess = '[Data API] notes page loaded success',
+  NotesPageDataLoadedFailure = '[Data API] notes page loaded failure',
+
+  NoteSaved = '[Note Editor] note saved',
+  NoteSavedSuccess = '[Data API] note saved success',
+  NoteSavedFailure = '[Data API] note saved failure',
+
+  NoteDeleted = '[Notes Page] note deleted',
+  NoteDeletedSuccess = '[Data API] note deleted success',
+  NoteDeletedFailure = '[Data API] note deleted failure',
+```
+
+And export the following related action functions:
+
+```TypeScript
+export const notesPageLoaded = createAction(ActionTypes.NotesPageLoaded);
+export const notesPageLoadedSuccess = createAction(
+  ActionTypes.NotesPageDataLoadedSuccess,
+  props<{ notes: Array<TastingNote> }>(),
+);
+export const notesPageLoadedFailure = createAction(
+  ActionTypes.NotesPageDataLoadedFailure,
+  props<{ errorMessage: string }>(),
+);
+
+export const noteSaved = createAction(
+  ActionTypes.NoteSaved,
+  props<{ note: TastingNote }>(),
+);
+export const noteSavedSuccess = createAction(
+  ActionTypes.NoteSavedSuccess,
+  props<{ note: TastingNote }>(),
+);
+export const noteSavedFailure = createAction(
+  ActionTypes.NoteSavedFailure,
+  props<{ errorMessage: string }>(),
+);
+
+export const noteDeleted = createAction(
+  ActionTypes.NoteDeleted,
+  props<{ note: TastingNote }>(),
+);
+export const noteDeletedSuccess = createAction(
+  ActionTypes.NoteDeletedSuccess,
+  props<{ note: TastingNote }>(),
+);
+export const noteDeletedFailure = createAction(
+  ActionTypes.NoteDeletedFailure,
+  props<{ errorMessage: string }>(),
+);
+```
+
+#### Reducers
+
+The reducers are also pretty straight forward. We will do this in steps. All of the following modifications are in one of the two following files: `src/app/store/reducers/data/data.reducer.ts` or `src/app/store/reducers/data/data.reducer.spec.ts`
+
+First, we need to add the notes to the state. Add the `notes` property as shown here.
+
+```TypeScript
+...
+import { TastingNote, Tea } from '@app/models';
+
+export interface DataState {
+  notes: Array<TastingNote>;
+  teas: Array<Tea>;
+  loading: boolean;
+  errorMessage: string;
+}
+
+export const initialState: DataState = {
+  notes: [],
+  teas: [],
+  loading: false,
+  errorMessage: '',
+};
+...
+```
+
+Let's add some data to test with. This is towards the top of the file where we have our other test data defined:
+
+```TypeScript
+import { Session, TastingNote, Tea } from '@app/models';
+...
+const notes: Array<TastingNote> = [
+  {
+    id: 42,
+    brand: 'Lipton',
+    name: 'Green Tea',
+    teaCategoryId: 3,
+    rating: 3,
+    notes: 'A basic green tea, very passable but nothing special',
+  },
+  {
+    id: 314159,
+    brand: 'Lipton',
+    name: 'Yellow Label',
+    teaCategoryId: 2,
+    rating: 1,
+    notes:
+      'Very acidic, even as dark teas go, OK for iced tea, horrible for any other application',
+  },
+  {
+    id: 73,
+    brand: 'Rishi',
+    name: 'Puer Cake',
+    teaCategoryId: 6,
+    rating: 5,
+    notes: 'Smooth and peaty, the king of puer teas',
+  },
+];
+```
+
+We need to update the `LogoutSuccess` portion of the reducer to including the clearing of `notes` in addition to `teas`. Here is the updated test and code.
+
+```TypeScript
+  {
+    description: `${ActionTypes.LogoutSuccess}: clears the data`,
+    action: logoutSuccess(),
+    begin: { teas, notes },
+    end: {},
+  },
+```
+
+```TypeScript
+  on(Actions.logoutSuccess, state => ({
+    ...state,
+    notes: [],
+    teas: [],
+  })),
+```
+
+Then add the new test cases that we need:
+
+```TypeScript
+  {
+    description: `${ActionTypes.NotesPageLoaded}: sets the loading flag and clears any error message`,
+    action: notesPageLoaded(),
+    begin: { teas, errorMessage: 'The last thing, it failed' },
+    end: { teas, loading: true },
+  },
+  {
+    description: `${ActionTypes.NotesPageDataLoadedSuccess}: adds the notes / clears the loading flag`,
+    action: notesPageLoadedSuccess({ notes }),
+    begin: { teas, loading: true },
+    end: { teas, notes },
+  },
+  {
+    description: `${ActionTypes.NotesPageDataLoadedFailure}: adds the error message / clears the loading flag`,
+    action: notesPageLoadedFailure({ errorMessage: 'Something is borked' }),
+    begin: { notes, teas, loading: true },
+    end: { notes, teas, errorMessage: 'Something is borked' },
+  },
+  {
+    description: `${ActionTypes.NoteSaved}: sets the loading flag and clears any error message`,
+    action: noteSaved({ note: notes[2] }),
+    begin: { notes, teas, errorMessage: 'The last thing, it failed' },
+    end: { notes, teas, loading: true },
+  },
+  {
+    description: `${ActionTypes.NoteSavedSuccess}: updates an existing note`,
+    action: noteSavedSuccess({
+      note: { ...notes[2], brand: 'Generic Tea Co.' },
+    }),
+    begin: { notes, teas, loading: true },
+    end: {
+      notes: [notes[0], notes[1], { ...notes[2], brand: 'Generic Tea Co.' }],
+      teas,
+    },
+  },
+  {
+    description: `${ActionTypes.NoteSavedSuccess}: appends a new note`,
+    action: noteSavedSuccess({
+      note: {
+        id: 999943,
+        brand: 'Berkley',
+        name: 'Green Tea',
+        teaCategoryId: 3,
+        rating: 2,
+        notes: 'I am not sure this is even tea',
+      },
+    }),
+    begin: { notes, teas, loading: true },
+    end: {
+      notes: [
+        ...notes,
+        {
+          id: 999943,
+          brand: 'Berkley',
+          name: 'Green Tea',
+          teaCategoryId: 3,
+          rating: 2,
+          notes: 'I am not sure this is even tea',
+        },
+      ],
+      teas,
+    },
+  },
+  {
+    description: `${ActionTypes.NoteSavedFailure}: adds the error message / clears the loading flag`,
+    action: noteSavedFailure({ errorMessage: 'Something is borked' }),
+    begin: { notes, teas, loading: true },
+    end: { notes, teas, errorMessage: 'Something is borked' },
+  },
+  {
+    description: `${ActionTypes.NoteDeleted}: sets the loading flag and clears any error message`,
+    action: noteDeleted({ note: notes[0] }),
+    begin: { notes, teas, errorMessage: 'The last thing, it failed' },
+    end: { notes, teas, loading: true },
+  },
+  {
+    description: `${ActionTypes.NoteDeletedSuccess}: removes the note`,
+    action: noteDeletedSuccess({ note: notes[1] }),
+    begin: { notes, teas, loading: true },
+    end: { notes: [notes[0], notes[2]], teas },
+  },
+  {
+    description: `${ActionTypes.NoteDeletedFailure}: adds the error message / clears the loading flag`,
+    action: noteDeletedFailure({ errorMessage: 'Something is borked' }),
+    begin: { notes, teas, loading: true },
+    end: { notes, teas, errorMessage: 'Something is borked' },
+  },
+```
+
+Finally, add the code to the reducer:
+
+```TypeScript
+  on(Actions.notesPageLoaded, state => ({
+    ...state,
+    loading: true,
+    errorMessage: '',
+  })),
+  on(Actions.notesPageLoadedSuccess, (state, { notes }) => ({
+    ...state,
+    loading: false,
+    notes,
+  })),
+  on(Actions.notesPageLoadedFailure, (state, { errorMessage }) => ({
+    ...state,
+    loading: false,
+    errorMessage,
+  })),
+  on(Actions.noteSaved, state => ({
+    ...state,
+    loading: true,
+    errorMessage: '',
+  })),
+  on(Actions.noteSavedSuccess, (state, { note }) => {
+    const notes = [...state.notes];
+    const idx = notes.findIndex(n => n.id === note.id);
+    if (idx > -1) {
+      notes.splice(idx, 1, note);
+    } else {
+      notes.push(note);
+    }
+    return {
+      ...state,
+      notes,
+      loading: false,
+    };
+  }),
+  on(Actions.noteSavedFailure, (state, { errorMessage }) => ({
+    ...state,
+    loading: false,
+    errorMessage,
+  })),
+  on(Actions.noteDeleted, state => ({
+    ...state,
+    loading: true,
+    errorMessage: '',
+  })),
+  on(Actions.noteDeletedSuccess, (state, { note }) => {
+    const notes = [...state.notes];
+    const idx = notes.findIndex(n => n.id === note.id);
+    if (idx > -1) {
+      notes.splice(idx, 1);
+    }
+    return {
+      ...state,
+      notes,
+      loading: false,
+    };
+  }),
+  on(Actions.noteDeletedFailure, (state, { errorMessage }) => ({
+    ...state,
+    loading: false,
+    errorMessage,
+  })),
+```
+
+#### Effects
+
+For our tests, we will need some test data as well, so add the same test data that we added to the data recuder tests.
+
+We are also going to need to inject the `TastingNotesService` so update the `TestBed` configuration as well:
+
+```TypeScript
+        {
+          provide: TastingNotesService,
+          useFactory: createTastingNotesServiceMock
+        },
+```
+
+Once that is in place, we can create test for the following workflows:
+
+- loading the notes list page (load the notes)
+- saving a note
+- deleting a note
+
+```TypeScript
+  describe('notesPageLoaded$', () => {
+    beforeEach(() => {
+      const notesService = TestBed.inject(TastingNotesService);
+      (notesService.getAll as any).and.returnValue(of(notes));
+    });
+
+    it('loads the notes', done => {
+      const notesService = TestBed.inject(TastingNotesService);
+      actions$ = of(notesPageLoaded());
+      effects.notesPageLoaded$.subscribe(() => {
+        expect(notesService.getAll).toHaveBeenCalledTimes(1);
+        done();
+      });
+    });
+
+    describe('on success', () => {
+      it('dispatches notes loaded success', done => {
+        actions$ = of(notesPageLoaded());
+        effects.notesPageLoaded$.subscribe(newAction => {
+          expect(newAction).toEqual({
+            type: ActionTypes.NotesPageDataLoadedSuccess,
+            notes,
+          });
+          done();
+        });
+      });
+    });
+
+    describe('on an exception', () => {
+      beforeEach(() => {
+        const notesService = TestBed.inject(TastingNotesService);
+        (notesService.getAll as any).and.returnValue(
+          throwError(new Error('the server is blowing chunks')),
+        );
+      });
+
+      it('dispatches notes loaded failure with a generic message', done => {
+        actions$ = of(notesPageLoaded());
+        effects.notesPageLoaded$.subscribe(newAction => {
+          expect(newAction).toEqual({
+            type: ActionTypes.NotesPageDataLoadedFailure,
+            errorMessage: 'Error in data load, check server logs',
+          });
+          done();
+        });
+      });
+    });
+  });
+
+  describe('noteSaved$', () => {
+    let note: TastingNote;
+    let noteWithId: TastingNote;
+    beforeEach(() => {
+      note = {
+        brand: 'Bigalow',
+        name: 'Earl Grey',
+        teaCategoryId: 5,
+        rating: 3,
+        notes: 'Not great, but not bad either',
+      };
+      noteWithId = { ...note, id: 99385 };
+      const notesService = TestBed.inject(TastingNotesService);
+      (notesService.save as any).and.returnValue(of(noteWithId));
+    });
+
+    it('saves the notes', done => {
+      const notesService = TestBed.inject(TastingNotesService);
+      actions$ = of(noteSaved({ note }));
+      effects.noteSaved$.subscribe(() => {
+        expect(notesService.save).toHaveBeenCalledTimes(1);
+        expect(notesService.save).toHaveBeenCalledWith(note);
+        done();
+      });
+    });
+
+    describe('on success', () => {
+      it('dispatches note saved success', done => {
+        actions$ = of(noteSaved({ note }));
+        effects.noteSaved$.subscribe(newAction => {
+          expect(newAction).toEqual({
+            type: ActionTypes.NoteSavedSuccess,
+            note: noteWithId,
+          });
+          done();
+        });
+      });
+    });
+
+    describe('on an exception', () => {
+      beforeEach(() => {
+        const notesService = TestBed.inject(TastingNotesService);
+        (notesService.save as any).and.returnValue(
+          throwError(new Error('the server is blowing chunks')),
+        );
+      });
+
+      it('dispatches note saved failure with a generic message', done => {
+        actions$ = of(noteSaved({ note }));
+        effects.noteSaved$.subscribe(newAction => {
+          expect(newAction).toEqual({
+            type: ActionTypes.NoteSavedFailure,
+            errorMessage: 'Error in data load, check server logs',
+          });
+          done();
+        });
+      });
+    });
+  });
+
+  describe('noteDeleted$', () => {
+    beforeEach(() => {
+      const notesService = TestBed.inject(TastingNotesService);
+      (notesService.delete as any).and.returnValue(of(null));
+    });
+
+    it('deletes the notes', done => {
+      const notesService = TestBed.inject(TastingNotesService);
+      actions$ = of(noteDeleted({ note: notes[1] }));
+      effects.noteDeleted$.subscribe(() => {
+        expect(notesService.delete).toHaveBeenCalledTimes(1);
+        expect(notesService.delete).toHaveBeenCalledWith(notes[1].id);
+        done();
+      });
+    });
+
+    describe('on success', () => {
+      it('dispatches note deleted success', done => {
+        actions$ = of(noteDeleted({ note: notes[1] }));
+        effects.noteDeleted$.subscribe(newAction => {
+          expect(newAction).toEqual({
+            type: ActionTypes.NoteDeletedSuccess,
+            note: notes[1]
+          });
+          done();
+        });
+      });
+    });
+
+    describe('on an exception', () => {
+      beforeEach(() => {
+        const notesService = TestBed.inject(TastingNotesService);
+        (notesService.delete as any).and.returnValue(
+          throwError(new Error('the server is blowing chunks')),
+        );
+      });
+
+      it('dispatches note deleted failure with a generic message', done => {
+        actions$ = of(noteDeleted({ note: notes[1] }));
+        effects.noteDeleted$.subscribe(newAction => {
+          expect(newAction).toEqual({
+            type: ActionTypes.NoteDeletedFailure,
+            errorMessage: 'Error in data load, check server logs',
+          });
+          done();
+        });
+      });
+    });
+  });
+```
+
+```TypeScript
+  notesPageLoaded$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(notesPageLoaded),
+      mergeMap(() =>
+        this.tastingNotesService.getAll().pipe(
+          map(notes => notesPageLoadedSuccess({ notes })),
+          catchError(() =>
+            of(
+              notesPageLoadedFailure({
+                errorMessage: 'Error in data load, check server logs',
+              }),
+            ),
+          ),
+        ),
+      ),
+    ),
+  );
+
+  noteSaved$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(noteSaved),
+      mergeMap(action =>
+        this.tastingNotesService.save(action.note).pipe(
+          map(note => noteSavedSuccess({ note })),
+          catchError(() =>
+            of(
+              noteSavedFailure({
+                errorMessage: 'Error in data load, check server logs',
+              }),
+            ),
+          ),
+        ),
+      ),
+    ),
+  );
+
+  noteDeleted$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(noteDeleted),
+      mergeMap(action =>
+        this.tastingNotesService.delete(action.note.id).pipe(
+          map(() => noteDeletedSuccess({ note: action.note })),
+          catchError(() =>
+            of(
+              noteDeletedFailure({
+                errorMessage: 'Error in data load, check server logs',
+              }),
+            ),
+          ),
+        ),
+      ),
+    ),
+  );
+```
+
+#### Selectors
+
+For selectors, we need one to get all of the notes and one to get a specific note.
+
+```TypeScript
+import { TastingNote, Tea } from '@app/models';
+...
+export const selectNotes = createSelector(
+  selectData,
+  (state: DataState) => state.notes,
+);
+export const selectNote = createSelector(
+  selectNotes,
+  (notes: Array<TastingNote>, props: { id: number }) =>
+    notes.find(t => t.id === props.id),
+);
+```
 
 ## Create the Editor Component
 
@@ -228,7 +776,7 @@ import { SharedModule } from '@app/shared';
 export class TastingNoteEditorModule {}
 ```
 
-Make the same change within the `src/app/tasting-notes/tasting-note-editor/tasting-note-editor.component.spec.ts` where the testing module is configured.
+Make the same change with regard to the `imports` within the `src/app/tasting-notes/tasting-note-editor/tasting-note-editor.component.spec.ts` where the testing module is configured.
 
 ### Hookup the Modal
 
@@ -237,7 +785,7 @@ The first thing we need to do is get a modal overlay hooked up for the "add a ne
 First we need to set up the test for the `TastingNotesPage`.
 
 ```typescript
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { waitForAsync, ComponentFixture, TestBed } from '@angular/core/testing';
 import { IonicModule, ModalController, IonRouterOutlet } from '@ionic/angular';
 
 import { TastingNotesPage } from './tasting-notes.page';
@@ -257,31 +805,37 @@ describe('TastingNotesPage', () => {
     nativeEl: {},
   };
 
-  beforeEach(async(() => {
-    modal = createOverlayElementMock('Modal');
-    TestBed.configureTestingModule({
-      declarations: [TastingNotesPage],
-      imports: [IonicModule, TastingNoteEditorModule],
-      providers: [
-        {
-          provide: ModalController,
-          useFactory: () =>
-            createOverlayControllerMock('ModalController', modal),
-        },
-        { provide: IonRouterOutlet, useValue: mockRouterOutlet },
-      ],
-    }).compileComponents();
+  beforeEach(
+    waitForAsync(() => {
+      modal = createOverlayElementMock('Modal');
+      TestBed.configureTestingModule({
+        declarations: [TastingNotesPage],
+        imports: [IonicModule, TastingNoteEditorModule],
+        providers: [
+          {
+            provide: ModalController,
+            useFactory: () =>
+              createOverlayControllerMock('ModalController', modal),
+          },
+          { provide: IonRouterOutlet, useValue: mockRouterOutlet },
+        ],
+      }).compileComponents();
 
-    fixture = TestBed.createComponent(TastingNotesPage);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
-  }));
+      fixture = TestBed.createComponent(TastingNotesPage);
+      component = fixture.componentInstance;
+    }),
+  );
 
   it('should create', () => {
+    fixture.detectChanges();
     expect(component).toBeTruthy();
   });
 
   describe('add new note', () => {
+    beforeEach(() => {
+      fixture.detectChanges();
+    });
+
     it('creates the editor modal', () => {
       const modalController = TestBed.inject(ModalController);
       component.newNote();
@@ -352,11 +906,32 @@ export class TastingNotesPage implements OnInit {
 
 Also add the `TastingNoteEditorModule` to the imports list within the `TastingNotesPageModule`. This will make the `TastingNoteEditorComponent` available for use in our modal overlay.
 
+```diff
+--- a/src/app/tasting-notes/tasting-notes.module.ts
++++ b/src/app/tasting-notes/tasting-notes.module.ts
+@@ -6,6 +6,7 @@ import { IonicModule } from '@ionic/angular';
+
+ import { TastingNotesPageRoutingModule } from './tasting-notes-routing.module';
+
++import { TastingNoteEditorModule } from './tasting-note-editor/tasting-note-editor.module';
+ import { TastingNotesPage } from './tasting-notes.page';
+
+ @NgModule({
+@@ -13,6 +14,7 @@ import { TastingNotesPage } from './tasting-notes.page';
+     CommonModule,
+     FormsModule,
+     IonicModule,
++    TastingNoteEditorModule,
+     TastingNotesPageRoutingModule,
+   ],
+   declarations: [TastingNotesPage],
+```
+
 ### Create the Editor Component
 
 #### Basic Layout
 
-After that, let's start laying out the basics of our form. We know what we will need a header section with a title, a footer secion with a button, and that the content will be our form. So let's start there:
+Let's switch bach to our editor component and start laying out the basics of our form. We know what we will need a header section with a title, a footer secion with a button, and that the content will be our form. So let's start there:
 
 ```html
 <ion-header>
@@ -479,7 +1054,7 @@ First, we have a lot of `[(ngModel)]` bindings. We need to declare the propertie
   teaCategories$: Observable<Array<Tea>>;
 ```
 
-Note that the `teaCategoryId` is a string even though in reality it is a number. The reason for this is because the values in the select always bind as a string just due to how HTML attributes work, so we will need to convert this to a number when we do the save.
+Note that the `teaCategoryId` is a string even though in reality it is a number. The reason for this is because the values in the select always bind as a string due to how HTML attributes work, so we will need to convert this to a number when we do the save.
 
 ##### Initialization
 
@@ -488,16 +1063,29 @@ The only initialization we need at this point is to set up the `teaCategories$` 
 ###### Test
 
 ```typescript
-  beforeEach(async(() => {
-    TestBed.configureTestingModule({
-      declarations: [TastingNoteEditorComponent],
-      imports: [FormsModule, IonicModule, SharedModule],
-      providers: [{ provide: TeaService, useFactory: createTeaServiceMock }],
-    }).compileComponents();
+...
+import { MockStore, provideMockStore } from '@ngrx/store/testing';
+...
+import { DataState, initialState } from '@app/store/reducers/data/data.reducer';
+...
+import { Store } from '@ngrx/store';
+import { selectTeas } from '@app/store';
+import {By} from '@angular/platform-browser';
+...
+  beforeEach(
+    waitForAsync(() => {
+      TestBed.configureTestingModule({
+        declarations: [TastingNoteEditorComponent],
+        imports: [FormsModule, IonicModule, SharedModule],
+        providers: [
+          provideMockStore<{ data: DataState }>({
+            initialState: { data: initialState },
+          }),
+        ],
+      }).compileComponents();
 
-    const teaService = TestBed.inject(TeaService);
-    (teaService.getAll as any).and.returnValue(
-      of([
+      const store = TestBed.inject(Store) as MockStore;
+      store.overrideSelector(selectTeas, [
         {
           id: 7,
           name: 'White',
@@ -512,16 +1100,14 @@ The only initialization we need at this point is to set up the `teaCategories$` 
           description: 'Yellow tea description.',
           rating: 3,
         },
-      ]),
-    );
+      ]);
 
-    fixture = TestBed.createComponent(TastingNoteEditorComponent);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
-  }));
-
+      fixture = TestBed.createComponent(TastingNoteEditorComponent);
+      component = fixture.componentInstance;
+      fixture.detectChanges();
+    }),
+  );
 ...
-
   describe('initialization', () => {
     it('binds the tea select', () => {
       const sel = fixture.debugElement.query(By.css('ion-select'));
@@ -532,6 +1118,8 @@ The only initialization we need at this point is to set up the `teaCategories$` 
       expect(opts[1].nativeElement.textContent).toEqual('Yellow');
     });
   });
+...
+ });
 ```
 
 ###### Code
@@ -539,9 +1127,12 @@ The only initialization we need at this point is to set up the `teaCategories$` 
 The population of the `ion-select-option` values is handled via `*ngFor="let t of teaCategories$ | async"` so all we need to do at this point is assign the `teaCategories$` observable. You will need to inject the `TeaService`.
 
 ```typescript
+  constructor(private store: Store<State>) {}
+
   ngOnInit() {
-    this.teaCategories$ = this.teaService.getAll();
+    this.teaCategories$ = this.store.select(selectTeas);
   }
+
 ```
 
 ##### Perform the Add
@@ -550,42 +1141,33 @@ The add is relativily easy. Create a tea object using the properties, call `tast
 
 ###### Test
 
-First update the `TestBed` to provide the `TastingNotesService` and the `ModalController`. You should have a good set of examples of how to do this, so no code is provided here.
+First update the `TestBed` to provide the `ModalController`. You should have a good set of examples of how to do this, so no code is provided here.
 
 Once that is in place, here is the code for the tests:
 
 ```typescript
 describe('save', () => {
-  beforeEach(() => {
-    const tastingNotesService = TestBed.inject(TastingNotesService);
-    (tastingNotesService.save as any).and.returnValue(
-      of({
-        id: 73,
-        brand: 'Lipton',
-        name: 'Yellow Label',
-        teaCategoryId: 3,
-        rating: 1,
-        notes: 'ick',
-      }),
-    );
-  });
-
-  it('saves the data', () => {
-    const tastingNotesService = TestBed.inject(TastingNotesService);
+  it('dispatches the save with the data', () => {
+    const store = TestBed.inject(Store);
+    spyOn(store, 'dispatch');
     component.brand = 'Lipton';
     component.name = 'Yellow Label';
     component.teaCategoryId = '3';
     component.rating = 1;
     component.notes = 'ick';
     component.save();
-    expect(tastingNotesService.save).toHaveBeenCalledTimes(1);
-    expect(tastingNotesService.save).toHaveBeenCalledWith({
-      brand: 'Lipton',
-      name: 'Yellow Label',
-      teaCategoryId: 3,
-      rating: 1,
-      notes: 'ick',
-    });
+    expect(store.dispatch).toHaveBeenCalledTimes(1);
+    expect(store.dispatch).toHaveBeenCalledWith(
+      noteSaved({
+        note: {
+          brand: 'Lipton',
+          name: 'Yellow Label',
+          teaCategoryId: 3,
+          rating: 1,
+          notes: 'ick',
+        },
+      }),
+    );
   });
 
   it('dismisses the modal', () => {
@@ -604,16 +1186,18 @@ You will first need to inject the appropriate services, then the following code 
 
 ```typescript
   save() {
-    this.tastingNotesService
-      .save({
-        brand: this.brand,
-        name: this.name,
-        teaCategoryId: parseInt(this.teaCategoryId, 10),
-        rating: this.rating,
-        notes: this.notes,
-      })
-      .pipe(tap(() => this.modalController.dismiss()))
-      .subscribe();
+    this.store.dispatch(
+      noteSaved({
+        note: {
+          brand: this.brand,
+          name: this.name,
+          teaCategoryId: parseInt(this.teaCategoryId, 10),
+          rating: this.rating,
+          notes: this.notes,
+        },
+      }),
+    );
+    this.modalController.dismiss();
   }
 ```
 
@@ -671,34 +1255,37 @@ First we need to provide a mock for the `TastingNotesService` and configure it t
   let testData: Array<TastingNote>;
   ...
 
-  // Most of this exists already. Add the parts that are currently missing
-  beforeEach(async(() => {
-    initializeTestData();
-    modal = createOverlayElementMock('Modal');
-    TestBed.configureTestingModule({
-      declarations: [TastingNotesPage],
-      imports: [IonicModule, TastingNoteEditorModule],
-      providers: [
-        {
-          provide: ModalController,
-          useFactory: () =>
-            createOverlayControllerMock('ModalController', modal),
-        },
-        { provide: IonRouterOutlet, useValue: mockRouterOutlet },
-        {
-          provide: TastingNotesService,
-          useFactory: createTastingNotesServiceMock,
-        },
-      ],
-    }).compileComponents();
+  // Most of this already exists, add the bits that do not
+  beforeEach(
+    waitForAsync(() => {
+      initializeTestData();
+      modal = createOverlayElementMock('Modal');
+      TestBed.configureTestingModule({
+        declarations: [TastingNotesPage],
+        imports: [IonicModule, TastingNoteEditorModule],
+        providers: [
+          {
+            provide: ModalController,
+            useFactory: () =>
+              createOverlayControllerMock('ModalController', modal),
+          },
+          { provide: IonRouterOutlet, useValue: mockRouterOutlet },
+          provideMockStore<{ data: DataState }>({
+            initialState: { data: initialState },
+          }),
+        ],
+      }).compileComponents();
 
-    const tastingNotesService = TestBed.inject(TastingNotesService);
-    (tastingNotesService.getAll as any).and.returnValue(of(testData));
+      const store = TestBed.inject(Store) as MockStore;
+      store.overrideSelector(selectNotes, testData);
 
-    fixture = TestBed.createComponent(TastingNotesPage);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
-  }));
+      fixture = TestBed.createComponent(TastingNotesPage);
+      component = fixture.componentInstance;
+      fixture.detectChanges();
+    }),
+  );
+
+  ...
 
   // add this function at the end of the main describe()
   function initializeTestData() {
@@ -723,16 +1310,20 @@ First we need to provide a mock for the `TastingNotesService` and configure it t
   }
 ```
 
-Then we can create a couple of simple tests to ensure our list is displayed properly.
+Then we can create simple test to ensure our list is displayed properly.
 
 ```typescript
 describe('initialization', () => {
-  it('gets all of the notes', () => {
-    const tastingNotesService = TestBed.inject(TastingNotesService);
-    expect(tastingNotesService.getAll).toHaveBeenCalledTimes(1);
+  it('dispatches notes page loaded', () => {
+    const store = TestBed.inject(Store);
+    spyOn(store, 'dispatch');
+    fixture.detectChanges();
+    expect(store.dispatch).toHaveBeenCalledTimes(1);
+    expect(store.dispatch).toHaveBeenCalledWith(notesPageLoaded());
   });
 
   it('displays the notes', () => {
+    fixture.detectChanges();
     const items = fixture.debugElement.queryAll(By.css('ion-item'));
     expect(items.length).toEqual(2);
     expect(items[0].nativeElement.textContent).toContain('Bently');
@@ -744,11 +1335,20 @@ describe('initialization', () => {
 ### Code
 
 ```typescript
-  notes$: Observable<Array<TastingNote>>;
 ...
+  notes$: Observable<Array<TastingNote>>;
+
+  constructor(
+    private modalController: ModalController,
+    private routerOutlet: IonRouterOutlet,
+    private store: Store,
+  ) {}
+
   ngOnInit() {
-    this.notes$ = this.tastingNotesService.getAll();
+    this.store.dispatch(notesPageLoaded());
+    this.notes$ = this.store.select(selectNotes);
   }
+...
 ```
 
 ### HTML
@@ -784,69 +1384,6 @@ For the Tasting Notes page, we could just add a simple list, but now that we hav
     </ion-fab-button>
   </ion-fab>
 </ion-content>
-```
-
-## Refresh the Notes
-
-The notes we have added so far show up, but when we add a new note it does not. We can easily fix that by adding a "refresh" subject to our pipeline.
-
-### Test
-
-Add the following tests to the "add new note" section of `src/app/tasting-notes/tasting-notes.page.spec.ts`. We want to make sure we wait for the modal to be dismissed and that we refresh the note list.
-
-```typescript
-it('waits for the dismiss', async () => {
-  await component.newNote();
-  expect(modal.onDidDismiss).toHaveBeenCalledTimes(1);
-});
-
-it('refreshes the notes list', async () => {
-  const tastingNotesService = TestBed.inject(TastingNotesService);
-  await component.newNote();
-  expect(tastingNotesService.getAll).toHaveBeenCalledTimes(2);
-});
-```
-
-### Code
-
-We need to:
-
-- Declare the subject
-- Instantiate the subject in the constructor
-- Inrcorporate the subject into our observable pipeline
-
-```typescript
-  private refresh: BehaviorSubject<void>;
-
-  constructor(
-    private modalController: ModalController,
-    private routerOutlet: IonRouterOutlet,
-    private tastingNotesService: TastingNotesService,
-  ) {
-    this.refresh = new BehaviorSubject(null);
-  }
-
-  ngOnInit() {
-    this.notes$ = this.refresh.pipe(
-      switchMap(() => this.tastingNotesService.getAll()),
-    );
-  }
-```
-
-Then, in the code that handles the modal, we await the dismiss of the modal and emit on the refresh subject to trigger the refresh in the pipeline.
-
-```typescript
-  async newNote(): Promise<void> {
-    const modal = await this.modalController.create({
-      component: TastingNoteEditorComponent,
-      backdropDismiss: false,
-      swipeToClose: true,
-      presentingElement: this.routerOutlet.nativeEl,
-    });
-    await modal.present();
-    await modal.onDidDismiss();
-    this.refresh.next();
-  }
 ```
 
 ## Edit a Note
@@ -903,17 +1440,6 @@ describe('update existing note', () => {
     await component.updateNote(note);
     expect(modal.present).toHaveBeenCalledTimes(1);
   });
-
-  it('waits for the dismiss', async () => {
-    await component.updateNote(note);
-    expect(modal.onDidDismiss).toHaveBeenCalledTimes(1);
-  });
-
-  it('refreshes the notes list', async () => {
-    const tastingNotesService = TestBed.inject(TastingNotesService);
-    await component.updateNote(note);
-    expect(tastingNotesService.getAll).toHaveBeenCalledTimes(2);
-  });
 });
 ```
 
@@ -969,7 +1495,7 @@ it('should create', () => {
 });
 ```
 
-This will allow is to set up data before the `ngOnInit()` call is made. Note tht for the "save" tests, you can put the call at the end of the "save" `beforeEach()`
+This will allow us to set up data before the `ngOnInit()` call is made.
 
 Finally, add the following test the the "initialization" set of tests:
 
@@ -1001,7 +1527,7 @@ describe('with a note', () => {
 
 ```typescript
   ngOnInit() {
-    this.teaCategories$ = this.teaService.getAll();
+    this.teaCategories$ = this.store.select(selectTeas);
     if (this.note) {
       this.brand = this.note.brand;
       this.name = this.note.name;
@@ -1024,36 +1550,30 @@ The technique used here is to wrap the existing "save" tests in a child `describ
 describe('save', () => {
   describe('a new note', () => {
     beforeEach(() => {
-      const tastingNotesService = TestBed.inject(TastingNotesService);
-      (tastingNotesService.save as any).and.returnValue(
-        of({
-          id: 73,
-          brand: 'Lipton',
-          name: 'Yellow Label',
-          teaCategoryId: 3,
-          rating: 1,
-          notes: 'ick',
-        }),
-      );
       fixture.detectChanges();
     });
 
-    it('saves the data', () => {
-      const tastingNotesService = TestBed.inject(TastingNotesService);
+    it('dispatches the save with the data', () => {
+      const store = TestBed.inject(Store);
+      spyOn(store, 'dispatch');
       component.brand = 'Lipton';
       component.name = 'Yellow Label';
       component.teaCategoryId = '3';
       component.rating = 1;
       component.notes = 'ick';
       component.save();
-      expect(tastingNotesService.save).toHaveBeenCalledTimes(1);
-      expect(tastingNotesService.save).toHaveBeenCalledWith({
-        brand: 'Lipton',
-        name: 'Yellow Label',
-        teaCategoryId: 3,
-        rating: 1,
-        notes: 'ick',
-      });
+      expect(store.dispatch).toHaveBeenCalledTimes(1);
+      expect(store.dispatch).toHaveBeenCalledWith(
+        noteSaved({
+          note: {
+            brand: 'Lipton',
+            name: 'Yellow Label',
+            teaCategoryId: 3,
+            rating: 1,
+            notes: 'ick',
+          },
+        }),
+      );
     });
 
     it('dismisses the modal', () => {
@@ -1073,37 +1593,31 @@ describe('save', () => {
         rating: 3,
         notes: 'it is ok',
       };
-      const tastingNotesService = TestBed.inject(TastingNotesService);
-      (tastingNotesService.save as any).and.returnValue(
-        of({
-          id: 73,
-          brand: 'Lipton',
-          name: 'Yellow Label',
-          teaCategoryId: 3,
-          rating: 1,
-          notes: 'ick',
-        }),
-      );
       fixture.detectChanges();
     });
 
     it('saves the data including the ID', () => {
-      const tastingNotesService = TestBed.inject(TastingNotesService);
+      const store = TestBed.inject(Store);
+      spyOn(store, 'dispatch');
       component.brand = 'Lipton';
       component.name = 'Yellow Label';
       component.teaCategoryId = '3';
       component.rating = 1;
       component.notes = 'ick';
       component.save();
-      expect(tastingNotesService.save).toHaveBeenCalledTimes(1);
-      expect(tastingNotesService.save).toHaveBeenCalledWith({
-        id: 73,
-        brand: 'Lipton',
-        name: 'Yellow Label',
-        teaCategoryId: 3,
-        rating: 1,
-        notes: 'ick',
-      });
+      expect(store.dispatch).toHaveBeenCalledTimes(1);
+      expect(store.dispatch).toHaveBeenCalledWith(
+        noteSaved({
+          note: {
+            id: 73,
+            brand: 'Lipton',
+            name: 'Yellow Label',
+            teaCategoryId: 3,
+            rating: 1,
+            notes: 'ick',
+          },
+        }),
+      );
     });
 
     it('dismisses the modal', () => {
@@ -1135,10 +1649,8 @@ Refactoring the `save()` method to handle the new requirement is straight forwar
       note.id = this.note.id;
     }
 
-    this.tastingNotesService
-      .save(note)
-      .pipe(tap(() => this.modalController.dismiss()))
-      .subscribe();
+    this.store.dispatch(noteSaved({ note }));
+    this.modalController.dismiss();
   }
 ```
 
@@ -1223,7 +1735,7 @@ There are multiple ways to deal with this, but the easiest is probably just to c
 
 The final feature we will add is the ability to delete a note. We will keep this one simple and make it somewhat hidden so that it isn't too easy for a user to delete a note.
 
-We will use a contruct called a <a ref="" target="_blank">item sliding</a> to essentially "hide" the delete button behind the item. That way the user has to slide the item over in order to expose the button and do a delete.
+We will use a contruct called a <a ref="https://ionicframework.com/docs/api/item-sliding" target="_blank">item sliding</a> to essentially "hide" the delete button behind the item. That way the user has to slide the item over in order to expose the button and do a delete.
 
 Using this results in a little be of rework in how the item is rendered and bound on the `TastingNotesPage`:
 
@@ -1248,10 +1760,7 @@ And the code for the delete is pretty straight forward:
 
 ```typescript
   deleteNote(note: TastingNote): void {
-    this.tastingNotesService
-      .delete(note.id)
-      .pipe(tap(() => this.refresh.next()))
-      .subscribe();
+    this.store.dispatch(noteDeleted({ note }));
   }
 ```
 

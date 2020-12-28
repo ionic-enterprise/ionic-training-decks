@@ -2,132 +2,757 @@
 
 In this lab you will:
 
-- Inject a service into your main page
-- Retrieve real data from the service, replacing the mock data
+- Expand your store to include a `data` module
+- Update the tea page to use data from the store rather than the fake data it is currently using
 
-## Injector Error
+## Load Data Up Front
 
-Start by injecting the `TeaService` into the `tea` page.
+The first thing we should think about with the teas is how we intend to use them. We know we will use them on the one and only non-login page we currently have, but we also know from other items on our backlog that this tea data will be an important part of several pages in our application. For this reason it makes sense to load this data whenever we establish a session in our application.
+
+### Actions
+
+We already have the actions in place that mean we have established a session and need to load some data. These are the `InitializedWithRestoredSession` and `LoginSuccess` actions. When these actions are dispatched, we will begin an initial load of data (at this time, it is only the tea data, but it could expand in the future). So we have two new events in our application that we will need to express as actions:
 
 ```TypeScript
-import { TeaService } from '@app/core';
-
+import { Session, Tea } from '@app/models';
 ...
-
-  constructor(
-    private auth: AuthenticationService,
-    private tea: TeaService
-  ) {}
+  InitialLoadSuccess = '[Data API] initial data load success',
+  InitialLoadFailure = '[Data API] initial data load failure',
+...
+export const initialLoadSuccess = createAction(
+  ActionTypes.InitialLoadSuccess,
+  props<{teas: Array<Tea>}>()
+)
+export const initialLoadFailure = createAction(
+  ActionTypes.InitialLoadFailure,
+  props<{ errorMessage: string }>(),
+);
 ```
 
-## Mock the Service
+### State Slice for Data
 
-One problem we see right away is that the test for the `TeaPage` has started failing because the `TestBed` does not know how to inject the `HttpClient`. The real issue, though is that are are tring to inject the real `TeaService`.
+We already have a slice of state for the authentication system. Let's aslo create one for the data. For our small app we will just have those two slices, one for `auth` and one for the rest of the `data`.
 
-1. We are testing the page in isolation, so we should create a mock object for the tea service.
-1. We need to provide the mock tea service to the test.
-
-I prefer to keep my mocks along side my services. This has a couple of benefits:
-
-1. It allows for having a standard mock for each service.
-1. It makes it easy to remember to update the mock each time the service is updated.
-
-### Create the Mock Service Factory
-
-The factory creates a jasmine spy matching the API for the service. In the case of the tea service, each method returns an `EMPTY` observable by default.
-
-#### `src/app/core/tea/tea.service.mock.ts`
+We have been defining the state slices along with the reducers, so create a file called `src/app/store/reducers/data/data.reducer.ts` with the following initial contents:
 
 ```TypeScript
-import { EMPTY } from 'rxjs';
-import { TeaService } from './tea.service';
+import { Action, createReducer, on } from '@ngrx/store';
+import { Tea } from '@app/models';
 
-export function createTeaServiceMock() {
-  return jasmine.createSpyObj<TeaService>('TeaService', {
-    getAll: EMPTY,
-    get: EMPTY,
-  });
+export interface DataState {
+  teas: Array<Tea>;
+  loading: boolean;
+  errorMessage: string;
+}
+
+export const initialState: DataState = {
+  teas: [],
+  loading: false,
+  errorMessage: '',
+};
+
+const dataReducer = createReducer(initialState);
+
+export function reducer(state: DataState | undefined, action: Action) {
+  return dataReducer(state, action);
 }
 ```
 
-Remember to add the mock to the `src/app/core/testing.ts`
-
-### Inject the Mock Service
-
-The mock can either be manually created and injecting via `useValue` or we can provide the factory for the service and let Angular's DI create the service for us. I prefer the latter.
+As well as a starting test file for it (`src/app/store/reducers/data/data.reducer.spec.ts`)
 
 ```TypeScript
-  beforeEach(async(() => {
-    TestBed.configureTestingModule({
-      declarations: [TeaPage],
-      imports: [IonicModule],
-      providers: [
+import { initialState, reducer } from './data.reducer';
+import {
+  ActionTypes,
+} from '@app/store/actions';
+
+it('returns the default state', () => {
+  expect(reducer(undefined, { type: 'NOOP' })).toEqual(initialState);
+});
+```
+
+At this point we can update the `src/app/store/reducers/index.ts` file so this slice of state and its reducer are included in the store.
+
+```diff
+--- a/src/app/store/reducers/index.ts
++++ b/src/app/store/reducers/index.ts
+@@ -2,13 +2,16 @@ import { ActionReducerMap, MetaReducer } from '@ngrx/store';
+ import { environment } from '@env/environment';
+
+ import { AuthState, reducer as authReducer } from './auth/auth.reducer';
++import { DataState, reducer as dataReducer } from './data/data.reducer';
+
+ export interface State {
+   auth: AuthState;
++  data: DataState;
+ }
+
+ export const reducers: ActionReducerMap<State> = {
+   auth: authReducer,
++  data: dataReducer,
+ };
+
+ export const metaReducers: MetaReducer<State>[] = !environment.production
+```
+
+### Reducers
+
+For this sllice, we will need the reducer to handle the following actions:
+
+- `LoginSuccess` - set the loading flag, clear any old error message
+- `InitializedWithRestoredSession` - set the loading flag, clear any old error message
+- `InitialLoadFailure` - clear the loading flag, set the error message
+- `InitialLoadSuccess` - clear the loading flag, set the tea data
+
+For the test, we will need some data to work with:
+
+```TypeScript
+const session: Session = {
+  user: {
+    id: 314,
+    firstName: 'Kevin',
+    lastName: 'Minion',
+    email: 'goodtobebad@gru.org',
+  },
+  token: '39948503',
+};
+
+const teas: Array<Tea> = [
+  {
+    id: 1,
+    name: 'Green',
+    image: 'assets/img/green.jpg',
+    description: 'Green teas are green',
+  },
+  {
+    id: 2,
+    name: 'Black',
+    image: 'assets/img/black.jpg',
+    description: 'Black teas are not green',
+  },
+  {
+    id: 3,
+    name: 'Herbal',
+    image: 'assets/img/herbal.jpg',
+    description: 'Herbal teas are not even tea',
+  },
+];
+```
+
+With the data in place, and using what we did for the `auth` slice as a guide we _could_ write some tests (**Do not write these tests**):
+
+```TypeScript
+describe(ActionTypes.LoginSuccess, () => {
+  it('sets the loading flag and clears any error message', () => {
+    const action = loginSuccess({ session });
+    expect(
+      reducer(
         {
-          provide: AuthenticationService,
-          useFactory: createAuthenticationServiceMock,
+          teas:[],
+          loading: false,
+          errorMessage: 'Unknown error with data load',
         },
+        action,
+      ),
+    ).toEqual({
+      teas:[],
+      loading: true,
+      errorMessage: '',
+    });
+  });
+});
+
+describe(ActionTypes.InitializedWithRestoredSession, () => {
+  it('sets the loading flag and clears any error message', () => {
+    const action = initializedWithRestoredSession({ session });
+    expect(
+      reducer(
+        {
+          teas:[],
+          loading: false,
+          errorMessage: 'Unknown error with data load',
+        },
+        action,
+      ),
+    ).toEqual({
+      teas:[],
+      loading: true,
+      errorMessage: '',
+    });
+  });
+});
+
+describe(ActionTypes.InitialLoadFailure,  () => {
+  it('clears the loading flag and sets the error message', () => {
+    const action = initialLoadFailure({errorMessage: 'The load blew some chunks'});
+    expect(
+      reducer(
+        {
+          teas:[],
+          loading: true,
+          errorMessage: '',
+        },
+        action,
+      ),
+    ).toEqual({
+      teas:[],
+      loading: false,
+      errorMessage: 'The load blew some chunks',
+    });
+  });
+});
+
+describe(ActionTypes.InitialLoadSuccess, () => {
+  it('clears the loading flag and sets the teas', () => {
+    const action = initialLoadSuccess({teas});
+    expect(
+      reducer(
+        {
+          teas:[],
+          loading: true,
+          errorMessage: '',
+        },
+        action,
+      ),
+    ).toEqual({
+      teas,
+      loading: false,
+      errorMessage: '',
+    });
+  });
+});
+```
+
+But notice how repetative those tests are. Let's see if we can do better. Looking at the tests, they all:
+
+- have a description
+- create an action,
+- start with a specific state
+- end with a specific state
+
+So, we could abstract that out in to some data for each test and have a single test function that does the work. Further, since it would be nice to only have to specify the parts of state that differ from the initial state. That way, if we add to the state, our tests don't need to change. Let's do that now:
+
+```TypeScript
+function createState(stateChanges: {
+  teas?: Array<Tea>;
+  loading?: boolean;
+  errorMessage?: string;
+}): DataState {
+  return { ...initialState, ...stateChanges };
+}
+
+it('returns the default state', () => {
+  expect(reducer(undefined, { type: 'NOOP' })).toEqual(initialState);
+});
+
+[
+  {
+    description: `${ActionTypes.LoginSuccess}: sets the loading flag and clears any error message`,
+    action: loginSuccess({ session }),
+    begin: { errorMessage: 'Unknown error with data load' },
+    end: { loading: true },
+  },
+  {
+    description: `${ActionTypes.InitializedWithRestoredSession}: sets the loading flag and clears any error message`,
+    action: initializedWithRestoredSession({ session }),
+    begin: { errorMessage: 'Unknown error with data load' },
+    end: { loading: true },
+  },
+  {
+    description: `${ActionTypes.InitialLoadFailure}: clears the loading flag and sets the error message`,
+    action: initialLoadFailure({ errorMessage: 'The load blew some chunks' }),
+    begin: { loading: true },
+    end: { errorMessage: 'The load blew some chunks' },
+  },
+  {
+    description: `${ActionTypes.InitialLoadSuccess}: clears the loading flag and sets the teas`,
+    action: initialLoadSuccess({ teas }),
+    begin: { loading: true },
+    end: { teas },
+  },
+].forEach(test =>
+  it(test.description, () => {
+    expect(reducer(createState(test.begin), test.action)).toEqual(
+      createState(test.end),
+    );
+  }),
+);
+```
+
+That is a lot less repetative code, and will be a lot easier to maintain as our state grows.
+
+With the tests in place, we are ready to update the `dataReducer` in `src/app/store/reducers/data/data.reducer.ts`. I will provide one of the action handlers, and let you fill in the others.
+
+```TypeScript
+  on(Actions.initialLoadSuccess, (state, {teas}) => ({
+    ...state,
+    loading: false,
+    teas: [...teas]
+  })),
+```
+
+Have a peek at the auth reducer if you get stuck. If you get _realy_ stuck the code will be provided in the conclusion section of this lab.
+
+### Effects
+
+Right now, the only effect we need for the data slice is to load the tea data whenever we have a new session. The first task will be to create the required files and get the effects hooked up:
+
+**`src/app/store/effects/data/data.effects.spec.ts`**
+
+```TypeScript
+import { TestBed } from '@angular/core/testing';
+import { provideMockActions } from '@ngrx/effects/testing';
+import { Observable } from 'rxjs';
+
+import { TeaService } from '@app/core';
+import { createTeaServiceMock } from '@app/core/testing';
+import { DataEffects } from './data.effects';
+
+describe('DataEffects', () => {
+  let actions$: Observable<any>;
+  let effects: DataEffects;
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      providers: [
+        DataEffects,
+        provideMockActions(() => actions$),
         {
           provide: TeaService,
           useFactory: createTeaServiceMock,
         },
       ],
-    }).compileComponents();
+    });
+    effects = TestBed.inject(DataEffects);
+  });
 
-    fixture = TestBed.createComponent(TeaPage);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
-  }));
+  it('should be created', () => {
+    expect(effects).toBeTruthy();
+  });
+});
 ```
 
-## Using the Data
+**`src/app/store/effects/data/data.effects.ts`**
 
-There are a few lifecycle events that are good candidates for getting and/or refreshing data:
+```TypeScript
+import { Injectable } from '@angular/core';
+import { Actions, createEffect, ofType } from '@ngrx/effects';
+import { tap } from 'rxjs/operators';
 
-- `ngOnInit` - Angular lifecycle event, fired when a component is instantiated
-- `ionViewWillEnter` / `ionViewDidEnter` - Ionic lifecycle events, fired each time a page is visited
+import {
+  initializedWithRestoredSession,
+  loginSuccess,
+} from '@app/store/actions';
 
-The `ngOnInit` method is an excellent place to set up our observable pipeline.
+@Injectable()
+export class DataEffects {
+  sessionLoaded$ = createEffect(
+    () =>
+      this.actions$.pipe(
+        ofType(loginSuccess, initializedWithRestoredSession),
+        tap(() => {
+          console.log('An auth session had been loaded');
+        }),
+      ),
+    { dispatch: false },
+  );
+  constructor(private actions$: Actions) {}
+}
+```
 
-If we had the desire to refresh our data we could do so via RxJS Subjects and emitting an event from either `ionViewWillEnter` or `ionViewDidEnter`. We will see an example where we do something like this later in the course.
+**`src/app/app.module.ts`**
 
-### Page Class Cleanup
+```diff
+--- a/src/app/app.module.ts
++++ b/src/app/app.module.ts
+@@ -10,7 +10,7 @@ import { IonicModule, IonicRouteStrategy } from '@ionic/angular';
+ import { AppComponent } from './app.component';
+ import { AppRoutingModule } from './app-routing.module';
+ import { reducers, metaReducers, State } from './store';
+-import { AuthEffects } from './store/effects';
++import { AuthEffects, DataEffects } from './store/effects';
+ import { initialize } from './store/actions';
+ import { AuthInterceptor, UnauthInterceptor } from './core';
+ import { StoreDevtoolsModule } from '@ngrx/store-devtools';
+@@ -31,7 +31,7 @@ import { environment } from '../environments/environment';
+         strictActionImmutability: true,
+       },
+     }),
+-    EffectsModule.forRoot([AuthEffects]),
++    EffectsModule.forRoot([AuthEffects, DataEffects]),
+     StoreDevtoolsModule.instrument({
+       maxAge: 25,
+       logOnly: environment.production,
 
-Let's start by cleaning up the `TeaPage` a little:
+```
 
-- refactor `listToMatrix` to take a single array of teas and return a matrix of teas
-- change the code that calls it to compensate for the change (`this.teaMatrix = this.listToMatrix(this.teaData);`), your tests should still work
-- change the class declaration for the page to add `implements OnInit`
-- add an empty `ngOnInit()` method
-- rename `teaMatrix` to `teaMatrix$` and make it an `Observable<Array<Array<Tea>>>`
-- finally, remove the private `teaData` object and the `this.listToMatrix()` call in the constructor
+Now that we are set up, we need an effect that gets the teas when we have a new session that was loaded, either via login or via session restore due to application reload. We already have a shell for this effect, so let's work out the tests. Remember that you will need to adjust your `impoort` statements as new objects are referenced.
 
-That last items broke your tests. That is fine. We will fix that. If you did everything correctly, your code should now look something like this:
+First, we will copy the test data from our data reducer tests. We will need similar data here, so we may as well just use the same data. Since we won't have a need to change these we can just declare them right after the `import` statements and don't have to worry about re-initializing them with each test.
 
-```typescript
+```TypeScript
+const session: Session = {
+  user: {
+    id: 314,
+    firstName: 'Kevin',
+    lastName: 'Minion',
+    email: 'goodtobebad@gru.org',
+  },
+  token: '39948503',
+};
+
+const teas: Array<Tea> = [
+  {
+    id: 1,
+    name: 'Green',
+    image: 'assets/img/green.jpg',
+    description: 'Green teas are green',
+  },
+  {
+    id: 2,
+    name: 'Black',
+    image: 'assets/img/black.jpg',
+    description: 'Black teas are not green',
+  },
+  {
+    id: 3,
+    name: 'Herbal',
+    image: 'assets/img/herbal.jpg',
+    description: 'Herbal teas are not even tea',
+  },
+];
+```
+
+We can then add our first test:
+
+```TypeScript
+  [
+    loginSuccess({ session }),
+    initializedWithRestoredSession({ session }),
+  ].forEach(action =>
+    describe(`sessionLoaded$ with ${action.type}`, () => {
+      it('fetches the teas', done => {
+        const teaService = TestBed.inject(TeaService);
+        (teaService.getAll as any).and.returnValue(of(undefined));
+        actions$ = of(action);
+        effects.sessionLoaded$.subscribe(() => {
+          expect(teaService.getAll).toHaveBeenCalledTimes(1);
+          done();
+        });
+      });
+    }),
+  );
+```
+
+Notice that we are using the "Array" trick again, this time to test this over a couple of different actions.
+
+In the effect code, we can remove our `tap()`:
+
+```TypeScript
+        tap(() => {
+          console.log('An auth session had been loaded');
+        }),
+```
+
+And replace it with a `mergeMap()` within which we make our API call:
+
+```TypeScript
+        mergeMap(() => this.teaService.getAll()),
+```
+
+At this point, we have two possible outcomes: we either succeed in our quest to get teas, or the backend fails and we get an exception. Let's handle the first scenario first:
+
+```TypeScript
+      describe('on success', () => {
+        beforeEach(() => {
+          const teaService = TestBed.inject(TeaService);
+          (teaService.getAll as any).and.returnValue(of(teas));
+        });
+
+        it('dispatches initial load success', done => {
+          actions$ = of(action);
+          effects.sessionLoaded$.subscribe(action => {
+            expect(action).toEqual({
+              type: ActionTypes.InitialLoadSuccess,
+              teas,
+            });
+            done();
+          });
+        });
+      });
+```
+
+In the code, we can modify our `mergeMap()` related code a bit:
+
+```TypeScript
+        mergeMap(() =>
+          this.teaService
+            .getAll()
+            .pipe(map(teas => initialLoadSuccess({ teas }))),
+        ),
+```
+
+Finally, the error case. First the test:
+
+```TypeScript
+      describe('on an exception', () => {
+        beforeEach(() => {
+          const teaService = TestBed.inject(TeaService);
+          (teaService.getAll as any).and.returnValue(
+            throwError(new Error('the server is blowing chunks')),
+          );
+        });
+
+        it('dispatches initial load failure', done => {
+          actions$ = of(action);
+          effects.sessionLoaded$.subscribe(newAction => {
+            expect(newAction).toEqual({
+              type: ActionTypes.InitialLoadFailure,
+              errorMessage: 'Error in data load, check server logs',
+            });
+            done();
+          });
+        });
+      });
+```
+
+Then the code:
+
+```TypeScript
+        mergeMap(() =>
+          this.teaService.getAll().pipe(
+            map(teas => initialLoadSuccess({ teas })),
+            catchError(() =>
+              of(
+                initialLoadFailure({
+                  errorMessage: 'Error in data load, check server logs',
+                }),
+              ),
+            ),
+          ),
+```
+
+At this point, our effect is getting the data and is then returning the proper action to dispatch. Thus remove the `{ dispatch: false },` from the effect. That was just there to avoid an infinite loop when all we were doing was the `tap`. Speaking of which, the `tap` opeator should no longer be imported either, so go clean up your imports and you can then call the store mods done.
+
+## The Tea Page
+
+If you run the application in the browser and have a look at the network tab, you will see we are loading our teas (or tea-categories, as the endpoint is called) from the backend. If you have a look with the Redux DevTools, you should also see that the "teas" are populated in the "data" slice of our state. So, now we just need to use those teas.
+
+### Create Selectors
+
+First we will need a selector. Use the existing `src/app/store/selectors/auth.selectors.ts` as a model and create a `src/app/store/selectors/data.selectors.ts` file with two selectors:
+
+- `selectData` - the whole data slice
+- `selectTeas` - the teas on the data slice
+
+If you get stuck, check the code in the Conclusion section. Remember to update the `src/app/selectors/index.ts` file.
+
+### Update the Test
+
+A lot of what we need for the test is already there. We just need to modify the setup to include the data slice in the state and then overridde the teas selector to return the test tea data.
+
+```diff
+--- a/src/app/tea/tea.page.spec.ts
++++ b/src/app/tea/tea.page.spec.ts
+@@ -3,12 +3,14 @@ import { DebugElement } from '@angular/core';
+ import { By } from '@angular/platform-browser';
+ import { IonicModule } from '@ionic/angular';
+ import { Store } from '@ngrx/store';
+-import { provideMockStore } from '@ngrx/store/testing';
++import { MockStore, provideMockStore } from '@ngrx/store/testing';
+
+-import { AuthState, initialState } from '@app/store/reducers/auth/auth.reducer';
++import { AuthState, initialState as initialAuthState } from '@app/store/reducers/auth/auth.reducer';
++import { DataState, initialState as initialDataState } from '@app/store/reducers/data/data.reducer';
+ import { TeaPage } from './tea.page';
+ import { Tea } from '@app/models';
+ import { logout } from '@app/store/actions';
++import {selectTeas} from '@app/store/selectors';
+
+ describe('TeaPage', () => {
+   let component: TeaPage;
+@@ -22,12 +24,15 @@ describe('TeaPage', () => {
+         declarations: [TeaPage],
+         imports: [IonicModule],
+         providers: [
+-          provideMockStore<{ auth: AuthState }>({
+-            initialState: { auth: initialState },
++          provideMockStore<{ auth: AuthState, data: DataState }>({
++            initialState: { auth: initialAuthState, data: initialDataState },
+           }),
+         ],
+       }).compileComponents();
+
++      const store = TestBed.inject(Store) as MockStore;
++      store.overrideSelector(selectTeas, teas);
++
+       fixture = TestBed.createComponent(TeaPage);
+       component = fixture.componentInstance;
+       fixture.detectChanges();
+```
+
+### Update the Tea Page
+
+For the page itself, let's take this one step at a time. Right now, the HTML is directly consuming the hard coded data after we turn it into a matrix. We want to get to a point where the page is consuming the tea data from the store translated into a matrix. For that, we will need an Observable.
+
+Here are the changes to both the class and the template:
+
+```diff
+--- a/src/app/tea/tea.page.ts
++++ b/src/app/tea/tea.page.ts
+@@ -4,6 +4,8 @@ import { Store } from '@ngrx/store';
+ import { Tea } from '@app/models';
+ import { State } from '@app/store';
+ import { logout } from '@app/store/actions';
++import { Observable, of } from 'rxjs';
++import { map } from 'rxjs/operators';
+
+ @Component({
+   selector: 'app-tea',
+@@ -70,10 +72,12 @@ export class TeaPage implements OnInit {
+     },
+   ];
+
+-  get teaMatrix(): Array<Array<Tea>> {
++  teas$: Observable<Array<Array<Tea>>>;
++
++  private teaMatrix(teas: Array<Tea>): Array<Array<Tea>> {
+     const matrix: Array<Array<Tea>> = [];
+     let row = [];
+-    this.teaData.forEach(t => {
++    teas.forEach(t => {
+       row.push(t);
+       if (row.length === 4) {
+         matrix.push(row);
+@@ -94,5 +98,7 @@ export class TeaPage implements OnInit {
+     this.store.dispatch(logout());
+   }
+
+-  ngOnInit() {}
++  ngOnInit() {
++    this.teas$ = of(this.teaData).pipe(map(teas => this.teaMatrix(teas)));
++  }
+
+
+--- a/src/app/tea/tea.page.html
++++ b/src/app/tea/tea.page.html
+@@ -17,7 +17,7 @@
+   </ion-header>
+
+   <ion-grid>
+-    <ion-row *ngFor="let teaRow of teaMatrix" class="ion-align-items-stretch">
++    <ion-row *ngFor="let teaRow of teas$ | async" class="ion-align-items-stretch">
+       <ion-col *ngFor="let tea of teaRow" size="12" size-md="6" size-xl="3">
+         <ion-card>
+           <ion-img [src]="tea.image"></ion-img>
+```
+
+After making those changes, all of your tests should still pass.
+
+You can now replace the manufactured Observable with the observable select from the store:
+
+```diff
+--- a/src/app/tea/tea.page.ts
++++ b/src/app/tea/tea.page.ts
+ import { Tea } from '@app/models';
+ import { State } from '@app/store';
+ import { logout } from '@app/store/actions';
+-import { Observable, of } from 'rxjs';
++import { Observable } from 'rxjs';
+ import { map } from 'rxjs/operators';
++import { selectTeas } from '@app/store/selectors';
+
+ @Component({
+   selector: 'app-tea',
+@@ -99,6 +100,9 @@ export class TeaPage implements OnInit {
+   }
+
+   ngOnInit() {
+-    this.teas$ = of(this.teaData).pipe(map(teas => this.teaMatrix(teas)));
++    this.teas$ = this.store
++      .select(selectTeas)
++      .pipe(map(teas => this.teaMatrix(teas)));
+   }
+ }
+```
+
+After making those changes, all of your tests should still pass, and you are now using the actual data and should see 8 teas instead of 7.
+
+You can now remove the fake data from the Tea Page and clean up your imports if need be. The full code for the tea page class is included in the conclusion in case you got lost.
+
+## The Tea Clearing Challenge
+
+Testing this out in the browser everything _appears_ to run fine, but run it with Redux DevTools open and have a look at the state after logging off. The data is left over. For this app, that probalby is not a big deal, but in something like a banking app you don't want user A to log out and then have user B log in with user A's data still hanging out, even if for a short while.
+
+**Code Challenge:** update the data reducer to clear the tea data upon `LogoutSuccess`. Start with a test, and then write the code. Both are included at the end of this page.
+
+## Conclusion
+
+In the last two labs, we have learned how to to get data via a service and then how to use that service within our pages. Be sure to commit your changes.
+
+Here is the code for the data recuder:
+
+```TypeScript
+const dataReducer = createReducer(
+  initialState,
+  on(Actions.loginSuccess, state => ({
+    ...state,
+    loading: true,
+    errorMessage: '',
+  })),
+  on(Actions.initializedWithRestoredSession, state => ({
+    ...state,
+    loading: true,
+    errorMessage: '',
+  })),
+  on(Actions.initialLoadFailure, (state, {errorMessage}) => ({
+    ...state,
+    loading: false,
+    errorMessage,
+  })),
+  on(Actions.initialLoadSuccess, (state, {teas}) => ({
+    ...state,
+    loading: false,
+    teas: [...teas]
+  })),
+);
+```
+
+The following is the data selectors:
+
+```TypeScript
+import { createSelector, createFeatureSelector } from '@ngrx/store';
+import { DataState } from '@app/store/reducers/data/data.reducer';
+
+export const selectData = createFeatureSelector('data');
+export const selectTeas = createSelector(
+  selectData,
+  (state: DataState) => state.teas,
+);
+```
+
+The final TeaPage code:
+
+```TypeScript
 import { Component, OnInit } from '@angular/core';
+import { select, Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
-import { take } from 'rxjs/operators';
+import { map } from 'rxjs/operators';
 
 import { Tea } from '@app/models';
-import { AuthenticationService, TeaService } from '@app/core';
+import { State } from '@app/store';
+import { logout } from '@app/store/actions';
+import { selectTeas } from '@app/store/selectors';
 
 @Component({
   selector: 'app-tea',
-  templateUrl: 'tea.page.html',
-  styleUrls: ['tea.page.scss'],
+  templateUrl: './tea.page.html',
+  styleUrls: ['./tea.page.scss'],
 })
 export class TeaPage implements OnInit {
-  teaMatrix$: Observable<Array<Array<Tea>>>;
+  teas$: Observable<Array<Array<Tea>>>;
 
-  constructor(private auth: AuthenticationService, private tea: TeaService) {}
-
-  ngOnInit() {}
-
-  logout() {
-    this.auth.logout().pipe(take(1)).subscribe();
-  }
-
-  private listToMatrix(teas: Array<Tea>): Array<Array<Tea>> {
+  private teaMatrix(teas: Array<Tea>): Array<Array<Tea>> {
     const matrix: Array<Array<Tea>> = [];
     let row = [];
     teas.forEach(t => {
@@ -144,155 +769,38 @@ export class TeaPage implements OnInit {
 
     return matrix;
   }
+
+  constructor(private store: Store<State>) {}
+
+  logout() {
+    this.store.dispatch(logout());
+  }
+
+  ngOnInit() {
+    this.teas$ = this.store.pipe(
+      select(selectTeas),
+      map(teas => this.teaMatrix(teas || [])),
+    );
+  }
 }
 ```
 
-### Consume the Observable
+For the tea clearing challenge, first add the following case to the array of tests we process
 
-We need to make one small modification to the HTML for our page. The template will now directly consume the Observable that we are exporting from the page's class. This means a variable name change in the binding, as well as adding the async pipe.
-
-```html
-<ion-row
-  *ngFor="let teaRow of teaMatrix$ | async"
-  class="ion-justify-content-center ion-align-items-stretch"
-></ion-row>
+```TypeScript
+  {
+    description: `${ActionTypes.LogoutSuccess}: clears the tea data`,
+    action: logoutSuccess(),
+    begin: { teas },
+    end: {},
+  },
 ```
 
-### Test First
+Then add the code that modifies the state:
 
-First remove the "makes a tea matrix" test. We will certainly be making one, but we will be doing so based on the data fetched from the backend API, not from the hard coded data we had before.
-
-For the new functionality, we want to test the following:
-
-- it fetches the teas
-- it displays an empty matrix if there are no teas
-- it displays an X by 4 matrix when their are teas (use a multiple of 4 and a non-multiple of 4)
-
-In order to do this, we will have to move where we do the `fixture.detectChanges();` call. This will have to be moved to the tests after the return value of the `getAll()` mock is set up. We should also remove any existing initialization tests. They will be replaced.
-
-The intial shell for the tests will then look like this:
-
-```typescript
-it('should create', () => {
-  fixture.detectChanges();
-  expect(component).toBeTruthy();
-});
-
-describe('initialization', () => {
-  it('gets the teas', () => {});
-
-  it('displays an empty matrix if there is no tea', () => {});
-
-  it('displays a 1x4 matrix for 4 teas', () => {});
-
-  it('displays a 2x4 matrix with two empty spots in the last row for 6 teas', () => {});
-});
+```TypeScript
+  on(Actions.logoutSuccess, state => ({
+    ...state,
+    teas: [],
+  })),
 ```
-
-**Important:** make sure the `fixture.detectChanges()` is removed from the `beforeEach()`.
-
-Let's fill in the tests one at a time and create the code.
-
-#### Get the Teas
-
-```typescript
-it('gets the teas', () => {
-  const teaService = TestBed.inject(TeaService);
-  fixture.detectChanges();
-  expect(teaService.getAll).toHaveBeenCalledTimes(1);
-});
-```
-
-Write the minimal code in `ngOnInit()` in order to make the test pass. This will be the start of us building out our observable pipeline.
-
-```typescript
-  ngOnInit() {
-    this.teaMatrix$ = this.tea.getAll() as any;
-  }
-```
-
-Once again, the `as any` is just to make TypeScript happy for now. It will be removed after we properly transform the data.
-
-#### Initialize an Empty Matrix for No Tea
-
-```typescript
-it('displays an empty matrix if there is no tea', () => {
-  const teaService = TestBed.inject(TeaService);
-  (teaService.getAll as any).and.returnValue(of([]));
-  fixture.detectChanges();
-  const rows = fixture.debugElement.queryAll(By.css('ion-row'));
-  expect(rows.length).toEqual(0);
-});
-```
-
-**Note:** The above test requires a couple of imports to be added:
-
-- `import { of } from 'rxjs';`
-- `import { By } from '@angular/platform-browser';`
-
-This test likely already passes. If not, fix your code so it does.
-
-#### Display a 1x4 Matrix for Four Teas
-
-```typescript
-it('displays a 1x4 matrix for 4 teas', () => {
-  const teaService = TestBed.inject(TeaService);
-  (teaService.getAll as any).and.returnValue(
-    of([
-      {
-        id: 1,
-        name: 'Green',
-        image: 'assets/img/green.jpg',
-        description: 'Green tea description.',
-      },
-      {
-        id: 2,
-        name: 'Black',
-        image: 'assets/img/black.jpg',
-        description: 'Black tea description.',
-      },
-      {
-        id: 3,
-        name: 'Herbal',
-        image: 'assets/img/herbal.jpg',
-        description: 'Herbal Infusion description.',
-      },
-      {
-        id: 4,
-        name: 'Oolong',
-        image: 'assets/img/oolong.jpg',
-        description: 'Oolong tea description.',
-      },
-    ]),
-  );
-  fixture.detectChanges();
-  const rows = fixture.debugElement.queryAll(By.css('ion-row'));
-  expect(rows.length).toEqual(1);
-  const cols = rows[0].queryAll(By.css('ion-col'));
-  expect(cols.length).toEqual(4);
-});
-```
-
-write the code required to get this to pass. You will need to add a `map` to the observable pipeline that is returned by the `getAll()`, use a call to `this.listToMatrix()` to transform the data, `subscribe()` to the observable, and assign the `this.teaMatrix` appropriately.
-
-#### Display a 2x4 Matrix for Four Teas
-
-This test is really just a copy of the prior test with two more teas. The output should have two rows in the matix with the second row consisting of the two extra teas. Creation of this test is left as an exercise to the reader.
-
-This test should pass. If it does not, figure out what is wrong and fix it.
-
-#### Completed Code
-
-When you are done, your `ngOnInit()` method should look something like this:
-
-```typescript
-  ngOnInit() {
-    this.teaMatrix$ = this.tea
-      .getAll()
-      .pipe(map((teas: Array<Tea>) => this.listToMatrix(teas)));
-  }
-```
-
-## Conclusion
-
-In the last two labs, we have learned how to to get data via a service and then how to use that service within our pages. Be sure to commit your changes.

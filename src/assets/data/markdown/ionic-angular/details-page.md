@@ -1,4 +1,4 @@
-# Lab: Tea Details Page
+b: Tea Details Page
 
 In this lab, you will:
 
@@ -74,17 +74,12 @@ beforeEach(async(() => {
     declarations: [TeaPage],
     imports: [IonicModule],
     providers: [
-      {
-        provide: AuthenticationService,
-        useFactory: createAuthenticationServiceMock,
-      },
+      provideMockStore<{ auth: AuthState; data: DataState }>({
+        initialState: { auth: initialAuthState, data: initialDataState },
+      }),
       {
         provide: NavController,
         useFactory: createNavControllerMock,
-      },
-      {
-        provide: TeaService,
-        useFactory: createTeaServiceMock,
       },
     ],
   }).compileComponents();
@@ -134,6 +129,7 @@ Before we get too far into the page, let's do an initial layout of what the data
 ```css
 ion-img {
   width: 75%;
+  max-width: 768px;
 }
 ```
 
@@ -147,42 +143,42 @@ ion-img {
 </ion-header>
 
 <ion-content class="ion-padding">
-  <div class="ion-justify-content-center" style="display: flex;">
-    <ion-img [src]="tea?.image"></ion-img>
+  <div *ngIf="tea$ | async as tea">
+    <div class="ion-justify-content-center" style="display: flex">
+      <ion-img [src]="tea?.image"></ion-img>
+    </div>
+    <h1 data-testid="name">{{ tea?.name }}</h1>
+    <p data-testid="description">{{ tea?.description }}</p>
   </div>
-  <h1>{{ tea?.name }}</h1>
-  <p>{{ tea?.description }}</p>
 </ion-content>
 ```
 
 #### Reading the ID Parameter
 
-Now that we are navigating to the tea-details page with an ID parameter, we need to modify `src/app/tea-details/tea-details.page.ts` to read the parameter and get the tea informtion for that ID. To accomplish this we will need to use the Angular Components Router's `ActivedRoute` service and our own `TeaService`. We will also eventually make use of the `NavController`.
+Now that we are navigating to the tea-details page with an ID parameter, we need to modify `src/app/tea-details/tea-details.page.ts` to read the parameter and get the tea informtion for that ID. To accomplish this we will need to use the Angular Components Router's `ActivedRoute` service and our store. We will also eventually make use of the `NavController`.
 
 In the `src/app/tea-details/tea-details.page.spec.ts` file, set up the `TestBed` to inject mocks for these services.
 
 ```typescript
-beforeEach(async(() => {
-  TestBed.configureTestingModule({
-    declarations: [TeaDetailsPage],
-    imports: [IonicModule],
-    providers: [
-      {
-        provide: ActivatedRoute,
-        useFactory: createActivatedRouteMock,
-      },
-      {
-        provide: NavController,
-        useFactory: createNavControllerMock,
-      },
-      { provide: TeaService, useFactory: createTeaServiceMock },
-    ],
-  }).compileComponents();
+beforeEach(
+  waitForAsync(() => {
+    TestBed.configureTestingModule({
+      declarations: [TeaDetailsPage],
+      imports: [IonicModule],
+      providers: [
+        provideMockStore<{ data: DataState }>({
+          initialState: { data: initialState },
+        }),
+        { provide: ActivatedRoute, useFactory: createActivatedRouteMock },
+        { provide: NavController, useFactory: createNavControllerMock },
+      ],
+    }).compileComponents();
 
-  fixture = TestBed.createComponent(TeaDetailsPage);
-  component = fixture.componentInstance;
-  fixture.detectChanges();
-}));
+    fixture = TestBed.createComponent(TeaDetailsPage);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
+  }),
+);
 ```
 
 You will need to adjust your import statements accordingly.
@@ -195,86 +191,58 @@ Create an `initiallization` section in the test. Also, since we will need to do 
 describe('initialization', () => {});
 ```
 
-We are now ready to start writing tests. Add the following tests one at a time and then write the code that satisfies them.
+We would like to write most of our tests from the point of view of the end user requirements, which would basically mean that we verify that we get the tea and display it properly without getting into implementation details, but we do have _one_ test that works out best if we just scratch the surface a bit on the implementation details, so we will start there:
 
-First, we need to get the ID from the route:
+```TypeScript
+  describe('initialization', () => {
+    let store: MockStore
+    beforeEach(() => {
+      const route = TestBed.inject(ActivatedRoute);
+      (route.snapshot.paramMap.get as any).withArgs('id').and.returnValue('42');
+      store = TestBed.inject(Store) as MockStore;
+      store.overrideSelector(selectTea, {
+        id: 7,
+        name: 'White',
+        description: 'Often looks like frosty silver pine needles',
+        image: 'imgs/white.png',
+      });
+    });
 
-```typescript
-it('determines the ID from the route', () => {
-  const route = TestBed.inject(ActivatedRoute);
-  fixture.detectChanges();
-  expect(route.snapshot.paramMap.get).toHaveBeenCalledTimes(1);
-  expect(route.snapshot.paramMap.get).toHaveBeenCalledWith('id');
-});
+    it('selects the tea based on the route', () => {
+      spyOn(store, 'select');
+      fixture.detectChanges();
+      expect(store.select).toHaveBeenCalledTimes(1);
+      expect(store.select).toHaveBeenCalledWith(selectTea, { id: 42 });
+    });
+  });
 ```
 
-Now add code in `src/app/tea-details/tea-details.page.ts` in the `ngOnInit()` method that satisfies the test.
+The code for that looks like this:
 
-Next we need to pass the ID to the `TeaService`. Note that the ID is read from the route as a string but we want to pass an integer to our service. A conversion wil be required.
-
-```typescript
-it('gets the tea of the ID', () => {
-  const route = TestBed.inject(ActivatedRoute);
-  const teaService = TestBed.inject(TeaService);
-  (route.snapshot.paramMap.get as any).and.returnValue('42');
-  fixture.detectChanges();
-  expect(teaService.get).toHaveBeenCalledTimes(1);
-  expect(teaService.get).toHaveBeenCalledWith(42);
-});
-```
-
-Now add code in `src/app/tea-details/tea-details.page.ts` in the `ngOnInit()` method that satisfies the test.
-
-Finally, we will make sure the tea is bound properly in the HTML.
-
-```typescript
-it('gets the tea of the ID', () => {
-  const route = TestBed.inject(ActivatedRoute);
-  const teaService = TestBed.inject(TeaService);
-  (teaService.get as any).and.returnValue(
-    of({
-      id: 42,
-      name: 'Yellow',
-      image: 'assets/img/yellow.jpg',
-      description: 'Yellow tea description.',
-    }),
-  );
-  (route.snapshot.paramMap.get as any).and.returnValue('42');
-  fixture.detectChanges();
-  const h1 = fixture.debugElement.query(By.css('h1'));
-  expect(h1.nativeElement.textContent).toEqual('Yellow');
-  const p = fixture.debugElement.query(By.css('p'));
-  expect(p.nativeElement.textContent).toEqual('Yellow tea description.');
-});
-```
-
-Now add code in `src/app/tea-details/tea-details.page.ts` in the `ngOnInit()` method that satisfies the test. In this case, you will also have to create a new property on the class as such: `tea: Tea;` where `Tea` is defined in our `@app/models` module.
-
-When you are complete, your `src/app/tea-details/tea-details.page.ts` file should look something like this:
-
-```typescript
-import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
-
-import { TeaService } from '@app/core';
-import { Tea } from '@app/models';
-
-@Component({
-  selector: 'app-tea-details',
-  templateUrl: './tea-details.page.html',
-  styleUrls: ['./tea-details.page.scss'],
-})
+```TypeScript
 export class TeaDetailsPage implements OnInit {
-  tea: Tea;
+  tea$: Observable<Tea>;
 
-  constructor(private route: ActivatedRoute, private teaService: TeaService) {}
+  constructor(private route: ActivatedRoute, private store: Store<State>) {}
 
   ngOnInit() {
     const id = parseInt(this.route.snapshot.paramMap.get('id'), 10);
-    this.teaService.get(id).subscribe((t: Tea) => (this.tea = t));
+    this.tea$ = this.store.select(selectTea, { id });
   }
 }
 ```
+
+We can now do a couple more "user" centric tests by checking a couple of the bindings. Here is the test for the name binding:
+
+```TypeScript
+    it('binds the name', () => {
+      fixture.detectChanges();
+      const nameEl = fixture.debugElement.query(By.css('[data-testid="name"]'));
+      expect(nameEl.nativeElement.textContent.trim()).toBe('White');
+    });
+```
+
+**Challenge:** add a similar test for the description.
 
 #### Navigating Back from the Details Page
 

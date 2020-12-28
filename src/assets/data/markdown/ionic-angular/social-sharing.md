@@ -46,7 +46,7 @@ At this point, the button should display and be clickable, but it is not functio
 
 The designers have let us know that they only want this functionallity available when users are running in a mobile context, so let't take care of making sure the button is only visible in that context.
 
-We will start with the test. First, import the `Platform` servcie from `@ionic/angular` and provide a mock it where we set up the testing module.
+We will start with the test. First, import the `Platform` servcie from `@ionic/angular` and provide a mock for it where we set up the testing module.
 
 ```TypeScript
 import { IonicModule, ModalController, Platform } from '@ionic/angular';
@@ -66,26 +66,28 @@ describe('TastingNoteEditorComponent', () => {
 At this point we can start creating the tests for the properties that control the button:
 
 ```TypeScript
-  describe('share', () => {
-    describe('in a web context', () => {
+  describe('share' () => {
+    describe('in a web context' () => {
       beforeEach(() => {
         const platform = TestBed.inject(Platform);
         (platform.is as any).withArgs('hybrid').and.returnValue(false);
+        fixture.detectChanges();
       });
 
-      it('is not available', () => {
-        expect(component.sharingIsAvailable).toBeFalse();
+      it('is not available' () => {
+        expect(fixture.debugElement.query(By.css('#share-button'))).toBeFalsy();
       });
     });
 
-    describe('in a mobile context', () => {
+    describe('in a mobile context' () => {
       beforeEach(() => {
         const platform = TestBed.inject(Platform);
         (platform.is as any).withArgs('hybrid').and.returnValue(true);
+        fixture.detectChanges();
       });
 
-      it('is available', () => {
-        expect(component.sharingIsAvailable).toBeTrue();
+      it('is available' () => {
+        expect(fixture.debugElement.query(By.css('#share-button'))).toBeTruthy();
       });
     });
   });
@@ -116,16 +118,20 @@ First we will test for it. This test belongs right after the `is avialable` test
 
 ```TypeScript
       it('is not allowed until a brand, name, and rating have all beeen entered', () => {
-        expect(component.allowSharing).toBeFalse();
+        const button = fixture.debugElement.query(By.css('#share-button'));
+        expect(button.nativeElement.disabled).toBeTrue();
 
         component.brand = 'Lipton';
-        expect(component.allowSharing).toBeFalse();
+        fixture.detectChanges();
+        expect(button.nativeElement.disabled).toBeTrue();
 
         component.name = 'Yellow Label';
-        expect(component.allowSharing).toBeFalse();
+        fixture.detectChanges();
+        expect(button.nativeElement.disabled).toBeTrue();
 
         component.rating = 2;
-        expect(component.allowSharing).toBeTrue();
+        fixture.detectChanges();
+        expect(button.nativeElement.disabled).toBeFalse();
       });
 ```
 
@@ -153,7 +159,7 @@ describe('TastingNoteEditorComponent', () => {
   beforeEach(
     waitForAsync(() => {
       originalShare = Plugins.Share;
-      Plugins.Storage = jasmine.createSpyObj('Share', {
+      Plugins.Share = jasmine.createSpyObj('Share', {
         share: Promise.resolve(),
       });
       ...
@@ -163,25 +169,28 @@ describe('TastingNoteEditorComponent', () => {
   ...
 ```
 
-Then we will add a test within the `share button` describe block.
+Then we will add a test within the `share in a web mobile context` describe block.
 
 ```TypeScript
-    it('calls the share plugin when pressed', async () => {
-      const { Share } = Plugins;
+      it('calls the share plugin when clicked', async () => {
+        const button = fixture.debugElement.query(By.css('#share-button'));
 
-      component.brand = 'Lipton';
-      component.name = 'Yellow Label';
-      component.rating = 2;
-      component.share();
+        component.brand = 'Lipton';
+        component.name = 'Yellow Label';
+        component.rating = 2;
 
-      expect(Share.share).toHaveBeenCalledTimes(1);
-      expect(Share.share).toHaveBeenCalledWith({
-        title: 'foobar: mytea',
-        text: 'I gave foobar: mytea 2 stars on the Tea Taster app',
-        dialogTitle: 'Share your tasting note',
-        url: 'https://tea-taster-training.web.app',
+        const event = new Event('click');
+        button.nativeElement.dispatchEvent(event);
+        fixture.detectChanges();
+
+        expect(Plugins.Share.share).toHaveBeenCalledTimes(1);
+        expect(Plugins.Share.share).toHaveBeenCalledWith({
+          title: 'Lipton: Yellow Label',
+          text: 'I gave Lipton: Yellow Label 2 stars on the Tea Taster app',
+          dialogTitle: 'Share your tasting note',
+          url: 'https://tea-taster-training.web.app',
+        });
       });
-    });
 ```
 
 We can then add the code fill out the `share()` accordingly. You will also have to add a line importing the `Plugins` object from `@capacitor/core`:

@@ -212,7 +212,7 @@ There is also a set of other colors for both iOS and Material Design. For these,
 
 #### Applying the Colors
 
-The first requirement from our design team is that the pages should have a gradient background, going from from white to `--ion-color-secondary` for the light theme, or `--ion-background-color` to `--ion-color-secondary` for dark theme. We will do this via a class. Unless otherwise notied, all of the following styles will go in the `src/global.scss` file.
+The first requirement from our design team is that the pages should have a gradient background, going from from white to `--ion-color-secondary` for the light theme, or `--ion-background-color` to `--ion-color-secondary` for dark theme. We will do this via a class. Unless otherwise noted, all of the following styles will go in the `src/global.scss` file.
 
 ```css
 .main-content {

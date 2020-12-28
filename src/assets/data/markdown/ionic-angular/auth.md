@@ -5,12 +5,22 @@ In this lab you will add learn how to:
 - Use Angular's HttpClient service to POST data to an API
 - Test code that relies on HTTP calls
 - Use HTTP Interceptors to modify requests
-- Use HTTP Interceptors to respond to handle errors with responses
+- Use HTTP Interceptors to handle errors with responses
 - Perform up-front application intialization
+
+## Set up the Environment
+
+Update both of the files under `src/environments` to include the following property in the JSON:
+
+```TypeScript
+dataService: 'https://cs-demo-api.herokuapp.com'
+```
+
+These files define the `dev` and `prod` environments. Typically they would have different values for something like the data service, but for our app we only have a single API server. Also, you can create more environments (QA, Testing, etc), but doing so is beyond the scope of this class.
 
 ## Authentication Service
 
-In the last lab, we created a service that stores information about the currently logged in user as well as that user's current login token. But how do we get that token in the first place? That is where the authentication service comes in. Just like with any other service, the first thing we need to do is generate it:
+In the last lab, we created a service that stores session. But how do we get that session in the first place? That is where the authentication service comes in. Just like with any other service, the first thing we need to do is generate it:
 
 ```bash
 $ ionic g s core/authentication/authentication
@@ -28,15 +38,15 @@ import { HttpClient } from '@angular/common/http';
 
 import { Observable, EMPTY } from 'rxjs';
 
-import { IdentityService } from '../identity/identity.service';
+import { Session } from '@app/models';
 
 @Injectable({
   providedIn: 'root',
 })
 export class AuthenticationService {
-  constructor(private http: HttpClient, private identity: IdentityService) {}
+  constructor(private http: HttpClient) {}
 
-  login(email: string, password: string): Observable<boolean> {
+  login(email: string, password: string): Observable<Session | undefined> {
     return EMPTY;
   }
 
@@ -58,8 +68,6 @@ import {
 } from '@angular/common/http/testing';
 
 import { AuthenticationService } from './authentication.service';
-import { IdentityService } from '../identity/identity.service';
-import { createIdentityServiceMock } from '../identity/identity.service.mock';
 
 describe('AuthenticationService', () => {
   let httpTestingController: HttpTestingController;
@@ -68,9 +76,6 @@ describe('AuthenticationService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [HttpClientTestingModule],
-      providers: [
-        { provide: IdentityService, useFactory: createIdentityServiceMock },
-      ],
     });
     httpTestingController = TestBed.inject(HttpTestingController);
     service = TestBed.inject(AuthenticationService);
@@ -107,7 +112,7 @@ it('POSTs the login', () => {
 ```
 
 ```typescript
-return this.http.post<boolean>(`${environment.dataService}/login`, {});
+return this.http.post<Session>(`${environment.dataService}/login`, {});
 ```
 
 #### Step 2 - Pass the Credentials
@@ -128,7 +133,7 @@ it('passes the credentials in the body', () => {
 ```
 
 ```typescript
-return this.http.post<boolean>(`${environment.dataService}/login`, {
+return this.http.post<Session>(`${environment.dataService}/login`, {
   username: email,
   password,
 });
@@ -156,15 +161,23 @@ describe('on success', () => {
 });
 ```
 
-The folloing `3.x` steps should then be nested within the `describe()` that was just created.
+The folloing `3.1` step should then be nested within the `describe()` that was just created.
 
-##### Step 3.1 - Emit True
+##### Step 3.1 - Emit the Session
 
 ```typescript
-it('emits true', fakeAsync(() => {
-  service
-    .login('thank.you@forthefish.com', 'solongDude')
-    .subscribe(r => expect(r).toEqual(true));
+it('emits the session', fakeAsync(() => {
+  service.login('thank.you@forthefish.com', 'solongDude').subscribe(r =>
+    expect(r).toEqual({
+      token: '48499501093kf00399sg',
+      user: {
+        id: 42,
+        firstName: 'Douglas',
+        lastName: 'Adams',
+        email: 'thank.you@forthefish.com',
+      },
+    }),
+  );
   const req = httpTestingController.expectOne(
     `${environment.dataService}/login`,
   );
@@ -177,10 +190,8 @@ it('emits true', fakeAsync(() => {
 For this one, it would be best to create a local type definition. So create the following in `src/app/core/authentication/authentication.service.ts` right after the ES6 imports.
 
 ```typescript
-interface LoginResponse {
+interface LoginResponse extends Session {
   success: boolean;
-  token: string;
-  user: User;
 }
 ```
 
@@ -192,40 +203,12 @@ return this.http
     username: email,
     password,
   })
-  .pipe(map(res => res.success));
-```
-
-##### Step 3.2 - Set the Identity
-
-```typescript
-it('sets the identity', () => {
-  const identity = TestBed.inject(IdentityService);
-  service.login('thank.you@forthefish.com', 'solongDude').subscribe();
-  const req = httpTestingController.expectOne(
-    `${environment.dataService}/login`,
+  .pipe(
+    map(res => {
+      delete res.success;
+      return res;
+    }),
   );
-  req.flush(response);
-  httpTestingController.verify();
-  expect(identity.set).toHaveBeenCalledTimes(1);
-  expect(identity.set).toHaveBeenCalledWith(
-    {
-      id: 42,
-      firstName: 'Douglas',
-      lastName: 'Adams',
-      email: 'thank.you@forthefish.com',
-    },
-    '48499501093kf00399sg',
-  );
-});
-```
-
-This can be accomplished by using the `tap()` operator within the observable pipeline.
-
-```typescript
-.pipe(
-  tap(res => this.identity.set(res.user, res.token)),
-  map(res => res.success),
-);
 ```
 
 #### Step 4 - Handle a Login Failure
@@ -241,13 +224,13 @@ describe('on failure', () => {
 });
 ```
 
-##### Step 4.1 - Emit False
+##### Step 4.1 - Emit Undefined
 
 ```typescript
-it('emits false', fakeAsync(() => {
+it('emits undefined', fakeAsync(() => {
   service
     .login('thank.you@forthefish.com', 'solongDude')
-    .subscribe(r => expect(r).toEqual(false));
+    .subscribe(r => expect(r).toEqual(undefined));
   const req = httpTestingController.expectOne(
     `${environment.dataService}/login`,
   );
@@ -257,31 +240,15 @@ it('emits false', fakeAsync(() => {
 }));
 ```
 
-So, that works out of the box. Moving on...
+That just takes one minor tweak in the `map()`:
 
-##### Step 4.2 - Do Not Set the Identity
-
-```typescript
-it('does not set the identity', () => {
-  const identity = TestBed.inject(IdentityService);
-  service.login('thank.you@forthefish.com', 'solongDude').subscribe();
-  const req = httpTestingController.expectOne(
-    `${environment.dataService}/login`,
-  );
-  req.flush(response);
-  httpTestingController.verify();
-  expect(identity.set).not.toHaveBeenCalled();
-});
-```
-
-That can be made to pass by updating the `tap()` a little:
-
-```typescript
-tap(res => {
-  if (res.success) {
-    this.identity.set(res.user, res.token);
-  }
-}),
+```TypeScript
+        map(res => {
+          if (res.success) {
+            delete res.success;
+            return res;
+          }
+        }),
 ```
 
 In case you got lost at any step, here is the complete code so far:
@@ -289,38 +256,36 @@ In case you got lost at any step, here is the complete code so far:
 ```typescript
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+
 import { Observable, EMPTY } from 'rxjs';
-import { map, tap } from 'rxjs/operators';
+import { map } from 'rxjs/operators';
 
-import { IdentityService } from '../identity/identity.service';
+import { Session } from '@app/models';
 import { environment } from '@env/environment';
-import { User } from '@app/models';
 
-interface LoginResponse {
+interface LoginResponse extends Session {
   success: boolean;
-  token: string;
-  user: User;
 }
 
 @Injectable({
   providedIn: 'root',
 })
 export class AuthenticationService {
-  constructor(private http: HttpClient, private identity: IdentityService) {}
+  constructor(private http: HttpClient) {}
 
-  login(email: string, password: string): Observable<boolean> {
+  login(email: string, password: string): Observable<Session | undefined> {
     return this.http
       .post<LoginResponse>(`${environment.dataService}/login`, {
         username: email,
         password,
       })
       .pipe(
-        tap(res => {
+        map(res => {
           if (res.success) {
-            this.identity.set(res.user, res.token);
+            delete res.success;
+            return res;
           }
         }),
-        map(res => res.success),
       );
   }
 
@@ -348,24 +313,13 @@ it('POSTs the logout', () => {
 });
 ```
 
-#### Step 2 - Clear the Identity
+Well, that's really the only step...
 
-```typescript
-it('clears the identity', fakeAsync(() => {
-  const identity = TestBed.inject(IdentityService);
-  service.logout().subscribe();
-  const req = httpTestingController.expectOne(
-    `${environment.dataService}/logout`,
-  );
-  req.flush({});
-  tick();
-  expect(identity.clear).toHaveBeenCalledTimes(1);
-}));
-```
+**Challenge:** go write the code for that requirement. When you are done making this test pass, `EMPTY` should be marked as unused in your imports section. Be sure to remove it.
 
 ### Create a Mock Factory
 
-We will eventually want to use the `AuthenticationService` and thus will need to mock it in tests. Create a factory for that now.
+We will want to use the `AuthenticationService` when we update the store logic and thus will need to mock it in tests. Create a factory for that now.
 
 ```typescript
 import { EMPTY } from 'rxjs';
@@ -403,25 +357,32 @@ import {
   HttpHandler,
   HttpRequest,
 } from '@angular/common/http';
-
-import { IdentityService } from '../identity/identity.service';
+import { select, Store } from '@ngrx/store';
+import { selectAuthToken, State } from '@app/store';
+import { mergeMap, take, tap } from 'rxjs/operators';
 
 @Injectable()
 export class AuthInterceptor implements HttpInterceptor {
-  constructor(private identity: IdentityService) {}
+  constructor(private store: Store<State>) {}
 
   intercept(
     req: HttpRequest<any>,
     next: HttpHandler,
   ): Observable<HttpEvent<any>> {
-    if (this.requestRequiresToken(req) && this.identity.token) {
-      req = req.clone({
-        setHeaders: {
-          Authorization: 'Bearer ' + this.identity.token,
-        },
-      });
-    }
-    return next.handle(req);
+    return this.store.pipe(
+      select(selectAuthToken),
+      take(1),
+      tap(token => {
+        if (token && this.requestRequiresToken(req)) {
+          req = req.clone({
+            setHeaders: {
+              Authorization: 'Bearer ' + token,
+            },
+          });
+        }
+      }),
+      mergeMap(() => next.handle(req)),
+    );
   }
 
   private requestRequiresToken(req: HttpRequest<any>): boolean {
@@ -443,12 +404,13 @@ import {
 } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
+import { Store } from '@ngrx/store';
 
-import { IdentityService } from '../identity/identity.service';
+import { State } from '@app/store';
 
 @Injectable()
 export class UnauthInterceptor implements HttpInterceptor {
-  constructor(private identity: IdentityService) {}
+  constructor(private store: Store<State>) {}
 
   intercept(
     req: HttpRequest<any>,
@@ -459,7 +421,7 @@ export class UnauthInterceptor implements HttpInterceptor {
         (event: HttpEvent<any>) => {},
         (err: any) => {
           if (err instanceof HttpErrorResponse && err.status === 401) {
-            this.identity.clear();
+            // What should we do here?
           }
         },
       ),
@@ -468,9 +430,110 @@ export class UnauthInterceptor implements HttpInterceptor {
 }
 ```
 
+**Note:** What should we do when we have a 401 error? Well, we really should inform the store, but we don't really have a an action for that, so let's add one really quick:
+
+```diff
+--- a/src/app/store/actions.ts
++++ b/src/app/store/actions.ts
+@@ -12,6 +12,8 @@ export enum ActionTypes {
+   Logout = '[Tea Page] logout',
+   LogoutSuccess = '[Auth API] logout success',
+   LogoutFailure = '[Auth API] logout failure',
++
++  UnauthError = '[Auth API] unauthenticated error',
+ }
+
+ export const initialize = createAction(ActionTypes.Initialize);
+@@ -39,3 +41,5 @@ export const logoutFailure = createAction(
+   ActionTypes.LogoutFailure,
+   props<{ errorMessage: string }>(),
+ );
++
++export const unauthError = createAction(ActionTypes.UnauthError);
+```
+
+We will also need a reducer to modify the state. All it needs to do is remove the session from the state since the session is not valid.
+
+```TypeScript
+  describe(ActionTypes.UnauthError, () => {
+    it('clears the session', () => {
+      const action = unauthError();
+      expect(
+        reducer(
+          {
+            session: {
+              user: {
+                id: 42,
+                firstName: 'Douglas',
+                lastName: 'Adams',
+                email: 'solong@thanksforthefish.com',
+              },
+              token: 'Imalittletoken',
+            },
+            loading: false,
+            errorMessage: '',
+          },
+          action,
+        ),
+      ).toEqual({ loading: false, errorMessage: '' });
+    });
+  });
+```
+
+```TypeScript
+  on(Actions.unauthError, state => {
+    const newState = { ...state };
+    delete newState.session;
+    return newState;
+  }),
+```
+
+Finally, we need a `unauthError$` effect. It needs to clear the storage and dispatch the fact that we are in a logged out state (LogoutSuccess).
+
+```TypeScript
+  describe('unauthError$', () => {
+    it('clears the session from storage', done => {
+      const sessionVaultService = TestBed.inject(SessionVaultService);
+      actions$ = of(unauthError());
+      effects.unauthError$.subscribe(() => {
+        expect(sessionVaultService.clear).toHaveBeenCalledTimes(1);
+        done();
+      });
+    });
+
+    it('dispatches the logout success event', done => {
+      actions$ = of(unauthError());
+      effects.unauthError$.subscribe(action => {
+        expect(action).toEqual({
+          type: ActionTypes.LogoutSuccess,
+        });
+        done();
+      });
+    });
+  });
+```
+
+```TypeScript
+  unauthError$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(unauthError),
+      tap(() => {
+        this.sessionVault.clear();
+      }),
+      map(() => logoutSuccess()),
+    ),
+  );
+```
+
+The end result being that once the `UnauthError` action is dispatched, the session will be cleared from memory and the user will be redirected to the login screen. This means we can replace the comment in the unauth interceptor with this:
+
+```TypeScript
+this.store.dispatch(unauthError());
+```
+
 ### Hookup the Interceptors
 
-Provide the interceptors in the `app.module.ts` file. This ensures that they are used by the whole application. The `HTTP_INTERCEPTORS` needs to be imported from `@angluar/common/http`.
+Provide the interceptors to the `providers` array in the `app.module.ts` file. This ensures that they are used by the whole application. The `HTTP_INTERCEPTORS` array needs to be imported from `@angluar/common/http`.
 
 ```typescript
     { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
@@ -479,145 +542,213 @@ Provide the interceptors in the `app.module.ts` file. This ensures that they are
 
 While we are in there, we should also add `HttpClientModule` (also from `@angular/common/http`) to our `AppModule`'s list of imports.
 
-## APP_INITIALIZER
+## Update the Store
 
-The `APP_INITIALIZER` defined functions that are injected at startup and executed during the application bootstrap process. We would like to have the `IdentityService` initialized during startup. Add the following to the `providers` list in `AppModule`. `APP_INITIALIZER` needs to be imported from `@angular/core`.
+There is one part of our store that performs asynchronous data actions, and that is the `effects`. Assuming we laid out the rest of our application properly, the only part of our authentication flow that should need to change is the operation of the effects.
+
+### The Auth Effects Tests
+
+Update the `TestBed` to provide a mock authentication service:
 
 ```TypeScript
-{
-  provide: APP_INITIALIZER,
-  useFactory: (identity: IdentityService) => () => identity.init(),
-  deps: [IdentityService],
-  multi: true
-},
+        {
+          provide: AuthenticationService,
+          useFactory: createAuthenticationServiceMock,
+        },
 ```
 
-## Login Page
+Then we need to update the `login$` tests. We need to:
 
-We have the button hooked up to the `signIn()` method and we have a stub for it. It is now time to code that.
+- add a test that verifies we call the `AuthenticationService`
+- redifine how success and failure are detected by making it dependent on the outcome of the `login()` call
+- add a set of tests for when a hard error occurs with the login (for example, a 500 error from the server)
 
-### Test Setup
-
-First, we need to add the `AuthenticationService` to the testing module's `providers` list:
-
-```typescript
-providers: [
-  {
-    provide: AuthenticationService,
-    useFactory: createAuthenticationServiceMock,
-  },
-],
-```
-
-We will also need a method that will perform a click event:
-
-```typescript
-function click(button: HTMLIonButtonElement) {
-  const event = new Event('click');
-  button.dispatchEvent(event);
-  fixture.detectChanges();
-}
-```
-
-Add the following tests within the `describe('signon button', ...)` section of the `login.page.spec.ts` test file.
-
-### Step 1 - Call the Login Method on Click
-
-```typescript
-it('performs a login on clicked', () => {
-  const authenticationService = TestBed.inject(AuthenticationService);
-  setInputValue(email, 'test@test.com');
-  setInputValue(password, 'password');
-  click(button);
-  expect(authenticationService.login).toHaveBeenCalledTimes(1);
-  expect(authenticationService.login).toHaveBeenCalledWith(
-    'test@test.com',
-    'password',
-  );
-});
-```
-
-Now inject the `AuthenticationService` in the page's class and update the `signIn()` method to call the login method.
-
-### Step 2 - Set Error Message if Login Fails
-
-```typescript
-it('sets an error message if the login failed', () => {
-  const authenticationService = TestBed.inject(AuthenticationService);
-  const errorDiv: HTMLDivElement = fixture.nativeElement.querySelector(
-    '.error-message',
-  );
-  (authenticationService.login as any).and.returnValue(of(false));
-  click(button);
-  expect(errorDiv.textContent.trim()).toEqual(
-    'Invalid e-mail address or password',
-  );
-});
-```
-
-Now write the code to make this pass.
-
-**Hint:** Set an `errorMessage` property in the class, and display it within the `.error-messages` `div` in the HTML.
-
-### The Code
-
-The final code and markup should look like this:
-
-```typescript
-  signIn() {
-    this.auth
-      .login(this.email, this.password)
-      .pipe(take(1))
-      .subscribe(success => {
-        if (!success) {
-          this.errorMessage = 'Invalid e-mail address or password';
-        }
+```TypeScript
+  describe('login$', () => {
+    it('performs a login operation', done => {
+      const auth = TestBed.inject(AuthenticationService);
+      (auth.login as any).and.returnValue(of(undefined));
+      actions$ = of(login({ email: 'test@test.com', password: 'test' }));
+      effects.login$.subscribe(() => {
+        expect(auth.login).toHaveBeenCalledTimes(1);
+        expect(auth.login).toHaveBeenCalledWith('test@test.com', 'test');
+        done();
       });
-  }
+    });
+
+    describe('on login success', () => {
+      beforeEach(() => {
+        const auth = TestBed.inject(AuthenticationService);
+        (auth.login as any).and.returnValue(
+          of({
+            user: {
+              id: 73,
+              firstName: 'Ken',
+              lastName: 'Sodemann',
+              email: 'test@test.com',
+            },
+            token: '314159',
+          }),
+        );
+      });
+      ...
+    });
+
+    describe('on login failure', () => {
+      beforeEach(() => {
+        const auth = TestBed.inject(AuthenticationService);
+        (auth.login as any).and.returnValue(of(undefined));
+      });
+      ...
+    });
+
+    describe('on a hard error', () => {
+      beforeEach(() => {
+        const auth = TestBed.inject(AuthenticationService);
+        (auth.login as any).and.returnValue(
+          throwError(new Error('the server is blowing chunks')),
+        );
+      });
+
+      it('does not save the session', done => {
+        const sessionVaultService = TestBed.inject(SessionVaultService);
+        actions$ = of(login({ email: 'test@test.com', password: 'badpass' }));
+        effects.login$.subscribe(() => {
+          expect(sessionVaultService.set).not.toHaveBeenCalled();
+          done();
+        });
+      });
+
+      it('dispatches the login failure event', done => {
+        actions$ = of(login({ email: 'test@test.com', password: 'badpass' }));
+        effects.login$.subscribe(action => {
+          expect(action).toEqual({
+            type: ActionTypes.LoginFailure,
+            errorMessage: 'Unknown error in login',
+          });
+          done();
+        });
+      });
+    });
+  });
 ```
 
-```HTML
-    <div class="error-message">
+For the `logout$` effect, we need to add a test verifying we are performing the logout. We also need to test that on a hard error we trigger a logout failure with a generic message. This is for cases where the API call errors out.
 
-      <!-- (input related error messages are here) -->
+```TypeScript
+  describe('logout$', () => {
+    beforeEach(() => {
+      const auth = TestBed.inject(AuthenticationService);
+      (auth.logout as any).and.returnValue(of(undefined));
+    });
 
-      <div>{{ errorMessage }}</div>
-    </div>
+    it('performs a logout operation', done => {
+      const auth = TestBed.inject(AuthenticationService);
+      actions$ = of(logout());
+      effects.logout$.subscribe(() => {
+        expect(auth.logout).toHaveBeenCalledTimes(1);
+        done();
+      });
+    });
+    ...
+
+    describe('on a hard error', () => {
+      beforeEach(() => {
+        const auth = TestBed.inject(AuthenticationService);
+        (auth.logout as any).and.returnValue(
+          throwError(new Error('the server is blowing chunks')),
+        );
+      });
+
+      it('does not clear the session from storage', done => {
+        const sessionVaultService = TestBed.inject(SessionVaultService);
+        actions$ = of(logout());
+        effects.logout$.subscribe(() => {
+          expect(sessionVaultService.clear).not.toHaveBeenCalled();
+          done();
+        });
+      });
+
+      it('dispatches the logout failure event', done => {
+        actions$ = of(logout());
+        effects.logout$.subscribe(action => {
+          expect(action).toEqual({
+            type: ActionTypes.LogoutFailure,
+            errorMessage: 'Unknown error in logout',
+          });
+          done();
+        });
+      });
+    });
+  });
 ```
 
-## Tea Page
+### The Auth Effects Code
 
-This is a temporary change for testing. We will eventually move the logout and do more with it. We won't unit test it yet, but we will need to provide the mock to prevent our existing tests from failing.
+Turning our attention to the code, the first thing we need to do is inject the `AuthenticationService`
 
-```typescript
-TestBed.configureTestingModule({
-  declarations: [TeaPage],
-  imports: [IonicModule],
-  providers: [
-    {
-      provide: AuthenticationService,
-      useFactory: createAuthenticationServiceMock,
-    },
-  ],
-}).compileComponents();
+```TypeScript
+  constructor(
+    private actions$: Actions,
+    private auth: AuthenticationService,
+    private navController: NavController,
+    private sessionVault: SessionVaultService,
+  ) {}
 ```
 
-Inject the authentication service and create a simple logout method.
+Then we can modify the logic in the `login$` effect:
 
-```typescript
-  constructor(private auth: AuthenticationService) {
-    this.listToMatrix();
-  }
-
-  logout() {
-    this.auth
-      .logout()
-      .pipe(take(1))
-      .subscribe();
-  }
+```diff
+     this.actions$.pipe(
+       ofType(login),
+       exhaustMap(action =>
+-        from(this.fakeLogin(action.email, action.password)).pipe(
+-          tap(session => this.sessionVault.set(session)),
+-          map(session => loginSuccess({ session })),
+-          catchError(error =>
+-            of(loginFailure({ errorMessage: error.message })),
++        this.auth.login(action.email, action.password).pipe(
++          tap(session => {
++            if (session) {
++              this.sessionVault.set(session);
++            }
++          }),
++          map(session =>
++            session
++              ? loginSuccess({ session })
++              : loginFailure({ errorMessage: 'Invalid Username or Password' }),
++          ),
++          catchError(() =>
++            of(loginFailure({ errorMessage: 'Unknown error in login' })),
+           ),
+         ),
+       ),
 ```
 
-Have a look at the <a href="https://ionicframework.com/docs/api/toolbar" target="_blank">Ionic Toolbar</a> documentation and add a button in the `end` slot of the toolbar. Use the `log-out-outline` icon in the `icon-only` slot of the button, and hook the button's click event up to the newly created `logout()` method.
+You can completely remove the private `fakeLogin()` method at this point.
+
+We can also modify the logic in the `logout$` effect:
+
+```diff
+     this.actions$.pipe(
+       ofType(logout),
+       exhaustMap(() =>
+-        from(this.sessionVault.clear()).pipe(map(() => logoutSuccess())),
++        this.auth.logout().pipe(
++          tap(() => this.sessionVault.clear()),
++          map(() => logoutSuccess()),
++          catchError(() =>
++            of(logoutFailure({ errorMessage: 'Unknown error in logout' })),
++          ),
++        ),
+       ),
+     ),
+   );
+```
+
+Test this out in the application. Note from the "network" tab in the devtools that you are now using actual calls to the backend for the login and the logout.
+
+Also note that you were able to use the store to fake the login for a period of time, and then when the time was right you were able to switch over to using the backend API but only had to change the effects that handle them, the rest of your application was able to continue functioning as-is. This is an important tool that you can utilize in your own development.
 
 ## Conclusion
 
