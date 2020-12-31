@@ -196,10 +196,6 @@ There is nothing all that new to learn with the store modifications. We will fol
 Add the following to the `ActionTypes`:
 
 ```TypeScript
-  TeaDetailsChangeRating = '[Tea Details Page] change rating',
-  TeaDetailsChangeRatingSuccess = '[Data API] change rating success',
-  TeaDetailsChangeRatingFailure = '[Data API] change rating failure',
-
   NotesPageLoaded = '[Notes Page] loaded',
   NotesPageDataLoadedSuccess = '[Data API] notes page loaded success',
   NotesPageDataLoadedFailure = '[Data API] notes page loaded failure',
@@ -726,6 +722,16 @@ Once that is in place, we can create test for the following workflows:
   );
 ```
 
+Be sure to inject the `TastingNotesService`.
+
+```TypeScript
+  constructor(
+    private actions$: Actions,
+    private tastingNotesService: TastingNotesService,
+    private teaService: TeaService,
+  ) {}
+```
+
 #### Selectors
 
 For selectors, we need one to get all of the notes and one to get a specific note.
@@ -785,16 +791,23 @@ The first thing we need to do is get a modal overlay hooked up for the "add a ne
 First we need to set up the test for the `TastingNotesPage`.
 
 ```typescript
-import { waitForAsync, ComponentFixture, TestBed } from '@angular/core/testing';
-import { IonicModule, ModalController, IonRouterOutlet } from '@ionic/angular';
+import {
+  waitForAsync,
+  ComponentFixture,
+  TestBed,
+  fakeAsync,
+  tick,
+} from '@angular/core/testing';
+import { By } from '@angular/platform-browser';
+import { IonicModule, IonRouterOutlet, ModalController } from '@ionic/angular';
 
-import { TastingNotesPage } from './tasting-notes.page';
 import {
   createOverlayControllerMock,
   createOverlayElementMock,
 } from '@test/mocks';
 import { TastingNoteEditorComponent } from './tasting-note-editor/tasting-note-editor.component';
 import { TastingNoteEditorModule } from './tasting-note-editor/tasting-note-editor.module';
+import { TastingNotesPage } from './tasting-notes.page';
 
 describe('TastingNotesPage', () => {
   let component: TastingNotesPage;
@@ -823,11 +836,11 @@ describe('TastingNotesPage', () => {
 
       fixture = TestBed.createComponent(TastingNotesPage);
       component = fixture.componentInstance;
+      fixture.detectChanges();
     }),
   );
 
   it('should create', () => {
-    fixture.detectChanges();
     expect(component).toBeTruthy();
   });
 
@@ -838,7 +851,10 @@ describe('TastingNotesPage', () => {
 
     it('creates the editor modal', () => {
       const modalController = TestBed.inject(ModalController);
-      component.newNote();
+      const button = fixture.debugElement.query(
+        By.css('[data-testid="add-new-button"]'),
+      ).nativeElement;
+      click(button);
       expect(modalController.create).toHaveBeenCalledTimes(1);
       expect(modalController.create).toHaveBeenCalledWith({
         component: TastingNoteEditorComponent,
@@ -848,11 +864,21 @@ describe('TastingNotesPage', () => {
       });
     });
 
-    it('displays the editor modal', async () => {
-      await component.newNote();
+    it('displays the editor modal', fakeAsync(() => {
+      const button = fixture.debugElement.query(
+        By.css('[data-testid="add-new-button"]'),
+      ).nativeElement;
+      click(button);
+      tick();
       expect(modal.present).toHaveBeenCalledTimes(1);
-    });
+    }));
   });
+
+  function click(button: HTMLElement) {
+    const event = new Event('click');
+    button.dispatchEvent(event);
+    fixture.detectChanges();
+  }
 });
 ```
 
@@ -867,7 +893,7 @@ From here, the code and the markup are pretty easy:
 
 <ion-content>
   <ion-fab vertical="bottom" horizontal="end" slot="fixed">
-    <ion-fab-button (click)="newNote()">
+    <ion-fab-button data-testid="add-new-button" (click)="newNote()">
       <ion-icon name="add"></ion-icon>
     </ion-fab-button>
   </ion-fab>
@@ -1063,6 +1089,7 @@ The only initialization we need at this point is to set up the `teaCategories$` 
 ###### Test
 
 ```typescript
+import { By } from '@angular/platform-browser';
 ...
 import { MockStore, provideMockStore } from '@ngrx/store/testing';
 ...
@@ -1070,7 +1097,6 @@ import { DataState, initialState } from '@app/store/reducers/data/data.reducer';
 ...
 import { Store } from '@ngrx/store';
 import { selectTeas } from '@app/store';
-import {By} from '@angular/platform-browser';
 ...
   beforeEach(
     waitForAsync(() => {
@@ -1137,7 +1163,7 @@ The population of the `ion-select-option` values is handled via `*ngFor="let t o
 
 ##### Perform the Add
 
-The add is relativily easy. Create a tea object using the properties, call `tastingNotesService.save()`, and close the modal.
+The add is relativily easy. Create a tea object using the properties, dispatch `noteSaved`, and close the modal.
 
 ###### Test
 
@@ -1178,7 +1204,7 @@ describe('save', () => {
 });
 ```
 
-**Note:** these tests call the `component.save()` directly. If we wanted to be more complete we could add a helper function to do a button click, get the "Add" button, and perform a click on it. Exapanding the test in such a way is left as an exercise for the reader to do on their own. We have examples of such tests for the `LoginPage`.
+**Note:** these tests call the `component.save()` directly. If we wanted to be more complete we could add a helper function to do a button click, get the "Add" button, and perform a click on it. Exapanding the test in such a way is left as an exercise for the reader to do on their own. We have examples of such tests on several page components.
 
 ###### Code
 
@@ -1248,7 +1274,7 @@ We can add notes all day long, but we cannot see them. Let's shift back to the `
 
 ### Test
 
-First we need to provide a mock for the `TastingNotesService` and configure it to return some basic test data.
+First we need to provide a mock for the `Store` and configure it to return some basic test data from the `selectNotes` selector.
 
 ```typescript
   // add this up by the other declarations...
@@ -1281,7 +1307,6 @@ First we need to provide a mock for the `TastingNotesService` and configure it t
 
       fixture = TestBed.createComponent(TastingNotesPage);
       component = fixture.componentInstance;
-      fixture.detectChanges();
     }),
   );
 
@@ -1379,7 +1404,7 @@ For the Tasting Notes page, we could just add a simple list, but now that we hav
   </ion-list>
 
   <ion-fab vertical="bottom" horizontal="end" slot="fixed">
-    <ion-fab-button (click)="newNote()">
+    <ion-fab-button data-testid="add-new-button" (click)="newNote()">
       <ion-icon name="add"></ion-icon>
     </ion-fab-button>
   </ion-fab>
@@ -1407,39 +1432,34 @@ Each note that we have is represented by an item in the list. We can bind each o
 
 #### Tests
 
-This tests will be almost identical to the `newNote()` tests with the exception that we will pass a note to the modal component.
+This tests will be almost identical to the `newNote()` tests with the exception that we will pass a note to the modal component.Also, the element being clicked is different.
 
 ```typescript
-describe('update existing note', () => {
-  let note: TastingNote;
+describe('update an existing note', () => {
   beforeEach(() => {
-    note = {
-      id: 73,
-      brand: 'Lipton',
-      name: 'Yellow Label',
-      teaCategoryId: 3,
-      rating: 1,
-      notes: 'ick',
-    };
+    fixture.detectChanges();
   });
 
   it('creates the editor modal', () => {
     const modalController = TestBed.inject(ModalController);
-    component.updateNote(note);
+    const item = fixture.debugElement.query(By.css('ion-item')).nativeElement;
+    click(item);
     expect(modalController.create).toHaveBeenCalledTimes(1);
     expect(modalController.create).toHaveBeenCalledWith({
       component: TastingNoteEditorComponent,
       backdropDismiss: false,
       swipeToClose: true,
       presentingElement: mockRouterOutlet.nativeEl as any,
-      componentProps: { note },
+      componentProps: { note: testData[0] },
     });
   });
 
-  it('displays the editor modal', async () => {
-    await component.updateNote(note);
+  it('displays the editor modal', fakeAsync(() => {
+    const item = fixture.debugElement.query(By.css('ion-item')).nativeElement;
+    click(item);
+    tick();
     expect(modal.present).toHaveBeenCalledTimes(1);
-  });
+  }));
 });
 ```
 
@@ -1493,6 +1513,17 @@ it('should create', () => {
   fixture.detectChanges();
   expect(component).toBeTruthy();
 });
+```
+
+Or, in test sets where we do not need fine control, within a `beforeEach()` like this:
+
+```TypeScript
+  describe('save', () => {
+    beforeEach(() => {
+      fixture.detectChanges();
+    });
+    ...
+  });
 ```
 
 This will allow us to set up data before the `ngOnInit()` call is made.

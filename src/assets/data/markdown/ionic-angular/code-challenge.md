@@ -1,6 +1,6 @@
 # Lab: Code Challenge
 
-This lab is code challenge where we provide _some_ of the code, and you provide the rest. Let's see how you do. If you get stuck, please ask and we can work through the parts you are stuck on together.
+This lab is a code challenge where we provide _some_ of the code, and you provide the rest. Let's see how you do. If you get stuck, please ask and we can work through the parts you are stuck on together.
 
 ## Challenge - Complete the Logout
 
@@ -70,7 +70,7 @@ Here is the test for how it should work
 +    });
 +  });
 +
-+  function click(button: HTMLIonButtonElement) {
++  function click(button: HTMLElement) {
 +    const event = new Event('click');
 +    button.dispatchEvent(event);
 +    fixture.detectChanges();
@@ -90,7 +90,12 @@ Get those in place. At that point, your challenge is to add the items that make 
   - write a test for the `logoutSuccess$` effect
   - write the `logoutSuccess$` effect
 
-**Hint #1:** at this time, the only task for `logout$` is to clear the storage, making it structurally similar to the `initialize$`, which also only has one task. For the tests you can create a `describe('logout$')` block and copy the two test cases from `initialize$` and make minor modifcations. Likewise, the basic logic for the effect can by copied from the `initialize$` effect and the modified for the `logout$` situation.
+**Hint #1:** at this time, the `logout$` effect only needs to do two things:
+
+- clear the session
+- dispatch the `logoutSuccess` event.
+
+This makes the tests for it similar to the "on login success" tests for the `login$` effect, only without all of the argument passing and checking since the `logout` related actions and methods do not take arguments.
 
 **Hint #2:** `logoutSuccess$` is a lot like `loginSuccess$` with only the details of the action and the actual path navigated to differing. This makes `loginSuccess$` a pretty good model for what you need to do.
 
@@ -125,7 +130,7 @@ As promised, here is one way to test the `logout$` effect:
 +      const sessionVaultService = TestBed.inject(SessionVaultService);
 +      actions$ = of(logout());
 +      effects.logout$.subscribe(() => {
-+        expect(sessionVaultService.clear).toHaveBeenCalledTimes(1);
++        expect(sessionVaultService.logout).toHaveBeenCalledTimes(1);
 +        done();
 +      });
 +    });

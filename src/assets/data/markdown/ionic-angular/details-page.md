@@ -30,7 +30,7 @@ UPDATE src/app/app-routing.module.ts (746 bytes)
 
 Note the output of the command. This generated several files for us and also updated our main routing module. We now have a new route called `tea-details`. If we do a little URL hacking in our browser, we can even display the page. Neat!
 
-But, we want details for a specific tea, so our route will need to have the tea ID as part of it. Let's start by modifying the route to take a parameter. Edit the `src/app/tea-details/tea-details-routing.module.ts` module file to add an `:id` parameter to the path and to guard the route.
+But, we want details for a specific tea, so our route will need to have the tea ID as part of it. Let's start by modifying the route to take a parameter. Edit the `src/app/tea-details/tea-details-routing.module.ts` module file to add an `:id` parameter to the path. While we are here, also add the guard to the route.
 
 ```typescript
 import { NgModule } from '@angular/core';
@@ -56,7 +56,7 @@ export class TeaDetailsPageRoutingModule {}
 
 With a little URL hacking, you should still be able to get to this page, but now you will need to supply an ID like this: `tea-details/1`.
 
-### Integrate the Page in to the App
+### Integrate the Page Into the App
 
 The first thing we will do is to integrate the page within the routing flow of the application. This will involve:
 
@@ -93,32 +93,48 @@ In the same file, create the following set of tests:
 
 ```typescript
 describe('show details page', () => {
+  let card: HTMLElement;
+  beforeEach(() => {
+    const grid = fixture.debugElement.query(By.css('ion-grid'));
+    const rows = grid.queryAll(By.css('ion-row'));
+    const cols = rows[0].queryAll(By.css('ion-col'));
+    card = cols[2].query(By.css('ion-card')).nativeElement;
+  });
+
   it('navigates forward', () => {
     const navController = TestBed.inject(NavController);
-    component.showDetailsPage(42);
+    click(card);
     expect(navController.navigateForward).toHaveBeenCalledTimes(1);
   });
 
   it('passes the details page and the ID', () => {
     const navController = TestBed.inject(NavController);
-    component.showDetailsPage(42);
+    click(card);
     expect(navController.navigateForward).toHaveBeenCalledWith([
       'tea-details',
-      42,
+      teas[2].id,
     ]);
   });
 });
 ```
 
-These tests assert that when we call a method named `showDetailsPage()` with an ID, we will navigate to the `tea-details/:id` route. At this point, write the code that satisfies these tests.
+These tests assert that when a card is clicked we will navigate to the `tea-details/:id` route using the ID from the tea displayed by that card. Getting these tests to pass is a two step operation:
 
-Once the code is written, we need to hook up the click event in the HTML. When we click a card, we want to navigate to the details for that tea, so adding a `(click)` event binding on the `ion-card` makes the most sense. We will aslo add a `button` property which will add some styling to make the card behave in a "clickable" fashion.
+- update the template markup to include the proper event binding
+- write the handler for the event
+
+Here is the markup for the template. A `(click)` event binding has been added that will call a method called `showDetailsPage()` passing the tea's ID. The `button` property adds some styling to make the card behave in a "clickable" fashion.
 
 ```html
-<ion-card button (click)="showDetailsPage(tea.id)"></ion-card>
+<ion-card button (click)="showDetailsPage(tea.id)">
+  <!-- the contents of the card is here -->
+</ion-card>
 ```
 
-Now when we click on a card we should go to the Tea Details page, and the path should include the ID.
+**Code Challenge:** write the `showDetailsPage()` method. To accomplish this, you will need to:
+
+- inject the `NavController` in the `TeaPage` class
+- call the appropriate method on that service passing the proper parameters (see the test)
 
 #### Display Something
 
@@ -128,8 +144,8 @@ Before we get too far into the page, let's do an initial layout of what the data
 
 ```css
 ion-img {
-  width: 75%;
-  max-width: 768px;
+  max-width: 75%;
+  max-height: 512px;
 }
 ```
 
@@ -152,6 +168,22 @@ ion-img {
   </div>
 </ion-content>
 ```
+
+#### Selecting a Single Tea
+
+NgRX selectors allow us to <a href="https://ngrx.io/guide/store/selectors#using-selectors-with-props" target="_blank">pass properties</a> to them. We can use this in order to craft a selector that will observe a specific tea within the state.
+
+Open `src/app/state/selectors/data.selectors.ts` and add the following selector:
+
+```TypeScript
+export const selectTea = createSelector(
+  selectTeas,
+  (teas: Array<Tea>, props: { id: number }) =>
+    teas.find(t => t.id === props.id),
+);
+```
+
+Notice how we are building upon the other selectors.
 
 #### Reading the ID Parameter
 
@@ -217,9 +249,24 @@ We would like to write most of our tests from the point of view of the end user 
   });
 ```
 
+**Note:** you need to remove the `fixture.detectChanges()` call from the `beforeEach()`. We want to delay the `ngOnInit()` call until after we have set up our spy.
+
 The code for that looks like this:
 
 ```TypeScript
+import { Component, OnInit } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
+import { Store } from '@ngrx/store';
+import { Observable } from 'rxjs';
+
+import { Tea } from '@app/models';
+import { selectTea, State } from '@app/store';
+
+@Component({
+  selector: 'app-tea-details',
+  templateUrl: './tea-details.page.html',
+  styleUrls: ['./tea-details.page.scss'],
+})
 export class TeaDetailsPage implements OnInit {
   tea$: Observable<Tea>;
 
@@ -237,12 +284,12 @@ We can now do a couple more "user" centric tests by checking a couple of the bin
 ```TypeScript
     it('binds the name', () => {
       fixture.detectChanges();
-      const nameEl = fixture.debugElement.query(By.css('[data-testid="name"]'));
-      expect(nameEl.nativeElement.textContent.trim()).toBe('White');
+      const el = fixture.debugElement.query(By.css('[data-testid="name"]'));
+      expect(el.nativeElement.textContent.trim()).toBe('White');
     });
 ```
 
-**Challenge:** add a similar test for the description.
+**Challenge:** add a similar test for the description. Both of these tests should go inside the "initialization" describe.
 
 #### Navigating Back from the Details Page
 

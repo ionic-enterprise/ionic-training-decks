@@ -37,13 +37,13 @@ export class SessionVaultService {
 
   constructor() {}
 
-  async set(session: Session): Promise<void> {}
+  async login(session: Session): Promise<void> {}
 
-  async get(): Promise<Session> {
+  async restoreSession(): Promise<Session> {
     return null;
   }
 
-  async clear(): Promise<void> {}
+  async logout(): Promise<void> {}
 }
 ```
 
@@ -81,11 +81,11 @@ describe('SessionVaultService', () => {
     expect(service).toBeTruthy();
   });
 
-  describe('set', () => {});
+  describe('login', () => {});
 
-  describe('get', () => {});
+  describe('restoreSession', () => {});
 
-  describe('clear', () => {});
+  describe('logout', () => {});
 });
 ```
 
@@ -93,26 +93,28 @@ describe('SessionVaultService', () => {
 
 As we start crafting the service, we will do so in a TDD fashion. First write a test that verifies a requirment, then create the code to make the test pass. Be sure to add each test within the appropriate `describe()` block.
 
-#### Set
+#### Login
 
-The `set()` method is used to store the session via the Capacitor Storage plugin.
+The `login()` method is called at login and stores the session via the Capacitor Storage plugin.
 
 ```typescript
-it('saves the session in storage', async () => {
-  const session: Session = {
-    user: {
-      id: 42,
-      firstName: 'Joe',
-      lastName: 'Tester',
-      email: 'test@test.org',
-    },
-    token: '19940059fkkf039',
-  };
-  await service.set(session);
-  expect(Plugins.Storage.set).toHaveBeenCalledTimes(1);
-  expect(Plugins.Storage.set).toHaveBeenCalledWith({
-    key: 'auth-session',
-    value: JSON.stringify(session),
+describe('login', () => {
+  it('saves the session in storage', async () => {
+    const session: Session = {
+      user: {
+        id: 42,
+        firstName: 'Joe',
+        lastName: 'Tester',
+        email: 'test@test.org',
+      },
+      token: '19940059fkkf039',
+    };
+    await service.login(session);
+    expect(Plugins.Storage.set).toHaveBeenCalledTimes(1);
+    expect(Plugins.Storage.set).toHaveBeenCalledWith({
+      key: 'auth-session',
+      value: JSON.stringify(session),
+    });
   });
 });
 ```
@@ -120,7 +122,7 @@ it('saves the session in storage', async () => {
 The code for this then looks like the following:
 
 ```TypeScript
-  async set(session: Session): Promise<void> {
+  async login(session: Session): Promise<void> {
     const { Storage } = Plugins;
     await Storage.set({ key: this.key, value: JSON.stringify(session) });
   }
@@ -128,50 +130,73 @@ The code for this then looks like the following:
 
 Be sure to import `Plugins` from `@capacitor/core` at the top of your file.
 
-#### Get
+#### Restore Session
 
-The `get()` method is used to get the session via the Capacitor Storage plugin.
+The `restoreSession()` method is used to get the session via the Capacitor Storage plugin.
 
 ```typescript
-it('gets the session from storage', async () => {
-  (Plugins.Storage.get as any).and.returnValue(
-    Promise.resolve({ value: null }),
-  );
-  await service.get();
-  expect(Plugins.Storage.get).toHaveBeenCalledTimes(1);
-  expect(Plugins.Storage.get).toHaveBeenCalledWith({
-    key: 'auth-session',
+describe('restore session', () => {
+  it('gets the session from storage', async () => {
+    (Plugins.Storage.get as any).and.returnValue(
+      Promise.resolve({ value: null }),
+    );
+    await service.restoreSession();
+    expect(Plugins.Storage.get).toHaveBeenCalledTimes(1);
+    expect(Plugins.Storage.get).toHaveBeenCalledWith({
+      key: 'auth-session',
+    });
   });
-});
 
-it('resolves the session', async () => {
-  const session: Session = {
-    user: {
-      id: 42,
-      firstName: 'Joe',
-      lastName: 'Tester',
-      email: 'test@test.org',
-    },
-    token: '19940059fkkf039',
-  };
-  (Plugins.Storage.get as any).and.returnValue(
-    Promise.resolve({ value: JSON.stringify(session) }),
-  );
-  expect(await service.get()).toEqual(session);
+  describe('with a session', () => {
+    const session: Session = {
+      user: {
+        id: 42,
+        firstName: 'Joe',
+        lastName: 'Tester',
+        email: 'test@test.org',
+      },
+      token: '19940059fkkf039',
+    };
+    beforeEach(() => {
+      (Plugins.Storage.get as any).and.returnValue(
+        Promise.resolve({ value: JSON.stringify(session) }),
+      );
+    });
+
+    it('resolves the session', async () => {
+      expect(await service.restoreSession()).toEqual(session);
+    });
+  });
+
+  describe('with a session', () => {
+    beforeEach(() => {
+      (Plugins.Storage.get as any).and.returnValue(
+        Promise.resolve({ value: null }),
+      );
+    });
+
+    it('resolves the session', async () => {
+      expect(await service.restoreSession()).toEqual(null);
+    });
+  });
 });
 ```
 
 **Challenge:** write the code for this method. Check with the <a href="https://capacitorjs.com/docs/apis/storage" target="_blank">Storage API</a> docs if you get stuck.
 
-#### Clear
+#### Logout
 
-The clear() method is used to remove the session from storage.
+The Logout() method is called at logout and removes the session from storage.
 
 ```typescript
-it('clears the storage', async () => {
-  await service.clear();
-  expect(Plugins.Storage.remove).toHaveBeenCalledTimes(1);
-  expect(Plugins.Storage.remove).toHaveBeenCalledWith({ key: 'auth-session' });
+describe('logout', () => {
+  it('clears the storage', async () => {
+    await service.logout();
+    expect(Plugins.Storage.remove).toHaveBeenCalledTimes(1);
+    expect(Plugins.Storage.remove).toHaveBeenCalledWith({
+      key: 'auth-session',
+    });
+  });
 });
 ```
 
@@ -179,14 +204,14 @@ it('clears the storage', async () => {
 
 ## Session Vault Service Mock Factory
 
-Add a `src/app/core/session-vault/session-vault.service.mock.ts` file and inside of it create a factory used to build mock SessionVaultService objects for testing.
+Add a `src/app/core/session-vault/session-vault.service.mock.ts` file and inside of it create a factory used to build mock `SessionVaultService` objects for testing.
 
 ```typescript
 export function createSessionVaultServiceMock() {
   return jasmine.createSpyObj('SessionVaultService', {
-    set: Promise.resolve(),
-    get: Promise.resolve(),
-    clear: Promise.resolve(),
+    login: Promise.resolve(),
+    restoreSession: Promise.resolve(),
+    logout: Promise.resolve(),
   });
 }
 ```
@@ -214,7 +239,7 @@ Try an `npm run build` and notice that it fails because it is trying to bring th
 There are two tasks we currently need to perform within the store:
 
 - upon login, save the session
-- upon application init, get the session from storage
+- when the session is restored, dispatch an action to update the state
 
 ### Handle Login
 
@@ -248,8 +273,8 @@ import { createSessionVaultServiceMock } from '@app/core/testing';
         const sessionVaultService = TestBed.inject(SessionVaultService);
         actions$ = of(login({ email: 'test@test.com', password: 'test' }));
         effects.login$.subscribe(() => {
-          expect(sessionVaultService.set).toHaveBeenCalledTimes(1);
-          expect(sessionVaultService.set).toHaveBeenCalledWith({
+          expect(sessionVaultService.login).toHaveBeenCalledTimes(1);
+          expect(sessionVaultService.login).toHaveBeenCalledWith({
             user: {
               id: 73,
               firstName: 'Ken',
@@ -261,7 +286,6 @@ import { createSessionVaultServiceMock } from '@app/core/testing';
           done();
         });
       });
-    });
 ...
     describe('on login failure', () => {
 ...
@@ -269,12 +293,10 @@ import { createSessionVaultServiceMock } from '@app/core/testing';
         const sessionVaultService = TestBed.inject(SessionVaultService);
         actions$ = of(login({ email: 'test@test.com', password: 'badpass' }));
         effects.login$.subscribe(() => {
-          expect(sessionVaultService.set).not.toHaveBeenCalled();
+          expect(sessionVaultService.login).not.toHaveBeenCalled();
           done();
         });
       });
-    });
-  });
 ...
 ```
 
@@ -285,7 +307,7 @@ In the code, we can add a `tap()` to our observable pipeline that will fulfill t
 import { SessionVaultService } from '@app/core';
 ...
         from(this.fakeLogin(action.email, action.password)).pipe(
-          tap(session => this.sessionVault.set(session)),
+          tap(session => this.sessionVault.login(session)),
           map(session => loginSuccess({ session })),
           catchError(error =>
             of(loginFailure({ errorMessage: error.message })),
@@ -300,56 +322,25 @@ import { SessionVaultService } from '@app/core';
 ...
 ```
 
-### Handle Initialization
+### Handle Session Restore
 
-We are now persisting the session on login, but we also need to read it on application startup. Let's do that now. We will need to add some actions, then update the reducer to handle them. Finally, we need an effect to perform our asynchronous loading action.
-
-#### Actions
-
-Remember that actions represent events in our application. In this case the events will be initialization of the application as well as completing the initialization with or without a session. Add the following to `src/app/store/actions.ts`
+When the session is restored, we need to dispatch an action to the store in order to update the state with the session. First add the action in `src/app/store/actions.js`:
 
 ```TypeScript
 ...
-  Initialize = '[Application] initialize auth',
-  InitializedWithRestoredSession = '[Auth API] initialized with restored session',
-  InitializedWithoutSession = '[Auth API] initialized without session',
+  SessionRestored = '[Vault API] session restored',
 ...
-export const initialize = createAction(ActionTypes.Initialize);
-export const initializedWithRestoredSession = createAction(
-  ActionTypes.InitializedWithRestoredSession,
+export const sessionRestored = createAction(
+  ActionTypes.SessionRestored,
   props<{ session: Session }>(),
 );
-export const initializedWithoutSession = createAction(
-  ActionTypes.InitializedWithoutSession,
-);
-...
 ```
 
-#### Reducer Update
-
-The reducer needs to handle these actions in a very similar manner to how it handles the `Login` and `LoginSuccess` actions, so we will test that out in `src/app/store/reducers/auth/auth.reducer.spec.ts` (remember to import the two new actions):
+The reducer (`src/app/store/reducers/auth/auth.reducer.*`) should handle this action by setting the session in the state.
 
 ```TypeScript
-describe(ActionTypes.Initialize, () => {
-  it('sets the loading flag and clears other data', () => {
-    const action = initialize();
-    expect(
-      reducer(
-        {
-          loading: false,
-          errorMessage: 'Invalid Email or Password',
-        },
-        action,
-      ),
-    ).toEqual({
-      loading: true,
-      errorMessage: '',
-    });
-  });
-});
-
-describe(ActionTypes.InitializedWithRestoredSession, () => {
-  it('clears the loading flag and sets the session', () => {
+describe(ActionTypes.SessionRestored, () => {
+  it('sets the session', () => {
     const session: Session = {
       user: {
         id: 42,
@@ -359,175 +350,93 @@ describe(ActionTypes.InitializedWithRestoredSession, () => {
       },
       token: 'Imalittletoken',
     };
-    const action = initializedWithRestoredSession({ session });
-    expect(reducer({ loading: true, errorMessage: '' }, action)).toEqual({
+    const action = sessionRestored({ session });
+    expect(reducer({ loading: false, errorMessage: '' }, action)).toEqual({
       session,
       loading: false,
       errorMessage: '',
     });
   });
 });
-
-describe(ActionTypes.InitializedWithoutSession, () => {
-  it('clears the loading flag', () => {
-    const action = initializedWithoutSession();
-    expect(reducer({ loading: true, errorMessage: '' }, action)).toEqual({
-      loading: false,
-      errorMessage: '',
-    });
-  });
-});
 ```
 
-The code to satisfy that is straight forward:
-
 ```TypeScript
-  on(Actions.initialize, state => ({
-    ...state,
-    loading: true,
-    errorMessage: '',
-  })),
-  on(Actions.initializedWithRestoredSession, (state, { session }) => ({
+  on(Actions.sessionRestored, (state, { session }) => ({
     ...state,
     session,
-    loading: false,
-  })),
-  on(Actions.initializedWithoutSession, state => ({
-    ...state,
-    loading: false,
   })),
 ```
 
-#### Effects
-
-The last pieces are the effects. The first one listens for the `Actions.Initialize` action, performs the required action, and dispatches the `InitializeSuccess` when it has completed it. The second listens for `InitializeSuccess` and navigates to the login page if we have no session.
-
-##### The `initialize$` Effect
-
-First we test (`src/app/store/effects/auth/auth.effects.spec.ts`). Be sure to update your import statements accordingly.
+Finally, modify the `SessionVaultService` to dispatch this action whenever a session is restored.
 
 ```TypeScript
-  describe('initialize$', () => {
-    [
-      {
-        desc: 'with a stored session',
-        value: {
-          user: {
-            id: 73,
-            firstName: 'Ken',
-            lastName: 'Sodemann',
-            email: 'test@test.com',
-          },
-          token: '314159',
-        },
-      },
-      {
-        desc: 'without a stored session',
-        value: undefined,
-      },
-    ].forEach(test => {
-      describe(test.desc, () => {
-        beforeEach(() => {
-          const sessionVaultService = TestBed.inject(SessionVaultService);
-          (sessionVaultService.get as any).and.returnValue(
-            Promise.resolve(test.value),
-          );
-        });
+...
+import { Store } from '@ngrx/store';
+import { provideMockStore } from '@ngrx/store/testing';
+...
+import { sessionRestored } from '@app/store/actions';
 
-        it('gets the session from storage', done => {
-          const sessionVaultService = TestBed.inject(SessionVaultService);
-          actions$ = of(initialize());
-          effects.initialize$.subscribe(() => {
-            expect(sessionVaultService.get).toHaveBeenCalledTimes(1);
-            done();
-          });
-        });
-
-        it('dispatches the proper initialized event', done => {
-          actions$ = of(initialize());
-          effects.initialize$.subscribe(action => {
-            if (test.value) {
-              expect(action).toEqual({
-                type: ActionTypes.InitializedWithRestoredSession,
-                session: test.value,
-              });
-            } else {
-              expect(action).toEqual({
-                type: ActionTypes.InitializedWithoutSession,
-              });
-            }
-            done();
-          });
-        });
-      });
+...
+    TestBed.configureTestingModule({
+      providers: [provideMockStore()],
     });
-  });
-```
+...
 
-Notide the array of values and the `forEach`. Sometimes it is desirable to run the same test cases over multiple sets of data. This is one technique that can be used to accomplish this.
+  describe('restore session', () => {
+    ...
 
-Then there is the code for this. Again it is up to use to update your import statements at the top of the file.
-
-```TypeScript
-  initialize$ = createEffect(() =>
-    this.actions$.pipe(
-      ofType(initialize),
-      exhaustMap(() =>
-        from(this.sessionVault.get()).pipe(
-          map(session =>
-            session
-              ? initializedWithRestoredSession({ session })
-              : initializedWithoutSession(),
-          ),
-        ),
-      ),
-    ),
-  );
-```
-
-##### The `initializedWithoutSession` Effect
-
-When we initialize without a session, we should direct the user to the login screen. Again, we will first write the tests:
-
-```TypeScript
-  describe('initializedWithoutSession$', () => {
-    it('navigats to the login page', done => {
-      const navController = TestBed.inject(NavController);
-      actions$ = of(initializedWithoutSession());
-      effects.initializedWithoutSession$.subscribe(() => {
-        expect(navController.navigateRoot).toHaveBeenCalledTimes(1);
-        expect(navController.navigateRoot).toHaveBeenCalledWith(['/', 'login']);
-        done();
+    describe('with a session', () => {
+      ...
+      it('dispatches session restored', async () => {
+        const store = TestBed.inject(Store);
+        spyOn(store, 'dispatch');
+        await service.restoreSession();
+        expect(store.dispatch).toHaveBeenCalledTimes(1);
+        expect(store.dispatch).toHaveBeenCalledWith(
+          sessionRestored({ session }),
+        );
       });
-    });
-  });
+
+...
+
+    describe('without a session', () => {
+      ...
+      it('does not dispatch session restored', async () => {
+        const store = TestBed.inject(Store);
+        spyOn(store, 'dispatch');
+        await service.restoreSession();
+        expect(store.dispatch).not.toHaveBeenCalled();
+      });
+...
 ```
 
-**Challenge:** switch over to the auth effects code and write the code for this effect. Have a look at the `loginSuccess$` effect. This one will be very similar. Check at the end of this page if you get stuck, but try to finish this up without peeking.
-
-#### APP_INITIALIZER
-
-The `APP_INITIALIZER` defines functions that are injected at startup and executed during the application bootstrap process. We would like to have our auth state initialized during startup. Add the following to the `providers` list in `AppModule`.
+The code to accomplish this while still satisfying the other tests looks like this:
 
 ```TypeScript
-    {
-      provide: APP_INITIALIZER,
-      useFactory: (store: Store<State>) => () => store.dispatch(initialize()),
-      deps: [Store],
-      multi: true,
-    },
-```
+...
+import { Store } from '@ngrx/store';
+import { sessionRestored } from '@app/store/actions';
+...
+import { State } from '@app/store';
+...
 
-You will have to update some of the imports to get this to compile:
+  constructor(private store: Store<State>) {}
 
-```TypeScript
-import { APP_INITIALIZER, NgModule } from '@angular/core';
 ...
-import { Store, StoreModule } from '@ngrx/store';
+
+  async restoreSession(): Promise<Session> {
+    const { Storage } = Plugins;
+    const { value } = await Storage.get({ key: this.key });
+    const session = JSON.parse(value);
+
+    if (session) {
+      this.store.dispatch(sessionRestored({ session }));
+    }
+
+    return session;
+  }
+
 ...
-import { reducers, metaReducers, State } from './store';
-...
-import { initialize } from './store/actions';
 ```
 
 ## A Note on Security
@@ -544,16 +453,3 @@ Here we are just storing the user's name, etc. and are not using anything other 
 ## Conclusion
 
 You have created a service that will store the information about the currently logged in user, but we have not provided a way for the user to actually authenticate with the API. That is what we will talk about after a quick coding challenge.
-
-In case you need to peek, here is the implementation of the `initializeSuccess$` effect:
-
-```TypeScript
-  initializedWithoutSession$ = createEffect(
-    () =>
-      this.actions$.pipe(
-        ofType(initializedWithoutSession),
-        tap(() => this.navController.navigateRoot(['/', 'login'])),
-      ),
-    { dispatch: false },
-  );
-```

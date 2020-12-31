@@ -66,27 +66,27 @@ describe('TastingNoteEditorComponent', () => {
 At this point we can start creating the tests for the properties that control the button:
 
 ```TypeScript
-  describe('share' () => {
-    describe('in a web context' () => {
+  describe('share', () => {
+    describe('in a web context', () => {
       beforeEach(() => {
         const platform = TestBed.inject(Platform);
         (platform.is as any).withArgs('hybrid').and.returnValue(false);
         fixture.detectChanges();
       });
 
-      it('is not available' () => {
+      it('is not available', () => {
         expect(fixture.debugElement.query(By.css('#share-button'))).toBeFalsy();
       });
     });
 
-    describe('in a mobile context' () => {
+    describe('in a mobile context', () => {
       beforeEach(() => {
         const platform = TestBed.inject(Platform);
         (platform.is as any).withArgs('hybrid').and.returnValue(true);
         fixture.detectChanges();
       });
 
-      it('is available' () => {
+      it('is available', () => {
         expect(fixture.debugElement.query(By.css('#share-button'))).toBeTruthy();
       });
     });
@@ -169,7 +169,7 @@ describe('TastingNoteEditorComponent', () => {
   ...
 ```
 
-Then we will add a test within the `share in a web mobile context` describe block.
+Then we will add a test within the `share in a mobile context` describe block.
 
 ```TypeScript
       it('calls the share plugin when clicked', async () => {

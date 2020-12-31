@@ -167,23 +167,25 @@ The folloing `3.1` step should then be nested within the `describe()` that was j
 
 ```typescript
 it('emits the session', fakeAsync(() => {
-  service.login('thank.you@forthefish.com', 'solongDude').subscribe(r =>
-    expect(r).toEqual({
-      token: '48499501093kf00399sg',
-      user: {
-        id: 42,
-        firstName: 'Douglas',
-        lastName: 'Adams',
-        email: 'thank.you@forthefish.com',
-      },
-    }),
-  );
+  let session: Session;
+  service
+    .login('thank.you@forthefish.com', 'solongDude')
+    .subscribe(r => (session = r));
   const req = httpTestingController.expectOne(
     `${environment.dataService}/login`,
   );
   req.flush(response);
   tick();
   httpTestingController.verify();
+  expect(session).toEqual({
+    token: '48499501093kf00399sg',
+    user: {
+      id: 42,
+      firstName: 'Douglas',
+      lastName: 'Adams',
+      email: 'thank.you@forthefish.com',
+    },
+  });
 }));
 ```
 
@@ -496,7 +498,7 @@ Finally, we need a `unauthError$` effect. It needs to clear the storage and disp
       const sessionVaultService = TestBed.inject(SessionVaultService);
       actions$ = of(unauthError());
       effects.unauthError$.subscribe(() => {
-        expect(sessionVaultService.clear).toHaveBeenCalledTimes(1);
+        expect(sessionVaultService.logout).toHaveBeenCalledTimes(1);
         done();
       });
     });
@@ -518,7 +520,7 @@ Finally, we need a `unauthError$` effect. It needs to clear the storage and disp
     this.actions$.pipe(
       ofType(unauthError),
       tap(() => {
-        this.sessionVault.clear();
+        this.sessionVault.logout();
       }),
       map(() => logoutSuccess()),
     ),
@@ -560,7 +562,7 @@ Update the `TestBed` to provide a mock authentication service:
 Then we need to update the `login$` tests. We need to:
 
 - add a test that verifies we call the `AuthenticationService`
-- redifine how success and failure are detected by making it dependent on the outcome of the `login()` call
+- redifine how success and failure are detected by making it dependent on the outcome of the `login()` call (we reflect this in the tests by adding the `beforeEach()` setup methods to the 'on login success' and 'on login failure' tests, representing success and failure responses from our backend)
 - add a set of tests for when a hard error occurs with the login (for example, a 500 error from the server)
 
 ```TypeScript
@@ -614,7 +616,7 @@ Then we need to update the `login$` tests. We need to:
         const sessionVaultService = TestBed.inject(SessionVaultService);
         actions$ = of(login({ email: 'test@test.com', password: 'badpass' }));
         effects.login$.subscribe(() => {
-          expect(sessionVaultService.set).not.toHaveBeenCalled();
+          expect(sessionVaultService.login).not.toHaveBeenCalled();
           done();
         });
       });
@@ -664,7 +666,7 @@ For the `logout$` effect, we need to add a test verifying we are performing the 
         const sessionVaultService = TestBed.inject(SessionVaultService);
         actions$ = of(logout());
         effects.logout$.subscribe(() => {
-          expect(sessionVaultService.clear).not.toHaveBeenCalled();
+          expect(sessionVaultService.logout).not.toHaveBeenCalled();
           done();
         });
       });
@@ -703,14 +705,14 @@ Then we can modify the logic in the `login$` effect:
        ofType(login),
        exhaustMap(action =>
 -        from(this.fakeLogin(action.email, action.password)).pipe(
--          tap(session => this.sessionVault.set(session)),
+-          tap(session => this.sessionVault.login(session)),
 -          map(session => loginSuccess({ session })),
 -          catchError(error =>
 -            of(loginFailure({ errorMessage: error.message })),
 +        this.auth.login(action.email, action.password).pipe(
 +          tap(session => {
 +            if (session) {
-+              this.sessionVault.set(session);
++              this.sessionVault.login(session);
 +            }
 +          }),
 +          map(session =>
@@ -733,9 +735,9 @@ We can also modify the logic in the `logout$` effect:
      this.actions$.pipe(
        ofType(logout),
        exhaustMap(() =>
--        from(this.sessionVault.clear()).pipe(map(() => logoutSuccess())),
+-        from(this.sessionVault.logout()).pipe(map(() => logoutSuccess())),
 +        this.auth.logout().pipe(
-+          tap(() => this.sessionVault.clear()),
++          tap(() => this.sessionVault.logout()),
 +          map(() => logoutSuccess()),
 +          catchError(() =>
 +            of(logoutFailure({ errorMessage: 'Unknown error in logout' })),
@@ -749,6 +751,8 @@ We can also modify the logic in the `logout$` effect:
 Test this out in the application. Note from the "network" tab in the devtools that you are now using actual calls to the backend for the login and the logout.
 
 Also note that you were able to use the store to fake the login for a period of time, and then when the time was right you were able to switch over to using the backend API but only had to change the effects that handle them, the rest of your application was able to continue functioning as-is. This is an important tool that you can utilize in your own development.
+
+At this point, it would be a good idea to look for unused imports, etc. and clean any of that up.
 
 ## Conclusion
 

@@ -37,33 +37,37 @@ export class AuthGuardService implements CanActivate {
 
 ### Configure the Testing Module
 
-We know that we are going to be checking to see if we have an identity and that we may have to navigate to the login page. So let's set up the module such that the `Store` and `NavController` are both provided as mocks by adding a `providers` array to the `TestBed.configureTestingModule()` call.
+We know that we are going to be checking to see if we have an identity and that we may have to navigate to the login page. So let's set up the module such that the `Store`, `SessionVaultService`, and `NavController` are both provided as mocks by adding a `providers` array to the `TestBed.configureTestingModule()` call.
 
 ```typescript
-import { provideMockStore } from '@ngrx/store/testing';
 ...
-import { AuthState, initialState } from '@app/store/reducers/auth/auth.reducer';
+import { NavController } from '@ionic/angular';
+import { provideMockStore } from '@ngrx/store/testing';
+
+import { SessionVaultService } from '../session-vault/session-vault.service';
 import { createNavControllerMock } from '@test/mocks';
-import { AuthGuardService } from './auth-guard.service';
+import { createSessionVaultServiceMock } from '../session-vault/session-vault.service.mock';
 ...
       providers: [
-        provideMockStore<{ auth: AuthState }>({
-          initialState: { auth: initialState },
-        }),
+        provideMockStore(),
         { provide: NavController, useFactory: createNavControllerMock },
+        {
+          provide: SessionVaultService,
+          useFactory: createSessionVaultServiceMock,
+        },
       ],
 ```
 
 As you go through the next steps, remember that you will need to expand your imports a bit from time to time.
 
-### Step 1 - when logged in
+### Step 1 - when a token exists in the state
 
 We will use the presence of a token to signify that a person is currently logged in.
 
 When the user is logged in, the guard should not navigate and should return `true`.
 
 ```typescript
-describe('when logged in', () => {
+describe('when a token exists in the state', () => {
   beforeEach(() => {
     const store = TestBed.inject(Store) as MockStore;
     store.overrideSelector(selectAuthToken, '294905993');
@@ -77,40 +81,69 @@ describe('when logged in', () => {
     });
   });
 
-  it('returns true', () => {
-    let response: boolean;
-    service.canActivate().subscribe((r: boolean) => (response = r));
-    expect(response).toBe(true);
+  it('emits true', done => {
+    service.canActivate().subscribe(response => {
+      expect(response).toBe(true);
+      done();
+    });
   });
 });
 ```
 
 Add those tests within the main `describe` and then write the code that satisfies them. In this case, you just have to flip the return value from `false` to `true` in `src/app/core/auth-guard/auth-guard.service.ts`.
 
-### Step 2 - when not logged in
+### Step 2 - when a token does not exist in the state
 
-When the user is not logged in, the guard should navigate to the login page and should return `false`.
+If a token does not exist in the state, we are in one of two situations:
+
+- the user _is_ actually logged in and the session needs to be restored from storage
+- the user is not logged in
+
+So, we need to try and restore the session and then do whatever is appropriate.
 
 ```typescript
-describe('when not logged in', () => {
+describe('when a token does not exist in the state', () => {
   beforeEach(() => {
     const store = TestBed.inject(Store) as MockStore;
     store.overrideSelector(selectAuthToken, '');
   });
 
-  it('navigates to the login page', done => {
-    const navController = TestBed.inject(NavController);
-    service.canActivate().subscribe(() => {
-      expect(navController.navigateRoot).toHaveBeenCalledTimes(1);
-      expect(navController.navigateRoot).toHaveBeenCalledWith(['/', 'login']);
-      done();
+  describe('with a stored session', () => {
+    beforeEach(() => {
+      const sessionVault = TestBed.inject(SessionVaultService);
+      (sessionVault.restoreSession as any).and.returnValue(
+        Promise.resolve({
+          user: {
+            id: 42,
+            firstName: 'Joe',
+            lastName: 'Tester',
+            email: 'test@test.org',
+          },
+          token: '19940059fkkf039',
+        }),
+      );
     });
+
+    // The tests are are identical to the "when a token exists in the state" tests.
+    // Copy them here.
   });
 
-  it('returns false', () => {
-    let response: boolean;
-    service.canActivate().subscribe((r: boolean) => (response = r));
-    expect(response).toBe(false);
+  describe('without a stored session', () => {
+    it('navigates to the login page', done => {
+      const navController = TestBed.inject(NavController);
+      service.canActivate().subscribe(() => {
+        expect(navController.navigateRoot).toHaveBeenCalledTimes(1);
+        expect(navController.navigateRoot).toHaveBeenCalledWith(['/', 'login']);
+        done();
+      });
+    });
+
+    it('emits false', done => {
+      service.canActivate().subscribe(response => {
+        expect(response).toBe(false);
+        done();
+      });
+    });
   });
 });
 ```
@@ -119,24 +152,23 @@ Add those tests within the `describe` and then write the code that satisfies the
 
 ```typescript
 export class AuthGuardService implements CanActivate {
-  constructor(
-    // inject the store and nav controller here as private
-  ) {}
+  constructor() {} // inject the store, nav controller, and session value here as private
 
   canActivate(): Observable<boolean> {
     return this.store.pipe(
       select(selectAuthToken),
       take(1),
-      tap(token => {
-        // Logic to navigate to login page when appropriate goes here
+      mergeMap(token => (token ? of(token) : this.vault.restoreSession())),
+      map(value => !!value),
+      tap(sessionExists => {
+        // navigation logic goes here...
       }),
-      map(token => /* logic to map the result to "true" or "false" goes here */ ),
     );
   }
 }
 ```
 
-Be sure to replace the comments with the actual logic... 🤓
+Be sure to replace the comments with the actual logic. I had to leave _something_ as an exercise for you... 🤓
 
 ## Hookup the Guard
 

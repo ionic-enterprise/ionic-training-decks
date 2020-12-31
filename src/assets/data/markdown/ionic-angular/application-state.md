@@ -731,7 +731,7 @@ import { login } from '@app/store/actions';
 Notice that we need to click the sign on button. We don't have a function for that, so let's create one down by the `setInput()` fuction we already have:
 
 ```TypeScript
-function click(button: HTMLIonButtonElement) {
+function click(button: HTMLElement) {
   const event = new Event('click');
   button.dispatchEvent(event);
   fixture.detectChanges();

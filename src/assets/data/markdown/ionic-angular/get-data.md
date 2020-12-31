@@ -26,7 +26,7 @@ While we are in there, let's also create a stub for the method we are going to n
 - `save(obj)` - save and existing item or create add a new one, depending on whether an ID exists on the object or not, return the saved object
 - `delete(obj)` - delete the object
 
-These are the names and semantics I tend to use. The details here are not quite as important as making sure you come up with names and semantics that work for your application and then being consistent with them.
+Not every service has all of these methods, but when they need the method these are the names that I use. The details here are not quite as important as making sure you come up with names and semantics that work for your application and your team, and then being consistent with them.
 
 ```TypeScript
 import { Injectable } from '@angular/core';

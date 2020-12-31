@@ -111,7 +111,7 @@ Finally, let's add a `click` handler that will change the rating as the user cli
 <div>
   <ion-icon
     *ngFor="let n of [1, 2, 3, 4, 5]"
-    [name]="n > (rating || 0) ? 'star' : 'star-outline'"
+    [name]="n > (rating || 0) ? 'star-outline' : 'star'"
     (click)="rating = n"
   ></ion-icon>
 </div>
@@ -158,7 +158,7 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
   ],
 })
 export class RatingComponent implements ControlValueAccessor {
-  rating: number;
+  @Input() rating: number;
 
   constructor() {}
 
@@ -381,7 +381,7 @@ We need to do two things in the service:
 
 ##### Modify the Test Data
 
-In the `expectedTeas` array that is part of the `TeaService` test, add a rating to each tea as such:
+In the `expectedTeas` array that is part of the `TeaService` test, add a rating to each tea as shown. For some of them, use zero. This will be the default value for teas that do not yet have a rating.
 
 ```typescript
       {
@@ -392,8 +392,6 @@ In the `expectedTeas` array that is part of the `TeaService` test, add a rating 
         rating: 4
       },
 ```
-
-For some of them, use zero. This will be the default value for teas that do not yet have a rating.
 
 The rating is not part of the data coming back from our API, so the API results we use cannot have it. Where the `resultTeas` array is defined, delete the `rating` just like we do for the `image`.
 
@@ -410,13 +408,7 @@ resultTeas = expectedTeas.map((t: Tea) => {
 
 We will use the Capacitor Storage API, so we will mock that. There are multiple ways that we could store the ratings. We will just go with the very simple strategy of using a key of `ratingX` where `X` is the `ID` of the tea.
 
-First, define a variable to store the real `Storage` implementation so we can restore it when we are done:
-
-```typescript
-let originalStorage: any;
-```
-
-Then update the setup and teardown for the tests to initialize the behavior of the `Storage` mock. Where the return values are set up, they will need to match however you set up your test data above. Only the non-zero rated teas should be included. Note that `Plugins.Storage.get()` resolves a string value and not a number.
+First, define a variable to store the real `Storage` implementation so we can restore it when we are done. Then update the setup and teardown for the tests to initialize the behavior of the `Storage` mock. Where the return values are set up, they will need to match however you set up your test data above. Only the non-zero rated teas should be included. Note that `Plugins.Storage.get()` resolves a string value and not a number.
 
 ```typescript
 ...
@@ -479,12 +471,12 @@ At this point, you should have a failing test. Update the code in `src/app/core/
 The first step is to make our private `convert()` method async and then grab the rating from storage:
 
 ```typescript
-  private async convert(tea: any): Promise<Tea> {
+  private async convert(res: any): Promise<Tea> {
     const { Storage } = Plugins;
-    const rating = await Storage.get({ key: `rating${tea.id}` });
+    const rating = await Storage.get({ key: `rating${res.id}` });
     return {
-      ...tea,
-      image: `assets/img/${this.images[tea.id - 1]}.jpg`,
+      ...res,
+      image: `assets/img/${this.images[res.id - 1]}.jpg`,
       rating: parseInt((rating && rating.value) || '0', 10),
     };
   }
@@ -506,8 +498,8 @@ But this makes our `getAll()` method unhappy. We are not returning an Observable
 
 Reading that code from the inside out:
 
-- `convert()` takes a raw tea and converts it to our model, but needs to do so async, so it returns a promise of that convertion
-- `Promise.all()` takes all of those promises of convertions and groups them into a single promise that resolvs to an array of teas once all of the inner promises resolve
+- `convert()` takes a raw tea and converts it to our model, but needs to do so async, so it returns a promise of that conversion
+- `Promise.all()` takes all of those promises of conversions and groups them into a single promise that resolvs to an array of teas once all of the inner promises resolve
 - `mergeMap()` converts that promise to an Observable and returns it instead of the original Observable from the HTTP call
 
 #### Save the Rating
@@ -558,6 +550,8 @@ We will need a new action to signify that the user has changed the rating on a t
    LogoutFailure = '[Auth API] logout failure',
 
    UnauthError = '[Auth API] unauthenticated error',
+
+  SessionRestored = '[Vault API] session restored',
 +
 +  TeaDetailsChangeRating = '[Tea Details Page] change rating',
 +  TeaDetailsChangeRatingSuccess = '[Data API] change rating success',
@@ -566,9 +560,10 @@ We will need a new action to signify that the user has changed the rating on a t
 
  export const initialize = createAction(ActionTypes.Initialize);
 @@ -59,3 +63,16 @@ export const logoutFailure = createAction(
- );
-
- export const unauthError = createAction(ActionTypes.UnauthError);
+export const sessionRestored = createAction(
+  ActionTypes.SessionRestored,
+  props<{ session: Session }>(),
+);
 +
 +export const teaDetailsChangeRating = createAction(
 +  ActionTypes.TeaDetailsChangeRating,
@@ -588,7 +583,7 @@ We will need a new action to signify that the user has changed the rating on a t
 
 For the reducer we need to update the state with the updated tea if the rating change succeeded, and with the error message if it failed.
 
-The `src/app/store/reducers/data/data.reducer.spec.ts` file defines some test teas. Add a rating to each. Then add the following test cases. Note that we only need to handle the "success" and "failure" actions:
+The `src/app/store/reducers/data/data.reducer.spec.ts` file defines some test teas. Add a rating to each. Then add the following test cases. Note that we only need to handle the "success" and "failure" actions (remember to adjust the imports at the top of the test file for the new actions):
 
 ```TypeScript
   {
@@ -599,7 +594,7 @@ The `src/app/store/reducers/data/data.reducer.spec.ts` file defines some test te
   },
   {
     description: `${ActionTypes.TeaDetailsChangeRatingFailure}: sets the error message`,
-    action: initialLoadFailure({ errorMessage: 'The save blew some chunks' }),
+    action: teaDetailsChangeRatingFailure({ errorMessage: 'The save blew some chunks' }),
     begin: { teas },
     end: { teas, errorMessage: 'The save blew some chunks' },
   },
@@ -732,6 +727,9 @@ Then add a test to verify the initialization of the rating value. Similar to the
 Then in the code we can tap into the Observable pipeline and grab the rating:
 
 ```TypeScript
+...
+  rating: number;
+...
     this.tea$ = this.store
       .select(selectTea, { id })
       .pipe(tap(tea => (this.rating = tea && tea.rating)));
@@ -751,19 +749,22 @@ When the user clicks on the rating component, we need to dispatch the change to 
 
 ```TypeScript
 describe('rating click', () => {
+  let store: MockStore;
+  let tea: Tea;
   beforeEach(() => {
-    fixture.detectChanges();
-  });
-
-  it('dispatches a rating change action', () => {
-    const tea = {
+    tea = {
       id: 7,
       name: 'White',
       description: 'Often looks like frosty silver pine needles',
       image: 'imgs/white.png',
       rating: 4,
     };
-    const store = TestBed.inject(Store);
+    store = TestBed.inject(Store) as MockStore;
+    store.overrideSelector(selectTea, tea);
+    fixture.detectChanges();
+  });
+
+  it('dispatches a rating change action', () => {
     spyOn(store, 'dispatch');
     component.rating = 3;
     component.changeRating(tea);

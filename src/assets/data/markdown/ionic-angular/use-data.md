@@ -11,7 +11,7 @@ The first thing we should think about with the teas is how we intend to use them
 
 ### Actions
 
-We already have the actions in place that mean we have established a session and need to load some data. These are the `InitializedWithRestoredSession` and `LoginSuccess` actions. When these actions are dispatched, we will begin an initial load of data (at this time, it is only the tea data, but it could expand in the future). So we have two new events in our application that we will need to express as actions:
+We already have the actions in place that mean we have established a session and need to load some data. These are the `SessionRestored` and `LoginSuccess` actions. When these actions are dispatched, we will begin an initial load of data (at this time, it is only the tea data, but it could expand in the future). So we have two new events in our application that we will need to express as actions:
 
 ```TypeScript
 import { Session, Tea } from '@app/models';
@@ -29,7 +29,7 @@ export const initialLoadFailure = createAction(
 );
 ```
 
-### State Slice for Data
+### A New State Slice for the Data
 
 We already have a slice of state for the authentication system. Let's aslo create one for the data. For our small app we will just have those two slices, one for `auth` and one for the rest of the `data`.
 
@@ -37,7 +37,9 @@ We have been defining the state slices along with the reducers, so create a file
 
 ```TypeScript
 import { Action, createReducer, on } from '@ngrx/store';
+
 import { Tea } from '@app/models';
+import * as Actions from '@app/store/actions';
 
 export interface DataState {
   teas: Array<Tea>;
@@ -100,7 +102,7 @@ At this point we can update the `src/app/store/reducers/index.ts` file so this s
 For this sllice, we will need the reducer to handle the following actions:
 
 - `LoginSuccess` - set the loading flag, clear any old error message
-- `InitializedWithRestoredSession` - set the loading flag, clear any old error message
+- `SessionRestored` - set the loading flag, clear any old error message
 - `InitialLoadFailure` - clear the loading flag, set the error message
 - `InitialLoadSuccess` - clear the loading flag, set the tea data
 
@@ -162,9 +164,9 @@ describe(ActionTypes.LoginSuccess, () => {
   });
 });
 
-describe(ActionTypes.InitializedWithRestoredSession, () => {
+describe(ActionTypes.SessionRestored, () => {
   it('sets the loading flag and clears any error message', () => {
-    const action = initializedWithRestoredSession({ session });
+    const action = sessionRestored({ session });
     expect(
       reducer(
         {
@@ -253,8 +255,8 @@ it('returns the default state', () => {
     end: { loading: true },
   },
   {
-    description: `${ActionTypes.InitializedWithRestoredSession}: sets the loading flag and clears any error message`,
-    action: initializedWithRestoredSession({ session }),
+    description: `${ActionTypes.SessionRestored}: sets the loading flag and clears any error message`,
+    action: sessionRestored({ session }),
     begin: { errorMessage: 'Unknown error with data load' },
     end: { loading: true },
   },
@@ -340,7 +342,7 @@ import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { tap } from 'rxjs/operators';
 
 import {
-  initializedWithRestoredSession,
+  sessionRestored,
   loginSuccess,
 } from '@app/store/actions';
 
@@ -349,7 +351,7 @@ export class DataEffects {
   sessionLoaded$ = createEffect(
     () =>
       this.actions$.pipe(
-        ofType(loginSuccess, initializedWithRestoredSession),
+        ofType(loginSuccess, sessionRestored),
         tap(() => {
           console.log('An auth session had been loaded');
         }),
@@ -359,6 +361,8 @@ export class DataEffects {
   constructor(private actions$: Actions) {}
 }
 ```
+
+Be sure to update `src/app/store/effects/index.ts`.
 
 **`src/app/app.module.ts`**
 
@@ -386,7 +390,7 @@ export class DataEffects {
 
 ```
 
-Now that we are set up, we need an effect that gets the teas when we have a new session that was loaded, either via login or via session restore due to application reload. We already have a shell for this effect, so let's work out the tests. Remember that you will need to adjust your `impoort` statements as new objects are referenced.
+Now that we are set up, we need an effect that gets the teas when we have a new session that was loaded, either via login or via session restore due to application reload. We already have a shell for this effect, so let's work out the tests. Remember that you will need to adjust your `import` statements as new objects are referenced.
 
 First, we will copy the test data from our data reducer tests. We will need similar data here, so we may as well just use the same data. Since we won't have a need to change these we can just declare them right after the `import` statements and don't have to worry about re-initializing them with each test.
 
@@ -428,7 +432,7 @@ We can then add our first test:
 ```TypeScript
   [
     loginSuccess({ session }),
-    initializedWithRestoredSession({ session }),
+    sessionRestored({ session }),
   ].forEach(action =>
     describe(`sessionLoaded$ with ${action.type}`, () => {
       it('fetches the teas', done => {
@@ -460,7 +464,7 @@ And replace it with a `mergeMap()` within which we make our API call:
         mergeMap(() => this.teaService.getAll()),
 ```
 
-At this point, we have two possible outcomes: we either succeed in our quest to get teas, or the backend fails and we get an exception. Let's handle the first scenario first:
+At this point, we have two possible outcomes: we either succeed in our quest to get teas, or the backend fails and we get an exception. Let's handle the first scenario first. Place this `describe()` inside the previous `describe()` that we added above.
 
 ```TypeScript
       describe('on success', () => {
@@ -532,7 +536,7 @@ Then the code:
           ),
 ```
 
-At this point, our effect is getting the data and is then returning the proper action to dispatch. Thus remove the `{ dispatch: false },` from the effect. That was just there to avoid an infinite loop when all we were doing was the `tap`. Speaking of which, the `tap` opeator should no longer be imported either, so go clean up your imports and you can then call the store mods done.
+At this point, our effect is getting the data and is then returning the proper action to dispatch. Thus remove the `{ dispatch: false },` from the effect. That was just there to avoid an infinite loop when all we were doing was the `tap`. Speaking of which, the `tap` opeator should no longer be used, so go clean up your imports and you can then call the store mods done.
 
 ## The Tea Page
 
@@ -567,7 +571,7 @@ A lot of what we need for the test is already there. We just need to modify the 
  import { TeaPage } from './tea.page';
  import { Tea } from '@app/models';
  import { logout } from '@app/store/actions';
-+import {selectTeas} from '@app/store/selectors';
++import { selectTeas } from '@app/store/selectors';
 
  describe('TeaPage', () => {
    let component: TeaPage;
@@ -700,7 +704,7 @@ const dataReducer = createReducer(
     loading: true,
     errorMessage: '',
   })),
-  on(Actions.initializedWithRestoredSession, state => ({
+  on(Actions.sessionRestored, state => ({
     ...state,
     loading: true,
     errorMessage: '',
