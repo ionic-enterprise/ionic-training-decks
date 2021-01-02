@@ -341,8 +341,8 @@
               "file": "install"
             },
             {
-              "title": "Identity Service",
-              "file": "identity-service"
+              "title": "The Vault Service",
+              "file": "vault-service"
             },
             {
               "title": "Add Biometrics to Login",

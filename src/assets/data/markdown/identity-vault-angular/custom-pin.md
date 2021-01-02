@@ -9,23 +9,24 @@ Since this isn't a trainig on "How to Create a Modal Dialog", let's just steal s
 Just grab the PIN dialog from the <a href="https://github.com/ionic-team/tea-taster-angular/tree/feature/identity-vault/src/app/pin-dialog" target="_blank">completed example</a> for this training and copy it into your application. Note that you will also need to update the `app.module.ts` file to import the `PinDialogModule` into `AppModule`:
 
 ```diff
- import { AppComponent } from './app.component';
- import { AppRoutingModule } from './app-routing.module';
- import { httpInterceptorProviders } from './services/http-interceptors';
+--- a/src/app/app.module.ts
++++ b/src/app/app.module.ts
+@@ -14,6 +14,7 @@ import { AuthEffects, DataEffects } from './store/effects';
+ import { StoreDevtoolsModule } from '@ngrx/store-devtools';
+ import { environment } from '../environments/environment';
+ import { AuthInterceptor, UnauthInterceptor } from './core';
 +import { PinDialogComponentModule } from './pin-dialog/pin-dialog.module';
 
  @NgModule({
    declarations: [AppComponent],
-@@ -18,7 +19,8 @@ import { httpInterceptorProviders } from './services/http-interceptors';
-     HttpClientModule,
+@@ -23,6 +24,7 @@ import { AuthInterceptor, UnauthInterceptor } from './core';
+     BrowserModule,
      IonicModule.forRoot(),
-     IonicStorageModule.forRoot(),
--    AppRoutingModule
-+    AppRoutingModule,
-+    PinDialogComponentModule
-   ],
-   providers: [
-     httpInterceptorProviders,
+     HttpClientModule,
++    PinDialogComponentModule,
+     StoreModule.forRoot(reducers, {
+       metaReducers,
+       runtimeChecks: {
 ```
 
 The logic within this coomponent implements the following workflows:
@@ -48,87 +49,7 @@ For our application, we have the following requirements for the PIN dialog:
 - When the dialog is dismissed, resolve the PIN
 - If the PIN is `undefined`, resolve to an empty string (this avoids showing the system dialogs)
 
-We need to update the tests in `src/app/core/identity/identity.service.spec.ts` to refect these new requirements. The first step is to update the intial test setup:
-
-```diff
---- a/src/app/core/identity/identity.service.spec.ts
-+++ b/src/app/core/identity/identity.service.spec.ts
-@@ -3,22 +3,35 @@ import {
-   HttpClientTestingModule,
-   HttpTestingController,
- } from '@angular/common/http/testing';
--import { Platform } from '@ionic/angular';
-+import { ModalController, Platform } from '@ionic/angular';
- import { AuthMode, DefaultSession } from '@ionic-enterprise/identity-vault';
-
- import { IdentityService } from './identity.service';
- import { environment } from '@env/environment';
--import { createPlatformMock } from '@test/mocks';
-+import {
-+  createOverlayControllerMock,
-+  createOverlayElementMock,
-+  createPlatformMock,
-+} from '@test/mocks';
-+import { PinDialogComponent } from '@app/pin-dialog/pin-dialog.component';
-
- describe('IdentityService', () => {
-+  let modal: HTMLIonModalElement;
-   let service: IdentityService;
-
-   beforeEach(() => {
-+    modal = createOverlayElementMock('modal');
-     TestBed.configureTestingModule({
-       imports: [HttpClientTestingModule],
--      providers: [{ provide: Platform, useFactory: createPlatformMock }],
-+      providers: [
-+        {
-+          provide: ModalController,
-+          useFactory: () => createOverlayControllerMock('ModalController', modal),
-+        },
-+        { provide: Platform, useFactory: createPlatformMock },
-+      ],
-```
-
-Next we add a section to the test the exercises the requirements for the `onPasswordRequest()` method.
-
-```TypeScript
-  describe('onPasscodeRequest', () => {
-    beforeEach(() => {
-     (modal.onDidDismiss as any).and.returnValue(Promise.resolve({ role: 'cancel' }));
-    });
-
-    [true, false].forEach(setPasscode => {
-      it(`creates a PIN dialog, setting passcode: ${setPasscode}`, async () => {
-        const modalController = TestBed.inject(ModalController);
-        await service.onPasscodeRequest(setPasscode);
-        expect(modalController.create).toHaveBeenCalledTimes(1);
-        expect(modalController.create).toHaveBeenCalledWith({
-          backdropDismiss: false,
-          component: PinDialogComponent,
-          componentProps: {
-            setPasscodeMode: setPasscode
-          }
-        });
-      });
-    });
-
-    it('presents the modal', async () => {
-      await service.onPasscodeRequest(false);
-      expect(modal.present).toHaveBeenCalledTimes(1);
-    });
-
-    it('resolves to the PIN', async () => {
-      (modal.onDidDismiss as any).and.returnValue(Promise.resolve({ data: '4203', role: 'OK' }));
-      expect(await service.onPasscodeRequest(true)).toEqual('4203');
-    });
-
-    it('resolves to an empty string if the PIN is undefined', async () => {
-      expect(await service.onPasscodeRequest(true)).toEqual('');
-    });
-  });
-```
-
-The code to accomplish this follows. Be sure to import the `PinDialogComponent` and to inject the `ModalController`.
+The code to add to `src/app/core/session-vault/session-vault.service.spec.ts` is then as follows. Be sure to import the `PinDialogComponent` and to inject the `ModalController`.
 
 ```TypeScript
   async onPasscodeRequest(isPasscodeSetRequest: boolean): Promise<string> {

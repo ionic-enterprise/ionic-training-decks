@@ -198,4 +198,4 @@ Create a `src/app/core/browser-vault/browser-vault.plugin.ts` file with the abov
 
 ## Conclusion
 
-Now that Identity Vault has been installed, it is time to modify the `IdentityService` to use Identity Vault. We will do this in baby steps. Our first step will just be to get the application working essetially as it is today, except using Idenity Vault for the storage of the session information.
+Now that Identity Vault has been installed, it is time to modify the `SessionVaultService` to use Identity Vault. We will do this in baby steps. Our first step will just be to get the application working essetially as it is today, except using Idenity Vault for the storage of the session information.

@@ -2,11 +2,11 @@
 
 We will implement a workflow where-by if a user can use biometrics to secure their login, Biometrics will be used. Otherwise a PIN will be used. In order to accomplish this, we will need to modify the `IdentityService` to handle locking the vault, and we will need to modify the `LoginPage` to present the user with unlock options when the vault is locked.
 
-## `IdentityService` Modifications
+## `SessionVaultService` Modifications
 
 ### Modify the Configuration
 
-We need to add a couple of options to our configuration. Most notably, we need to tell Identlty Vault how long, in milliseconds, the application should be in the background before the token is locked. This is handled via the `lockAfter` property. We will also tell Identity Vault to protect our data by hiding the screen content with the app is in the background, and that the Identity Vault should automatically try to unlock a locked vault upon attempting to access it.
+We need to add a couple of options to our configuration. Most notably, we need to tell Identity Vault how long, in milliseconds, the application should be in the background before the token is locked. This is handled via the `lockAfter` property. We will also tell Identity Vault to protect our data by hiding the screen content with the app is in the background, and that the Identity Vault should automatically try to unlock a locked vault upon attempting to access it.
 
 We will eventually remove the `authMode` option and specify it during the login, but we will leave it in place for now.
 
@@ -21,7 +21,6 @@ We will eventually remove the `authMode` option and specify it during the login,
       hideScreenOnBackground: true,
       lockAfter: 5000,
     });
-    this._changed = new Subject();
   }
 ```
 
@@ -31,94 +30,18 @@ If you build and run on a device at this time, the one difference you should not
 
 #### Use Biometrics
 
-Our first requirement is to use biometrics if it is available. Let's repurpose the existing "calls the base class login" test of the `set()` method to prove out this requirement. Note that it will still also prove out the original requirement it was testing. There are multiple ways to handle that, depending on the level of tracking you need.
-
-```diff
-@@ -121,6 +122,7 @@ describe('IdentityService', () => {
-     });
-
-     it('calls the base class login', async () => {
-+      spyOn(service, 'isBiometricsAvailable').and.returnValue(Promise.resolve(true));
-       spyOn(service, 'login');
-       await service.set(
-         {
-@@ -132,10 +134,34 @@ describe('IdentityService', () => {
-         '19940059fkkf039',
-       );
-       expect(service.login).toHaveBeenCalledTimes(1);
--      expect(service.login).toHaveBeenCalledWith({
--        username: 'test@test.org',
--        token: '19940059fkkf039',
--      });
-+      expect(service.login).toHaveBeenCalledWith(
-+        {
-+          username: 'test@test.org',
-+          token: '19940059fkkf039',
-+        },
-+        AuthMode.BiometricOnly,
-+      );
-+    });
-```
-
-To get this to pass, we can cheat a little bit on the code (remember, this is _totally_ within the spirit of TDD which says to do the simplest thing possible and refactor as you go).
-
-```diff
-   async set(user: User, token: string): Promise<void> {
-     const session = { username: user.email, token };
-+    const mode = AuthMode.BiometricOnly;
--    await this.login(session);
-+    await this.login(session, mode);
-     this._changed.next(session);
-   }
-```
-
-At this point it makes sense to remove the `AuthMode` option from the constructor since we are now setting the mode when the user logs in. The mode set at construction has no meaning any more.
-
-#### Fallback to Passcode
-
-Our second requirement is to fallback to passcode if biometrics are not available.
-
-The test for this is a straight forward copy of our prior test with a couple of changes.
+Our first requirement is to use biometrics if it is available. We will determine this at login time, which means that we will need to add a login method to our `SessionVaultService` class that determines the appropriate mode and then calls the login on the base class.
 
 ```TypeScript
-    it('uses passcode if biometrics is not available', async () => {
-      spyOn(service, 'isBiometricsAvailable').and.returnValue(Promise.resolve(false));
-      spyOn(service, 'login');
-      await service.set(
-        {
-          id: 42,
-          firstName: 'Joe',
-          lastName: 'Tester',
-          email: 'test@test.org',
-        },
-        '19940059fkkf039',
-      );
-      expect(service.login).toHaveBeenCalledTimes(1);
-      expect(service.login).toHaveBeenCalledWith(
-        {
-          username: 'test@test.org',
-          token: '19940059fkkf039',
-        },
-        AuthMode.PasscodeOnly,
-      );
-    });
+async login(session: Session): Promise<void> {
+  const mode = (await this.isBiometricsAvailable())
+    ? AuthMode.BiometricOnly
+    : AuthMode.PasscodeOnly;
+  await super.login(session, mode);
+}
 ```
 
-**Note:** the "sets the user" test should also be modified to use `async/await` at this point.
-
-Making our prior code work with this requirement is also straight forward
-
-```diff
-   async set(user: User, token: string): Promise<void> {
-     const session = { username: user.email, token };
--    const mode = AuthMode.BiometricOnly;
-+    const mode = (await this.isBiometricsAvailable())
-+      ? AuthMode.BiometricOnly
-+      : AuthMode.PasscodeOnly;
-     await this.login(session, mode);
-     this._changed.next(session);
-  }
-```
+At this point, we can remove the `authMode` configuration from the constructor code.
 
 #### Update the `info.plist` File
 
@@ -129,92 +52,159 @@ On iOS, the user has to give permission to use FaceID. In order to do this, open
 
 This is the prompt that will be used when asking for permission to use FaceID.
 
-#### Try it on a Device
+#### Implement the `onVaultLocked` Event Handler
 
-Build the application for your device and run it.
+Our service should dispatch an action to the store when the vault is locked. So let's first create an action for that and update the service to dispatch it.
 
-- Log in
-- Enter a PIN if needed
-- Put the app in the background for more than 5 seconds
-- Come back to the app
-- Click on a tea category to edit
-- Note that the app either asks for a PIN or redirects to the login page
+```diff
+--- a/src/app/store/actions.ts
++++ b/src/app/store/actions.ts
+@@ -16,6 +16,7 @@ export enum ActionTypes {
 
-There are a few issues:
+   UnauthError = '[Auth API] unauthenticated error',
 
-1. The app is technically locked, but the user can still see the data
-1. Depending on your current biometrics configuration, you were either asked to unlock via PIN or simply redirected to the login page
-1. If you were redirected to the login page, you had no way to unlock the vault
++  SessionLocked = '[Vault API] session locked',
+   SessionRestored = '[Vault API] session restored',
 
-We will fix the workflow issue now. We will fix the issue on the login page later.
+   TeaDetailsChangeRating = '[Tea Details Page] change rating',
+@@ -66,6 +67,7 @@ export const logoutFailure = createAction(
 
-### Implement the `onVaultLocked` Event Handler
+ export const unauthError = createAction(ActionTypes.UnauthError);
 
-When the app is locked it should redirect to a page where the user can either unlock the application or login in again. The `onVaultLocked` event handler should be used to accomplish this task. The handler needs to be added to our `IdentityService`.
-
-The test for the handleri looks like this:
-
-```TypeScript
-  describe('on vault locked', ( ) =>{
-    it('emits an empty session', () => {
-      let session: DefaultSession = {
-        username: 'test@test.org',
-        token: '19940059fkkf039',
-      };
-      service.changed.subscribe(s => (session = s));
-      service.onVaultLocked(null);
-      expect(session).toBeUndefined();
-    });
-  });
++export const sessionLocked = createAction(ActionTypes.SessionLocked)
+ export const sessionRestored = createAction(
+   ActionTypes.SessionRestored,
+   props<{ session: Session }>(),
 ```
 
-The code to accomplish this is:
+```diff
+--- a/src/app/core/session-vault/session-vault.service.ts
++++ b/src/app/core/session-vault/session-vault.service.ts
+@@ -4,11 +4,12 @@ import {
+   AuthMode,
+   IonicIdentityVaultUser,
+   IonicNativeAuthPlugin,
++  LockEvent,
+ } from '@ionic-enterprise/identity-vault';
+ import { Platform } from '@ionic/angular';
 
-```TypeScript
-  onVaultLocked(evt: LockEvent) {
-    this._changed.next();
-  }
+ import { Session } from '@app/models';
+-import { sessionRestored } from '@app/store/actions';
++import { sessionLocked, sessionRestored } from '@app/store/actions';
+ import { State } from '@app/store';
+ import { BrowserVaultPlugin } from '../browser-vault/browser-vault.plugin';
+
+@@ -46,6 +47,10 @@ export class SessionVaultService extends IonicIdentityVaultUser<Session> {
+     return session;
+   }
+
++  onVaultLocked(event: LockEvent) {
++    this.store.dispatch(sessionLocked());
++  }
++
 ```
 
-That should fix the issue where the user still is still in the app even thought it is locked. We will need the opposite logic to execute when the session is restored.
+That let's our store know that the session is locked, but how should the store react? How should this affect the state of our application? Here is what should happen:
+
+- the session should be cleared in the state (reducer)
+- the application should navigate to the login page (effect)
+
+Notice that we are not storing the locked state in the store. If we did that, we would need to worry about stuff like:
+
+- Resetting the lock state on restart if appropriate.
+- Handling issues with users removing fingerprints while we are locked out.
+
+Basically, the locked state can change on us due to external influences, making it a poor choice for putting in the store. It is better if we query the vault for the state when we need it. We will do that later.
+
+The reducer code is pretty straight forward:
+
+```diff
+--- a/src/app/store/reducers/auth/auth.reducer.ts
++++ b/src/app/store/reducers/auth/auth.reducer.ts
+@@ -50,6 +50,11 @@ const authReducer = createReducer(
+     delete newState.session;
+     return newState;
+   }),
++  on(Actions.sessionLocked, state => {
++    const newState = { ...state };
++    delete newState.session;
++    return newState;
++  }),
+   on(Actions.sessionRestored, (state, { session }) => ({
+     ...state,
+```
+
+The effect is a little more involved, but only because we have some design decisions to make. We already have an effect that does exactly the thing we need to do. It is called `logoutSuccess$` since that is the only action it was concerned with before. That gives us two choices:
+
+1. rename `loginSuccess$` to something more generic, and reuse it
+1. create a new effect that does exactly the same thing
+
+I believe the first solution makes the most sense in this case, so let's do that:
+
+```diff
+--- a/src/app/store/effects/auth/auth.effects.ts
++++ b/src/app/store/effects/auth/auth.effects.ts
+@@ -11,6 +11,7 @@ import {
+   logout,
+   logoutFailure,
+   logoutSuccess,
++  sessionLocked,
+   unauthError,
+ } from '@app/store/actions';
+ import { AuthenticationService, SessionVaultService } from '@app/core';
+@@ -64,10 +65,10 @@ export class AuthEffects {
+     ),
+   );
+
+-  logoutSuccess$ = createEffect(
++  navigateToLogin$ = createEffect(
+     () =>
+       this.actions$.pipe(
+-        ofType(logoutSuccess),
++        ofType(logoutSuccess, sessionLocked),
+         tap(() => this.navController.navigateRoot(['/', 'login'])),
+       ),
+```
 
 ### Implement the `onSessionRestored` Event Handler
 
-When the session is restored, the `onSessionRestored` event handler will be called with the session information passed to it. We need to emit that session on our `_changed` Subject.
+Currently, we are dispatching the `sessionRestored` action from the `restoreSession()` method, but Identity Vault has an event handler that makes for a more logical and "future proof" place to dispatch this action, so let's use that.
 
-The test for that looks like this:
+```diff
+--- a/src/app/core/session-vault/session-vault.service.ts
++++ b/src/app/core/session-vault/session-vault.service.ts
+@@ -39,11 +39,6 @@ export class SessionVaultService extends IonicIdentityVaultUser<Session> {
 
-```TypeScript
-  describe('on session restored', ( ) =>{
-    it('emits the session', () => {
-      let session: DefaultSession;
-      service.changed.subscribe(s => (session = s));
-      service.onSessionRestored({
-        username: 'test@test.org',
-        token: '19940059fkkf039',
-      });
-      expect(session).toEqual({
-        username: 'test@test.org',
-        token: '19940059fkkf039',
-      });
-    });
-  });
+   async restoreSession(): Promise<Session> {
+     const session = await super.restoreSession();
+-
+-    if (session) {
+-      this.store.dispatch(sessionRestored({ session }));
+-    }
+-
+     return session;
+   }
+
+@@ -51,6 +46,10 @@ export class SessionVaultService extends IonicIdentityVaultUser<Session> {
+     this.store.dispatch(sessionLocked());
+   }
+
++  onSessionRestored(session: Session) {
++    this.store.dispatch(sessionRestored({ session }));
++  }
++
 ```
 
-The code to accomplish this is:
-
-```TypeScript
-  onSessionRestored(session: DefaultSession) {
-    this._changed.next(session);
-  }
-```
+That makes our `restoreSession()` code kinda pointless. We could just remove it and use the base class code, but don't. We are going to beef that up a bit right now.
 
 ### Override the `restoreSession()` Method
 
 It is possible, especially during development, to get the vault in a state where we try to perform a restore while the vault itself is locked and cannot be unlocked. In such cases, we will just clear the vault, forcing a new login. It is really hard to test this scenario so we will just provide the code without a test.
 
-```typescript
-  async restoreSession(): Promise<DefaultSession> {
+Replace our currently pointless `restoreSession()` implementation with the following:
+
+```TypeScript
+  async restoreSession(): Promise<Session> {
     try {
       return await super.restoreSession();
     } catch (error) {
@@ -228,44 +218,22 @@ It is possible, especially during development, to get the vault in a state where
   }
 ```
 
-The login screen still does not present a way to unlock the app, which is something we will fix now.
+You will need to import `VaultErrorCodes` from `@ionic-enterprise/identity-vault`.
+
+If you build the app and run it on a device at this point, the app will lock after 5 seconds in the background, which will force you over to the login page. You don't currently have a way to unlock the app, but you can lock it. So far so good.
+
+If you shut down the app and restart it, the vault will also be locked. However, since you are trying to restore the session as part of the vault logic, you will be asked for your PIN, finger print, face, etc (depending on your device capabilities). Providing the appropriate response will then unlock the app. Excellent!!
 
 ## `LoginPage` Modifications
 
-The application now redirects to the login page as needed. However, the login page does not allow the token to be unlocked, forcing the user to log in again. In order to allow unlocking the token the `LoginPage` will have to interact with the `IdentityService`.
+The login screen still does not present a way to unlock the app, which is something we will fix now.
 
-### Update the `IdentityService` Mock
+### New Property
 
-The `IdentityService` mock should have what we need from a previous update, but let's just make sure. It should look something like this:
-
-```typescript
-import { Subject } from 'rxjs';
-import { DefaultSession } from '@ionic-enterprise/identity-vault';
-import { AuthMode } from '@ionic-enterprise/identity-vault';
-import { IdentityService } from './identity.service';
-
-export function createIdentityServiceMock() {
-  const mock = jasmine.createSpyObj<IdentityService>('IdentityService', {
-    set: Promise.resolve(),
-    clear: Promise.resolve(),
-    hasStoredSession: Promise.resolve(false),
-    isBiometricsAvailable: Promise.resolve(false),
-    getAuthMode: Promise.resolve(AuthMode.InMemoryOnly),
-    restoreSession: Promise.resolve(null),
-  });
-  (mock as any).changed = new Subject<DefaultSession>();
-  return mock;
-}
-```
-
-Many of these methods are used by the `LoginPage` in managing the unlocking of the authentication token. Let's start making changes to the `LoginPage` now in order to support unlocking.
-
-### New Properties
-
-The `LoginPage` will use a couple of different properties to control when the unlock prompt is displayed and which icon is used. Create the following properties in the page's class and just assign default values for now:
+The `LoginPage` will use a property to control when the unlock prompt is displayed and which icon is used. Create the following in the page's class and just assign default values for now:
 
 ```typescript
-displayVaultLogin = true;
+canUnlock: boolean = true;
 ```
 
 Before going any further, make sure you are serving the application and are logged out. This will allow us to see the changes to the login page as we make them.
@@ -275,7 +243,7 @@ Before going any further, make sure you are serving the application and are logg
 In cases where a locked session exists we want to display something that the user can click to begin the unlock process.
 
 ```HTML
-    <div class="unlock-app ion-text-center" *ngIf="displayVaultLogin" (click)="unlock()">
+    <div class="unlock-app ion-text-center" *ngIf="canUnlock" (click)="unlock()">
       <ion-icon name="lock-open-outline"></ion-icon>
       <div>Unlock</div>
     </div>
@@ -292,153 +260,211 @@ We will also perform a little bit of styling to make the "unlock" part of the sc
 }
 ```
 
-### Initialize the `LoginPage`
+### Determine if we can Unlock
 
-#### Tests
-
-The `LoginPage` unit test will need to be modified to provide a mock `IdentityService`. We should also import the Identity Vault `AuthMode` definition.
-
-```diff
---- a/src/app/login/login.page.spec.ts
-+++ b/src/app/login/login.page.spec.ts
-@@ -7,10 +7,14 @@ import {
- } from '@angular/core/testing';
- import { FormsModule } from '@angular/forms';
- import { IonicModule } from '@ionic/angular';
-+import { AuthMode } from '@ionic-enterprise/identity-vault';
-
- import { LoginPage } from './login.page';
--import { AuthenticationService } from '@app/core';
--import { createAuthenticationServiceMock } from '@app/core/testing';
-+import { AuthenticationService, IdentityService } from '@app/core';
-+import {
-+  createAuthenticationServiceMock,
-+  createIdentityServiceMock,
-+} from '@app/core/testing';
- import { of } from 'rxjs';
-
- describe('LoginPage', () => {
-@@ -27,6 +31,7 @@ describe('LoginPage', () => {
-             provide: AuthenticationService,
-             useFactory: createAuthenticationServiceMock,
-           },
-+          { provide: IdentityService, useFactory: createIdentityServiceMock },
-         ],
-       }).compileComponents();
-
-@@ -40,6 +45,59 @@ describe('LoginPage', () => {
-     expect(component).toBeTruthy();
-   });
-```
-
-When the login page is initialized, we need to determine if the user has a locked session or not. If they do, we need to display an unlock option with an appropriate icon to give the user a cue as to the type of unlocking mechasism that will be used.
+Add a method to `src/app/core/session-vault/session-vault.service.ts` that determines if we have a locked session that we are capable of unlocking:
 
 ```TypeScript
-  describe('init', () => {
-    describe('without a stored session', () => {
-      let identity;
-      beforeEach(() => {
-        identity = TestBed.inject(IdentityService);
-        (identity.hasStoredSession as any).and.returnValue(Promise.resolve(false));
-      });
-
-      it('sets displayVaultLogin to false', async () => {
-        await component.ngOnInit();
-        expect(component.displayVaultLogin).toEqual(false);
-      });
-    });
-
-    describe('with a stored session', () => {
-      let identity;
-      beforeEach(() => {
-        identity = TestBed.inject(IdentityService);
-        (identity.hasStoredSession as any).and.returnValue(Promise.resolve(true));
-      });
-
-      it('sets displayVaultLogin to true for passcode', async () => {
-        (identity.getAuthMode as any).and.returnValue(Promise.resolve(AuthMode.PasscodeOnly));
-        await component.ngOnInit();
-        expect(component.displayVaultLogin).toEqual(true);
-      });
-
-      it('sets displayVaultLogin to true for biometric and passcode', async () => {
-        (identity.getAuthMode as any).and.returnValue(Promise.resolve(AuthMode.BiometricAndPasscode));
-        await component.ngOnInit();
-        expect(component.displayVaultLogin).toEqual(true);
-      });
-
-      it('sets displayVaultLogin to false for biometric when bio is not available', async () => {
-        (identity.getAuthMode as any).and.returnValue(Promise.resolve(AuthMode.BiometricOnly));
-        await component.ngOnInit();
-        expect(component.displayVaultLogin).toEqual(false);
-      });
-
-      it('sets displayVaultLogin to true for biometric when bio is available', async () => {
-        (identity.isBiometricsAvailable as any).and.returnValue(Promise.resolve(true));
-        (identity.getAuthMode as any).and.returnValue(Promise.resolve(AuthMode.BiometricOnly));
-        await component.ngOnInit();
-        expect(component.displayVaultLogin).toEqual(true);
-      });
-    });
-  });
-```
-
-The code to accomplish this looks like the following:
-
-```TypeScript
-  displayVaultLogin: boolean
-
-  constructor(
-    private auth: AuthenticationService,
-    private identity: IdentityService,
-  ) {}
-
-  ...
-
-  async ngOnInit(): Promise<void> {
-    this.displayVaultLogin = await this.canUnlock();
-  }
-
-  ...
-
-  private async canUnlock(): Promise<boolean> {
-    if (!(await this.identity.hasStoredSession())) {
+  async canUnlock(): Promise<boolean> {
+    if (!(await this.hasStoredSession())) {
+      return false;
+    }
+    const vault = await this.getVault();
+    if (!(await vault.isLocked())) {
       return false;
     }
 
-    const mode = await this.identity.getAuthMode();
+    const mode = await this.getAuthMode();
     return (
       mode === AuthMode.PasscodeOnly ||
       mode === AuthMode.BiometricAndPasscode ||
-      (mode === AuthMode.BiometricOnly &&
-        (await this.identity.isBiometricsAvailable()))
+      (mode === AuthMode.BiometricOnly && (await this.isBiometricsAvailable()))
     );
   }
 ```
 
-Be sure to update the `import` statements at the top of the file accordingly.
+We can then update the page the check that value on init:
 
-### Unlocking the Token
+```diff
+--- a/src/app/login/login.page.ts
++++ b/src/app/login/login.page.ts
+@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 
-When the unlock button is clicked, we need to attempt to restore the session. If the session is restored then we will redirect the user to the `/tea-categories` page. In a real app, we might want to get fancier and redirect to the last visited page or something like that.
+ import { selectAuthErrorMessage, State } from '@app/store';
+ import { login, unlockSession } from '@app/store/actions';
++import { SessionVaultService } from '@app/core';
 
-```TypeScript
-  describe('clicking the "unlock" button', () => {
-    it('restores the session', () => {
-      const identity = TestBed.inject(IdentityService);
-      component.unlock();
-      expect(identity.restoreSession).toHaveBeenCalledTimes(1);
-    });
-  });
+ @Component({
+   selector: 'app-login',
+@@ -17,10 +18,14 @@ export class LoginPage implements OnInit {
+
+   errorMessage$: Observable<string>;
+
+-  constructor(private store: Store<State>) {}
++  constructor(
++    private sessionVault: SessionVaultService,
++    private store: Store<State>,
++  ) {}
+
+-  ngOnInit() {
++  async ngOnInit(): Promise<void> {
+     this.errorMessage$ = this.store.select(selectAuthErrorMessage);
++    this.canUnlock = await this.sessionVault.canUnlock();
+   }
+
+   signIn() {
 ```
 
-The code to accomplish this looks like the following:
+### Unlock the Session
+
+We will need some actions to represent that the user clicked on the unlock item:
+
+```diff
+--- a/src/app/store/actions.ts
++++ b/src/app/store/actions.ts
+@@ -14,6 +14,10 @@ export enum ActionTypes {
+   LogoutSuccess = '[Auth API] logout success',
+   LogoutFailure = '[Auth API] logout failure',
+
++  UnlockSession = '[Login Page] unlock session',
++  UnlockSessionSuccess = '[Vault API] unlock session success',
++  UnlockSessionFailure = '[Login Page] unlock session failure',
++
+   UnauthError = '[Auth API] unauthenticated error',
+
+   SessionLocked = '[Vault API] session locked',
+@@ -73,6 +77,10 @@ export const sessionRestored = createAction(
+   props<{ session: Session }>(),
+ );
+
++export const unlockSession = createAction(ActionTypes.UnlockSession);
++export const unlockSessionSuccess = createAction(ActionTypes.UnlockSessionSuccess);
++export const unlockSessionFailure = createAction(ActionTypes.UnlockSessionFailure);
++
+```
+
+The `UnlockSession` needs to be dispatched from the `LoginPage`:
 
 ```TypeScript
-  unlockClicked() {
-    this.identity.restoreSession();
+  unlock() {
+    this.store.dispatch(unlockSession())
   }
 ```
+
+These actions do not directly change the state, so we do not need to update the reducers at all. Rather, if the unlock is successful, the state will be updated appropriately due to the session restore event handling we implemented earlier.
+
+However, we will need some effects:
+
+- for the UnlockSession, we need to attempt to restore the session
+- for the UnlockSessionSuccess, we need to navigate away from the login page
+
+Add the foollowing effect to `src/app/store/effects/auth/auth.effects.ts`. When the `unlockSession` action is dispatched, it will attempt to restore the session, dispatching a success or failure depending on the outcome.
+
+```TypeScript
+  unlockSession$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(unlockSession),
+      exhaustMap(() =>
+        from(this.sessionVault.restoreSession()).pipe(
+          map(session =>
+            session ? unlockSessionSuccess() : unlockSessionFailure(),
+          ),
+          catchError(() => of(unlockSessionFailure())),
+        ),
+      ),
+    ),
+  );
+```
+
+Be sure to add the required `import` statements as well.
+
+We do not need to do anything yet for the `UnlockSessionFailure` action. We will just stay where we are.
+
+For the `UnlockSessionSuccess` action we need to navigate the same way we need to for the `LoginSuccess`. We will re-use that same effect after renaming it to `navigateToRoot$` similar to what we did for `navigateToLogin$`
+
+Find the `loginSuccess$` effect in `src/app/store/effects/auth/auth.effects.ts` and tweak it slightly.
+
+```diff
+--- a/src/app/store/effects/auth/auth.effects.ts
++++ b/src/app/store/effects/auth/auth.effects.ts
+@@ -73,10 +73,10 @@ export class AuthEffects {
+     ),
+   );
+
+-  loginSuccess$ = createEffect(
++  navigateToRoot$ = createEffect(
+     () =>
+       this.actions$.pipe(
+-        ofType(loginSuccess),
++        ofType(loginSuccess, unlockSessionSuccess),
+         tap(() => this.navController.navigateRoot(['/'])),
+       ),
+     { dispatch: false },
+```
+
+## Problem: Exceptions on Restore
+
+Run the application on a device. You should notice that the "happy path" works well. Try this:
+
+1. Make sure biometric security is properly set up on your device.
+1. Start the app and log in.
+1. Put the app in the background (switch to a different app).
+1. Wait 5 seconds.
+1. Go back to the tea app, you will be at the login page and can unlock the session.
+1. Unlock the session.
+1. Close the app.
+1. Restart the app.
+1. At this point, it should ask for biometric credentials again, and if you supply them you are back in the app.
+
+But now try this:
+
+1. Close the app.
+1. Restart the app.
+1. Fail the biometric credentials.
+
+At this point the app is bricked and you have to close it and restart to recover.
+
+If you do something like remove your fingerprint from the device, you can also brick the app, but a restart will not fix that. You are stuck.o
+
+If you were to hook them up to the Chrome or Safari dev tools and do a little debugging, it would not take long to narrow the issue down to an exception being thrown when you try to restore the session. The restore in question is the one we are doing in the auth guard.
+
+This is pretty easy to fix:
+
+```diff
+--- a/src/app/core/auth-guard/auth-guard.service.ts
++++ b/src/app/core/auth-guard/auth-guard.service.ts
+@@ -7,6 +7,7 @@ import { NavController } from '@ionic/angular';
+ import { selectAuthToken, State } from '@app/store';
+ import { SessionVaultService } from '../session-vault/session-vault.service';
+ import { map, mergeMap, take, tap } from 'rxjs/operators';
++import { Session } from '@app/models';
+
+ @Injectable({
+   providedIn: 'root',
+@@ -22,7 +23,7 @@ export class AuthGuardService implements CanActivate {
+     return this.store.pipe(
+       select(selectAuthToken),
+       take(1),
+-      mergeMap(token => (token ? of(token) : this.vault.restoreSession())),
++      mergeMap(token => (token ? of(token) : this.tryRestoreSession())),
+       map(value => !!value),
+       tap(sessionExists => {
+         if (!sessionExists) {
+@@ -31,4 +32,12 @@ export class AuthGuardService implements CanActivate {
+       }),
+     );
+   }
++
++  private async tryRestoreSession(): Promise<Session | undefined> {
++    try {
++      return await this.vault.restoreSession();
++    } catch (err) {
++      return undefined;
++    }
++  }
+```
+
+If an exception occurs while trying to restore the session, we will just assume a bad session or bad vault resulting in going to the login page.
 
 ## Conclusion
 
