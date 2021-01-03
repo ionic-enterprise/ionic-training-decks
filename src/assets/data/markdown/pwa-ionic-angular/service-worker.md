@@ -130,40 +130,114 @@ We will register for updates when the application is initialized in the `AppComp
 
 ### Test
 
-The first thing we need to do in the test is provide the `ApplicationService` using our mock factory.
+The first thing we need to do in the test is provide the `ApplicationService` and `Platform` service using mock factories.
 
-```typescript
-        {
-          provide: ApplicationService,
-          useFactory: createAppliationServiceMock,
-        },
+```diff
+--- a/src/app/app.component.spec.ts
++++ b/src/app/app.component.spec.ts
+@@ -1,7 +1,11 @@
+ import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+ import { TestBed, waitForAsync } from '@angular/core/testing';
++import { Platform } from '@ionic/angular';
++import { createPlatformMock } from '@test/mocks';
+
+ import { AppComponent } from './app.component';
++import { ApplicationService } from './core';
++import { createApplicationServiceMock } from './core/testing';
+
+ describe('AppComponent', () => {
+   beforeEach(
+@@ -9,6 +13,16 @@ describe('AppComponent', () => {
+       TestBed.configureTestingModule({
+         declarations: [AppComponent],
+         schemas: [CUSTOM_ELEMENTS_SCHEMA],
++        providers: [
++          {
++            provide: Platform,
++            useFactory: createPlatformMock,
++          },
++          {
++            provide: ApplicationService,
++            useFactory: createApplicationServiceMock,
++          },
++        ],
+       }).compileComponents();
+     }),
+   );
 ```
 
-Once that is in place, we need to have one test in the "hybrid mobile context" section showing that we _do not_ register for updates and another almost identical test in the "web context" section showing that we _do_ register for updates. Note the one line difference between the two tests.
+Once that is in place, add a couple of tests, one for a hybrid mobile context, the other for a web context. In the "hybrid mobile context" section show that we _do not_ register for updates. In the "web context" section show that we _do_ register for updates. Note the one line difference between the two tests.
 
-```typescript
-    describe('in a hybrid mobile context', () => {
-      ...
-      it('registers for updates', () => {
-        const application = TestBed.inject(ApplicationService);
-        TestBed.createComponent(AppComponent);
-        expect(application.registerForUpdates).not.toHaveBeenCalled();
-      });
-    });
-
-    describe('in a web context', () => {
-      ...
-      it('registers for updates', () => {
-        const application = TestBed.inject(ApplicationService);
-        TestBed.createComponent(AppComponent);
-        expect(application.registerForUpdates).toHaveBeenCalledTimes(1);
-      });
-    });
+```diff
+@@ -18,4 +32,33 @@ describe('AppComponent', () => {
+     const app = fixture.debugElement.componentInstance;
+     expect(app).toBeTruthy();
+   });
++
++  describe('in a hybrid mobile context', () => {
++    beforeEach(() => {
++      const platform = TestBed.inject(Platform);
++      (platform.is as any).withArgs('hybrid').and.returnValue(true);
++      const fixture = TestBed.createComponent(AppComponent);
++      fixture.detectChanges();
++    });
++
++    it('registers for updates', () => {
++      const application = TestBed.inject(ApplicationService);
++      expect(application.registerForUpdates).not.toHaveBeenCalled();
++    });
++  });
++
++  describe('in a web context', () => {
++    beforeEach(() => {
++      const platform = TestBed.inject(Platform);
++      (platform.is as any).withArgs('hybrid').and.returnValue(false);
++      const fixture = TestBed.createComponent(AppComponent);
++      fixture.detectChanges();
++    });
++
++    it('registers for updates', () => {
++      const application = TestBed.inject(ApplicationService);
++      TestBed.createComponent(AppComponent);
++      expect(application.registerForUpdates).toHaveBeenCalledTimes(1);
++    });
++  });
+ });
 ```
 
 ### Code
 
-In the `AppComponent`, inject the `ApplicationService` and call its `registerForUpdates()` method in the appropriate spot.
+In the `AppComponent`, inject the `ApplicationService` and `Platform` service. Implement the `OnInit` interface, registering for updates when not in a hybrid mobile context.
+
+```diff
+--- a/src/app/app.component.ts
++++ b/src/app/app.component.ts
+@@ -1,10 +1,21 @@
+-import { Component } from '@angular/core';
++import { Component, OnInit } from '@angular/core';
++import { Platform } from '@ionic/angular';
++import { ApplicationService } from './core';
+
+ @Component({
+   selector: 'app-root',
+   templateUrl: 'app.component.html',
+   styleUrls: ['app.component.scss'],
+ })
+-export class AppComponent {
+-  constructor() {}
++export class AppComponent implements OnInit {
++  constructor(
++    private application: ApplicationService,
++    private platform: Platform,
++  ) {}
++
++  ngOnInit() {
++    if (!this.platform.is('hybrid')) {
++      this.application.registerForUpdates();
++    }
++  }
+ }
+```
 
 ## Conclusion
 

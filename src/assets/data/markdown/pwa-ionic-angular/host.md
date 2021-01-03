@@ -31,19 +31,18 @@ Since this is something that will be done often, and I suggest adding it as a sc
 
 ```JSON
   "scripts": {
-    "build": "ng build && cap copy",
-    "build:prod": "ng build --prod && cap copy",
+    "build": "ng build --prod && cap copy",
     "e2e": "ng e2e",
     "lint": "ng lint",
     "ng": "ng",
     "start": "ng serve",
     "test": "ng test --browsers=ChromeHeadless",
-    "test:ci": "ng test --browsers=ChromeHeadlessCI --no-watch",
+    "test:ci": "ng test --no-watch --browsers=ChromeHeadlessCI",
     "test:debug": "ng test"
   },
 ```
 
-Now running `npm run build:prod` will result in a build that is ready to be served as a web application.
+Now running `npm run build` will result in a build that is ready to be served as a web application.
 
 ## Host the Application on Firebase
 
@@ -63,7 +62,7 @@ That is all you have to do on Firebase itself. The rest of the work needs to be 
 - `npm install -g firebase-tools`
 - `firebase login`
 
-From the `ionic-weather` root directory, run `firebase init` which will walk you through some steps to initialize your app:
+From the `tea-taster-angular` root directory, run `firebase init` which will walk you through some steps to initialize your app:
 
 - The only feature you need to chose is "Hosting: Configure and deploy Firebase Hosting sites".
 - For "Project Setup", choose the project you just created
@@ -141,7 +140,7 @@ Untracked files:
 
 The `firebase.json` and `.firebaserc` contain firebase configuration information and should be committed. The `.firebase` directory contains cache information and should be ignored.
 
-- Add `.firebase/` to the `.gitignore` file
+- Add `/.firebase` to the `.gitignore` file
 - Add `firebase.json` and `.firebaserc` to git
 - Commit the two new files and changed `.gitignore` file
 

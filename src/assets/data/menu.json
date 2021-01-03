@@ -286,6 +286,10 @@
               "file": "pwa"
             },
             {
+              "title": "Interact with the Service Worker",
+              "file": "service-worker"
+            },
+            {
               "title": "PWA Links",
               "file": "links"
             }
