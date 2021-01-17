@@ -11,7 +11,7 @@ In this lab, you will:
 
 When a Capacitor platform is added or updated, information in the `capacitor.config.json` file is used to generate some of the project files. Some of this information should be changed up front:
 
-- The `appId` should be change to something unique like `com.kensodemann.teataster`
+- The `appId` should be change to something unique like `com.kensodemann.teataster` (only use your own name or company domain, not my name... 🤓)
 - The `appName` should be checked to ensure it is correct
 
 Here is an example of those changes:
@@ -38,7 +38,7 @@ Here is an example of those changes:
 
 ```xml
 {
-  "appId": "com.kensodemann.teataster",
+  "appId": "com.yournamehere.teataster",
   "appName": "Tea Taster",
   "bundledWebRuntime": false,
   "npmClient": "npm",

@@ -1,6 +1,6 @@
 # Lab: Manage the Session State
 
-The application needs to know about the current state of the session. However, you will notice that both of our services are stateless. We could use `IdentityService.get()` each time we need to know if we have a session or not, but that seems wasteful. It would be better if we had something inside our application that was in charge of managing the state of the application for us. Enter <a href="https://next.vuex.vuejs.org" target="_blank">vuex</a>.
+The application needs to know about the current state of the session. However, you will notice that both of our services are stateless. We could use `SessionVaultService.get()` each time we need to know if we have a session or not, but that seems wasteful. It would be better if we had something inside our application that was in charge of managing the state of the application for us. Enter <a href="https://next.vuex.vuejs.org" target="_blank">vuex</a>.
 
 In this lab you will learn how to create a basic Vuex store.
 
@@ -41,7 +41,7 @@ export interface State {
   session: Session | null;
 }
 
-const state = {
+export const state = {
   session: null,
 };
 ```
@@ -77,7 +77,7 @@ export const mutations = {};
 Then add a `tests/unit/store/mutations.spec.ts` file that we will use to test our mutations. At this time, our root state consists of our session, and the only things we will need to do to it are set it and clear it, so we will have two mutations: SET_SESSION and CLEAR_SESSION.
 
 ```typescript
-import { mutations } from '@/store';
+import { mutations } from '@/store/mutations';
 import { Session } from '@/models';
 
 const session: Session = {
@@ -135,7 +135,7 @@ export default createStore({
 
 ## Actions
 
-Actions are similar to mutations, the differences being that:
+Actions are simple JavaScript functions just like mutations, the differences being that:
 
 - Instead of mutating the state, actions commit mutations.
 - Actions can contain arbitrary asynchronous operations.
@@ -146,7 +146,7 @@ We will start with four distinct actions at the root of our store:
 
 - login
 - logout
-- initialize
+- restore
 - clear
 
 Notice that the first three are logically actions taken by the application as the user interacts with it. The last action (`clear`) it an action dispatched within the store itself to let the store know it should clear its data. There will be a similar in-store root action called `load` that will instruct certain store modules (not discussed yet) to load their data.
@@ -155,13 +155,13 @@ First create a `tests/unit/store/actions.spec.ts` file with the following skelet
 
 ```typescript
 import { ActionContext } from 'vuex';
-import { actions } from '@/store';
+import { actions } from '@/store/actions';
 import AuthenticationService from '@/services/AuthenticationService';
-import SessionService from '@/services/SessionService';
+import SessionVaultService from '@/services/SessionVaultService';
 import { Session } from '@/models';
 
 jest.mock('@/services/AuthenticationService');
-jest.mock('@/services/SessionService');
+jest.mock('@/services/SessionVaultService');
 
 const context: ActionContext<any, any> = {
   commit: jest.fn(),
@@ -191,7 +191,7 @@ describe('root actions', () => {
 
   describe('logout', () => {});
 
-  describe('initialize', () => {});
+  describe('restore', () => {});
 });
 ```
 
@@ -201,9 +201,10 @@ In `src/store/actions.ts` (new file), create a skeleton for the `actions` as wel
 import { ActionContext } from 'vuex';
 
 import AuthenticationService from '@/services/AuthenticationService';
-import SessionService from '@/services/SessionService';
+import SessionVaultService from '@/services/SessionVaultService';
 
 import { State } from './state';
+import { Session } from '@/models';
 
 export const actions = {
   async login(
@@ -213,11 +214,11 @@ export const actions = {
     return false;
   },
 
-  async logout({ commit }: ActionContext<State, State>): Promise<void> {
+  async logout({ dispatch }: ActionContext<State, State>): Promise<void> {
     return undefined;
   },
 
-  async initialize({ commit }: ActionContext<State, State>): Promise<void> {
+  async restore({ commit }: ActionContext<State, State>): Promise<void> {
     return undefined;
   },
 
@@ -264,7 +265,7 @@ describe('logout', () => {
 
   it('clears the session storage', async () => {
     await actions.logout(context);
-    expect(SessionService.clear).toHaveBeenCalledTimes(1);
+    expect(SessionVaultService.clear).toHaveBeenCalledTimes(1);
   });
 
   it('dispatches the clear action', async () => {
@@ -278,27 +279,25 @@ describe('logout', () => {
 In the code, that translates to:
 
 ```typescript
-...
-import AuthenticationService from '@/services/AuthenticationService';
-import SessionService from '@/services/SessionService';
-...
-export const actions = {
-...
   async logout({ dispatch }: ActionContext<State, State>): Promise<void> {
     await AuthenticationService.logout();
-    await SessionService.clear();
+    await SessionVaultService.clear();
     dispatch('clear');
   },
-...
-};
 ```
 
 ### Login
 
-The Login takes a little bit more work because the login itself may fail. We will build this one up a little at a time. First, though, is the fact that we need to call the authentication login correctly:
+The Login takes a little bit more work because the login itself may fail. We will build this one up a little at a time. The first step is to call the authentication login method correctly:
 
 ```typescript
 describe('login', () => {
+  beforeEach(() => {
+    (AuthenticationService.login as any).mockResolvedValue({
+      success: false,
+    });
+  });
+
   const credentials = {
     email: 'test@test.com',
     password: 'thisisatest',
@@ -342,7 +341,7 @@ describe('on failure', () => {
 
   it('does not store the session', async () => {
     await actions.login(context, credentials);
-    expect(SessionService.set).not.toHaveBeenCalled();
+    expect(SessionVaultService.set).not.toHaveBeenCalled();
   });
 
   it('does not commit any state changes', async () => {
@@ -372,8 +371,8 @@ The final set of tests are for the case when the login succeeds. This is basical
 
       it('stores the session', async () => {
         await actions.login(context, credentials);
-        expect(SessionService.set).toHaveBeenCalledTimes(1);
-        expect(SessionService.set).toHaveBeenCalledWith(session.user, session.token);
+        expect(SessionVaultService.set).toHaveBeenCalledTimes(1);
+        expect(SessionVaultService.set).toHaveBeenCalledWith(session);
       });
 
       it('commits the session', async () => {
@@ -399,44 +398,43 @@ The code for the action is pretty straight forward:
       credentials.email,
       credentials.password,
     );
-    if (response?.success && response?.user && response?.token) {
-      SessionService.set(response.user, response.token);
-      commit('SET_SESSION', {
+    if (response.success && response.user && response.token) {
+      const session: Session = {
         user: response.user,
-        token: response.token,
-      });
+        token: response.token
+      };
+      commit('SET_SESSION', session);
+      SessionVaultService.set(session);
     }
-    return !!response && response.success;
+    return response.success;
   },
 ```
 
-Note that before unpacking the reponse is making sure we actually _have_ a response. Also, the `!!` syntax on the final line coerces the value to a boolean (just in case you have not seen that syntax before).
-
-### Initialize
+### restore
 
 When we start up the application, there is some initialzation of the store that will need to occur. Currently that is just loading the session information from storage if it exists.
 
 ```typescript
-describe('initialize', () => {
+describe('restore', () => {
   it('gets the current session from storage', async () => {
-    await actions.initialize(context);
-    expect(SessionService.get).toHaveBeenCalledTimes(1);
+    await actions.restore(context);
+    expect(SessionVaultService.get).toHaveBeenCalledTimes(1);
   });
 
   describe('without a stored session', () => {
     it('does not commit the session', async () => {
-      await actions.initialize(context);
+      await actions.restore(context);
       expect(context.commit).not.toHaveBeenCalled();
     });
   });
 
   describe('with a stored session', () => {
     beforeEach(() => {
-      (SessionService.get as any).mockResolvedValue(session);
+      (SessionVaultService.get as any).mockResolvedValue(session);
     });
 
     it('commits the session', async () => {
-      await actions.initialize(context);
+      await actions.restore(context);
       expect(context.commit).toHaveBeenCalledTimes(1);
       expect(context.commit).toHaveBeenCalledWith('SET_SESSION', session);
     });
@@ -444,46 +442,28 @@ describe('initialize', () => {
 });
 ```
 
-The two inner `describe()`'s may seem like overkill now, but that will come in handy later. It is generally best to nest different routes through the code in their own `describe()`.
+The two inner `describe()`'s may seem like overkill now, but that will come in handy later. It is generally best to nest different paths through the code in their own `describe()`.
 
 The code for the action is then as follows:
 
 ```typescript
-  async initialize({ commit }: ActionContext<State, State>): Promise<void> {
-    const session = await SessionService.get();
+  async restore({ commit }: ActionContext<State, State>): Promise<void> {
+    const session = await SessionVaultService.get();
     if (session) {
       commit('SET_SESSION', session);
     }
   },
 ```
 
-Finally, using the mutations as a model, add the actions to the store.
+### Add the Actions to the Store
+
+Using the mutations as a model, add the actions to the store.
 
 ## Modules
 
 Notice that we did everything at the root level for within our store. As our application grows, we will want to look into using <a href="https://vuex.vuejs.org/guide/modules.html" target="_blank">modules</a>. However, we are currently dealing with a fairly core concept within our application so it makes sense that it should be defined at the root level.
 
 We aren't going to do anything here, I just wanted to make sure you were aware that these existed. These will come into play as we expand our application. This is also the reason we have the `clear` action that currently just seems like an extra layer of abstraction.
-
-## Initialize the Store
-
-Before we mount the application we need to initialize the store and thus load our session information if we have any. We can do this in `src/main.ts` by adding a method that dispatches the initialize. We can then wait for it to finish just like we wait for the router to be ready before mounting the app.
-
-```typescript
-function initializeStore(): Promise<void> {
-  return store.dispatch('initialize');
-}
-
-const app = createApp(App)
-  .use(IonicVue)
-  .use(router)
-  .use(store)
-  .use(VuelidatePlugin);
-
-Promise.all([initializeStore(), router.isReady()]).then(() => {
-  app.mount('#app');
-});
-```
 
 ## Conclusion
 

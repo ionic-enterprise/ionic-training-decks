@@ -10,7 +10,7 @@ In this lab, you will learn how to:
 
 ## Install the Images
 
-The service we just created references several image assets, but these assets to do not exist yet. <a download href="/assets/packages/ionic-angular/img.zip">Download the images</a> and unpack the zip file under `public/assets`, creating an `img` folder with the images in them.
+There are several images we would like to display for our teas, but these assets to do not exist yet. <a download href="/assets/packages/ionic-angular/img.zip">Download the images</a> and unpack the zip file under `public/assets`, creating an `img` folder with the images in them.
 
 **Note:** the specifics on doing this depends on the type of machine you are using. On a Mac:
 
@@ -55,14 +55,14 @@ First move the files as noted above. You can also just rename them in your IDE i
 
 ### Fix the Routing
 
-The routing is set up in `src/router/index.ts`. When we renamed the Vue file from Home to Tea, we broke the import statement. In reality all we have to do is fix that statement. That is, all we _really_ need to do is this:
+The routing is set up in `src/router/index.ts`. When we renamed the Vue file from Home to Tea, we broke the import statement. In reality all we _have_ to do is fix that statement, like this:
 
 ```diff
 -import Home from '../views/Home.vue';
 +import Home from '../views/TeaList.vue';
 ```
 
-In the long run, though, that would be confusing. While we are in there we should also update the routes so they are more descriptive for our application. We should also use a more descriptive name for the component.
+In the long run, though, that would be confusing. While we are in there we should also update the routes so they are more descriptive for our application. We should also use a more descriptive name for the component. As a result, do this instead:
 
 ```diff
  import { createRouter, createWebHistory } from '@ionic/vue-router';
@@ -153,6 +153,35 @@ As of this writing, we will need to start mounting this component with the `rout
 
 First, create a router object in a `beforeEach()`:
 
+```diff
+--- a/tests/unit/views/TeaList.spec.ts
++++ b/tests/unit/views/TeaList.spec.ts
+-import { mount } from '@vue/test-utils';
++import { mount, VueWrapper } from '@vue/test-utils';
+import TeaList from '@/views/TeaList.vue';
+
+ describe('TeaList.vue', () => {
++  let wrapper: VueWrapper<any>;
++  beforeEach(() => {
++    wrapper = mount(TeaList);
++  });
++
+   it('displays the title', () => {
+-    const wrapper = mount(TeaList);
+     const titles = wrapper.findAllComponents('ion-title');
+     expect(titles).toHaveLength(2);
+     expect(titles[0].text()).toBe('Teas');
+     expect(titles[1].text()).toBe('Teas');
+   });
+
+   it('displays the default text', () => {
+-    const wrapper = mount(TeaList);
+     const container = wrapper.find('#container');
+     expect(container.text()).toContain('Ready to create an app?');
+   });
+ });
+```
+
 ```typescript
 import { mount, VueWrapper } from '@vue/test-utils';
 import { createRouter, createWebHistory } from '@ionic/vue-router';
@@ -182,7 +211,7 @@ Then, remove everywhere else that we are current mounting the `Tea` component si
 
 ### Mock the Data
 
-Within the `<script>` tag, add a `data()` method to the object passed to `defineComponent()`. This method returns an object that defines the data used by the component. Add the method as follows:
+Switching away from the test and to the view code, within the `<script>` tag, add a `data()` method to the object passed to `defineComponent()`. This method returns an object that defines the data used by the component. Add the method as follows:
 
 ```typescript
   data() {
@@ -249,19 +278,22 @@ Within the `<script>` tag, add a `data()` method to the object passed to `define
   },
 ```
 
-**Note:** If we were further along, we probably would have created a "service" class and had it return fake data using the same sort of interface it would use to return real data, but we haven't talked about any of that yet in this training.
+**Note:** If we were further along, we probably would have created fake data in the Vuex store for the application, but we have not talked about Vuex yet, so we will just hard code the data like this for now.
 
 ### Experiement with a List
 
-Now that we have a list of teas, we need to figure out how to display this information. One component that seems natural is to use a <a href="https://ionicframework.com/docs/api/card" target="_blank">card</a> to display each tea in the list. Let's see how that looks.
+Now that we have a list of teas, we need to figure out how to display this information. One component that seems natural is to use a <a href="https://ionicframework.com/docs/api/card" target="_blank">card</a> to display each tea in the list. Let's see how that looks. Before doing this, use your browser's dev-tools to emulate an iPhone.
 
-Before doing this, use your browser's dev-tools to emulate an iPhone.
+First we will do a little cleanup:
 
-Replace the `<div id="container">` with the following markup (feel free to remove the styles for the "#container" as well):
+- Remove the `<div id="container">` and all of its child elements from the `template`
+- Remove the styles for the "#container" from the `style`
+
+The add the following markup where the `<div id="container">` used to be (under the `ion-header` that is within the `ion-content`):
 
 ```html
 <ion-list>
-  <ion-item v-for="tea of teaData">
+  <ion-item v-for="tea of teaData" :key="tea.id">
     <ion-card>
       <ion-img :src="tea.image"></ion-img>
       <ion-card-header>
@@ -287,7 +319,9 @@ What we really need is a way to do the following:
 1. show two columns of tea cards side by side on an iPad
 1. expand the columns to four on even wider screens, such as an iPad in landscape mode or our desktop
 
-Enter the <a href="https://ionicframework.com/docs/layout/grid" target="_blank">responsive grid</a>. By default, the resonsive grid shows rows of 12 columns each. However, we want to show at most rows of four columns. Luckily, there are some simple mechanisms in place that will allow us to do that, but first let's think about how we want the grid to work at the highest resolutions and then express that in some tests.
+Enter the <a href="https://ionicframework.com/docs/layout/grid" target="_blank">responsive grid</a>. By default, the resonsive grid shows rows containing 12 columns. Elements within the rows can be contained either within a single column or spread across multiple columns allowing for a very flexible layout within the row.
+
+In our case we want to show at most four columns of cards per row for high resolution tablets. As the form factor changes, we want the number of columns to change. On lower resolution tablets we would like to display only two columns per row, and on phone resoutions we would like just a single column of cards. Luckily, there are some simple mechanisms in place that will allow us to do that, but first let's think about how we want the grid to work at the highest resolutions and then express that in some tests.
 
 First, we no longer need the test that expects the content of our "#container" so remove that test case.
 
@@ -335,7 +369,9 @@ Add the following code to the Tea view's component configuration object:
   },
 ```
 
-We can then update the view's template accordingly:
+**Note:** you will also need to import the `Tea` model as such: `import { Tea } from '@/models';` The imports are the first set of items within the `script` tag of the `.vue` file.
+
+We can then update the view's template accordingly. Add the following markup either directly above or directly below the `ion-list` that we added earlier:
 
 ```html
 <ion-grid>
@@ -365,7 +401,7 @@ it('displays three columns in the second row', () => {
 });
 ```
 
-Verify that we have two failing tests. Now we can update the template:
+Verify that we have two failing tests. Now we can update the template by adding `<ion-col v-for="tea of row" size="3" :key="tea.id"></ion-col>` inside the `ion-row`:
 
 ```html
 <ion-grid>
@@ -374,22 +410,24 @@ Verify that we have two failing tests. Now we can update the template:
     v-for="(row, index) in teaRows"
     :key="index"
   >
-    <ion-col v-for="tea of row" size="3"></ion-col>
+    <ion-col v-for="tea of row" size="3" :key="tea.id"></ion-col>
   </ion-row>
 </ion-grid>
 ```
 
 Rember to add IonCol to the list of our child components.
 
-**Note:** the `size="3"` tells the column to take up three colunns in the row. Remember that each row contains 12 columns, and we are only supplying at most four columns. Thus, each column we supply should occupy three columns in the row.
+**Note:** the `size="3"` tells the column to take up three colunns in the row. Remember that each row contains 12 columns and that elements in the row can be spread across mutliple columns. We only want at most four columns per row. Thus, each column we supply should be spread across three of the columns in the row.
 
-Now that we have the grid layed out, we can add our card template. We will just use the card template from our "list experiment" above, but first let's write some tests:
+Now that we have the grid layed out, we can add our card template. We will just use the card template from our `ion-list` that we had added above.
 
 ```typescript
-import { Tea as TeaModel } from '@/models';
+import { Tea } from '@/models';
 ...
+  describe('with seven teas', () => {
+    ...
     it('displays the name in the title', () => {
-      const teas = wrapper.vm.teaData as Array<TeaModel>;
+      const teas = wrapper.vm.teaData as Array<Tea>;
       const cols = wrapper.findAllComponents('ion-col');
       cols.forEach((c, idx) => {
         const title = c.findComponent('ion-card ion-card-header ion-card-title');
@@ -398,14 +436,26 @@ import { Tea as TeaModel } from '@/models';
     });
 
     it('displays the description in the content', () => {
-      const teas = wrapper.vm.teaData as Array<TeaModel>;
+      const teas = wrapper.vm.teaData as Array<Tea>;
       const cols = wrapper.findAllComponents('ion-col');
       cols.forEach((c, idx) => {
         const title = c.findComponent('ion-card ion-card-content');
         expect(title.text()).toBe(teas[idx].description);
       });
     });
+  });
 ```
+
+With the test in place, we can make the following modifications to the view:
+
+- Move the `ion-card` layout from the `ion-list` to be a child of the `ion-col` in our grid
+- Remove the rest of the `ion-list`
+- Add the following components to the components list:
+  - IonCard
+  - IonCardContent
+  - IonCardHeader
+  - IonCardTitle
+  - IonImg
 
 This loops through the rows and for each row displays a column for each tea in that row. That looks great on a iPad Pro, though the cards are all different sizes and look a little crowded. We can fix that with some simple CSS in the view.
 
@@ -425,7 +475,7 @@ Note the `scoped` attribute. That limits the effects of this CSS to only the vie
 
 Now each card takes up its full cell height, and there is some margin between the rows. Nice!
 
-But there is one last thing. This will always display four columns, which will look very squished on a phone. The grid provides breakpoints that allow us to set the column sizes based on the size of the screen. Let's do the following:
+But there is one last thing. This will always display four columns, which will look very squished on a phone. Recall that we wanted two columns on lower resolution tablets and a single column on phones. The grid provides breakpoints that allow us to set the column sizes based on the size of the screen. Let's do the following:
 
 - smaller devices: column size 12 -> each column takes up the whole "row"
 - large devices: column size 6 -> each column takes up half of the "row" (2 columns per "row")
@@ -447,4 +497,4 @@ Now as you change the type of device that is being emulated, the layout adapts a
 
 ## Conclusion
 
-In this lab you learned how to mock up the UI to ensure it looks the way you want it to look. Make sure you have a look at your app in both light and dark mode. Next we will look at how to get real data.
+In this lab you learned how to mock up the UI to ensure it looks the way you want it to look. Make sure you have a look at your app in both light and dark mode. Next we will begin laying out our authentication workflow so we can eventually get real data from our backend API.

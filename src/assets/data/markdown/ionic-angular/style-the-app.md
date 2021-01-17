@@ -2,6 +2,8 @@
 
 In this lab, you will further explore how to style your application.
 
+**Note:** the first half of this lab is just explanation, so do not try to put the CSS samples anywhere. The second half will apply all of this to our app.
+
 ## A Note on iOS and Material Design Styling
 
 The Ionic Framework automatically adapts between styling that matches the iOS Human Interface Guidelines and Android's Material Design. We _highly_ suggest that you keep this paradigm in place. It allows your customers to see the application in a manner that makes sense to them on whatever platform they are on. The best practice here is to style your application in a way that injects your own branding without interfering with the native styling that makes the application look "at home" on each platform.
@@ -92,6 +94,8 @@ ion-select::part(icon) {
 ```
 
 ## Putting it All Together
+
+**Note:** now we are finally getting to the bit where we will modify our code... 🤓
 
 The design team has started giving us design requirements. Mostly the color schemes to use for both light and dark mode, but they would also like a minor tweak to the border radius on the cards and a slightly different style on the select dropdown.
 

@@ -17,7 +17,7 @@ These are a couple of things we have done multiple times now, so I will just giv
 
 ### The `TastingNotes` Model
 
-Add the following model in `src/models/tasting-note.ts` and make sure to update the `src/models/index.ts` accordingly:
+Add the following model in `src/models/TastingNote.ts` and make sure to update the `src/models/index.ts` accordingly:
 
 ```typescript
 export interface TastingNote {
@@ -171,7 +171,7 @@ The `tastingNotes` store module is going to be very similar to the `teas` module
 
 ### State
 
-Copy `src/store/teas/state.ts` to `src/store/tasting-notes/state.ts` and change the type used for the `items` collection from `Array<Tea>` to `Array<TastingNote>`.
+Copy `src/store/teas/state.ts` to `src/store/tasting-notes/state.ts` and change the type used for the `items` collection from `Array<Tea>` to `Array<TastingNote>`. Same for the `find()` getter.
 
 ### Mutations
 
@@ -219,7 +219,7 @@ const tastingNotes: Array<TastingNote> = [
   },
 ];
 
-describe('tea mutations', () => {
+describe('tasting notes mutations', () => {
   describe('CLEAR_SESSION', () => {
     it('set the notes to an empty array', () => {
       const state = { list: tastingNotes };
@@ -245,13 +245,13 @@ import { State } from './state';
 import { TastingNote } from '@/models';
 
 export const mutations = {
-  CLEAR: (state: State) => (state.list = []),
-  SET: (state: State, tastingNotes: Array<TastingNote>) =>
-    (state.list = tastingNotes),
+  SET: (state: State, teas: Array<TastingNote>): Array<TastingNote> =>
+    (state.list = teas),
+  CLEAR: (state: State): Array<TastingNote> => (state.list = []),
 };
 ```
 
-At this point we can look at what we will need for the MERGE and DELETE mutations.
+At this point we can look at what we will need for the DELETE and MERGE mutations.
 
 #### DELETE
 
@@ -281,7 +281,7 @@ Test:
 Code:
 
 ```TypeScript
-  DELETE: (state: State, tastingNote: TastingNote) => {
+  DELETE: (state: State, tastingNote: TastingNote): void => {
     const idx = state.list.findIndex(x => x.id === tastingNote.id);
     if (idx > -1) {
       state.list.splice(idx, 1);
@@ -330,7 +330,7 @@ Test:
 Code:
 
 ```TypeScript
-  MERGE: (state: State, tastingNote: TastingNote) => {
+  MERGE: (state: State, tastingNote: TastingNote): void => {
     const idx = state.list.findIndex(x => x.id === tastingNote.id);
     if (idx > -1) {
       state.list.splice(idx, 1, tastingNote);
@@ -553,7 +553,9 @@ Code:
 
 Now that the store module's state, mutations, and actions are all in place, we are ready to add it to our store. First, copy the `index.ts` file from `scr/store/teas` to `src/store/tasting-notes`. If you have a look at that file you will see that it is very generic. There is nothing here that needs to change.
 
-Next add the module in the `src/store/index.ts` file using the teas module as a guide.
+Next add the module in the `src/store/index.ts` file using the teas module as a guide. Let's call the new module `testingNotes` in the store's configuration object.
+
+**Note:** that should be it for the stuff that is all review of what we have done before. Starting with the next section we will be getting back into new territory as we create and display a modal dialog.
 
 ## Create the Editor Component
 
@@ -573,25 +575,19 @@ Let's create a composite component that we can use to create new tasting notes o
 </template>
 
 <script lang="ts">
-  import {
-    IonContent,
-    IonHeader,
-    IonPage,
-    IonTitle,
-    IonToolbar,
-  } from '@ionic/vue';
+  import { IonContent, IonHeader, IonTitle, IonToolbar } from '@ionic/vue';
   import { defineComponent } from 'vue';
 
   export default defineComponent({
     name: 'AppTastingNoteEditor',
-    components: { IonContent, IonHeader, IonPage, IonTitle, IonToolbar },
+    components: { IonContent, IonHeader, IonTitle, IonToolbar },
   });
 </script>
 
 <style scoped></style>
 ```
 
-We also create a `tests/unit/components/AppTastingNoteEditor.spec.ts` file with the following contents:
+Also create a `tests/unit/components/AppTastingNoteEditor.spec.ts` file with the following contents:
 
 ```TypeScript
 import { mount, VueWrapper } from '@vue/test-utils';
@@ -639,10 +635,10 @@ From here, the code and the markup in `src/views/TastingNotes.vue` are pretty ea
 ```html
 <template>
   ...
-  <ion-content class="ion-padding">
+  <ion-content>
     <ion-fab vertical="bottom" horizontal="end" slot="fixed">
       <ion-fab-button @click="presentNoteEditor">
-        <ion-icon name="add"></ion-icon>
+        <ion-icon :icon="add"></ion-icon>
       </ion-fab-button>
     </ion-fab>
   </ion-content>
@@ -706,7 +702,7 @@ Now that we can click on the FAB button and see the modal, let's start laying ou
       data-testid="cancel-button"
       @click="cancel()"
     >
-      <ion-icon slot="icon-only" name="close"></ion-icon>
+      <ion-icon slot="icon-only" :icon="close"></ion-icon>
     </ion-button>
   </ion-buttons>
   ...
@@ -740,7 +736,7 @@ Now that we can click on the FAB button and see the modal, let's start laying ou
 </script>
 ```
 
-Let's start filling out the form. We already have one simple form. The `LoginPage`. It looks like over there we used a list of inputs. We will need something like that, so let's use that as a model for the first couple of input fields here. All of the following items will go inside the `ion-content` element. Be sure to update the components as usual, and also to add some ref objects for the data items that we are binding.
+Let's start filling out the form. We already have one simple form. The `LoginPage`. On that page we used a list of inputs. We will need something like that within this editor, so let's use that as a model for the first couple of input fields. All of the following items will go inside the `ion-content` element. Be sure to update the components list as usual, and also add some ref objects for the data items that we are binding.
 
 ```html
 <template>
@@ -773,12 +769,6 @@ Let's start filling out the form. We already have one simple form. The `LoginPag
     components: {
       // TODO: there are now component references missing, add them
     },
-    data() {
-      return {
-        name: '',
-        brand: '',
-      };
-    },
     setup() {
       const brand = ref('');
       const name = ref('');
@@ -791,7 +781,7 @@ Let's start filling out the form. We already have one simple form. The `LoginPag
 </script>
 ```
 
-We need a way to select the type of tea that we have. Add a select for this. In addition to the usual upding of the component references (not shown, but be sure to do it, also applies to the other additions we need to make), you will also need to map the teas from the state so we can use them to populate the select.
+We need a way to select the type of tea that we have. Add a select for this. In addition to the usual upding of the component references (not shown), you will also need to map the teas from the state so we can use them to populate the select.
 
 First we should create a test to make sure we do the binding correctly. Update `tests/unit/components/AppTastingNoteEditor.spec.ts`
 
@@ -935,12 +925,12 @@ That looks pretty good so far.
 
 ### Validations
 
-Basically, every field is required. For the text fields we will add a validation so a message is displayed if someone has information entered and then removes it. The button should be disabled any time some information is missing.
+Basically, every field is required. For the text fields we will add a validation such that a message is displayed if someone has entered information and then removes it. The button should be disabled any time some information is missing.
 
 First the test for the validation messages:
 
 ```TypeScript
-  it.skip('displays messages as the user enters invalid data', async () => {
+  it('displays messages as the user enters invalid data', async () => {
     const brand = wrapper.findComponent('[data-testid="brand-input"]');
     const name = wrapper.findComponent('[data-testid="name-input"]');
     const notes = wrapper.findComponent('[data-testid="notes-textbox"]');
@@ -983,6 +973,7 @@ In the `AppTastingNoteEditor.vue` file, we need to:
 - `import { required } from '@vuelidate/validators';`
 - add a section to display the error messages
 - add the validation rules in the `setup()`
+- change the bindings for the three inputs being validated (example: `v-model.trim="name"` becomes `v-model.trim="v.name.$model"`)
 
 Refer to the `Login.vue` file if you need a sample. I will provide a couple of the items here:
 
@@ -1194,7 +1185,6 @@ With that in place it is a matter of writing and exposing the functions that are
     ...
     async function submit() {
       await store.dispatch('tastingNotes/save', {
-        id: props.noteId,
         brand: brand.value,
         name: name.value,
         rating: rating.value,
@@ -1224,7 +1214,7 @@ With that in place it is a matter of writing and exposing the functions that are
 
 We can now theoretically add tasting notes, but we don't really know since we cannot see them. So now would be a good time to update the TastingNotes page view to display the notes that we have in the store.
 
-First, let update the test (`tests/unit/view/TastingNotes.spec.ts`) to include some notes. There is a lot going on here, so let's take it a bit at a time.
+First, let update the test (`tests/unit/views/TastingNotes.spec.ts`) to include some notes. There is a lot going on here, so let's take it a bit at a time.
 
 First, define some tasting notes data:
 
@@ -1236,7 +1226,7 @@ describe('TastingNotes.vue', () => {
   ...
   let tastingNotes: Array<TastingNote>;
 
-  beforeEach(async () => {
+  beforeEach(() => {
     tastingNotes = [
       {
         id: 42,
@@ -1291,13 +1281,15 @@ Due to mounting the `App` component and then navigating to the `TastingNotes` co
     });
 ```
 
-This event will be triggered from the `ionViewWillEnter()` lifecycle event. In order to trigger that event we need to navigate to the page but we need to do so within the context of an `ion-router-outlet`, so what we will do is wrap the `App` component, which contains said outlet, and use the router to navigate to our page.
+This event will be triggered from the `ionViewWillEnter()` lifecycle event. In order to trigger that event we need to navigate to the page but we need to do so within the context of an `ion-router-outlet`, so what we will do is wrap the `App` component, which contains said outlet, and use the router to navigate to our page. This will also require is to make the `beforeEach()` callback `async`.
 
 ```TypeScript
 import { createRouter, createWebHistory } from '@ionic/vue-router';
 import App from '@/App.vue';
 ...
-    router = createRouter({
+  beforeEach(async () => {
+    ...
+    const router = createRouter({
       history: createWebHistory(process.env.BASE_URL),
       routes: [{ path: '/', component: TastingNotes }],
     });
@@ -1315,15 +1307,15 @@ Here is what it looks like when it is all put together.
 ```TypeScript
 import { mount, VueWrapper } from '@vue/test-utils';
 import { createRouter, createWebHistory } from '@ionic/vue-router';
+
 import App from '@/App.vue';
 import TastingNotes from '@/views/TastingNotes.vue';
 import store from '@/store';
 import { TastingNote } from '@/models';
 
 describe('TastingNotes.vue', () => {
-  let router: any;
-  let wrapper: VueWrapper<any>;
   let tastingNotes: Array<TastingNote>;
+  let wrapper: VueWrapper<any>;
 
   beforeEach(async () => {
     tastingNotes = [
@@ -1358,7 +1350,7 @@ describe('TastingNotes.vue', () => {
         store.commit('tastingNotes/SET', tastingNotes);
       }
     });
-    router = createRouter({
+    const router = createRouter({
       history: createWebHistory(process.env.BASE_URL),
       routes: [{ path: '/', component: TastingNotes }],
     });
@@ -1459,7 +1451,7 @@ The editor component currently only handles creating new tasting note. We will a
 We can then modify the `TastingNotes` page to pass along the `noteId` when a user clicks on the note in the list. This only involves minor changes to the `presentNoteEditor()` method.
 
 ```html
-<ion-item @click="presentNoteEditor($event, note.id)"></ion-item>
+<ion-item @click="presentNoteEditor($event, note.id)" ...></ion-item>
 ```
 
 ```TypeScript
@@ -1484,12 +1476,12 @@ First, we should modify the title based on whether we are doing an add or an upd
   it('displays an appropriate title', async () => {
     const title = wrapper.findComponent('ion-title');
     expect(title.text()).toBe('Add New Tasting Note');
-    await wrapper.setData({ id: 42 });
+    await wrapper.setProps({ noteId: 42 });
     expect(title.text()).toBe('Tasting Note');
   });
 ```
 
-So the add case has "Add New Tasting Note" where the update case just says "Tasting Note". Let's implement that in the code:
+So the add case has "Add New Tasting Note" where the update case just says "Tasting Note". Let's implement that in the code. Note that `setup()` take two parameters. The first is our component's props, the second is the context. We have not been using either one, but now we will start to use the `props` parameter.
 
 ```html
 <template>
@@ -1500,7 +1492,7 @@ So the add case has "Add New Tasting Note" where the update case just says "Tast
 ...
 <script lang="ts">
     ...
-    setup() {
+    setup(props) {
       ...
       const title = computed(
         () => `${props.noteId ? '' : 'Add New '}Tasting Note`,
@@ -1583,7 +1575,7 @@ At that point, we can add a test. We will need to mount the component within our
   });
 ```
 
-We can then add this directly to our `setup()` function. Note that `setup()` take two parameters. The first is our component's props, the second is the context. We have not been using either one, but now we will start to use the `props` parameter.
+We can then add this directly to our `setup()` function.
 
 ```TypeScript
   setup(props) {
@@ -1616,7 +1608,7 @@ We can then add this directly to our `setup()` function. Note that `setup()` tak
 
 #### Save the Note
 
-When saving the note, the value should be dispatched with the ID. Here is the test:
+When saving the note, the value should be dispatched with the ID. Here is the test. Place this right after the existing "dispatches the save action" test.
 
 ```TypeScript
       it('includes the ID if it set', async () => {
@@ -1637,15 +1629,15 @@ When saving the note, the value should be dispatched with the ID. Here is the te
 
 **Challenge:** Update the submit method so this code passes.
 
-Now go add and edit some tasting notes to make sure everything still passes.
+Now go add and edit some tasting notes to make sure everything still works when using the app.
 
 ## Delete a Note
 
 The final feature we will add is the ability to delete a note. We will keep this one simple and make it somewhat hidden so that it isn't too easy for a user to delete a note.
 
-We will use a contruct called a <a href="https://ionicframework.com/docs/api/item-sliding" target="_blank">item sliding</a> to essentially "hide" the delete button behind the item. That way the user has to slide the item over in order to expose the button and do a delete.
+For this feature, we need to switch our attention back to the `TastingNotes` page where we are listing the tasting notes. We will use a contruct called a <a href="https://ionicframework.com/docs/api/item-sliding" target="_blank">item sliding</a> to essentially "hide" the delete button behind the item. That way the user has to slide the item over in order to expose the button and do a delete.
 
-Using this results in a little be of rework in how the item is rendered and bound on the `TastingNotes` page:
+Using this results in a little bit of rework in how the item is rendered and bound on the `TastingNotes` page:
 
 ```HTML
         <ion-item-sliding v-for="note of tastingNotes" :key="note.id">
@@ -1682,7 +1674,7 @@ Play around with this in the browser and make sure everthing is working.
 
 Let's put the browser in iPhone emulation mode and reload the app to make sure we are getting the iOS styling. Notice on the Teas page we have what is called a <a href="https://ionicframework.com/docs/api/title#collapsible-large-titles">Collapsible Large Title</a>. On the Tasting Notes page, we do not have this, but we probably should because we essentially have a scollable list. So let's add that.
 
-First we will update the "displays the title" test in `tests/util/views/TastingNotes.spec.ts`. This isn't a huge change, but it is enough to ensure both titles are set correctly.
+First we will update the "displays the title" test in `tests/unit/views/TastingNotes.spec.ts`. This isn't a huge change, but it is enough to ensure both titles are set correctly.
 
 ```diff
    it('displays the title', () => {
@@ -1733,4 +1725,4 @@ The last thing we should do is add a couple of options to the modal dialog to pr
 
 ## Conclusion
 
-Congratulations. You have used what we have learned to this point to add a whole new feature to your app. Along the way, you also exercised a few Framework components you had not used before. We are almost done with this app. One more page to go and we will be done.
+Congratulations. You have used what we have learned to this point to add a whole new feature to your app. Along the way, you also exercised a few Framework components you had not used before. We are almost done with this app.

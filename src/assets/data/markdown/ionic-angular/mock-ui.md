@@ -10,7 +10,7 @@ In this lab, you will learn how to:
 
 ## Install the Images
 
-The service we just created references several image assets, but these assets to do not exist yet. <a download href="/assets/packages/ionic-angular/img.zip">Download the images</a> and unpack the zip file under `src/assets`, creating an `img` folder with the images in them.
+There are several images we would like to display for our teas, but these assets to do not exist yet. <a download href="/assets/packages/ionic-angular/img.zip">Download the images</a> and unpack the zip file under `src/assets`, creating an `img` folder with the images in them.
 
 **Note:** the specifics on doing this depends on the type of machine you are using. On a Mac:
 

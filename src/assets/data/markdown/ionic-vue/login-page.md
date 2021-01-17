@@ -56,7 +56,7 @@ Let's just start with a skeleton page that will display the inputs properly and 
 
     <ion-footer>
       <ion-toolbar>
-        <ion-button expand="full">
+        <ion-button expand="full" data-testid="signin-button">
           Sign In
           <ion-icon slot="end" :icon="logInOutline"></ion-icon>
         </ion-button>
@@ -161,7 +161,7 @@ import { VuelidatePlugin } from '@vuelidate/core';
 
 ### Set up the Models
 
-We have two bits of information to get from the user. Their email address and their password. So let's add `ref()` objects for those in our `setup()`. Be sure to import the `ref()` function.
+Switching back to the view file, we have two bits of information to get from the user. Their email address and their password. So let's add `ref()` objects for those in our `setup()`. Be sure to import the `ref()` function.
 
 ```TypeScript
 import { defineComponent, ref } from 'vue';
@@ -252,7 +252,7 @@ This configuration exposed an object for us called `v` and we can have a look at
 }
 ```
 
-Notice that the `email` and `password` objects both have a `$model` value. This property is directly tied to the model value we set up in our `data()` object, so we can use it as a `v-model` in our inputs. Let's configured our inputs right now to use it.
+Notice that the `email` and `password` objects both have a `$model` value. This property is directly tied to the reference objects we created and configured in our `setup()` method, so we can use it as a `v-model` in our inputs. Let's configured our inputs right now to use it.
 
 ```html
 <ion-item>
@@ -358,6 +358,8 @@ it('has a disabled signin button until valid data is entered', async () => {
   expect(button.attributes().disabled).toBe('false');
 });
 ```
+
+We then need to set the `disabled` property on the button. A binding such as the following ought to do the trick: `:disabled="!password || !email || v.$invalid"`
 
 ## Conclusion
 

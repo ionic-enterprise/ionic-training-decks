@@ -10,7 +10,7 @@ In this lab, you will:
 
 The Ionic command line is the main tool used to develop Ionic applications. This tool allows you to generate new applications, add features to the application, build the application, interact with Appflow and many other tasks. The command line also wraps and extends several other command lines such as the Apache Cordova or Capacitor command lines, the Angular command line, etc.
 
-If you type `ionic --help` at the command line you get a list of the available top level commands that can be run via the CLI. These commands are broken into two sections: Global Commands and Project Commands. Global Commands can be run from anywhere where as Project Commands can only be run from an Ionic project directory. Commonly used commands include `start`, `info`, `generate`, and `serve`. We wil learn more about these commands as we use them.
+If you type `ionic --help` at the command line you get a list of the available top level commands that can be run via the CLI. These commands are separated into two sections: Global Commands and Project Commands. Global Commands can be run from anywhere where as Project Commands can only be run from an Ionic project directory. Commonly used commands include `start`, `info`, `generate`, and `serve`. We wil learn more about these commands as we use them.
 
 ## Create the Application
 

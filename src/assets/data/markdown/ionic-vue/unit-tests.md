@@ -65,7 +65,7 @@ Our one current test does nothing. We really would like to have our various comp
 - `App.vue`
 - `views/Home.vue`
 
-These components do not currently do much, so now is a really good time to scaffold the tests for them so we can build the tests up as we go. On the filesystem, we will build a structure of unit tests under `tests/unit` that mimics our file structure under `src`. Thise keeps the tests out of the way of our code while still keeping them easy to find.
+These components do not currently do much, so now is a really good time to scaffold the tests for them so we can build the tests up as we go. On the filesystem, we will build a structure of unit tests under `tests/unit` that mimics our file structure under `src`. This keeps the tests out of the way of our code while still keeping them easy to find.
 
 ### Configuration
 

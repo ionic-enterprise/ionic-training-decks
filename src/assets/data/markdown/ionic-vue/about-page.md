@@ -67,7 +67,9 @@ This will allow us to read the `package.json` file and get some important inform
 </script>
 ```
 
-**Note:** You may need to add the `author` node to the `package.json` file. You can just your your name like this: `<author>Jackie Smith</author>`.
+**Note:** You may need to add the `author` node to the `package.json` file. You can just your your name like this: `"author": "Jackie Smith",`.
+
+**Note:** If you change the `ion-title` value like I did here you will also need to reflect that change in your test.
 
 ## Move the Logout Logic
 
@@ -75,41 +77,35 @@ Currently, the logout logic is on the first page. Once the user has logged in, i
 
 We start by moving the 'dispatches a logout action when the logout button is clicked' test from the `TeaList` view's test to the `About` view's test.
 
-Here is the full `About` test, be sure to remove that test case from the `TestList` test:
+Here are the test you will need to move from the `TestList` test file to the `About` test file. You will also need to do the `router` creation and configuration in the `About` test, and modify the dispatch mock to return a resovled value. Use the `TeaList` test as a model.
 
 ```typescript
-import { mount, VueWrapper } from '@vue/test-utils';
-import About from '@/views/About.vue';
-import store from '@/store';
+it('dispatches a logout action when the logout button is clicked', () => {
+  const button = wrapper.findComponent('[data-testid="logout-button"]');
+  button.trigger('click');
+  expect(store.dispatch).toHaveBeenCalledTimes(1);
+  expect(store.dispatch).toHaveBeenCalledWith('logout');
+});
 
-describe('About.vue', () => {
-  let wrapper: VueWrapper<any>;
-
-  beforeEach(async () => {
-    store.dispatch = jest.fn();
-    wrapper = mount(About, {
-      global: {
-        plugins: [store],
-      },
-    });
-  });
-
-  it('displays the title', () => {
-    const titles = wrapper.findAllComponents('ion-title');
-    expect(titles).toHaveLength(1);
-    expect(titles[0].text()).toBe('About Tea Taster');
-  });
-
-  it('dispatches a logout action when the logout button is clicked', () => {
-    const button = wrapper.findComponent('[data-testid="logout-button"]');
-    button.trigger('click');
-    expect(store.dispatch).toHaveBeenCalledTimes(1);
-    expect(store.dispatch).toHaveBeenCalledWith('logout');
-  });
+it('navigates to the login after the dispatch is complete', async () => {
+  const button = wrapper.findComponent('[data-testid="logout-button"]');
+  await button.trigger('click');
+  expect(router.replace).toHaveBeenCalledTimes(1);
+  expect(router.replace).toHaveBeenCalledWith('/login');
 });
 ```
 
 I leave it up to you to move the proper code from `src/views/TeaList.vue` to `src/views/About.vue` and then clean up the `TeaList` code.
+
+Be sure that:
+
+- All of your tests are passing.
+- You have no lint errors.
+- Your app builds cleanly.
+- Your app runs in the browser without warnings or errors in the console.
+- Your app runs well on your devices.
+
+If any of these are not the case, we should spend some time doing a little debugging.
 
 ## Conclusion
 

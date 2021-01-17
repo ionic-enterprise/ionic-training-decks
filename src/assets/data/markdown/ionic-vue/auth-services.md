@@ -1,6 +1,6 @@
 # Lab: Create Authentication Services
 
-Before we get too far in to authentication, we need to do some data modeling and define some services that will allow us to abstract out some very specific tasks. In this lab you will learn how to:
+Before we get too far in to authentication, we need to do some data modeling and define some services that will allow us to abstract out some fundamental tasks. In this lab you will learn how to:
 
 - Create Services
 - Use the Capacitor Storage API
@@ -31,35 +31,35 @@ export interface Session {
 
 Be sure to update `src/models/index.ts`
 
-## The `SessionService` Service
+## The `SessionVaultService` Service
 
-When the user logs in, the establish a session. This session is defined by the user and the authentication token that was returned by our backend API during the login. We will need a place to store this information. We will create a service to do this. The single responsibility of this service will be to manage the storage of the current session information. Thus, we will call it the `SessionService`.
+When the user logs in, the establish a session. This session is defined by the user and the authentication token that was returned by our backend API during the login. We will need a place to store this information. We will create a service to do this. The single responsibility of this service will be to manage the storage of the current session information. Thus, we will call it the `SessionVaultService`.
 
 ### Test and Service Shells
 
 First create two files that will serve as the shells for our test and service. You will also need to create the proper directories for them as they do not exist yet.
 
-`tests/unit/services/SessionService.spec.ts`
+`tests/unit/services/SessionVaultService.spec.ts`
 
 ```typescript
 import { Plugins } from '@capacitor/core';
-import SessionService from '@/services/SessionService';
+import SessionVaultService from '@/services/SessionVaultService';
 import { Session } from '@/models';
 
 jest.mock('@capacitor/core');
 
-describe('SessionService', () => {
+describe('SessionVaultService', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 });
 ```
 
-`src/services/SessionService.ts`
+`src/services/SessionVaultService.ts`
 
 ```typescript
 import { Plugins } from '@capacitor/core';
-import { Session, User } from '@/models';
+import { Session } from '@/models';
 
 const key = 'session';
 
@@ -74,23 +74,24 @@ For the following methods, add the test code to the test file that you just crea
 
 For the `set()` call, we want to ensure that that user data and token are combined into a single object and stored using the `session` key.
 
-```typescript
+```TypeScript
 describe('set', () => {
   it('sets the auth data using the user and token', async () => {
     const { Storage } = Plugins;
     (Storage.set as any).mockResolvedValue();
-    const user = {
-      id: 73,
-      firstName: 'Sheldon',
-      lastName: 'Cooper',
-      email: 'physics@caltech.edu',
+    const session: Session = {
+      user: {
+        id: 73,
+        firstName: 'Sheldon',
+        lastName: 'Cooper',
+        email: 'physics@caltech.edu',
+      },
+      token: '98761243',
     };
-    const token = '98761243';
-    await SessionService.set(user, token);
+    await SessionVaultService.set(user, token);
     expect(Storage.set).toHaveBeenCalledTimes(1);
     expect(Storage.set).toHaveBeenCalledWith({
-      key: 'session',
-      value: JSON.stringify({ user, token }),
+      value: JSON.stringify(session),
     });
   });
 });
@@ -100,14 +101,14 @@ The code to satisfy this requirement looks like this:
 
 ```typscript
 import { Plugins } from '@capacitor/core';
-import { Session, User } from '@/models';
+import { Session } from '@/models';
 
 const key = 'session';
 
 export default {
-  async set(user: User, token: string): Promise<void> {
+  async set(session: Session): Promise<void> {
     const { Storage } = Plugins;
-    const value = JSON.stringify({ user, token } as Session);
+    const value = JSON.stringify(session);
     await Storage.set({ key, value });
   },
 }
@@ -136,13 +137,13 @@ describe('get', () => {
 
   it('gets the value from storage', async () => {
     const { Storage } = Plugins;
-    await SessionService.get();
+    await SessionVaultService.get();
     expect(Storage.get).toHaveBeenCalledTimes(1);
     expect(Storage.get).toHaveBeenCalledWith({ key: 'session' });
   });
 
   it('returns the value', async () => {
-    const session = await SessionService.get();
+    const session = await SessionVaultService.get();
     expect(session).toEqual({
       user: {
         id: 42,
@@ -157,7 +158,7 @@ describe('get', () => {
   it('returns undefined if a value has not been set', async () => {
     const { Storage } = Plugins;
     (Storage.get as any).mockResolvedValue({ value: null });
-    expect(await SessionService.get()).toBeUndefined();
+    expect(await SessionVaultService.get()).toBeUndefined();
   });
 });
 ```
@@ -183,7 +184,7 @@ describe('clear', () => {
   it('removes the data from storage', async () => {
     const { Storage } = Plugins;
     (Storage.remove as any).mockResolvedValue();
-    await SessionService.clear();
+    await SessionVaultService.clear();
     expect(Storage.remove).toHaveBeenCalledTimes(1);
     expect(Storage.remove).toHaveBeenCalledWith({ key: 'session' });
   });
@@ -209,7 +210,7 @@ We will also create a single Axios instance for our backend API. Create a `src/s
 ```typescript
 import axios from 'axios';
 
-const baseURL: 'https://cs-demo-api.herokuapp.com';
+const baseURL = 'https://cs-demo-api.herokuapp.com';
 
 export const client = axios.create({
   baseURL,
@@ -228,11 +229,11 @@ const baseURL: process.env.NODE_ENV === 'production' ?
   'https://devapi.mydomain.com';
 ```
 
-This can be expanded based on how many different environments you may be building for or modified to match however it is you specifically control the environment for your build.
+This can be expanded based on how many different environments you may be building for. However, it is you specifically control the environment for your build.
 
 ### Test and Service Shells
 
-Similar to when we created the `SessionService`, we need to create shells for the unit test and the service.
+Similar to when we created the `SessionVaultService`, we need to create shells for the unit test and the service.
 
 - `tests/unit/services/AuthenticationService.spec.ts`
 - `src/services/AuthenticationService.ts`

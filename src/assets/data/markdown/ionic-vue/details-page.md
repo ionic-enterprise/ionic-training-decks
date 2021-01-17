@@ -79,7 +79,7 @@ export default defineComponent({
 
 ## Navigating
 
-Now that we have a details page, let's set up the navigation to the page and then back again. The first thing we should do is set up the route to the page. From URL perspective, it makes sense that the page should be a child to the `/teas` route. Also, since we will be displaying a particular tea it makes sense that the tea's ID shoudld be part of the route. Update `src/router/index.ts` with the following route:
+Now that we have a details page, let's set up the navigation to the page and then back again. The first thing we should do is set up the route to the page. From URL perspective, it makes sense that the page should be a child to the `/teas` route. Also, since we will be displaying a particular tea it makes sense that the tea's ID should be part of the route. Add the following route in the `src/router/index.ts` file:
 
 ```TypeScript
   {
@@ -156,7 +156,6 @@ import { Tea } from '@/models';
       name: 'Purple Tea',
       description: 'Is this actually a thing?',
       image: '/assets/img/nope.jpg',
-      rating: 2,
     };
     store.commit('teas/SET', [tea]);
     ...
@@ -186,6 +185,8 @@ You will also need to add a couple of imports within the `script` tag:
 ```typescript
 import { useRoute } from 'vue-router';
 import { mapGetters } from 'vuex';
+
+import { Tea } from '@/models';
 ```
 
 Then we need to add a couple of computed properties:
@@ -226,16 +227,19 @@ Within the view we can then add the following markup. Add this inside the `ion-c
   <div class="ion-justify-content-center" style="display: flex">
     <ion-img :src="tea.image"></ion-img>
   </div>
-  <h1>{{ tea.name }}</h1>
-  <p>{{ tea.description }}</p>
+  <h1 data-testid="name">{{ tea.name }}</h1>
+  <p data-testid="description">{{ tea.description }}</p>
 </div>
 ```
+
+Be sure to also update our list of components for anything new we added (this should just be `IonImg`, unless something was missed earlier).
 
 We should also style that image just a tad to make sure it is not too big:
 
 ```html
 <style scoped>
   ion-img {
+    max-width: 75%;
     max-height: 512px;
   }
 </style>

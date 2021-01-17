@@ -11,7 +11,7 @@ In this lab, you will:
 
 The Ionic command line (CLI) is the main tool used to develop Ionic Framework applications. This tool allows you to generate new applications, build applications, interact with Appflow, and many other tasks. The Ionic CLI also wraps and extends other commands lines - such as the Capacitor command line, the Create React App command line, and more.
 
-If you type `ionic --help` in the terminal, you will get a list of the available top level commands that can be run via the Ionic CLI. These commands are broken into two sections: Global Commands and Project Commands. Global Commands can be run from any directory whereas Project Commands can only be run within an Ionic Framework project directory. Commonly used Ionic CLI commands include `start`, `info`, `build`, and `serve`. We will learn more about these commands as we use them.
+If you type `ionic --help` in the terminal, you will get a list of the available top level commands that can be run via the Ionic CLI. These commands are separated into two sections: Global Commands and Project Commands. Global Commands can be run from any directory whereas Project Commands can only be run within an Ionic Framework project directory. Commonly used Ionic CLI commands include `start`, `info`, `build`, and `serve`. We will learn more about these commands as we use them.
 
 ## Create the Application
 

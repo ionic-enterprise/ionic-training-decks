@@ -19,7 +19,7 @@ By laying everything out this way, we allow for change in our system without bre
 
 **Scenario 1:** We add an endpoint for storing user ratings of teas in the backend API. In this case, the only thing that needs to change is the `TeaService` to change how the `save()` and `getAll()` access the ratings data.
 
-**Scenario 2:** We add an admin area to the app where admin users are allowed to edit the names and descriptions of the teas. In this case we can update `TeaService.save()` to allow for a full save of the tea, and we can add some new actions and mutations to the store, but the existing actions and mutatins that _only_ deal with the tea ratings can stay the same.
+**Scenario 2:** We add an admin area to the app where admin users are allowed to edit the names and descriptions of the teas. In this case we can update `TeaService.save()` to allow for a full save of the tea, and we can add some new actions and mutations to the store, but the existing actions and mutations that _only_ deal with the tea ratings can stay the same.
 
 In neither of these scenarios did we need to touch any of the components, only the areas of the app that deal with the data.
 
@@ -33,11 +33,19 @@ Add a `rating` property in `src/models/Tea.ts`
 rating: number;
 ```
 
-In the `tests/unit/services/TestService.spec.ts` file, there are a few preliminary items to handle:
+Several tests are using the `Tea` model when creating test data. Update those now to include a `rating` in any defined `Tea` model. Those tests are:
+
+- `tests/unit/views/TeaDetails.spec.ts`
+- `tests/unit/views/TeaList.spec.ts`
+- `tests/unit/store/teas/actions.spec.ts`
+- `tests/unit/store/teas/mutations.spec.ts`
+
+In the `tests/unit/services/TestService.spec.ts` file, there are a few other preliminary items to handle as well:
 
 - import the `Plugins` object
 - mock `@capacitor/core`
 - add a rating to each Tea model (use a value of zero for now)
+- update the creation of `httpResultTeas` to delete the `result` just like we do the `image`
 - reset the mocks in the setup
 - add a `describe()` block for the saving of the rating
 
@@ -147,6 +155,8 @@ First, pick some teas in our `expectedTeas` array to have non-zero ratings. I su
 
 We will be using the Storage API's `get()` method to get the proper data. In the `beforeEach()` for the "getAll" set of tests, mock the `Plugins.Storage.get` method. We will use a `mockImplementation()` to return the proper values for each key based on the `expectedTeas` we set to have a non-zero rating. Remember that the code we are mocking is asyncronous, so we should return a promise.
 
+Note that your code will be different depending on how you set the `ratings` in your test data. Be sure to adjust this code based on your data setup.
+
 ```typescript
   describe('getAll', () => {
     beforeEach(() => {
@@ -209,27 +219,28 @@ export const mutations = {
   SET_RATING: (state: State, payload: { id: number; rating: number }) => (state),
 };
 ```
+
 The test for this in `tests/util/store/teas/mutations.spec.ts` looks like this:
 
 ```typescript
 describe('SET_RATING', () => {
   it('sets the specific tea', () => {
-    const state = { teas, session };
-    mutations.SET_RATING(state, { ...teas[1], rating: 4 });
+    const state = { list: teas };
+    mutations.SET_RATING(state, { id: teas[1].id, rating: 4 });
     const expectedTeas = [...teas];
     expectedTeas[1] = { ...teas[1], rating: 4 };
-    expect(state).toEqual({ teas: expectedTeas, session });
+    expect(state).toEqual({ list: expectedTeas });
   });
 });
 ```
 
-**Note:** the `teas` array is missing the `rating` for each tea. Fill add one for each item. Just make sure `teas[1]` has a rating other than 4.
+**Note:** you may need to adjust this based on how you have your `rating`s initialized. Just make sure the value you are setting the rating to is different than the initial rating.
 
 Filling out the body of the mutation in `src/store/teas/mutations.ts` we get:
 
 ```TypeScript
-  SET_RATING: (state: State, payload: { id: number; rating: number })=> {
-    const targetTea = state.teas.find(t => t.id === payload.id);
+  SET_RATING: (state: State, payload: { id: number; rating: number }): void => {
+    const targetTea = state.list.find(t => t.id === payload.id);
     if (targetTea) {
       targetTea.rating = payload.rating;
     }
@@ -256,8 +267,6 @@ export const actions = {
 ```
 
 Thinking about what this action needs to do, it needs to save the tea with the new rating, and it needs to commit the change to the store. Let's express those requirements as tests in `tests/unit/store/teas/actions.spec.ts`.
-
-The first thing to note is that we have the same problem with the `teas` array that we had in the `mutations` test. Perform a similar update here by adding a `rating` to each tea in the array.
 
 ```TypeScript
   describe('rate', () => {
@@ -312,6 +321,8 @@ First, we will update the test `tests/unit/views/TeaDetails.spec.ts` to cover ou
     expect(store.dispatch).toHaveBeenCalledWith('teas/rate', {tea, rating: 3});
   });
 ```
+
+**Note:** depending on how you set up your initial test data, you may need to update the values used above. Basically, the first test should use the specified rating, and the second test should set it to something else.
 
 And then `TeaDetails.vue` code changes that make this happen:
 

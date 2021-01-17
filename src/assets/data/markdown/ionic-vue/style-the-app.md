@@ -2,6 +2,8 @@
 
 In this lab, you will further explore how to style your application.
 
+**Note:** the first half of this lab is just explanation, so do not try to put the CSS samples anywhere. The second half will apply all of this to our app.
+
 ## A Note on iOS and Material Design Styling
 
 The Ionic Framework automatically adapts between styling that matches the iOS Human Interface Guidelines and Android's Material Design. We _highly_ suggest that you keep this paradigm in place. It allows your customers to see the application in a manner that makes sense to them on whatever platform they are on. The best practice here is to style your application in a way that injects your own branding without interfering with the native styling that makes the application look "at home" on each platform.
@@ -104,7 +106,19 @@ ion-select::part(icon) {
 
 ## Putting it All Together
 
+**Note:** now we are getting to the part where we will modify our code... 🤓
+
 The design team has started giving us design requirements. Mostly the color schemes to use for both light and dark mode, but they would also like a minor tweak to the border radius on the cards and a slightly different style on the select dropdown.
+
+### Global Styles
+
+Up to now, we have done very minimal styling to our app. We have one global style, which we placed in `src/App.vue`, which is OK for trvial apps, but not very managable for production scale apps. Let's fix that now.
+
+1. Create a `src/theme/styles.css` file.
+1. Import this new file in `src/main.ts` using the current import of `src/theme/variables.css` as a guide.
+1. Move the `error-message` styling from `src/App.vue` to `src/theme/styles.css`.
+
+In an even larger scaled app we may want to break our styling into even more files. This will work for our application, however.
 
 ### The Color Theme
 
@@ -240,7 +254,9 @@ The first requirement from our design team is that the pages should have a gradi
 }
 ```
 
-Then add the `main-content` class to the `ion-content` elements in each of our pages. So far so good, but the lists in a couple of our pages show the default background color, which looks a little out of place, so let's make the background for the various list elements transparent.
+Then add the `main-content` class to the `ion-content` elements in each of our pages.
+
+So far so good, but the lists in a couple of our pages show the default background color, which looks a little out of place, so let's make the background for the various list elements transparent (in `src/theme/styles.css`).
 
 ```css
 .list-ios {
@@ -291,7 +307,7 @@ ion-card {
 }
 ```
 
-They would also like the select component to have a nice box around the down-arrow shape. This is in the shadow DOM so we need to use a different technique. In this case, we can use Shadow Parts to modify the select.
+They would also like the select component to have a nice box around the down-arrow shape. This is in the shadow DOM so we need to use a different technique. In this case, we can use Shadow Parts to modify the select. Have a look at the select we have in the tasting notes editor modal if you would like to see how this looks before and after the change.
 
 ```css
 ion-select::part(icon) {
@@ -301,7 +317,7 @@ ion-select::part(icon) {
 }
 ```
 
-This results in the text being a little too close to the button icon, crowding it a bit, so we will use the shadow part for the text to nudge that over.
+If you select a tea type in our modal, you will see that this results in the text being a little too close to the button icon, crowding it a bit, so we will use the `text` shadow part for the text to nudge that over.
 
 ```css
 ion-select::part(text) {
