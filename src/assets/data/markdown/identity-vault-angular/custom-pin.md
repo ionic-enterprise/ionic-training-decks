@@ -49,7 +49,7 @@ For our application, we have the following requirements for the PIN dialog:
 - When the dialog is dismissed, resolve the PIN
 - If the PIN is `undefined`, resolve to an empty string (this avoids showing the system dialogs)
 
-The code to add to `src/app/core/session-vault/session-vault.service.spec.ts` is then as follows. Be sure to import the `PinDialogComponent` and to inject the `ModalController`.
+The code to add to `src/app/core/session-vault/session-vault.service.ts` is then as follows. Be sure to import the `PinDialogComponent` and to inject the `ModalController`.
 
 ```TypeScript
   async onPasscodeRequest(isPasscodeSetRequest: boolean): Promise<string> {

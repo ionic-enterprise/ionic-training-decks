@@ -377,12 +377,36 @@
         {
           "name": "vue",
           "title": "Vue",
-          "folder": "noimp",
+          "folder": "identity-vault-vue",
           "icon": "logo-vue",
           "pages": [
             {
               "title": "Introduction",
-              "file": "vue"
+              "file": "intro"
+            },
+            {
+              "title": "The Base Application",
+              "file": "base"
+            },
+            {
+              "title": "Install Identity Vault",
+              "file": "install"
+            },
+            {
+              "title": "The Vault Service",
+              "file": "vault-service"
+            },
+            {
+              "title": "Add Biometrics to Login",
+              "file": "biometrics"
+            },
+            {
+              "title": "Customize the PIN Dialog",
+              "file": "custom-pin"
+            },
+            {
+              "title": "Other Configurations",
+              "file": "other-options"
             }
           ]
         }

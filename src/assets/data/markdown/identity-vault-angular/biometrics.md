@@ -222,7 +222,7 @@ You will need to import `VaultErrorCodes` from `@ionic-enterprise/identity-vault
 
 If you build the app and run it on a device at this point, the app will lock after 5 seconds in the background, which will force you over to the login page. You don't currently have a way to unlock the app, but you can lock it. So far so good.
 
-If you shut down the app and restart it, the vault will also be locked. However, since you are trying to restore the session as part of the vault logic, you will be asked for your PIN, finger print, face, etc (depending on your device capabilities). Providing the appropriate response will then unlock the app. Excellent!!
+If you shut down the app and restart it, the vault will also be locked. However, since you are trying to restore the session as part of the startup logic, you will be asked for your PIN, finger print, face, etc (depending on your device capabilities). Providing the appropriate response will then unlock the app. Excellent!!
 
 ## `LoginPage` Modifications
 
