@@ -1,3 +1,9 @@
+## [4.2.1](https://github.com/ionic-team/ionic-training-decks/compare/v4.2.0...v4.2.1) (2021-01-17)
+
+### Bug Fixes
+
+- **vue:** clean up typos in the testing docs ([681b425](https://github.com/ionic-team/ionic-training-decks/commit/681b425bd914a91bd26f536508c69988ca2e2fe8))
+
 # [4.2.0](https://github.com/ionic-team/ionic-training-decks/compare/v4.1.9...v4.2.0) (2021-01-03)
 
 ### Bug Fixes
