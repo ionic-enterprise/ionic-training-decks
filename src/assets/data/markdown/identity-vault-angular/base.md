@@ -41,7 +41,9 @@ This application uses an Route Guard to ensure that the user is logged in before
 
 #### Startup
 
-The `APP_INITIALIZER`, as defined in the `AppModule`, dispatches the `initialize` action which uses the `SessionVaultService` to read the session informtion from persistent storage. If the session information can be read, the user continues using the application. If not, they are redirected to the login page.
+When the application first starts, the session is undefined in the store. The first time that a route is hit that requires authentication, the Auth Guard will note that the session does not exist and attempt to restore the session. If the session is restored, then the application can continue to the guarded route. If not, then the application is redirected to the login page.
+
+This allows the application to delay attempting to restore the session until a session is actually required (which is actually for all pages except the login page for this application, but that is not always the case in every app).
 
 #### Execution
 
