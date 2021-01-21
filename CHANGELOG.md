@@ -1,3 +1,13 @@
+# [4.3.0](https://github.com/ionic-team/ionic-training-decks/compare/v4.2.1...v4.3.0) (2021-01-21)
+
+### Bug Fixes
+
+- **angular:** clarify the architecture at the start of the IV training ([d2173e3](https://github.com/ionic-team/ionic-training-decks/commit/d2173e3f70d2889111eeb4820e0d38ea0c0e496d))
+
+### Features
+
+- **vue:** add identity vault training ([871e342](https://github.com/ionic-team/ionic-training-decks/commit/871e34293103f3296c6d55d29a4aab6bfa586718))
+
 ## [4.2.1](https://github.com/ionic-team/ionic-training-decks/compare/v4.2.0...v4.2.1) (2021-01-17)
 
 ### Bug Fixes
