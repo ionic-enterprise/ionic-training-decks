@@ -1,3 +1,33 @@
+## [4.3.1](https://github.com/ionic-team/ionic-training-decks/compare/v4.1.10...v4.3.1) (2021-01-22)
+
+### Bug Fixes
+
+- **angular:** clarify the architecture at the start of the IV training ([d2173e3](https://github.com/ionic-team/ionic-training-decks/commit/d2173e3f70d2889111eeb4820e0d38ea0c0e496d))
+- **angular/vue:** fix typos in the styling guide ([b34e39e](https://github.com/ionic-team/ionic-training-decks/commit/b34e39e432ef3ec4798cc6bd056c2c7e2bcaf459))
+- **vue:** clean up typos in the testing docs ([681b425](https://github.com/ionic-team/ionic-training-decks/commit/681b425bd914a91bd26f536508c69988ca2e2fe8))
+- **vue:** fix the 401 handling ([c3c00f7](https://github.com/ionic-team/ionic-training-decks/commit/c3c00f7b07302118f993b0ae766b3cca7e870c29))
+- **vue:** fix up the creation editing of notes ([4736680](https://github.com/ionic-team/ionic-training-decks/commit/4736680b6ce518927b5caed74c2e87c8bba00e63))
+- **vue:** navigate the child view correctly ([5b73868](https://github.com/ionic-team/ionic-training-decks/commit/5b73868335247c21ef0db863c25cf6ffd0871995))
+- **vue:** repair the startup code ([adf3b35](https://github.com/ionic-team/ionic-training-decks/commit/adf3b35c9e855bb4e66384f0e3e9a8c9e77c16c4))
+- **vue:** startup navigate to current route ([c3c94ab](https://github.com/ionic-team/ionic-training-decks/commit/c3c94ab9de26241c615d8058097ba02dc70d51a1))
+
+### Features
+
+- **angular:** add social sharing section ([e1a786b](https://github.com/ionic-team/ionic-training-decks/commit/e1a786bf8aaff0d1e66ecd6a293309a8ad90f80a))
+- **angular:** add state management ([52c770c](https://github.com/ionic-team/ionic-training-decks/commit/52c770c1d1f1ca487b7a807e306a436cfe9a8855))
+- **angular:** IV with NgRX ([8de75d6](https://github.com/ionic-team/ionic-training-decks/commit/8de75d60c57263ba3690ee7db2ea18e3f929c39f))
+- **angular:** restore the session ([b392a12](https://github.com/ionic-team/ionic-training-decks/commit/b392a12b033962989de582456213252a89459664))
+- **pwa:** update the pwa steps to match the latest starting point ([3cd3910](https://github.com/ionic-team/ionic-training-decks/commit/3cd3910d173a3b3997366bd904444c90b81453a7))
+- **react:** add a section on styling ([#44](https://github.com/ionic-team/ionic-training-decks/issues/44)) ([fffe2b1](https://github.com/ionic-team/ionic-training-decks/commit/fffe2b14f3025c838a23cd333ff305ae8e6ae36e))
+- **vue:** add a section on styling ([3a66cfa](https://github.com/ionic-team/ionic-training-decks/commit/3a66cfa5e60e172e9d8f28ec8a474257f09bf34b))
+- **vue:** add about page ([a19dcf2](https://github.com/ionic-team/ionic-training-decks/commit/a19dcf28fb042ae10123ecb9a09a913fd7930857))
+- **vue:** add identity vault training ([871e342](https://github.com/ionic-team/ionic-training-decks/commit/871e34293103f3296c6d55d29a4aab6bfa586718))
+- **vue:** add social sharing section ([08f7bbb](https://github.com/ionic-team/ionic-training-decks/commit/08f7bbb3704f361abe3f7d2ba0e18369a7c049b8))
+- **vue:** add tabbed navigation ([b1b5e68](https://github.com/ionic-team/ionic-training-decks/commit/b1b5e682a6ffdbdd46ccdde0e57f7de6dd510fb6))
+- **vue:** clean up after making store modular ([60061f3](https://github.com/ionic-team/ionic-training-decks/commit/60061f390b1139284f41fc78fad251972f1458b9))
+- **vue:** tasting notes feature ([129827b](https://github.com/ionic-team/ionic-training-decks/commit/129827b05eedbf6f4dcfb48482a3d94c9f2ec637))
+- **vue:** use the composition API in specific components ([29df9ab](https://github.com/ionic-team/ionic-training-decks/commit/29df9ab31d747888259e84700d0960e76df29a74))
+
 # [4.3.0](https://github.com/ionic-team/ionic-training-decks/compare/v4.2.1...v4.3.0) (2021-01-21)
 
 ### Bug Fixes
