@@ -10,7 +10,7 @@ We will walk through adding the parent class one step at a time. The changes mad
 
 **A Note on Unit Tests:** in order to concentrate this traning on the changes required for Identity Vault, the unit test modifications are not included. This does not mean you should skip unit testing. Rather, we wanted to make sure this training was focused on Identity Vault itself as much as possible.
 
-Please refer the the individual commits in the <a href="https://github.com/ionic-team/tea-taster-angular/tree/feature/identity-vault" target="_blank">`feature/identityVault` barch of the model application</a> for details on the unit testing modifications.
+Please refer the the individual commits in the <a href="https://github.com/ionic-team/tea-taster-angular/tree/feature/identity-vault" target="_blank">`feature/identity-vault` barch of the model application</a> for details on the unit testing modifications.
 
 ## Add the Platform Service
 
