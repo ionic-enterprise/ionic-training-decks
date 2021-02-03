@@ -78,7 +78,7 @@ export interface User {
 `src/app/models/session.ts`:
 
 ```TypeScript
-import { User } from './User';
+import { User } from './user';
 
 export interface Session {
   user: User;
@@ -345,6 +345,16 @@ describe('logout actions', () => {
 ```
 
 **Challenge:** write add the hooks for these actions to the reducer, like we did for the login related actions. Refer the login actions for a guild. If you really get stuck on something, example implementations are included at the end of this section.
+
+**Hint:** for the `LogoutSuccess` we need to remove the session. That code looks like this:
+
+```TypeScript
+  on(Actions.logoutSuccess, state => {
+    const newState = {...state, loading: false};
+    delete newState.session;
+    return newState;
+  }),
+```
 
 Once we are done, we need to update the main reducers file (`src/app/store/reucers/index.ts`) to include our `auth` state as well as the reducer for it:
 
@@ -637,9 +647,13 @@ Notice the `{ dispatch: false }`. This tells NgRX to not bother dispatching anyt
 
 ### Register the Effects
 
+In order for the application to know about the effects, we first need to register them. As we add various modules to our store, we will want a barrel file to bring them all together, so add a `src/app/store/effects/index.ts` file with the following contents:
+
 ```TypeScript
 export * from './auth/auth.effects';
 ```
+
+We will then import the `AuthEffects` in `src/app/app.module.ts` and register them with the `EffectsModule`:
 
 ```TypeScript
 import { AuthEffects } from './store/effects';

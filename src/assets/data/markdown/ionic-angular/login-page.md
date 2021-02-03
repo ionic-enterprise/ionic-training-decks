@@ -171,7 +171,7 @@ export class LoginPage {
 
 Switch back to the test file. The bindings should be tested to make sure they are done correctly. Here are the tests for the Email Address input. Add these and then create similar tests for the password input. You will have to import `fakeAsync` and `tick` from `@angular/core/testing`.
 
-Notice how we are using the `nativeElement` along with standard JavaScript DOM APIs in these tests. We could have also used the `debugElement` and used its `.query(By.css(...))` syntax like before, and then gone down to the native element for the rest of the test. You can use whichever method you are most compfortable with combined with whatever is going to best meet the needs of your test. In these tests we need the HTML element, so I just went that route right away.
+Notice how we are using the `nativeElement` along with standard JavaScript DOM APIs in these tests. We could have also used the `debugElement` and used its `.query(By.css(...))` syntax like before, and then gone down to the native element for the rest of the test. You can use whichever method you are most comfortable with combined with whatever is going to best meet the needs of your test. In these tests we need the HTML element, so I just went that route right away.
 
 ```TypeScript
   describe('email input binding', () => {

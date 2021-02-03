@@ -333,6 +333,9 @@ There are two ways that we could go with the test for this:
 The first set of tests would be testing an implementation detail, and therefor is not ideal. The second test more accurately reflects the requirement for the page from the user's perspective, and that is what is important, so we will write the test from the perspective. This also has the advantage of being a more robust test since the implementation details may change but the requirements for what we display to the user will likely stay the same.
 
 ```TypeScript
+...
+import { DebugElement } from '@angular/core';
+...
   describe('a grid of seven teas', () => {
     let grid: DebugElement;
     beforeEach(() => {
