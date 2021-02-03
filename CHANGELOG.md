@@ -1,3 +1,10 @@
+## [4.3.2](https://github.com/ionic-team/ionic-training-decks/compare/v4.3.0...v4.3.2) (2021-02-03)
+
+### Bug Fixes
+
+- **angular:** clarify some of the lab steps ([3234e7e](https://github.com/ionic-team/ionic-training-decks/commit/3234e7ef4ce06d71e9449637c080c0bde1390c54))
+- **vue:** update branch name ([bc65e39](https://github.com/ionic-team/ionic-training-decks/commit/bc65e39eec34740f1f03bab776b1fcb45bcca197))
+
 ## [4.3.1](https://github.com/ionic-team/ionic-training-decks/compare/v4.1.10...v4.3.1) (2021-01-22)
 
 ### Bug Fixes
