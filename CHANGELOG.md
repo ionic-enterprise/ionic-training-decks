@@ -1,3 +1,9 @@
+## [4.3.3](https://github.com/ionic-team/ionic-training-decks/compare/v4.3.2...v4.3.3) (2021-02-04)
+
+### Bug Fixes
+
+- **angular:** remove stuff no longer required with new starter ([e6e561b](https://github.com/ionic-team/ionic-training-decks/commit/e6e561b306157dd4a2db1ca08362145ff95675fe))
+
 ## [4.3.2](https://github.com/ionic-team/ionic-training-decks/compare/v4.3.0...v4.3.2) (2021-02-03)
 
 ### Bug Fixes
