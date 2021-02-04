@@ -168,7 +168,7 @@ describe('restore session', () => {
     });
   });
 
-  describe('with a session', () => {
+  describe('without a session', () => {
     beforeEach(() => {
       (Plugins.Storage.get as any).and.returnValue(
         Promise.resolve({ value: null }),
