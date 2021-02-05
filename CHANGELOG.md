@@ -1,3 +1,9 @@
+## [4.3.4](https://github.com/ionic-team/ionic-training-decks/compare/v4.3.3...v4.3.4) (2021-02-05)
+
+### Bug Fixes
+
+- **angular:** be sure to call through ([356db59](https://github.com/ionic-team/ionic-training-decks/commit/356db59647b7cb007e6f5611751da1455740f620))
+
 ## [4.3.3](https://github.com/ionic-team/ionic-training-decks/compare/v4.3.2...v4.3.3) (2021-02-04)
 
 ### Bug Fixes
