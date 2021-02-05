@@ -241,7 +241,7 @@ We would like to write most of our tests from the point of view of the end user 
     });
 
     it('selects the tea based on the route', () => {
-      spyOn(store, 'select');
+      spyOn(store, 'select').and.callThrough();
       fixture.detectChanges();
       expect(store.select).toHaveBeenCalledTimes(1);
       expect(store.select).toHaveBeenCalledWith(selectTea, { id: 42 });
