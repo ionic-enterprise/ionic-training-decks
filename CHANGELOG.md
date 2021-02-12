@@ -1,3 +1,10 @@
+## [4.3.5](https://github.com/ionic-team/ionic-training-decks/compare/v4.3.4...v4.3.5) (2021-02-12)
+
+### Bug Fixes
+
+- **angular:** fix typos ([51e541b](https://github.com/ionic-team/ionic-training-decks/commit/51e541b2687fba9b8c024d5d0fd2f007bf8a85a0))
+- **angular:** update a couple typos in tea-details lab ([5394bb5](https://github.com/ionic-team/ionic-training-decks/commit/5394bb584e9c9f87403d01b3de66a9d7b7734042))
+
 ## [4.3.4](https://github.com/ionic-team/ionic-training-decks/compare/v4.3.3...v4.3.4) (2021-02-05)
 
 ### Bug Fixes
