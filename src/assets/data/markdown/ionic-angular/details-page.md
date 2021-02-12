@@ -83,9 +83,7 @@ beforeEach(async(() => {
       },
     ],
   }).compileComponents();
-
-  fixture = TestBed.createComponent(TeaPage);
-  component = fixture.componentInstance;
+  ...
 }));
 ```
 
@@ -173,7 +171,7 @@ ion-img {
 
 NgRX selectors allow us to <a href="https://ngrx.io/guide/store/selectors#using-selectors-with-props" target="_blank">pass properties</a> to them. We can use this in order to craft a selector that will observe a specific tea within the state.
 
-Open `src/app/state/selectors/data.selectors.ts` and add the following selector:
+Open `src/app/store/selectors/data.selectors.ts` and add the following selector:
 
 ```TypeScript
 export const selectTea = createSelector(
