@@ -139,7 +139,10 @@ function runTasks(oldVersion, inc) {
     },
     {
       title: 'Pushing to Github',
-      task: () => execa('git', ['push', '--follow-tags'], { cwd: rootDir }),
+      task: () =>
+        execa('git', ['push', '--follow-tags', '--no-verify'], {
+          cwd: rootDir,
+        }),
     },
     {
       title: 'Production Build',
