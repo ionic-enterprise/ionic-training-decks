@@ -15,7 +15,7 @@ $ ng add @ngrx/store@latest
 Create the following folders, either from the CLI or fromm your favirote IDE:
 
 ```bash
-$ mkdir src/app/store src/app/store/actions src/app/store/reducers src/app/store/selectors
+$ mkdir src/app/store src/app/store/effects src/app/store/reducers src/app/store/selectors
 ```
 
 Create a `src/app/store/reducers/index.ts` file with an empty State definition. This is where we will slowly build up the definition of our appliation state as well as the reducers that act upon it. We _could_ do that directly in this file, but we will not. Rather we will use a very modulare format as we go.
@@ -344,7 +344,7 @@ describe('logout actions', () => {
 });
 ```
 
-**Challenge:** write add the hooks for these actions to the reducer, like we did for the login related actions. Refer the login actions for a guild. If you really get stuck on something, example implementations are included at the end of this section.
+**Challenge:** add the hooks for these actions to the reducer, like we did for the login related actions. Refer the login actions as a guide. If you really get stuck on something, example implementations are included at the end of this section.
 
 **Hint:** for the `LogoutSuccess` we need to remove the session. That code looks like this:
 
@@ -423,7 +423,9 @@ Under `src/app/store/effects/auth` (create any missing directories), create the 
 import { TestBed } from '@angular/core/testing';
 import { provideMockActions } from '@ngrx/effects/testing';
 import { Observable } from 'rxjs';
+import { NavController } from '@ionic/angular';
 
+import { createNavControllerMock } from '@test/mocks';
 import { AuthEffects } from './auth.effects';
 
 describe('AuthEffects', () => {

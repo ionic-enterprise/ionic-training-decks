@@ -152,7 +152,7 @@ Add those tests within the `describe` and then write the code that satisfies the
 
 ```typescript
 export class AuthGuardService implements CanActivate {
-  constructor() {} // inject the store, nav controller, and session value here as private
+  constructor() {} // inject the store, nav controller, and session vault here as private
 
   canActivate(): Observable<boolean> {
     return this.store.pipe(
