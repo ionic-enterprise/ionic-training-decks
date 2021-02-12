@@ -64,6 +64,8 @@ Modify your `package.json` file. I suggest moving the `description` up to the to
   "homepage": "https://ionicframework.com/",
   "scripts": {
     ...
+    "postinstall": "husky install",
+    ...
   },
   "private": true,
   "dependencies": {
@@ -72,14 +74,20 @@ Modify your `package.json` file. I suggest moving the `description` up to the to
   "devDependencies": {
     ...
   },
-  "prettier": "@ionic/prettier-config",
-  "husky": {
-    "hooks": {
-      "pre-commit": "pretty-quick --staged"
-    }
-  }
+  "prettier": "@ionic/prettier-config"
 }
 ```
+
+**Note:** Throughout the training portions of code examples will be snipped and replaced with `...` (ellipsis). This is done for brevity and to better focus on actionable areas.
+
+By default, the git hooks handled by `husky` are stored in the `.husky` directory. Let's add a couple now:
+
+```bash
+$ npx husky add .husky/pre-commit "npx pretty-quick --staged"
+$ npx husky add .husky/pre-push "npm run lint"
+```
+
+This will ensure our code is properly fomatted before each commit. It will also ensure that our code does not have any linting errors before we push it out to the `origin` repo. It would also be good to run the unit tests in the `pre-push` hook, but we have not gotten that far yet.
 
 Finally, make sure all of our source is formatted properly.
 
