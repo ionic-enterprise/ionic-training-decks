@@ -1,3 +1,9 @@
+## [4.3.6](https://github.com/ionic-team/ionic-training-decks/compare/v4.3.5...v4.3.6) (2021-02-12)
+
+### Bug Fixes
+
+- **framework:** update for husky v5 ([c9e786f](https://github.com/ionic-team/ionic-training-decks/commit/c9e786f745b903c9278b7be24501efdae2dfda34))
+
 ## [4.3.5](https://github.com/ionic-team/ionic-training-decks/compare/v4.3.4...v4.3.5) (2021-02-12)
 
 ### Bug Fixes
