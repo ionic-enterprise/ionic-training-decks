@@ -1,7 +1,6 @@
 import { ApplicationService } from './application.service';
 
-export function createAppliationServiceMock() {
-  return jasmine.createSpyObj<ApplicationService>('ApplicationService', [
+export const createAppliationServiceMock = () =>
+  jasmine.createSpyObj<ApplicationService>('ApplicationService', [
     'registerForUpdates',
   ]);
-}

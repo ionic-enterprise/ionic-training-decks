@@ -277,7 +277,7 @@ describe('MenuItemsService', () => {
     });
   });
 
-  function initializeTestData() {
+  const initializeTestData = () => {
     testMenu = {
       pages: [
         {
@@ -429,5 +429,5 @@ describe('MenuItemsService', () => {
         },
       ],
     };
-  }
+  };
 });

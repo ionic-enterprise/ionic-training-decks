@@ -11,12 +11,6 @@ import { PageMenuComponent } from '@app/page-menu/page-menu.component';
   styleUrls: ['./page.page.scss'],
 })
 export class PagePage implements OnInit {
-  private sectionParam: string;
-  private tabParam: string;
-  private pageIdx: number;
-  private section: MenuItem;
-  private page: MenuItem;
-
   disableMenu = true;
   errorMessage: string;
   file: string;
@@ -24,6 +18,12 @@ export class PagePage implements OnInit {
   next: string;
   prev: string;
   title: string;
+
+  private sectionParam: string;
+  private tabParam: string;
+  private pageIdx: number;
+  private section: MenuItem;
+  private page: MenuItem;
 
   constructor(
     private activatedRoute: ActivatedRoute,

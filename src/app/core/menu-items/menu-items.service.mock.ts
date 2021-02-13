@@ -1,7 +1,7 @@
 import { MenuItemsService } from './menu-items.service';
 
-export function createMenuItemsServiceMock() {
-  return jasmine.createSpyObj<MenuItemsService>('MenuItemsService', {
+export const createMenuItemsServiceMock = () =>
+  jasmine.createSpyObj<MenuItemsService>('MenuItemsService', {
     courses: Promise.resolve([]),
     mainMenu: [],
     folder: undefined,
@@ -9,4 +9,3 @@ export function createMenuItemsServiceMock() {
     url: undefined,
     redirectUrl: undefined,
   });
-}

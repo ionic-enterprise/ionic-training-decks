@@ -1,9 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { NavController, Platform } from '@ionic/angular';
-import { Plugins, StatusBarStyle } from '@capacitor/core';
 
 import { MenuItemsService, ApplicationService } from '@app/core';
-import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-root',
@@ -19,18 +17,12 @@ export class AppComponent implements OnInit {
     private menuItems: MenuItemsService,
     private navController: NavController,
     private platform: Platform,
-    private route: ActivatedRoute,
   ) {
     this.initializeApp();
   }
 
   async initializeApp() {
-    await this.platform.ready();
-    if (this.platform.is('hybrid')) {
-      const { SplashScreen } = Plugins;
-      SplashScreen.hide();
-      this.styleByMode();
-    } else {
+    if (!this.platform.is('hybrid')) {
       this.applicationService.registerForUpdates();
     }
   }
@@ -69,20 +61,5 @@ export class AppComponent implements OnInit {
       this.selectedIndex = 0;
       this.navController.navigateRoot(this.appPages[0].url);
     }
-  }
-
-  private styleByMode() {
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)');
-    this.setStatusBarStyle(prefersDark.matches);
-    prefersDark.addEventListener('change', mediaQuery =>
-      this.setStatusBarStyle(mediaQuery.matches),
-    );
-  }
-
-  private setStatusBarStyle(darkMode: boolean) {
-    const { StatusBar } = Plugins;
-    StatusBar.setStyle({
-      style: darkMode ? StatusBarStyle.Dark : StatusBarStyle.Light,
-    });
   }
 }
