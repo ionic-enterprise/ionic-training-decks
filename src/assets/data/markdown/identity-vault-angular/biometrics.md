@@ -56,25 +56,8 @@ This is the prompt that will be used when asking for permission to use FaceID.
 
 Our service should dispatch an action to the store when the vault is locked. So let's first create an action for that and update the service to dispatch it.
 
-```diff
---- a/src/app/store/actions.ts
-+++ b/src/app/store/actions.ts
-@@ -16,6 +16,7 @@ export enum ActionTypes {
-
-   UnauthError = '[Auth API] unauthenticated error',
-
-+  SessionLocked = '[Vault API] session locked',
-   SessionRestored = '[Vault API] session restored',
-
-   TeaDetailsChangeRating = '[Tea Details Page] change rating',
-@@ -66,6 +67,7 @@ export const logoutFailure = createAction(
-
- export const unauthError = createAction(ActionTypes.UnauthError);
-
-+export const sessionLocked = createAction(ActionTypes.SessionLocked)
- export const sessionRestored = createAction(
-   ActionTypes.SessionRestored,
-   props<{ session: Session }>(),
+```TypeScript
+export const sessionLocked = createAction(ActionTypes.SessionLocked)
 ```
 
 ```diff
@@ -319,28 +302,10 @@ We can then update the page the check that value on init:
 
 We will need some actions to represent that the user clicked on the unlock item:
 
-```diff
---- a/src/app/store/actions.ts
-+++ b/src/app/store/actions.ts
-@@ -14,6 +14,10 @@ export enum ActionTypes {
-   LogoutSuccess = '[Auth API] logout success',
-   LogoutFailure = '[Auth API] logout failure',
-
-+  UnlockSession = '[Login Page] unlock session',
-+  UnlockSessionSuccess = '[Vault API] unlock session success',
-+  UnlockSessionFailure = '[Login Page] unlock session failure',
-+
-   UnauthError = '[Auth API] unauthenticated error',
-
-   SessionLocked = '[Vault API] session locked',
-@@ -73,6 +77,10 @@ export const sessionRestored = createAction(
-   props<{ session: Session }>(),
- );
-
-+export const unlockSession = createAction(ActionTypes.UnlockSession);
-+export const unlockSessionSuccess = createAction(ActionTypes.UnlockSessionSuccess);
-+export const unlockSessionFailure = createAction(ActionTypes.UnlockSessionFailure);
-+
+```TypeScript
+export const unlockSession = createAction(ActionTypes.UnlockSession);
+export const unlockSessionSuccess = createAction(ActionTypes.UnlockSessionSuccess);
+export const unlockSessionFailure = createAction(ActionTypes.UnlockSessionFailure);
 ```
 
 The `UnlockSession` needs to be dispatched from the `LoginPage`:

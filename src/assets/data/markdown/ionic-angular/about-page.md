@@ -131,11 +131,11 @@ describe('AboutPage', () => {
     });
   });
 
-  function click(button: HTMLElement) {
+  const click = (button: HTMLElement) => {
     const event = new Event('click');
     button.dispatchEvent(event);
     fixture.detectChanges();
-  }
+  };
 });
 ```
 

@@ -297,7 +297,6 @@ We currently have a list of X number of teas (currently 7, but once we start get
 First let's set up the test data in `src/app/tea/tea.page.spec.ts`:
 
 ```TypeScript
-import { waitForAsync, ComponentFixture, TestBed } from '@angular/core/testing';
 ...
 import { Tea } from '@app/models';
 
@@ -312,7 +311,7 @@ describe('TeaPage', () => {
       ...
   });
   ...
-  function initializeTestData() {
+  const initializeTestData = () => {
     teas = [
       // Remember those tea records we hard coded into the page?
       // Copy those records here.
@@ -320,8 +319,6 @@ describe('TeaPage', () => {
   }
 });
 ```
-
-**Important:** If you look closely you will see that the test was generated with code that imported `async`, but I changed it to `waitForAsync`. The Angular team has deprecated `async` and will remove it in the future. However, our templates need to cover multiple versions of Angular, including versions that do not have `waitForAsync`, so you will need to make this change yourself in order to stay current.
 
 **Note:** The duplication of the data is annoying, but it is short-term. In the future, we will get the data from or backend, but we will still need the data in the test to feed our mock.
 
@@ -383,9 +380,15 @@ Turning our attention away from the test and back to the code, we can modify the
 
 ```TypeScript
   get teaMatrix(): Array<Array<Tea>> {
+    return this.toMatrix(this.teaData);
+  }
+
+...
+
+  private toMatrix(tea: Array<Tea>): Array<Array<Tea>> {
     const matrix: Array<Array<Tea>> = [];
     let row = [];
-    this.teaData.forEach(t => {
+    tea.forEach(t => {
       row.push(t);
       if (row.length === 4) {
         matrix.push(row);

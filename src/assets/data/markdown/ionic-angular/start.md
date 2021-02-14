@@ -25,8 +25,8 @@ Lets start our application via whichever technique you want.
 **Example:**
 
 ```bash
-$ cd ~/Projects/Training
-$ ionic start tea-taster blank --type=angular --capacitor
+cd ~/Projects/Training
+ionic start tea-taster blank --type=angular --capacitor
 ```
 
 Let's look at some of those options more closely.
@@ -39,8 +39,8 @@ Let's look at some of those options more closely.
 Once the application has been generated, let's start the development server:
 
 ```bash
-$ cd tea-taster
-$ ionic serve
+cd tea-taster
+ionic serve
 ```
 
 ## Enforce Consistent Styling
@@ -50,7 +50,7 @@ $ ionic serve
 Prettier itself is an opinionated code formatter, and Ionic has its own opinions on how it is best configured, so let's install both Prettier and Ionic's Prettier configuration. We will also install <a href="https://www.npmjs.com/package/husky" target="_blank">husky</a> and <a href="https://www.npmjs.com/package/pretty-quick" target="_blank">pretty-quick</a>. This will allow us to set up a commit hook to make sure Prettier is run with each commit. After that we don't have to waste brain cycles thinking about code formatting ever again.
 
 ```bash
-$ npm install -D @ionic/prettier-config husky prettier pretty-quick
+npm install -D @ionic/prettier-config husky prettier pretty-quick
 ```
 
 Modify your `package.json` file. I suggest moving the `description` up to the top and giving it a reasonable value, and then adding the Prettier config portion to the bottom. For example:
@@ -80,11 +80,17 @@ Modify your `package.json` file. I suggest moving the `description` up to the to
 
 **Note:** Throughout the training portions of code examples will be snipped and replaced with `...` (ellipsis). This is done for brevity and to better focus on actionable areas.
 
+Initialize Husky:
+
+```bash
+npx husky install
+```
+
 By default, the git hooks handled by `husky` are stored in the `.husky` directory. Let's add a couple now:
 
 ```bash
-$ npx husky add .husky/pre-commit "npx pretty-quick --staged"
-$ npx husky add .husky/pre-push "npm run lint"
+npx husky add .husky/pre-commit "npx pretty-quick --staged"
+npx husky add .husky/pre-push "npm run lint"
 ```
 
 This will ensure our code is properly fomatted before each commit. It will also ensure that our code does not have any linting errors before we push it out to the `origin` repo. It would also be good to run the unit tests in the `pre-push` hook, but we have not gotten that far yet.
@@ -92,10 +98,37 @@ This will ensure our code is properly fomatted before each commit. It will also 
 Finally, make sure all of our source is formatted properly.
 
 ```bash
-$ npx prettier --write src
+npx prettier --write src
 ```
 
 At this point all of the source should be formatting properly and will remain so automatically with each commit.
+
+## Upgrade to ESLint
+
+Try linting your app (`npm run lint`) and you will see that TSLint has been deprecated. Upgrading to ESLint at this point is very easy, so let's do that while the application is tiny.
+
+```bash
+npx ng add @angular-eslint/schematics
+npx ng g @angular-eslint/schematics:convert-tslint-to-eslint app
+```
+
+Run `npm run lint` again and fix any errors that currently exist. At this point, there should only be one in the `src/zone-flags.ts` file. We cannot really "fix" that one, so we will just tell ESLint to ignore it.
+
+```TypeScript
+/**
+ * Prevents Angular change detection from
+ * running with certain Web Component callbacks
+ */
+// eslint-disable-next-line no-underscore-dangle
+(window as any).__Zone_disable_customElements = true;
+```
+
+We can now remove TSLint and codelyzer.
+
+```bash
+npm rm tslint codelyzer
+rm tslint.json
+```
 
 ## Side Note: `ionic serve` vs. `npm start`
 

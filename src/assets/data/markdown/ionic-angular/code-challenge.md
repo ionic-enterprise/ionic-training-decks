@@ -34,7 +34,7 @@ Here is the test for how it should work
 +import { Store } from '@ngrx/store';
 +import { provideMockStore } from '@ngrx/store/testing';
 
-+import { AuthState, initialState } from '@app/store/reducers/auth/auth.reducer';
++import { AuthState, initialState } from '@app/store/reducers/auth.reducer';
  import { TeaPage } from './tea.page';
  import { Tea } from '@app/models';
 +import {logout} from '@app/store/actions';
@@ -70,13 +70,13 @@ Here is the test for how it should work
 +    });
 +  });
 +
-+  function click(button: HTMLElement) {
++  const click = (button: HTMLElement) => {
 +    const event = new Event('click');
 +    button.dispatchEvent(event);
 +    fixture.detectChanges();
 +  }
 +
-   function initializeTestData() {
+   const initializeTestData = () => {
      teas = [
        {
 ```
@@ -110,8 +110,8 @@ Hopefully you got through that without issue, but if you have any questions plea
 As promised, here is one way to test the `logout$` effect:
 
 ```diff
---- a/src/app/store/effects/auth/auth.effects.spec.ts
-+++ b/src/app/store/effects/auth/auth.effects.spec.ts
+--- a/src/app/store/effects/auth.effects.spec.ts
++++ b/src/app/store/effects/auth.effects.spec.ts
 @@ -9,6 +9,8 @@ import {
    login,
    loginSuccess,
@@ -139,7 +139,7 @@ As promised, here is one way to test the `logout$` effect:
 +      actions$ = of(logout());
 +      effects.logout$.subscribe(action => {
 +        expect(action).toEqual({
-+          type: ActionTypes.LogoutSuccess,
++          type: '[Auth API] logout success',
 +        });
 +        done();
 +      });

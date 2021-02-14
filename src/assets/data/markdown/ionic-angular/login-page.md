@@ -325,12 +325,12 @@ Those tests are getting very verbose, especially when it comes to setting a valu
 Add a `setInputValue()` function within the main `describe()`.
 
 ```TypeScript
-function setInputValue(input: HTMLIonInputElement, value: string) {
+const setInputValue = (input: HTMLIonInputElement, value: string) => {
   const event = new InputEvent('ionChange');
   input.value = value;
   input.dispatchEvent(event);
   fixture.detectChanges();
-}
+};
 ```
 
 With that in place, clean up the tests.

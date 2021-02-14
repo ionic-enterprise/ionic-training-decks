@@ -7,7 +7,7 @@ In this lab, we will begin to learn how to use NgRX to manage our application's 
 The first thing that we need to do is install <a href="https://ngrx.io/">NgRX</a>.
 
 ```bash
-$ ng add @ngrx/store@latest
+npx ng add @ngrx/store@latest
 ```
 
 ## Boilerplate Setup
@@ -15,7 +15,7 @@ $ ng add @ngrx/store@latest
 Create the following folders, either from the CLI or fromm your favirote IDE:
 
 ```bash
-$ mkdir src/app/store src/app/store/effects src/app/store/reducers src/app/store/selectors
+mkdir src/app/store src/app/store/effects src/app/store/reducers src/app/store/selectors
 ```
 
 Create a `src/app/store/reducers/index.ts` file with an empty State definition. This is where we will slowly build up the definition of our appliation state as well as the reducers that act upon it. We _could_ do that directly in this file, but we will not. Rather we will use a very modulare format as we go.
@@ -108,23 +108,25 @@ Create a `src/app/store/actions.ts` file with the following contents:
 import { createAction, props } from '@ngrx/store';
 import { Session } from '@app/models';
 
-export enum ActionTypes {
-  Login = '[Login Page] login',
-  LoginSuccess = '[Auth API] login success',
-  LoginFailure = '[Auth API] login failure',
+export const login = createAction(
+  '[Login Page] login',
+  props<{ email: string; password: string }>(),
+);
+export const loginSuccess = createAction(
+  '[Auth API] login success',
+  props<{ session: Session }>(),
+);
+export const loginFailure = createAction(
+  '[Auth API] login failure',
+  props<{ errorMessage: string }>(),
+);
 
-  Logout = '[Tea Page] logout',
-  LogoutSuccess = '[Auth API] logout success',
-  LogoutFailure = '[Auth API] logout failure'
-}
-
-export const login = createAction(ActionTypes.Login, props<{ email: string; password: string }>());
-export const loginSuccess = createAction(ActionTypes.LoginSuccess, props<{ session: Session }>());
-export const loginFailure = createAction(ActionTypes.LoginFailure, props<{ errorMessage: string }>());
-
-export const logout = createAction(ActionTypes.Logout);
-export const logoutSuccess = createAction(ActionTypes.LogoutSuccess);
-export const logoutFailure = createAction(ActionTypes.LogoutFailure, props<{ errorMessage: string }>());
+export const logout = createAction('[Tea Page] logout');
+export const logoutSuccess = createAction('[Auth API] logout success');
+export const logoutFailure = createAction(
+  '[Auth API] logout failure',
+  props<{ errorMessage: string }>(),
+);
 ```
 
 As you can see, this is really just registering what the actions are as well as what their payload will be if they have one (see the `login` action).
@@ -138,12 +140,11 @@ They should also be the only function that modify that portion of the state. For
 
 Being pure synchronous functions also make them fairly easy to test.
 
-Let's start with a boiler plate test in `src/app/store/reducers/auth/auth.reducer.spec.ts`:
+Let's start with a boiler plate test in `src/app/store/reducers/auth.reducer.spec.ts`:
 
 ```TypeScript
 import { initialState, reducer } from './auth.reducer';
 import {
-  ActionTypes,
   login,
   loginFailure,
   loginSuccess,
@@ -158,10 +159,10 @@ it('returns the default state', () => {
 });
 ```
 
-We can then define our state our states shape and initial contents in `src/app/store/reducers/auth/auth.reducer.ts`
+We can then define our state our states shape and initial contents in `src/app/store/reducers/auth.reducer.ts`
 
 ```TypeScript
-import { Action, createReducer, on } from '@ngrx/store';
+import { createReducer, on } from '@ngrx/store';
 import * as Actions from '@app/store/actions';
 import { Session } from '@app/models';
 
@@ -176,13 +177,9 @@ export const initialState: AuthState = {
   errorMessage: '',
 };
 
-const authReducer = createReducer(
+export const reducer = createReducer(
   initialState,
 );
-
-export function reducer(state: AuthState | undefined, action: Action) {
-  return authReducer(state, action);
-}
 ```
 
 The reducer listens for actions and then modifies the state accordingly. So let's start with our login action and figure out how it should affect the state. This action is taken by the login page, and it informs the store that we are initiating the login process. So all it needs to do is set the loading flag to true and clear any existing error message from a previous attempt (actually initiating the process will be done by something called an `effect` and we will get to that later).
@@ -190,7 +187,7 @@ The reducer listens for actions and then modifies the state accordingly. So let'
 We first express that requirement in our test. Notice that the reducer takes arguments consisting of the current state and the action being performed.
 
 ```TypeScript
-describe(ActionTypes.Login, () => {
+describe('Login', () => {
   it('sets the loading flag and clears other data', () => {
     const action = login({ email: 'test@testy.com', password: 'mysecret' });
     expect(
@@ -227,7 +224,7 @@ So, on the `Actions.login` action, we take our current state state transform it 
 The `LoginSuccess` and `LoginFailure` actions will be dispatched by the `effect` that handles the login API call. Neither the `effect` nor the API service exist yet, but we can still add a handler for these actions to our reducer since we know how they should affect the state.
 
 ```TypeScript
-describe(ActionTypes.LoginSuccess, () => {
+describe('Login Success', () => {
   it('clears the loading flag and sets the session', () => {
     const session: Session = {
       user: {
@@ -247,7 +244,7 @@ describe(ActionTypes.LoginSuccess, () => {
   });
 });
 
-describe(ActionTypes.LoginFailure, () => {
+describe('Login Failure', () => {
   it('clears the loading flag and sets the error', () => {
     const action = loginFailure({
       errorMessage: 'There was a failure, it was a mess',
@@ -295,7 +292,7 @@ describe('logout actions', () => {
       }),
   );
 
-  describe(ActionTypes.Logout, () => {
+  describe('Logout', () => {
     it('sets the loading flag and clears the error message', () => {
       const action = logout();
       expect(
@@ -315,7 +312,7 @@ describe('logout actions', () => {
     });
   });
 
-  describe(ActionTypes.LogoutSuccess, () => {
+  describe('Logout Success', () => {
     it('clears the loading flag and the session', () => {
       const action = logoutSuccess();
       expect(
@@ -327,7 +324,7 @@ describe('logout actions', () => {
     });
   });
 
-  describe(ActionTypes.LogoutFailure, () => {
+  describe('Logout Failure', () => {
     it('clears the loading flag and sets the error', () => {
       const action = logoutFailure({
         errorMessage: 'There was a failure, it was a mess',
@@ -359,7 +356,7 @@ describe('logout actions', () => {
 Once we are done, we need to update the main reducers file (`src/app/store/reucers/index.ts`) to include our `auth` state as well as the reducer for it:
 
 ```TypeScript
-import { AuthState, reducer as authReducer } from './auth/auth.reducer';
+import { AuthState, reducer as authReducer } from './auth.reducer';
 
 export interface State {
   auth: AuthState
@@ -376,7 +373,7 @@ Selectors are used to get data from the state. These are generally straight forw
 
 ```TypeScript
 import { createSelector, createFeatureSelector } from '@ngrx/store';
-import { AuthState } from '@app/store/reducers/auth/auth.reducer';
+import { AuthState } from '@app/store/reducers/auth.reducer';
 
 export const selectAuth = createFeatureSelector('auth');
 export const selectAuthToken = createSelector(selectAuth, (state: AuthState) => state.session?.token);
@@ -410,12 +407,12 @@ The most common use case for us will be to make HTTP requests to either fetch or
 Use `ng add` to install the NgRX Effects library. This will also update our `AppModule` for us, though we will still need to register our effects once we create them.
 
 ```bash
-ng add @ngrx/effects@latest
+npx ng add @ngrx/effects@latest
 ```
 
 ### Create the Auth Effects
 
-Under `src/app/store/effects/auth` (create any missing directories), create the following files:
+Under `src/app/store/effects` create the following files:
 
 **`auth.effects.spec.ts`**
 
@@ -520,7 +517,7 @@ These tests define how the effect itself should work. Basically, the effect shou
 ...
 import { Observable, of } from 'rxjs';
 
-import { ActionTypes, login } from '@app/store/actions';
+import { login } from '@app/store/actions';
 ...
 
   describe('login$', () => {
@@ -529,7 +526,7 @@ import { ActionTypes, login } from '@app/store/actions';
         actions$ = of(login({ email: 'test@test.com', password: 'test' }));
         effects.login$.subscribe(action => {
           expect(action).toEqual({
-            type: ActionTypes.LoginSuccess,
+            type: '[Auth API] login success',
             session: {
               user: {
                 id: 73,
@@ -550,7 +547,7 @@ import { ActionTypes, login } from '@app/store/actions';
         actions$ = of(login({ email: 'test@test.com', password: 'badpass' }));
         effects.login$.subscribe(action => {
           expect(action).toEqual({
-            type: ActionTypes.LoginFailure,
+            type: '[Auth API] login failure',
             errorMessage: 'Invalid Username or Password',
           });
           done();
@@ -600,7 +597,6 @@ Whenever we have a `loginSuccess`, we want to navigate to the root route. First 
 
 ```TypeScript
 import {
-  ActionTypes,
   login,
   loginSuccess,
 } from '@app/store/actions';
@@ -652,7 +648,7 @@ Notice the `{ dispatch: false }`. This tells NgRX to not bother dispatching anyt
 In order for the application to know about the effects, we first need to register them. As we add various modules to our store, we will want a barrel file to bring them all together, so add a `src/app/store/effects/index.ts` file with the following contents:
 
 ```TypeScript
-export * from './auth/auth.effects';
+export * from './auth.effects';
 ```
 
 We will then import the `AuthEffects` in `src/app/app.module.ts` and register them with the `EffectsModule`:
@@ -684,7 +680,7 @@ First we will update the test setup so we are able to inject the store into our 
  import { By } from '@angular/platform-browser';
  import { IonicModule } from '@ionic/angular';
 +import { provideMockStore } from '@ngrx/store/testing';
-+import { AuthState, initialState } from '@app/store/reducers/auth/auth.reducer';
++import { AuthState, initialState } from '@app/store/reducers/auth.reducer';
 
  import { LoginPage } from './login.page';
 
@@ -747,7 +743,7 @@ import { login } from '@app/store/actions';
 Notice that we need to click the sign on button. We don't have a function for that, so let's create one down by the `setInput()` fuction we already have:
 
 ```TypeScript
-function click(button: HTMLElement) {
+const click = (button: HTMLElement) => {
   const event = new Event('click');
   button.dispatchEvent(event);
   fixture.detectChanges();

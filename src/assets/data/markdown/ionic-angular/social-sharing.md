@@ -197,6 +197,7 @@ We can then add the code fill out the `share()` accordingly. You will also have 
 
 ```TypeScript
   async share(): Promise<void> {
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     const { Share } = Plugins;
     await Share.share({
       title: `${this.brand}: ${this.name}`,

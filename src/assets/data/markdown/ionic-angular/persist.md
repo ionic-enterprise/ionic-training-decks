@@ -11,7 +11,7 @@ In this lab you will learn how to:
 It is now time to get down to the main subject here and create an Angular service that will store information about the currently authenticated user.
 
 ```bash
-$ ionic generate service core/session-vault/session-vault
+ionic generate service core/session-vault/session-vault
 ```
 
 Create `src/app/core/index.ts`. This is the barrel file for all of our `core` services.
@@ -123,6 +123,7 @@ The code for this then looks like the following:
 
 ```TypeScript
   async login(session: Session): Promise<void> {
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     const { Storage } = Plugins;
     await Storage.set({ key: this.key, value: JSON.stringify(session) });
   }
@@ -175,7 +176,7 @@ describe('restore session', () => {
       );
     });
 
-    it('resolves the session', async () => {
+    it('resolves without a session', async () => {
       expect(await service.restoreSession()).toEqual(null);
     });
   });
@@ -207,13 +208,12 @@ describe('logout', () => {
 Add a `src/app/core/session-vault/session-vault.service.mock.ts` file and inside of it create a factory used to build mock `SessionVaultService` objects for testing.
 
 ```typescript
-export function createSessionVaultServiceMock() {
-  return jasmine.createSpyObj('SessionVaultService', {
+export const createSessionVaultServiceMock = () =>
+  jasmine.createSpyObj('SessionVaultService', {
     login: Promise.resolve(),
     restoreSession: Promise.resolve(),
     logout: Promise.resolve(),
   });
-}
 ```
 
 Also create a `testing` barrel file called `src/app/core/testing.ts` that will eventually contain all of the `core` mock factories.
@@ -243,7 +243,7 @@ There are two tasks we currently need to perform within the store:
 
 ### Handle Login
 
-Let's start with the easy one. We need to save the session when the login succeeds and do nothing when it fails. The first thing to do is create tests in `src/app/store/effects/auth/auth.effects.spec.ts` that express these requirements:
+Let's start with the easy one. We need to save the session when the login succeeds and do nothing when it fails. The first thing to do is create tests in `src/app/store/effects/auth.effects.spec.ts` that express these requirements:
 
 ```TypeScript
 ...
@@ -327,19 +327,16 @@ import { SessionVaultService } from '@app/core';
 When the session is restored, we need to dispatch an action to the store in order to update the state with the session. First add the action in `src/app/store/actions.js`:
 
 ```TypeScript
-...
-  SessionRestored = '[Vault API] session restored',
-...
 export const sessionRestored = createAction(
-  ActionTypes.SessionRestored,
+  '[Vault API] session restored',
   props<{ session: Session }>(),
 );
 ```
 
-The reducer (`src/app/store/reducers/auth/auth.reducer.*`) should handle this action by setting the session in the state.
+The reducer (`src/app/store/reducers/auth.reducer.*`) should handle this action by setting the session in the state.
 
 ```TypeScript
-describe(ActionTypes.SessionRestored, () => {
+describe('Session Restored', () => {
   it('sets the session', () => {
     const session: Session = {
       user: {
@@ -425,6 +422,7 @@ import { State } from '@app/store';
 ...
 
   async restoreSession(): Promise<Session> {
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     const { Storage } = Plugins;
     const { value } = await Storage.get({ key: this.key });
     const session = JSON.parse(value);

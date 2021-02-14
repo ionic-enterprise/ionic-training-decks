@@ -101,7 +101,7 @@ First, create `expectedTeas` and `resultTeas` variables within the main `describ
 We can then use `expectedTeas` to manufacture a set of `resultTeas` by deleting the `image`. The `resultTeas` will be the result of our API call. Create the following function at the bottom of the main `describe()` function callback.
 
 ```typescript
-function initializeTestData() {
+const initializeTestData = () => {
   expectedTeas = [
     {
       id: 1,
@@ -157,7 +157,7 @@ function initializeTestData() {
     delete tea.image;
     return tea;
   });
-}
+};
 ```
 
 Call this function from the main `beforeEach()`.

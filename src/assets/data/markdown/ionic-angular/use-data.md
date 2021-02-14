@@ -16,15 +16,12 @@ We already have the actions in place that mean we have established a session and
 ```TypeScript
 import { Session, Tea } from '@app/models';
 ...
-  InitialLoadSuccess = '[Data API] initial data load success',
-  InitialLoadFailure = '[Data API] initial data load failure',
-...
 export const initialLoadSuccess = createAction(
-  ActionTypes.InitialLoadSuccess,
+  '[Data API] initial data load success',
   props<{teas: Array<Tea>}>()
 )
 export const initialLoadFailure = createAction(
-  ActionTypes.InitialLoadFailure,
+  '[Data API] initial data load failure',
   props<{ errorMessage: string }>(),
 );
 ```
@@ -33,10 +30,10 @@ export const initialLoadFailure = createAction(
 
 We already have a slice of state for the authentication system. Let's aslo create one for the data. For our small app we will just have those two slices, one for `auth` and one for the rest of the `data`.
 
-We have been defining the state slices along with the reducers, so create a file called `src/app/store/reducers/data/data.reducer.ts` with the following initial contents:
+We have been defining the state slices along with the reducers, so create a file called `src/app/store/reducers/data.reducer.ts` with the following initial contents:
 
 ```TypeScript
-import { Action, createReducer, on } from '@ngrx/store';
+import { createReducer, on } from '@ngrx/store';
 
 import { Tea } from '@app/models';
 import * as Actions from '@app/store/actions';
@@ -53,20 +50,13 @@ export const initialState: DataState = {
   errorMessage: '',
 };
 
-const dataReducer = createReducer(initialState);
-
-export function reducer(state: DataState | undefined, action: Action) {
-  return dataReducer(state, action);
-}
+export const reducer = createReducer(initialState);
 ```
 
-As well as a starting test file for it (`src/app/store/reducers/data/data.reducer.spec.ts`)
+As well as a starting test file for it (`src/app/store/reducers/data.reducer.spec.ts`)
 
 ```TypeScript
 import { initialState, reducer } from './data.reducer';
-import {
-  ActionTypes,
-} from '@app/store/actions';
 
 it('returns the default state', () => {
   expect(reducer(undefined, { type: 'NOOP' })).toEqual(initialState);
@@ -81,8 +71,8 @@ At this point we can update the `src/app/store/reducers/index.ts` file so this s
 @@ -2,13 +2,16 @@ import { ActionReducerMap, MetaReducer } from '@ngrx/store';
  import { environment } from '@env/environment';
 
- import { AuthState, reducer as authReducer } from './auth/auth.reducer';
-+import { DataState, reducer as dataReducer } from './data/data.reducer';
+ import { AuthState, reducer as authReducer } from './auth.reducer';
++import { DataState, reducer as dataReducer } from './data.reducer';
 
  export interface State {
    auth: AuthState;
@@ -144,7 +134,7 @@ const teas: Array<Tea> = [
 With the data in place, and using what we did for the `auth` slice as a guide we _could_ write some tests (**Do not write these tests**):
 
 ```TypeScript
-describe(ActionTypes.LoginSuccess, () => {
+describe('Login Success', () => {
   it('sets the loading flag and clears any error message', () => {
     const action = loginSuccess({ session });
     expect(
@@ -164,7 +154,7 @@ describe(ActionTypes.LoginSuccess, () => {
   });
 });
 
-describe(ActionTypes.SessionRestored, () => {
+describe('Session Restored', () => {
   it('sets the loading flag and clears any error message', () => {
     const action = sessionRestored({ session });
     expect(
@@ -184,7 +174,7 @@ describe(ActionTypes.SessionRestored, () => {
   });
 });
 
-describe(ActionTypes.InitialLoadFailure,  () => {
+describe('Initial Load Failure',  () => {
   it('clears the loading flag and sets the error message', () => {
     const action = initialLoadFailure({errorMessage: 'The load blew some chunks'});
     expect(
@@ -204,7 +194,7 @@ describe(ActionTypes.InitialLoadFailure,  () => {
   });
 });
 
-describe(ActionTypes.InitialLoadSuccess, () => {
+describe('Initial Load Success', () => {
   it('clears the loading flag and sets the teas', () => {
     const action = initialLoadSuccess({teas});
     expect(
@@ -235,13 +225,11 @@ But notice how repetative those tests are. Let's see if we can do better. Lookin
 So, we could abstract that out in to some data for each test and have a single test function that does the work. Further, since it would be nice to only have to specify the parts of state that differ from the initial state. That way, if we add to the state, our tests don't need to change. Let's do that now:
 
 ```TypeScript
-function createState(stateChanges: {
+const createState = (stateChanges: {
   teas?: Array<Tea>;
   loading?: boolean;
   errorMessage?: string;
-}): DataState {
-  return { ...initialState, ...stateChanges };
-}
+}): DataState => ({ ...initialState, ...stateChanges });
 
 it('returns the default state', () => {
   expect(reducer(undefined, { type: 'NOOP' })).toEqual(initialState);
@@ -249,25 +237,25 @@ it('returns the default state', () => {
 
 [
   {
-    description: `${ActionTypes.LoginSuccess}: sets the loading flag and clears any error message`,
+    description: 'Login Success: sets the loading flag and clears any error message',
     action: loginSuccess({ session }),
     begin: { errorMessage: 'Unknown error with data load' },
     end: { loading: true },
   },
   {
-    description: `${ActionTypes.SessionRestored}: sets the loading flag and clears any error message`,
+    description: 'Session Restored: sets the loading flag and clears any error message',
     action: sessionRestored({ session }),
     begin: { errorMessage: 'Unknown error with data load' },
     end: { loading: true },
   },
   {
-    description: `${ActionTypes.InitialLoadFailure}: clears the loading flag and sets the error message`,
+    description: 'Initial Load Failure: clears the loading flag and sets the error message',
     action: initialLoadFailure({ errorMessage: 'The load blew some chunks' }),
     begin: { loading: true },
     end: { errorMessage: 'The load blew some chunks' },
   },
   {
-    description: `${ActionTypes.InitialLoadSuccess}: clears the loading flag and sets the teas`,
+    description: 'Initial Load Success: clears the loading flag and sets the teas',
     action: initialLoadSuccess({ teas }),
     begin: { loading: true },
     end: { teas },
@@ -283,7 +271,7 @@ it('returns the default state', () => {
 
 That is a lot less repetative code, and will be a lot easier to maintain as our state grows.
 
-With the tests in place, we are ready to update the `dataReducer` in `src/app/store/reducers/data/data.reducer.ts`. I will provide one of the action handlers, and let you fill in the others.
+With the tests in place, we are ready to update the `dataReducer` in `src/app/store/reducers/data.reducer.ts`. I will provide one of the action handlers, and let you fill in the others.
 
 ```TypeScript
   on(Actions.initialLoadSuccess, (state, {teas}) => ({
@@ -299,7 +287,7 @@ Have a peek at the auth reducer if you get stuck. If you get _realy_ stuck the c
 
 Right now, the only effect we need for the data slice is to load the tea data whenever we have a new session. The first task will be to create the required files and get the effects hooked up:
 
-**`src/app/store/effects/data/data.effects.spec.ts`**
+**`src/app/store/effects/data.effects.spec.ts`**
 
 ```TypeScript
 import { TestBed } from '@angular/core/testing';
@@ -334,7 +322,7 @@ describe('DataEffects', () => {
 });
 ```
 
-**`src/app/store/effects/data/data.effects.ts`**
+**`src/app/store/effects/data.effects.ts`**
 
 ```TypeScript
 import { Injectable } from '@angular/core';
@@ -475,9 +463,9 @@ At this point, we have two possible outcomes: we either succeed in our quest to 
 
         it('dispatches initial load success', done => {
           actions$ = of(action);
-          effects.sessionLoaded$.subscribe(action => {
-            expect(action).toEqual({
-              type: ActionTypes.InitialLoadSuccess,
+          effects.sessionLoaded$.subscribe(mappedAction => {
+            expect(mappedAction).toEqual({
+              type: '[Data API] initial data load success',
               teas,
             });
             done();
@@ -511,7 +499,7 @@ Finally, the error case. First the test:
           actions$ = of(action);
           effects.sessionLoaded$.subscribe(newAction => {
             expect(newAction).toEqual({
-              type: ActionTypes.InitialLoadFailure,
+              type: '[Data API] initial data load failure',
               errorMessage: 'Error in data load, check server logs',
             });
             done();
@@ -565,9 +553,9 @@ A lot of what we need for the test is already there. We just need to modify the 
 -import { provideMockStore } from '@ngrx/store/testing';
 +import { MockStore, provideMockStore } from '@ngrx/store/testing';
 
--import { AuthState, initialState } from '@app/store/reducers/auth/auth.reducer';
-+import { AuthState, initialState as initialAuthState } from '@app/store/reducers/auth/auth.reducer';
-+import { DataState, initialState as initialDataState } from '@app/store/reducers/data/data.reducer';
+-import { AuthState, initialState } from '@app/store/reducers/auth.reducer';
++import { AuthState, initialState as initialAuthState } from '@app/store/reducers/auth.reducer';
++import { DataState, initialState as initialDataState } from '@app/store/reducers/data.reducer';
  import { TeaPage } from './tea.page';
  import { Tea } from '@app/models';
  import { logout } from '@app/store/actions';
@@ -599,56 +587,28 @@ A lot of what we need for the test is already there. We just need to modify the 
 
 For the page itself, let's take this one step at a time. Right now, the HTML is directly consuming the hard coded data after we turn it into a matrix. We want to get to a point where the page is consuming the tea data from the store translated into a matrix. For that, we will need an Observable.
 
-Here are the changes to both the class and the template:
+For the first step, let's create an Observable that just uses the hard coded teas:
 
-```diff
---- a/src/app/tea/tea.page.ts
-+++ b/src/app/tea/tea.page.ts
-@@ -4,6 +4,8 @@ import { Store } from '@ngrx/store';
- import { Tea } from '@app/models';
- import { State } from '@app/store';
- import { logout } from '@app/store/actions';
-+import { Observable, of } from 'rxjs';
-+import { map } from 'rxjs/operators';
+```TypeScript
+import { Observable, of } from 'rxjs';
+import { map } from 'rxjs/operators';
+...
+export class TeaPage implements OnInit {
+  teas$: Observable<Array<Array<Tea>>>;
+...
+  ngOnInit() {
+    this.teas$ = of(this.teaData).pipe(map(teas => this.toMatrix(teas)));
+  }
+...
+```
 
- @Component({
-   selector: 'app-tea',
-@@ -70,10 +72,12 @@ export class TeaPage implements OnInit {
-     },
-   ];
+In the HTML, change the binding to use the observable and `async` pipe
 
--  get teaMatrix(): Array<Array<Tea>> {
-+  teas$: Observable<Array<Array<Tea>>>;
-+
-+  private teaMatrix(teas: Array<Tea>): Array<Array<Tea>> {
-     const matrix: Array<Array<Tea>> = [];
-     let row = [];
--    this.teaData.forEach(t => {
-+    teas.forEach(t => {
-       row.push(t);
-       if (row.length === 4) {
-         matrix.push(row);
-@@ -94,5 +98,7 @@ export class TeaPage implements OnInit {
-     this.store.dispatch(logout());
-   }
-
--  ngOnInit() {}
-+  ngOnInit() {
-+    this.teas$ = of(this.teaData).pipe(map(teas => this.teaMatrix(teas)));
-+  }
-
-
---- a/src/app/tea/tea.page.html
-+++ b/src/app/tea/tea.page.html
-@@ -17,7 +17,7 @@
-   </ion-header>
-
-   <ion-grid>
--    <ion-row *ngFor="let teaRow of teaMatrix" class="ion-align-items-stretch">
-+    <ion-row *ngFor="let teaRow of teas$ | async" class="ion-align-items-stretch">
-       <ion-col *ngFor="let tea of teaRow" size="12" size-md="6" size-xl="3">
-         <ion-card>
-           <ion-img [src]="tea.image"></ion-img>
+```html
+<ion-row
+  *ngFor="let teaRow of teas$ | async"
+  class="ion-align-items-stretch"
+></ion-row>
 ```
 
 After making those changes, all of your tests should still pass.
@@ -726,7 +686,7 @@ The following is the data selectors:
 
 ```TypeScript
 import { createSelector, createFeatureSelector } from '@ngrx/store';
-import { DataState } from '@app/store/reducers/data/data.reducer';
+import { DataState } from '@app/store/reducers/data.reducer';
 
 export const selectData = createFeatureSelector('data');
 export const selectTeas = createSelector(
@@ -793,7 +753,7 @@ For the tea clearing challenge, first add the following case to the array of tes
 
 ```TypeScript
   {
-    description: `${ActionTypes.LogoutSuccess}: clears the tea data`,
+    description: 'Logout Success: clears the tea data',
     action: logoutSuccess(),
     begin: { teas },
     end: {},

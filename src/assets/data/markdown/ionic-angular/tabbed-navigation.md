@@ -11,8 +11,8 @@ In this lab you will:
 If we are going to have multiple tabs, we are going to need a place to navigate to. For now, we will just navigate to some blank starter pages. Let's create those now:
 
 ```bash
-$ ionic generate page about
-$ ionic generate page tasting-notes
+ionic generate page about
+ionic generate page tasting-notes
 ```
 
 Once those pages have been generated, be sure to open each of their routing modules and add our Auth Guard to their base routes. For example:
@@ -25,31 +25,7 @@ Once those pages have been generated, be sure to open each of their routing modu
   },
 ```
 
-Also, open the test for each page and do the following:
-
-```diff
---- a/src/app/about/about.page.spec.ts
-+++ b/src/app/about/about.page.spec.ts
-@@ -1,4 +1,4 @@
--import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-+import { waitForAsync, ComponentFixture, TestBed } from '@angular/core/testing';
- import { IonicModule } from '@ionic/angular';
-
- import { AboutPage } from './about.page';
-@@ -7,10 +7,10 @@ describe('AboutPage', () => {
-   let component: AboutPage;
-   let fixture: ComponentFixture<AboutPage>;
-
--  beforeEach(async(() => {
-+  beforeEach(waitForAsync(() => {
-     TestBed.configureTestingModule({
-       declarations: [AboutPage],
--      imports: [IonicModule.forRoot()],
-+      imports: [IonicModule],
-     }).compileComponents();
-
-     fixture = TestBed.createComponent(AboutPage);
-```
+Also, open the test for each page and remove the `forRoot()` from the `IonicModule` import in the `TestBed` configuration object.
 
 ## Tabs
 
@@ -62,7 +38,7 @@ This application will have a small number of distinct sections, so tabs make the
 Before we go any further, we should create the tabs page itself and see how it looks.
 
 ```bash
-$ ionic generate page tabs
+ ionic generate page tabs
 ```
 
 At this point, we can go to the tabs page by manually setting the route via the URL (example: `http://localhost:4200/tabs`) and we can see that the page is not all that interesting yet. Let's fix that now. Remove everything that is currently in `src/app/tabs/tabs.page.html` and replace it with the following markup:

@@ -5,9 +5,9 @@
 Before we can use Identity Vault, we need to install it and update the native projects.
 
 ```Bash
-$ ionic enterprise register --key=YOURPRODUCTKEY
-$ npm i @ionic-enterprise/identity-vault
-$ npx cap update
+ionic enterprise register --key=YOURPRODUCTKEY
+npm i @ionic-enterprise/identity-vault
+npx cap update
 ```
 
 **Note:** if you have already registered your product key using a different app, you can just copy the `.npmrc` file from the other application to this training application. Since this is just a training app, we do not care that you are using your key here and in your production application at the same time.
@@ -45,8 +45,6 @@ import {
   providedIn: 'root',
 })
 export class BrowserVaultService implements IdentityVault {
-  constructor() {}
-
   config = {
     authMode: AuthMode.SecureStorage,
     descriptor: {
@@ -61,9 +59,12 @@ export class BrowserVaultService implements IdentityVault {
     lockAfter: 50000,
   };
 
+  constructor() {}
+
   async unsubscribe(): Promise<void> {}
 
   async clear(): Promise<void> {
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     const { Storage } = Plugins;
     await Storage.clear();
   }
@@ -75,6 +76,7 @@ export class BrowserVaultService implements IdentityVault {
   }
 
   async isInUse(): Promise<boolean> {
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     const { Storage } = Plugins;
     return !!(await Storage.get({ key: 'session' }));
   }
@@ -98,22 +100,26 @@ export class BrowserVaultService implements IdentityVault {
   }
 
   async storeValue(key: string, value: any): Promise<void> {
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     const { Storage } = Plugins;
     await Storage.set({ key, value: JSON.stringify(value) });
   }
 
   async getValue(key: string): Promise<any> {
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     const { Storage } = Plugins;
     const { value } = await Storage.get({ key });
     return JSON.parse(value);
   }
 
   async removeValue(key: string): Promise<void> {
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     const { Storage } = Plugins;
     await Storage.remove({ key });
   }
 
   async getKeys(): Promise<Array<string>> {
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     const { Storage } = Plugins;
     const { keys } = await Storage.keys();
     return keys;

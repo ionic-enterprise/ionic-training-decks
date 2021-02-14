@@ -61,21 +61,21 @@ Make similar changes to your application.
 Before adding any Capacitor platforms, you need to make sure that your application has been built. If it has not been built, the `www` directory will not exist and the attempt to add the platform will fail (ignore the build warnings that are produced, we will fix those later).
 
 ```bash
-$ npm run build
+npm run build
 ```
 
 Now you can add both the Android and iOS platforms.
 
 ```bash
-$ ionic cap add android
-$ ionic cap add ios
+ionic cap add android
+ionic cap add ios
 ```
 
 Once the platforms are added, open the native projects, each in their own IDE.
 
 ```bash
-$ ionic cap open android
-$ ionic cap open ios
+ionic cap open android
+ionic cap open ios
 ```
 
 **Note:** you need to have Android Studio installed if you want to build on Android. You need to be using a Mac that has Xcode properly installed in order to build for iOS.
@@ -85,7 +85,7 @@ $ ionic cap open ios
 Before taking this step, make sure you have `cordova-res` installed globally by typing `cordova-res --version`. If you do not have it instsalled, run the following command:
 
 ```bash
-$ npm i -g cordova-res
+npm i -g cordova-res
 ```
 
 `cordova-res` is a tool that is used to create icon and splash screen images. Despite the name, it can be used both with Apache Cordova and Capacitor applications.
@@ -111,8 +111,8 @@ For this application:
 To generate the required resources and copy them to the native projects, use the following commands:
 
 ```bash
-$ cordova-res ios --skip-config --copy
-$ cordova-res android --skip-config --copy
+cordova-res ios --skip-config --copy
+cordova-res android --skip-config --copy
 ```
 
 These commands will use the source images to produce all of the various images required by the native projects and then copy them to the proper locations.
@@ -139,8 +139,8 @@ At this point, perform an `npm run build` and then open either the Android or iO
 Now that the projects are set up and building properly, you can use Ionic's "live reload" feature if you would like to. This feature allows you to run the application on your device and then rebuild and reload the application on your device as you develop. This is similar to `ionic serve` but is running the application on your device(s) instead of the browser.
 
 ```bash
-$ ionic cap run android --livereload --external
-$ ionic cap run ios --livereload --external
+ionic cap run android --livereload --external
+ionic cap run ios --livereload --external
 ```
 
 These commands start a dev server that monitors changes to the Ionic project, launches the proper IDE, and allows you to run the application on a device. Once that is done, then when you change the Ionic application, it will be rebuilt and reloaded on the device(s).

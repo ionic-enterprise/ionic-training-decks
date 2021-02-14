@@ -13,8 +13,8 @@ A common convension in Angular application is to use a <a href="https://angular.
 Create a shared module, and then create the rating component in the same folder
 
 ```bash
-$ ionic g module shared
-$ ionic g component shared/rating
+ionic g module shared
+ionic g component shared/rating
 ```
 
 The `RatingComponent` will need to be declared and exported in the `SharedModule` so we will then be able to use it elsewhere in the system. We are going to use at least one Ionic Framework component in this module, so be sure to import the `FormsModule` and `IonicModule` as well.
@@ -162,9 +162,7 @@ export class RatingComponent implements ControlValueAccessor {
 
   constructor() {}
 
-  /* tslint:disable:variable-name */
   onChange = (_rating: number) => {};
-  /* tslint:endable:variable-name */
 
   onTouched = () => {};
 
@@ -472,6 +470,7 @@ The first step is to make our private `convert()` method async and then grab the
 
 ```typescript
   private async convert(res: any): Promise<Tea> {
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     const { Storage } = Plugins;
     const rating = await Storage.get({ key: `rating${res.id}` });
     return {
@@ -527,6 +526,7 @@ The code to add to the `TeaService` in order to accomplish this is straight forw
 
 ```typescript
   save(tea: Tea): Promise<void> {
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     const { Storage } = Plugins;
     return Storage.set({
       key: `rating${tea.id}`,
@@ -543,57 +543,36 @@ Be sure to update the mock factory for this service to reflect the new method.
 
 We will need a new action to signify that the user has changed the rating on a tea. Notice that it is tied to this page. Also notice that our `actions.ts` file is getting a little large. We may want to look at reorganizing how that is laid out at some point, but for now let's continue to run with the single file.
 
-```diff
---- a/src/app/store/actions.ts
-+++ b/src/app/store/actions.ts
-@@ -18,6 +18,10 @@ export enum ActionTypes {
-   LogoutFailure = '[Auth API] logout failure',
-
-   UnauthError = '[Auth API] unauthenticated error',
-
-  SessionRestored = '[Vault API] session restored',
-+
-+  TeaDetailsChangeRating = '[Tea Details Page] change rating',
-+  TeaDetailsChangeRatingSuccess = '[Data API] change rating success',
-+  TeaDetailsChangeRatingFailure = '[Data API] change rating failure',
- }
-
- export const initialize = createAction(ActionTypes.Initialize);
-@@ -59,3 +63,16 @@ export const logoutFailure = createAction(
-export const sessionRestored = createAction(
-  ActionTypes.SessionRestored,
-  props<{ session: Session }>(),
+```TypeScript
+export const teaDetailsChangeRating = createAction(
+  '[Tea Details Page] change rating',
+  props<{ tea: Tea; rating: number }>(),
 );
-+
-+export const teaDetailsChangeRating = createAction(
-+  ActionTypes.TeaDetailsChangeRating,
-+  props<{ tea: Tea; rating: number }>(),
-+);
-+export const teaDetailsChangeRatingSuccess = createAction(
-+  ActionTypes.TeaDetailsChangeRatingSuccess,
-+  props<{ tea: Tea }>(),
-+);
-+export const teaDetailsChangeRatingFailure = createAction(
-+  ActionTypes.TeaDetailsChangeRatingFailure,
-+  props<{ errorMessage: string }>(),
-+);
+export const teaDetailsChangeRatingSuccess = createAction(
+  '[Data API] change rating success',
+  props<{ tea: Tea }>(),
+);
+export const teaDetailsChangeRatingFailure = createAction(
+  '[Data API] change rating failure',
+  props<{ errorMessage: string }>(),
+);
 ```
 
 #### Reducer
 
 For the reducer we need to update the state with the updated tea if the rating change succeeded, and with the error message if it failed.
 
-The `src/app/store/reducers/data/data.reducer.spec.ts` file defines some test teas. Add a rating to each. Then add the following test cases. Note that we only need to handle the "success" and "failure" actions (remember to adjust the imports at the top of the test file for the new actions):
+The `src/app/store/reducers/data.reducer.spec.ts` file defines some test teas. Add a rating to each. Then add the following test cases. Note that we only need to handle the "success" and "failure" actions (remember to adjust the imports at the top of the test file for the new actions):
 
 ```TypeScript
   {
-    description: `${ActionTypes.TeaDetailsChangeRatingSuccess}: sets the rating for the tea`,
+    description: 'Tea Details ChangeRating Success: sets the rating for the tea',
     action: teaDetailsChangeRatingSuccess({ tea: {...teas[1], rating: 3} }),
     begin: { teas },
     end: { teas: [teas[0], { ...teas[1], rating: 3 }, teas[2]] },
   },
   {
-    description: `${ActionTypes.TeaDetailsChangeRatingFailure}: sets the error message`,
+    description: 'Tea Details Change Rating Failure: sets the error message',
     action: teaDetailsChangeRatingFailure({ errorMessage: 'The save blew some chunks' }),
     begin: { teas },
     end: { teas, errorMessage: 'The save blew some chunks' },
@@ -641,7 +620,7 @@ The effect that we require is pretty straight forward:
         actions$ = of(teaDetailsChangeRating({ tea: teas[1], rating: 5 }));
         effects.teaRatingChanged$.subscribe(newAction => {
           expect(newAction).toEqual({
-            type: ActionTypes.TeaDetailsChangeRatingSuccess,
+            type: '[Data API] change rating success',
             tea: { ...teas[1], rating: 5 },
           });
           done();
@@ -661,7 +640,7 @@ The effect that we require is pretty straight forward:
         actions$ = of(teaDetailsChangeRating({ tea: teas[1], rating: 5 }));
         effects.teaRatingChanged$.subscribe(newAction => {
           expect(newAction).toEqual({
-            type: ActionTypes.TeaDetailsChangeRatingFailure,
+            type: '[Data API] change rating failure',
             errorMessage: 'private storage is blowing chunks?',
           });
           done();
@@ -707,12 +686,16 @@ Now that everything is fully operational, let's update the `TeaDetailsPage` to u
 
 The first thing we will need to do is get the current rating when we select the tea. We need to do this because we cannot just bind directly to `tea.rating` in our view. The component modifying that value would directly modify the state, and that is not allowed.
 
-Add a rating to our test tea and change the one spy we have to call through so the selector is operational for that test case (before it wasn't realy doing anything, we would could just spy on it').
+Add a rating to our test tea.
 
 ```TypeScript
-        rating: 4
-...
-     spyOn(store, 'select').and.callThrough();
+      store.overrideSelector(selectTea, {
+        id: 7,
+        name: 'White',
+        description: 'Often looks like frosty silver pine needles',
+        image: 'imgs/white.png',
+        rating: 4,
+      });
 ```
 
 Then add a test to verify the initialization of the rating value. Similar to the previously modified test, this is also in the "initialization" describe block

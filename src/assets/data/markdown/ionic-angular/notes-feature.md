@@ -16,6 +16,16 @@ There are a couple of preliminary items that we need to get out of the way first
 
 These are a few things we have done multiple times now, so I will just give you the code to move things along. If you are still unsure on these items, though, please review the code that is provided here.
 
+### Create Some Entities
+
+First let's generate some entities that we are going to need. We will fill these in as we go.
+
+```bash
+ionic g service core/tasting-notes/tasting-notes
+ionic g module tasting-notes/tasting-note-editor
+ionic g component tasting-notes/tasting-note-editor
+```
+
 ### The `TastingNotes` Model
 
 Add the following model in `src/app/models/tasting-note.ts` and make sure to update the `src/app/models/index.ts` accordingly:
@@ -32,8 +42,6 @@ export interface TastingNote {
 ```
 
 ### The `TastingNotes` Service
-
-First create the files: `ionic generate service core/tasting-notes/tasting-notes`
 
 #### Test
 
@@ -168,20 +176,19 @@ export class TastingNotesService {
 import { EMPTY } from 'rxjs';
 import { TastingNotesService } from './tasting-notes.service';
 
-export function createTastingNotesServiceMock() {
-  return jasmine.createSpyObj<TastingNotesService>('TastingNotesService', {
+export const createTastingNotesServiceMock = () =>
+  jasmine.createSpyObj<TastingNotesService>('TastingNotesService', {
     getAll: EMPTY,
     delete: EMPTY,
     save: EMPTY,
   });
-}
 ```
 
 **Important:** remember to update the `src/app/core/[index.ts|testing.ts]` files.
 
 ### Store Updates
 
-There is nothing all that new to learn with the store modifications. We will follow the basic pattern we have laid out thus far where:
+We will follow the basic pattern we have laid out thus far where:
 
 - the page or component dispatches an action
 - that action generally sets a `loading` flag (think of it as a "busy state")
@@ -193,65 +200,49 @@ There is nothing all that new to learn with the store modifications. We will fol
 
 #### Actions
 
-Add the following to the `ActionTypes`:
+Export the following actions:
 
 ```TypeScript
-  NotesPageLoaded = '[Notes Page] loaded',
-  NotesPageDataLoadedSuccess = '[Data API] notes page loaded success',
-  NotesPageDataLoadedFailure = '[Data API] notes page loaded failure',
-
-  NoteSaved = '[Note Editor] note saved',
-  NoteSavedSuccess = '[Data API] note saved success',
-  NoteSavedFailure = '[Data API] note saved failure',
-
-  NoteDeleted = '[Notes Page] note deleted',
-  NoteDeletedSuccess = '[Data API] note deleted success',
-  NoteDeletedFailure = '[Data API] note deleted failure',
-```
-
-And export the following related action functions:
-
-```TypeScript
-export const notesPageLoaded = createAction(ActionTypes.NotesPageLoaded);
+export const notesPageLoaded = createAction('[Notes Page] loaded');
 export const notesPageLoadedSuccess = createAction(
-  ActionTypes.NotesPageDataLoadedSuccess,
+  '[Data API] notes page loaded success',
   props<{ notes: Array<TastingNote> }>(),
 );
 export const notesPageLoadedFailure = createAction(
-  ActionTypes.NotesPageDataLoadedFailure,
+  '[Data API] notes page loaded failure',
   props<{ errorMessage: string }>(),
 );
 
 export const noteSaved = createAction(
-  ActionTypes.NoteSaved,
+  '[Note Editor] note saved',
   props<{ note: TastingNote }>(),
 );
 export const noteSavedSuccess = createAction(
-  ActionTypes.NoteSavedSuccess,
+  '[Data API] note saved success',
   props<{ note: TastingNote }>(),
 );
 export const noteSavedFailure = createAction(
-  ActionTypes.NoteSavedFailure,
+  '[Data API] note saved failure',
   props<{ errorMessage: string }>(),
 );
 
 export const noteDeleted = createAction(
-  ActionTypes.NoteDeleted,
+  '[Notes Page] note deleted',
   props<{ note: TastingNote }>(),
 );
 export const noteDeletedSuccess = createAction(
-  ActionTypes.NoteDeletedSuccess,
+  '[Data API] note deleted success',
   props<{ note: TastingNote }>(),
 );
 export const noteDeletedFailure = createAction(
-  ActionTypes.NoteDeletedFailure,
+  '[Data API] note deleted failure',
   props<{ errorMessage: string }>(),
 );
 ```
 
 #### Reducers
 
-The reducers are also pretty straight forward. We will do this in steps. All of the following modifications are in one of the two following files: `src/app/store/reducers/data/data.reducer.ts` or `src/app/store/reducers/data/data.reducer.spec.ts`
+All of the following modifications are for the `data` reducers. Be sure you are updating the correct reducer related files.
 
 First, we need to add the notes to the state. Add the `notes` property as shown here.
 
@@ -275,7 +266,7 @@ export const initialState: DataState = {
 ...
 ```
 
-Let's add some data to test with. This is towards the top of the file where we have our other test data defined:
+Let's add some data to test with. This is towards the top of the test file, where we have our other test data defined:
 
 ```TypeScript
 import { Session, TastingNote, Tea } from '@app/models';
@@ -313,7 +304,7 @@ We need to update the `LogoutSuccess` portion of the reducer to including the cl
 
 ```TypeScript
   {
-    description: `${ActionTypes.LogoutSuccess}: clears the data`,
+    description: 'Logout Success: clears the data',
     action: logoutSuccess(),
     begin: { teas, notes },
     end: {},
@@ -332,31 +323,31 @@ Then add the new test cases that we need:
 
 ```TypeScript
   {
-    description: `${ActionTypes.NotesPageLoaded}: sets the loading flag and clears any error message`,
+    description: 'Notes Page Loaded: sets the loading flag and clears any error message',
     action: notesPageLoaded(),
     begin: { teas, errorMessage: 'The last thing, it failed' },
     end: { teas, loading: true },
   },
   {
-    description: `${ActionTypes.NotesPageDataLoadedSuccess}: adds the notes / clears the loading flag`,
+    description: 'Notes Page Data Loaded Success: adds the notes / clears the loading flag',
     action: notesPageLoadedSuccess({ notes }),
     begin: { teas, loading: true },
     end: { teas, notes },
   },
   {
-    description: `${ActionTypes.NotesPageDataLoadedFailure}: adds the error message / clears the loading flag`,
+    description: 'Notes Page Data Loaded Failure: adds the error message / clears the loading flag',
     action: notesPageLoadedFailure({ errorMessage: 'Something is borked' }),
     begin: { notes, teas, loading: true },
     end: { notes, teas, errorMessage: 'Something is borked' },
   },
   {
-    description: `${ActionTypes.NoteSaved}: sets the loading flag and clears any error message`,
+    description: 'Note Saved: sets the loading flag and clears any error message',
     action: noteSaved({ note: notes[2] }),
     begin: { notes, teas, errorMessage: 'The last thing, it failed' },
     end: { notes, teas, loading: true },
   },
   {
-    description: `${ActionTypes.NoteSavedSuccess}: updates an existing note`,
+    description: 'Note Saved Success: updates an existing note',
     action: noteSavedSuccess({
       note: { ...notes[2], brand: 'Generic Tea Co.' },
     }),
@@ -367,7 +358,7 @@ Then add the new test cases that we need:
     },
   },
   {
-    description: `${ActionTypes.NoteSavedSuccess}: appends a new note`,
+    description: 'Note Saved Success: appends a new note',
     action: noteSavedSuccess({
       note: {
         id: 999943,
@@ -395,25 +386,25 @@ Then add the new test cases that we need:
     },
   },
   {
-    description: `${ActionTypes.NoteSavedFailure}: adds the error message / clears the loading flag`,
+    description: 'Note Saved Failure: adds the error message / clears the loading flag',
     action: noteSavedFailure({ errorMessage: 'Something is borked' }),
     begin: { notes, teas, loading: true },
     end: { notes, teas, errorMessage: 'Something is borked' },
   },
   {
-    description: `${ActionTypes.NoteDeleted}: sets the loading flag and clears any error message`,
+    description: 'Note Deleted: sets the loading flag and clears any error message',
     action: noteDeleted({ note: notes[0] }),
     begin: { notes, teas, errorMessage: 'The last thing, it failed' },
     end: { notes, teas, loading: true },
   },
   {
-    description: `${ActionTypes.NoteDeletedSuccess}: removes the note`,
+    description: 'Note Deleted Success: removes the note',
     action: noteDeletedSuccess({ note: notes[1] }),
     begin: { notes, teas, loading: true },
     end: { notes: [notes[0], notes[2]], teas },
   },
   {
-    description: `${ActionTypes.NoteDeletedFailure}: adds the error message / clears the loading flag`,
+    description: 'Note Deleted Failure: adds the error message / clears the loading flag',
     action: noteDeletedFailure({ errorMessage: 'Something is borked' }),
     begin: { notes, teas, loading: true },
     end: { notes, teas, errorMessage: 'Something is borked' },
@@ -490,6 +481,36 @@ Finally, add the code to the reducer:
 
 For our tests, we will need some test data as well, so add the same test data that we added to the data recuder tests.
 
+```TypeScript
+const notes: Array<TastingNote> = [
+  {
+    id: 42,
+    brand: 'Lipton',
+    name: 'Green Tea',
+    teaCategoryId: 3,
+    rating: 3,
+    notes: 'A basic green tea, very passable but nothing special',
+  },
+  {
+    id: 314159,
+    brand: 'Lipton',
+    name: 'Yellow Label',
+    teaCategoryId: 2,
+    rating: 1,
+    notes:
+      'Very acidic, even as dark teas go, OK for iced tea, horrible for any other application',
+  },
+  {
+    id: 73,
+    brand: 'Rishi',
+    name: 'Puer Cake',
+    teaCategoryId: 6,
+    rating: 5,
+    notes: 'Smooth and peaty, the king of puer teas',
+  },
+];
+```
+
 We are also going to need to inject the `TastingNotesService` so update the `TestBed` configuration as well:
 
 ```TypeScript
@@ -526,7 +547,7 @@ Once that is in place, we can create test for the following workflows:
         actions$ = of(notesPageLoaded());
         effects.notesPageLoaded$.subscribe(newAction => {
           expect(newAction).toEqual({
-            type: ActionTypes.NotesPageDataLoadedSuccess,
+            type: '[Data API] notes page loaded success',
             notes,
           });
           done();
@@ -546,7 +567,7 @@ Once that is in place, we can create test for the following workflows:
         actions$ = of(notesPageLoaded());
         effects.notesPageLoaded$.subscribe(newAction => {
           expect(newAction).toEqual({
-            type: ActionTypes.NotesPageDataLoadedFailure,
+            type: '[Data API] notes page loaded failure',
             errorMessage: 'Error in data load, check server logs',
           });
           done();
@@ -586,7 +607,7 @@ Once that is in place, we can create test for the following workflows:
         actions$ = of(noteSaved({ note }));
         effects.noteSaved$.subscribe(newAction => {
           expect(newAction).toEqual({
-            type: ActionTypes.NoteSavedSuccess,
+            type: '[Data API] note saved success',
             note: noteWithId,
           });
           done();
@@ -606,7 +627,7 @@ Once that is in place, we can create test for the following workflows:
         actions$ = of(noteSaved({ note }));
         effects.noteSaved$.subscribe(newAction => {
           expect(newAction).toEqual({
-            type: ActionTypes.NoteSavedFailure,
+            type: '[Data API] note saved failure',
             errorMessage: 'Error in data load, check server logs',
           });
           done();
@@ -636,7 +657,7 @@ Once that is in place, we can create test for the following workflows:
         actions$ = of(noteDeleted({ note: notes[1] }));
         effects.noteDeleted$.subscribe(newAction => {
           expect(newAction).toEqual({
-            type: ActionTypes.NoteDeletedSuccess,
+            type: '[Data API] note deleted success',
             note: notes[1]
           });
           done();
@@ -656,7 +677,7 @@ Once that is in place, we can create test for the following workflows:
         actions$ = of(noteDeleted({ note: notes[1] }));
         effects.noteDeleted$.subscribe(newAction => {
           expect(newAction).toEqual({
-            type: ActionTypes.NoteDeletedFailure,
+            type: '[Data API] note deleted failure',
             errorMessage: 'Error in data load, check server logs',
           });
           done();
@@ -750,29 +771,18 @@ export const selectNote = createSelector(
 );
 ```
 
-## Create the Editor Component
+### The Editor Component
 
-Now we are getting into the new stuff. Back to the usual format. 🤓
+#### `src/app/tasting-notes/tasting-note-editor/tasting-note-editor.module.ts`
 
-Let's create a composite component that we can use to create new tasting notes or update existing notes. We will create this new component under the `src/app/tasting-notes` folder since it is going to be specific to the "tasting notes" feature of our application.
-
-```bash
-$ ionic g module tasting-notes/tasting-note-editor
-$ ionic g component tasting-notes/tasting-note-editor
-```
-
-### Update the Editor Module
-
-Notice that we created a module for the editor. Let's update that to declare and export our component. Since we will be creating an editor form using Ionic Framework components as well as our ratings component, we will also modify it to include the following modules in its list of imports: `FormsModule`, `IonicModule`, and `SharedModule`.
-
-```typescript
+```TypeScript
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IonicModule } from '@ionic/angular';
 
-import { TastingNoteEditorComponent } from './tasting-note-editor.component';
 import { SharedModule } from '@app/shared';
+import { TastingNoteEditorComponent } from './tasting-note-editor.component';
 
 @NgModule({
   declarations: [TastingNoteEditorComponent],
@@ -782,15 +792,422 @@ import { SharedModule } from '@app/shared';
 export class TastingNoteEditorModule {}
 ```
 
-Make the same change with regard to the `imports` within the `src/app/tasting-notes/tasting-note-editor/tasting-note-editor.component.spec.ts` where the testing module is configured.
+#### `src/app/tasting-notes/tasting-note-editor/tasting-note-editor.component.spec.ts`
 
-### Hookup the Modal
+```TypeScript
+import { waitForAsync, ComponentFixture, TestBed } from '@angular/core/testing';
+import { FormsModule } from '@angular/forms';
+import { By } from '@angular/platform-browser';
+import { Store } from '@ngrx/store';
+import { MockStore, provideMockStore } from '@ngrx/store/testing';
+import { IonicModule, ModalController } from '@ionic/angular';
 
-The first thing we need to do is get a modal overlay hooked up for the "add a new note" case. This will allow us to test out the component for the modal as we develop it. This will also get the infrastructure for the rest of our modifications in place. We will launch the modal for the "add a new note" scenario from a floating action button on the `TastingNotesPage`.
+import { SharedModule } from '@app/shared';
+import { selectTeas } from '@app/store';
+import { DataState, initialState } from '@app/store/reducers/data.reducer';
+import { createOverlayControllerMock } from '@test/mocks';
+import { TastingNoteEditorComponent } from './tasting-note-editor.component';
+import { noteSaved } from '@app/store/actions';
 
-First we need to set up the test for the `TastingNotesPage`.
+describe('TastingNoteEditorComponent', () => {
+  let component: TastingNoteEditorComponent;
+  let fixture: ComponentFixture<TastingNoteEditorComponent>;
 
-```typescript
+  beforeEach(
+    waitForAsync(() => {
+      TestBed.configureTestingModule({
+        declarations: [TastingNoteEditorComponent],
+        imports: [FormsModule, IonicModule, SharedModule],
+        providers: [
+          provideMockStore<{ data: DataState }>({
+            initialState: { data: initialState },
+          }),
+          {
+            provide: ModalController,
+            useFactory: () => createOverlayControllerMock('ModalController'),
+          },
+        ],
+      }).compileComponents();
+
+      const store = TestBed.inject(Store) as MockStore;
+      store.overrideSelector(selectTeas, [
+        {
+          id: 7,
+          name: 'White',
+          image: 'assets/img/white.jpg',
+          description: 'White tea description.',
+          rating: 5,
+        },
+        {
+          id: 8,
+          name: 'Yellow',
+          image: 'assets/img/yellow.jpg',
+          description: 'Yellow tea description.',
+          rating: 3,
+        },
+      ]);
+
+      fixture = TestBed.createComponent(TastingNoteEditorComponent);
+      component = fixture.componentInstance;
+    }),
+  );
+
+  it('should create', () => {
+    fixture.detectChanges();
+    expect(component).toBeTruthy();
+  });
+
+  describe('initialization', () => {
+    it('binds the tea select', () => {
+      fixture.detectChanges();
+      const sel = fixture.debugElement.query(By.css('ion-select'));
+      const opts = sel.queryAll(By.css('ion-select-option'));
+      expect(opts[0].nativeElement.value).toEqual('7');
+      expect(opts[0].nativeElement.textContent).toEqual('White');
+      expect(opts[1].nativeElement.value).toEqual('8');
+      expect(opts[1].nativeElement.textContent).toEqual('Yellow');
+    });
+
+    describe('without a note', () => {
+      beforeEach(() => {
+        fixture.detectChanges();
+      });
+
+      it('has the add title', () => {
+        const el = fixture.debugElement.query(By.css('ion-title'));
+        expect(el.nativeElement.textContent).toEqual('Add New Tasting Note');
+      });
+
+      it('has the add button label', () => {
+        const footer = fixture.debugElement.query(By.css('ion-footer'));
+        const el = footer.query(By.css('ion-button'));
+        expect(el.nativeElement.textContent).toEqual('Add');
+      });
+    });
+
+    describe('with a note', () => {
+      beforeEach(() => {
+        component.note = {
+          id: 7,
+          brand: 'Lipton',
+          name: 'Yellow Label',
+          notes: 'Overly acidic, highly tannic flavor',
+          rating: 1,
+          teaCategoryId: 3,
+        };
+        fixture.detectChanges();
+      });
+
+      it('sets the properties', () => {
+        expect(component.brand).toEqual('Lipton');
+        expect(component.name).toEqual('Yellow Label');
+        expect(component.notes).toEqual('Overly acidic, highly tannic flavor');
+        expect(component.rating).toEqual(1);
+        expect(component.teaCategoryId).toEqual('3');
+      });
+
+      it('has the update title', () => {
+        const el = fixture.debugElement.query(By.css('ion-title'));
+        expect(el.nativeElement.textContent).toEqual('Tasting Note');
+      });
+
+      it('has the update button label', () => {
+        const footer = fixture.debugElement.query(By.css('ion-footer'));
+        const el = footer.query(By.css('ion-button'));
+        expect(el.nativeElement.textContent).toEqual('Update');
+      });
+    });
+  });
+
+  describe('save', () => {
+    describe('a new note', () => {
+      beforeEach(() => {
+        fixture.detectChanges();
+      });
+
+      it('dispatches the save with the data', () => {
+        const store = TestBed.inject(Store);
+        spyOn(store, 'dispatch');
+        component.brand = 'Lipton';
+        component.name = 'Yellow Label';
+        component.teaCategoryId = '3';
+        component.rating = 1;
+        component.notes = 'ick';
+        component.save();
+        expect(store.dispatch).toHaveBeenCalledTimes(1);
+        expect(store.dispatch).toHaveBeenCalledWith(
+          noteSaved({
+            note: {
+              brand: 'Lipton',
+              name: 'Yellow Label',
+              teaCategoryId: 3,
+              rating: 1,
+              notes: 'ick',
+            },
+          }),
+        );
+      });
+
+      it('dismisses the modal', () => {
+        const modalController = TestBed.inject(ModalController);
+        component.save();
+        expect(modalController.dismiss).toHaveBeenCalledTimes(1);
+      });
+    });
+
+    describe('an existing note', () => {
+      beforeEach(() => {
+        component.note = {
+          id: 73,
+          brand: 'Generic',
+          name: 'White Label',
+          teaCategoryId: 2,
+          rating: 3,
+          notes: 'it is ok',
+        };
+        fixture.detectChanges();
+      });
+
+      it('dispatches the save with the data', () => {
+        const store = TestBed.inject(Store);
+        spyOn(store, 'dispatch');
+        component.brand = 'Lipton';
+        component.name = 'Yellow Label';
+        component.teaCategoryId = '3';
+        component.rating = 1;
+        component.notes = 'ick';
+        component.save();
+        expect(store.dispatch).toHaveBeenCalledTimes(1);
+        expect(store.dispatch).toHaveBeenCalledWith(
+          noteSaved({
+            note: {
+              id: 73,
+              brand: 'Lipton',
+              name: 'Yellow Label',
+              teaCategoryId: 3,
+              rating: 1,
+              notes: 'ick',
+            },
+          }),
+        );
+      });
+
+      it('dismisses the modal', () => {
+        const modalController = TestBed.inject(ModalController);
+        component.save();
+        expect(modalController.dismiss).toHaveBeenCalledTimes(1);
+      });
+    });
+  });
+
+  describe('close', () => {
+    beforeEach(() => {
+      fixture.detectChanges();
+    });
+
+    it('dismisses the modal', () => {
+      const modalController = TestBed.inject(ModalController);
+      component.close();
+      expect(modalController.dismiss).toHaveBeenCalledTimes(1);
+    });
+  });
+});
+```
+
+#### `src/app/tasting-notes/tasting-note-editor/tasting-note-editor.component.ts`
+
+```TypeScript
+import { Component, Input, OnInit } from '@angular/core';
+import { Observable } from 'rxjs';
+import { Store } from '@ngrx/store';
+
+import { TastingNote, Tea } from '@app/models';
+import { selectTeas, State } from '@app/store';
+import { ModalController } from '@ionic/angular';
+import { noteSaved } from '@app/store/actions';
+
+@Component({
+  selector: 'app-tasting-note-editor',
+  templateUrl: './tasting-note-editor.component.html',
+  styleUrls: ['./tasting-note-editor.component.scss'],
+})
+export class TastingNoteEditorComponent implements OnInit {
+  @Input() note: TastingNote;
+
+  brand: string;
+  name: string;
+  teaCategoryId: string;
+  rating: number;
+  notes: string;
+
+  teaCategories$: Observable<Array<Tea>>;
+
+  get title(): string {
+    return this.note ? 'Tasting Note' : 'Add New Tasting Note';
+  }
+
+  get buttonLabel(): string {
+    return this.note ? 'Update' : 'Add';
+  }
+
+  constructor(
+    private modalController: ModalController,
+    private store: Store<State>,
+  ) {}
+
+  ngOnInit() {
+    this.teaCategories$ = this.store.select(selectTeas);
+    if (this.note) {
+      this.brand = this.note.brand;
+      this.name = this.note.name;
+      this.teaCategoryId = this.note.teaCategoryId.toString();
+      this.rating = this.note.rating;
+      this.notes = this.note.notes;
+    }
+  }
+
+  close() {
+    this.modalController.dismiss();
+  }
+
+  save() {
+    const note: TastingNote = {
+      brand: this.brand,
+      name: this.name,
+      teaCategoryId: parseInt(this.teaCategoryId, 10),
+      rating: this.rating,
+      notes: this.notes,
+    };
+
+    if (this.note) {
+      note.id = this.note.id;
+    }
+
+    this.store.dispatch(noteSaved({ note }));
+    this.modalController.dismiss();
+  }
+}
+```
+
+#### `src/app/tasting-notes/tasting-note-editor/tasting-note-editor.component.html`
+
+```html
+<ion-header>
+  <ion-toolbar>
+    <ion-title>{{ title }}</ion-title>
+    <ion-buttons slot="primary">
+      <ion-button id="cancel-button" (click)="close()">
+        <ion-icon slot="icon-only" name="close"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <form #notesEditorForm="ngForm">
+    <ion-item>
+      <ion-label position="floating">Brand</ion-label>
+      <ion-input
+        id="brand-input"
+        name="brand"
+        [(ngModel)]="brand"
+        #brandInput="ngModel"
+        required
+      ></ion-input>
+    </ion-item>
+    <ion-item>
+      <ion-label position="floating">Name</ion-label>
+      <ion-input
+        id="name-input"
+        name="name"
+        [(ngModel)]="name"
+        #nameInput="ngModel"
+        required
+      ></ion-input>
+    </ion-item>
+    <ion-item>
+      <ion-label>Type</ion-label>
+      <ion-select
+        name="tea-type-select"
+        [(ngModel)]="teaCategoryId"
+        #teaTypeSelect="ngModel"
+        required
+      >
+        <ion-select-option
+          *ngFor="let t of teaCategories$ | async"
+          value="{{ t.id }}"
+          >{{ t.name }}</ion-select-option
+        >
+      </ion-select>
+    </ion-item>
+    <ion-item>
+      <ion-label>Rating</ion-label>
+      <app-rating
+        [(ngModel)]="rating"
+        id="rating-input"
+        name="rating"
+        #ratingInput="ngModel"
+        required
+      ></app-rating>
+    </ion-item>
+    <ion-item>
+      <ion-label position="floating">Notes</ion-label>
+      <ion-textarea
+        id="notes-textbox"
+        name="notes"
+        [(ngModel)]="notes"
+        #notesInput="ngModel"
+        rows="5"
+        required
+      ></ion-textarea>
+    </ion-item>
+  </form>
+</ion-content>
+
+<ion-footer>
+  <ion-toolbar>
+    <ion-button
+      expand="full"
+      [disabled]="!notesEditorForm.form.valid"
+      (click)="save()"
+      >{{ buttonLabel }}</ion-button
+    >
+  </ion-toolbar>
+</ion-footer>
+```
+
+### List the Notes
+
+#### `src/app/tasting-notes/tasting-notes.page.html`
+
+```html
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-title>Tasting Notes</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <ion-header collapse="condense">
+    <ion-toolbar>
+      <ion-title size="large">Tasting Notes</ion-title>
+    </ion-toolbar>
+  </ion-header>
+
+  <ion-list>
+    <ion-item *ngFor="let note of notes$ | async">
+      <ion-label>
+        <div>{{ note.brand }}</div>
+        <div>{{ note.name }}</div>
+      </ion-label>
+    </ion-item>
+  </ion-list>
+</ion-content>
+```
+
+#### `src/app/tasting-notes/tasting-notes.page.spec.ts`
+
+```TypeScript
 import {
   waitForAsync,
   ComponentFixture,
@@ -799,20 +1216,21 @@ import {
   tick,
 } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
-import { IonicModule, IonRouterOutlet, ModalController } from '@ionic/angular';
+import { Store } from '@ngrx/store';
+import { MockStore, provideMockStore } from '@ngrx/store/testing';
+import { IonicModule } from '@ionic/angular';
 
-import {
-  createOverlayControllerMock,
-  createOverlayElementMock,
-} from '@test/mocks';
-import { TastingNoteEditorComponent } from './tasting-note-editor/tasting-note-editor.component';
-import { TastingNoteEditorModule } from './tasting-note-editor/tasting-note-editor.module';
+import { DataState, initialState } from '@app/store/reducers/data.reducer';
 import { TastingNotesPage } from './tasting-notes.page';
+import { selectNotes } from '@app/store';
+import { TastingNote } from '@app/models';
+import { notesPageLoaded } from '@app/store/actions';
 
 describe('TastingNotesPage', () => {
   let component: TastingNotesPage;
   let fixture: ComponentFixture<TastingNotesPage>;
   let modal: HTMLIonModalElement;
+  let testData: Array<TastingNote>;
 
   const mockRouterOutlet = {
     nativeEl: {},
@@ -820,6 +1238,127 @@ describe('TastingNotesPage', () => {
 
   beforeEach(
     waitForAsync(() => {
+      initializeTestData();
+      TestBed.configureTestingModule({
+        declarations: [TastingNotesPage],
+        imports: [IonicModule],
+        providers: [
+          provideMockStore<{ data: DataState }>({
+            initialState: { data: initialState },
+          }),
+        ],
+      }).compileComponents();
+
+      const store = TestBed.inject(Store) as MockStore;
+      store.overrideSelector(selectNotes, testData);
+
+      fixture = TestBed.createComponent(TastingNotesPage);
+      component = fixture.componentInstance;
+    }),
+  );
+
+  it('should create', () => {
+    expect(component).toBeTruthy();
+  });
+
+  describe('initialization', () => {
+    it('dispatches notes page loaded', () => {
+      const store = TestBed.inject(Store);
+      spyOn(store, 'dispatch');
+      fixture.detectChanges();
+      expect(store.dispatch).toHaveBeenCalledTimes(1);
+      expect(store.dispatch).toHaveBeenCalledWith(notesPageLoaded());
+    });
+
+    it('displays the notes', () => {
+      fixture.detectChanges();
+      const items = fixture.debugElement.queryAll(By.css('ion-item'));
+      expect(items.length).toEqual(2);
+      expect(items[0].nativeElement.textContent).toContain('Bently');
+      expect(items[1].nativeElement.textContent).toContain('Lipton');
+    });
+  });
+
+  const click = (button: HTMLElement) => {
+    const event = new Event('click');
+    button.dispatchEvent(event);
+    fixture.detectChanges();
+  }
+
+  const initializeTestData = () => {
+    testData = [
+      {
+        id: 73,
+        brand: 'Bently',
+        name: 'Brown Label',
+        notes: 'Essentially OK',
+        rating: 3,
+        teaCategoryId: 2,
+      },
+      {
+        id: 42,
+        brand: 'Lipton',
+        name: 'Yellow Label',
+        notes: 'Overly acidic, highly tannic flavor',
+        rating: 1,
+        teaCategoryId: 3,
+      },
+    ];
+  }
+});
+```
+
+#### `src/app/tasting-notes/tasting-notes.page.ts`
+
+```TypeScript
+import { Component, OnInit } from '@angular/core';
+import { Observable } from 'rxjs';
+import { Store } from '@ngrx/store';
+
+import { TastingNote } from '@app/models';
+import { selectNotes, State } from '@app/store';
+import { notesPageLoaded } from '@app/store/actions';
+
+@Component({
+  selector: 'app-tasting-notes',
+  templateUrl: './tasting-notes.page.html',
+  styleUrls: ['./tasting-notes.page.scss'],
+})
+export class TastingNotesPage implements OnInit {
+  notes$: Observable<Array<TastingNote>>;
+
+  constructor(
+    private store: Store<State>,
+  ) {}
+
+  ngOnInit() {
+    this.store.dispatch(notesPageLoaded());
+    this.notes$ = this.store.select(selectNotes);
+  }
+}
+```
+
+## Using the Notes Editor
+
+Now we are getting into the new stuff. Back to the usual format. 🤓
+
+We are going to use the Notes Editor in a modal in order to accomplish two different tasks:
+
+- adding a new note
+- updating an existing note
+
+With that in mind, let's update the test and the view model so we can inject the items that we will require. **Note:** adding the proper `import` statements is left as an exercise for the reader.
+
+In `src/app/tasting-notes/tasting-notes.page.spec.ts`, update the `TestBed` configuration to provide the `ModalController` and the `IonRouterOutlet`. The full `beforeEach` should look something like the following. **Do not** copy past this in. Instead just add the parts you don't have, using the auto-complete and auto-import features of your editor to get the proper `import` statements added for you. Here is a synopsis of the changes:
+
+- create a mock for the modal element
+- import the `TastingNoteEditorModule`
+- provide mocks for the `IonRouterOutlet` and `ModalController`
+
+```TypeScript
+  beforeEach(
+    waitForAsync(() => {
+      initializeTestData();
       modal = createOverlayElementMock('Modal');
       TestBed.configureTestingModule({
         declarations: [TastingNotesPage],
@@ -831,19 +1370,58 @@ describe('TastingNotesPage', () => {
               createOverlayControllerMock('ModalController', modal),
           },
           { provide: IonRouterOutlet, useValue: mockRouterOutlet },
+          provideMockStore<{ data: DataState }>({
+            initialState: { data: initialState },
+          }),
         ],
       }).compileComponents();
 
+      const store = TestBed.inject(Store) as MockStore;
+      store.overrideSelector(selectNotes, testData);
+
       fixture = TestBed.createComponent(TastingNotesPage);
       component = fixture.componentInstance;
-      fixture.detectChanges();
     }),
   );
+```
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
+In `src/app/tasting-notes/tasting-notes.page.ts` inject the same items that we just set up providers for:
 
+```TypeScript
+  constructor(
+    private modalController: ModalController,
+    private routerOutlet: IonRouterOutlet,
+    private store: Store<State>,
+  ) {}
+```
+
+Finally, in `src/app/tasting-notes/tasting-notes.module.ts`, add `TastingNoteEditorModule` to the imports list:
+
+```TypeScript
+  imports: [
+    CommonModule,
+    FormsModule,
+    IonicModule,
+    TastingNoteEditorModule,
+    TastingNotesPageRoutingModule,
+  ],
+```
+
+### Add a New Note
+
+Adding a new node will be handled via a <a href="https://ionicframework.com/docs/api/fab" target="_blank">floating action button</a>. Add the following markup to the tasting notes page HTML within the `ion-content`:
+
+```html
+<ion-fab vertical="bottom" horizontal="end" slot="fixed">
+  <ion-fab-button data-testid="add-new-button" (click)="newNote()">
+    <ion-icon name="add"></ion-icon>
+  </ion-fab-button>
+</ion-fab>
+```
+
+In our test, we will verify that the modal is properly opened:
+
+```TypeScript
   describe('add new note', () => {
     beforeEach(() => {
       fixture.detectChanges();
@@ -873,51 +1451,11 @@ describe('TastingNotesPage', () => {
       expect(modal.present).toHaveBeenCalledTimes(1);
     }));
   });
-
-  function click(button: HTMLElement) {
-    const event = new Event('click');
-    button.dispatchEvent(event);
-    fixture.detectChanges();
-  }
-});
 ```
 
-From here, the code and the markup are pretty easy:
+The code required to perform this action is:
 
-```html
-<ion-header>
-  <ion-toolbar>
-    <ion-title>Tasting Notes</ion-title>
-  </ion-toolbar>
-</ion-header>
-
-<ion-content>
-  <ion-fab vertical="bottom" horizontal="end" slot="fixed">
-    <ion-fab-button data-testid="add-new-button" (click)="newNote()">
-      <ion-icon name="add"></ion-icon>
-    </ion-fab-button>
-  </ion-fab>
-</ion-content>
-```
-
-```typescript
-import { Component, OnInit } from '@angular/core';
-import { IonRouterOutlet, ModalController } from '@ionic/angular';
-import { TastingNoteEditorComponent } from './tasting-note-editor/tasting-note-editor.component';
-
-@Component({
-  selector: 'app-tasting-notes',
-  templateUrl: './tasting-notes.page.html',
-  styleUrls: ['./tasting-notes.page.scss'],
-})
-export class TastingNotesPage implements OnInit {
-  constructor(
-    private modalController: ModalController,
-    private routerOutlet: IonRouterOutlet,
-  ) {}
-
-  ngOnInit() {}
-
+```TypeScript
   async newNote(): Promise<void> {
     const modal = await this.modalController.create({
       component: TastingNoteEditorComponent,
@@ -927,547 +1465,54 @@ export class TastingNotesPage implements OnInit {
     });
     modal.present();
   }
-}
 ```
 
-Also add the `TastingNoteEditorModule` to the imports list within the `TastingNotesPageModule`. This will make the `TastingNoteEditorComponent` available for use in our modal overlay.
+When you click on the FAB button, you should be able to add a tasting note. Check that out to determine if it works.
 
-```diff
---- a/src/app/tasting-notes/tasting-notes.module.ts
-+++ b/src/app/tasting-notes/tasting-notes.module.ts
-@@ -6,6 +6,7 @@ import { IonicModule } from '@ionic/angular';
+### Edit an Existing Note
 
- import { TastingNotesPageRoutingModule } from './tasting-notes-routing.module';
+The modal editor component handles editing an existing note by binding the `note` property to the note to be edited when the modal is created. Let's change the code to support that.
 
-+import { TastingNoteEditorModule } from './tasting-note-editor/tasting-note-editor.module';
- import { TastingNotesPage } from './tasting-notes.page';
-
- @NgModule({
-@@ -13,6 +14,7 @@ import { TastingNotesPage } from './tasting-notes.page';
-     CommonModule,
-     FormsModule,
-     IonicModule,
-+    TastingNoteEditorModule,
-     TastingNotesPageRoutingModule,
-   ],
-   declarations: [TastingNotesPage],
-```
-
-### Create the Editor Component
-
-#### Basic Layout
-
-Let's switch bach to our editor component and start laying out the basics of our form. We know what we will need a header section with a title, a footer secion with a button, and that the content will be our form. So let's start there:
+Find the `ion-item` that displays each note in the list and add the following event binding:
 
 ```html
-<ion-header>
-  <ion-toolbar>
-    <ion-title>Add New Tasting Note</ion-title>
-    <ion-buttons slot="primary">
-      <ion-button id="cancel-button" (click)="close()">
-        <ion-icon slot="icon-only" name="close"></ion-icon>
-      </ion-button>
-    </ion-buttons>
-  </ion-toolbar>
-</ion-header>
-
-<ion-content>
-  <form #notesEditorForm="ngForm"></form>
-</ion-content>
-
-<ion-footer>
-  <ion-toolbar>
-    <ion-button expand="full" [disabled]="!notesEditorForm.form.valid"
-      >Add</ion-button
-    >
-  </ion-toolbar>
-</ion-footer>
+<ion-item (click)="updateNote(note)" ...> ... </ion-item>
 ```
 
-Let's start filling out that form. We already have one simple form. The `LoginPage`. It looks like over there we used a list of inputs. We will need something like that, so let's use that as a model for the first couple of input fields here. All of the following items will go inside the `form` element:
+Now we can add a set of tests:
 
-```html
-<ion-item>
-  <ion-label position="floating">Brand</ion-label>
-  <ion-input
-    id="brand-input"
-    name="brand"
-    [(ngModel)]="brand"
-    #brandInput="ngModel"
-    required
-  ></ion-input>
-</ion-item>
-<ion-item>
-  <ion-label position="floating">Name</ion-label>
-  <ion-input
-    id="name-input"
-    name="name"
-    [(ngModel)]="name"
-    #nameInput="ngModel"
-    required
-  ></ion-input>
-</ion-item>
-```
-
-We need a way to select the type of tea that we have:
-
-```html
-<ion-item>
-  <ion-label>Type</ion-label>
-  <ion-select
-    name="tea-type-select"
-    [(ngModel)]="teaCategoryId"
-    #teaTypeSelect="ngModel"
-    required
-  >
-    <ion-select-option
-      *ngFor="let t of teaCategories$ | async"
-      value="{{ t.id }}"
-      >{{ t.name }}</ion-select-option
-    >
-  </ion-select>
-</ion-item>
-```
-
-A rating
-
-```html
-<ion-item>
-  <ion-label>Rating</ion-label>
-  <app-rating
-    [(ngModel)]="rating"
-    id="rating-input"
-    name="rating"
-    #ratingInput="ngModel"
-    required
-  ></app-rating>
-</ion-item>
-```
-
-A text area for some free-form notes on the tea we just tasted:
-
-```html
-<ion-item>
-  <ion-label position="floating">Notes</ion-label>
-  <ion-textarea
-    id="notes-textbox"
-    name="notes"
-    [(ngModel)]="notes"
-    #notesInput="ngModel"
-    rows="5"
-    required
-  ></ion-textarea>
-</ion-item>
-```
-
-That looks pretty good so far.
-
-#### Hooking it Up
-
-We will now turn our attention to the `src/app/tasting-notes/tasting-note-editor/tasting-note-editor.component.spec.ts` and `src/app/tasting-notes/tasting-note-editor/tasting-note-editor.component.ts` files.
-
-##### Properties
-
-First, we have a lot of `[(ngModel)]` bindings. We need to declare the properties for these:
-
-```typescript
-  brand: string;
-  name: string;
-  teaCategoryId: string;
-  rating: number;
-  notes: string;
-
-  teaCategories$: Observable<Array<Tea>>;
-```
-
-Note that the `teaCategoryId` is a string even though in reality it is a number. The reason for this is because the values in the select always bind as a string due to how HTML attributes work, so we will need to convert this to a number when we do the save.
-
-##### Initialization
-
-The only initialization we need at this point is to set up the `teaCategories$` observable such that our `ion-select` is bound properly.
-
-###### Test
-
-```typescript
-import { By } from '@angular/platform-browser';
-...
-import { MockStore, provideMockStore } from '@ngrx/store/testing';
-...
-import { DataState, initialState } from '@app/store/reducers/data/data.reducer';
-...
-import { Store } from '@ngrx/store';
-import { selectTeas } from '@app/store';
-...
-  beforeEach(
-    waitForAsync(() => {
-      TestBed.configureTestingModule({
-        declarations: [TastingNoteEditorComponent],
-        imports: [FormsModule, IonicModule, SharedModule],
-        providers: [
-          provideMockStore<{ data: DataState }>({
-            initialState: { data: initialState },
-          }),
-        ],
-      }).compileComponents();
-
-      const store = TestBed.inject(Store) as MockStore;
-      store.overrideSelector(selectTeas, [
-        {
-          id: 7,
-          name: 'White',
-          image: 'assets/img/white.jpg',
-          description: 'White tea description.',
-          rating: 5,
-        },
-        {
-          id: 8,
-          name: 'Yellow',
-          image: 'assets/img/yellow.jpg',
-          description: 'Yellow tea description.',
-          rating: 3,
-        },
-      ]);
-
-      fixture = TestBed.createComponent(TastingNoteEditorComponent);
-      component = fixture.componentInstance;
+```TypeScript
+  describe('update an existing note', () => {
+    beforeEach(() => {
       fixture.detectChanges();
-    }),
-  );
-...
-  describe('initialization', () => {
-    it('binds the tea select', () => {
-      const sel = fixture.debugElement.query(By.css('ion-select'));
-      const opts = sel.queryAll(By.css('ion-select-option'));
-      expect(opts[0].nativeElement.value).toEqual('7');
-      expect(opts[0].nativeElement.textContent).toEqual('White');
-      expect(opts[1].nativeElement.value).toEqual('8');
-      expect(opts[1].nativeElement.textContent).toEqual('Yellow');
     });
-  });
-...
- });
-```
 
-###### Code
-
-The population of the `ion-select-option` values is handled via `*ngFor="let t of teaCategories$ | async"` so all we need to do at this point is assign the `teaCategories$` observable. You will need to inject the `TeaService`.
-
-```typescript
-  constructor(private store: Store<State>) {}
-
-  ngOnInit() {
-    this.teaCategories$ = this.store.select(selectTeas);
-  }
-
-```
-
-##### Perform the Add
-
-The add is relativily easy. Create a tea object using the properties, dispatch `noteSaved`, and close the modal.
-
-###### Test
-
-First update the `TestBed` to provide the `ModalController`. You should have a good set of examples of how to do this, so no code is provided here.
-
-Once that is in place, here is the code for the tests:
-
-```typescript
-describe('save', () => {
-  it('dispatches the save with the data', () => {
-    const store = TestBed.inject(Store);
-    spyOn(store, 'dispatch');
-    component.brand = 'Lipton';
-    component.name = 'Yellow Label';
-    component.teaCategoryId = '3';
-    component.rating = 1;
-    component.notes = 'ick';
-    component.save();
-    expect(store.dispatch).toHaveBeenCalledTimes(1);
-    expect(store.dispatch).toHaveBeenCalledWith(
-      noteSaved({
-        note: {
-          brand: 'Lipton',
-          name: 'Yellow Label',
-          teaCategoryId: 3,
-          rating: 1,
-          notes: 'ick',
-        },
-      }),
-    );
-  });
-
-  it('dismisses the modal', () => {
-    const modalController = TestBed.inject(ModalController);
-    component.save();
-    expect(modalController.dismiss).toHaveBeenCalledTimes(1);
-  });
-});
-```
-
-**Note:** these tests call the `component.save()` directly. If we wanted to be more complete we could add a helper function to do a button click, get the "Add" button, and perform a click on it. Exapanding the test in such a way is left as an exercise for the reader to do on their own. We have examples of such tests on several page components.
-
-###### Code
-
-You will first need to inject the appropriate services, then the following code will need to be written:
-
-```typescript
-  save() {
-    this.store.dispatch(
-      noteSaved({
-        note: {
-          brand: this.brand,
-          name: this.name,
-          teaCategoryId: parseInt(this.teaCategoryId, 10),
-          rating: this.rating,
-          notes: this.notes,
-        },
-      }),
-    );
-    this.modalController.dismiss();
-  }
-```
-
-###### Markup
-
-Modify the HTML for the component to hook up the `(click)` event on the button in the footer to the `save()` method we just created.
-
-```html
-<ion-footer>
-  <ion-toolbar>
-    <ion-button
-      expand="full"
-      [disabled]="!notesEditorForm.form.valid"
-      (click)="save()"
-      >Add</ion-button
-    >
-  </ion-toolbar>
-</ion-footer>
-```
-
-##### Close the Modal
-
-We have an 'X' icon in the toolbar that allows users to close the dialog if they cannot swipe to close. The test and code is very easy since all it needs to do is dismiss the modal without saving anything.
-
-###### Test
-
-```typescript
-describe('close', () => {
-  it('dismisses the modal', () => {
-    const modalController = TestBed.inject(ModalController);
-    component.close();
-    expect(modalController.dismiss).toHaveBeenCalledTimes(1);
-  });
-});
-```
-
-###### Code
-
-```typescript
-  close() {
-    this.modalController.dismiss();
-  }
-```
-
-## List the Notes
-
-We can add notes all day long, but we cannot see them. Let's shift back to the `TastingNotesPage` and do a little work. Basically, when we come into the page, we want to display the existing notes in a simple list, so we will need to get them.
-
-### Test
-
-First we need to provide a mock for the `Store` and configure it to return some basic test data from the `selectNotes` selector.
-
-```typescript
-  // add this up by the other declarations...
-  let testData: Array<TastingNote>;
-  ...
-
-  // Most of this already exists, add the bits that do not
-  beforeEach(
-    waitForAsync(() => {
-      initializeTestData();
-      modal = createOverlayElementMock('Modal');
-      TestBed.configureTestingModule({
-        declarations: [TastingNotesPage],
-        imports: [IonicModule, TastingNoteEditorModule],
-        providers: [
-          {
-            provide: ModalController,
-            useFactory: () =>
-              createOverlayControllerMock('ModalController', modal),
-          },
-          { provide: IonRouterOutlet, useValue: mockRouterOutlet },
-          provideMockStore<{ data: DataState }>({
-            initialState: { data: initialState },
-          }),
-        ],
-      }).compileComponents();
-
-      const store = TestBed.inject(Store) as MockStore;
-      store.overrideSelector(selectNotes, testData);
-
-      fixture = TestBed.createComponent(TastingNotesPage);
-      component = fixture.componentInstance;
-    }),
-  );
-
-  ...
-
-  // add this function at the end of the main describe()
-  function initializeTestData() {
-    testData = [
-      {
-        id: 73,
-        brand: 'Bently',
-        name: 'Brown Label',
-        notes: 'Essentially OK',
-        rating: 3,
-        teaCategoryId: 2,
-      },
-      {
-        id: 42,
-        brand: 'Lipton',
-        name: 'Yellow Label',
-        notes: 'Overly acidic, highly tannic flavor',
-        rating: 1,
-        teaCategoryId: 3,
-      },
-    ];
-  }
-```
-
-Then we can create simple test to ensure our list is displayed properly.
-
-```typescript
-describe('initialization', () => {
-  it('dispatches notes page loaded', () => {
-    const store = TestBed.inject(Store);
-    spyOn(store, 'dispatch');
-    fixture.detectChanges();
-    expect(store.dispatch).toHaveBeenCalledTimes(1);
-    expect(store.dispatch).toHaveBeenCalledWith(notesPageLoaded());
-  });
-
-  it('displays the notes', () => {
-    fixture.detectChanges();
-    const items = fixture.debugElement.queryAll(By.css('ion-item'));
-    expect(items.length).toEqual(2);
-    expect(items[0].nativeElement.textContent).toContain('Bently');
-    expect(items[1].nativeElement.textContent).toContain('Lipton');
-  });
-});
-```
-
-### Code
-
-```typescript
-...
-  notes$: Observable<Array<TastingNote>>;
-
-  constructor(
-    private modalController: ModalController,
-    private routerOutlet: IonRouterOutlet,
-    private store: Store,
-  ) {}
-
-  ngOnInit() {
-    this.store.dispatch(notesPageLoaded());
-    this.notes$ = this.store.select(selectNotes);
-  }
-...
-```
-
-### HTML
-
-For the Tasting Notes page, we could just add a simple list, but now that we have a potentially scrollable list here, it would be nice to also use the collapsable large title. Since that is a little more complex to add, here is the whole markup:
-
-```html
-<ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-title>Tasting Notes</ion-title>
-  </ion-toolbar>
-</ion-header>
-
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">Tasting Notes</ion-title>
-    </ion-toolbar>
-  </ion-header>
-
-  <ion-list>
-    <ion-item *ngFor="let note of notes$ | async">
-      <ion-label>
-        <div>{{ note.brand }}</div>
-        <div>{{ note.name }}</div>
-      </ion-label>
-    </ion-item>
-  </ion-list>
-
-  <ion-fab vertical="bottom" horizontal="end" slot="fixed">
-    <ion-fab-button data-testid="add-new-button" (click)="newNote()">
-      <ion-icon name="add"></ion-icon>
-    </ion-fab-button>
-  </ion-fab>
-</ion-content>
-```
-
-## Edit a Note
-
-It would be nice to be able to go back and either view or modify notes that we had previously made.
-
-### Bind the List Item
-
-Each note that we have is represented by an item in the list. We can bind each of those items to a method called `updateNote()` in order to open that note in the modal.
-
-#### HTML
-
-```html
-<ion-item *ngFor="let note of notes$ | async" (click)="updateNote(note)">
-  <ion-label>
-    <div>{{ note.brand }}</div>
-    <div>{{ note.name }}</div>
-  </ion-label>
-</ion-item>
-```
-
-#### Tests
-
-This tests will be almost identical to the `newNote()` tests with the exception that we will pass a note to the modal component.Also, the element being clicked is different.
-
-```typescript
-describe('update an existing note', () => {
-  beforeEach(() => {
-    fixture.detectChanges();
-  });
-
-  it('creates the editor modal', () => {
-    const modalController = TestBed.inject(ModalController);
-    const item = fixture.debugElement.query(By.css('ion-item')).nativeElement;
-    click(item);
-    expect(modalController.create).toHaveBeenCalledTimes(1);
-    expect(modalController.create).toHaveBeenCalledWith({
-      component: TastingNoteEditorComponent,
-      backdropDismiss: false,
-      swipeToClose: true,
-      presentingElement: mockRouterOutlet.nativeEl as any,
-      componentProps: { note: testData[0] },
+    it('creates the editor modal', () => {
+      const modalController = TestBed.inject(ModalController);
+      const item = fixture.debugElement.query(By.css('ion-item')).nativeElement;
+      click(item);
+      expect(modalController.create).toHaveBeenCalledTimes(1);
+      expect(modalController.create).toHaveBeenCalledWith({
+        component: TastingNoteEditorComponent,
+        backdropDismiss: false,
+        swipeToClose: true,
+        presentingElement: mockRouterOutlet.nativeEl as any,
+        componentProps: { note: testData[0] },
+      });
     });
-  });
 
-  it('displays the editor modal', fakeAsync(() => {
-    const item = fixture.debugElement.query(By.css('ion-item')).nativeElement;
-    click(item);
-    tick();
-    expect(modal.present).toHaveBeenCalledTimes(1);
-  }));
-});
+    it('displays the editor modal', fakeAsync(() => {
+      const item = fixture.debugElement.query(By.css('ion-item')).nativeElement;
+      click(item);
+      tick();
+      expect(modal.present).toHaveBeenCalledTimes(1);
+    }));
+  });
 ```
 
-#### Code
+The quick and dirty way to get this test to pass is to copy the `newNote()` method and add the note property binding to it as such:
 
-For our first cut at this, we can just copy-paste `newNote()` and update a couple of things:
-
-```typescript
+```TypeScript
   async updateNote(note: TastingNote): Promise<void> {
     const modal = await this.modalController.create({
       component: TastingNoteEditorComponent,
@@ -1476,291 +1521,37 @@ For our first cut at this, we can just copy-paste `newNote()` and update a coupl
       presentingElement: this.routerOutlet.nativeEl,
       componentProps: { note },
     });
-    await modal.present();
-    await modal.onDidDismiss();
-    this.refresh.next();
+    modal.present();
   }
 ```
 
-**Challenge:** Refactor your code (just the code, not the tests) so it does not repeat so much.
-
-### Modify the Editor
-
-What we have "works" in that it displays the editor, but it doesn't load the note for editing. The next thing we will need to do is expand the capabilities of the editor a bit. We will need to modify the editor such that:
-
-- It can have a note to edit passed to it
-- If it has a note passed to it, it initiailizes the bound properties based on that note
-- It should have a different title and different button text based on whether or not a note is passed
-
-All of the following modifications will be to the `tasting-note-editor.component` spec and ts files.
-
-#### Pass the Note
-
-First we will need a mechanism to pass the note:
-
-```typescript
-@Input() note: TastingNote;
-```
-
-Now that we have the note property, if it is set at the time that the component is initialized, then we need to unpack it.
-
-##### Tests
-
-Before we write this test, we will need to take control of when we do the initialization. To do this, remove the call to `fixture.detectChanges()` from the main `beforeEach()`. Instead, call it at the start of each test like this:
-
-```typescript
-it('should create', () => {
-  fixture.detectChanges();
-  expect(component).toBeTruthy();
-});
-```
-
-Or, in test sets where we do not need fine control, within a `beforeEach()` like this:
+But that is a lot of repeated code with just a one line difference. Let's refactor that a bit:
 
 ```TypeScript
-  describe('save', () => {
-    beforeEach(() => {
-      fixture.detectChanges();
-    });
-    ...
-  });
-```
-
-This will allow us to set up data before the `ngOnInit()` call is made.
-
-Finally, add the following test the the "initialization" set of tests:
-
-```typescript
-describe('with a note', () => {
-  beforeEach(() => {
-    component.note = {
-      id: 7,
-      brand: 'Lipton',
-      name: 'Yellow Label',
-      notes: 'Overly acidic, highly tannic flavor',
-      rating: 1,
-      teaCategoryId: 3,
-    };
-    fixture.detectChanges();
-  });
-
-  it('sets the properties', () => {
-    expect(component.brand).toEqual('Lipton');
-    expect(component.name).toEqual('Yellow Label');
-    expect(component.notes).toEqual('Overly acidic, highly tannic flavor');
-    expect(component.rating).toEqual(1);
-    expect(component.teaCategoryId).toEqual('3');
-  });
-});
-```
-
-##### Code
-
-```typescript
-  ngOnInit() {
-    this.teaCategories$ = this.store.select(selectTeas);
-    if (this.note) {
-      this.brand = this.note.brand;
-      this.name = this.note.name;
-      this.teaCategoryId = this.note.teaCategoryId.toString();
-      this.rating = this.note.rating;
-      this.notes = this.note.notes;
-    }
+  async newNote(): Promise<void> {
+    return this.displayEditor();
   }
-```
 
-#### Save the Updates
+  async updateNote(note: TastingNote): Promise<void> {
+    return this.displayEditor(note);
+  }
 
-Now when the user clicks the button at the bottom of the editor, we want to save the modifications, but with the ID from the original note (the save when adding does not have an ID).
-
-##### Tests
-
-The technique used here is to wrap the existing "save" tests in a child `describe()` with the label "a new note". You can then copy that whole section, rename it "an existing note", and change the tests slightly to reflect the new requirements. When you are done, the full set of tests looks like this:
-
-```typescript
-describe('save', () => {
-  describe('a new note', () => {
-    beforeEach(() => {
-      fixture.detectChanges();
-    });
-
-    it('dispatches the save with the data', () => {
-      const store = TestBed.inject(Store);
-      spyOn(store, 'dispatch');
-      component.brand = 'Lipton';
-      component.name = 'Yellow Label';
-      component.teaCategoryId = '3';
-      component.rating = 1;
-      component.notes = 'ick';
-      component.save();
-      expect(store.dispatch).toHaveBeenCalledTimes(1);
-      expect(store.dispatch).toHaveBeenCalledWith(
-        noteSaved({
-          note: {
-            brand: 'Lipton',
-            name: 'Yellow Label',
-            teaCategoryId: 3,
-            rating: 1,
-            notes: 'ick',
-          },
-        }),
-      );
-    });
-
-    it('dismisses the modal', () => {
-      const modalController = TestBed.inject(ModalController);
-      component.save();
-      expect(modalController.dismiss).toHaveBeenCalledTimes(1);
-    });
-  });
-
-  describe('an existing note', () => {
-    beforeEach(() => {
-      component.note = {
-        id: 73,
-        brand: 'Generic',
-        name: 'White Label',
-        teaCategoryId: 2,
-        rating: 3,
-        notes: 'it is ok',
-      };
-      fixture.detectChanges();
-    });
-
-    it('saves the data including the ID', () => {
-      const store = TestBed.inject(Store);
-      spyOn(store, 'dispatch');
-      component.brand = 'Lipton';
-      component.name = 'Yellow Label';
-      component.teaCategoryId = '3';
-      component.rating = 1;
-      component.notes = 'ick';
-      component.save();
-      expect(store.dispatch).toHaveBeenCalledTimes(1);
-      expect(store.dispatch).toHaveBeenCalledWith(
-        noteSaved({
-          note: {
-            id: 73,
-            brand: 'Lipton',
-            name: 'Yellow Label',
-            teaCategoryId: 3,
-            rating: 1,
-            notes: 'ick',
-          },
-        }),
-      );
-    });
-
-    it('dismisses the modal', () => {
-      const modalController = TestBed.inject(ModalController);
-      component.save();
-      expect(modalController.dismiss).toHaveBeenCalledTimes(1);
-    });
-  });
-});
-```
-
-**Note:** If you did this correctly, it was really just a copy-paste with a few lines of code changed. You could probably clean this up a bit if you wanted for maintainability, but sometimes that makes the tests less stright forward to read and map to requirements.
-
-##### Code
-
-Refactoring the `save()` method to handle the new requirement is straight forward. Here is one way of doing it.
-
-```typescript
-  save() {
-    const note: TastingNote = {
-      brand: this.brand,
-      name: this.name,
-      teaCategoryId: parseInt(this.teaCategoryId, 10),
-      rating: this.rating,
-      notes: this.notes,
+  private async displayEditor(note?: TastingNote): Promise<void> {
+    const opt = {
+      component: TastingNoteEditorComponent,
+      backdropDismiss: false,
+      swipeToClose: true,
+      presentingElement: this.routerOutlet.nativeEl,
     };
 
-    if (this.note) {
-      note.id = this.note.id;
-    }
-
-    this.store.dispatch(noteSaved({ note }));
-    this.modalController.dismiss();
+    const modal = await (note
+      ? this.modalController.create({ ...opt, componentProps: { note } })
+      : this.modalController.create(opt));
+    return modal.present();
   }
 ```
 
-#### Modify the UI
-
-Now we can load a note for editing and we can modify the data and have it saved, but we need to be change some of the labels on the dialog to reflect what we are actually doing.
-
-##### Tests
-
-First add a "witout a note" section within the initialization tests. These should pass.
-
-```typescript
-describe('without a note', () => {
-  beforeEach(() => {
-    fixture.detectChanges();
-  });
-
-  it('has the add title', () => {
-    const el = fixture.debugElement.query(By.css('ion-title'));
-    expect(el.nativeElement.textContent).toEqual('Add New Tasting Note');
-  });
-
-  it('has the add button label', () => {
-    const footer = fixture.debugElement.query(By.css('ion-footer'));
-    const el = footer.query(By.css('ion-button'));
-    expect(el.nativeElement.textContent).toEqual('Add');
-  });
-});
-```
-
-Next add simlar tests within the "with a note" section we added earlier. Only now, the expected text will be slightly different:
-
-```typescript
-it('has the update title', () => {
-  const el = fixture.debugElement.query(By.css('ion-title'));
-  expect(el.nativeElement.textContent).toEqual('Tasting Note');
-});
-
-it('has the update button label', () => {
-  const footer = fixture.debugElement.query(By.css('ion-footer'));
-  const el = footer.query(By.css('ion-button'));
-  expect(el.nativeElement.textContent).toEqual('Update');
-});
-```
-
-##### Code
-
-There are multiple ways to deal with this, but the easiest is probably just to create a couple of getters and then bind them in the HTML
-
-```typescript
-  get title(): string {
-    return this.note ? 'Tasting Note' : 'Add New Tasting Note';
-  }
-
-  get buttonLabel(): string {
-    return this.note ? 'Update' : 'Add';
-  }
-```
-
-```html
-<ion-header>
-  <ion-toolbar>
-    <ion-title>{{ title }}</ion-title>
-  </ion-toolbar>
-</ion-header>
-
-...
-
-<ion-footer>
-  <ion-toolbar>
-    <ion-button
-      expand="full"
-      [disabled]="!notesEditorForm.form.valid"
-      (click)="save()"
-      >{{ buttonLabel }}</ion-button
-    >
-  </ion-toolbar>
-</ion-footer>
-```
+Try clicking on an existing note to make sure that you can properly update it.
 
 ## Delete a Note
 

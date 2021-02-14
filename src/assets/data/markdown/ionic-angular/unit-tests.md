@@ -10,28 +10,6 @@ In this lab, you will learn how to:
 
 Using Chrome in headless mode allows the tests to run in a real browser (Chrome) without taking up valuable screen real estate with an actual browser window. Since there is no drawing being performed, the tests also tend to run faster. Finally, if tests are going to be run on a CI/CD server of some type, headless support is almost certainly required.
 
-Setting up the tests to use headless Chrome is a straight forward process:
-
-1. Optionally add a custom launcher to the `karma.conf.js` file
-1. Add some testing scripts that use the custom launcher
-
-### `karma.conf.js` (optional)
-
-Some CI/CD servers will run into issues running `ChromeHeadless` as-is. The solution is to run it with the `--no-sandbox` option. Add a custom launcher called `ChromeHeadlessCI` right after the `browsers` array in the `src/karma.conf.js` file. It will look like this:
-
-```JavaScript
-    customLaunchers: {
-      ChromeHeadlessCI: {
-        base: 'ChromeHeadless',
-        flags: ['--no-sandbox']
-      }
-    },
-```
-
-_Note:_ This is only required in certain specific circumstances. See <a href="https://developers.google.com/web/updates/2017/04/headless-chrome" target="_blank">Getting Started with Headless Chrome</a> for details.
-
-### `package.json`
-
 I suggest changing the `test` script configuration in the `package.json` file as such:
 
 - `test` - use the `ChromeHeadless` browser configuration, re-run the tests as changes are made
@@ -46,7 +24,7 @@ I suggest changing the `test` script configuration in the `package.json` file as
     "ng": "ng",
     "start": "ng serve",
     "test": "ng test --browsers=ChromeHeadless",
-    "test:ci": "ng test --no-watch --browsers=ChromeHeadlessCI",
+    "test:ci": "ng test --no-watch --browsers=ChromeHeadless",
     "test:debug": "ng test"
   },
 ```

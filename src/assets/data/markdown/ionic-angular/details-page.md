@@ -1,4 +1,4 @@
-b: Tea Details Page
+# Tea Details Page
 
 In this lab, you will:
 
@@ -213,15 +213,11 @@ beforeEach(
 
 You will need to adjust your import statements accordingly.
 
-Create an `initiallization` section in the test. Also, since we will need to do some setup within the initialization tests, remove the `fixture.detectChanges();` line from the main `beforeEach()`. That call will run the initialization, and we want to delay its execution until after our test setup code has run.
-
 **Note:** We are not going to directly use the `NavController` but it will get used indirectly when we add the `ion-back-button` so we need the mock for it.
 
-```typescript
-describe('initialization', () => {});
-```
-
 We would like to write most of our tests from the point of view of the end user requirements, which would basically mean that we verify that we get the tea and display it properly without getting into implementation details, but we do have _one_ test that works out best if we just scratch the surface a bit on the implementation details, so we will start there:
+
+Create an `initiallization` section in the test. Also, since we will need to do some setup within the initialization tests, remove the `fixture.detectChanges();` line from the main `beforeEach()`. That call will run the initialization, and we want to delay its execution until after our test setup code has run.
 
 ```TypeScript
   describe('initialization', () => {
@@ -247,9 +243,9 @@ We would like to write most of our tests from the point of view of the end user 
   });
 ```
 
-**Note:** you need to remove the `fixture.detectChanges()` call from the `beforeEach()`. We want to delay the `ngOnInit()` call until after we have set up our spy.
+**Note:** remember to remove the `fixture.detectChanges()` call from the top-level `beforeEach()`.
 
-The code for that looks like this:
+The code that satisifes that test looks like this:
 
 ```TypeScript
 import { Component, OnInit } from '@angular/core';

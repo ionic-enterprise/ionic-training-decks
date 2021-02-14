@@ -23,7 +23,7 @@ These files define the `dev` and `prod` environments. Typically they would have 
 In the last lab, we created a service that stores session. But how do we get that session in the first place? That is where the authentication service comes in. Just like with any other service, the first thing we need to do is generate it:
 
 ```bash
-$ ionic g s core/authentication/authentication
+ionic g s core/authentication/authentication
 ```
 
 Be sure to add it to the `src/app/core/index.ts`.
@@ -327,12 +327,11 @@ We will want to use the `AuthenticationService` when we update the store logic a
 import { EMPTY } from 'rxjs';
 import { AuthenticationService } from './authentication.service';
 
-export function createAuthenticationServiceMock() {
-  return jasmine.createSpyObj<AuthenticationService>('AuthenticationService', {
+export const createAuthenticationServiceMock = () =>
+  jasmine.createSpyObj<AuthenticationService>('AuthenticationService', {
     login: EMPTY,
     logout: EMPTY,
   });
-}
 ```
 
 Remember to add to `src/app/core/testing.ts`
@@ -342,8 +341,8 @@ Remember to add to `src/app/core/testing.ts`
 Outgoing requests needs to have the token added to the headers, and incoming responses needeed to be checked for 401 errors. It is best to handle these sorts of things in a centralized location. This is a perfect job for HTTP Interceptors.
 
 ```bash
-$ ionic g s core/http-interceptors/auth-interceptor --skipTests
-$ ionic g s core/http-interceptors/unauth-interceptor --skipTests
+ionic g s core/http-interceptors/auth-interceptor --skipTests
+ionic g s core/http-interceptors/unauth-interceptor --skipTests
 ```
 
 Be sure to update the `src/core/index.ts` file.
@@ -434,30 +433,14 @@ export class UnauthInterceptor implements HttpInterceptor {
 
 **Note:** What should we do when we have a 401 error? Well, we really should inform the store, but we don't really have a an action for that, so let's add one really quick:
 
-```diff
---- a/src/app/store/actions.ts
-+++ b/src/app/store/actions.ts
-@@ -12,6 +12,8 @@ export enum ActionTypes {
-   Logout = '[Tea Page] logout',
-   LogoutSuccess = '[Auth API] logout success',
-   LogoutFailure = '[Auth API] logout failure',
-+
-+  UnauthError = '[Auth API] unauthenticated error',
- }
-
- export const initialize = createAction(ActionTypes.Initialize);
-@@ -39,3 +41,5 @@ export const logoutFailure = createAction(
-   ActionTypes.LogoutFailure,
-   props<{ errorMessage: string }>(),
- );
-+
-+export const unauthError = createAction(ActionTypes.UnauthError);
+```TypeScript
+export const unauthError = createAction('[Auth API] unauthenticated error');
 ```
 
 We will also need a reducer to modify the state. All it needs to do is remove the session from the state since the session is not valid.
 
 ```TypeScript
-  describe(ActionTypes.UnauthError, () => {
+  describe('Unauth Error', () => {
     it('clears the session', () => {
       const action = unauthError();
       expect(
@@ -507,7 +490,7 @@ Finally, we need a `unauthError$` effect. It needs to clear the storage and disp
       actions$ = of(unauthError());
       effects.unauthError$.subscribe(action => {
         expect(action).toEqual({
-          type: ActionTypes.LogoutSuccess,
+          type: '[Auth API] logout success',
         });
         done();
       });
@@ -625,7 +608,7 @@ Then we need to update the `login$` tests. We need to:
         actions$ = of(login({ email: 'test@test.com', password: 'badpass' }));
         effects.login$.subscribe(action => {
           expect(action).toEqual({
-            type: ActionTypes.LoginFailure,
+            type: '[Auth API] login failure',
             errorMessage: 'Unknown error in login',
           });
           done();
@@ -675,7 +658,7 @@ For the `logout$` effect, we need to add a test verifying we are performing the 
         actions$ = of(logout());
         effects.logout$.subscribe(action => {
           expect(action).toEqual({
-            type: ActionTypes.LogoutFailure,
+            type: '[Auth API] logout failure',
             errorMessage: 'Unknown error in logout',
           });
           done();
