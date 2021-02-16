@@ -80,6 +80,12 @@ Modify your `package.json` file. I suggest moving the `description` up to the to
 
 **Note:** Throughout the training portions of code examples will be snipped and replaced with `...` (ellipsis). This is done for brevity and to better focus on actionable areas.
 
+Initialize Husky:
+
+```bash
+$ nxp husky install
+```
+
 By default, the git hooks handled by `husky` are stored in the `.husky` directory. Let's add a couple now:
 
 ```bash
