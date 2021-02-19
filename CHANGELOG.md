@@ -1,3 +1,10 @@
+## [4.3.7](https://github.com/ionic-team/ionic-training-decks/compare/v4.3.6...v4.3.7) (2021-02-19)
+
+### Bug Fixes
+
+- **angular:** update for tighter eslint rules ([f4cc368](https://github.com/ionic-team/ionic-training-decks/commit/f4cc3688f2d935398203523c3bad72d42a72ce84))
+- **vue:** add the husky install step ([abe1bba](https://github.com/ionic-team/ionic-training-decks/commit/abe1bbafb1529baa1f48c9384d5358e1b4f5996b))
+
 ## [4.3.6](https://github.com/ionic-team/ionic-training-decks/compare/v4.3.5...v4.3.6) (2021-02-12)
 
 ### Bug Fixes
