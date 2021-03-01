@@ -369,12 +369,36 @@
         {
           "name": "react",
           "title": "React",
-          "folder": "noimp",
+          "folder": "identity-vault-react",
           "icon": "logo-react",
           "pages": [
             {
               "title": "Introduction",
-              "file": "react"
+              "file": "intro"
+            },
+            {
+              "title": "The Base Application",
+              "file": "base"
+            },
+            {
+              "title": "Install Identity Vault",
+              "file": "install"
+            },
+            {
+              "title": "The Vault Service",
+              "file": "vault-service"
+            },
+            {
+              "title": "Add Biometrics to Login",
+              "file": "biometrics"
+            },
+            {
+              "title": "Customize the PIN Dialog",
+              "file": "custom-pin"
+            },
+            {
+              "title": "Other Configurations",
+              "file": "other-options"
             }
           ]
         },
