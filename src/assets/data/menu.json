@@ -385,7 +385,7 @@
               "file": "install"
             },
             {
-              "title": "The Vault Service",
+              "title": "Securing the Session",
               "file": "vault-service"
             },
             {
