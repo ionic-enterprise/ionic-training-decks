@@ -12,17 +12,6 @@ npx cap update
 
 **Note:** if you have already registered your product key using a different app, you can just copy the `.npmrc` file from the other application to this training application. Since this is just a training app, we do not care that you are using your key here and in your production application at the same time.
 
-Capacitor provides us with a helpful warning that we need to modify the `Info.plist` file of our iOS project to declare our intent of (eventually) using biometrics for the application:
-
-```Bash
-[warn] Plugin @ionic-enterprise/identity-vault requires you to add
-  <key>NSFaceIDUsageDescription</key>
-  <string>Use Face ID to authenticate yourself and login</string>
- to your Info.plist to work
-```
-
-Add the two lines of code to `ios/App/App/Info.plist` before `<key>UILaunchStoryboardName</key>`.
-
 ## Browser Auth Plugin and Classes
 
 Identity Vault uses hardware and APIs that are only available when we are running on a device as a hybrid mobile application. That limits our application to only being run on a device or emulator. That is less than ideal. We would like to be able to also run our application in a web context in order to support the following scenarios:

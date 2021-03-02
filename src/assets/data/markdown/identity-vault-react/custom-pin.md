@@ -6,33 +6,12 @@ At this point, the application has a well defined workflow for determining how t
 
 Since this isn't a trainig on "How to Create a Modal Dialog", let's just steal some code for that 😃
 
-Just grab the PIN dialog from the <a href="https://github.com/ionic-team/tea-taster-angular/tree/feature/identity-vault/src/app/pin-dialog" target="_blank">completed example</a> for this training and copy it into your application. Note that you will also need to update the `app.module.ts` file to import the `PinDialogModule` into `AppModule`:
-
-```diff
---- a/src/app/app.module.ts
-+++ b/src/app/app.module.ts
-@@ -14,6 +14,7 @@ import { AuthEffects, DataEffects } from './store/effects';
- import { StoreDevtoolsModule } from '@ngrx/store-devtools';
- import { environment } from '../environments/environment';
- import { AuthInterceptor, UnauthInterceptor } from './core';
-+import { PinDialogComponentModule } from './pin-dialog/pin-dialog.module';
-
- @NgModule({
-   declarations: [AppComponent],
-@@ -23,6 +24,7 @@ import { AuthInterceptor, UnauthInterceptor } from './core';
-     BrowserModule,
-     IonicModule.forRoot(),
-     HttpClientModule,
-+    PinDialogComponentModule,
-     StoreModule.forRoot(reducers, {
-       metaReducers,
-       runtimeChecks: {
-```
+Just grab the PIN dialog files from the <a href="https://github.com/ionic-team/tea-taster-react/tree/feature/identity-vault/src/pin-dialog" target="_blank">completed example</a> for this training and copy it into your application.
 
 The logic within this coomponent implements the following workflows:
 
-- when setting up a new PIN, ask for the PIN twice to verify the correct PIN was entered
-- when unlocking, just take the PIN once
+- When setting up a new PIN, ask for the PIN twice to verify the correct PIN was entered
+- When unlocking, just take the PIN once
 
 Have a look at the code just to get an idea of how it works. There is nothing in this code that is specific to Identity Vault, but if you have any questions about how the modal works, please ask.
 
@@ -40,30 +19,138 @@ Have a look at the code just to get an idea of how it works. There is nothing in
 
 Now that we have a PIN dialog, let's get straight into the Identity Vault portions and get it all hooked up so we can use it instead of the default "development-only" PIN entry prompts.
 
+Note that we will be working within the `src/core/auth/AuthContext.tsx` file for the remainder of this lab.
+
 The `IonicIdentityVaultUser` base class provides a hook called `onPasscodeRequest()`. This hook can be used to perform essentially any workflow that you desire so long as that workflow involves returning a Promise that will resolve to the PIN. If `onPasscodeRequest()` resolves to `undefined` then the system PIN dialogs will be used.
+
+```
+// TODO
 
 For our application, we have the following requirements for the PIN dialog:
 
-- Create a modal that uses the PinDialogComponent, disables backdrop dismiss, and passes the `setPasscodeMode` parameter
-- Present the dialog
-- When the dialog is dismissed, resolve the PIN
+- Create a passcode handler that presents the `PinDialog` component and passes the `setPasscodeMode` prop
+- Determine when the `PinDialog` component should be displayed
+- When the dialog is dismissed, handle the request callback
 - If the PIN is `undefined`, resolve to an empty string (this avoids showing the system dialogs)
+```
 
-The code to add to `src/app/core/session-vault/session-vault.service.ts` is then as follows. Be sure to import the `PinDialogComponent` and to inject the `ModalController`.
+### Handling a Passcode Request
 
-```TypeScript
-  async onPasscodeRequest(isPasscodeSetRequest: boolean): Promise<string> {
-    const dlg = await this.modalController.create({
-      backdropDismiss: false,
-      component: PinDialogComponent,
-      componentProps: {
-        setPasscodeMode: isPasscodeSetRequest
-      }
-    });
-    dlg.present();
-    const { data } = await dlg.onDidDismiss();
-    return Promise.resolve(data || '');
-  }
+Handling a passcode request consists of two pieces:
+
+1. Displaying `PinDialog` when appropriate
+2. Creating a callback that can be handled by the `onPasscodeRequest()` event
+
+Start by creating a type `PasscodeCallback` that takes in a string and returns `void`. This string will be the value returned to us from `PinDialog`. We will also create a variable named `passcodeRequestCallback` that we can redefine within the `<AuthProvider />` component.
+
+Add the following two lines anywhere _outside_ of the `AuthProvider` definition:
+
+```typescript
+type PasscodeCallback = (value: string) => void;
+let passcodeRequestCallback: undefined | PasscodeCallback;
+```
+
+For simplicity, I put those lines right above the `AuthProvider` function. It is important that `passcodeRequestCallback` is defined outside of the "React scope" in order to work within Identity Vault's lifecycle. The rest of the modifications we make in this lab will be _within_ the `<AuthProvider />` component.
+
+Next, let's start overriding `onPasscodeRequest()` such that it will handle the callback we created. Add the following method below `vault.onVaultLocked()`:
+
+```typescript
+vault.onPasscodeRequest = async (
+  _isPasscodeSetRequest: boolean,
+): Promise<string | undefined> => {
+  return new Promise(resolve => {
+    passcodeRequestCallback = (value: string) => {
+      resolve(value || '');
+    };
+  });
+};
+```
+
+This method will handle our passcode request's callback when `PinDialog` is dismissed. Should `PinDialog` return `undefined`, we will resolve to an empty string (thus avoiding Identity Vault from showing the system dialogs).
+
+We need to add a way to display `PinDialog`. Add the following function under `vault.onPasscodeRequest()`:
+
+```typescript
+const handlePasscodeRequest = (callback: PasscodeCallback) => (
+  <PinDialog onDismiss={({ data }) => callback(data)} setPasscodeMode={true} />
+);
+```
+
+We will update this function later so `setPasscodeMode` is actually bound to a variable in the next section.
+
+Finally, add the following line to the `return` block:
+
+```diff
+return (
+  <AuthContext.Provider value={{ state, dispatch, vault }}>
++   {passcodeRequestCallback && handlePasscodeRequest(passcodeRequestCallback)}
+    {children}
+  </AuthContext.Provider>
+);
+```
+
+If you run the application now on a device that does not support biometrics (such as an iOS simulator) you should see `PinDialog` request you to create a PIN. However, the `PinDialog` component is never dismissed, and it assumes the user is always creating a PIN - there is no way to toggle the mode. Let's fix that.
+
+### Additional State Properties
+
+We need to track the state of two things: whether or not the application should display `PinDialog`, and if `PinDialog` needs to set up a new PIN or if it is being used to unlock the application.
+
+Let's add two new state variables to `<AuthProvider />` to hold those pieces of state:
+
+```typescript
+const [showPasscodeModal, setShowPasscodeModal] = useState<boolean>(false);
+const [setPasscodeMode, setSetPasscodeMode] = useState<boolean>(false);
+```
+
+I prefer to have all my component variable definitions grouped together, so I added these lines under:
+
+```typescript
+const [state, dispatch] = useReducer(reducer, initialState);
+```
+
+As long as it builds you are free to add them anywhere you'd like.
+
+Modify `vault.onPasscodeRequest()` so that it updates these pieces of state, letting the application know when `PinDialog` should show, and in what mode:
+
+```diff
+vault.onPasscodeRequest = async (
+  _isPasscodeSetRequest: boolean,
+): Promise<string | undefined> => {
+  return new Promise(resolve => {
+    passcodeRequestCallback = (value: string) => {
+      resolve(value || '');
++     setShowPasscodeModal(false);
++     setSetPasscodeMode(false);
+    };
++   setSetPasscodeMode(_isPasscodeSetRequest);
++   setShowPasscodeModal(true);
+  });
+};
+```
+
+Likewise, modify `handlePasscodeRequest`:
+
+```diff
+const handlePasscodeRequest = (callback: PasscodeCallback) => (
+  <PinDialog
+    onDismiss={({ data }) => callback(data)}
+-   setPasscodeMode={true}
++   setPasscodeMode={setPasscodeMode}
+  />
+);
+```
+
+And finally, update the `return` block:
+
+```diff
+ return (
+    <AuthContext.Provider value={{ state, dispatch, vault }}>
++     {showPasscodeModal &&
+        passcodeRequestCallback &&
+        handlePasscodeRequest(passcodeRequestCallback)}
+      {children}
+    </AuthContext.Provider>
+  );
 ```
 
 This is just one possible implementation. You do not have to use a single dialog with the mode sent as a property. You could use two completely different dialogs. You could use different dialogs for iOS and Android. You could generate a random PIN and display it to the user when setting the passcode and then display a dialog to get the PIN back from the user. You can basically do anything you want so long as it makes sense.
