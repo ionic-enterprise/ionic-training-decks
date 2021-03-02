@@ -51,18 +51,18 @@ For some applications, the desired behavior may be to use `BiometricOnly` or `Pa
 To do this in the most effective manner:
 
 - Use the `BiometricOnly` authentication mode if biometrics is available
-- Set `allowSystemPinFallback` option to `true` in the `IdentityService` constructor
-- Set `shouldClearVaultAfterTooManyFailedAttempts` to `false` in the `IdentityService` constructor
+- Set `allowSystemPinFallback` option to `true` in the constructor
+- Set `shouldClearVaultAfterTooManyFailedAttempts` to `false` in the constructor
 
 The application will then present the Biometric prompt to unlock the device. If the user cancels the biometric unlock or the biometric unlock fails too many times, the system PIN prompt will be presented. In cases where the biometric identity has been locked by the OS due to too many failed attempts, unlocking via the system PIN will also unlock the biometric identity.
 
 In cases where biometrics is not available (or the user does not want to use biometrics), you can use any of the following modes: `PasscodeOnly`, `SecureStorage`, `InMemoryOnly`
 
-**Note:** you should never use `BiometricAndPasscode` when using system PIN as a fallback since the whole point of `BiometricAndPasscode` is to use a session PIN fallback, so you would have competing fallback positions.
+**Note:** You should never use `BiometricAndPasscode` when using system PIN as a fallback since the whole point of `BiometricAndPasscode` is to use a session PIN fallback, so you would have competing fallback positions.
 
 ## User Settings
 
-In our application, we are using `IdentityVault` to query the native OS and determine if biometric locking is available to the user. The application then uses that information to determine if session is biometrically locked or not.
+In our application, we are using `isBiometricsAvailable()` to query the native OS and determine if biometric locking is available to the user. The application then uses that information to determine if session is biometrically locked or not.
 
 We have the ability to provide more flexibility to our users. For example, as part of the login process there could be a toggle that turns biometric locking on or off depending on user preferences. Once the user has established a session, that option would be used throughout that session.
 
@@ -72,13 +72,13 @@ If you couple all of this with the Capacitor [Storage API](https://capacitorjs.c
 
 ## Mutliple Vaults
 
-In our application, we are using one vault, the `IdentityService`. It is possible to have mutiple vaults by creating multiple services that extend `IonicIdentityVaultUser` and pass a `VaultDescriptor` to the constructor of the base class in order to give each vault a unique ID.
+In our application, we are using one vault, the `SessionVault`. It is possible to have mutiple vaults by creating multiple classes that extend `IonicIdentityVaultUser` and pass a `VaultDescriptor` to the constructor of the base class in order to give each vault a unique ID.
 
 Here is an example:
 
 ```typescript
 super(
-  platform,
+  { ready: () => Promise.resolve(true) },
   {
     restoreSessionOnReady: false,
     unlockOnReady: false,
@@ -94,12 +94,10 @@ super(
 );
 ```
 
-This can be used for multiple different scenarios. For example, let's say that upon login, part of the workflow within the application involves asking the back-end for various API keys. We would like to securely store those API keys, but they are not really part of the session. We can use the main vault to store the session, and then use the
+This can be used for multiple different scenarios. For example, let's say that upon login, part of the workflow within the application involves asking the back-end for various API keys. We would like to securely store those API keys, but they are not really part of the session. We can use the main vault to store the session, and then use the secondary vault to store the API keys.
 
 ## Conclusion
 
-If you have a look at the end code in the [Identity Vault branch](https://github.com/ionic-team/tea-taster-angular/tree/feature/identity-vault) you will see that we have implemented some of what was discussed here. We have done that for demo puroses only. It is not a perscribed workflow, but one that you can use as a starting point for your own.
-
-Please play around with some of these options and see how they work within the training application. Note that the approach taken here is not the only valid approach to take. Rather, it is the approach that works for _this_ application. It is a common approach that will work in many instsances, but there are areas in the workflow that you may want to change in your own application.
+Play around with some of these options and see how they work within the training application. Note that the approach taken in this training is not the only valid approach to take. Rather, it is the approach that works for _this_ application. It is a common approach that will work in many instsances, but there are areas in the workflow that you may want to change in your own application.
 
 Please remember that we are here to advise you in this and other implementation details of your application. If you do not have advisory hours on your contract, please let us know. We will be happy to work with you to provide you with options that make sense for your situation.
