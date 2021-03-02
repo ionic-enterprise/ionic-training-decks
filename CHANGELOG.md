@@ -1,3 +1,21 @@
+# [4.4.0](https://github.com/ionic-team/ionic-training-decks/compare/v4.3.1...v4.4.0) (2021-03-02)
+
+### Bug Fixes
+
+- **angular:** be sure to call through ([356db59](https://github.com/ionic-team/ionic-training-decks/commit/356db59647b7cb007e6f5611751da1455740f620))
+- **angular:** clarify some of the lab steps ([3234e7e](https://github.com/ionic-team/ionic-training-decks/commit/3234e7ef4ce06d71e9449637c080c0bde1390c54))
+- **angular:** fix typos ([51e541b](https://github.com/ionic-team/ionic-training-decks/commit/51e541b2687fba9b8c024d5d0fd2f007bf8a85a0))
+- **angular:** remove stuff no longer required with new starter ([e6e561b](https://github.com/ionic-team/ionic-training-decks/commit/e6e561b306157dd4a2db1ca08362145ff95675fe))
+- **angular:** update a couple typos in tea-details lab ([5394bb5](https://github.com/ionic-team/ionic-training-decks/commit/5394bb584e9c9f87403d01b3de66a9d7b7734042))
+- **angular:** update for tighter eslint rules ([f4cc368](https://github.com/ionic-team/ionic-training-decks/commit/f4cc3688f2d935398203523c3bad72d42a72ce84))
+- **framework:** update for husky v5 ([c9e786f](https://github.com/ionic-team/ionic-training-decks/commit/c9e786f745b903c9278b7be24501efdae2dfda34))
+- **vue:** add the husky install step ([abe1bba](https://github.com/ionic-team/ionic-training-decks/commit/abe1bbafb1529baa1f48c9384d5358e1b4f5996b))
+- **vue:** update branch name ([bc65e39](https://github.com/ionic-team/ionic-training-decks/commit/bc65e39eec34740f1f03bab776b1fcb45bcca197))
+
+### Features
+
+- **react:** add identity vault training ([5acd05f](https://github.com/ionic-team/ionic-training-decks/commit/5acd05fdec1960c2665b95dc2c433031cce05ff2))
+
 ## [4.3.7](https://github.com/ionic-team/ionic-training-decks/compare/v4.3.6...v4.3.7) (2021-02-19)
 
 ### Bug Fixes
