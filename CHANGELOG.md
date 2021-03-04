@@ -1,3 +1,5 @@
+## [4.4.1](https://github.com/ionic-team/ionic-training-decks/compare/v4.4.0...v4.4.1) (2021-03-04)
+
 # [4.4.0](https://github.com/ionic-team/ionic-training-decks/compare/v4.3.1...v4.4.0) (2021-03-02)
 
 ### Bug Fixes
