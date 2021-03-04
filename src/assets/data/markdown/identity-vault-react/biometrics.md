@@ -184,41 +184,65 @@ Before going any further, make sure you are serving the application and are logg
 
 ### Markup Changes
 
-In cases where a locked session exists, we want to display something that the user can tap to begin the unlock process. Add the following code in `src/login/LoginPage.tsx`:
+In cases where a locked session exists, we want to display something that the user can tap on to begin the unlock process. Add the following component logic to `src/login/LoginPage.tsx`:
 
-```TypeScript
+```diff
 ...
 const LoginPage: React.FC = () => {
-  ...
-  const [showUnlock, setShowUnlock] = useState<boolean>(false);
+  const history = useHistory();
++ const [showUnlock, setShowUnlock] = useState<boolean>(false);
   const {
     login,
     session,
     error,
-    canUnlockVault,
-    restoreSession,
++   canUnlockVault,
++   restoreSession,
   } = useAuthentication();
-  ...
+  const { handleSubmit, control, formState, errors } = useForm<{
+    email: string;
+    password: string;
+  }>({
+    mode: 'onChange',
+  });
+
   useEffect(() => {
-    (async () => {
-      setShowUnlock(await canUnlockVault());
-    })();
-    // eslint-disable-next-line
-  }, [session]);
+    session && history.replace('/tabs');
+  }, [session, history]);
+
++ useEffect(() => {
++   (async () => {
++     setShowUnlock(await canUnlockVault());
++   })();
++   // eslint-disable-next-line
++ }, [session]);
+
+  const handleLogin = async (data: { email: string; password: string }) => {
+    await login(data.email, data.password);
+  };
+...
+```
+
+It's worth noting that without `// eslint-disable-next-line`, React will warn us that we are missing a `useEffect` dependency: `canUnlockVault`. However, if we add that method as a dependency, it will run on each re-render, including each keystroke made on the page. That's not ideal. While we appreciate the effort from React, we know we want to recalculate this value whenever our authentication state's `session` changes, so we'll add both the "ignore next line" linting comment and make `session` the dependency in which when changed the `useEffect` runs again.
+
+Next modify the component template:
+
+```diff
+...
+const LoginPage: React.FC = () => {
   ...
   return (
     <IonPage>
       ...
         </IonHeader>
-        {showUnlock && (
-          <div
-            className="unlock-app ion-text-center"
-            onClick={() => restoreSession()}
-          >
-            <IonIcon icon={lockOpenOutline} />
-            <div>Unlock</div>
-          </div>
-        )}
++       {showUnlock && (
++         <div
++           className="unlock-app ion-text-center"
++           onClick={() => restoreSession()}
++          >
++           <IonIcon icon={lockOpenOutline} />
++           <div>Unlock</div>
++         </div>
++       )}
         <form>
           ...
     </IonPage>
@@ -227,8 +251,6 @@ const LoginPage: React.FC = () => {
 
 export default LoginPage;
 ```
-
-It's worth noting that without `// eslint-disable-next-line`, React will warn us that we are missing a `useEffect` dependency: `canUnlockVault`. However, if we add that method as a dependency, it will run on each re-render, including each keystroke made on the page. That's not ideal. While we appreciate the effort from React, we know we want to recalculate this value whenever our authentication state's `session` changes, so we'll add both the "ignore next line" linting comment and make `session` the dependency in which when changed the `useEffect` runs again.
 
 ### Style Changes
 
