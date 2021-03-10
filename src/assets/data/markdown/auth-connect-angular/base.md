@@ -1,168 +1,91 @@
-# Lab: The Base Application
+# Install the Base Application
 
-This training starts with an Ionic Framework application that uses standard `email/password` with a remote hosted server for authentication. This is a common paradigm used in web applications. In this lab, we will add SSO with Auth0 capability for authentication.
+We will start with a very simple starter appication and enhance it to establish an authentication session via Ionic Auth Connect. The application we will use is a basic Ionic tabs based starter with a little code added that will eventually allow us to access some information from a REST API so we can display the information in the app.
 
-## Getting Started
+## Clone
 
-These instrctions assume that you have a reasonable development environment set up on your machine including `git`, `node`, `npm`, and `Android Studio`. If your are using a Mac and want to build for iOS, you should also have `Xcode`, the Xcode commandline tools, and `cocoapods`.
+Before we get started, you should create an area on your file system for working on training applications. I use the `~/Projects/Training` folder, but you can use whichever folder works best for you. The key is just to keep your file system organized. Follow these steps to clone the starting point for this training:
 
-To get started, perform the following actions within a working folder:
+1. Open a terminal session
+1. `cd ~/Projects/Training` (or whichever )
+1. `git clone https://github.com/ionic-team/training-lab-angular.git training-auth-connect`
+1. `cd training-auth-connect`
+1. `git remote remove origin`
 
-- `git clone https://github.com/ionic-team/ac-training-starter.git`
-- `cd ac-training-starter`
-- `npm i`
-- `npm run build`
-- `npx cap update` - this may take a while
-- `npm run build`
-- `npm start` - to run in the browser
+## Build
 
-To build for installation on a device, use `npx cap open android` or `npx cap open ios`. This will open the project in the appropriate IDE. From there you can build the native application and install it on your device.
+Make sure you can build the application and run it in your browser.
 
-## General Architecture
+1. `npm i`
+1. `npm start`
 
-### Services
+At this point, you can view the application <a href="http://localhost:8100" target="_blank">http://localhost:8100</a>.
 
-Two services are related to the authentication workflow. The `AuthenticationService` handles the API calls that perform login actions. The `IdentiyService` handles the identity of the currently logged in user.
+### Build for Devices
 
-#### AuthenticationService
+If you would like to try running the application on a device, follow these steps:
 
-The `AuthenticationService` handles the POSTs to the login endpoint. If this operation is successful it registers this fact with the `IdentityService`. This is the first of two services used in this training, so let's look at it a bit more in depth.
+1. `npm run build`
+1. `npx cap sync`
+1. `npx cap open android`
+1. `npx cap open ios`
 
-##### Construction
+**Note:** for iOS, you will need to have an Apple developer account in order to run on a device.
 
-This service is registered with the dependency injection engine such that it is available to the whole application. This service exposes various methods that can be called to perform authentication actions. Currently, supports a `login()` action.
+## Tour
 
-##### `login()` - Attempt to login with email and password
+Open the application in the browser. You should be on the first tab and you are not logged in. Go to the third tab. That should be accessible as well. Now try the second tab. When clicking on this tab you will be redirected to the login page. Let's have a look at what is going on within the application.
 
-Makes a call to the API that will attempt to login the user using `email` and `password` credentials. If successful, the server will respond with an authentication token that we save into our identityService where it can be referenced by other parts of the application when needed. When then map the response to `true` to notify the caller that the result of the operation was successful.
+Have a look at the following various parts of the application. With the exception of the page, which is in its own folder, all of these items can be found under `src/app/core`.
 
-```TypeScript
-login(username: string, password: string): Observable<boolean> {
-    return this.http.post(`${environment.dataService}/auth/login`, {
-        username,
-        password
-    }, {
-        responseType: 'text'
-    }).pipe(
-        map(token => this.identityService.newIdentity(token)),
-        mapTo(true)
-    );
-}
-```
+### Tea Service
 
-#### IdentityService
+The tea service is a basic HTTP service that fetches tea related data from a REST API using Angular's HttpClient service. Our REST API requires authentication in order to provide data. We currently lack a means to provide that authentication.
 
-The `IdentityService` defines the identity of the currently logged in user including the authentication token associated with the user. This service also persists the token so it is available between sessions. This is the second service used in this training, so let's examine it feature by feature.
+### Tab2 Page
 
-##### Construction
+The tab 2 page uses the tea service to obtain tea related data from our REST API. It then displays that information in a list.
 
-This service is registered with the dependency injection engine such that it is availale to the whole application. All of the data controlled by this service is private. Consumers must interact with the data via the public methods. A `changed` subject is created so other parts of the application can know when the user has changed, allowing then to requery data as needed.
+### Auth Guard
 
-```TypeScript
-@Injectable({
-  providedIn: 'root'
-})
-export class IdentityService {
-  private tokenKey = 'auth-token';
-  private token: string;
-  private user: User;
+The auth guard is intended to guard our route by disallowing navigation if we are not currently authenticated. Currently, it does nothing and just returns `true`, allowing us through.
 
-  changed: Subject<User>;
+### HTTP Ineterceptors
 
-  constructor(private http: HttpClient, private storage: Storage) {
-    this.changed = new Subject();
-  }
-  ...
-}
-```
+Our application contains two HTTP interceptors: an auth interceptor and an unauth interceptor.
 
-##### `set()` - Set the Current User and Token
+The auth interceptor modifies outbound requests. It adds a bearer token to the `Authorization` header of any request that requires a token. For our application, this is any request other than a `login` request (which we will not be using in this application anyhow, since we will be using Auth Connect to obtain the authorization from an OIDC provider rather than from our own API).
 
-The `set()` method takes a `User` object and a token. The `User` object is cached locally and the token is stored in a local storage mechanism. The `changed` subject is also fired. This method should be called as part of the login workflow.
+The unauth interceptor examines inbout responses looking for 401 (unauthorized) errors. If it finds one, it redirects the user to the login page. **Note:** this is what is currently causing us to redirect to the login page when we try to access the tab 2 page. The flow looks something like this:
 
-```TypeScript
-  async set(user: User, token: string): Promise<void> {
-    this.user = user;
-    await this.setToken(token);
-    this.changed.next(this.user);
-  }
-```
+1. the auth guard is a do nothing guard at this point and lets us in
+1. the page uses the tea service to try to get some tea info
+1. the tea service makes the request
+1. the auth interceptor cannnot find a token, so it does not append a bearer token
+1. the request is sent to the REST API
+1. the REST API rejects to unauthorzied request with a 401 error code
+1. the unauth interceptor examines the response, sees the 401 error code, and redirects the user to the login page
 
-##### `get()` - Get the Current User
+## Conclusion
 
-Our API has a `users/current` endpoint that returns the `User` that is assciated with whichever authentication token is sent in the request. Our application will then do one of the following with any `get()` call:
+This is our starting point. Our goal will be to integrate Auth Connect with our application so the flow looks more like one of the following.
 
-- A `User` will already be cached (either from a `set()` call or a prior `get()` call), that user will be returned
-- A `User` is not cached so we make an API call to get the user, in which case:
-  - An HTTP interceptor applies the currently stored token
-  - The call returns the user associated with that token and the user is cached
-  - If a token does not exist or is invalid, a 401 is generated by the API
+When not logged in:
 
-```TypeScript
-get(): Observable<User> {
-    if (!this.user) {
-        return this.http
-            .get<User>(`${environment.dataService}/user/current`)
-            .pipe(
-                catchError(e => of(null)),
-                tap(u => (this.user = u))
-            );
-    } else {
-        return of(this.user);
-    }
-}
-```
+1. the auth guard asks Auth Connect if we are authenticated
+1. Auth Connect returns `false`
+1. the auth guard disallows navigation to the page and instead redirects users to the login page
 
-This allows our application to retrieve information about the currently logged in user after a restart. This method could be called as part of the bootstrap workflow or at any other time that data about the currently logged in user is required.
+When logged in:
 
-##### `getToken()` - Get the Current Token
+1. the auth guard asks Auth Connect if we are authenticated
+1. Auth Connect returns `true`
+1. the auth guard allows the navigation
+1. the page uses the tea service to try to get some tea info
+1. the tea service makes the request
+1. the auth interceptor gets an access token from Auth Connect and adds it as a bearer token in the Authorization header
+1. the request is sent to the REST API
+1. the REST API accepts the reqest and retuns the data
+1. the page displays the returned data
 
-The `getToken()` method returns the currently set token. If no token is currently set, it attempts to retrieve a token from a local storage mechanism.
-
-```TypeScript
-  async getToken(): Promise<string> {
-    if (!this.token) {
-      await this.storage.ready();
-      this.token = await this.storage.get(this.tokenKey);
-    }
-    return this.token;
-  }
-```
-
-This method is most commonly used whenever an HTTP call is made so the token can be added to the headers of the call. In this application, the logic that performs that action has been abstracted into an HTTP interceptor.
-
-##### `remove()` - Remove the User and the Token
-
-The user and the token are removed from memory and from the local storage mechanism.
-
-```TypeScript
-  async remove(): Promise<void> {
-    this.user = undefined;
-    await this.setToken('');
-    this.changed.next(this.user);
-  }
-```
-
-This method should be called as part of the login workflow.
-
-### Additional Classes
-
-#### AuthInterceptor
-
-This HTTP Interceptor adds the authentication token to the outgoing requests that require a token. For this application, that is every request that is not itself the `login` request.
-
-#### LoggedInGuard
-
-This guard is attached to routes that we want to only allow access to when the user is authenticated. If the user is not authenticated, they will be redirected to the login page.
-
-### Application Workflow
-
-#### Startup
-
-Upon starting up, the application attempts to load the `HomePage`. Three scenarios are possible at this point:
-
-- A valid token has been stored from a previous session and the User data is available
-- A token has been stored from a previous session but is invalid and will not load the User data
-- A token has not been stored from a previous session
-
-In the first scenario, the `HomePage` successfully loads and displays the username of the current user. In the last two scenarios, the system will be unable to restore the user data from the server and the `LoggedInGuard` will prevent the user from accessing any secured pages and redirect them to the login page.
+In the next section we will get started by installing and configuring Auth Connect.

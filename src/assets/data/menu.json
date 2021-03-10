@@ -460,24 +460,20 @@
               "file": "base"
             },
             {
-              "title": "Auth0 Configuration",
-              "file": "auth0-setup"
+              "title": "Install Auth Conect",
+              "file": "install"
             },
             {
-              "title": "Authentication Service",
-              "file": "authentication-service"
+              "title": "Create the Auth Workflow",
+              "file": "auth-service"
             },
             {
-              "title": "Login Page",
-              "file": "login-page"
+              "title": "Include Identity Vault",
+              "file": "identity-vault"
             },
             {
-              "title": "Home Page",
-              "file": "home-page"
-            },
-            {
-              "title": "Run in Browser",
-              "file": "configure-browser"
+              "title": "Conclusion",
+              "file": "conclusion"
             }
           ]
         },
