@@ -1,3 +1,11 @@
+# [4.5.0](https://github.com/ionic-team/ionic-training-decks/compare/v4.3.7...v4.5.0) (2021-03-25)
+
+### Features
+
+- **auth-connect:** make the Angular AC training self-guided ([dafb925](https://github.com/ionic-team/ionic-training-decks/commit/dafb925e2a16f710ea806637b9fe483591ebad2a))
+- **auth-connect:** use IV with AC in Angular ([a467c6f](https://github.com/ionic-team/ionic-training-decks/commit/a467c6f0082c3e94a51f74a17042db4475527aaa))
+- **react:** add identity vault training ([5acd05f](https://github.com/ionic-team/ionic-training-decks/commit/5acd05fdec1960c2665b95dc2c433031cce05ff2))
+
 ## [4.4.1](https://github.com/ionic-team/ionic-training-decks/compare/v4.4.0...v4.4.1) (2021-03-04)
 
 # [4.4.0](https://github.com/ionic-team/ionic-training-decks/compare/v4.3.1...v4.4.0) (2021-03-02)
