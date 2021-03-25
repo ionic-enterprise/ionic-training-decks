@@ -470,10 +470,6 @@
             {
               "title": "Include Identity Vault",
               "file": "identity-vault"
-            },
-            {
-              "title": "Conclusion",
-              "file": "conclusion"
             }
           ]
         },
