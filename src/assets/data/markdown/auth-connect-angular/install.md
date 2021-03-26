@@ -1,4 +1,4 @@
-# Install AuthConnect
+# Install Auth Connect
 
 The first thing we need to do is install Auth Connect. In order to do this, you will need to have an Ionic Enterprise key that includes access to Auth Connect. Since you are working through this particular tutorial, it is assumed that you have one. There are two ways you can associate this application with your Ionic Enterprise key:
 
@@ -17,8 +17,6 @@ npx cap update
 ## Environment
 
 Often, the most difficult part of setting up Auth Connect is simply making sure you have the OIDC provider configured correction and then properly translating that configuration into the Auth Connect configuration. Please refer to <a href="https://ionic.io/docs/auth-connect/azure-ad-b2c" target="_blank">our setup guides</a> for information on how to configure your provider. The informtion that each provider needs is generally the same with some minor differences, so if your provider is not listed you should be able to get started by looking at one of the other providers. Auth0 is the most standard of the bunch so is very likely a good place to start.
-
-- link to the cs-demo-ac-iv app
 
 Once we have the OIDC provider configured properly, we need to configure Auth Connect such that it knows about the OIDC provider. We have a <a href="https://github.com/ionic-team/cs-demo-ac-providers" target="_blank">sample application</a> that will help in this regard. This application is focused solely on the login and logout flows and making sure that the configuration is correct. For this reason we suggest modifying this application for your OIDC provider and working with the configuration within the application. This will then make it easier to integrate the proper configuration into your own application.
 
