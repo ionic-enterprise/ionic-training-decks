@@ -1,3 +1,10 @@
+## [4.5.2](https://github.com/ionic-team/ionic-training-decks/compare/v4.5.1...v4.5.2) (2021-03-26)
+
+### Bug Fixes
+
+- **auth-connect-angular:** fix typo ([6f8983c](https://github.com/ionic-team/ionic-training-decks/commit/6f8983cc314b0452764629afaba3e6cbcdcc89f4))
+- **auth-connect-angular:** fix typoes and remove working note ([c20996d](https://github.com/ionic-team/ionic-training-decks/commit/c20996d4a971d0083f14c77d098ee349f38ce516))
+
 ## [4.5.1](https://github.com/ionic-team/ionic-training-decks/compare/v4.5.0...v4.5.1) (2021-03-26)
 
 ### Bug Fixes
