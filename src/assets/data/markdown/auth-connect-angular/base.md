@@ -7,17 +7,23 @@ We will start with a very simple starter appication and enhance it to establish 
 Before we get started, you should create an area on your file system for working on training applications. I use the `~/Projects/Training` folder, but you can use whichever folder works best for you. The key is just to keep your file system organized. Follow these steps to clone the <a href="https://github.com/ionic-team/training-lab-angular">starting project</a> for this training:
 
 1. Open a terminal session
-1. `cd ~/Projects/Training` (or whichever )
-1. `git clone https://github.com/ionic-team/training-lab-angular.git training-auth-connect`
-1. `cd training-auth-connect`
-1. `git remote remove origin`
+1. Type the following:
+
+```bash
+cd ~/Projects/Training # or whichever folder you will use to organize your training projects
+git clone https://github.com/ionic-team/training-lab-angular.git training-auth-connect
+cd training-auth-connect
+git remote remove origin
+```
 
 ## Build
 
 Make sure you can build the application and run it in your browser.
 
-1. `npm i`
-1. `npm start`
+```bash
+npm i
+npm start
+```
 
 At this point, you can view the application <a href="http://localhost:8100" target="_blank">http://localhost:8100</a>.
 
@@ -25,10 +31,12 @@ At this point, you can view the application <a href="http://localhost:8100" targ
 
 If you would like to try running the application on a device, follow these steps:
 
-1. `npm run build`
-1. `npx cap sync`
-1. `npx cap open android`
-1. `npx cap open ios`
+```bash
+npm run build
+npx cap sync
+npx cap open android
+npx cap open ios
+```
 
 **Note:** for iOS, you will need to have an Apple developer account in order to run on a device.
 
