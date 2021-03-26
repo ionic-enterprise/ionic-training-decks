@@ -1,3 +1,9 @@
+## [4.5.1](https://github.com/ionic-team/ionic-training-decks/compare/v4.5.0...v4.5.1) (2021-03-26)
+
+### Bug Fixes
+
+- **auth-connect:** link to start project ([0984c9d](https://github.com/ionic-team/ionic-training-decks/commit/0984c9d3c0aecb54a65dafa01e0a2983e79566ad))
+
 # [4.5.0](https://github.com/ionic-team/ionic-training-decks/compare/v4.3.7...v4.5.0) (2021-03-25)
 
 ### Features
