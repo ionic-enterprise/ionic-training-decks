@@ -4,7 +4,7 @@ We will start with a very simple starter appication and enhance it to establish 
 
 ## Clone
 
-Before we get started, you should create an area on your file system for working on training applications. I use the `~/Projects/Training` folder, but you can use whichever folder works best for you. The key is just to keep your file system organized. Follow these steps to clone the starting point for this training:
+Before we get started, you should create an area on your file system for working on training applications. I use the `~/Projects/Training` folder, but you can use whichever folder works best for you. The key is just to keep your file system organized. Follow these steps to clone the <a href="https://github.com/ionic-team/training-lab-angular">starting project</a> for this training:
 
 1. Open a terminal session
 1. `cd ~/Projects/Training` (or whichever )
