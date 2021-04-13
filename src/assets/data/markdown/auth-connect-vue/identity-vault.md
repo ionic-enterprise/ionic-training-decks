@@ -35,40 +35,33 @@ npx cap update
 
 Similar to how we implemented Auth Connect, we will implement Identity Vault by creating a service within our application that extends a base Identity Vault class.
 
-```bash
-ionic g s core/vault --skipTests
-```
-
-We will start with very basic Identity Vault configuration in `src/app/core/vault.service.ts`:
+We will start with very basic Identity Vault configuration in `src/services/VaultService.ts`:
 
 ```TypeScript
-import { Injectable } from '@angular/core';
-import {
-  AuthMode,
-  IonicIdentityVaultUser,
-} from '@ionic-enterprise/identity-vault';
-import { Platform } from '@ionic/angular';
+import { IonicIdentityVaultUser, AuthMode } from '@ionic-enterprise/identity-vault';
 
-@Injectable({
-  providedIn: 'root',
-})
 export class VaultService extends IonicIdentityVaultUser<any> {
-  constructor(platform: Platform) {
-    super(platform, {
-      unlockOnAccess: true,
-      hideScreenOnBackground: true,
-      authMode: AuthMode.SecureStorage,
-    });
+  constructor() {
+    super(
+      { ready: () => Promise.resolve() },
+      {
+        unlockOnAccess: true,
+        hideScreenOnBackground: true,
+        authMode: AuthMode.SecureStorage
+      }
+    );
   }
 }
+
+export const vaultService = new VaultService();
 ```
 
-We will then inject the `VaultService` into the `AuthenticationService` and set the `tokenStorageProvider` in `src/app/core/authentication.service.ts`:
+We will then import the `vaultService` into the `AuthenticationService` and set the `tokenStorageProvider` in `src/services/AuthenticationService.ts`:
 
 ```TypeScript
-  constructor(platform: Platform, vault: VaultService) {
-    const config = platform.is('hybrid') ? mobileAzureConfig : webAzureConfig;
-    config.tokenStorageProvider = vault;
+  constructor() {
+    const config = getAuthConfig();
+    config.tokenStorageProvider = vaultService;
     super(config);
   }
 ```
@@ -79,26 +72,36 @@ That is really all we need to do in order to combine Auth Connect and Identity V
 
 The services that are required are boiler-plate, so let's just download them rather than going through writing them:
 
-- <a download href="/assets/packages/ionic-angular/browser-vault.zip">Download the zip file</a>
+- <a download href="/assets/packages/ionic-vue/browser-vault.zip">Download the zip file</a>
 - unzip the file somewhere
-- copy the `browser-vault.plugin.ts` and `browser-vault.service.ts` files from where you unpacked them to `src/app/core`
+- copy the `BrowserVaultPlugin.ts` and `BrowserVaultService.ts` files from where you unpacked them to `src/services`
 
-The final change required is to inject the `BrowserVaultPlugin` class into our `VaultService` and override the `getPlugin()` method to return either the standard Identity Vault plugin or the "Browser Vault" plugin depending upon the context in which the application is being run.
+The final change required is to import the `browserVaultPlugin` into our `VaultService` and override the `getPlugin()` method to return either the standard Identity Vault plugin or the "Browser Vault" plugin depending upon the context in which the application is being run.
+
+Here is what the Vault Service looks like when we are done:
 
 ```TypeScript
+import { IonicIdentityVaultUser, AuthMode, IonicNativeAuthPlugin } from '@ionic-enterprise/identity-vault';
+import { isPlatform } from '@ionic/vue';
+import { browserVaultPlugin } from './BrowserVaultPlugin';
+
 export class VaultService extends IonicIdentityVaultUser<any> {
-  constructor(
-    private browserVaultPlugin: BrowserVaultPlugin,
-    platform: Platform,
-  ) {
-    ...
+  constructor() {
+    super(
+      { ready: () => Promise.resolve() },
+      {
+        unlockOnAccess: true,
+        hideScreenOnBackground: true,
+        authMode: AuthMode.SecureStorage
+      }
+    );
   }
 
   getPlugin(): IonicNativeAuthPlugin {
-    if ((this.platform as Platform).is('hybrid')) {
+    if (isPlatform('hybrid')) {
       return super.getPlugin();
     }
-    return this.browserVaultPlugin;
+    return browserVaultPlugin;
   }
 }
 ```
@@ -109,8 +112,8 @@ Now when you run in the browser, the application will use the `BrowserVault` plu
 
 Congratulations. You now have a fully functional application that is utilizing Auth Connect and Identity Vault. However, this is just a starting point. For example, we are not currently using any of the more advanced storage modes that Identity Vault offers us (such as locking the keys behind a Biometric lock).
 
-- For more information on different options that you can explore with Identity Vault, please see our [Identity Vault training](course/identity-vault/tabs/angular/page/0).
-- We also have a <a href="https://github.com/ionic-team/tea-taster-angular/tree/feature/auth-connect" target="_blank">sample application</a> that demonstrates one way to integrate Auth Connect and Identity Vault into a real-world application.
+- For more information on different options that you can explore with Identity Vault, please see our [Identity Vault training](course/identity-vault/tabs/vue/page/0).
+- We also have a <a href="https://github.com/ionic-team/tea-taster-vue/tree/feature/auth-connect" target="_blank">sample application</a> that demonstrates one way to integrate Auth Connect and Identity Vault into a real-world application.
 
 If you have any question, please let us know. We are here to help.
 

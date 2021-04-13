@@ -14,41 +14,70 @@ npm i @ionic-enterprise/auth
 npx cap update
 ```
 
-## Environment
+## Configuration
 
 Often, the most difficult part of setting up Auth Connect is simply making sure you have the OIDC provider configured correction and then properly translating that configuration into the Auth Connect configuration. Please refer to <a href="https://ionic.io/docs/auth-connect/azure-ad-b2c" target="_blank">our setup guides</a> for information on how to configure your provider. The informtion that each provider needs is generally the same with some minor differences, so if your provider is not listed you should be able to get started by looking at one of the other providers. Auth0 is the most standard of the bunch so is very likely a good place to start.
 
 Once we have the OIDC provider configured properly, we need to configure Auth Connect such that it knows about the OIDC provider. We have a <a href="https://github.com/ionic-team/cs-demo-ac-providers" target="_blank">sample application</a> that will help in this regard. This application is focused solely on the login and logout flows and making sure that the configuration is correct. For this reason we suggest modifying this application for your OIDC provider and working with the configuration within the application. This will then make it easier to integrate the proper configuration into your own application.
 
-Here is the configuration that is required to connect to the provider that we have for this application. This will need to be added to our `src/ environments/environment.ts` and `src/environments/environment.prod.ts` files. In a real-world application it is very likely that this information would be different between development and production, but that is not the case here.
+**Note:** the CS Demo AC Providers app is currently only available in Angular and React flavors. However, this should allow you to verify your configuration in a way that is easy to adapt to your Vue code. A Vue version of this sample will be created at a later date.
+
+Here is the configuration that is required to connect to the provider that we have for this application:
+
+- **Base:**
+  - **OIDC Provider:** Azure
+  - **client ID:** `b69e2ee7-b67a-4e26-8a38-f7ca30d2e4d4`
+  - **Scope:** `openid offline_access email profile https://vikingsquad.onmicrosoft.com/api/Hello.Read`
+  - **Dicovery URL:** `https://vikingsquad.b2clogin.com/vikingsquad.onmicrosoft.com/v2.0/.well-known/openid-configuration?p=B2C_1_Signup_Signin`
+  - **Audiece:** `https://api.myapp.com`
+- **Mobile:**
+  - **Redirect URI:** `myapp://callback`
+  - **Logout URL:** `myapp://callback?logout=true`
+- **Web:**
+  - **Redirect URI:** `http://localhost:8100/login`
+  - **Logout URL:** `http://localhost:8100/login`
+
+The redirect URI and logout URL in mobile do not actually exist in our app. Take note of the URL scheme used here. It should be the same for both "redirect" and "logout" and will be required when we perform the native project configuration.
+
+For the web URLs, the paths need to be valid, though Auth Connect will not actually redirect to them unless using the <a href="https://ionic.io/docs/auth-connect/api#webauthflow" target="_blank">implicit flow</a> with a UI mode of <a href="https://ionic.io/docs/auth-connect/api#implicitlogin" target="_blank">POPUP</a> (details of doing so are not covered by this tutorial).
+
+Add a file called `src/services/AuthConnectConfig.ts`. Add code that abstracts the above configuration into the <a href="https://ionic.io/docs/auth-connect/api#interface-ionicauthoptions" target ="_blank">Auth Connect configuration object</a>. This will allow us to build the proper configuration based on the current platform. This will also allow us to expand the configuration in the future when, for example, we have different configurations based on whether we are doing a production or an development build.
 
 ```TypeScript
 import { IonicAuthOptions } from '@ionic-enterprise/auth';
+import { isPlatform } from '@ionic/vue';
+
+type authConfigType = 'azure';
 
 const baseConfig = {
   clientID: 'b69e2ee7-b67a-4e26-8a38-f7ca30d2e4d4',
-  scope: 'openid offline_access email profile https://vikingsquad.onmicrosoft.com/api/Hello.Read',
+  scope:
+    'openid offline_access email profile https://vikingsquad.onmicrosoft.com/api/Hello.Read',
   discoveryUrl:
     'https://vikingsquad.b2clogin.com/vikingsquad.onmicrosoft.com/v2.0/.well-known/openid-configuration?p=B2C_1_Signup_Signin',
   audience: 'https://api.myapp.com',
-  authConfig: 'azure' as 'azure'
+  authConfig: 'azure' as authConfigType,
 };
 
-export const mobileAzureConfig: IonicAuthOptions = {
+const mobileAzureConfig: IonicAuthOptions = {
   ...baseConfig,
   redirectUri: 'myapp://callback',
   logoutUrl: 'myapp://callback?logout=true',
   platform: 'cordova',
   iosWebView: 'private',
-  androidToolbarColor: 'Red'
+  androidToolbarColor: 'Red',
 };
 
-export const webAzureConfig: IonicAuthOptions = {
+const webAzureConfig: IonicAuthOptions = {
   ...baseConfig,
   redirectUri: 'http://localhost:8100/login',
   logoutUrl: 'http://localhost:8100/login',
-  platform: 'web'
+  platform: 'web',
 };
+
+export function getAuthConfig(): IonicAuthOptions {
+  return isPlatform('hybrid') ? mobileAzureConfig : webAzureConfig;
+}
 ```
 
 ## Native Project Configuration

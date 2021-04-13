@@ -4,14 +4,14 @@ We will start with a very simple starter appication and enhance it to establish 
 
 ## Clone
 
-Before we get started, you should create an area on your file system for working on training applications. I use the `~/Projects/Training` folder, but you can use whichever folder works best for you. The key is just to keep your file system organized. Follow these steps to clone the <a href="https://github.com/ionic-team/training-lab-angular">starting project</a> for this training:
+Before we get started, you should create an area on your file system for working on training applications. I use the `~/Projects/Training` folder, but you can use whichever folder works best for you. The key is just to keep your file system organized. Follow these steps to clone the <a href="https://github.com/ionic-team/training-lab-vue">starting project</a> for this training:
 
 1. Open a terminal session
 1. Type the following:
 
 ```bash
 cd ~/Projects/Training # or whichever folder you will use to organize your training projects
-git clone https://github.com/ionic-team/training-lab-angular.git training-auth-connect
+git clone https://github.com/ionic-team/training-lab-vue.git training-auth-connect
 cd training-auth-connect
 git remote remove origin
 ```
@@ -22,7 +22,7 @@ Make sure you can build the application and run it in your browser.
 
 ```bash
 npm i
-npm start
+npm run serve
 ```
 
 At this point, you can view the application <a href="http://localhost:8100" target="_blank">http://localhost:8100</a>.
@@ -44,31 +44,29 @@ npx cap open ios
 
 Open the application in the browser. You should be on the first tab and you are not logged in. Go to the third tab. That should be accessible as well. Now try the second tab. When clicking on this tab you will be redirected to the login page. Let's have a look at what is going on within the application.
 
-Have a look at the following various parts of the application. With the exception of the page, which is in its own folder, all of these items can be found under `src/app/core`.
+### API Service
+
+The API service abstracts the Axios configuration required to access our backend API.
+
+Of special note are the two interceptors defined here, one on outgoing request and the other on incoming responses.  The request interceptor modifies outbound requests by adding a bearer token to the `Authorization` header. 
+
+The response interceptor examines inbout responses looking for 401 (unauthorized) errors. If it finds one, it redirects the user to the login page. **Note:** this is what is currently causing us to redirect to the login page when we try to access the tab 2 page. The flow looks something like this:
+
+1. the auth guard is a do nothing guard at this point and lets us in
+1. the tab2 page uses the tea service to try to get some tea info
+1. the tea service makes the request
+1. the request interceptor cannnot find a token, so it does not append a bearer token
+1. the request is sent to the REST API
+1. the REST API rejects to unauthorzied request with a 401 error code
+1. the response interceptor examines the response, sees the 401 error code, and redirects the user to the login page
 
 ### Tea Service
 
-The tea service is a basic HTTP service that fetches tea related data from a REST API using Angular's HttpClient service. Our REST API requires authentication in order to provide data. We currently lack a means to provide that authentication.
+The tea service is a basic HTTP service that fetches tea related data from a REST API using the Axios client defined in our API service. Our REST API requires authentication in order to provide data. We currently lack a means to provide that authentication.
 
 ### Auth Guard
 
-The auth guard is intended to guard our route by disallowing navigation if we are not currently authenticated. Currently, it does nothing and just returns `true`, allowing us through.
-
-### HTTP Ineterceptors
-
-Our application contains two HTTP interceptors: an auth interceptor and an unauth interceptor.
-
-The auth interceptor modifies outbound requests. It adds a bearer token to the `Authorization` header of any request that requires a token. For our application, this is any request other than a `login` request (which we will not be using in this application anyhow, since we will be using Auth Connect to obtain the authorization from an OIDC provider rather than from our own API).
-
-The unauth interceptor examines inbout responses looking for 401 (unauthorized) errors. If it finds one, it redirects the user to the login page. **Note:** this is what is currently causing us to redirect to the login page when we try to access the tab 2 page. The flow looks something like this:
-
-1. the auth guard is a do nothing guard at this point and lets us in
-1. the page uses the tea service to try to get some tea info
-1. the tea service makes the request
-1. the auth interceptor cannnot find a token, so it does not append a bearer token
-1. the request is sent to the REST API
-1. the REST API rejects to unauthorzied request with a 401 error code
-1. the unauth interceptor examines the response, sees the 401 error code, and redirects the user to the login page
+In `src/route/index.ts` we have a method called `checkAuthStatus`. The purpose of this method is to to guard our routes that require authentication by disallowing navigation if we are not currently authenticated. Currently, it does nothing and just returns `true`, allowing us through.
 
 ### Tab2 Page
 
@@ -91,7 +89,7 @@ When logged in:
 1. the auth guard allows the navigation
 1. the page uses the tea service to try to get some tea info
 1. the tea service makes the request
-1. the auth interceptor gets an access token from Auth Connect and adds it as a bearer token in the Authorization header
+1. the request interceptor gets an access token from Auth Connect and adds it as a bearer token in the Authorization header
 1. the request is sent to the REST API
 1. the REST API accepts the reqest and retuns the data
 1. the page displays the returned data

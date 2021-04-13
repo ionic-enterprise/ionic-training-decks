@@ -488,12 +488,28 @@
         {
           "name": "vue",
           "title": "Vue",
-          "folder": "noimp",
+          "folder": "auth-connect-vue",
           "icon": "logo-vue",
           "pages": [
             {
               "title": "Introduction",
-              "file": "vue"
+              "file": "intro"
+            },
+            {
+              "title": "The Base Application",
+              "file": "base"
+            },
+            {
+              "title": "Install Auth Connect",
+              "file": "install"
+            },
+            {
+              "title": "Create the Auth Workflow",
+              "file": "auth-service"
+            },
+            {
+              "title": "Include Identity Vault",
+              "file": "identity-vault"
             }
           ]
         }
