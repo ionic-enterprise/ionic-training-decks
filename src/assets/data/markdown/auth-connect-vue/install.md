@@ -186,6 +186,45 @@ Notice the schema used in the `redirectUri` and `logoutUrl` on mobile. The only 
 
 In general, a schema like `myapp` like we are using for the training is not very good. You should use something far more specicific such as the budle ID of your application. For the training app, however, you have to use `myapp` as we have configured above. The reason for this is that this is out the OIDC provider we are using is configured.
 
+## Testing
+
+We are not doing any unit testing for this tutorial. However, in a production application unit tests are absolutely essential to having a maintainable product. If you perform a `npm run test:unit` you will get errors building the tests. To fix this, update the `jest.config.js` by adding `@ionic-enterprise` to the `transformIgnorePatterns` and adding a `setupFiles` array with a routine to patch JS-DOM.
+
+The `jest.config.js` should look something like this:
+
+```JavaScript
+module.exports = {
+  preset: '@vue/cli-plugin-unit-jest/presets/typescript-and-babel',
+  transform: {
+    '^.+\\.vue$': 'vue-jest'
+  },
+  transformIgnorePatterns: ['/node_modules/(?!@ionic/vue|@ionic/vue-router|@ionic-enterprise)'],
+  setupFiles: ['./patchJSDom.js']
+};
+```
+
+The `patchJSDom.js` file needs to patch in a mock `matchMedia` function:
+
+```JavaScript
+/* eslint-disable */
+
+Object.defineProperty(window, 'matchMedia', {
+  writable: true,
+  value: jest.fn().mockImplementation(query => ({
+    matches: false,
+    media: query,
+    onchange: null,
+    addListener: jest.fn(), // deprecated
+    removeListener: jest.fn(), // deprecated
+    addEventListener: jest.fn(),
+    removeEventListener: jest.fn(),
+    dispatchEvent: jest.fn()
+  }))
+});
+```
+
+Now your tests will compile and run. They will still very likely fail, but this time with an actual testing error. But that is just because we are not maintaining the tests... 🤓
+
 ## Conclusion
 
 At this point, we have our OIDC provider configured. We also have Auth Connect is installed and configured within our application. In the next section we will implement the authentication workflow.
