@@ -1,3 +1,14 @@
+# [4.6.0](https://github.com/ionic-team/ionic-training-decks/compare/v4.5.2...v4.6.0) (2021-04-16)
+
+### Bug Fixes
+
+- **auth-connect:** add test config modifications ([7a9f3a8](https://github.com/ionic-team/ionic-training-decks/commit/7a9f3a89b59ab51db299b88f0928f602a3ead39d))
+- **auth-connect-angular:** put the steps in bash blocks ([fca1738](https://github.com/ionic-team/ionic-training-decks/commit/fca17386e4ba5b4ed819dac9a1339f95a6d04b88))
+
+### Features
+
+- **auth-connect:** add vue training ([c5aff30](https://github.com/ionic-team/ionic-training-decks/commit/c5aff303ff1eab0410d1c7864253240b989935b9))
+
 ## [4.5.2](https://github.com/ionic-team/ionic-training-decks/compare/v4.5.1...v4.5.2) (2021-03-26)
 
 ### Bug Fixes
