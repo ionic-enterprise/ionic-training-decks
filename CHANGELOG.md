@@ -1,3 +1,13 @@
+# [4.7.0](https://github.com/ionic-team/ionic-training-decks/compare/v4.6.0...v4.7.0) (2021-04-24)
+
+### Bug Fixes
+
+- **menu:** update the auth modes title ([a3c0812](https://github.com/ionic-team/ionic-training-decks/commit/a3c0812b5a6b1e87f96b64373b2089110c5d569d))
+
+### Features
+
+- **identity-vault:** make the training a self-paced walkthrough ([fe19927](https://github.com/ionic-team/ionic-training-decks/commit/fe19927e356199349e37f435c06f6ce043975192))
+
 # [4.6.0](https://github.com/ionic-team/ionic-training-decks/compare/v4.5.2...v4.6.0) (2021-04-16)
 
 ### Bug Fixes
