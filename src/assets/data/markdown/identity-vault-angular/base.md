@@ -12,7 +12,7 @@ Before we get started, you should create an area on your file system for working
 ```bash
 cd ~/Projects/Training # or whichever folder you will use to organize your training projects
 git clone https://github.com/ionic-team/training-lab-angular.git training-identity-vault
-cd training-auth-connect
+cd training-identity-vault
 git remote remove origin
 ```
 
@@ -62,7 +62,7 @@ The auth guard is intended to guard our route by disallowing navigation if we ar
 
 Our application contains two HTTP interceptors: an auth interceptor and an unauth interceptor.
 
-The auth interceptor modifies outbound requests. It adds a bearer token to the `Authorization` header of any request that requires a token. For our application, this is any request other than a `login` request (which we will not be using in this application anyhow, since we will be using Auth Connect to obtain the authorization from an OIDC provider rather than from our own API).
+The auth interceptor modifies outbound requests. It adds a bearer token to the `Authorization` header of any request that requires a token. For our application, this is any request other than a `login` request.
 
 The unauth interceptor examines inbout responses looking for 401 (unauthorized) errors. If it finds one, it redirects the user to the login page. **Note:** this is what is currently causing us to redirect to the login page when we try to access the tab 2 page. The flow looks something like this:
 
