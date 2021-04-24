@@ -5,7 +5,7 @@ The first thing we need to do is install Auth Connect. In order to do this, you 
 - you can perform this <a href="" target="_blank">registration</a>
 - or you can copy the `.npmrc` file from your production application if you have already performed the registration there
 
-**Note:** your key is only for a single production application, but you can use it with as many training exercises as you would like. The same holds true for prototype applications. If you would like to whip up a prototype application in which to try a new authentication workflow that you may incorporate into your production application, please do. If you need to use Auth Connect in more production app, however, please contact us about obtaining more keys.
+**Note:** your key is only for a single production application, but you can use it with as many training exercises as you would like. The same holds true for prototype applications. If you would like to whip up a prototype application in which to try a new authentication workflow that you may incorporate into your production application, please do. If you need to use Auth Connect in more production applications, however, please contact us about obtaining more keys.
 
 Once the app is properly registered (or the `.npmrc` file is properly copied over), you should perform the following commands to install Auth Connect and update your native projects:
 

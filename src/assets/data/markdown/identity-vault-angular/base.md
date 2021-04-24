@@ -1,50 +1,89 @@
-# Lab: The Base Application
+# Install the Base Application
 
-This training starts with an Ionic Framework application that uses the Capacitor Storage API to store the current authentication token. This is a common paradigm used in web applications. For hybrid mobile applications, however, we can go a step further and store the token in a secure storage area. We can also lock the token behind biometric or PIN based security.
+We will start with a very simple starter appication and enhance it to securely store our session data via Ionic Identity Vault. The application we will use is a basic Ionic tabs based starter with a little code added that will eventually allow us to access some information from a REST API so we can display the information in the app.
 
-## Getting Started
+## Clone
 
-These instrctions assume that you have a reasonable development environment set up on your machine including `git`, `node`, `npm`, and `Android Studio`. If your are using a Mac and want to build for iOS, you should also have `Xcode`, the Xcode commandline tools, and `cocoapods`.
+Before we get started, you should create an area on your file system for working on training applications. I use the `~/Projects/Training` folder, but you can use whichever folder works best for you. The key is just to keep your file system organized. Follow these steps to clone the <a href="https://github.com/ionic-team/training-lab-angular">starting project</a> for this training:
 
-To get started, perform the following actions within a working folder:
+1. Open a terminal session
+1. Type the following:
 
-- `git clone https://github.com/ionic-team/tea-taster-angular.git`
-- `cd tea-taster-angular`
-- `npm i`
-- `npm run build`
-- `npx cap sync` - this may take a while
-- `npm start` - to run in the browser
+```bash
+cd ~/Projects/Training # or whichever folder you will use to organize your training projects
+git clone https://github.com/ionic-team/training-lab-angular.git training-identity-vault
+cd training-auth-connect
+git remote remove origin
+```
 
-To build for installation on a device, use `npx cap open android` or `npx cap open ios`. This will open the project in the appropriate IDE. From there you can build the native application and install it on your device.
+## Build
 
-**Note:** If you recently participated in the Ionic Framework training, this repo is the end result of that training, so you can use your existing codebase if you wish. You can start with a clean slate following the instructions above.
+Make sure you can build the application and run it in your browser.
 
-## General Architecture
+```bash
+npm i
+npm start
+```
 
-### The Store
+At this point, you can view the application <a href="http://localhost:8100" target="_blank">http://localhost:8100</a>.
 
-This application uses an NgRX store to keep track of the application state. Part of that state includes the current session. Have a look at the `auth` slice of the state, defined in `src/app/store/reducers/auth/auth.reducer.ts` and examine how the session is represented in the state.
+### Build for Devices
 
-### Services
+If you would like to try running the application on a device, follow these steps:
 
-Two services are related to the authentication workflow. The `SessionVaultService` handles storing the session information in persistent storage. The `AuthenticationService` handles the API calls that perform login and logout actions.
+```bash
+npm run build
+npx cap sync
+npx cap open android
+npx cap open ios
+```
 
-### HTTP Interceptors
+**Note:** for iOS, you will need to have an Apple developer account in order to run on a device.
 
-Two HTTP interceptors are used by the authentication workflow. The `AuthInterceptor` adds the authentication token to outgoing requests if they require a token. The `UnauthInterceptor` redirects the application to the login page when requests fail with a 401 error.
+## Tour
+
+Open the application in the browser. You should be on the first tab and you are not logged in. Go to the third tab. That should be accessible as well. Now try the second tab. When clicking on this tab you will be redirected to the login page. Let's have a look at what is going on within the application.
+
+Have a look at the following various parts of the application. With the exception of the page, which is in its own folder, all of these items can be found under `src/app/core`.
+
+### Tea Service
+
+The tea service is a basic HTTP service that fetches tea related data from a REST API using Angular's HttpClient service. Our REST API requires authentication in order to provide data. We currently lack a means to provide that authentication.
+
+### Tab2 Page
+
+The tab 2 page uses the tea service to obtain tea related data from our REST API. It then displays that information in a list.
 
 ### Auth Guard
 
-This application uses an Route Guard to ensure that the user is logged in before accessing any routes other than the login page route. See `src/app/core/auth-guard/auth-guard.service.ts` for details.
+The auth guard is intended to guard our route by disallowing navigation if we are not currently authenticated. Currently, it does nothing and just returns `true`, allowing us through.
 
-### Application Workflow
+### HTTP Ineterceptors
 
-#### Startup
+Our application contains two HTTP interceptors: an auth interceptor and an unauth interceptor.
 
-When the application first starts, the session is undefined in the store. The first time that a route is hit that requires authentication, the Auth Guard will note that the session does not exist and attempt to restore the session. If the session is restored, then the application can continue to the guarded route. If not, then the application is redirected to the login page.
+The auth interceptor modifies outbound requests. It adds a bearer token to the `Authorization` header of any request that requires a token. For our application, this is any request other than a `login` request (which we will not be using in this application anyhow, since we will be using Auth Connect to obtain the authorization from an OIDC provider rather than from our own API).
 
-This allows the application to delay attempting to restore the session until a session is actually required (which is actually for all pages except the login page for this application, but that is not always the case in every app).
+The unauth interceptor examines inbout responses looking for 401 (unauthorized) errors. If it finds one, it redirects the user to the login page. **Note:** this is what is currently causing us to redirect to the login page when we try to access the tab 2 page. The flow looks something like this:
 
-#### Execution
+1. the auth guard is a do nothing guard at this point and lets us in
+1. the page uses the tea service to try to get some tea info
+1. the tea service makes the request
+1. the auth interceptor cannnot find a token, so it does not append a bearer token
+1. the request is sent to the REST API
+1. the REST API rejects to unauthorzied request with a 401 error code
+1. the unauth interceptor examines the response, sees the 401 error code, and redirects the user to the login page
 
-If at any point the user is logged out, either through their own logging out, or via a 401 error, the `logoutSuccess` action is dispatched, and the user is redirected to the login page where they can restablish a session.
+## Conclusion
+
+This is our starting point. Our goal will be to create an authentication service that will establish our session and then integrate Identity Vault with our application to securely store the session information. When we are done, the flow will look like this:
+
+When not logged in:
+
+TODO: Fill this in once the app is created...
+
+When logged in:
+
+TODO: Fill this in once the app is created...
+
+In the next section we will get started by implementing a simple authentication workflow without identity vault

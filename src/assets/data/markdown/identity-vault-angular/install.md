@@ -1,207 +1,115 @@
-# Lab: Installation and Basic Setup
+# Install Identity Vault
 
-## Install Identity Vault
+The first thing we need to do is install Identity Vault. In order to do this, you will need to have an Ionic Enterprise key that includes access to Identity Vault. Since you are working through this particular tutorial, it is assumed that you have one. There are two ways you can associate this application with your Ionic Enterprise key:
 
-Before we can use Identity Vault, we need to install it and update the native projects.
+- you can perform this <a href="https://ionic.io/docs/premier-plugins/setup" target="_blank">registration</a>
+- or you can copy the `.npmrc` file from your production application if you have already performed the registration there
 
-```Bash
-ionic enterprise register --key=YOURPRODUCTKEY
+**Note:** your key is only for a single production application, but you can use it with as many training exercises as you would like. The same holds true for prototype applications. If you would like to whip up a prototype application in which to try a new authentication workflow that you may incorporate into your production application, please do. If you need to use Identity Vault in more production applications, however, please contact us about obtaining more keys.
+
+Once the app is properly registered (or the `.npmrc` file is properly copied over), you should perform the following commands to install Identity Vault and update your native projects:
+
+```bash
 npm i @ionic-enterprise/identity-vault
 npx cap update
 ```
 
-**Note:** if you have already registered your product key using a different app, you can just copy the `.npmrc` file from the other application to this training application. Since this is just a training app, we do not care that you are using your key here and in your production application at the same time.
+## A Simple Vault Service
 
-## Browser Auth Plugin and Service
+In order to ingegrate Identity Vault into our application, we will extend the `IonicIdentityVaultUser` class that is provided by Identity Vault. Using this class, we will configure the vault and interact with it.
 
-Identity Vault uses hardware and APIs that are only available when we are running on a device as a hybrid mobile application. That limits our application to only being run on a device or emulator. That is less than ideal. We would like to be able to also run our application in a web context in order to support the following scenarios:
+When integrating Identity Vault into an existing application, there is quite often a service that is a natural choice to convert. We already have a `VaultService` and we will convert it to use Identity Vault. Most other applications have a service that manages the the current session. Other common names for these services are `IdentityService` or `SessionService`. Whatever this service is in your existing system is a good candidate. In many cases, you can modify this service to extend Identity Vault. This has the advantage of needing to make few changes throughout the rest of the appliction as the workflow for how the current session information is obtained is already defined.
 
-- Unit testing
-- Running in the development server as we build out our application
-- Deploying the application to the web for use as a PWA
-
-In order to support these scenarios, we need to add a service that will perform the "Identity Vault" related tasks but store the token using the Capacitor Storage API, similar to what our app is currently doing.
-
-### The Services
-
-Two services need to be created. They both will reside in the `src/app/core/browser-vault` folder, so create that folder now.
-
-#### BrowserVaultService
-
-The `BrowserVaultService` is based on the JavaScript interface for the Identity Vault itself. It contains all of the same methods that the actual Vault does. Many of these methods are just stubs. A few need to perform actions, however. For the most part, these actions involve storing and retrieving the authentication token using the Capacitor Storage API. A common implementation looks like this:
+In our tutorial application, we will convert the `VaultService` to extend `IonicIdentityVaultUser`.
 
 ```TypeScript
 import { Injectable } from '@angular/core';
-import { Plugins } from '@capacitor/core';
 import {
-  BiometricType,
-  IdentityVault,
-  PluginConfiguration,
   AuthMode,
-  SupportedBiometricType,
+  IonicIdentityVaultUser,
+  IonicNativeAuthPlugin,
 } from '@ionic-enterprise/identity-vault';
+import { Platform } from '@ionic/angular';
+import { Session } from '../models';
 
 @Injectable({
   providedIn: 'root',
 })
-export class BrowserVaultService implements IdentityVault {
-  config = {
-    authMode: AuthMode.SecureStorage,
-    descriptor: {
-      username: '',
-      vaultId: '',
-    },
-    isBiometricsEnabled: false,
-    isPasscodeEnabled: false,
-    isPasscodeSetupNeeded: false,
-    isSecureStorageModeEnabled: true,
-    hideScreenOnBackground: false,
-    lockAfter: 50000,
-  };
-
-  constructor() {}
-
-  async unsubscribe(): Promise<void> {}
-
-  async clear(): Promise<void> {
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    const { Storage } = Plugins;
-    await Storage.clear();
+export class VaultService extends IonicIdentityVaultUser<Session> {
+  constructor(platform: Platform) {
+    super(platform, {
+      unlockOnAccess: true,
+      hideScreenOnBackground: true,
+      lockAfter: 5000,
+      authMode: AuthMode.SecureStorage,
+    });
   }
-
-  async lock(): Promise<void> {}
-
-  async isLocked(): Promise<boolean> {
-    return false;
-  }
-
-  async isInUse(): Promise<boolean> {
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    const { Storage } = Plugins;
-    return !!(await Storage.get({ key: 'session' }));
-  }
-
-  async getConfig(): Promise<PluginConfiguration> {
-    return this.config;
-  }
-
-  async remainingAttempts(): Promise<number> {
-    return 5;
-  }
-
-  async getUsername(): Promise<string> {
-    return 'MyUsername';
-  }
-
-  async storeToken(token: any): Promise<void> {}
-
-  async getToken(): Promise<any> {
-    return 'MyToken';
-  }
-
-  async storeValue(key: string, value: any): Promise<void> {
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    const { Storage } = Plugins;
-    await Storage.set({ key, value: JSON.stringify(value) });
-  }
-
-  async getValue(key: string): Promise<any> {
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    const { Storage } = Plugins;
-    const { value } = await Storage.get({ key });
-    return JSON.parse(value);
-  }
-
-  async removeValue(key: string): Promise<void> {
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    const { Storage } = Plugins;
-    await Storage.remove({ key });
-  }
-
-  async getKeys(): Promise<Array<string>> {
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    const { Storage } = Plugins;
-    const { keys } = await Storage.keys();
-    return keys;
-  }
-
-  // tslint:disable-next-line
-  async getBiometricType(): Promise<BiometricType> {
-    return 'none';
-  }
-
-  async getAvailableHardware(): Promise<Array<SupportedBiometricType>> {
-    return [];
-  }
-
-  async setBiometricsEnabled(isBiometricsEnabled: boolean): Promise<void> {}
-
-  async isBiometricsEnabled(): Promise<boolean> {
-    return false;
-  }
-
-  async isBiometricsAvailable(): Promise<boolean> {
-    return false;
-  }
-
-  async isBiometricsSupported(): Promise<boolean> {
-    return false;
-  }
-
-  async isLockedOutOfBiometrics(): Promise<boolean> {
-    return false;
-  }
-
-  async isPasscodeSetupNeeded(): Promise<boolean> {
-    return false;
-  }
-
-  async setPasscode(passcode?: string): Promise<void> {}
-
-  async isPasscodeEnabled(): Promise<boolean> {
-    return false;
-  }
-
-  async isSecureStorageModeEnabled(): Promise<boolean> {
-    return true;
-  }
-
-  async setPasscodeEnabled(isPasscodeEnabled: boolean): Promise<void> {}
-
-  async setSecureStorageModeEnabled(enabled: boolean): Promise<void> {}
-
-  async unlock(usingPasscode?: boolean, passcode?: string): Promise<void> {}
 }
 ```
 
-Create a `src/app/core/browser-vault/browser-vault.service.ts` file with the above contents.
+This is what our configuration means:
 
-#### BrowserVaultPlugin
+- `unlockOnAccess`: if the vault is locked, unlock the vault when the application attempts to access the session. If this value is false, the application will need to call `unlock()` itself. This value is typically `true` unless you want fine-grained control over the unlock workflow.
+- `hideScreenOnBackground`: setting this option `true` results in a privacy screen being displayed rather than a snaphot of the application when it is in the background.
+- `lockAfter`: the number of milliseconds to wait before locking the vault when the application is in the background.
+- `authMode`: the method to use to unlock the vault. In the case of `SecureStorage`, the session will be stored in a secure location, but the vault will never lock.
 
-The `BrowserVaultPlugin` service mimics the Indentity Vault plugin's JavaScript interface that gets us access to the vault. Rather than returning an object that accesses the Vault plugin, the `BrowserVaultPlugin` service returns an instance of the `BrowserVaultService`, which is our browser-based service that implements the same API as the plugin. This code is very simple:
+For a full explanation of all of the configuration options, please see <a href="https://ionic.io/docs/identity-vault/api#vaultoptions" target="_blank">the VaultOptions documentation</a>.
+
+If you build and run the application on a device at this point, you should be able to log in and have your session persist after you close and restart the application.
+
+## Supporting the Browser
+
+Since Identity Vault is used to store the authentication tokens in a secure location on mobile devices and since there is no such thing as a secure storage mechanism in the browser, Identity Vault does not, by default, work in the browser. However, we would still like to be able to use the browser as our primary platform when doing development. In order to do this, we will need to create a fake "browser vault" plugin and service. The reason it is fake is that the web does not actually have a secure vault location where data like this can be stored. Instead, we will create services that use the same interface as the Vault users. This fake plugin will then use `@capacitor/storage` as its storage mechanism.
+
+The classes themselves are boiler-plate, so let's just download them rather than going through writing it:
+
+- <a download href="/assets/packages/ionic-angular/browser-vault.zip">Download the zip file</a>
+- unzip the file somewhere
+- copy the `browser-vault.service.ts` and `browser-vault.plugin.ts` files from where you unpacked them to `src/app/core`
+
+Finally, in the `VaultService` class, we will inject the `BrowserVaultPlugin` and override the `getPlugin()` method to use real plugin if the application is run in a hybrid mobile context, and the fake "browser vault" otherwise.
+
+When completed, the service will now look like this:
 
 ```TypeScript
 import { Injectable } from '@angular/core';
 import {
-  IdentityVault,
-  PluginOptions,
-  IonicNativeAuthPlugin
+  AuthMode,
+  IonicIdentityVaultUser,
+  IonicNativeAuthPlugin,
 } from '@ionic-enterprise/identity-vault';
-import { BrowserVaultService } from './browser-vault.service';
+import { Platform } from '@ionic/angular';
+import { Session } from '../models';
+import { BrowserVaultPlugin } from './browser-vault.plugin';
 
-@Injectable({ providedIn: 'root' })
-export class BrowserVaultPlugin implements IonicNativeAuthPlugin {
-  constructor(private browserVaultService: BrowserVaultService) {}
+@Injectable({
+  providedIn: 'root',
+})
+export class VaultService extends IonicIdentityVaultUser<Session> {
+  constructor(
+    private browserVaultPlugin: BrowserVaultPlugin,
+    platform: Platform,
+  ) {
+    super(platform, {
+      unlockOnAccess: true,
+      hideScreenOnBackground: true,
+      lockAfter: 5000,
+      authMode: AuthMode.SecureStorage,
+    });
+  }
 
-  getVault(config: PluginOptions): IdentityVault {
-    config.onReady(this.browserVaultService);
-    return this.browserVaultService;
+  getPlugin(): IonicNativeAuthPlugin {
+    if ((this.platform as Platform).is('hybrid')) {
+      return super.getPlugin();
+    }
+    return this.browserVaultPlugin;
   }
 }
 ```
 
-Create a `src/app/core/browser-vault/browser-vault.plugin.ts` file with the above contents.
+Now when you run in the browser, the application will use the `BrowserVaultPlugin` and `BrowserVaultService` classes to store the keys in a way that the browser can consume them.
 
 ## Conclusion
 
-Now that Identity Vault has been installed, it is time to modify the `SessionVaultService` to use Identity Vault. We will do this in baby steps. Our first step will just be to get the application working essetially as it is today, except using Idenity Vault for the storage of the session information.
+We are now using Identity Vault to securely persist our session between application reloads. Next we will look at using various authentication modes in order to lock and unlock the vault.

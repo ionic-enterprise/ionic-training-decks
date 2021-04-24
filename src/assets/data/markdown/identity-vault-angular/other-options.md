@@ -96,10 +96,16 @@ super(
 
 This can be used for multiple different scenarios. For example, let's say that upon login, part of the workflow within the application involves asking the back-end for various API keys. We would like to securely store those API keys, but they are not really part of the session. We can use the main vault to store the session, and then use the
 
+## A "Real World" Example
+
+We also have a more "real world" demo that shows Identity Vault being integrated into a non-trivial application that is using NgRX for state management as well as other "real world" application paradigms. The app itself is relativily small so that it is approachable, but is complex enough to show how Identity Vault can be integrated into a more typical application.
+
+If you have a look at the end code in the [Identity Vault branch](https://github.com/ionic-team/tea-taster-angular/tree/feature/identity-vault) you will see that we have implemented some of what was discussed here. We have done that for demo purposes only. It is not a perscribed workflow, but one that you can use as a starting point for your own.
+
+Please play around with some of these options and see how they work within the demo application. Note that the approach taken here is not the only valid approach to take. Rather, it is the approach that works for _this_ application. It is a common approach that will work in many instsances, but there are areas in the workflow that you may want to change in your own application.
+
 ## Conclusion
 
-If you have a look at the end code in the [Identity Vault branch](https://github.com/ionic-team/tea-taster-angular/tree/feature/identity-vault) you will see that we have implemented some of what was discussed here. We have done that for demo puroses only. It is not a perscribed workflow, but one that you can use as a starting point for your own.
-
-Please play around with some of these options and see how they work within the training application. Note that the approach taken here is not the only valid approach to take. Rather, it is the approach that works for _this_ application. It is a common approach that will work in many instsances, but there are areas in the workflow that you may want to change in your own application.
-
 Please remember that we are here to advise you in this and other implementation details of your application. If you do not have advisory hours on your contract, please let us know. We will be happy to work with you to provide you with options that make sense for your situation.
+
+Happy Coding!!

@@ -2,54 +2,68 @@
 
 At this point, the application has a well defined workflow for determining how to secure the token. However, the workflow used to gather or enter the PIN is a little clunky. The workflow and UI that it is currently using is intended for development use only, and is not intended to be used in a production quality application. **We highly suggest that application developers create their own PIN dialog and workflow in order to provide a more appropriate experience for their application.**
 
-## Create the PIN Dialog
+In this section we will improve the session PIN user experience.
 
-Since this isn't a trainig on "How to Create a Modal Dialog", let's just steal some code for that 😃
+## The `onPasscodeRequest` Callback
 
-Just grab the PIN dialog from the <a href="https://github.com/ionic-team/tea-taster-angular/tree/feature/identity-vault/src/app/pin-dialog" target="_blank">completed example</a> for this training and copy it into your application. Note that you will also need to update the `app.module.ts` file to import the `PinDialogModule` into `AppModule`:
+The `IonicIdentityVaultUser` class contains a method named `onPasscodeRequest` that is called whenever the system needs to obtain a PIN. This method is called with a single parameter that is `true` if the vault is setting the passcode and `false` when the vault is obtaining the passcode in order to unlock the vault.
 
-```diff
---- a/src/app/app.module.ts
-+++ b/src/app/app.module.ts
-@@ -14,6 +14,7 @@ import { AuthEffects, DataEffects } from './store/effects';
- import { StoreDevtoolsModule } from '@ngrx/store-devtools';
- import { environment } from '../environments/environment';
- import { AuthInterceptor, UnauthInterceptor } from './core';
-+import { PinDialogComponentModule } from './pin-dialog/pin-dialog.module';
-
- @NgModule({
-   declarations: [AppComponent],
-@@ -23,6 +24,7 @@ import { AuthInterceptor, UnauthInterceptor } from './core';
-     BrowserModule,
-     IonicModule.forRoot(),
-     HttpClientModule,
-+    PinDialogComponentModule,
-     StoreModule.forRoot(reducers, {
-       metaReducers,
-       runtimeChecks: {
+```TypeScript
+  async onPasscodeRequest(isPasscodeSetRequest: boolean): Promise<string> {
+    // Code to obtain PIN goes here...
+    return pin;
+  }
 ```
 
-The logic within this coomponent implements the following workflows:
+The `onPasscodeRequest` method should return one of the following values:
 
-- when setting up a new PIN, ask for the PIN twice to verify the correct PIN was entered
-- when unlocking, just take the PIN once
+- `empty string`: the user cancelled the entry of the PIN
+- `non-empty string`: the PIN entered by the user
 
-Have a look at the code just to get an idea of how it works. There is nothing in this code that is specific to Identity Vault, but if you have any questions about how the modal works, please ask.
+If you return `undefined` from this method, Identity Vault will fall back to the default PIN experience, so when the user cancels make sure you are returning an empty string and not `undefined`.
 
-## Hooking up the PIN Dialog
+### Obtaining the PIN
 
-Now that we have a PIN dialog, let's get straight into the Identity Vault portions and get it all hooked up so we can use it instead of the default "development-only" PIN entry prompts.
+The "Code to obtain PIN goes hear..." could literally be anything you want to obtain a PIN. For example, each users in the system could have an "employee number" associated with their user that gets looked up from the API and then gets used as a PIN. In this case, the user would never have to establish a PIN. They would just have to enter their employee ID to unlock the vault.In that case, your logic may look like this:
 
-The `IonicIdentityVaultUser` base class provides a hook called `onPasscodeRequest()`. This hook can be used to perform essentially any workflow that you desire so long as that workflow involves returning a Promise that will resolve to the PIN. If `onPasscodeRequest()` resolves to `undefined` then the system PIN dialogs will be used.
+```TypeScript
+  async onPasscodeRequest(isPasscodeSetRequest: boolean): Promise<string> {
+    if (isPasscodeSetRequest) {
+      return obtainPINFromAPI();
+    } else {
+      return obtainPINFromUser();
+    }
+  }
+```
 
-For our application, we have the following requirements for the PIN dialog:
+In this scenario, `obtainPINFromAPI()` makes an API call to get the employee ID and returns it. The `obtainPINFromUser()` method then displays some kind of dialog where the user enters their employee ID to unlock the vault.
 
-- Create a modal that uses the PinDialogComponent, disables backdrop dismiss, and passes the `setPasscodeMode` parameter
-- Present the dialog
-- When the dialog is dismissed, resolve the PIN
-- If the PIN is `undefined`, resolve to an empty string (this avoids showing the system dialogs)
+A more common scenario, however, is to use a custom component within a modal dialog to obtain the PIN for both initially setting the PIN and for unlocking the vault. That is the flow we will implement here.
 
-The code to add to `src/app/core/session-vault/session-vault.service.ts` is then as follows. Be sure to import the `PinDialogComponent` and to inject the `ModalController`.
+### The `PinDialogComponent`
+
+Rather than write the PIN Dialog component, we are just going to give you the code. <a download href="/assets/packages/ionic-angular/pin-dialog.zip">Download the zip file</a> and unpack it under `src/app` creating a `pin-dialog` folder. Have a look at the component to get an idea of what the code does. The component displays a simple numeric keypad and a prompt area. The following workflows are implemented by the component:
+
+- when `setPasscodeMode` is `true`
+  - the user is prompted for a PIN
+  - the user is prompted for a verification PIN that must match the first PIN
+  - if the PINs match, the modal is closed returning that PIN
+  - if the PINs do not match, the user has to start over
+  - the user _cannot_ cancel, they _must_ enter a PIN
+- when `setPasscodeMode` is `false`
+  - the user is prompted for a PIN
+  - the modal will close with the entered PIN
+  - the user can cancel, in which case the modal will close without a PIN
+
+In our case, the `PinDialogComponent` encapsulates our whole workflow giving the user a consistent UX when entering a PIN. That is often desireable, but as noted above is not the only way that this can be done.
+
+### Hooking it Up
+
+Now that we have the component in place, it is time to hook it up.
+
+First, add the `PinDialogComponentModule` to the `imports` array in `app.module.ts`.
+
+Once that is in place, we can modify `vault.service.ts` to implement the `onPasscodeRequest` event callback:
 
 ```TypeScript
   async onPasscodeRequest(isPasscodeSetRequest: boolean): Promise<string> {
@@ -57,17 +71,23 @@ The code to add to `src/app/core/session-vault/session-vault.service.ts` is then
       backdropDismiss: false,
       component: PinDialogComponent,
       componentProps: {
-        setPasscodeMode: isPasscodeSetRequest
-      }
+        setPasscodeMode: isPasscodeSetRequest,
+      },
     });
     dlg.present();
     const { data } = await dlg.onDidDismiss();
-    return Promise.resolve(data || '');
+    return data || '';
   }
 ```
 
-This is just one possible implementation. You do not have to use a single dialog with the mode sent as a property. You could use two completely different dialogs. You could use different dialogs for iOS and Android. You could generate a random PIN and display it to the user when setting the passcode and then display a dialog to get the PIN back from the user. You can basically do anything you want so long as it makes sense.
+Note the return value. If the data passed back from the dialog is "falsey" we want to make sure we are resolving to an empty string to signify the user cancelling the operation.
+
+## A Note on Security
+
+Identity Vault never stores the PIN that the user enters. Instead, it uses the PIN to generate a key. The key is used to lock the vault. When the vault is locked, the key is thrown away. As a result, when the vault needs to be unlocked, a new key needs to be generated. The Vault obtains a PIN from the user and a new key is generated using that PIN. The key will match the original key if the same PIN is used, or it will not if a different PIN is used.
+
+In this way, neither the PIN nor the key is ever stored anywhere. This means that neither the PIN nor the key can be obtained by a bad actor. This also means that neither the PIN nor the key is recoverable, so always give your user a way to log in again via traditional means.
 
 ## Conclusion
 
-Congratulations. You now have a fully functional Identity Vault implementation. The implementation that we have is not the only "right way" to implement this. In the next section we will discussion various other options that are commonly implemented.
+We have now fully integrated Identity Vault into our "proof of concept" application, and have seen some of the configuration options at work. We can now start thinking about how it would be best integrated in our own real-world applications.

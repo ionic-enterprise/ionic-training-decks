@@ -345,19 +345,19 @@
               "file": "base"
             },
             {
+              "title": "Add Authentication",
+              "file": "auth"
+            },
+            {
               "title": "Install Identity Vault",
               "file": "install"
             },
             {
-              "title": "The Vault Service",
-              "file": "vault-service"
+              "title": "Other Vault Types",
+              "file": "vault-types"
             },
             {
-              "title": "Add Biometrics to Login",
-              "file": "biometrics"
-            },
-            {
-              "title": "Customize the PIN Dialog",
+              "title": "Hadle the PIN Dialog",
               "file": "custom-pin"
             },
             {
