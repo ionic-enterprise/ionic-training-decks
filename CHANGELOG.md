@@ -1,3 +1,9 @@
+## [4.7.1](https://github.com/ionic-team/ionic-training-decks/compare/v4.7.0...v4.7.1) (2021-04-24)
+
+### Bug Fixes
+
+- **identity-vault:** remove references to auth connect ([f5f4e15](https://github.com/ionic-team/ionic-training-decks/commit/f5f4e154e31107d51f0f0f4c444fbea0623a2584))
+
 # [4.7.0](https://github.com/ionic-team/ionic-training-decks/compare/v4.6.0...v4.7.0) (2021-04-24)
 
 ### Bug Fixes
