@@ -80,10 +80,12 @@ This is our starting point. Our goal will be to create an authentication service
 
 When not logged in:
 
-TODO: Fill this in once the app is created...
+1. The user starts on the tab one page, which tells them they are not logged in.
+1. The tab 2 page's route is guarded. The guard will redirect the user to the login page, at which point they will need to login in to continue.
 
 When logged in:
 
-TODO: Fill this in once the app is created...
+1. The user starts on the tab one page. If the vault is locked, the user will be asked to unlock it. The page tells them they are logged in.
+1. When the user goes to page 2, the session data is obtained from the vault by the HTTP interceptor, unlocking the vault if it is locked.
 
 In the next section we will get started by implementing a simple authentication workflow without identity vault
