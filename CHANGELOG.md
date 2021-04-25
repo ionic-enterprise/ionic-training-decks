@@ -1,3 +1,9 @@
+## [4.7.2](https://github.com/ionic-team/ionic-training-decks/compare/v4.7.1...v4.7.2) (2021-04-25)
+
+### Bug Fixes
+
+- **identity-vault:** fix the flow in Angular ([68edbf2](https://github.com/ionic-team/ionic-training-decks/commit/68edbf2c6f013c95a6d79181b3f8c1c1d2baf195))
+
 ## [4.7.1](https://github.com/ionic-team/ionic-training-decks/compare/v4.7.0...v4.7.1) (2021-04-24)
 
 ### Bug Fixes
