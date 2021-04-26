@@ -8,4 +8,4 @@ This training demonstrates how to integrate Identity Vault within an Ionic Frame
 - Lock the token behind biometrics or a PIN
 - Provide a custom PIN dialog
 
-It is assumed that before taking this training you have a general understanding of how to build a hybrid mobile application using the Ionic Framework with Vue and Capacitor.
+It is assumed that before taking this training you have a general understanding of how to build a hybrid mobile application using the Ionic Framework with Vue and either Apache Cordova or Capacitor. This training uses Capacitor, but a deep understanding of Capacitor itself is not required.

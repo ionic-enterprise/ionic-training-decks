@@ -82,6 +82,8 @@ Once that is in place, we can modify `vault.service.ts` to implement the `onPass
 
 Note the return value. If the data passed back from the dialog is "falsey" we want to make sure we are resolving to an empty string to signify the user cancelling the operation.
 
+Build this and give it a try on your device.
+
 ## A Note on Security
 
 Identity Vault never stores the PIN that the user enters. Instead, it uses the PIN to generate a key. The key is used to lock the vault. When the vault is locked, the key is thrown away. As a result, when the vault needs to be unlocked, a new key needs to be generated. The Vault obtains a PIN from the user and a new key is generated using that PIN. The key will match the original key if the same PIN is used, or it will not if a different PIN is used.

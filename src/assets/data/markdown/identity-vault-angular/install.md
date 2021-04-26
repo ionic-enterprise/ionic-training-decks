@@ -27,7 +27,6 @@ import { Injectable } from '@angular/core';
 import {
   AuthMode,
   IonicIdentityVaultUser,
-  IonicNativeAuthPlugin,
 } from '@ionic-enterprise/identity-vault';
 import { Platform } from '@ionic/angular';
 import { Session } from '../models';
@@ -68,7 +67,7 @@ The classes themselves are boiler-plate, so let's just download them rather than
 - unzip the file somewhere
 - copy the `browser-vault.service.ts` and `browser-vault.plugin.ts` files from where you unpacked them to `src/app/core`
 
-Finally, in the `VaultService` class, we will inject the `BrowserVaultPlugin` and override the `getPlugin()` method to use real plugin if the application is run in a hybrid mobile context, and the fake "browser vault" otherwise.
+Finally, in the `VaultService` class, inject the `BrowserVaultPlugin` and override the `getPlugin()` method to use the real plugin if the application is run in a hybrid mobile context, and the fake "browser vault" otherwise.
 
 When completed, the service will now look like this:
 

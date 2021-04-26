@@ -17,144 +17,148 @@ Identity Vault supports multiple different authentication of modes. The most com
 Currently, we are setting the authentication mode when we instantiate the vault. This is a poor time to do this, so let's remove that line of code:
 
 ```diff
---- a/src/app/core/vault.service.ts
-+++ b/src/app/core/vault.service.ts
-@@ -20,7 +20,6 @@ export class VaultService extends IonicIdentityVaultUser<Session> {
-       unlockOnAccess: true,
-       hideScreenOnBackground: true,
-       lockAfter: 5000,
--      authMode: AuthMode.SecureStorage,
-     });
+--- a/src/services/VaultService.ts
++++ b/src/services/VaultService.ts
+@@ -15,7 +15,6 @@ class VaultService extends IonicIdentityVaultUser<Session> {
+         unlockOnAccess: true,
+         hideScreenOnBackground: true,
+         lockAfter: 5000,
+-        authMode: AuthMode.SecureStorage,
+       },
+     );
    }
 ```
 
-Have a look at the login page, and you will see that we are calling `this.vault.login(session);` only passing the session. This will register our session with the vault using the current auth mode. This method can take a second parameter, which is the authentication mode to use. Let's modify the login page to pass that value.
+Have a look at the login page, and you will see that we are calling `vault.login();` only passing the session information. This will register our session with the vault using the current auth mode. This method can take a second parameter, which is the authentication mode to use. Let's modify the login page to pass that value.
 
-First, modify `login.page.html` to present the user with some options for the authentication mode. Add the following markup within the `ion-list`
+First, modify `template` to present the user with some options for the authentication mode. Add the following markup within the `ion-list`
 
 ```html
-<ion-item *ngIf="displayLockingOptions">
+<ion-item v-if="displayAuthMode">
   <ion-label>Session Locking</ion-label>
-  <ion-select id="auth-mode-select" name="auth-mode" [(ngModel)]="authMode">
+  <ion-select v-model="authMode" data-testid="auth-mode-select">
     <ion-select-option
-      *ngFor="let authMode of authModes"
-      [value]="authMode.mode"
-      >{{authMode.label}}</ion-select-option
+      v-for="authMode of authModes"
+      :value="authMode.mode"
+      :key="authMode.mode"
+      >{{ authMode.label }}</ion-select-option
     >
   </ion-select>
 </ion-item>
 ```
 
-Next, modify `login.page.ts` to populate the data we need for the `ion-select` we just added:
+**Note:** remember to add `IonSelect` and `IonSelectOption` to the list of `components`.
+
+Next, modify `code` to populate the data we need for the `ion-select` we just added. The following will need to be added to the `setup()`:
 
 ```TypeScript
-  authMode: AuthMode;
-  authModes: Array<{ mode: AuthMode; label: string }> = [
-    {
-      mode: AuthMode.PasscodeOnly,
-      label: 'Session PIN Unlock',
-    },
-    {
-      mode: AuthMode.SecureStorage,
-      label: 'Never Lock Session',
-    },
-    {
-      mode: AuthMode.InMemoryOnly,
-      label: 'Force Login',
-    },
-  ];
-  displayLockingOptions: boolean;
+    const authMode = ref<number>();
+    const authModes = ref<Array<{ mode: AuthMode; label: string }>>([
+      {
+        mode: AuthMode.PasscodeOnly,
+        label: 'Session PIN Unlock',
+      },
+      {
+        mode: AuthMode.SecureStorage,
+        label: 'Never Lock Session',
+      },
+      {
+        mode: AuthMode.InMemoryOnly,
+        label: 'Force Login',
+      },
+    ]);
+    vault.isBiometricsAvailable().then(available => {
+      if (available) {
+        authModes.value = [
+          {
+            mode: AuthMode.BiometricOnly,
+            label: 'Biometric Unlock',
+          },
+          ...authModes.value,
+        ];
+      }
+      authMode.value = authModes.value[0].mode;
+    });
+    const displayAuthMode = computed(() => isPlatform('hybrid'));
 ```
 
-In the same file, update the `ngOnInit()` to determine if we need to display the options since this is really only an option if we are running on mobile. We will also query the vault to determine if biometric authentication is available, meaning that the device supports it and the user has properly enabled it. If so, we will add that as the first option.
-
-```TypeScript
-  async ngOnInit() {
-    this.displayLockingOptions = this.platform.is('hybrid');
-    if (await this.vault.isBiometricsAvailable()) {
-      this.authModes = [
-        {
-          mode: AuthMode.BiometricOnly,
-          label: 'Biometric Unlock',
-        },
-        ...this.authModes,
-      ];
-    }
-    this.authMode = this.authModes[0].mode;
-  }
-```
+Please be sure to `import { AuthMode } from '@ionic-enterprise/identity-vault';`, add `computed` to the import from `vue`, and add `isPlatform` to the import from `@ionic/vue`.
 
 Finally, we will pass the chosen authentication mode to the vault when we register the current session:
 
 ```TypeScript
-        this.vault.login(session, this.authMode);
+        vault.login(
+          {
+            user,
+            token,
+          },
+          authMode.value,
+        );
 ```
 
-Putting all of the code together, it looks like this:
+Putting all of the code together, the `setup()` for this page should look something like this:
 
 ```TypeScript
-import { Component, OnInit } from '@angular/core';
-import { AuthMode } from '@ionic-enterprise/identity-vault';
-import { NavController, Platform } from '@ionic/angular';
-import { AuthenticationService } from '../core';
-import { VaultService } from '../core/vault.service';
-
-@Component({
-  selector: 'app-login',
-  templateUrl: './login.page.html',
-  styleUrls: ['./login.page.scss'],
-})
-export class LoginPage implements OnInit {
-  email: string;
-  password: string;
-
-  authMode: AuthMode;
-  authModes: Array<{ mode: AuthMode; label: string }> = [
-    {
-      mode: AuthMode.PasscodeOnly,
-      label: 'Session PIN Unlock',
-    },
-    {
-      mode: AuthMode.SecureStorage,
-      label: 'Never Lock Session',
-    },
-    {
-      mode: AuthMode.InMemoryOnly,
-      label: 'Force Login',
-    },
-  ];
-  displayLockingOptions: boolean;
-
-  constructor(
-    private authentication: AuthenticationService,
-    private navController: NavController,
-    private platform: Platform,
-    private vault: VaultService,
-  ) {}
-
-  async ngOnInit() {
-    this.displayLockingOptions = this.platform.is('hybrid');
-    if (await this.vault.isBiometricsAvailable()) {
-      this.authModes = [
-        {
-          mode: AuthMode.BiometricOnly,
-          label: 'Biometric Unlock',
-        },
-        ...this.authModes,
-      ];
-    }
-    this.authMode = this.authModes[0].mode;
-  }
-
-  signIn() {
-    this.authentication.login(this.email, this.password).subscribe(session => {
-      if (session) {
-        this.vault.login(session, this.authMode);
-        this.navController.navigateRoot('/');
+  setup() {
+    const email = ref('');
+    const password = ref('');
+    const router = useRouter();
+    const authMode = ref<number>();
+    const authModes = ref<Array<{ mode: AuthMode; label: string }>>([
+      {
+        mode: AuthMode.PasscodeOnly,
+        label: 'Session PIN Unlock',
+      },
+      {
+        mode: AuthMode.SecureStorage,
+        label: 'Never Lock Session',
+      },
+      {
+        mode: AuthMode.InMemoryOnly,
+        label: 'Force Login',
+      },
+    ]);
+    vault.isBiometricsAvailable().then(available => {
+      if (available) {
+        authModes.value = [
+          {
+            mode: AuthMode.BiometricOnly,
+            label: 'Biometric Unlock',
+          },
+          ...authModes.value,
+        ];
       }
+      authMode.value = authModes.value[0].mode;
     });
-  }
-}
+    const displayAuthMode = computed(() => isPlatform('hybrid'));
+
+    async function signInClicked() {
+      const { success, user, token } = await AuthenticationService.login(
+        email.value,
+        password.value,
+      );
+      if (success && user && token) {
+        vault.login(
+          {
+            user,
+            token,
+          },
+          authMode.value,
+        );
+        router.replace('/');
+      }
+    }
+
+    return {
+      authMode,
+      authModes,
+      displayAuthMode,
+      email,
+      password,
+      logInOutline,
+      signInClicked,
+    };
+  },
 ```
 
 ## Native Modifications
@@ -180,13 +184,15 @@ Try the following test:
 
 Notice at this point that we can still see the data on page 2 even though the app is locked. This page requires us to be logged in with an unlocked session in order to navigate to it, but since we are already there we aren't blocked.
 
-Let's fix this by navigating to tab number three (which does not require authentication) when the session locks. Then we will have to unlock the session in order to go back to page two. Add the following code to `vault.service.ts`:
+Let's fix this by navigating to tab number three (which does not require authentication) when the session locks. Then we will have to unlock the session in order to go back to page two. Add the following code to `VaultService.ts`:
 
 ```TypeScript
   onVaultLocked() {
-    this.navController.navigateRoot(['/', 'tabs', 'tab3']);
+    router.replace('/tabs/tab3');
   }
 ```
+
+Remember to import the router (`import router from '@/router';`).
 
 While we are responding to events like this, let's also cache the session in our service so we don't always have to go to the vault to get it. To do this, we will need to:
 
@@ -196,7 +202,7 @@ While we are responding to events like this, let's also cache the session in our
 1. clear `currentSession` when the vault is locked
 1. set `currentSession` when the session is restored
 
-The code for that in `vault.service.ts` looks like this:
+The code for that in `VaultService.ts` looks like this:
 
 ```TypeScript
   login(session: Session, mode?: AuthMode): Promise<void> {
@@ -210,7 +216,7 @@ The code for that in `vault.service.ts` looks like this:
 
   onVaultLocked() {
     this.currentSession = undefined;
-    this.navController.navigateRoot(['/', 'tabs', 'tab3']);
+    router.replace('/tabs/tab3');
   }
 
   onSessionRestored(session: Session) {

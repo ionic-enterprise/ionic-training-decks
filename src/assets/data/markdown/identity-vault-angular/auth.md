@@ -107,7 +107,7 @@ export class VaultService {
 }
 ```
 
-Ignore the the fact that the naming of the methods as well as the fact that they are all `async` when they don't need to be. We'll just call that _foreshadowing_ for now... 🤓
+Ignore the the naming of the methods as well as the fact that they are all `async` when they don't need to be. We'll just call that _foreshadowing_ for now... 🤓
 
 ## The Rest of the App
 
@@ -171,6 +171,11 @@ From the login page, we need to perform the login and then store the session in 
     });
   }
 ```
+
+At this point, we can try the login and it should work. Use the following credentials:
+
+- **email:** `test@test.com`
+- **password:** `test`
 
 ### Tab 1 Page
 

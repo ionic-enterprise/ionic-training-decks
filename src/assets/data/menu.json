@@ -357,7 +357,7 @@
               "file": "vault-types"
             },
             {
-              "title": "Hadle the PIN Dialog",
+              "title": "Customize the PIN Dialog",
               "file": "custom-pin"
             },
             {
@@ -417,16 +417,16 @@
               "file": "base"
             },
             {
+              "title": "Add Authentication",
+              "file": "auth"
+            },
+            {
               "title": "Install Identity Vault",
               "file": "install"
             },
             {
-              "title": "The Vault Service",
-              "file": "vault-service"
-            },
-            {
-              "title": "Add Biometrics to Login",
-              "file": "biometrics"
+              "title": "Other Auth Modes",
+              "file": "vault-types"
             },
             {
               "title": "Customize the PIN Dialog",
