@@ -1,3 +1,9 @@
+# [4.8.0](https://github.com/ionic-team/ionic-training-decks/compare/v4.7.2...v4.8.0) (2021-04-26)
+
+### Features
+
+- **identity-vault:** make the vue training self guided ([373cdd5](https://github.com/ionic-team/ionic-training-decks/commit/373cdd555cdd9007375e033ad55a061b88ed8f7e))
+
 ## [4.7.2](https://github.com/ionic-team/ionic-training-decks/compare/v4.7.1...v4.7.2) (2021-04-25)
 
 ### Bug Fixes
