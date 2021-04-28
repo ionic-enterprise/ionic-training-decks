@@ -80,8 +80,9 @@ In order to replace this with something more appropriate for use with Ionic Auth
 In the markup:
 
 - remove the form
-- remove the `*ngIf="loginForm.form.valid"`
+- remove the `*ngIf="loginForm.form.valid"` from the signin `div`
 - replace the contents of the `error-message` div with `{{ errorMessage}}`
+- move the "Skip Login" to the bottom
 
 When completed, the `ion-content` for the page should look like this:
 
@@ -99,6 +100,8 @@ When completed, the `ion-content` for the page should look like this:
   <div class="error-message">
     <div>{{ errorMessage }}</div>
   </div>
+
+  <div class="ion-text-center"><a href="tabs/tab1">Skip Login</a></div>
 </ion-content>
 ```
 
@@ -165,13 +168,15 @@ We still cannot go to the tea list on the `tab2` page. The reason is that while 
 
 ### The Auth Interceptor
 
-We are getting 401 errors since while we now have an access token we are not actually including it on the outgoing request. We fix that by updating the auth interceptor. The interceptor has a `getToken()` method that currently returns `undefined`. We will change it to get the access token from Ionic Auth Connect.
+We are getting 401 errors since while we now have an access token we are not actually including it on the outgoing request. We fix that by updating the auth interceptor (`src/app/core/auth-interceptor.service.ts`). The interceptor has a `getToken()` method that currently returns `undefined`. We will change it to get the access token from Ionic Auth Connect.
 
 ```TypeScript
   private async getToken(): Promise<string | undefined> {
     return this.auth.getAccessToken();
   }
 ```
+
+**Note:** you will need to inject the `AuthenticationService` just like we have in other places.
 
 Now that we are sending the access token to the backend, we should see a list of teas rather than getting 401 errors that redirect us to the login page.
 
@@ -185,7 +190,7 @@ Let's update the auth-guard to make sure we are authenticated before we ever get
 
 - inject the nav controller
 - inject the auth service
-- update the canActivate logic
+- update the canActivate logic as shown below
 
 ```TypeScript
   async canActivate(): Promise<boolean> {

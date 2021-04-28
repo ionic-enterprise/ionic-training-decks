@@ -43,6 +43,8 @@ For the web URLs, the paths need to be valid, though Auth Connect will not actua
 
 Add a file called `src/services/AuthConnectConfig.ts`. Add code that abstracts the above configuration into the <a href="https://ionic.io/docs/auth-connect/api#interface-ionicauthoptions" target ="_blank">Auth Connect configuration object</a>. This will allow us to build the proper configuration based on the current platform. This will also allow us to expand the configuration in the future when, for example, we have different configurations based on whether we are doing a production or an development build.
 
+**`src/services/AuthConnectConfig.ts`**
+
 ```TypeScript
 import { IonicAuthOptions } from '@ionic-enterprise/auth';
 import { isPlatform } from '@ionic/vue';
@@ -110,7 +112,7 @@ Also add the following within the root `manifest` node:
   </queries>
 ```
 
-Nost of this is boiler-plate. Pay attention to the following line, however:
+Most of this is boiler-plate. Pay attention to the following line, however:
 
 ```xml
     <data android:scheme="myapp"/>
@@ -123,8 +125,8 @@ The value supplied here _must_ match the schema used in the `redirectUri` of you
 ### iOS
 
 - Open `App/App/Info.plist` in Xcode
-- Look for an existing `URL Types > Item 0 > URL Schemas > Item 0` (this should not exist in the training app, but may exist in an existing production application)
-  - If it does not exist (most likely):
+- Look for an existing `URL Types > Item 0 > URL Schemas > Item 0`
+  - If it does not exist:
     - Add `URL types`, which will create an `Item 0` since it is an array
     - Under `Item 0` a `URL identifier` node will have been added by default, change it to `URL Schemas`
     - This is also an array and will have an `Item 0`, give it is value of `myapp`

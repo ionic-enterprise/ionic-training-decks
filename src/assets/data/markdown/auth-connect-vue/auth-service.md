@@ -26,7 +26,7 @@ We _do_ need to do some work in our extended class, however:
 - we need to pass the correct configuration based on the current execution context of the application
 - we will add a `getUserInfo()` method to extract important user information from the ID token
 
-Here is the code for our service.
+Here is the code for our service (create a new file: `src/services/AuthenticationService.ts`).
 
 ```TypeScript
 import { User } from '@/models';
@@ -71,8 +71,9 @@ In order to replace this with something more appropriate for use with Ionic Auth
 In the markup:
 
 - remove the `ion-list` and its contents
-- remove the `v-if="email && password"`
-- add an `error-message` div as noted below
+- remove the `v-if="email && password"` from the "Sign In" outer `div`
+- add an `error-message` div as shown below
+- move the "Skip Login" `div` to the bottom of the content
 
 When completed, the `ion-content` for the page should look like this:
 
@@ -86,17 +87,22 @@ When completed, the `ion-content` for the page should look like this:
       <div class="error-message">
         <div>{{ errorMessage }}</div>
       </div>
+
+      <div class="ion-text-center">
+        <a href="tabs/tab1">Skip Login</a>
+      </div>
     </ion-content>
 ```
 
 In the code:
 
 - add an `errorMessage` property
-- inject the auth service
-- modify the `signIn()` to do the login
+- remove the now unused `email` and `password` properties
+- import the `authenticationService` service (`import { authenticationService } from '@/services/AuthenticationService';`)
+- modify the `signInClicked()` function to do the login
 - clean up the imports and the components list since there are a few that are no longer in the template
 
-Here is what the page's `setup()` method should look like:
+Here is what the page's `setup()` function should look like:
 
 ```TypeScript
   setup() {
@@ -133,7 +139,7 @@ import { ..., onIonViewWillEnter } from '@ionic/vue';
 Upon entry to the screen we need to get the information for the currently logged in user. Add the following code within the `setup()` method.
 
 ```TypeScript
-  onIonViewWillEnter(async () => this.currentUser = await authenticationService.getUserInfo());
+  onIonViewWillEnter(async () => currentUser.value = await authenticationService.getUserInfo());
 ```
 
 This will be displayed already by the view due to how the template is currently set up.
@@ -179,7 +185,7 @@ Now that we are sending the access token to the backend, we should see a list of
 
 ### Guard the Route
 
-If we log out and then try to go to `tab2` we still get a 401 error in the console. Idealy we would not see those at all. 
+If we log out and then try to go to `tab2` we still get a 401 error in the console. Idealy we would not see those at all.
 
 Let's update the guard to make sure we are authenticated before we ever get to the route. To do this, open `src/router/index.ts` and find the definition for `checkAuthStatus`. Notice that it is currently just setting `authenticated` to true. Change that line to check with our authenticationService instead.
 
