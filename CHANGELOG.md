@@ -1,3 +1,9 @@
+## [4.8.1](https://github.com/ionic-team/ionic-training-decks/compare/v4.8.0...v4.8.1) (2021-04-28)
+
+### Bug Fixes
+
+- **auth-connect:** fix typos and clarify items ([331185f](https://github.com/ionic-team/ionic-training-decks/commit/331185f21687a0f19ba13d8522d21456ee283072))
+
 # [4.8.0](https://github.com/ionic-team/ionic-training-decks/compare/v4.7.2...v4.8.0) (2021-04-26)
 
 ### Features
