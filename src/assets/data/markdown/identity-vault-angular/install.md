@@ -53,6 +53,8 @@ This is what our configuration means:
 - `lockAfter`: the number of milliseconds to wait before locking the vault when the application is in the background.
 - `authMode`: the method to use to unlock the vault. In the case of `SecureStorage`, the session will be stored in a secure location, but the vault will never lock.
 
+**Note:** with `authMode: AuthMode.SecureStorage` it does not _really_ matter if we set `unlockOnAccess` to `true` or to `false`, but as we modify this application it will matter, so we are just setting it `true` because we will eventually want that behavior.
+
 For a full explanation of all of the configuration options, please see <a href="https://ionic.io/docs/identity-vault/api#vaultoptions" target="_blank">the VaultOptions documentation</a>.
 
 If you build and run the application on a device at this point, you should be able to log in and have your session persist after you close and restart the application.
@@ -108,6 +110,15 @@ export class VaultService extends IonicIdentityVaultUser<Session> {
 ```
 
 Now when you run in the browser, the application will use the `BrowserVaultPlugin` and `BrowserVaultService` classes to store the keys in a way that the browser can consume them.
+
+**Side Note**
+
+You may be wondering why we are doing the following cast: `this.platform as Platform`. Here is what is happening:
+
+- The base class has a protected member called `platform` that is set to the first parameter passed during construction.
+- Within Identity Vault, this `platform` is typed to `{ ready: () => Promise<any> }`, and not the full `@ionic/angular` `Platform` service, which would tie IV to `@ionic/angular`. We want Identity Vault to be usable with any framework.
+- The `Platform` service from `@ionic/angular` meets the contract, so that is what we pass.
+- We know what we passed, and we need to access other methods from it, so it is safe for us to cast it back to gain access to those methods.
 
 ## Conclusion
 

@@ -115,7 +115,7 @@ Now that we have the basics in place, let's modify the rest of the application t
 
 ### Auth Interceptor
 
-The purpose of the auth interceptor is to modify outgoing requests to include the auth token in the `Authorization` header as a bearer token. Now that we have a toke, we can get the token from the vault and add it to the outbound requests:
+The purpose of the auth interceptor is to modify outgoing requests to include the auth token in the `Authorization` header as a bearer token. Now that we have a token, we can get the token from the vault and add it to the outbound requests:
 
 You will need to inject the `VaultService` and then update the `getToken()` method as such:
 

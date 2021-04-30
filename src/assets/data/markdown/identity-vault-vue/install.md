@@ -55,6 +55,8 @@ This is what our configuration means:
 - `lockAfter`: the number of milliseconds to wait before locking the vault when the application is in the background.
 - `authMode`: the method to use to unlock the vault. In the case of `SecureStorage`, the session will be stored in a secure location, but the vault will never lock.
 
+**Note:** with `authMode: AuthMode.SecureStorage` it does not _really_ matter if we set `unlockOnAccess` to `true` or to `false`, but as we modify this application it will matter, so we are just setting it `true` because we will eventually want that behavior.
+
 For a full explanation of all of the configuration options, please see <a href="https://ionic.io/docs/identity-vault/api#vaultoptions" target="_blank">the VaultOptions documentation</a>.
 
 If you build and run the application on a device at this point, you should be able to log in and have your session persist after you close and restart the application.

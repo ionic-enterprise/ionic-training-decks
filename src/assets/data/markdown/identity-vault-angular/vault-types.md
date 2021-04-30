@@ -66,7 +66,7 @@ Next, modify `login.page.ts` to populate the data we need for the `ion-select` w
   displayLockingOptions: boolean;
 ```
 
-In the same file, update the `ngOnInit()` to determine if we need to display the options since this is really only an option if we are running on mobile. We will also query the vault to determine if biometric authentication is available, meaning that the device supports it and the user has properly enabled it. If so, we will add that as the first option.
+In the same file, update the `ngOnInit()` to determine if we need to display the options since this is really only an option if we are running on mobile. We will also query the vault to determine if biometric authentication is available, meaning that the device supports it and the user has properly enabled it. If so, we will add that as the first option. You will need to inject the `Platform` service in the constructor.
 
 ```TypeScript
   async ngOnInit() {
@@ -178,7 +178,7 @@ Try the following test:
 1. put the app in the background for 5 or more seconds
 1. come back to the app
 
-Notice at this point that we can still see the data on page 2 even though the app is locked. This page requires us to be logged in with an unlocked session in order to navigate to it, but since we are already there we aren't blocked.
+Notice at this point that we can still see the data on page 2 even though the app is locked. This page requires us to be logged in with an unlocked session in order to navigate to it, but since we are already there we aren't blocked. However, if you then navigate to tab 3 and back to tab 2 you _will_ need to unlock the vault.
 
 Let's fix this by navigating to tab number three (which does not require authentication) when the session locks. Then we will have to unlock the session in order to go back to page two. Add the following code to `vault.service.ts`:
 
@@ -187,6 +187,8 @@ Let's fix this by navigating to tab number three (which does not require authent
     this.navController.navigateRoot(['/', 'tabs', 'tab3']);
   }
 ```
+
+**Note:** you will need to inject the `NavController`.
 
 While we are responding to events like this, let's also cache the session in our service so we don't always have to go to the vault to get it. To do this, we will need to:
 

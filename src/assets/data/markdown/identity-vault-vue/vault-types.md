@@ -31,7 +31,7 @@ Currently, we are setting the authentication mode when we instantiate the vault.
 
 Have a look at the login page, and you will see that we are calling `vault.login();` only passing the session information. This will register our session with the vault using the current auth mode. This method can take a second parameter, which is the authentication mode to use. Let's modify the login page to pass that value.
 
-First, modify `template` to present the user with some options for the authentication mode. Add the following markup within the `ion-list`
+First, modify the `template` to present the user with some options for the authentication mode. Add the following markup within the `ion-list`
 
 ```html
 <ion-item v-if="displayAuthMode">
@@ -49,7 +49,7 @@ First, modify `template` to present the user with some options for the authentic
 
 **Note:** remember to add `IonSelect` and `IonSelectOption` to the list of `components`.
 
-Next, modify `code` to populate the data we need for the `ion-select` we just added. The following will need to be added to the `setup()`:
+Next, modify the `code` to populate the data we need for the `ion-select` we just added. The following will need to be added to the `setup()`:
 
 ```TypeScript
     const authMode = ref<number>();
@@ -82,7 +82,12 @@ Next, modify `code` to populate the data we need for the `ion-select` we just ad
     const displayAuthMode = computed(() => isPlatform('hybrid'));
 ```
 
-Please be sure to `import { AuthMode } from '@ionic-enterprise/identity-vault';`, add `computed` to the import from `vue`, and add `isPlatform` to the import from `@ionic/vue`.
+Please be sure to do the following as well:
+
+- add `import { AuthMode } from '@ionic-enterprise/identity-vault';`
+- add `computed` to the import from `vue`
+- add `isPlatform` to the import from `@ionic/vue`
+- return the newly defined `authMode`, `authModes`, and `displayAuthMode` at the end of the `setup()` function
 
 Finally, we will pass the chosen authentication mode to the vault when we register the current session:
 
@@ -182,7 +187,7 @@ Try the following test:
 1. put the app in the background for 5 or more seconds
 1. come back to the app
 
-Notice at this point that we can still see the data on page 2 even though the app is locked. This page requires us to be logged in with an unlocked session in order to navigate to it, but since we are already there we aren't blocked.
+Notice at this point that we can still see the data on page 2 even though the app is locked. This page requires us to be logged in with an unlocked session in order to navigate to it, but since we are already there we aren't blocked. However, if you then navigate to tab 3 and back to tab 2 you _will_ need to unlock the vault.
 
 Let's fix this by navigating to tab number three (which does not require authentication) when the session locks. Then we will have to unlock the session in order to go back to page two. Add the following code to `VaultService.ts`:
 

@@ -86,7 +86,7 @@ Now that we have the basics in place, let's modify the rest of the application t
 
 ### Request Interceptor
 
-The purpose of the request interceptor is to modify outgoing requests to include the auth token in the `Authorization` header as a bearer token. Now that we have a toke, we can get the token from the vault and add it to the outbound requests. In `src/services/api.ts`, you will need to import the `vault` and then update the interceptor as such:
+The purpose of the request interceptor is to modify outgoing requests to include the auth token in the `Authorization` header as a bearer token. Now that we have a token, we can get the token from the vault and add it to the outbound requests. In `src/services/api.ts`, you will need to import the `vault` and then update the interceptor as such:
 
 ```TypeScript
 client.interceptors.request.use(async (config: AxiosRequestConfig) => {

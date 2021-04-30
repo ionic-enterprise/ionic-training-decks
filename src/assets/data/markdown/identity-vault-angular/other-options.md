@@ -2,6 +2,14 @@
 
 We have implemented Identity Vault in a very specific manner, but it is by no means the only choice that we have. Identity Vault can be configured to work in multiple different ways and can support multiple workflows depending on how you configure it. Here are some examples of other modifications we can make.
 
+## Different Workflows
+
+With the workflow we are using, if the vault is locked and you try to do something that requires an unlocked application, you unlock the vault at that time. However, if we were to add other pages such as the tab three page that do not require unlocking, then you _could_ go there without unlocking the vault. This flow makes sense if you have an application where you want the user to be able to use most of it regardless of authentication status, but then have specific operations that require valid authentication.
+
+This is just one workflow, however. It is also completely valid to implement a "locked" page that you navigate to when the application is locked, and the user is forced to unlock in order to navigate away from that page. Many of our other demo applications, for example, redirect to the Login page, which displays modified prompts when the vault is locked vs. when no one is logged in.
+
+Finally, one obvious omission with our current workflow is error message. These were omitted in order to make sure the focus was on actually implementing Identity Vault. In a production application, however, you should provide a bit more user feedback.
+
 ## Android Biometric Prompt Customizations
 
 The prompt that is displayed when doing biometric unlocking is controlled by the mobile OS, so there is nothing that can be done to customize that look and feel. Android, however, does allow you to modify the text prompts that are displayed. In order to do this, you can set the following properties when calling the base class' constructor:

@@ -63,7 +63,9 @@ Now that we have the component in place, it is time to hook it up.
 
 First, add the `PinDialogComponentModule` to the `imports` array in `app.module.ts`.
 
-Once that is in place, we can modify `vault.service.ts` to implement the `onPasscodeRequest` event callback:
+Second, in `vault.service.ts`, import the `PinDialogComponent` and inject the `ModalController`.
+
+Once all of that is in place, we can modify `vault.service.ts` to implement the `onPasscodeRequest` event callback:
 
 ```TypeScript
   async onPasscodeRequest(isPasscodeSetRequest: boolean): Promise<string> {
