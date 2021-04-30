@@ -1,3 +1,9 @@
+## [4.8.2](https://github.com/ionic-team/ionic-training-decks/compare/v4.8.1...v4.8.2) (2021-04-30)
+
+### Bug Fixes
+
+- **identity-vault:** fix typoes and clarify items ([e275c69](https://github.com/ionic-team/ionic-training-decks/commit/e275c69cf0fd9aa7161695463ba30f1723c008ac))
+
 ## [4.8.1](https://github.com/ionic-team/ionic-training-decks/compare/v4.8.0...v4.8.1) (2021-04-28)
 
 ### Bug Fixes
