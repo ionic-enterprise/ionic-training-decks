@@ -9,9 +9,7 @@ In this lab, you will learn how to:
 
 ## Overview
 
-The application is configured to use [Jest](https://jestjs.io) as it's testing framework and runner. <a href="https://testing-library.com/docs/react-testing-library/intro" target="_blank"> React Testing Library</a> is bundled with our application, which is used to facilitate testing React components.
-
-You may be used to testing React components with Enzyme. React Testing Library is similar but tests against actual DOM nodes, instead of dealing with instances of rendered React components. We will learn how to use React Testing Library as we write unit tests.
+Ionic Framework React applications use [Jest](https://jestjs.io) as it's testing framework and runner. <a href="https://testing-library.com/docs/react-testing-library/intro" target="_blank"> React Testing Library</a> is included to write unit tests that test React components.
 
 The `npm test` script will run all of our tests and then watch for changes to the code.
 
@@ -27,15 +25,16 @@ I suggest adding additional test script configurations in the `package.json` fil
 - `test:upd` - Regenerate snapshots, run the tests once and exit
 
 ```json
-  "scripts": {
-    "build": "react-scripts build",
-    "eject": "react-scripts eject",
-    "start": "react-scripts start",
-    "test": "react-scripts test",
-    "test:ci": "export CI=true; react-scripts test",
-    "test:cov": "export CI=true; react-scripts test --coverage",
-    "test:upd": "export CI=true; react-scripts test --updateSnapshot"
-  },
+"scripts": {
+  "start": "react-scripts start",
+  "build": "react-scripts build",
+  "eject": "react-scripts eject",
+  "postinstall": "husky install",
+  "test": "react-scripts test",
+  "test:ci": "export CI=true; react-scripts test",
+  "test:cov": "export CI=true; react-scripts test --coverage",
+  "test:upd": "export CI=true; react-scripts test --updateSnapshot"
+},
 ```
 
 ## Run the Tests
@@ -59,7 +58,7 @@ Jest test structure calls for a single file containing setup/teardown code and i
 
 ### Setup and Teardown
 
-Often when writing tests some initialization logic needs to occur before each test is run, and some cleanup that needs to occur after each test has been run. Jest provides the following methods to do this:
+Often when writing tests some initialization logic needs to occur before each test is run, and some cleanup needs to occur after each test has been run. Jest provides the following methods to do this:
 
 - `beforeAll` - Run once before any test in the file or group
 - `beforeEach` - Run before each test in the file or group
@@ -75,45 +74,22 @@ Some important aspects of a `describe()` group are:
 - They can be nested inside of another group
 - They can have their own setup and teardown routines which are run in addition to the setup/teardown of the file or enclosing groups
 
-### Side Note: Where to place test files?
+## Test the Home Page
 
-Jest allows multiple ways to organize test files in relation to your project:
+Start by creating a new file `Home.test.tsx` in the `src/pages` folder. Here we will add required imports and insert a `describe()` block where we can group tests for this component:
 
-- Place all test files into a `__tests__` directory at the root of the project
-- Place test files for a given folder within a `__tests__` subfolder
-- Place test files next to the project files they test
-
-I prefer to put test files next to the project files they test. This keeps my project structure flat and allows me to easily identify which files have tests written for them and which do not.
-
-## Write tests for the Home Page
-
-The application is not very complex in it's current state; it currently contains three components:
-
-- `<App />`
-- `<Home />`
-- `<ExploreContainer />`
-
-Let's write some test cases for our `<Home />` component.
-
-### `Home.test.tsx`
-
-Start by creating a new file, `Home.test.tsx`, in the `src/pages` folder.
-
-After creating `Home.test.tsx`, add the required imports and insert a `describe` block where we can group our tests:
+**`src/pages/Home.test.tsx`**
 
 ```Typescript
-import React from 'react';
 import { render } from '@testing-library/react';
 import Home from './Home';
 
-describe('<Home />', () => {
-
-});
+describe('<Home />', () => { });
 ```
 
 ### Test the Header
 
-By default, our Home page has it's header text set to "Blank". We can query the DOM in order to make sure that our header text is rendering correctly:
+The home page has it's header text set to "Blank". Let's write a test that verifies that the header text renders with the correct text:
 
 ```Typescript
 describe('<Home />', () => {
@@ -126,7 +102,7 @@ describe('<Home />', () => {
 
 ### Add Snapshot Test
 
-We can also create snapshots of the component under specific conditions and compare them as we modify the application. Add a test like this inside your describe block:
+We can also create snapshots of the component under specific conditions and compare them as we modify the application. Add the following test inside the `describe()` block, under the test previously created:
 
 ```TypeScript
 it('renders consistently', () => {
