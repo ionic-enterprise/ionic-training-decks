@@ -174,8 +174,8 @@ From the login page, we need to perform the login and then store the session in 
 
 At this point, we can try the login and it should work. Use the following credentials:
 
-- **email:** `test@test.com`
-- **password:** `test`
+- **email:** `test@ionic.io`
+- **password:** `Ion54321`
 
 ### Tab 1 Page
 

@@ -16,7 +16,7 @@ npx cap update
 
 ## Configuration
 
-Often, the most difficult part of setting up Auth Connect is simply making sure you have the OIDC provider configured correction and then properly translating that configuration into the Auth Connect configuration. Please refer to <a href="https://ionic.io/docs/auth-connect/azure-ad-b2c" target="_blank">our setup guides</a> for information on how to configure your provider. The informtion that each provider needs is generally the same with some minor differences, so if your provider is not listed you should be able to get started by looking at one of the other providers. Auth0 is the most standard of the bunch so is very likely a good place to start.
+Often, the most difficult part of setting up Auth Connect is simply making sure you have the OIDC provider configured correction and then properly translating that configuration into the Auth Connect configuration. Please refer to <a href="https://ionic.io/docs/auth-connect/aws-cognito" target="_blank">our setup guides</a> for information on how to configure your provider. The informtion that each provider needs is generally the same with some minor differences, so if your provider is not listed you should be able to get started by looking at one of the other providers. Auth0 is the most standard of the bunch so is very likely a good place to start.
 
 Once we have the OIDC provider configured properly, we need to configure Auth Connect such that it knows about the OIDC provider. We have a <a href="https://github.com/ionic-team/cs-demo-ac-providers" target="_blank">sample application</a> that will help in this regard. This application is focused solely on the login and logout flows and making sure that the configuration is correct. For this reason we suggest modifying this application for your OIDC provider and working with the configuration within the application. This will then make it easier to integrate the proper configuration into your own application.
 
@@ -25,14 +25,15 @@ Once we have the OIDC provider configured properly, we need to configure Auth Co
 Here is the configuration that is required to connect to the provider that we have for this application:
 
 - **Base:**
-  - **OIDC Provider:** Azure
-  - **client ID:** `b69e2ee7-b67a-4e26-8a38-f7ca30d2e4d4`
-  - **Scope:** `openid offline_access email profile https://vikingsquad.onmicrosoft.com/api/Hello.Read`
-  - **Dicovery URL:** `https://vikingsquad.b2clogin.com/vikingsquad.onmicrosoft.com/v2.0/.well-known/openid-configuration?p=B2C_1_Signup_Signin`
-  - **Audiece:** `https://api.myapp.com`
+  - **OIDC Provider:** Cognito
+  - **client ID:** `4geagm2idmq87fii15dq9toild`
+  - **Scope:** `openid email profile`
+  - **Dicovery URL:** `https://cognito-idp.us-east-2.amazonaws.com/us-east-2_YU8VQe29z/.well-known/openid-configuration`
+  - **Client Secret:** `124dch1p6824ppuef8o71unk14d4pt3p5hnntofvu21i2m960r1g`
+  - **Audiece:** ``
 - **Mobile:**
-  - **Redirect URI:** `myapp://callback`
-  - **Logout URL:** `myapp://callback?logout=true`
+  - **Redirect URI:** `msauth://login`
+  - **Logout URL:** `msauth://login`
 - **Web:**
   - **Redirect URI:** `http://localhost:8100/login`
   - **Logout URL:** `http://localhost:8100/login`
@@ -49,28 +50,26 @@ Add a file called `src/services/AuthConnectConfig.ts`. Add code that abstracts t
 import { IonicAuthOptions } from '@ionic-enterprise/auth';
 import { isPlatform } from '@ionic/vue';
 
-type authConfigType = 'azure';
-
 const baseConfig = {
-  clientID: 'b69e2ee7-b67a-4e26-8a38-f7ca30d2e4d4',
-  scope:
-    'openid offline_access email profile https://vikingsquad.onmicrosoft.com/api/Hello.Read',
+  authConfig: 'cognito' as 'cognito',
+  clientID: '4geagm2idmq87fii15dq9toild',
   discoveryUrl:
-    'https://vikingsquad.b2clogin.com/vikingsquad.onmicrosoft.com/v2.0/.well-known/openid-configuration?p=B2C_1_Signup_Signin',
-  audience: 'https://api.myapp.com',
-  authConfig: 'azure' as authConfigType,
+    'https://cognito-idp.us-east-2.amazonaws.com/us-east-2_YU8VQe29z/.well-known/openid-configuration',
+  clientSecret: '124dch1p6824ppuef8o71unk14d4pt3p5hnntofvu21i2m960r1g',
+  scope: 'openid email profile',
+  audience: '',
 };
 
-const mobileAzureConfig: IonicAuthOptions = {
+const mobileAuthConfig: IonicAuthOptions = {
   ...baseConfig,
-  redirectUri: 'myapp://callback',
-  logoutUrl: 'myapp://callback?logout=true',
+  redirectUri: 'msauth://login',
+  logoutUrl: 'msauth://login',
   platform: 'cordova',
   iosWebView: 'private',
   androidToolbarColor: 'Red',
 };
 
-const webAzureConfig: IonicAuthOptions = {
+const webAuthConfig: IonicAuthOptions = {
   ...baseConfig,
   redirectUri: 'http://localhost:8100/login',
   logoutUrl: 'http://localhost:8100/login',
@@ -78,7 +77,7 @@ const webAzureConfig: IonicAuthOptions = {
 };
 
 export function getAuthConfig(): IonicAuthOptions {
-  return isPlatform('hybrid') ? mobileAzureConfig : webAzureConfig;
+  return isPlatform('hybrid') ? mobileAuthConfig : webAuthConfig;
 }
 ```
 
@@ -90,7 +89,7 @@ Open the Android project in Android Studio via `npx cap open android` and find t
 
 ```xml
 <intent-filter>
-    <data android:scheme="myapp"/>
+    <data android:scheme="msauth"/>
     <action android:name="android.intent.action.VIEW"/>
     <category android:name="android.intent.category.DEFAULT"/>
     <category android:name="android.intent.category.BROWSABLE"/>
@@ -115,7 +114,7 @@ Also add the following within the root `manifest` node:
 Most of this is boiler-plate. Pay attention to the following line, however:
 
 ```xml
-    <data android:scheme="myapp"/>
+    <data android:scheme="msauth"/>
 ```
 
 The value supplied here _must_ match the schema used in the `redirectUri` of your mobile auth-connect config. This informs the native application that it should listen for and accept deep links that use that schema.
@@ -129,8 +128,8 @@ The value supplied here _must_ match the schema used in the `redirectUri` of you
   - If it does not exist:
     - Add `URL types`, which will create an `Item 0` since it is an array
     - Under `Item 0` a `URL identifier` node will have been added by default, change it to `URL Schemas`
-    - This is also an array and will have an `Item 0`, give it is value of `myapp`
-  - If it exists, add another item under `URL Schemas` and give it a value of `myapp`
+    - This is also an array and will have an `Item 0`, give it is value of `msauth`
+  - If it exists, add another item under `URL Schemas` and give it a value of `msauth`
 
 You can also add it directly to the `ios/App/App/Info.plist` file. In the case that you need to add this "from scratch" such as in this training application, it will look like this:
 
@@ -140,13 +139,13 @@ You can also add it directly to the `ios/App/App/Info.plist` file. In the case t
     <dict>
       <key>CFBundleURLSchemes</key>
       <array>
-        <string>myapp</string>
+        <string>msauth</string>
       </array>
     </dict>
   </array>
 ```
 
-In the case where you already have `URL types` defined (such as in a Capacitor v2 application), the setting will look more like the following. In this case you are just adding the `<string>myapp</string>` node within the `CFBundleURLSchemes` child array.
+In the case where you already have `URL types` defined (such as in a Capacitor v2 application), the setting will look more like the following. In this case you are just adding the `<string>msauth</string>` node within the `CFBundleURLSchemes` child array.
 
 ```xml
   <key>CFBundleURLTypes</key>
@@ -157,7 +156,7 @@ In the case where you already have `URL types` defined (such as in a Capacitor v
       <key>CFBundleURLSchemes</key>
       <array>
         <string>capacitor</string>
-        <string>myapp</string>
+        <string>msauth</string>
       </array>
     </dict>
   </array>
@@ -186,7 +185,7 @@ The most common mistake made when setting up Auth Connect is with the `redirectU
 
 Notice the schema used in the `redirectUri` and `logoutUrl` on mobile. The only requirement here is that it is something that is unique to your application. Otherwise, it can be anything you want it to be so long as it matches a URI you have set on in the OIDC provider configuration as valid.
 
-In general, a schema like `myapp` like we are using for the training is not very good. You should use something far more specicific such as the budle ID of your application. For the training app, however, you have to use `myapp` as we have configured above. The reason for this is that this is out the OIDC provider we are using is configured.
+In general, a schema like `msauth` like we are using for the training is not very good. You should use something far more specicific such as the budle ID of your application. For the training app, however, you have to use `msauth` as we have configured above. The reason for this is that this is out the OIDC provider we are using is configured.
 
 ## Testing
 

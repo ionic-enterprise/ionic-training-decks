@@ -122,7 +122,12 @@ Here is what the page's `setup()` function should look like:
   }
 ```
 
-At this point, we can log in, but there are a couple of problems:
+At this point, we can log in using the following credentials:
+
+- email: `test@ionic.io`
+- password: `Ion54321`
+
+However, there are a couple of problems:
 
 1. the tab1 page still shows us as logged out
 1. going to tab2 still causes a 401 error which kicks us back to the login page
@@ -144,7 +149,7 @@ Upon entry to the screen we need to get the information for the currently logged
 
 This will be displayed already by the view due to how the template is currently set up.
 
-Pressing the logout button will currently take us to the login page, but it does not really perform a logout. We can see this by doing a "sign in" again from the login page. Note that we were not asked for credentials from Azure. Fixing that is a matter of calling Ionic Auth Connect's `logout()` method before navigating to the login page. Note the `await`. We only want to navigate after a successful logout.
+Pressing the logout button will currently take us to the login page, but it does not really perform a logout. We can see this by doing a "sign in" again from the login page. Note that we were not asked for credentials from AWS. Fixing that is a matter of calling Ionic Auth Connect's `logout()` method before navigating to the login page. Note the `await`. We only want to navigate after a successful logout.
 
 Update the definition of the `logout` function in the page's `setup()`:
 
