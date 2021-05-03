@@ -1,3 +1,9 @@
+## [4.8.3](https://github.com/ionic-team/ionic-training-decks/compare/v4.8.2...v4.8.3) (2021-05-03)
+
+### Bug Fixes
+
+- **auth-connect:** switch up the provider ([acd9146](https://github.com/ionic-team/ionic-training-decks/commit/acd9146c6a4cfe9c38d6ca5d690ec5b2fead1f89))
+
 ## [4.8.2](https://github.com/ionic-team/ionic-training-decks/compare/v4.8.1...v4.8.2) (2021-04-30)
 
 ### Bug Fixes
