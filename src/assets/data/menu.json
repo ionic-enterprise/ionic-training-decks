@@ -138,10 +138,6 @@
               "file": "identity"
             },
             {
-              "title": "State Management",
-              "file": "state-management"
-            },
-            {
               "title": "Authentication",
               "file": "auth"
             },
