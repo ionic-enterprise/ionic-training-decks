@@ -18,19 +18,18 @@ Let's fill the files in with some shell code:
 **`src/tea/details/TeaDetailsPage.test.tsx`**
 
 ```TypeScript
-import React from 'react';
-import { render, wait } from '@testing-library/react';
+import { render, waitFor } from '@testing-library/react';
 import TeaDetailsPage from './TeaDetailsPage';
 
 describe('<TeaDetailsPage />', () => {
   it('displays the header', async () => {
     const { container } = render(<TeaDetailsPage />);
-    await wait(() => expect(container).toHaveTextContent(/Details/));
+    await waitFor(() => expect(container).toHaveTextContent(/Details/));
   });
 
   it('renders consistently', async () => {
     const { asFragment } = render(<TeaDetailsPage />);
-    await wait(() => expect(asFragment()).toMatchSnapshot());
+    await waitFor(() => expect(asFragment()).toMatchSnapshot());
   });
 });
 ```
@@ -38,7 +37,6 @@ describe('<TeaDetailsPage />', () => {
 **`src/tea/details/TeaDetailsPage.tsx`**
 
 ```TypeScript
-import React from 'react';
 import {
   IonContent,
   IonHeader,
@@ -74,15 +72,17 @@ Head over to `App.tsx`. We need to add an additional route inside our `<IonRoute
 
 **`src/App.tsx`**
 
-```TypeScript
-  ...
-  <IonRouterOutlet>
-    Route path="/login" component={LoginPage} exact={true} />
-    <ProtectedRoute path="/tea" component={TeaPage} exact={true} />
-    <ProtectedRoute path="/tea/details/:id" component={TeaDetailsPage} />
-    <Route exact path="/" render={() => <Redirect to="/tea" />} />
-  </IonRouterOutlet>
-  ...
+```JSX
+<IonRouterOutlet>
+  <PrivateRoute exact path="/tea" component={TeaPage} />
+  <PrivateRoute path="/tea/details/:id" component={TeaDetailsPage} />
+  <Route exact path="/login">
+    <LoginPage />
+  </Route>
+  <Route exact path="/">
+    <Redirect to="/tea" />
+  </Route>
+</IonRouterOutlet>
 ```
 
 With a little URL hacking you should be able to navigate to this page, but you will need to supply an ID like this: `/tea/details/1`. Pretty neat!
@@ -95,10 +95,8 @@ Modify the `<IonCard>` component in `TeaPage.tsx` by adding the following props:
 
 **`src/tea/TeaPage.tsx`**
 
-```TypeScript
-...
+```JSX
 <IonCard button onClick={() => showDetailsPage(tea.id)}>
-...
 ```
 
 The `button` prop which adds some styling to the card, making it behave in a "clickable" fashion.
@@ -131,9 +129,8 @@ Open `TeaDetailsPage.tsx` and make the following adjustments:
 **`src/tea/details/TeaDetailsPage.tsx`**
 
 ```TypeScript
-import React from 'react';
-import { useParams } from 'react-router';
 import { ... } from '@ionic/react';
+import { useParams } from 'react-router';
 
 const TeaDetailsPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -150,7 +147,6 @@ Now that we know how the `useParams()` hook works, let's go ahead and mock it in
 **`src/tea/details/TeaDetailsPage.test.tsx`**
 
 ```TypeScript
-import React from 'react';
 ...
 jest.mock('react-router', () => ({
   useParams: () => ({
@@ -180,9 +176,9 @@ We know that we want to fetch the details of the tea with the ID specified in ou
 **`src/tea/details/TeaDetailsPage.tsx`**:
 
 ```TypeScript
-import React from 'react';
-import { useParams } from 'react-router';
 import { ... } from '@ionic/react';
+import { useState, useEffect } from 'react';
+import { useParams } from 'react-router';
 import { Tea } from '../../shared/models';
 import { useTea } from '../useTea';
 
@@ -206,8 +202,7 @@ const TeaDetailsPage: React.FC = () => {
 export default TeaDetailsPage;
 ```
 
-Yikes, now our tests fail! Let's fix that:
-
+Our tests don't know how to handle calling `getTeaById` so let's fix that:
 **`src/tea/details/TeaDetailsPage.test.tsx`**
 
 ```TypeScript
@@ -222,15 +217,6 @@ jest.mock('../useTea', () => ({
   }),
 }));
 
-const mockTea = {
-  id: 1,
-  name: 'Green',
-  image: require('../../assets/images/green.jpg'),
-  description:
-    'Green teas have the oxidation process stopped very early on, leaving them with a very subtle flavor and ' +
-    'complex undertones. These teas should be steeped at lower temperatures for shorter periods of time.',
-};
-
 describe('<TeaDetailsPage />', () => {
   ...
 });
@@ -243,17 +229,17 @@ describe('<TeaDetailsPage />', () => {
   ...
   it('renders the tea name', async () => {
     const { container } = render(<TeaDetailsPage />);
-    await wait(() => expect(container).toHaveTextContent(mockTea.name));
+    await waitFor(() => expect(container).toHaveTextContent(mockTea.name));
   });
 
   it('renders the tea description', async () => {
     const { container } = render(<TeaDetailsPage />);
-    await wait(() => expect(container).toHaveTextContent(mockTea.description));
+    await waitFor(() => expect(container).toHaveTextContent(mockTea.description));
   });
 });
 ```
 
-Now that we have broken tests, we can start adding information to the page. Add the following markup right before the closing `</IonContent>` tag:
+Add the following markup right before the closing `</IonContent>` tag:
 
 ```JSX
 <div className="ion-padding">

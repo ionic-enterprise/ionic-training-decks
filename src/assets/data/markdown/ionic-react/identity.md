@@ -430,12 +430,11 @@ useEffect(() => {
       const headers = { Authorization: 'Bearer ' + token };
       const url = `${process.env.REACT_APP_DATA_SERVICE}/users/current`;
       const { data: user } = await Axios.get(url, { headers });
-
-      setInitializing(false);
       dispatch({ type: 'RESTORE_SESSION', session: { token, user } });
-    } catch (error) {
       setInitializing(false);
+    } catch (error) {
       dispatch({ type: 'CLEAR_SESSION' });
+      setInitializing(false);
     }
   })();
 }, []);

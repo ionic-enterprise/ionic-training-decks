@@ -9,88 +9,62 @@ In this lab you will learn how to:
 
 With our custom tea hook built and tested, it's time to replace our mock tea data with the real deal.
 
-## Displaying the Teas
-
-There are two lifecycle events that are good candidates for getting our data:
-
-- `useEffect` - React Hook that can fire initialization logic upon mounting of a component
-- `ionViewWillEnter` - Ionic Framework lifecycle event fired each time a page is navigated to
-
-We only want to fetch our tea data once per user session, it doesn't change often enough that we should fetch it each time the user navigates to our tea page. That said, it looks like `useEffect` is the correct choice for this situation. If we were loading data that updated more frequently, such as user comments or the delivery status of a package we ordered online, we would want to use `ionViewWillEnter`.
-
 ### Refactor
 
 Let's start by cleaning up `TeaPage.tsx` a bit. Make the following changes:
 
 1. Refactor `listToMatrix` to take a single array of teas and return a matrix of teas
-2. Update the component template that calls `listToMatrix` to compensate for the change
-3. Update the test `makes a tea matrix` to compensate for the change
-4. Finally, move the `teaData` constant to `TeaList.test.tsx`, rename it to `mockTeas` and fix the `makes a tea matrix` test accordingly.
-
-The last item broke your application; it now fails to compile. That's OK - we will fix that.
+2. Update the component template that calls `listToMatrix` to compensate for the change (pass in an empty array)
+3. Remove `teaData`. In `TeaList.test.tsx`, import and use `expectedTeas` from `./__mocks__/mockTeas` instead
+4. Finally update the `makes a tea matrix` test to compensate for the changes made
 
 ### Mocking `useTea`
 
-We need to remove the reference to our hard-coded tea data and replace it with the data returned from the `getTeas` function exposed by our `useTea` hook.
-
-In the spirit of TDD, we're going to start with our test file. We don't actually have to modify any of our existing tests, but we do need to mock the `useTea` hook.
-
-Open up the test file and add the following code:
+We need a way to mock the `useTea()` hook created in the last lab. Go ahead and add the following code to `TeaPage.test.tsx` after the import statements and before the describe block:
 
 **`src/tea/TeaPage.test.tsx`**
 
 ```TypeScript
-import React from 'react';
-...
+const mockTeas = expectedTeas;
 jest.mock('./useTea', () => ({
   useTea: () => ({
     getTeas: jest.fn(() => Promise.resolve(mockTeas)),
     getTeaById: jest.fn(),
   }),
 }));
-
-const mockTeas: Array<Tea> = [ ... ];
-
-describe('<TeaPage />', () => {
-  ...
-});
 ```
-
-This doesn't have any impact on our tests yet; they still fail and the application does too because `teaData` is no longer defined in `TeaPage.tsx`.
 
 ### Fetching the Data
 
-We know we want to use a `useEffect()` to run logic when the tea page component mounts, and we know that we want that logic to fetch the tea data, so let's set that up:
+When the user first enters the tea page, we want to fetch the list of teas from the backend data service. This process will be partially completed for you, it will be up to you to finish the implementation.
 
 **`src/tea/TeaPage.tsx`**
 
 ```TypeScript
+// Todo: Import useState from the 'react' module.
 ...
 import { useTea } from './useTea';
 ...
 const TeaPage: React.FC = () => {
   const { getTeas } = useTea();
+  const [teas, setTeas] = useState<Tea[]>([]);
   ...
-
   useEffect(() => {
-    const init = async () => await getTeas();
-    init();
+    (async () => {
+      const teas = await getTeas();
+      setTeas(teas);
+    });
   }, [getTeas]);
 
   const handleLogout = async () => {
     ...
   };
 
+  // Todo: Update the component to use the list of teas from the component's state.
   return (...);
 };
 export default TeaPage;
 ```
-
-Notice the way that we're telling the `useEffect` to run only once. Instead of telling the `useEffect` to only run once on mount using an empty dependency list (`[]`) we're saying "run this effect when `getTeas` changes". Since the function `getTeas` never changes, the `useEffect` is only called once - when the tea page component mounts. We could use an empty dependency list and our application would work, but it's not the correct way to manage `useEffect` dependencies.
-
-Now that our `useEffect()` is partially complete, I leave it up to you to add a `useState` to set the contents of `await getTeas()` to, and bind the state within `listToMatrix`.
-
-**Challenge:** Finish implementing the `init` function and bind the list of teas to the template.
 
 Once complete, you should notice that our tests are throwing an error:
 
@@ -98,7 +72,7 @@ Once complete, you should notice that our tests are throwing an error:
 Warning: An update to TeaPage inside a test was not wrapped in act(...).
 ```
 
-That's because our component is updated after it was rendered. So far, we've been wrapping some tests in an `await wait()` and haven't really dug into _why_ we're doing it. It's to prevent errors like the one above; React Testing Library knows when our components re-render, and throws an error letting us know. Adding `await wait(() => { ...our assertion... })` waits until the component re-renders to the point that our assertion passes, otherwise it times out after a few seconds. `wait()` actually wraps our code inside an `act()` call, so that's how we'll resolve the error for our tests:
+Let's go ahead and fix that:
 
 **`src/tea/TeaPage.test.tsx`**
 
@@ -107,12 +81,12 @@ That's because our component is updated after it was rendered. So far, we've bee
 describe('<TeaPage />', () => {
   it('displays the header', async () => {
     const { container } = render(<TeaPage />);
-    await wait(() => expect(container).toHaveTextContent(/Tea/));
+    await waitFor(() => expect(container).toHaveTextContent(/Tea/));
   });
 
   it('renders consistently', async () => {
     const { asFragment } = render(<TeaPage />);
-    await wait(() => expect(asFragment()).toMatchSnapshot());
+    await waitFor(() => expect(asFragment()).toMatchSnapshot());
   });
 
   describe('initialization', () => {
