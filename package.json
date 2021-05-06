@@ -68,7 +68,7 @@
     "date-fns": "~2.21.1",
     "eslint": "~7.25.0",
     "eslint-plugin-import": "2.22.1",
-    "eslint-plugin-jsdoc": "~33.0.0",
+    "eslint-plugin-jsdoc": "~33.1.0",
     "eslint-plugin-prefer-arrow": "~1.2.3",
     "execa": "~5.0.0",
     "husky": "~6.0.0",
