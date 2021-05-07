@@ -24,8 +24,6 @@ Fill `Rating.tsx` with the following boilerplate code:
 **`src/shared/components/rating/Rating.tsx`**
 
 ```TypeScript
-import React from 'react';
-
 import './Rating.css';
 
 export const Rating: React.FC = () => {
@@ -38,8 +36,7 @@ Now let's shell out the test file:
 **`src/shared/components/rating/Rating.test.tsx`**
 
 ```TypeScript
-import React from 'react';
-import { cleanup, render } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import { Rating } from './Rating';
 
 describe('<Rating />', () => {
@@ -48,10 +45,7 @@ describe('<Rating />', () => {
     expect(asFragment()).toMatchSnapshot();
   });
 
-  afterEach(() => {
-    cleanup();
-    jest.restoreAllMocks();
-  });
+  afterEach(() =>  jest.restoreAllMocks());
 });
 ```
 
@@ -93,14 +87,11 @@ Confirm that your component displays under the tea description. Once it does, mo
 
 ## Build the Rating Component
 
-### Writing the Template
-
-Let's update the rating component to display a row of five stars:
+Update the rating component to display a row of five stars:
 
 **`src/shared/components/rating/Rating.tsx`**
 
 ```TypeScript
-import React from 'react';
 import { IonIcon } from '@ionic/react';
 import { star } from 'ionicons/icons';
 
@@ -110,38 +101,43 @@ export const Rating: React.FC = () => {
   return (
     <div className="rating">
       {[1, 2, 3, 4, 5].map((_, idx) => (
-        <IonIcon key={idx} icon={star} />
+        <IonIcon
+          data-testid={`Rate ${num} stars`}
+          key={idx}
+          icon={star}
+        />
       ))}
     </div>
   );
 };
 ```
 
-**Challenge:** Using `useState` add a property `rating` to the component. Give it an inital value greater than zero but less than 5.
+**Challenge:** Using `useState` add a property `rating` to the component. Give it an initial value greater than zero but less than 5.
 
-Next, change the component's markup so that the number of filled in starts matches the initial rating and the rest are outlined stars:
+Change the component's markup so that the number of filled in starts matches the initial rating and the rest are outlined stars:
 
-```TypeScript
-    ...
-      {[1, 2, 3, 4, 5].map((num, idx) => (
-        <IonIcon key={idx} icon={num <= rating ? star : starOutline} />
-      ))}
-    ...
+```JSX
+{[1, 2, 3, 4, 5].map((num, idx) => (
+  <IonIcon
+    data-testid={`Rate ${num} stars`}
+    key={idx}
+    icon={num <= rating ? star : starOutline}
+  />
+))}
 };
 ```
 
-Finally, add an `onClick` handler that will change the rating when the user clicks on a star:
+Add an `onClick` handler that will change the rating when the user clicks on a star:
 
-```TypeScript
-    ...
-      {[1, 2, 3, 4, 5].map((num, idx) => (
-        <IonIcon
-          key={idx}
-          icon={num <= rating ? star : starOutline}
-          onClick={() => setRating(num)}
-        />
-      ))}
-    ...
+```JSX
+  {[1, 2, 3, 4, 5].map((num, idx) => (
+    <IonIcon
+      data-testid={`Rate ${num} stars`}
+      key={idx}
+      icon={num <= rating ? star : starOutline}
+      onClick={() => setRating(num)}
+    />
+  ))}
 ```
 
 Try clicking different rating values. So far so good!
@@ -168,13 +164,13 @@ Now it's much easier for users to change the rating of the tea category!
 
 ### Component Props
 
-Visually the rating component looks good, but it's not very useful to the components consuming it. It would be great if the consumer was able to:
+Visually the rating component looks good, but it's not very useful to the components consuming it. It would be great if the consumer of this component could:
 
 - Supply an initial rating value
 - Run a method when the rating changes
 - Allow the component to be disabled
 
-We can achieve this by creating a set of props specific to our rating component. We've kind of done this before when building the `ProtectedRoute`. This time, we won't be extending any existing prop definition, we'll be creating our own:
+This can be achieved by creating a set of props specific to the rating component.
 
 **`src/shared/components/rating/Rating.tsx`**
 
@@ -194,82 +190,52 @@ export const Rating: React.FC<RatingProps> = ({
   onRatingChange
 }) => {
   const [rating, setRating] = useState<number>(0);
-
   ...
 };
 ```
 
-The only prop that the consumer _needs_ to provide is `onRatingChange`. We'll supply default values for the optional props `initialRating` and `disabled`.
+The only prop that the consumer _needs_ to provide is `onRatingChange`. Default values for the optional props `initialRating` and `disabled` are provided.
 
-With our props defined, let's update the component to use them. First, we need a `useEffect()` that will update our rating when `initialRating` updates:
-
-```TypeScript
-...
-useEffect(() => setRating(initialRating), [initialRating]);
-...
-```
-
-Next, we'll want to establish a handler that will both update our rating state and invoke `onRatingChange()` passing in the updated rating value:
+Update the component to use `RatingProps`:
 
 ```TypeScript
+import { useEffect, useState } from 'react';
 ...
-const handleRatingChange = (rating: number) => { };
 
-return (
-    <div className="rating">
+export const Rating: React.FC<RatingProps> = ({
+  initialRating = 0,
+  disabled = false,
+  onRatingChange,
+}) => {
+  const [rating, setRating] = useState<number>(0);
+
+  useEffect(() => setRating(initialRating), [initialRating]);
+
+  const handleRatingChange = (rating: number) => {
+    setRating(rating);
+    onRatingChange(rating);
+  };
+
+  return (
+    <div className="rating" style={{ opacity: disabled ? 0.25 : 1 }}>
       {[1, 2, 3, 4, 5].map((num, idx) => (
         <IonIcon
-          ...
-          onClick={() => handleRatingChange(num)}
+          data-testid={`Rate ${num} stars`}
+          key={idx}
+          icon={num <= rating ? star : starOutline}
+          onClick={() => !disabled && handleRatingChange(num)}
         />
       ))}
     </div>
   );
-);
+};
 ```
 
-**Challenge:** Fill in `handleRatingChange`.
-
-Then, we'll add an `aria-label` property to `IonIcon`. This will be helpful for accessibility:
-
-```TypeScript
-...
-<IonIcon
-  aria-label={`Rate ${num} stars`}
-  key={idx}
-  icon={num <= rating ? star : starOutline}
-  onClick={() => handleRatingChange(num)}
-/>
-...
-```
-
-Finally, let's update the markup to accomodate the case where the component is disabled:
-
-```JSX
-...
-<div className="rating" style={{ opacity: disabled ? 0.25 : 1 }}>
-  {[1, 2, 3, 4, 5].map((num, idx) => (
-    <IonIcon
-      aria-label={`Rate ${num} stars`}
-      key={idx}
-      icon={num <= rating ? star : starOutline}
-      onClick={() => !disabled && handleRatingChange(num)}
-    />
-  ))}
-</div>
-...
-```
-
-At this point both running processes - `ionic serve` and `npm test` - should be showing errors. In the spirit of test-driven-development, we'll fix (and add) our tests first.
-
-### Test First
-
-You should notice that your "renders consistently" test has a syntax error. That's OK, let's remove the entire test. In it's place we will create two different snapshot tests, one for when the component is enabled and one when it's disabled:
+The tests for the rating component are failing. Let's replace the existing tests in favor for two separate `describe()` blocks for when the component is enabled and when the component is disabled.
 
 **`src/shared/components/rating/Rating.test.tsx`**
 
 ```TypeScript
-import React from 'react';
 import { ionFireEvent as fireEvent } from '@ionic/react-test-utils';
 ...
 
@@ -305,15 +271,15 @@ Fill out the `when enabled` describe block with the following:
     });
 
     it('sets the rating on click', async () => {
-      const { getByLabelText } = render(<Rating {...props} />);
-      const fourStars = getByLabelText('Rate 4 stars');
+      const { getByTestId } = render(<Rating {...props} />);
+      const fourStars = getByTestId('Rate 4 stars');
       fireEvent.click(fourStars);
       expect(props.onRatingChange).toHaveBeenCalledWith(4);
     });
 
     it('calls the change handler on click', async () => {
-      const { getByLabelText } = render(<Rating {...props} />);
-      const fourStars = getByLabelText('Rate 4 stars');
+      const { getByTestId } = render(<Rating {...props} />);
+      const fourStars = getByTestId('Rate 4 stars');
       fireEvent.click(fourStars);
       expect(props.onRatingChange).toHaveBeenCalledTimes(1);
     });
@@ -321,7 +287,7 @@ Fill out the `when enabled` describe block with the following:
   ...
 ```
 
-And the "when disabled" block:
+Then the "when disabled" block:
 
 ```TypeScript
   ...
@@ -344,8 +310,8 @@ And the "when disabled" block:
     });
 
     it('does not call the change handler on click', () => {
-      const { getByLabelText } = render(<Rating {...props} />);
-      const fourStars = getByLabelText('Rate 4 stars');
+      const { getByTestId } = render(<Rating {...props} />);
+      const fourStars = getByTestId('Rate 4 stars');
       fireEvent.click(fourStars);
       expect(props.onRatingChange).not.toHaveBeenCalled();
     });
@@ -353,33 +319,13 @@ And the "when disabled" block:
   ...
 ```
 
-Note that `getByLabelText` can retrieve elements based on the value of their `aria-label` property. Pretty neat! All the tests should now pass.
+## Saving the Rating
 
-### Then Code
+We need a way to save and retrieve the rating of each tea supplied by the user. Our backend data service does not currently support saving/storing tea ratings so we will store this data locally using the Capacitor Storage API.
 
-To fix our `ionic serve` process, add an `onRatingChange` prop to the `<Rating />` component in `TeaDetailsPage.tsx`:
+### Update the Tea Model
 
-**`src/tea/details/TeaDetailsPage.tsx`**
-
-```JSX
-...
-<Rating onRatingChange={() => { }}/>
-...
-```
-
-## Save the Rating
-
-We need a way to save and retrieve the rating of each tea. Our back end service does not currently support tea ratings, so we will store this data locally using the Capacitor Storage API.
-
-To integrate the rating feature within our data set we have to:
-
-- Add an optional `rating` property to the `Tea` model
-- Modify `useTea` to get the rating
-- Add a `saveRating()` method to `useTea` to set the rating
-
-### Update the Model
-
-The first step is easy, let's update the shared `Tea` model:
+First, update the `Tea` model to optionally contain a `rating`.
 
 **`src/shared/models/Tea.ts`**
 
@@ -395,30 +341,29 @@ export interface Tea {
 
 ### Get the Rating
 
-Let's add ratings to each of the `expectedTeas` tea items in `useTea.test.tsx` like so:
+Add ratings to each of the `expectedTeas` items in `src/tea/__mocks__/mockTea.ts`.
 
-**`src/tea/useTea.test.tsx`**
+**Example:**
 
 ```TypeScript
-...
 {
   id: 1,
   name: 'Green',
-  image: 'green.jpg',
+  image: require(`../../assets/images/green.jpg`).default,
   description: 'Green tea description.',
   rating: 4,
-},
-...
+}
 ```
 
 For some of the items, make the rating zero. This will be the default value for teas that do not yet have a rating.
 
-The rating is not part of the data coming back from the back end, so the result set that we expect back from the API should not include it. Update `resultTeas` so it deletes the `rating` property like we do for `image:
+The rating is not part of the data coming back from the back end, so the result set that we expect back from the API should not include it. Update `resultTeas` so it deletes the `rating` property like we do for `image`:
 
 ```TypeScript
 const resultTeas = () => {
   return expectedTeas.map((t: Tea) => {
     const tea = { ...t };
+    // @ts-ignore
     delete tea.image;
     delete tea.rating;
     return tea;
@@ -453,7 +398,9 @@ describe('useTea', () => {
 });
 ```
 
-At this point you should have failing tests. Let's update `useTea` to make them pass. First update `fromJsonToTea` to make it asyncrhonous and have it grab the rating from storage:
+The unit tests for `useTea` now fail. We will update the hook to make them pass.
+
+First update `fromJsonToTea()`:
 
 **`src/tea/useTea.tsx`**
 
@@ -471,30 +418,29 @@ At this point you should have failing tests. Let's update `useTea` to make them 
   ...
 ```
 
-We're not done yet; right now `getTeas()` and `getTeaById()` will return unresolved Promises as their `rating` property. Not cool. We can easily fix `getByTeaById()` by adding an `await` keyword as part of the return statement:
+Next update `getTeaById()`:
 
 ```TypeScript
-...
-const getTeaById = useCallback(async (id: number): Promise<Tea> => {
-  const url = `/tea-categories/${id}`;
-  const { data } = await apiInstance.get(url);
-  return await fromJsonToTea(data);
-}, []);
-...
+const getTeaById = useCallback(
+  async (id: number): Promise<Tea> => {
+    const url = `/tea-categories/${id}`;
+    const { data } = await instance.get(url);
+    return await fromJsonToTea(data);
+  },
+  [instance],
+);
 ```
 
-Fixing `getTeas()` is a bit trickier. We still need to add the `async` keyword to our return statement, but we need to asynchronize our `map()` call and place it inside `Promise.all()` so that we return resolved tea items instead of an array of pending Promises:
+Finally update `getTeas()`:
 
 ```TypeScript
-...
 const getTeas = useCallback(async (): Promise<Tea[]> => {
   const url = `/tea-categories`;
-  const { data } = await apiInstance.get(url);
-  return await Promise.all(
+  const { data } = await instance.get(url);
+  return Promise.all(
     data.map(async (item: any) => await fromJsonToTea(item)),
   );
-}, []);
-...
+}, [instance]);
 ```
 
 Now all our tests pass.
@@ -536,7 +482,7 @@ describe('useTea', () => {
 });
 ```
 
-Let's make this test pass. Add a new method `saveTea()` to the `useTea` hook:
+To make this test pass, add a new method `saveTea()` to the `useTea` hook:
 
 **`src/tea/useTea.tsx`**
 
@@ -556,50 +502,15 @@ export const useTea = () => {
 };
 ```
 
----
+## Update the Details Page
 
-#### Test First
+The tea details page needs to be adjusted to account for the changes made to the `<Rating />` component:
 
-Add a new describe block after the describe block for `get one`:
+1. It should be supplied an initial rating value
+2. It should be disabled if no tea item is available
+3. An event handler should save the tea when the rating is changed
 
-```TypeScript
-  ...
-  describe('save', () => {
-    it('saves the rating', async () => {
-      const tea = { ...expectedTeas[4] };
-      tea.rating = 4;
-      await teaCategories.save(tea);
-      expect(Plugins.Storage.set).toHaveBeenCalledTimes(1);
-      expect(Plugins.Storage.set).toHaveBeenCalledWith({
-        key: 'rating5',
-        value: '4',
-      });
-    });
-  });
-  ...
-```
-
-Now let's implement the method.
-
-#### Then Code
-
-Add the following method to our `TeaCategories` class:
-
-```TypeScript
-  async save(tea: Tea): Promise<void> {
-    const { Storage } = Plugins;
-    return Storage.set({
-      key: `rating${tea.id}`,
-      value: tea.rating?.toString() || '0',
-    });
-  }
-```
-
-Save and your test should now pass. One more step before we add it to the details page.
-
-## Modify the Details Page
-
-One more item before we finish the lab: we need to provide props to the `<Rating />` component in our details page. On rating change, we'll call `saveTea()` to save the rating to storage:
+Go ahead and make the following changes to the tea details page.
 
 **`src/tea/details/TeaDetailsPage.tsx`**
 
@@ -622,6 +533,8 @@ const TeaDetailsPage: React.FC = () => {
 export default TeaDetailsPage;
 ```
 
+Go ahead and test this functionality out. Add ratings to a couple of the tea items, reload (or refresh) the application and see that their values persist!
+
 ## Conclusion
 
-Congratulations! You have created and consumed your first (true) reusable component. Up next we will add tabbed navigation to our application.
+Components are the fundamental building block of React, so it's important to understand how to compose and test reusable components. Next we will add tabbed navigation to our application.
