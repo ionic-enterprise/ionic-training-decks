@@ -1148,4 +1148,4 @@ const handleDeleteNote = async (id: number) => {
 
 ## Conclusion
 
-Congratulations. You have used what we have learned to this point to add a whole new feature to your app. Along the way, you also exercised a few Framework components you had not used before. We are almost done with this app. One more page to go and we will be done.
+Congratulations. You have used what we have learned to this point to add a whole new feature to your app. Along the way, you also exercised a few Framework components you had not used before. Next we will add some styling to the application.

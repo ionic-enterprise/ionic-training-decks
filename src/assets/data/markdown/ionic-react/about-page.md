@@ -16,21 +16,12 @@ The about page will use properties from `package.json` to display in an `IonList
 **`src/about/AboutPage.tsx`**
 
 ```TypeScript
-import React from 'react';
 import {
-  IonContent,
-  IonHeader,
-  IonItem,
-  IonLabel,
-  IonList,
-  IonNote,
-  IonPage,
-  IonTitle,
-  IonToolbar,
-} from '@ionic/react';
+  IonContent, IonHeader, IonItem, IonLabel, IonList,
+  IonNote, IonPage, IonTitle, IonToolbar} from '@ionic/react';
 import { author, name, description, version } from '../../package.json';
 
-const About: React.FC = () => {
+const AboutPage: React.FC = () => {
   return (
     <IonPage>
       <IonHeader>
@@ -38,7 +29,7 @@ const About: React.FC = () => {
           <IonTitle>About Tea Taster</IonTitle>
         </IonToolbar>
       </IonHeader>
-      <IonContent>
+      <IonContent className="main-content">
         <IonHeader collapse="condense">
           <IonToolbar>
             <IonTitle size="large">About Tea Taster</IonTitle>
@@ -66,7 +57,7 @@ const About: React.FC = () => {
     </IonPage>
   );
 };
-export default About;
+export default AboutPage;
 ```
 
 ## Move the Logout Logic
@@ -78,11 +69,11 @@ Here is the full test file for `AboutPage.test.tsx`:
 **`src/about/AboutPage.test.tsx`**
 
 ```TypeScript
-import React from 'react';
-import { cleanup, render } from '@testing-library/react';
+import { render, waitFor } from '@testing-library/react';
 import { ionFireEvent as fireEvent } from '@ionic/react-test-utils';
 import AboutPage from './AboutPage';
 
+let mockLogout = jest.fn(() => Promise.resolve());
 jest.mock('../core/auth', () => ({
   useAuthentication: () => ({
     logout: mockLogout,
@@ -94,30 +85,31 @@ jest.mock('react-router', () => ({
   }),
 }));
 
-let mockLogout = jest.fn(() => Promise.resolve());
-
 describe('<AboutPage />', () => {
   beforeEach(() => (mockLogout = jest.fn(() => Promise.resolve())));
 
-  it('renders consistently', () => {
+  it('displays the header', async () => {
+    const { container } = render(<AboutPage />);
+    await waitFor(() =>
+      expect(container).toHaveTextContent(/About Tea Taster/),
+    );
+  });
+
+  it('renders consistently', async () => {
     const { asFragment } = render(<AboutPage />);
-    expect(asFragment).toMatchSnapshot();
+    await waitFor(() => expect(asFragment()).toMatchSnapshot());
   });
 
   describe('sign out button', () => {
     it('signs the user out', async () => {
-      let button: HTMLIonButtonElement;
-      const { container } = render(<AboutPage />);
-      button = container.querySelector('ion-button')!;
-      fireEvent.click(button);
-      expect(mockLogout).toHaveBeenCalledTimes(1);
+      const { getByTestId } = render(<AboutPage />);
+      const logout = await waitFor(() => getByTestId(/logout-button/));
+      fireEvent.click(logout);
+      await waitFor(() => expect(mockLogout).toHaveBeenCalledTimes(1));
     });
   });
 
-  afterEach(() => {
-    cleanup();
-    jest.restoreAllMocks();
-  });
+  afterEach(() => jest.restoreAllMocks());
 });
 ```
 
