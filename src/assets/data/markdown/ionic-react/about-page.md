@@ -1,4 +1,4 @@
-# Lab: Add the Notes Feature
+# Lab: The About Page
 
 In this lab you will:
 

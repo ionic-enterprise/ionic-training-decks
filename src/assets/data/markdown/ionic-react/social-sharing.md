@@ -14,7 +14,7 @@ While we are on the subject of plugins, Capacitor has been designed to also work
 
 Let's update the sliding items from the last lab so that it displays a trashcan icon instead of the full word "Delete".
 
-**`src/tasting-notes/TastingNotesPage.tsx**
+**`src/tasting-notes/TastingNotesPage.tsx`**
 
 ```JSX
 <IonItemOption
