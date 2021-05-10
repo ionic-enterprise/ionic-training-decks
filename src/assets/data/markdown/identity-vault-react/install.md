@@ -170,14 +170,14 @@ export class BrowserVault implements IdentityVault {
   async setSecureStorageModeEnabled(enabled: boolean): Promise<void> {}
 
   async unlock(usingPasscode?: boolean, passcode?: string): Promise<void> {}
-}Brows
+}
 ```
 
 Create a `src/app/core/vault/BrowserVault.ts` file with the above contents.
 
 #### BrowserVaultPlugin
 
-The `BrowserVaultPlugin` classes mimics the Indentity Vault plugin's JavaScript interface that gets us access to the vault. Rather than returning an object that accesses the Vault plugin, the `BrowserVaultPlugin` service returns the singleton instance of `BrowserVault`, which is our browser-based service that implements the same API as the plugin. This code is very simple:
+The `BrowserVaultPlugin` classes mimics the Identity Vault plugin's JavaScript interface that gets us access to the vault. Rather than returning an object that accesses the Vault plugin, the `BrowserVaultPlugin` service returns the singleton instance of `BrowserVault`, which is our browser-based service that implements the same API as the plugin. This code is very simple:
 
 ```TypeScript
 import {

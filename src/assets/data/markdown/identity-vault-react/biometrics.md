@@ -140,7 +140,7 @@ async restoreSession(): Promise<Session | undefined> {
 }
 ```
 
-### Sidenote: Using React Hook APIs with Identity Vault
+### Side-Note: Using React Hook APIs with Identity Vault
 
 At this point in the lab we have overrode Identity Vault methods in both the `SessionVault` singleton class, and the `<AuthProvider />` component (that establishes the `AuthContext`). It may seem confusing which file should be modified when, so an explanation is in order:
 
@@ -198,12 +198,14 @@ const LoginPage: React.FC = () => {
 +   canUnlockVault,
 +   restoreSession,
   } = useAuthentication();
-  const { handleSubmit, control, formState, errors } = useForm<{
+  const {
+    handleSubmit,
+    control,
+    formState: { errors, isDirty, isValid },
+  } = useForm<{
     email: string;
     password: string;
-  }>({
-    mode: 'onChange',
-  });
+  }>({ mode: 'onChange' });
 
   useEffect(() => {
     session && history.replace('/tabs');
@@ -273,7 +275,7 @@ Remember this block of code from the last lab?
 
 ```JSX
  <AuthContext.Provider value={{ state, dispatch, vault }}>
-  {initializing ? <div>Loading...</div> : children}
+  {initializing ? <IonSpinner {...} /> : children}
 </AuthContext.Provider>
 ```
 
