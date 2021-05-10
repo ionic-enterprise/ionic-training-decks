@@ -9,22 +9,22 @@ In this lab, you will learn how to:
 
 ## Overview
 
-Let's mock up how components will be used in each page. This allows us to test out exactly how our data should look like and also allows us to concentrate on styling without worrying about other moving parts. This is a common technique used when laying out user interfaces for an application.
+It is often desirable to lay out the user interface without worrying about how to get the data to be displayed. This allows us to concentrate solely on how the application will look and feel in order to get that worked out early in the process.
 
 ## Install the Images
 
 We'll want to display images for the tea data we will be mocking up, but these assets do not exist yet. <a href="/assets/packages/ionic-react/img.zip">Download the images</a> and unpack the zip file. Follow these steps to place them in the correct locations:
 
 1. Create a folder `src/assets`
-2. Within `src/assets` create two subfolders, `images` and `icon`
+2. Within `src/assets` create two sub folders, `images` and `icon`
 3. Move all files with the `.jpg` extension into `src/assets/images`
 4. Move `favicon.png` into `src/assets/icon`
 
 ## Feature Folders
 
-One way to organize project files is to create folders by feature, opposed to technology (i.e., a folder for components, a folder for hooks, etc.). A feature folder structure is easier to maintain over the lifetime of an application as new requirements and features are scheduled to be added. This training will utilize a feature folder approach.
+One way to organize project files is to create folders by feature, opposed to file "type". A feature folder structure is easier to maintain over the lifetime of an application as new requirements and features are scheduled to be added. This training will utilize a feature folder approach.
 
-In addition to folders by feature, it's typical to have folders for `core` and `shared` functionality: bits of code that are used across features. Begin this structure by creating the following folders:
+In addition to folders by feature, it's typical to have folders for `core` and `shared` functionality: bits of code that are used across features. Create the following folders:
 
 - `src/core`
 - `src/shared`
@@ -35,7 +35,7 @@ Let's mock how components will be used in our page. This allows us to test our e
 
 ### Tea Model
 
-Before mocking the layout we should create a model that defines the data for a given tea:
+Create a data model to define the data for a given tea.
 
 - Create a `src/shared/models` folder
 - Add a `src/shared/models/Tea.ts` file
@@ -76,8 +76,6 @@ This can be achieved by grouping like items into "barrel" files. Let's group all
 export * from './Tea';
 ```
 
-The files in our `models` folder are pretty redundant at this moment, but as the application grows this will help keep our import statements from getting out of hand.
-
 ### The Tea Page
 
 #### Rename the Home Page
@@ -94,32 +92,16 @@ $ git mv src/pages src/tea
 $ git mv src/tea/Home.tsx src/tea/TeaPage.tsx
 $ git mv src/tea/Home.css src/tea/TeaPage.css
 $ git mv src/tea/Home.test.tsx src/tea/TeaPage.test.tsx
+$ git mv src/tea/__snapshots__/Home.test.tsx.snap src/tea/__snapshots__/TeaPage.test.tsx.snap
 ```
 
 Using `git mv` to move the file ensures they are tracked properly in `git`. You could also do the renaming via your IDE; do whatever works best for you.
 
 ##### Rename the Objects
 
-All of the TypeScript files in `src/tea` contain path references to the old `home` files. They also contain object names such as `Home`. Fix the file path references and change the object names to be `TeaPage`:
+All of the TypeScript files in `src/tea` contain path references to the old `home` files. They also contain object names such as `Home`. Fix the file path references and change the object names to be `TeaPage`.
 
-**`src/tea/TeaPage.tsx`**
-
-```TypeScript
-import { ... } from '@ionic/react';
-import React from 'react';
-import ExploreContainer from '../components/ExploreContainer';
-import './TeaPage.css';
-
-const TeaPage: React.FC = () => {
-  return (
-    ...
-  );
-}
-
-export default TeaPage;
-```
-
-Update `App.tsx` to replace references to the old home page and update the routing to have a `tea` route instead of a `home` route:
+Then, update `App.tsx` to replace references to the old home page and update the routing to have a `tea` route instead of a `home` route:
 
 **`src/App.tsx`**
 
@@ -136,8 +118,12 @@ const App: React.FC = () => {
     <IonApp>
       <IonReactRouter>
         <IonRouterOutlet>
-          <Route path="/tea" component={TeaPage} exact={true} />
-          <Route exact path="/" render={() => <Redirect to="/tea" />} />
+          <Route exact path="/tea">
+            <TeaPage />
+          </Route>
+          <Route exact path="/">
+            <Redirect to="/tea" />
+          </Route>
         </IonRouterOutlet>
       </IonReactRouter>
     </IonApp>
@@ -147,22 +133,7 @@ const App: React.FC = () => {
 export default App;
 ```
 
-Finally, update `src/tea/TeaPage.test.tsx`:
-
-**`src/tea/TeaPage.test.tsx`**
-
-```TypeScript
-describe('<TeaPage />', () => {
-  it('displays the header', () => {
-    const { container } = render(<TeaPage />);
-    expect(container).toHaveTextContent(/Tea/);
-  });
-  ...
-```
-
-You may need to stop and restart `npm test` a few times for it to unlink the old `Home.test.tsx` file.
-
-**Challenge:** Update the header text in the `TeaPage` component such that the modified test no longer fails.
+**Challenge:** Replace the header text "Blank" with "Tea" and fix any failing tests.
 
 During this training, your snapshot tests will periodically fail as we update components. That's OK and makes sense - we are modifying our components so they shouldn't be matching existing snapshots. Remember to update your snapshots whenever the snapshot tests fail by pressing `u` in the terminal hosting `npm test`.
 
@@ -177,7 +148,7 @@ export const teaData: Array<Tea> = [
   {
     id: 1,
     name: 'Green',
-    image: require('../assets/images/green.jpg'),
+    image: require('../assets/images/green.jpg').default,
     description:
       'Green teas have the oxidation process stopped very early on, leaving them with a very subtle flavor and ' +
       'complex undertones. These teas should be steeped at lower temperatures for shorter periods of time.',
@@ -185,7 +156,7 @@ export const teaData: Array<Tea> = [
   {
     id: 2,
     name: 'Black',
-    image: require('../assets/images/black.jpg'),
+    image: require('../assets/images/black.jpg').default,
     description:
       'A fully oxidized tea, black teas have a dark color and a full robust and pronounced flavor. Black teas tend ' +
       'to have a higher caffeine content than other teas.',
@@ -193,7 +164,7 @@ export const teaData: Array<Tea> = [
   {
     id: 3,
     name: 'Herbal',
-    image: require('../assets/images/herbal.jpg'),
+    image: require('../assets/images/herbal.jpg').default,
     description:
       'Herbal infusions are not actually "tea" but are more accurately characterized as infused beverages ' +
       'consisting of various dried herbs, spices, and fruits.',
@@ -201,15 +172,15 @@ export const teaData: Array<Tea> = [
   {
     id: 4,
     name: 'Oolong',
-    image: require('../assets/images/oolong.jpg'),
+    image: require('../assets/images/oolong.jpg').default,
     description:
       'Oolong teas are partially oxidized, giving them a flavor that is not as robust as black teas but also ' +
-      'not as suble as green teas. Oolong teas often have a flowery fragrance.',
+      'not as subtle as green teas. Oolong teas often have a flowery fragrance.',
   },
   {
     id: 5,
     name: 'Dark',
-    image: require('../assets/images/dark.jpg'),
+    image: require('../assets/images/dark.jpg').default,
     description:
       'From the Hunan and Sichuan provinces of China, dark teas are flavorful aged probiotic teas that steeps ' +
       'up very smooth with slightly sweet notes.',
@@ -217,23 +188,23 @@ export const teaData: Array<Tea> = [
   {
     id: 6,
     name: 'Puer',
-    image: require('../assets/images/puer.jpg'),
+    image: require('../assets/images/puer.jpg').default,
     description:
       'An aged black tea from china. Puer teas have a strong rich flavor that could be described as "woody" or "peaty."',
   },
   {
     id: 7,
     name: 'White',
-    image: require('../assets/images/white.jpg'),
+    image: require('../assets/images/white.jpg').default,
     description:
       'White tea is produced using very young shoots with no oxidation process. White tea has an extremely ' +
-      'delicate flavor that is sweet and fragrent. White tea should be steeped at lower temperatures for ' +
+      'delicate flavor that is sweet and fragrant. White tea should be steeped at lower temperatures for ' +
       'short periods of time.',
   },
   {
     id: 8,
     name: 'Yellow',
-    image: require('../assets/images/yellow.jpg'),
+    image: require('../assets/images/yellow.jpg').default,
     description:
       'A rare tea from China, yellow tea goes through a similar shortened oxidation process like green teas. ' +
       'Yellow teas, however, do not have the grassy flavor that green teas tend to have. The leaves often ' +
@@ -245,16 +216,11 @@ export const teaData: Array<Tea> = [
 We haven't imported the `Tea` model into our file yet so your IDE may be showing some kind of visual cue. Let's go ahead and import it using the barrel file we created:
 
 ```TypeScript
-import React from 'react';
-import { ... } from '@ionic/react';
-import { Tea } from '../shared/models';
 import ExploreContainer from '../components/ExploreContainer';
-
+import { Tea } from '../shared/models';
 import './TeaPage.css';
 ...
 ```
-
-**Note:** If we were futher along, we probably would have create a custom React hook and had it return fake data using the same sort of interface it would use to return real data. But, we haven't talked about custom React hooks yet in this training.
 
 #### Create a List of Cards
 
@@ -294,11 +260,11 @@ Our application looks good when viewed on a phone resolution but if we modify ou
 
 Enter the <a href="" target="_blank">responsive grid</a>! By default, the responsive grid shows rows of 12 columns each. However, we only want to show at most rows of 4 columns. Luckily there are some simple mechanisms in place that will allow us to do that, but first we should massage our data a bit.
 
+### Setup a Data Matrix
+
 We have a list of X number of teas (currently 8, but once we start fetching data from a back end service it could be any number); let's break that up into a matrix with 4 teas in each row.
 
-### Test First
-
-Create a test that for this in `TeaPage.test.tsx`:
+Create a test for this in `TeaPage.test.tsx`:
 
 ```TypeScript
 ...
@@ -320,18 +286,16 @@ describe('<TeaPage />', () => {
 
 This test shows the single array being expanded into an array of two child arrays, each of which are four teas long. Let's create the code to do that.
 
-### Then Code
-
 Export a function called `listToMatrix()` in `TeaPage.tsx`:
 
 **`src/tea/TeaPage.tsx`**:
 
 ```TypeScript
 ...
-export const listToMatrix = (): Array<Array<Tea>> => {
-  let teaMatrix: Array<Array<Tea>> = [];
+export const listToMatrix = (): Tea[][] => {
+  let teaMatrix: Tea[][] = [];
+  let row: Tea[] = [];
 
-  let row: Array<Tea> = [];
   teaData.forEach(tea => {
     row.push(tea);
     if (row.length === 4) {
@@ -341,15 +305,14 @@ export const listToMatrix = (): Array<Array<Tea>> => {
   });
 
   if (row.length) teaMatrix.push(row);
-
   return teaMatrix;
 };
 ...
 ```
 
-Like our mock data this piece of logic doesn't belong here, but we can refactor later on.
-
 **Challenge:** Go ahead and update the unit test so it passes.
+
+### Style the Grid
 
 Now that we can have our matrix, let's create the grid. **Set up Chrome to emulate an iPad Pro in landscape mode.** We know we want 4 columns on a wide screen like this, and we know that the grid by default supports 12 columns. That means for a wide screen like this each column should take up 3 columns.
 
@@ -384,13 +347,14 @@ This code loops through the rows of the matrix and displays a column for each te
 **`src/tea/TeaPage.css`**
 
 ```CSS
-ion-card {
+.tea-grid ion-card {
   height: 100%;
 }
 
-ion-col {
+.tea-grid ion-col {
   margin-bottom: 1em;
 }
+
 ```
 
 Now each card takes up the same cell height and we have some margin between the rows. Nice!

@@ -23,7 +23,6 @@ Within `src/about` add two new files: `AboutPage.tsx` and `AboutPage.test.tsx`.
 **`src/about/AboutPage.tsx`**
 
 ```TypeScript
-import React from 'react';
 import { IonPage, IonHeader, IonTitle, IonToolbar, IonContent } from '@ionic/react';
 
 const AboutPage: React.FC = () => {
@@ -50,7 +49,6 @@ export default AboutPage;
 **`src/about/AboutPage.test.tsx`**
 
 ```TypeScript
-import React from 'react';
 import { render } from '@testing-library/react';
 import AboutPage from './AboutPage';
 
@@ -83,8 +81,9 @@ Take a moment to look at the <a href="https://ionicframework.com/docs/api/tabs" 
 
 Create a new file `src/Tabs.tsx` and fill it in with the following code:
 
+**`src/Tabs.tsx`**
+
 ```TypeScript
-import React from 'react';
 import { RouteComponentProps } from 'react-router';
 import { IonRouterOutlet, IonTabBar, IonTabs } from '@ionic/react';
 
@@ -103,7 +102,7 @@ Open `App.tsx` and replace the routes inside `<IonRouterOutlet>` with the follow
 
 ```JSX
 <Route exact path="/login" component={LoginPage} />
-<ProtectedRoute path="/tabs" component={Tabs} />
+<PrivateRoute path="/tabs" component={Tabs} />
 <Route exact path="/" render={() => <Redirect to="/login" />} />
 ```
 
@@ -121,10 +120,10 @@ Now open `Tabs.tsx` back up so we can add our tab-based routes. Place the follow
 
 ```JSX
 <Route exact path={match.url} render={() => <Redirect to={`${match.url}/tea`} />} />
-<ProtectedRoute exact path={`${match.url}/tea`} component={TeaPage} />
-<ProtectedRoute exact path={`${match.url}/about`} component={AboutPage} />
-<ProtectedRoute exact path={`${match.url}/tasting-notes`} component={TastingNotesPage} />
-<ProtectedRoute path={`${match.url}/tea/details/:id`} component={TeaDetailsPage} />
+<PrivateRoute exact path={`${match.url}/tea`} component={TeaPage} />
+<PrivateRoute exact path={`${match.url}/about`} component={AboutPage} />
+<PrivateRoute exact path={`${match.url}/tasting-notes`} component={TastingNotesPage} />
+<PrivateRoute path={`${match.url}/tea/details/:id`} component={TeaDetailsPage} />
 ```
 
 An Ionic Framework application can have multiple `<IonRouterOutlet />` components:
@@ -142,7 +141,6 @@ Now it's time to fill out the `<IonTabBar />` component:
 **`src/Tabs.tsx`**
 
 ```JSX
-...
 <IonTabBar slot="bottom">
   <IonTabButton tab="tea" href={`${match.url}/tea`}>
     <IonIcon icon={leaf} />
@@ -157,7 +155,6 @@ Now it's time to fill out the `<IonTabBar />` component:
     <IonLabel>About</IonLabel>
   </IonTabButton>
 </IonTabBar>
-...
 ```
 
 Our application now has tab-based navigation! Go ahead and switch back and forth between tabs.

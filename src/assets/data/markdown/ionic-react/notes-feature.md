@@ -10,7 +10,7 @@ In this lab you will:
 
 Let's take what we've learned so far to add a whole new feature to our application. Specifically, we will add the "Tasting Notes" feature. In addition to exercising some skills we have already learned such as creating models, hooks, components, and pages, we will also use some Ionic Framework components we have not seen yet.
 
-## Prelimary Items
+## Preliminary Items
 
 Before we move onto new stuff, there are a couple of preliminary items that we need to get out of the way first:
 
@@ -36,51 +36,87 @@ export interface TastingNote {
 }
 ```
 
-### The `useTastingNotes` Hook
+### Add Mock Data
 
-Create two more files inside `src/tasting-notes`: `useTastingNotes.tsx` and `useTastingNotes.test.tsx`.
+Create a new folder `src/tasting-notes/__mocks__` with a file `mockNotes.ts` within it.
+
+**`src/tasting-notes/__mocks__/mockNotes.ts`**
+
+```TypeScript
+import { TastingNote } from '../../shared/models';
+
+export const mockNotes: TastingNote[] = [
+  {
+    id: 4,
+    brand: 'Lipton',
+    name: 'Yellow Label',
+    notes: 'Overly acidic, highly tannic flavor',
+    rating: 4,
+    teaCategoryId: 1,
+  },
+  {
+    id: 73,
+    brand: 'Bently',
+    name: 'Brown Label',
+    notes: 'Essentially OK',
+    rating: 3,
+    teaCategoryId: 2,
+  },
+  {
+    id: 42,
+    brand: 'Lipton',
+    name: 'Yellow Label',
+    notes: 'Overly acidic, highly tannic flavor',
+    rating: 1,
+    teaCategoryId: 3,
+  },
+];
+```
+
+### `useTastingNotes` Hook
+
+Add two files to `src/tasting-notes` - `useTastingNotes.tsx` and `useTastingNotes.test.tsx`.
 
 **`src/tasting-notes/useTastingNotes.test.tsx`**
 
 ```TypeScript
-import { renderHook, act, cleanup } from '@testing-library/react-hooks';
-import apiInstance from '../core/apiInstance';
+import { renderHook, act } from '@testing-library/react-hooks';
 import { TastingNote } from '../shared/models';
 import { useTastingNotes } from './useTastingNotes';
+import { mockNotes } from './__mocks__/mockNotes';
 
-const mockNote = {
-  id: 4,
-  brand: 'Lipton',
-  name: 'Yellow Label',
-  notes: 'Overly acidic, highly tannic flavor',
-  rating: 1,
-  teaCategoryId: 3,
-};
+jest.mock('../core/auth/useAuthInterceptor', () => ({
+  useAuthInterceptor: () => ({
+    instance: {
+      get: mockInstanceVerb,
+      post: mockInstanceVerb,
+      delete: mockInstanceVerb,
+    },
+  }),
+}));
 
-describe('useTea', () => {
+let mockInstanceVerb = jest.fn();
+
+describe('useTastingNotes', () => {
   describe('get all notes', () => {
     beforeEach(() => {
-      (apiInstance.get as any) = jest.fn(() =>
-        Promise.resolve({ data: [mockNote] }),
-      );
+      mockInstanceVerb = jest.fn(async () => ({ data: [mockNotes] }));
+    });
 
-      it('gets the notes', async () => {
-        let notes: Array<TastingNote> = [];
-        const { result } = renderHook(() => useTastingNotes());
-        await act(async () => {
-          notes = await result.current.getNotes();
-        });
-        expect(apiInstance.get).toHaveBeenCalledTimes(1);
-        expect(notes).toEqual([mockNote]);
+    it('gets the notes', async () => {
+      let notes: Array<TastingNote> = [];
+      const { result } = renderHook(() => useTastingNotes());
+      await act(async () => {
+        notes = await result.current.getNotes();
       });
+      expect(mockInstanceVerb).toHaveBeenCalledTimes(1);
+      expect(notes).toEqual([mockNotes]);
     });
   });
 
   describe('get a singular note', () => {
     beforeEach(() => {
-      (apiInstance.get as any) = jest.fn(() =>
-        Promise.resolve({ data: mockNote }),
-      );
+      mockInstanceVerb = jest.fn(async () => ({ data: mockNotes[0] }));
     });
 
     it('gets a single TastingNote', async () => {
@@ -89,14 +125,14 @@ describe('useTea', () => {
       await act(async () => {
         note = await result.current.getNoteById(4);
       });
-      expect(apiInstance.get).toHaveBeenCalledTimes(1);
-      expect(note).toEqual(mockNote);
+      expect(mockInstanceVerb).toHaveBeenCalledTimes(1);
+      expect(note).toEqual(mockNotes[0]);
     });
   });
 
   describe('delete a note', () => {
     beforeEach(() => {
-      (apiInstance.delete as any) = jest.fn(() => Promise.resolve());
+      mockInstanceVerb = jest.fn(() => Promise.resolve());
     });
 
     it('deletes a single note', async () => {
@@ -104,28 +140,25 @@ describe('useTea', () => {
       await act(async () => {
         await result.current.deleteNote(4);
       });
-      expect(apiInstance.delete).toHaveBeenCalledTimes(1);
+      expect(mockInstanceVerb).toHaveBeenCalledTimes(1);
     });
   });
 
   describe('save a note', () => {
     beforeEach(() => {
-      (apiInstance.post as any) = jest.fn(() => Promise.resolve());
+      mockInstanceVerb = jest.fn(() => Promise.resolve());
     });
 
     it('saves a single note', async () => {
       const { result } = renderHook(() => useTastingNotes());
       await act(async () => {
-        await result.current.saveNote(mockNote);
+        await result.current.saveNote(mockNotes[0]);
       });
-      expect(apiInstance.post).toHaveBeenCalledTimes(1);
+      expect(mockInstanceVerb).toHaveBeenCalledTimes(1);
     });
   });
 
-  afterEach(() => {
-    cleanup();
-    jest.restoreAllMocks();
-  });
+  afterEach(() => jest.restoreAllMocks());
 });
 ```
 
@@ -133,31 +166,36 @@ describe('useTea', () => {
 
 ```TypeScript
 import { useCallback } from 'react';
-import apiInstance from '../core/apiInstance';
+import { useAuthInterceptor } from '../core/auth';
 import { TastingNote } from '../shared/models';
 
 export const useTastingNotes = () => {
-  const getNotes = useCallback(async (): Promise<Array<TastingNote>> => {
-    const url = `/user-tasting-notes`;
-    const { data } = await apiInstance.get(url);
-    return data;
-  }, []);
+  const { instance } = useAuthInterceptor();
 
-  const getNoteById = useCallback(async (id: number): Promise<TastingNote> => {
-    const url = `/user-tasting-notes/${id}`;
-    const { data } = await apiInstance.get(url);
+  const getNotes = useCallback(async (): Promise<TastingNote[]> => {
+    const url = `/user-tasting-notes`;
+    const { data } = await instance.get(url);
     return data;
-  }, []);
+  }, [instance]);
+
+  const getNoteById = useCallback(
+    async (id: number): Promise<TastingNote> => {
+      const url = `/user-tasting-notes/${id}`;
+      const { data } = await instance.get(url);
+      return data;
+    },
+    [instance],
+  );
 
   const deleteNote = async (id: number): Promise<void> => {
     const url = `/user-tasting-notes/${id}`;
-    await apiInstance.delete(url);
+    await instance.delete(url);
   };
 
   const saveNote = async (note: TastingNote) => {
     let url = `/user-tasting-notes`;
     if (note.id) url += `/${note.id}`;
-    await apiInstance.post(url, note);
+    await instance.post(url, note);
   };
 
   return { getNotes, getNoteById, deleteNote, saveNote };
@@ -172,14 +210,10 @@ Let's create a composite component that we can use to both create new tasting no
 
 Create a new folder inside of `src/tasting-notes` named `editor`. Create the following files in `src/tasting-notes/editor`: `TastingNoteEditor.tsx` and `TastingNoteEditor.test.tsx`.
 
-The editor will be a standalone component and not part of a page, which is why we're omitting "Page" from the name of the files.
-
 **`src/tasting-notes/editor/TastingNoteEditor.test.tsx`**
 
 ```TypeScript
-import React from 'react';
 import { render } from '@testing-library/react';
-import { cleanup } from '@testing-library/react-hooks';
 import TastingNoteEditor from './TastingNoteEditor';
 
 describe('<TastingNoteEditor />', () => {
@@ -188,18 +222,13 @@ describe('<TastingNoteEditor />', () => {
     expect(asFragment).toMatchSnapshot();
   });
 
-  afterEach(() => {
-    cleanup();
-    jest.restoreAllMocks();
-  });
+  afterEach(() => jest.restoreAllMocks());
 });
-
 ```
 
 **`src/tasting-notes/editor/TastingNoteEditor.tsx`**
 
 ```TypeScript
-import React from 'react';
 import { IonContent, IonFooter, IonHeader, IonTitle, IonToolbar } from '@ionic/react';
 
 const TastingNoteEditor: React.FC = () => {
@@ -230,7 +259,6 @@ Go ahead and add these props to our `TastingNoteEditor` component:
 **`src/tasting-notes/editor/TastingNoteEditor.tsx`**
 
 ```TypeScript
-import React from 'react';
 ...
 import { TastingNote } from '../../shared/models';
 
@@ -257,15 +285,9 @@ Since we have an optional prop, we should update our test file so that it genera
 **`src/tasting-note/editor/TastingNoteEditor.test.tsx`**
 
 ```TypeScript
-...
-const mockNote = {
-  id: 4,
-  brand: 'Lipton',
-  name: 'Yellow Label',
-  notes: 'Overly acidic, highly tannic flavor',
-  rating: 1,
-  teaCategoryId: 3,
-};
+import { render, waitFor } from '@testing-library/react';
+import TastingNoteEditor from './TastingNoteEditor';
+import { mockNotes } from '../__mocks__/mockNotes';
 
 describe('<TastingNoteEditor />', () => {
   let component: any;
@@ -276,21 +298,23 @@ describe('<TastingNoteEditor />', () => {
   describe('save', () => {
     it('renders consistently', async () => {
       const { asFragment } = render(component);
-      await wait(() => expect(asFragment()).toMatchSnapshot());
+      await waitFor(() => expect(asFragment()).toMatchSnapshot());
     });
   });
 
   describe('update', () => {
-    beforeEach(() => (component = (
-      <TastingNoteEditor onDismiss={mockDismiss} note={mockNote} />
-    )));
+    beforeEach(
+      () => (component = (<TastingNoteEditor onDismiss={mockDismiss} note={mockNotes[0]} />)),
+    );
 
     it('renders consistently', async () => {
       const { asFragment } = render(component);
-      await wait(() => expect(asFragment()).toMatchSnapshot());
+      await waitFor(() => expect(asFragment()).toMatchSnapshot());
     });
   });
-  ...
+
+  afterEach(() => jest.restoreAllMocks());
+});
 ```
 
 ### Hooking Up the Modal
@@ -302,38 +326,38 @@ We will launch the modal using a floating action button. We'll add a test case t
 **`src/tasting-notes/TastingNotesPage.test.tsx`**
 
 ```TypeScript
-...
+import { render, waitFor } from '@testing-library/react';
 import { ionFireEvent as fireEvent } from '@ionic/react-test-utils';
-...
+import TastingNotesPage from './TastingNotesPage';
 
 describe('<TastingNotesPage />', () => {
-  it('renders consistently', async () => {
+  it('renders consistently', () => {
     const { asFragment } = render(<TastingNotesPage />);
-    await wait(() => expect(asFragment()).toMatchSnapshot());
+    expect(asFragment).toMatchSnapshot();
   });
 
   describe('add a new note', () => {
     it('displays the editor modal', async () => {
-      const { container, getByText } = render(<TastingNotesPage />);
-      const button = container.querySelector('ion-fab-button')!;
+      const { getByText, getByTestId } = render(<TastingNotesPage />);
+      const button = getByTestId(/fab-button/) as HTMLIonButtonElement;
       fireEvent.click(button);
-      await wait(() => expect(getByText('Add New Tasting Note')).toBeDefined());
+      await waitFor(() =>
+        expect(getByText('Add New Tasting Note')).toBeDefined(),
+      );
     });
   });
 
-  afterEach(() => {
-    cleanup();
-    jest.restoreAllMocks();
-  });
+  afterEach(() => jest.resetAllMocks());
 });
 ```
 
 **`src/tasting-notes/TastingNotesPage.tsx`**
 
 ```TypeScript
-import React, { useState } from 'react';
+import { useState } from 'react';
 ...
 import TastingNoteEditor from './editor/TastingNoteEditor';
+import { add } from 'ionicons/icons';
 
 const TastingNotesPage: React.FC = () => {
   const [showModal, setShowModal] = useState<boolean>(false);
@@ -348,7 +372,10 @@ const TastingNotesPage: React.FC = () => {
           ...
         </IonHeader>
         <IonFab vertical="bottom" horizontal="end" slot="fixed">
-          <IonFabButton onClick={() => setShowModal(true)}>
+          <IonFabButton
+            data-testid="fab-button"
+            onClick={() => setShowModal(true)}
+          >
             <IonIcon icon={add} />
           </IonFabButton>
         </IonFab>
@@ -374,12 +401,12 @@ First we're going to tackle the cancel button. Since this action behaves the sam
 
 ```TypeScript
   ...
+  import { ionFireEvent as fireEvent } from '@ionic/react-test-utils';
+  ...
   describe('cancel button', () => {
-    it('calls the dismiss function', async () => {
-      const { container } = render(component);
-      const button = await waitForElement(
-        () => container.querySelector('#cancel-button')!,
-      );
+    it('calls the dismiss function', () => {
+      const { getByTestId } = render(component);
+      const button = getByTestId(/cancel-button/) as HTMLIonButtonElement;
       fireEvent.click(button);
       expect(mockDismiss).toHaveBeenCalledTimes(1);
     });
@@ -401,7 +428,7 @@ The cancel button will be part of the editor's header. Let's also throw in a `<f
     <IonToolbar>
       <IonTitle>Add New Tasting Note</IonTitle>
       <IonButtons slot="primary">
-        <IonButton id="cancel-button" onClick={() => onDismiss()}>
+        <IonButton data-testid="cancel-button" onClick={() => onDismiss()}>
           <IonIcon slot="icon-only" icon={close} />
         </IonButton>
       </IonButtons>
@@ -429,15 +456,24 @@ Let's start filling out that form. Add React Form Hook into our component:
 ```TypeScript
 ...
 const TastingNoteEditor: React.FC<TastingNoteEditorProps> = ({...}) => {
-  const { handleSubmit, control, formState } = useForm<TastingNote>({
-    mode: 'onChange',
-  });
+  const {
+    handleSubmit,
+    control,
+    formState: { isValid },
+  } = useForm<TastingNote>({ mode: 'onChange' });
+
   return (
     <>
       ...
       <IonFooter>
         <IonToolbar>
-          <IonButton expand="full" onClick={handleSubmit(() => { })}>Add</IonButton>
+         <IonButton
+            data-testid="submit-button"
+            expand="full"
+            onClick={handleSubmit(() => {})}
+          >
+            Add
+          </IonButton>
         </IonToolbar>
       </IonFooter>
     </>
@@ -449,45 +485,47 @@ export default TastingNoteEditor;
 We already have one simple form, the `LoginPage`. Over there we used a list of inputs, we will need something like that so let's use it as a model for the first couple of input fields here. All of the following code will go inside the `form` element:
 
 ```JSX
-<IonItem>
-  <IonLabel position="floating">Brand</IonLabel>
-  <Controller
-    render={({ onChange, value }) => (
-      <IonInput
-        id="brand-input"
-        onIonChange={(e: any) => onChange(e.detail.value!)}
-        value={value}
-      />
-    )}
-    control={control}
-    name="brand"
-    rules={{ required: true }}
-    defaultValue={note?.brand || ''}
-  />
-</IonItem>
-<IonItem>
-  <IonLabel position="floating">Name</IonLabel>
-  <Controller
-    render={({ onChange, value }) => (
-      <IonInput
-        id="name-input"
-        onIonChange={(e: any) => onChange(e.detail.value!)}
-        value={value}
-      />
-    )}
-    control={control}
-    name="name"
-    rules={{ required: true }}
-    defaultValue={note?.name || ''}
-  />
-</IonItem>
+<IonList>
+  <IonItem>
+    <IonLabel position="floating">Brand</IonLabel>
+    <Controller
+      render={({ field: { onChange, value } }) => (
+        <IonInput
+          data-testid="brand-input"
+          onIonChange={e => onChange(e.detail.value!)}
+          value={value}
+        />
+      )}
+      control={control}
+      name="brand"
+      rules={{ required: true, minLength: 1 }}
+      defaultValue={note?.brand || ''}
+    />
+  </IonItem>
+  <IonItem>
+    <IonLabel position="floating">Name</IonLabel>
+    <Controller
+      render={({ field: { onChange, value } }) => (
+        <IonInput
+          data-testid="name-input"
+          onIonChange={e => onChange(e.detail.value!)}
+          value={value}
+        />
+      )}
+      control={control}
+      name="name"
+      rules={{ required: true, minLength: 1 }}
+      defaultValue={note?.name || ''}
+    />
+  </IonItem>
+</IonList>
 ```
 
 We need a way to select the category of tea that we have. Add the following `useState` statement under the declaration for `useForm`:
 
 ```TypeScript
   ...
-  const [teas, setTeas] = useState<Array<Tea>>([]);
+  const [teas, setTeas] = useState<Tea[]>([]);
   ...
 ```
 
@@ -497,12 +535,13 @@ Then add the following template syntax underneath the "name" field created above
 <IonItem>
   <IonLabel>Category</IonLabel>
   <Controller
-    render={({ onChange, value }) => (
+    render={({ field: { onChange, value } }) => (
       <>
         {teas.length && (
           <IonSelect
-            onIonChange={(e: any) => onChange(e.detail.value!)}
-            value={value}>
+            onIonChange={e => onChange(e.detail.value!)}
+            value={value}
+          >
             {teas.map((tea: Tea) => (
               <IonSelectOption key={tea.id} value={tea.id}>
                 {tea.name}
@@ -514,7 +553,6 @@ Then add the following template syntax underneath the "name" field created above
     )}
     control={control}
     name="teaCategoryId"
-    rules={{ required: true }}
     defaultValue={note?.teaCategoryId || 1}
   />
 </IonItem>
@@ -523,10 +561,10 @@ Then add the following template syntax underneath the "name" field created above
 Under the category field, let's add a field for rating:
 
 ```JSX
-<IonItem>
+ <IonItem>
   <IonLabel>Rating</IonLabel>
   <Controller
-    render={({ onChange, value }) => (
+    render={({ field: { onChange, value } }) => (
       <Rating onRatingChange={onChange} initialRating={value} />
     )}
     control={control}
@@ -545,17 +583,17 @@ Finally, we'll add a text area for some free-form notes on the tea tasted:
  <IonItem>
   <IonLabel position="floating">Notes</IonLabel>
   <Controller
-    render={({ onChange, value }) => (
+    render={({ field: { onChange, value } }) => (
       <IonTextarea
-        id="notes-input"
-        onIonChange={(e: any) => onChange(e.detail.value!)}
+        data-testid="notes-input"
+        onIonChange={e => onChange(e.detail.value!)}
         rows={5}
         value={value}
       />
     )}
     control={control}
     name="notes"
-    rules={{ required: true }}
+    rules={{ required: true, minLength: 1 }}
     defaultValue={note?.notes || ''}
   />
 </IonItem>
@@ -563,39 +601,20 @@ Finally, we'll add a text area for some free-form notes on the tea tasted:
 
 ### Wiring up the Form
 
-We will now turn our attention to wiring the form up to submit tasting notes to the back end data service.
+We will now turn our attention to wiring the form up to submit tasting notes to the backend data service.
 
 #### Initialization
 
-The only initialization we need at this point is to fetch the list of tea categories to bind to our `ion-select` component. Add the following mock to `TastingNoteEditor.test.tsx`:
+The only initialization logic the form needs at this point is the list of tea categories to bind to the `IonSelect` component. Import the list of mock teas then add a mock for the `useTea` hook into the editor's test file.
 
 **`src/tasting-notes/editor/TastingNoteEditor.test.tsx`**
 
 ```TypeScript
-const mockTeas = [
-  {
-    id: 7,
-    name: 'White',
-    image: 'assets/img/white.jpg',
-    description: 'White tea description.',
-    rating: 5,
-  },
-  {
-    id: 8,
-    name: 'Yellow',
-    image: 'assets/img/yellow.jpg',
-    description: 'Yellow tea description.',
-    rating: 3,
-  },
-];
-```
-
-Add a mock for the `useTea` hook. We'll be using the `getTeas()` method in our initialization code:
-
-```TypeScript
-import React from 'react';
 ...
-import TastingNoteEditor from './TastingNoteEditor';
+import { resultTeas } from '../../tea/__mocks__/mockTeas';
+
+const mockTeas = resultTeas();
+
 jest.mock('../../tea/useTea', () => ({
   useTea: () => ({
     getTeas: jest.fn(() => Promise.resolve(mockTeas)),
@@ -604,87 +623,56 @@ jest.mock('../../tea/useTea', () => ({
 ...
 ```
 
-Like the cancel button, our initialization logic will run whether the user has the component in add or edit mode, so we'll make the "initialization" describe block a sibling of "save", "update", and "cancel button":
+Add a new `describe()` block as a sibling to the 'save', 'update' and 'cancel button' blocks with the following unit test:
 
 ```TypeScript
-...
-describe('<TastingNoteEditor />', () => {
-  ...
-  describe('initialization', () => {
-    it('binds the tea select', async () => {
-      const { container } = render(component);
-      const options = await waitForElement(
-        () => container.querySelector('ion-select')!.children,
-      );
-      expect(options.length).toEqual(2);
-      expect(options[0].textContent).toEqual('White');
-      expect(options[1].textContent).toEqual('Yellow');
-    });
+describe('initialization', () => {
+  it('binds the tea select', async () => {
+    const { getByTestId } = render(component);
+    const options = await waitFor(() => getByTestId(/category-select/));
+    expect(options.children.length).toEqual(8);
+    expect(options.children[0].textContent).toEqual('Green');
+    expect(options.children[1].textContent).toEqual('Black');
   });
-  ...
 });
 ```
 
 **Challenge:** Write a `useEffect` that gets the teas from `useTea` so that the test passes.
 
-Once complete, you should notice that some tests in `TastingNotesPage.test.tsx` are broken. We also need to add `mockTeas` and our `useTea` mock to `TastingNotesPage.test.tsx`. Go ahead and do that - remember that the path will be `../tea/useTea` because `TastingNotesPage.test.tsx` is one directory level higher than our editor.
-
 #### Perform the Add
 
 To add a new note is relatively simple. Take the form data, call `saveNote()`, and dismiss the modal.
 
-We need to mock out `useTastingNotes` in our test files:
-
-**`src/tasting-notes/editor/TastingNoteEditor.test.tsx`**
+Add the following mock to `src/tasting-notes/editor/TastingNoteEditor.test.tsx`:
 
 ```TypeScript
-import React from 'react';
-import { render, wait, waitForElement } from '@testing-library/react';
-import { ionFireEvent as fireEvent } from '@ionic/react-test-utils';
-import { cleanup } from '@testing-library/react-hooks';
-import TastingNoteEditor from './TastingNoteEditor';
-jest.mock('../../tea/useTea', () => (...);
 jest.mock('../useTastingNotes', () => ({
   useTastingNotes: () => ({
-    saveNote: mockSaveNote,
+    saveNote: jest.fn(() => Promise.resolve()),
   }),
 }));
-
-let mockSaveNote = jest.fn(() => Promise.resolve());
-...
-describe('<TastingNoteEditor />', () => {
-  let component: any;
-  let mockDismiss = jest.fn();
-
-  beforeEach(() => {
-    component = <TastingNoteEditor onDismiss={mockDismiss} />;
-    mockSaveNote = jest.fn(() => Promise.resolve());
-  });
-  ...
-});
 ```
 
-Now we can add the following unit test into our "save" describe block:
+Add the following unit test into the 'save' `describe()` block:
 
 ```TypeScript
 it('saves the note', async () => {
-  const expected = { ...mockNote };
+  const expected = { ...mockNotes[0] };
+  // @ts-ignore
   delete expected.id;
-  const { container, getByLabelText } = render(component);
-  const [brand, name, rating, notes, submit] = await waitForElement(() => [
-    container.querySelector('#brand-input')!,
-    container.querySelector('#name-input')!,
-    getByLabelText(/Rate 1 stars/),
-    container.querySelector('#notes-input')!,
-    container.querySelector('[type="submit"]')! as HTMLIonButtonElement,
-  ]);
-  await wait(() => {
-    fireEvent.ionChange(brand, mockNote.brand);
-    fireEvent.ionChange(name, mockNote.name);
-    fireEvent.click(rating);
-    fireEvent.ionChange(notes, mockNote.notes);
-    fireEvent.click(submit);
-  });
+  const { getByTestId } = render(component);
+  const brand = await waitFor(() => getByTestId(/brand-input/));
+  const name = await waitFor(() => getByTestId(/name-input/));
+  const rating = await waitFor(() => getByTestId(/Rate 4 stars/));
+  const notes = await waitFor(() => getByTestId(/notes-input/));
+  const submit = await waitFor(() => getByTestId(/submit-button/));
+
+  await waitFor(() => fireEvent.ionChange(brand, mockNotes[0].brand));
+  await waitFor(() => fireEvent.ionChange(name, mockNotes[0].name));
+  await waitFor(() => fireEvent.click(rating));
+  await waitFor(() => fireEvent.ionChange(notes, mockNotes[0].notes));
+  await waitFor(() => fireEvent.click(submit));
+
   expect(mockSaveNote).toHaveBeenCalledWith(expected);
   expect(mockSaveNote).toHaveBeenCalledTimes(1);
 });
@@ -693,7 +681,7 @@ it('saves the note', async () => {
 As we go back to implement the save in the component's code file, let's make these additional changes to the button in the footer:
 
 - Set it's `type` to `submit`
-- Disable the button if the form is invalid
+- Disable the button if the form is invalid or dirty
 
 **`src/tasting-notes/editor/TastingNoteEditor.tsx`**
 
@@ -717,8 +705,9 @@ const TastingNoteEditor: React.FC<TastingNoteEditorProps> = ({ ...}) => {
       <IonFooter>
         <IonToolbar>
           <IonButton
+            data-testid="submit-button"
             type="submit"
-            disabled={!formState.isValid}
+            disabled={!isValid}
             expand="full"
             onClick={handleSubmit(data => save(data))}
           >
@@ -740,95 +729,59 @@ We can add notes all day long, but we cannot see them. Let's shift back to the t
 
 ### Mocks and Test Data
 
-First we need to provide mock functions for `useTastingNotes`:
+Do some pre-work to provide the appropriate mocks and test data for the tasting notes page's test file.
 
 **`src/tasting-notes/TastingNotesPage.test.tsx`**
 
 ```TypeScript
-import React from 'react';
 ...
-jest.mock('../tea/useTea', () => ({
-  useTea: () => ({
-    getTeas: jest.fn(() => Promise.resolve(mockTeas)),
-  }),
-}));
+import { resultTeas } from '../tea/__mocks__/mockTeas';
+import { mockNotes } from './__mocks__/mockNotes';
+
+let mockGetNotes = jest.fn(async () => mockNotes);
 jest.mock('./useTastingNotes', () => ({
   useTastingNotes: () => ({
-    getNotes: mockGetNotes
+    getNotes: mockGetNotes,
   }),
 }));
 
-let mockGetNotes = jest.fn(() => Promise.resolve(mockNotes));
-
-const mockNotes: Array<TastingNote> = [
-  {
-    id: 73,
-    brand: 'Bently',
-    name: 'Brown Label',
-    notes: 'Essentially OK',
-    rating: 3,
-    teaCategoryId: 2,
-  },
-  {
-    id: 42,
-    brand: 'Lipton',
-    name: 'Yellow Label',
-    notes: 'Overly acidic, highly tannic flavor',
-    rating: 1,
-    teaCategoryId: 3,
-  },
-];
-
-const mockTeas = [
-  {
-    id: 7,
-    name: 'White',
-    image: 'assets/img/white.jpg',
-    description: 'White tea description.',
-    rating: 5,
-  },
-  {
-    id: 8,
-    name: 'Yellow',
-    image: 'assets/img/yellow.jpg',
-    description: 'Yellow tea description.',
-    rating: 3,
-  },
-];
-
 describe('<TastingNotesPage />', () => {
-  beforeEach(() => {
-    mockGetNotes = jest.fn(() => Promise.resolve(mockNotes));
-  });
+  beforeEach(() => (mockGetNotes = jest.fn(async () => mockNotes)));
   ...
 });
 ```
 
-Then create a describe block for the initialization of the page:
+### Fetching Tasting Notes
+
+Create a `describe()` block for the initialization of the page. It will be a sibling to the 'add a new note' `describe()` block.
 
 ```TypeScript
-...
-describe('<TastingNotesPage />', () => {
-  ...
-  describe('initialization', () => {
-    it('gets all of the notes', async () => {
-      render(<TastingNotesPage />);
-      await wait(() => expect(mockGetNotes).toHaveBeenCalledTimes(1));
-    });
+describe('initialization', () => {
+  it('gets all of the notes', async () => {
+    render(<TastingNotesPage />);
+    await waitFor(() => expect(mockGetNotes).toHaveBeenCalledTimes(1));
+  });
 
-    it('displays the notes', async () => {
-      const { container } = render(<TastingNotesPage />);
-      await wait(() => {
-        expect(container).toHaveTextContent(/Bently/);
-        expect(container).toHaveTextContent(/Lipton/);
-      });
+  it('displays the notes', async () => {
+    const { container } = render(<TastingNotesPage />);
+    await waitFor(() => {
+      expect(container).toHaveTextContent(/Bently/);
+      expect(container).toHaveTextContent(/Lipton/);
     });
   });
-  ...
 });
 ```
 
-We've done component initialization a few times now, so I'm just going to outline the changes to make to `TastingNotesPage`:
+We should also update the it `'renders consistently'` test knowing that when we have initialization logic our tests need to have a `waitFor()` expression before we can make any assertions:
+
+```TypeScript
+it('renders consistently', async () => {
+  const { asFragment } = render(<TastingNotesPage />);
+  await waitFor(() => expect(asFragment).toMatchSnapshot());
+});
+```
+
+We have initialized components a few times now. I will outline the changes to make to `TastingNotesPage` below.
 
 **`src/tasting-notes/TastingNotesPage.tsx`**
 
@@ -838,25 +791,24 @@ import { useTastingNotes } from './useTastingNotes';
 import { TastingNote } from '../shared/models';
 
 const TastingNotesPage: React.FC = () => {
-  ...
   const { getNotes } = useTastingNotes();
+  const [showModal, setShowModal] = useState<boolean>(false);
+  const [notes, setNotes] = useState<TastingNote[]>([]);
 
-  useEffect(() => {
-    const init = async () => {
+   useEffect(() => {
+    (async () => {
       const notes = await getNotes();
-      setNotes(notes);
-    };
-    init();
+      setNotes(notes.reverse());
+    })();
   }, [getNotes]);
 
   return (
     <IonPage>
       ...
-      </IonHeader>
       <IonContent>
-        ...
+        {/* Place before the IonFab component */}
         <IonList>
-          {notes.map((note, idx) => (
+          {notes.reverse().map((note, idx) => (
             <IonItem key={idx}>
               <IonLabel>
                 <div>{note.brand}</div>
@@ -875,50 +827,57 @@ export default TastingNotesPage;
 
 ## Refreshing Tasting Notes
 
-The notes we have added so far show up, but when we add a new note it does not. We can easily fix that.
+The existing notes stored in the backend data service show up but when we add a new note it does not. Let's update the page such that when a new tasting note has been added we refresh the list of tasting notes.
 
-When `TastingNoteEditor` is dismissed, it should notify the parent component if a refresh is required. Let's update the `onDismiss` prop to reflect this:
+Start by updating the `onDismiss` property in `TastingNoteEditor`. When the modal is dismissed, we will notify the consuming component if a refresh is required.
 
 **`src/tasting-notes/editor/TastingNoteEditor.tsx`**
 
 ```TypeScript
-...
 interface TastingNoteEditorProps {
   onDismiss: (opts: { refresh: boolean }) => void;
   note?: TastingNote;
 }
-...
 ```
 
-Now when we call `onDismiss` within the component we must pass in a boolean that will let any consumers know if they should refresh or not.
+Update the `save` method and the close button accordingly.
 
-Update `save` and the close button:
+Start by adding the `reset` property to the list of items destructured from `useForm()`:
 
 ```TypeScript
-...
-  const save = async (data: TastingNote) => {
-    await saveNote(data);
-    onDismiss({ refresh: true });
-  };
-
-  return (
-    ...
-      <IonButton
-        id="cancel-button"
-        onClick={() => onDismiss({refresh: false})}>
-      ...
-      </IonButton>
-    ...
-  );
-...
+const {
+    handleSubmit,
+    control,
+    formState: { isValid },
+    reset
+  } = useForm<TastingNote>({ mode: 'onChange' });
 ```
 
-If the user chooses to dismiss the form before adding a note, there's no reason to refresh. Let's update `TastingNotesPage` to handle this:
+Then update the `save` method:
+
+```TypeScript
+const save = async (data: TastingNote) => {
+  await saveNote(data);
+  reset();
+  onDismiss({refresh: true});
+};
+```
+
+Finally update the cancel button's click event:
+
+```TypeScript
+  <IonButton data-testid="cancel-button" onClick={() => onDismiss({ refresh: false})}>
+```
+
+Add a handler to `TastingNotesPage` that:
+
+1. Dismisses the modal
+2. Checks if the list of notes should be refreshed
+3. If so, fetches the list of tasting notes
 
 **`src/tasting-notes/TastingNotesPage.tsx`**
 
 ```TypeScript
-import React, { useEffect, useState } from 'react';
 ...
 const TastingNotesPage: React.FC = () => {
   ...
@@ -926,24 +885,14 @@ const TastingNotesPage: React.FC = () => {
     setShowModal(false);
     if (refresh) {
       const notes = await getNotes();
-      setNotes(notes);
+      setNotes(notes.reverse());
     }
   };
 
   return (
-    <IonPage>
-      <IonHeader>
-        ...
-      </IonHeader>
-      <IonContent>
-        ...
-        <IonModal isOpen={showModal}>
-          <TastingNoteEditor
-            onDismiss={({ refresh }) => handleOnDismiss(refresh)}
-          />
-        </IonModal>
-      </IonContent>
-    </IonPage>
+    ...
+    <TastingNoteEditor onDismiss={({refresh}) => handleOnDismiss(refresh)} />
+    ...
   );
 };
 export default TastingNotesPage;
@@ -973,36 +922,33 @@ Let's make use of the `update` describe block we created in `TastingNoteEditor.t
       await wait(() => expect(asFragment()).toMatchSnapshot());
     });
 
-    it('sets the properties', async () => {
-      const { container } = render(component);
-      const [brand, name, notes] = await waitForElement(() => [
-        container.querySelector('#brand-input')!,
-        container.querySelector('#name-input')!,
-        container.querySelector('#notes-input')!,
-      ]);
-      expect(brand.getAttribute('value')).toEqual(mockNote.brand);
-      expect(name.getAttribute('value')).toEqual(mockNote.name);
-      expect(notes.getAttribute('value')).toEqual(mockNote.notes);
+     it('sets the properties', async () => {
+      const { getByTestId } = render(component);
+      const brand = await waitFor(() => getByTestId(/brand-input/));
+      const name = await waitFor(() => getByTestId(/name-input/));
+      const notes = await waitFor(() => getByTestId(/notes-input/));
+      expect(brand.getAttribute('value')).toEqual(mockNotes[0].brand);
+      expect(name.getAttribute('value')).toEqual(mockNotes[0].name);
+      expect(notes.getAttribute('value')).toEqual(mockNotes[0].notes);
     });
 
     it('updates the data', async () => {
-      const expected = { ...mockNote };
+      const expected = { ...mockNotes[0] };
       expected.notes = "It's not good";
-      const { container, getByLabelText } = render(component);
-      const [brand, name, rating, notes, submit] = await waitForElement(() => [
-        container.querySelector('#brand-input')!,
-        container.querySelector('#name-input')!,
-        getByLabelText(/Rate 1 stars/),
-        container.querySelector('#notes-input')!,
-        container.querySelector('[type="submit"]')! as HTMLIonButtonElement,
-      ]);
-      await wait(() => {
-        fireEvent.ionChange(brand, mockNote.brand);
-        fireEvent.ionChange(name, mockNote.name);
-        fireEvent.click(rating);
-        fireEvent.ionChange(notes, expected.notes);
-        fireEvent.click(submit);
-      });
+      expected.rating = 1;
+      const { getByTestId } = render(component);
+      const brand = await waitFor(() => getByTestId(/brand-input/));
+      const name = await waitFor(() => getByTestId(/name-input/));
+      const rating = await waitFor(() => getByTestId(/Rate 1 stars/));
+      const notes = await waitFor(() => getByTestId(/notes-input/));
+      const submit = await waitFor(() => getByTestId(/submit-button/));
+
+      await waitFor(() => fireEvent.ionChange(brand, mockNotes[0].brand));
+      await waitFor(() => fireEvent.ionChange(name, mockNotes[0].name));
+      await waitFor(() => fireEvent.click(rating));
+      await waitFor(() => fireEvent.ionChange(notes, expected.notes));
+      await waitFor(() => fireEvent.click(submit));
+
       expect(mockSaveNote).toHaveBeenCalledWith(expected);
       expect(mockSaveNote).toHaveBeenCalledTimes(1);
     });
@@ -1023,41 +969,37 @@ const save = async (data: TastingNote) => {
 
 Now we can load a note for editing and we can modify the data and have it saved. We should change some of the labels on the editor to reflect which action the application user is doing.
 
-#### Test First
-
-Let's first add tests within the `save` describe block. These tests should pass:
+Add the following tests to the 'save' `describe()` block. They should all pass.
 
 ```TypeScript
 it('has the add title', async () => {
   const { container } = render(component);
-  await wait(() =>
+  await waitFor(() =>
     expect(container).toHaveTextContent(/Add New Tasting Note/),
   );
 });
 
 it('has the add button label', async () => {
-  const { container } = render(component);
-  const submit = await waitForElement(
-    () => container.querySelector('[type="submit"]')!,
-  );
-  expect((submit as HTMLIonButtonElement).textContent).toEqual('Add');
+  const { getByTestId } = render(component);
+  const submit = await waitFor(() => getByTestId(/submit-button/));
+  expect(submit.textContent).toEqual('Add');
 });
 ```
 
-Now let's add their counterparts to the `update` describe block:
+Add the following tests to the 'update' `describe()` block. These tests should fail.
 
 ```TypeScript
 it('has the update title', async () => {
   const { container } = render(component);
-  await wait(() => expect(container).toHaveTextContent(/Tasting Note/));
+  await waitFor(() =>
+    expect(container).toHaveTextContent(/Update Tasting Note/),
+  );
 });
 
 it('has the update button label', async () => {
-  const { container } = render(component);
-  const submit = await waitForElement(
-    () => container.querySelector('[type="submit"]')!,
-  );
-  expect((submit as HTMLIonButtonElement).textContent).toEqual('Update');
+  const { getByTestId } = render(component);
+  const submit = await waitFor(() => getByTestId(/submit-button/));
+  expect(submit.textContent).toEqual('Update');
 });
 ```
 
@@ -1067,43 +1009,24 @@ it('has the update button label', async () => {
 
 Now that the editor has been modified to handle updating existing tasting notes in addition to adding new tasting notes, we need to update the tasting note page so application users can access this functionality.
 
-Start by adding a new describe block in `TastingNotesPage.test.tsx`:
+Start by adding a new describe block in `TastingNotesPage.test.tsx`. It will be a sibling to the 'add a new note' `describe()` block.
 
 **`src/tasting-notes/TastingNotesPage.test.tsx`**
 
 ```TypeScript
 ...
-jest.mock('./useTastingNotes', () => ({
-  useTastingNotes: () => ({
-    getNotes: mockGetNotes,
-    getNote: mockGetNote,
-  }),
-}));
-
-let mockGetNotes = jest.fn(() => Promise.resolve(mockNotes));
-let mockGetNote = jest.fn(() => Promise.resolve(mockNotes[0]));
-...
-describe('<TastingNotesPage />', () => {
-  beforeEach(() => {
-    mockGetNotes = jest.fn(() => Promise.resolve(mockNotes));
-    mockGetNote = jest.fn(() => Promise.resolve(mockNotes[0]));
-  });
-  ...
-  describe('update an existing note', () => {
-    it('prepopulates the editor modal', async () => {
-      const { container, getByText } = render(<TastingNotesPage />);
-      const firstNote = await waitForElement(
-        () => container.querySelector('ion-item')!,
-      );
-      fireEvent.click(firstNote);
-      await wait(() => {
-        expect(getByText(/Bently/)).toBeDefined();
-      });
+describe('update an existing note', () => {
+  it('pre-populates the editor modal', async () => {
+    const { getByText, getByTestId } = render(<TastingNotesPage />);
+    const item = await waitFor(() => getByTestId(/note0/));
+    fireEvent.click(item);
+    await waitFor(() => {
+      expect(getByText(/Update Tasting Note/)).toBeDefined();
     });
   });
-  ...
 });
-
+...
+});
 ```
 
 To make this all work, we need to use state to update the `note` prop on `<TastingNoteEditor />` when:
@@ -1149,7 +1072,11 @@ const TastingNotesPage: React.FC = () => {
         ...
         <IonList>
           {notes.map((note, idx) => (
-            <IonItem key={idx} onClick={() => handleUpdateNote(note)}>
+            <IonItem
+              data-testid={`note${idx}`}
+              key={idx}
+              onClick={() => handleUpdateNote(note)}
+            >
               <IonLabel>
                 <div>{note.brand}</div>
                 <div>{note.name}</div>
@@ -1177,7 +1104,7 @@ export default TastingNotesPage;
 
 ## Delete a Note
 
-The final feature we will add is the ability to delete a ntoe. We will keep this one simple and make it somewhat hidden so that it isn't too easy for application users to delete notes.
+The final feature we will add is the ability to delete a note. We will keep this one simple and make it somewhat hidden so that it isn't too easy for application users to delete notes.
 
 We will use <a href="https://ionicframework.com/docs/api/item-sliding" target="_blank">item-sliding</a> to essentially "hide" the delete button behind the item. That way the application user has to slide the item over in order to expose the button and perform a delete.
 
@@ -1213,7 +1140,7 @@ The accompanying code for `handleDeleteNote()` simply calls our hook and refresh
 const handleDeleteNote = async (id: number) => {
   await deleteNote(id);
   const notes = await getNotes();
-  setNotes(notes);
+  setNotes(notes.reverse());
 };
 ```
 
@@ -1221,4 +1148,4 @@ const handleDeleteNote = async (id: number) => {
 
 ## Conclusion
 
-Congratulations. You have used what we have learned to this point to add a whole new feature to your app. Along the way, you also exercised a few Framework components you had not used before. We are almost done with this app. One more page to go and we will be done.
+Congratulations. You have used what we have learned to this point to add a whole new feature to your app. Along the way, you also exercised a few Framework components you had not used before. Next we will add some styling to the application.

@@ -255,11 +255,19 @@ ion-list-header {
 
 Nice!
 
-We have a couple of other components where we need to set a specific color. Namely the tabs as well as the footer area on the login page. To modify the color of spcific components, we can set the color attribute as such: `color="primary"`. Let's use this to set our colors:
+We have a couple of other components where we need to set a specific color. Namely the tabs as well as the footer area on the login page. To modify the color of specific components, we can set the color attribute as such: `color="primary"`. Let's use this to set our colors:
 
 **`src/login/LoginPage.tsx`**
 
-```html
+```JSX
+    <IonFooter>
+      <IonToolbar color="secondary">
+        <IonButton
+```
+
+**`src/tasting-notes/editor/TastingNoteEditor.tsx`**
+
+```JSX
     <IonFooter>
       <IonToolbar color="secondary">
         <IonButton
@@ -267,7 +275,7 @@ We have a couple of other components where we need to set a specific color. Name
 
 **`src/Tabs.tsx`**
 
-```html
+```JSX
     </IonRouterOutlet>
     <IonTabBar color="tertiary" slot="bottom">
       <IonTabButton tab="tea" href={`${match.url}/tea`}>
@@ -303,4 +311,4 @@ ion-select::part(text) {
 
 ## Conclusion
 
-We have now applied styling across our application. Test it out in both light and dark mode.
+We have now applied styling across our application. Test it out in both light and dark mode. Next we will allow users to share tasting notes from the app!

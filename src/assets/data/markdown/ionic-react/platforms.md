@@ -22,7 +22,7 @@ When a platform is added or updated to a Capacitor project, information in `capa
 
 **Example:**
 
-```xml
+```json
 {
   "appId": "com.mycompany.teataster",
   "appName": "Tea Tasting Notes",
@@ -42,17 +42,13 @@ Make similar changes to your application.
 
 ## Add the Android and iOS Platforms
 
-Before adding any Capacitor platforms, we need to ensure that the application has been built. Capacitor copies the `webDir` folder set in `capacitor.config.json` into platform project folders -- if the directory does not exist the attempt to add the platform will fail.
-
-Let's build the application:
+Before adding any Capacitor platforms, you need to make sure that your application has been built. If it has not been built, the `build` folder will not exist and the attempt to add the platform will fail.
 
 ```bash
 $ npm run build
 ```
 
-Notice that the `build` folder has been created. Now open `.gitignore`, notice that `/build` is ignored when committing files to source control. When you first pull a Capacitor project from source control, don't forget to build it otherwise you won't be able to run on Android or iOS!
-
-Go ahead and add both the Android and iOS platforms:
+Now you can add both the Android and iOS platforms.
 
 ```bash
 $ ionic cap add android
@@ -66,9 +62,17 @@ $ ionic cap open android
 $ ionic cap open ios
 ```
 
-**Note:** You need to have Android Studio installed if you want to build on Android. Likewise, you'll need to be using a Mac that has Xcode properly installed in order to build for iOS.
+**Note:** You need to have Android Studio installed if you want to build on Android. You need to be using a Mac that has Xcode properly installed in order to build for iOS.
 
 ## Update the Splash Screen and Application Icon
+
+Before taking this step, make sure you have `cordova-res` installed globally by typing `cordova-res --version`. If you do not have it installed, run the following command:
+
+```bash
+$ npm install -g cordova-res
+```
+
+`cordova-res` is a tool that is used to create icon and splash screen images. Despite the name, it can be used with Capacitor applications.
 
 The application should have its own splash screen and icon rather than using the default that Ionic supplies for you. Ionic provides a service that will take two source image files and create all of the resources that the application will require.
 
@@ -77,7 +81,7 @@ Remember to follow these guidelines when designing your splash screen and icon:
 - Keep the images simple and clear
 - You can supply source images in any of these formats: `.png`, `.psd`, `.ai`
 - Icon: At least 1024x1024 pixels; the image dimensions should be square
-- Splashscreen: At least 2732x2732 pixels with a simple image that is centered and no bigger than 1200x1200 pixels to faciliate reasonable display on all devices
+- Splash Screen: At least 2732x2732 pixels with a simple image that is centered and no bigger than 1200x1200 pixels to facilitate reasonable display on all devices
 
 For this application, download the following images and place them in a directory named `resources` in the root of your project:
 
@@ -98,7 +102,22 @@ $ cordova-res android --skip-config --copy
 
 These commands will use the source images to produce all of the various images required by the native projects and then copy them to the proper locations.
 
-## Optional: Live Reload
+## Update NPM Scripts
+
+I like to have my build do a copy for me. For this reason, I do a `cap copy` with every build. This ensures my native projects are always up to date with the latest changes made.
+
+```JSON
+  "scripts": {
+    "build": "react-scripts build && cap copy",
+    ...
+  },
+```
+
+At this point, run `npm run build` and then open either the Android or iOS native project and run the application on device or emulator. The application should have the updated icon as well as the new splash screen, and it should run normally.
+
+Stage all of your files and commit them to the git repo at this point (I suggest doing that at the end of every lab).
+
+## Live Reload (Optional)
 
 Now that the projects are set up and building properly, you can make use of Capacitor's "live reload" feature if you would like to. Live reload allows you to run the application on your device and will re-build and reload the application as you develop. This is similar to `ionic serve`, but is running the application on device instead of the browser.
 
@@ -107,23 +126,7 @@ $ ionic cap run android --livereload --external
 $ ionic cap run ios --livereload --external
 ```
 
-## Optional: Update NPM Scripts
-
-I like to have my build do a copy for me. For this reason, I do a `cap copy` with every build. This ensures my native projects are always up to date with the latest changes made.
-
-I suggest modifying the `build` script in `package.json` like so:
-
-```JSON
-  "scripts": {
-    "build": "react-scripts build && cap copy",
-    "eject": "react-scripts eject",
-    "start": "react-scripts start",
-    "test": "react-scripts test",
-    "test:ci": "export CI=true; react-scripts test",
-    "test:cov": "export CI=true; react-scripts test --coverage",
-    "test:upd": "export CI=true; react-scripts test --updateSnapshot"
-  },
-```
+These commands start a dev server that monitors changes to the Ionic Framework project, launches the proper IDE, and allows you to run the application on device. Once that is done, when you change code in the Ionic Framework project, it will be rebuilt and reloaded on the device(s).
 
 ## Conclusion
 

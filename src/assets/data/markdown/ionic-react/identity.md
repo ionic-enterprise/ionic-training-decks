@@ -1,18 +1,53 @@
-# Lab: Store the User Identity
+# Lab: Manage the User Identity
 
 In this lab, you will learn how to:
 
 - Use environment variables to configure dynamic values
 - Use the Capacitor Storage API
-- Implement the singleton pattern to create shared class instances
+- Use state management to share data across the application
+- Make network requests using Axios
 
 ## Overview
 
-Our application has a login page but it doesn't do much. We don't have a way to allow users to sign in or sign out, and we don't have a way to retrieve identity information. Let's fix that.
+In the last lab we created a login page but it doesn't do much. Our application is missing a way to store, retrieve, and share user identity information across the application.
 
-## Create the User Model
+In this lab we will use the Capacitor Storage API to store and retrieve information about the user using the application and manage the state of the user identity so the application knows when a user is signed in, signed out, etc.
 
-The first thing we will need is the model of the user. Create a folder inside `src/core` named `models`. Inside `src/core/models` create two files: `index.ts` and `User.ts`. Populate `User.ts` with the following contents:
+### Side-Note: State Management Options
+
+React provides the tools to implement state management out-of-the-box. It is important to note that this is **not** the only way to achieve state management in React. Several libraries exist for state management. It is up to you and your team to evaluate the options available and determine the best state management approach for your application.
+
+## Prerequisites
+
+Before we get started with this lab there are a few additions we need to make to the project. If you have any processes running (`ionic serve` and/or `npm test`) terminate them.
+
+### Set up Environment Variables
+
+This application will be communicating with a backend data service. As a best practice, values such as the service's URL should be stored as an environment variable. This is achieved by creating a new file at the root of the project named `.env`.
+
+Go ahead and create this file:
+
+**`.env`**
+
+```bash
+REACT_APP_DATA_SERVICE=https://cs-demo-api.herokuapp.com
+```
+
+### HTTP Networking with Axios
+
+Like state management, there are several libraries available to facilitate HTTP networking. This training uses <a href="https://github.com/axios/axios" target="_blank">Axios</a> which is very popular in the React community.
+
+Install the Axios dependency to your application:
+
+```bash
+$ npm install axios
+```
+
+At this point, you may restart the processes terminated at the beginning of this section. Please note, any time environment variables or npm packages are added/modified, you must restart the processes for updates to take effect.
+
+## User and Session Models
+
+We need to define the shape of the data we want to store as state. Create a folder inside `src/core` named `models`. Inside this folder, create an `index.ts` file along with the following model files:
 
 **`src/core/models/User.ts`**
 
@@ -25,432 +60,387 @@ export interface User {
 }
 ```
 
-**Challenge:** Populate `src/core/models/index.ts` so that it exports our `User` model.
-
-## Set Up the Environment
-
-Create a new file at the root of the project and name it `.env`:
-
-**`.env`**
-
-```bash
-REACT_APP_DATA_SERVICE=https://cs-demo-api.herokuapp.com
-```
-
-Stop your running instances of `ionic serve` and `npm test` and re-start them. Now our environment variables are available to our scripts.
-
-**Pro-tip:** If you notice that new/modified environment variables aren't working, the first step in troubleshooting is to terminate and restart any running scripts. This allows any node processes to use the latest updated version of your environment variables, and solves issues more times than not.
-
-## Identity Singleton
-
-Now it's time to get down to the main subject here and create a data service that will store information about the currently authenticated user.
-
-**Note:** The terms "service" and "singleton" are interchangable for this training. Front-end frameworks have a concept of "services": shared class instances used across an application. React does not provide any opinionated way to create these, so we will implement the singleton pattern to ensure that no actor can create multiple instances of the business logic classes we create.
-
-Create a new folder `src/core/services` and create `IdentityService.ts`, `IdentityService.test.ts`, and `index.ts` inside the newly created folder.
-
-### Interface Setup
-
-The first thing we will do is define what we want the shape of our service to be:
-
-**`src/core/services/IdentityService.ts`**
+**`src/core/models/Session.ts`**
 
 ```TypeScript
-import { User } from '../models';
+import { User } from './User';
 
-export class IdentityService {
-  private static instance: IdentityService | undefined = undefined;
-  private _key = 'auth-token';
-  private _token: string | undefined = undefined;
-  private _user: User | undefined = undefined;
-
-  get token(): string | undefined {
-    return this._token;
-  }
-
-  get user(): User | undefined {
-    return this._user;
-  }
-
-  private constructor() {}
-
-  public static getInstance(): IdentityService {
-    if (!IdentityService.instance) {
-      IdentityService.instance = new IdentityService();
-    }
-    return IdentityService.instance;
-  }
-
-  async init(): Promise<void> {}
-
-  async set(user: User, token: string): Promise<void> {}
-
-  async clear(): Promise<void> {}
+export interface Session {
+  user: User;
+  token: string;
 }
 ```
 
-Update `src/core/services/index.ts` to export `IdentityService`.
+**Challenge:** Populate `src/core/models/index.ts` to export `User.ts` and `Session.ts`.
 
-Finally, let's fill out a skeleton of our test file:
+## Building State
 
-**`src/core/services/IdentityService.test.ts`**
+Start by creating a new folder under `src/core` named `auth`. It needs three files, `AuthContext.tsx`, `AuthContext.test.tsx`, and `index.ts`. We will first focus on `AuthContext.tsx`.
+
+### State Definition
+
+What information would be useful for components in our application to know about the user's identity? The user's `Session` for sure, but it would also be nice if a component knew if any of our actions in managing this piece of state were in the process of `loading` or if any of our actions caused an `error`.
+
+Define an interface for `AuthState` within `AuthContext.tsx`:
+
+**`src/core/auth/AuthContext.tsx`**
 
 ```TypeScript
-import { IdentityService } from './IdentityService';
+import { Session } from '../models';
 
-describe('IdentityService', () => {
-  let identityService: IdentityService;
+interface AuthState {
+  session?: Session;
+  loading: boolean;
+  error: string;
+}
+```
 
-  beforeEach(() => {
-    identityService = IdentityService.getInstance();
-    identityService['_token'] = undefined;
-    identityService['_user'] = undefined;
-  });
+There needs to be an initial value for this state. Define it under the `AuthState` interface:
 
-  it('should use a single instance', () => {
-    expect(identityService).toBeDefined();
-  });
+```TypeScript
+const initialState: AuthState = {
+  session: undefined,
+  loading: false,
+  error: '',
+};
+```
 
-  describe('init', () => { });
+### State Actions
 
-  describe('set', () => { });
+What actions can happen to the application that would cause the state to change? A few are obvious -- sign in, sign out -- but there should also be a way to restore the state if the user closes the app without signing out and a way to clear out the session if it is expired.
 
-  describe('clear', () => { });
+Under `initialState`, add the `AuthAction` type:
 
-  afterEach(() => jest.restoreAllMocks());
+```TypeScript
+export type AuthAction =
+  | { type: 'CLEAR_SESSION' }
+  | { type: 'RESTORE_SESSION'; session: Session }
+  | { type: 'LOGIN' }
+  | { type: 'LOGIN_SUCCESS'; session: Session }
+  | { type: 'LOGIN_FAILURE'; error: string }
+  | { type: 'LOGOUT' }
+  | { type: 'LOGOUT_SUCCESS' }
+  | { type: 'LOGOUT_FAILURE'; error: string };
+```
+
+### State Reducer
+
+With our state and actions defined we can now write a reducer function that updates the state upon the _dispatch_ of an action.
+
+Under the `AuthAction` type, add the following function:
+
+```TypeScript
+const reducer = (
+  state: AuthState = initialState,
+  action: AuthAction,
+): AuthState => {
+  switch (action.type) {
+    case 'CLEAR_SESSION':
+      return { ...state, session: undefined };
+    case 'RESTORE_SESSION':
+      return { ...state, session: action.session };
+    case 'LOGIN':
+      return { ...state, loading: true, error: '' };
+    case 'LOGIN_SUCCESS':
+      return { ...state, loading: false, session: action.session };
+    case 'LOGIN_FAILURE':
+      return { ...state, loading: false, error: action.error };
+    case 'LOGOUT':
+      return { ...state, loading: true, error: '' };
+    case 'LOGOUT_SUCCESS':
+      return { ...state, loading: false, session: undefined };
+    case 'LOGOUT_FAILURE':
+      return { ...state, loading: false, error: action.error };
+    default:
+      return state;
+  }
+};
+```
+
+## Sharing State
+
+The pieces to setup state management are in place but there is no way to share it between components. The <a href="https://reactjs.org/docs/context.html" target="_blank">React Context API</a> provides a way to share a set of values across components and other pieces of functionality, such as custom hooks.
+
+A React Context consists of two pieces:
+
+- The Context object. When React renders a component that subscribes to this Context object it will read the value from the closest matching `Provider` above it in the component tree.
+- Every Context object has a provider React component that allows child components to subscribe to context changes via the `value` prop.
+
+### Context
+
+First we should define the Context we want to be accessible by child components. At the end of `AuthContext.tsx`, add the following code:
+
+**`src/core/auth/AuthContext.tsx`**
+
+```TypeScript
+export const AuthContext = createContext<{
+  state: typeof initialState;
+  dispatch: (action: AuthAction) => void;
+}>({
+  state: initialState,
+  dispatch: () => {},
 });
 ```
 
-Notice that we are also adding some setup code to reset the token and user properties before each test. In the teardown logic, we are calling `jest.restoreAllMocks()`. This is a utility function Jest provides that, well, restores all mocks. Going forward we'll take advantage of this so that all of our mocks are restored to their actual implementations after each test executes.
+The code above declares that we want to share both the `state` (of type `AuthState`) as well as a way to `dispatch` the actions created (of type `AuthAction`).
 
-### Initializing the User
+### Provider
 
-The following tests will all go within the `init` describe block of `IdentityService.test.ts`. In the spirit of test-driven-development, we will write the code to satisfy each test as we go.
+The Context's Provider returns a React component that allows any child components within it access to the Context created above. This can be a confusing concept at first, so let's write it out and use it in our application to gain a better understanding of this concept.
 
-The first task we have is to check storage to see if there is already a stored token on device:
-
-**`src/core/services/IdentityService.test.ts`**
+Add the following code after `AuthContext`, importing any modules along the way:
 
 ```TypeScript
-  ...
-  describe('init', () => {
-    beforeEach(() => {
-      (Plugins.Storage as any) = jest.fn();
-      (Plugins.Storage.get as any) = jest.fn(() =>
-        Promise.resolve({ value: '3884915llf950' }),
-      );
-    });
+export const AuthProvider: React.FC = ({ children }) => {
+  const [initializing, setInitializing] = useState<boolean>(true);
+  const [state, dispatch] = useReducer(reducer, initialState);
 
-    it('gets the stored token', async () => {
-      await identityService.init();
-      expect(Plugins.Storage.get).toHaveBeenCalledTimes(1);
-      expect(Plugins.Storage.get).toHaveBeenCalledWith({ key: 'auth-token' });
-    });
-  });
-  ...
+  useEffect(() => {
+    // This is where we will attempt to restore the user's session.
+  }, []);
+
+  return (
+    <AuthContext.Provider value={{ state, dispatch }}>
+      {initializing ? <IonSpinner name="dots" data-testid="initializing" /> : children}
+    </AuthContext.Provider>
+  );
+};
 ```
 
-Make sure to add imports as needed.
+We will go back and implement the `useEffect` shortly. Let's go ahead and use the `<AuthProvider />` component in our application:
 
-**Challenge:** Make this test pass. Check the <a href="https://capacitorjs.com/docs/apis/storage" target="_blank">Storage API documentation</a> if you get stuck.
+1. Export all from `./AuthContext` in `src/core/auth/index.ts`
+2. Modify `src/App.tsx` to match the changes below
 
-#### If a Token Exists
-
-When the token is obtained, there are two potential outcomes: either a token exists or it does not. Let's first define the behavior for when a token does not exists.
-
-Nest the following describe block inside of `describe('init', ...)`:
+**`src/App.tsx`**
 
 ```TypeScript
-  ...
-    describe('if there is a token', () => { });
-  ...
+...
+import { AuthProvider } from './core/auth';
+...
+const App: React.FC = () => {
+  useEffect( ... );
+
+  return (
+    <IonApp>
+      <AuthProvider>
+        <IonReactRouter>
+          <IonRouterOutlet>
+            <Route exact path="/tea">
+              <TeaPage />
+            </Route>
+            <Route exact path="/login">
+              <LoginPage />
+            </Route>
+            <Route exact path="/">
+              <Redirect to="/tea" />
+            </Route>
+          </IonRouterOutlet>
+        </IonReactRouter>
+      </AuthProvider>
+    </IonApp>
+  );
+};
+...
 ```
 
-If a token exists, it should be assigned to the property. Here is the test, place it into the `describe()` block you just added, after the `beforeEach()` block:
+We also need to make some slight modifications to `App.test.tsx`.
+
+**Challenge:** In `src/App.test.tsx` make each individual unit test `async` and modify the statement in each test where container is expected to be defined to the following:
 
 ```TypeScript
-it('assigns the token', async () => {
-  await identityService.init();
-  expect(identityService.token).toEqual('3884915llf950');
-});
+  await waitFor(() => expect(container).toBeDefined());
 ```
 
-**Challenge:** Make the test case pass.
+Take a look at your app running on `https://localhost:8100`. We make use of the Ionic Framework's `<IonSpinner />` component to indicate to application users that we are initializing their user identity. There is no logic being processed at this point to switch the UI from the animation to the actual application. We will implement that logic now.
 
-Next, if we have a token, we should query the back end API and get the user associated with that token. We don't know how to do this yet, so let's just add two stub tests that we can revisit later. Place the following tests after the "assigns the token" test:
+## Restoring the User Identity
+
+In order for our application to be able to restore the user's identity session the following conditions must be met:
+
+1. There must be an existing token stored
+2. We must fetch the user's information from the backend data service
+
+If neither of these conditions are met we should clear the session (which, eventually, will prompt the user to sign in).
+
+Regardless of the outcome, we should display the application once this operation completes.
+
+### Switching from the Initialization State
+
+Start by testing `<AuthProvider />` to verify that the loader is displayed while initializing:
+
+**`src/core/auth/AuthContext.test.tsx`**
 
 ```TypeScript
-it('gets the current user', async () => { });
+import { useContext } from 'react';
+import { render, waitFor } from '@testing-library/react';
+import { AuthContext, AuthProvider } from './AuthContext';
 
-it('assigns the user', async () => { });
-```
-
-#### If a Token Does Not Exist
-
-The tests for the case where a token is not defined are super simple. Nest the following `describe()` block inside of `describe('init', ...)`:
-
-```TypeScript
-describe('if there is not a token', () => {
-  beforeEach(() => {
-    (Plugins.Storage.get as any) = jest.fn(() =>
-      Promise.resolve({ value: null }),
-    );
-  });
-
-  it('does not assign a token', async () => {
-    await identityService.init();
-    expect(identityService.token).toBeUndefined();
-  });
-
-  it('does not get the current user', async () => {
-    await identityService.init();
-    expect(identityService.user).toBeUndefined();
-  });
-});
-```
-
-Now let's shift our focus to making HTTP requests.
-
-### HTTP Requests with Axios
-
-There are several libraries that can be used for HTTP networking with an Ionic Framework + React project.
-
-The most obvious of which is the <a href="https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch" target="_blank">Fetch API</a> which is bundled with browsers. The Fetch API is not very feature rich when compared to other libraries. <a href="https://github.com/axios/axios" target="_blank">Axios</a> is a very popular library within the JavaScript and React communities.
-
-Terminate `ionic serve` and `npm test` and add Axios to your application:
-
-```bash
-$ npm install axios
-```
-
-Start `ionic serve` and `npm test` again. Return to `IdentityService.test.ts` so we can start filling out the remaining tests for the `init` function. Update your test file to make the changes below:
-
-**`src/core/services/IdentityService.test.ts`**
-
-```TypeScript
-import { Plugins } from '@capacitor/core';
-import Axios from 'axios';
-import { User } from '../models';
-import { IdentityService } from './IdentityService';
-
-const mockUser: User = {
-  id: 42,
-  firstName: 'Joe',
-  lastName: 'Tester',
-  email: 'test@test.org',
+const MockConsumer: React.FC = () => {
+  const { state } = useContext(AuthContext);
+  return <div data-testid="session">{JSON.stringify(state.session)}</div>;
 };
 
-describe('IdentityService', () => {
-  let identityService: IdentityService;
+const ComponentTree = (
+  <AuthProvider>
+    <MockConsumer />
+  </AuthProvider>
+);
 
+describe('<AuthProvider />', () => {
+  it('displays the loader when initializing', async () => {
+    const { getByTestId } = render(ComponentTree);
+    expect(getByTestId(/initializing/)).toBeInTheDocument();
+    await waitFor(() => expect(getByTestId(/session/)).toBeInTheDocument());
+  });
+});
+```
+
+Make the test pass by adding the following code inside the `useEffect` statement in `AuthContext.tsx`, replacing the comment there.
+
+**`src/core/auth/AuthContext.tsx`**
+
+```TypeScript
+(async () => {
+  try {
+    setTimeout(() => setInitializing(false), 500);
+  } catch (error) {
+    setInitializing(false);
+  }
+})();
+```
+
+Fetching data from the Capacitor Storage API, as well as making HTTP network requests, are asynchronous operations so we are wrapping the `try/catch` block inside an IIFE (immediately invoked function expression). Don't worry about the timeout, we will replace that shortly. It is there temporarily otherwise `setInitializing(false)` is called too early and the test fails.
+
+If you go back to the served application and refresh the page, you should see our loading prompt for half-a-second, then we are redirected to the list of teas.
+
+### When a Token is Stored
+
+If a user's session can be restored `<AuthProvider />` should do the following:
+
+1. Obtain the token from the Capacitor Storage API
+2. Make a GET request to fetch the user's information
+3. Dispatch the `RESTORE_SESSION` action
+
+Before we start writing unit tests for this scenario, let's create a fixture we can use in our tests. Create a new folder under `src/core/auth` named `__mocks__`. This will prevent the folder from being included in production builds of the application. Inside it, create a file named `mockSession.ts`.
+
+**`src/core/auth/__mocks__/mockSession.ts`**
+
+```TypeScript
+import { Session } from '../../models';
+
+export const mockSession: Session = {
+  token: '3884915llf950',
+  user: {
+    id: 42,
+    firstName: 'Joe',
+    lastName: 'Tester',
+    email: 'test@test.org',
+  },
+};
+
+```
+
+Now, write unit tests for this scenario:
+
+**`src/core/auth/AuthContext.test.tsx`**
+
+```TypeScript
+...
+import { mockSession } from './__mocks__/mockSession';
+import { Plugins } from '@capacitor/core';
+import Axios from 'axios';
+...
+describe('<AuthProvider />', () => {
   beforeEach(() => {
+    (Plugins.Storage as any) = jest.fn();
+    (Plugins.Storage.get as any) = jest.fn(async () => ({ value: null }));
+  });
+
+  it('displays the loader when initializing', async () => {
     ...
   });
 
-  it('should use a single instance', () => {
-    ...
-  });
-
-  describe('init', () => {
+  describe('when a token is stored', () => {
     beforeEach(() => {
-      ...
-      (Axios.get as any) = jest.fn(() => Promise.resolve({ data: mockUser }));
+      (Plugins.Storage.get as any) = jest.fn(async () => ({
+        value: mockSession.token,
+      }));
+      (Axios.get as any) = jest.fn(async () => ({ data: mockSession.user }));
     });
 
-    ...
+    it('obtains the token from storage', async () => {
+      render(ComponentTree);
+      await waitFor(() => {
+        expect(Plugins.Storage.get).toHaveBeenCalledTimes(1);
+        expect(Plugins.Storage.get).toHaveBeenCalledWith({ key: 'auth-token' });
+      });
+    });
 
-    describe('if there is a token', () => {
-      ...
-
-      it('gets the current user', async () => {
-        await identityService.init();
-        const url = `${process.env.REACT_APP_DATA_SERVICE}/users/current`;
-        const headers = { Authorization: 'Bearer ' + '3884915llf950' };
+    it('GETs the user profile', async () => {
+      render(ComponentTree);
+      const headers = { Authorization: 'Bearer ' + mockSession.token };
+      const url = `${process.env.REACT_APP_DATA_SERVICE}/users/current`;
+      await waitFor(() => {
+        expect(Axios.get).toHaveBeenCalledTimes(1);
         expect(Axios.get).toHaveBeenCalledWith(url, { headers });
       });
-
-      it('assigns the user', async () => {
-        await identityService.init();
-        expect(identityService.user).toEqual(mockUser);
-      });
     });
 
-    describe('if there is not a token', () => {
-      ...
+    it('sets the session', async () => {
+      const { getByTestId } = render(ComponentTree);
+      const session = await waitFor(() => getByTestId('session'));
+      expect(session.textContent).toEqual(JSON.stringify(mockSession));
     });
   });
-
-  describe('set', () => {});
-
-  describe('clear', () => {});
 
   afterEach(() => jest.restoreAllMocks());
 });
-
 ```
 
-Now let's update `IdentityService` itself so that the tests pass:
+### When a Token is Not Stored
 
-**`src/core/services/IdentityService.ts`**
-
-```TypeScript
-import Axios from 'axios';
-import { Plugins } from '@capacitor/core';
-import { User } from '../models';
-
-export class IdentityService {
-  ...
-
-  private constructor() {}
-
-  public static getInstance(): IdentityService {
-    ...
-  }
-
-  async init(): Promise<void> {
-    const { Storage } = Plugins;
-    const { value } = await Storage.get({ key: this._key });
-
-    if (!value) return;
-
-    this._token = value;
-    this._user = await this.fetchUser(this._token);
-  }
-
-  async set(user: User, token: string): Promise<void> {}
-
-  async clear(): Promise<void> {}
-
-  private async fetchUser(token: string): Promise<User> {
-    const headers = { Authorization: 'Bearer ' + token };
-    const url = `${process.env.REACT_APP_DATA_SERVICE}/users/current`;
-    const { data } = await Axios.get(url, { headers });
-    return data;
-  }
-}
-```
-
-Make note of the `fetchUser` method. This method sets up and makes the network request to obtain the current user's information.
-
-### Setting the User and Storing the Token
-
-The `set()` method is called whenever a newly signed in user needs to be registered as the current user. Therefore, it has the following requirements:
-
-- Set the user
-- Set the token
-- Store the token in storage
-
-I will provide the tests. In each case, add them within the `describe('set', ...)` section of `src/core/services/IdentityService.test.ts`. Once you have added one test, save the file and observe the failing test. At that point, add the code required to get the test to pass.
-
-#### Set the User
-
-Here is the test that ensures that the user gets set:
+If a token is not available or is unable to be restored we should simply dispatch the `CLEAR_SESSION` action. The `describe()` block for this can be found below. Add it to `AuthContext.test.tsx`.
 
 ```TypeScript
-it('sets the user', async () => {
-  await identityService.set(mockUser, '19940059fkkf039');
-  expect(identityService.user).toEqual(mockUser);
-});
-```
-
-The code to make this pass should be pretty straight forward. Add it to the `set()` method in the code.
-
-#### Set the Token
-
-Once again, I will provide the test:
-
-```TypeScript
-it('sets the token', async () => {
-  await identityService.set(mockUser, '19940059fkkf039');
-  expect(identityService.token).toEqual('19940059fkkf039');
-});
-```
-
-Go ahead and provide the code to satisfy the test.
-
-#### Save the Token
-
-For this test, we will need to introduce setup code to our `set` tests. Below is the modified `set` describe block with the setup code and the test to save the token.
-
-```TypeScript
-describe('set', () => {
-  beforeEach(() => {
-    (Plugins.Storage as any) = jest.fn();
-    (Plugins.Storage.set as any) = jest.fn(() => Promise.resolve());
-  });
-
-  ...
-
-  it('saves the token in storage', async () => {
-    await identityService.set(mockUser, '19940059fkkf039');
-    expect(Plugins.Storage.set).toHaveBeenCalledTimes(1);
-    expect(Plugins.Storage.set).toHaveBeenCalledWith({
-      key: 'auth-token',
-      value: '19940059fkkf039',
-    });
+describe('when a token is not stored', () => {
+  it('does not set the session', async () => {
+    const { getByTestId } = render(ComponentTree);
+    const session = await waitFor(() => getByTestId('session'));
+    expect(session.textContent).toEqual('');
   });
 });
 ```
 
-Check the <a href="https://capacitorjs.com/docs/apis/storage" target="_blank">Storage API documentation</a> if you get stuck.
+### Implementation
 
-### Clearing the User
+The tests are all in place, let's finish implementing the `useEffect` in `AuthContext.tsx`:
 
-The `clear()` method is called whenever a user logs out. Its requirements are the opposite of those for the `set()` method:
-
-- Clear the user
-- Clear the token
-- Remove the token from storage
-
-Like we did for `set()`, I will provide the tests. In each case, add them within the `describe('clear', ...)` section of the test file. Once one test has been added, save, let the test fail, and then write the code to make the test pass.
-
-First though, we're going to need some setup code for the tests. Since this method is called when a user signs out, it makes sense for us to start in the state the system would be in with a logged in user:
-
-**`src/core/services/IdentityService.test.ts`**
+**`src/core/auth/AuthContext.tsx`**
 
 ```TypeScript
-  ...
-  describe('clear', () => {
-    beforeEach(() => {
-      identityService['_user'] = mockUser;
-      identityService['_token'] = '19940059fkkf039';
-      (Plugins.Storage as any) = jest.fn();
-      (Plugins.Storage.remove as any) = jest.fn(() => Promise.resolve());
-    });
-  });
-  ...
-```
+...
+useEffect(() => {
+  const { Storage } = Plugins;
+  (async () => {
+    try {
+      const { value: token } = await Storage.get({ key: 'auth-token' });
+      if (!token) throw new Error('Token not found.');
 
-#### Clear the User
-
-```TypeScript
-it('clears the user', async () => {
-  await identityService.clear();
-  expect(identityService.user).toBeUndefined();
-});
-```
-
-#### Clear the Token
-
-```TypeScript
-it('clears the token', async () => {
-  await identityService.clear();
-  expect(identityService.token).toBeUndefined();
-});
-```
-
-#### Clear the Storage
-
-```TypeScript
-it('clears the storage', async () => {
-  await identityService.clear();
-  expect(Plugins.Storage.remove).toHaveBeenCalledTimes(1);
-  expect(Plugins.Storage.remove).toHaveBeenCalledWith({
-    key: 'auth-token',
-  });
-});
+      const headers = { Authorization: 'Bearer ' + token };
+      const url = `${process.env.REACT_APP_DATA_SERVICE}/users/current`;
+      const { data: user } = await Axios.get(url, { headers });
+      dispatch({ type: 'RESTORE_SESSION', session: { token, user } });
+      setInitializing(false);
+    } catch (error) {
+      dispatch({ type: 'CLEAR_SESSION' });
+      setInitializing(false);
+    }
+  })();
+}, []);
+...
 ```
 
 ## Conclusion
 
-Our app can now handle identity and authorization! In the next lab we will work on authentication and making this information available using state management.
+Congratulations! Our application now manages user identity and built out our own state management implementation in the process! This is a pretty big achievement - give yourself a pat on the back. In the next lab we will handle authentication and protect routes against unauthorized users.
