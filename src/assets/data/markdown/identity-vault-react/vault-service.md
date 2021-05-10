@@ -6,7 +6,7 @@ In this lab, we will concentrate on refactoring the application to use the Ident
 
 Identity Vault includes a class called `IonicIdentityVaultUser` which defines the currently logged in user and provides an interface with the identity vault plugin. By the end of this section, we will have created a `SessionVault` singleton class that subclasses `IonicIdentityVaultUser`, giving us the access we need to the Identity Vault functionality.
 
-**A Note on Unit Tests:** in order to concentrate this traning on the changes required for Identity Vault, the unit test modifications are not included. This does not mean you should skip unit testing. Rather, we wanted to make sure this training was focused on Identity Vault itself as much as possible.
+**A Note on Unit Tests:** in order to concentrate this training on the changes required for Identity Vault, the unit test modifications are not included. This does not mean you should skip unit testing. Rather, we wanted to make sure this training was focused on Identity Vault itself as much as possible.
 
 ## Create the SessionVault Class
 
@@ -29,7 +29,7 @@ Create a file `src/core/vault/SessionVault.ts` with the above contents.
 
 ## Inherit from `IonicIdentityVaultUser`
 
-We want `SessionVault` to be the class through which we access the Identity Vault functionallity. To achieve this, we need to have `SessionVault` inherit and extend the `IonicIdentityVaultUser` class.
+We want `SessionVault` to be the class through which we access the Identity Vault functionality. To achieve this, we need to have `SessionVault` inherit and extend the `IonicIdentityVaultUser` class.
 
 To start with:
 
@@ -78,13 +78,13 @@ A further explanation of some of theses change are in order.
 
 When we extended the base class, we need to provide a type for our session. Identity Vault is very flexible as to what session information can be stored. For our application, we will use our already defined `Session` type.
 
-If you do not currently have a type that models your session, Identity Vault includes a type called `DefaultSession`. The `DefaultSession` includes `username` and `token`, which is adaquate for many applications. The `DefaultSession` can be extended if desired in order to store other information with your session data.
+If you do not currently have a type that models your session, Identity Vault includes a type called `DefaultSession`. The `DefaultSession` includes `username` and `token`, which is adequate for many applications. The `DefaultSession` can be extended if desired in order to store other information with your session data.
 
 ### The `super()` Call
 
-Because of JavaScript's inheritance rules, the first thing we need to do in our contructor is call `super()`. The base class takes an instantiation of a `platform` class, which includes a function `ready` which will let Identity Vault know the application is ready to be interacted with. This is applicable in frameworks that have an application lifecycle - such as Angular - but is not applicable to React. As it is required, we will simply pass in an implementation that let's Identity Vault know the application is ready once the singleton class has been instantiated.
+Because of JavaScript's inheritance rules, the first thing we need to do in our constructor is call `super()`. The base class takes an instantiation of a `platform` class, which includes a function `ready` which will let Identity Vault know the application is ready to be interacted with. This is applicable in frameworks that have an application lifecycle - such as Angular - but is not applicable to React. As it is required, we will simply pass in an implementation that let's Identity Vault know the application is ready once the singleton class has been instantiated.
 
-For our initial version of the application, the only configuration we will do is set the `authMode` to `SecureStorage`. This will configure the vault to securely store the session information, but will not configure any other advanced features, such as locking the vaulr or using biometrics to unlock the vault.
+For our initial version of the application, the only configuration we will do is set the `authMode` to `SecureStorage`. This will configure the vault to securely store the session information, but will not configure any other advanced features, such as locking the vault or using biometrics to unlock the vault.
 
 ### The `getPlugin()` Method
 
@@ -127,7 +127,11 @@ Subsequently, we need to return the `SessionVault` singleton instance as part of
 
   return (
 +   <AuthContext.Provider value={{ state, dispatch, vault }}>
-      {initializing ? <div>Loading...</div> : children}
+      {initializing ? (
+        <IonSpinner name="dots" data-testid="initializing" />
+      ) : (
+        children
+      )}
     </AuthContext.Provider>
   );
  ...
@@ -138,12 +142,17 @@ Finally, the `useEffect` block that runs when `<AuthProvider />` is rendered nee
 ```typescript
 useEffect(() => {
   (async () => {
-    const session = await vault.restoreSession();
-    if (!session) return setInitializing(false);
-    dispatch({ type: 'RESTORE_SESSION', session });
-    return setInitializing(false);
+    try {
+      const session = await vault.restoreSession();
+      if (!session) throw new Error('Session not found.');
+      dispatch({ type: 'RESTORE_SESSION', session });
+      setInitializing(false);
+    } catch (error) {
+      dispatch({ type: 'CLEAR_SESSION' });
+      setInitializing(false);
+    }
   })();
-}, [vault]);
+}, []);
 ```
 
 This `useEffect` function attempts to restore the session by leveraging Identity Vault's `restoreSession()` method. If a session is stored the `Session` object will be returned from Identity Vault. With it, the `RESTORE_SESSION` action is called, which allows the application to load the first auth guarded path. If no session is found, the action is not dispatched and the application will route to the login page.
@@ -256,7 +265,7 @@ Then you could have the class extend `IonicIdentityVaultUser` and modify the met
 
 - `set()` - call `super.login()` passing the session
 - `clear()` - call `super.logout()`
-- `get()` - call `super.getSession()`, or if all you need is the `token` from the session, remove this entirely since the base classes exposes the current token if it is avaliable
+- `get()` - call `super.getSession()`, or if all you need is the `token` from the session, remove this entirely since the base classes exposes the current token if it is available
 
 There are several other options as well. Consult with your Solutions Architect as to what the best course of action may be for your application.
 

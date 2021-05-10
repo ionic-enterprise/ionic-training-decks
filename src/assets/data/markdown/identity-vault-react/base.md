@@ -4,7 +4,7 @@ This training starts with an Ionic Framework application that uses the Capacitor
 
 ## Getting Started
 
-These instrctions assume that you have a reasonable development environment set up on your machine including `git`, `node`, `npm`, and `Android Studio`. If your are using a Mac and want to build for iOS, you should also have `Xcode`, the Xcode commandline tools, and `cocoapods`.
+These instructions assume that you have a reasonable development environment set up on your machine including `git`, `node`, `npm`, and `Android Studio`. If your are using a Mac and want to build for iOS, you should also have `Xcode`, the Xcode command line tools, and `cocoapods`.
 
 To get started, perform the following actions within a working folder:
 
@@ -23,13 +23,13 @@ To build for installation on a device, use `npx cap open android` or `npx cap op
 
 ### Authentication Context
 
-This application uses React's Context API to keep track of authentication state. Part of that state includes the current sesssion. Have a look at the authentication state, defined in `src/core/auth/AuthContext.tsx` and examine how the session is represented in the state.
+This application uses React's Context API to keep track of authentication state. Part of that state includes the current session. Have a look at the authentication state, defined in `src/core/auth/AuthContext.tsx` and examine how the session is represented in the state.
 
 Component interaction with the context is placed within a custom React hook, defined in `src/core/auth/useAuthentication.tsx`. This hook is provided as an abstraction between components and the authentication context.
 
 ### HTTP Interceptors
 
-An HTTP interceptor is used by the authentication workflow. The `useAuthInterceptor` hook adds the autherntication token to outgoing requests if they require a token, and redirects the application to the login page when requests fail with a 401 error. This hook is defined in `src/core/auth/useAuthInterceptor.tsx`.
+An HTTP interceptor is used by the authentication workflow. The `useAuthInterceptor` hook adds the authentication token to outgoing requests if they require a token, and redirects the application to the login page when requests fail with a 401 error. This hook is defined in `src/core/auth/useAuthInterceptor.tsx`.
 
 ### Private Routing
 
@@ -39,10 +39,10 @@ This application supplies a `<PrivateRoute />` component that will redirect the 
 
 #### Startup
 
-When the application first starts, the session is undefined in the store. The authentication context will attempt to restore the session. If the sesion is restored, then the application continues to the guarded route. If not, then the application is redirected to the login page.
+When the application first starts, the session is undefined in the store. The authentication context will attempt to restore the session. If the session is restored, then the application continues to the guarded route. If not, then the application is redirected to the login page.
 
 While the application is determining if a session exists and can be restored, a "loading" component is displayed. Once the determination has been made, the "loading" component is removed and the core application component is rendered. Provided that the core application component dismisses the application's splash screen, the "loading" component is only observed on the web platform and does not display on mobile platforms.
 
 #### Execution
 
-If at any point the user is logged out, either through their own logging out, or via a 401 error, the `LOGOUT_SUCCESS` action is dispatched, and the user is redirected to the login page where they can restablish a session.
+If at any point the user is logged out, either through their own logging out, or via a 401 error, the `LOGOUT_SUCCESS` action is dispatched, and the user is redirected to the login page where they can reestablish a session.
