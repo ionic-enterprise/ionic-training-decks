@@ -258,7 +258,7 @@ Our application looks good when viewed on a phone resolution but if we modify ou
 2. Show two columns of cards side-by-side on an iPad
 3. Show four columns on even wider screen, such as an iPad in landscape mode or a desktop
 
-Enter the <a href="" target="_blank">responsive grid</a>! By default, the responsive grid shows rows of 12 columns each. However, we only want to show at most rows of 4 columns. Luckily there are some simple mechanisms in place that will allow us to do that, but first we should massage our data a bit.
+Enter the <a href="https://ionicframework.com/docs/layout/grid" target="_blank">responsive grid</a>! By default, the responsive grid shows rows of 12 columns each. However, we only want to show at most rows of 4 columns. Luckily there are some simple mechanisms in place that will allow us to do that, but first we should massage our data a bit.
 
 ### Setup a Data Matrix
 

@@ -30,7 +30,7 @@ Speaking of testing, let's add a dependency that will help us test Ionic Framewo
 Install it with the following terminal command:
 
 ```bash
-$ npm install @ionic/react-test-utils
+$ npm install @ionic/react-test-utils --legacy-peer-deps
 ```
 
 Finally, open `src/setupTests.ts` and add the following lines of code:
@@ -437,7 +437,7 @@ Now let's update the form. Add the following block of code after the closing `Io
 ...
   </IonList>
 
-  <div className="error-message">
+  <div className="error-message" data-testid="errors">
     <div>
       {errors.email?.type === 'required' && 'E-Mail Address is required'}
     </div>
