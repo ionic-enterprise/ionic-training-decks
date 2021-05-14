@@ -411,7 +411,7 @@ First update `fromJsonToTea()`:
     const rating = await Storage.get({ key: `rating${obj.id}` });
     return {
       ...obj,
-      image: require(`../assets/images/${images[obj.id - 1]}.jpg`),
+      image: require(`../assets/images/${images[obj.id - 1]}.jpg`).default,
       rating: parseInt(rating?.value || '0', 10),
     };
   };

@@ -379,13 +379,13 @@ export const useTea = () => {
     const url = `/tea-categories`;
     const { data } = await instance.get(url);
     return data.map((item: any) => fromJsonToTea(item));
-  }, []);
+  }, [instance);
 
   const getTeaById = useCallback(async (id: number): Promise<Tea | undefined> => {
     const url = `/tea-categories/${id}`;
     const { data } = await instance.get(url);
     return fromJsonToTea(data);
-  }, []);
+  }, [instance]);
 
   const fromJsonToTea = (obj: any): Tea => {
     return {

@@ -646,9 +646,10 @@ To add a new note is relatively simple. Take the form data, call `saveNote()`, a
 Add the following mock to `src/tasting-notes/editor/TastingNoteEditor.test.tsx`:
 
 ```TypeScript
+let mockSaveNote = jest.fn(() => Promise.resolve());
 jest.mock('../useTastingNotes', () => ({
   useTastingNotes: () => ({
-    saveNote: jest.fn(() => Promise.resolve()),
+    saveNote: mockSaveNote,
   }),
 }));
 ```

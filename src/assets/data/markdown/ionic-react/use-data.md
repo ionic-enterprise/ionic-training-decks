@@ -53,7 +53,7 @@ const TeaPage: React.FC = () => {
     (async () => {
       const teas = await getTeas();
       setTeas(teas);
-    });
+    })();
   }, [getTeas]);
 
   const handleLogout = async () => {

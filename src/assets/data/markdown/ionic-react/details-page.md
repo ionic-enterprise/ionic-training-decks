@@ -210,6 +210,7 @@ Our tests don't know how to handle calling `getTeaById` so let's fix that:
 jest.mock('react-router', () => ({
  ...
 }));
+const mockTea = expectedTeas[0];
 jest.mock('../useTea', () => ({
   useTea: () => ({
     getTeas: jest.fn(),
