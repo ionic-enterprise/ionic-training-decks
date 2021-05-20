@@ -4,11 +4,12 @@ Every good app gives credit where credit is due. We will use a traditional "Abou
 
 ## Get the Data
 
-Modify the application's `tsconfig.json` file to the code to resolve JSON files:
+Modify the application's `tsconfig.json` file to the code to resolve JSON files. Also add `allowSyntheticDefaultImports` which will allow us to do a default style import:
 
 ```json
   "compilerOptions": {
 ...
+    "allowSyntheticDefaultImports": true,
     "resolveJsonModule": true,
 ...
 ```
@@ -18,7 +19,7 @@ This will allow us to read the `package.json` file and get some important inform
 ```typescript
 import { Component, OnInit } from '@angular/core';
 
-import { author, name, description, version } from '../../../package.json';
+import packageInfo from '../../../package.json';
 
 @Component({
   selector: 'app-about',
@@ -34,10 +35,10 @@ export class AboutPage implements OnInit {
   constructor() {}
 
   ngOnInit() {
-    this.author = author;
-    this.name = name;
-    this.description = description;
-    this.version = version;
+    this.author = packageInfo.author;
+    this.name = packageInfo.name;
+    this.description = packageInfo.description;
+    this.version = packageInfo.version;
   }
 }
 ```

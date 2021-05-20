@@ -12,10 +12,6 @@ Using Chrome in headless mode allows the tests to run in a real browser (Chrome)
 
 I suggest changing the `test` script configuration in the `package.json` file as such:
 
-- `test` - use the `ChromeHeadless` browser configuration, re-run the tests as changes are made
-- `test:ci` - use the `ChromeHeadlessCI` browser configuration, run the tests once and exit
-- `test:debug` - use the regular `Chrome` browser configuration, re-run the tests as changes are made
-
 ```JSON
   "scripts": {
     "build": "ng build",
@@ -63,15 +59,6 @@ import { By } from '@angular/platform-browser';
 ```
 
 That new test case should go directly under the existing "should create" test case.
-
-While in this file, remove the `forRoot()` from the import of the `IonicModule` when the `TestBed` is configured. It is not required here.
-
-```diff
--        imports: [IonicModule.forRoot()],
-+        imports: [IonicModule],
-```
-
-You should be able to do this in any component or page test that you add to the project, though I will not remind you to do so each time. That will be up to you.
 
 ## Install Mock Factories
 

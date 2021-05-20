@@ -8,6 +8,11 @@ We can use various <a href="https://capacitorjs.com/docs/plugins" target="_blank
 
 Some plugins, though, provide native functionallity that the user interacts with directly. The <a href="https://capacitorjs.com/docs/apis/share" target="_blank">Social Sharing</a> plugin is one of those. In this lab we will update the code to use that plugin to allow us to share tea tasting notes with our friends.
 
+```bash
+npm i @capacitor/share
+npx cap sync
+```
+
 While we are on the subject of plugins, Capacitor has been designed to also work with Cordova plugins. When choosing a plugin, we suggest favoring Capacitor plugins over Cordova plugins.
 
 ## Add a Button
@@ -145,34 +150,32 @@ We can then enter the proper logic in the `allowShare` getter:
 
 ## Share the Note
 
-The final step is to call the share API when the button is clicked. Let's update the test. First we will need to import the `Plugins` object and mock the `Share` object within it
+The final step is to call the share API when the button is clicked. Let's update the test. First we will need to create a global mock for the plugin (just like we previously did for the Storage plugin). Create a `__mocks__/@capacitor/share.ts` file with the following contents:
 
 ```TypeScript
-import { Plugins } from '@capacitor/core';
-...
+class MockShare {
+  async share(opt: {
+    title: string;
+    text: string;
+    url: string;
+    dialogTitle: string;
+  }): Promise<{ activityType: string | undefined }> {
+    return { activityType: 'test' };
+  }
+}
 
-describe('TastingNoteEditorComponent', () => {
-  let component: TastingNoteEditorComponent;
-  let fixture: ComponentFixture<TastingNoteEditorComponent>;
-  let originalShare: any;
+const Share = new MockShare();
 
-  beforeEach(
-    waitForAsync(() => {
-      originalShare = Plugins.Share;
-      Plugins.Share = jasmine.createSpyObj('Share', {
-        share: Promise.resolve(),
-      });
-      ...
-  );
-
-  afterEach(() => (Plugins.Share = originalShare));
-  ...
+export { Share };
 ```
 
-Then we will add a test within the `share in a mobile context` describe block.
+Then we will add a test within the `share in a mobile context` describe block of the notes editor test.
 
 ```TypeScript
+import { Share } from '@capacitor/share';
+...
       it('calls the share plugin when clicked', async () => {
+        spyOn(Share, 'share');
         const button = fixture.debugElement.query(By.css('#share-button'));
 
         component.brand = 'Lipton';
@@ -183,8 +186,8 @@ Then we will add a test within the `share in a mobile context` describe block.
         button.nativeElement.dispatchEvent(event);
         fixture.detectChanges();
 
-        expect(Plugins.Share.share).toHaveBeenCalledTimes(1);
-        expect(Plugins.Share.share).toHaveBeenCalledWith({
+        expect(Share.share).toHaveBeenCalledTimes(1);
+        expect(Share.share).toHaveBeenCalledWith({
           title: 'Lipton: Yellow Label',
           text: 'I gave Lipton: Yellow Label 2 stars on the Tea Taster app',
           dialogTitle: 'Share your tasting note',
@@ -193,12 +196,11 @@ Then we will add a test within the `share in a mobile context` describe block.
       });
 ```
 
-We can then add the code fill out the `share()` accordingly. You will also have to add a line importing the `Plugins` object from `@capacitor/core`:
+We can then add the code fill out the `share()` accordingly. You will also have to add a line importing the `Share` object from `@capacitor/share`:
 
 ```TypeScript
   async share(): Promise<void> {
     // eslint-disable-next-line @typescript-eslint/naming-convention
-    const { Share } = Plugins;
     await Share.share({
       title: `${this.brand}: ${this.name}`,
       text: `I gave ${this.brand}: ${this.name} ${this.rating} stars on the Tea Taster app`,

@@ -67,6 +67,7 @@ Since Identity Vault is used to store the authentication tokens in a secure loca
 
 The classes themselves are boiler-plate, so let's just download them rather than going through writing it:
 
+- `npm i @capacitor/storage`
 - <a download href="/assets/packages/ionic-vue/browser-vault.zip">Download the zip file</a>
 - unzip the file somewhere
 - copy the `BrowserVaultService.ts` and `BrowserVaultPlugin.ts` files from where you unpacked them to `src/services`

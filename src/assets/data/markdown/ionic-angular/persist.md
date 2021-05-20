@@ -20,6 +20,14 @@ Create `src/app/core/index.ts`. This is the barrel file for all of our `core` se
 export * from './session-vault/session-vault.service';
 ```
 
+## Install the Storage Plugin
+
+We are going to use `@capacitor/storage` to persist the session data between invokations of the application.
+
+```bash
+npm i @capacitor/storage
+```
+
 ### Interface Setup
 
 The first thing we will do is define what we want the shape of our service to be. Modify the generated service to include the following properties and methods.
@@ -49,32 +57,52 @@ export class SessionVaultService {
 
 ### Test Setup
 
-Now that we have the interface for the service worked out, we can fill out a skeleton of the test.
+Now that we have the interface for the service worked out, we can fill out a skeleton of the test. First, we need to set create some "global mocks" for the our `@capacitor` plugins. This will make it easier to mock the plugins. However, the concept of global mocks doesn't actually exist in Jasmine so we will have to perform a simple TypeScript configuration trick to fake it.
+
+Edit the `tsconfig.spec.json` file and add a `paths` parameter to the `compilerOptions` as such:
+
+```JSON
+    "paths": {
+      "@app/*": ["src/app/*"],
+      "@env/*": ["src/environments/*"],
+      "@test/*": ["test/*"],
+      "@capacitor/*": ["__mocks__/@capacitor/*"]
+    }
+```
+
+Note that this is exactly like the `paths` we added to the base `tsconfig.json` file in order to avoid relative routes in the imports. The change here is the addition of the `@capacitor/*` value.
+
+Next, create a `__mocks__/@capacitor` folder in the project's root and add a `storage.ts` file with the following contents:
+
+```TypeScript
+class MockStorage {
+  async remove(opt: { key: string }): Promise<void> {}
+  async set(opt: { key: string; value: string | undefined }): Promise<void> {}
+  async get(opt: { key: string }): Promise<{ value: string | null }> {
+    return { value: 'test' };
+  }
+}
+
+const Storage = new MockStorage();
+
+export { Storage };
+```
+
+Now we can begin creating the test:
 
 ```TypeScript
 import { TestBed } from '@angular/core/testing';
-import { Plugins } from '@capacitor/core';
+import { Storage } from '@capacitor/storage';
 
 import { Session } from '@app/models';
 import { SessionVaultService } from './session-vault.service';
 
 describe('SessionVaultService', () => {
   let service: SessionVaultService;
-  let originalStorage: any;
 
   beforeEach(() => {
-    originalStorage = Plugins.Storage;
-    Plugins.Storage = jasmine.createSpyObj('Storage', {
-      get: Promise.resolve(),
-      set: Promise.resolve(),
-      remove: Promise.resolve()
-    });
     TestBed.configureTestingModule({});
     service = TestBed.inject(SessionVaultService);
-  });
-
-  afterEach(() => {
-    Plugins.Storage = originalStorage;
   });
 
   it('should be created', () => {
@@ -100,6 +128,7 @@ The `login()` method is called at login and stores the session via the Capacitor
 ```typescript
 describe('login', () => {
   it('saves the session in storage', async () => {
+    spyOn(Storge, 'set');
     const session: Session = {
       user: {
         id: 42,
@@ -110,8 +139,8 @@ describe('login', () => {
       token: '19940059fkkf039',
     };
     await service.login(session);
-    expect(Plugins.Storage.set).toHaveBeenCalledTimes(1);
-    expect(Plugins.Storage.set).toHaveBeenCalledWith({
+    expect(Storage.set).toHaveBeenCalledTimes(1);
+    expect(Storage.set).toHaveBeenCalledWith({
       key: 'auth-session',
       value: JSON.stringify(session),
     });
@@ -123,13 +152,11 @@ The code for this then looks like the following:
 
 ```TypeScript
   async login(session: Session): Promise<void> {
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    const { Storage } = Plugins;
     await Storage.set({ key: this.key, value: JSON.stringify(session) });
   }
 ```
 
-Be sure to import `Plugins` from `@capacitor/core` at the top of your file.
+Be sure to import `Storage` from `@capacitor/storage` at the top of your file.
 
 #### Restore Session
 
@@ -138,12 +165,10 @@ The `restoreSession()` method is used to get the session via the Capacitor Stora
 ```typescript
 describe('restore session', () => {
   it('gets the session from storage', async () => {
-    (Plugins.Storage.get as any).and.returnValue(
-      Promise.resolve({ value: null }),
-    );
+    spyOn(Storage, 'get').and.returnValue(Promise.resolve({ value: null }));
     await service.restoreSession();
-    expect(Plugins.Storage.get).toHaveBeenCalledTimes(1);
-    expect(Plugins.Storage.get).toHaveBeenCalledWith({
+    expect(Storage.get).toHaveBeenCalledTimes(1);
+    expect(Storage.get).toHaveBeenCalledWith({
       key: 'auth-session',
     });
   });
@@ -159,7 +184,7 @@ describe('restore session', () => {
       token: '19940059fkkf039',
     };
     beforeEach(() => {
-      (Plugins.Storage.get as any).and.returnValue(
+      spyOn(Storage, 'get').and.returnValue(
         Promise.resolve({ value: JSON.stringify(session) }),
       );
     });
@@ -171,9 +196,7 @@ describe('restore session', () => {
 
   describe('without a session', () => {
     beforeEach(() => {
-      (Plugins.Storage.get as any).and.returnValue(
-        Promise.resolve({ value: null }),
-      );
+      spyOn(Storage, 'get').and.returnValue(Promise.resolve({ value: null }));
     });
 
     it('resolves without a session', async () => {
@@ -183,7 +206,7 @@ describe('restore session', () => {
 });
 ```
 
-**Challenge:** write the code for this method. Check with the <a href="https://capacitorjs.com/docs/apis/storage" target="_blank">Storage API</a> docs if you get stuck.
+**Challenge:** write the code for this method. Check with the <a href="https://capacitorjs.com/docs/apis/storage" target="_blank">Storage Plugin</a> docs if you get stuck.
 
 #### Logout
 
@@ -192,9 +215,10 @@ The Logout() method is called at logout and removes the session from storage.
 ```typescript
 describe('logout', () => {
   it('clears the storage', async () => {
+    spyOn(Storage, 'remove');
     await service.logout();
-    expect(Plugins.Storage.remove).toHaveBeenCalledTimes(1);
-    expect(Plugins.Storage.remove).toHaveBeenCalledWith({
+    expect(Storage.remove).toHaveBeenCalledTimes(1);
+    expect(Storage.remove).toHaveBeenCalledWith({
       key: 'auth-session',
     });
   });
@@ -422,8 +446,6 @@ import { State } from '@app/store';
 ...
 
   async restoreSession(): Promise<Session> {
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    const { Storage } = Plugins;
     const { value } = await Storage.get({ key: this.key });
     const session = JSON.parse(value);
 

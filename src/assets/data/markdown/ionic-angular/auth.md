@@ -377,6 +377,7 @@ export class AuthInterceptor implements HttpInterceptor {
         if (token && this.requestRequiresToken(req)) {
           req = req.clone({
             setHeaders: {
+              // eslint-disable-next-line @typescript-eslint/naming-convention
               Authorization: 'Bearer ' + token,
             },
           });
@@ -437,7 +438,7 @@ export class UnauthInterceptor implements HttpInterceptor {
 export const unauthError = createAction('[Auth API] unauthenticated error');
 ```
 
-We will also need a reducer to modify the state. All it needs to do is remove the session from the state since the session is not valid.
+We will also need to update the auth reducer to modify the state for the new action. All it needs to do is remove the session from the state since the session is not valid.
 
 ```TypeScript
   describe('Unauth Error', () => {
@@ -473,7 +474,7 @@ We will also need a reducer to modify the state. All it needs to do is remove th
   }),
 ```
 
-Finally, we need a `unauthError$` effect. It needs to clear the storage and dispatch the fact that we are in a logged out state (LogoutSuccess).
+Finally, we need a `unauthError$` effect. It needs to clear the storage and dispatch the fact that we are in a logged out state (LogoutSuccess). This should be added to the auth effects.
 
 ```TypeScript
   describe('unauthError$', () => {

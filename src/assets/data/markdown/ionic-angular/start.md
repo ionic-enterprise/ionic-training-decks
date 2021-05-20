@@ -103,33 +103,6 @@ npx prettier --write src
 
 At this point all of the source should be formatting properly and will remain so automatically with each commit.
 
-## Upgrade to ESLint
-
-Try linting your app (`npm run lint`) and you will see that TSLint has been deprecated. Upgrading to ESLint at this point is very easy, so let's do that while the application is tiny.
-
-```bash
-npx ng add @angular-eslint/schematics
-npx ng g @angular-eslint/schematics:convert-tslint-to-eslint app
-```
-
-Run `npm run lint` again and fix any errors that currently exist. At this point, there should only be one in the `src/zone-flags.ts` file. We cannot really "fix" that one, so we will just tell ESLint to ignore it.
-
-```TypeScript
-/**
- * Prevents Angular change detection from
- * running with certain Web Component callbacks
- */
-// eslint-disable-next-line no-underscore-dangle
-(window as any).__Zone_disable_customElements = true;
-```
-
-We can now remove TSLint and codelyzer.
-
-```bash
-npm rm tslint codelyzer
-rm tslint.json
-```
-
 ## Side Note: `ionic serve` vs. `npm start`
 
 You may be used to using `npm start` to start an application. That works, but it is different. The application is for all intents and purposes an Angular application and was generated using the standard Angular schematics with some extra Ionic spices, so all of the base Angular CLI application scripts are there.

@@ -657,7 +657,7 @@ In the last two labs, we have learned how to to get data via a service and then 
 Here is the code for the data recuder:
 
 ```TypeScript
-const dataReducer = createReducer(
+export const reducer = createReducer(
   initialState,
   on(Actions.loginSuccess, state => ({
     ...state,
@@ -716,6 +716,19 @@ import { selectTeas } from '@app/store/selectors';
 export class TeaPage implements OnInit {
   teas$: Observable<Array<Array<Tea>>>;
 
+  constructor(private store: Store<State>) {}
+
+  logout() {
+    this.store.dispatch(logout());
+  }
+
+  ngOnInit() {
+    this.teas$ = this.store.pipe(
+      select(selectTeas),
+      map(teas => this.teaMatrix(teas || [])),
+    );
+  }
+
   private teaMatrix(teas: Array<Tea>): Array<Array<Tea>> {
     const matrix: Array<Array<Tea>> = [];
     let row = [];
@@ -732,19 +745,6 @@ export class TeaPage implements OnInit {
     }
 
     return matrix;
-  }
-
-  constructor(private store: Store<State>) {}
-
-  logout() {
-    this.store.dispatch(logout());
-  }
-
-  ngOnInit() {
-    this.teas$ = this.store.pipe(
-      select(selectTeas),
-      map(teas => this.teaMatrix(teas || [])),
-    );
   }
 }
 ```

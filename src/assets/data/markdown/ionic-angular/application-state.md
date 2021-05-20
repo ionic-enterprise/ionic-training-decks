@@ -209,7 +209,7 @@ describe('Login', () => {
 Then we express it in our code by adding a listener for that action to the reducer in the `createReducer()` call.
 
 ```TypeScript
-const authReducer = createReducer(
+export const reducer = createReducer(
   initialState,
   on(Actions.login, state => ({
     ...state,

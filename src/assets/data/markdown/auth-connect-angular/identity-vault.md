@@ -79,6 +79,7 @@ That is really all we need to do in order to combine Auth Connect and Identity V
 
 The services that are required are boiler-plate, so let's just download them rather than going through writing them:
 
+- `npm i @capacitor/storage`
 - <a download href="/assets/packages/ionic-angular/browser-vault.zip">Download the zip file</a>
 - unzip the file somewhere
 - copy the `browser-vault.plugin.ts` and `browser-vault.service.ts` files from where you unpacked them to `src/app/core`

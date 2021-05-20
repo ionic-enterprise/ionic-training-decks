@@ -404,9 +404,9 @@ resultTeas = expectedTeas.map((t: Tea) => {
 
 ##### Set up the Storage Mock
 
-We will use the Capacitor Storage API, so we will mock that. There are multiple ways that we could store the ratings. We will just go with the very simple strategy of using a key of `ratingX` where `X` is the `ID` of the tea.
+We will use the Capacitor Storage plugin, so we will mock that. There are multiple ways that we could store the ratings. We will just go with the very simple strategy of using a key of `ratingX` where `X` is the `ID` of the tea.
 
-First, define a variable to store the real `Storage` implementation so we can restore it when we are done. Then update the setup and teardown for the tests to initialize the behavior of the `Storage` mock. Where the return values are set up, they will need to match however you set up your test data above. Only the non-zero rated teas should be included. Note that `Plugins.Storage.get()` resolves a string value and not a number.
+In the main `beforeEach()`, spy on `Storage.get()` returning a default of `{ vaule: '0' }` and add non-zero values for various ratings depending on the changes you made to the test data above.
 
 ```typescript
 ...
@@ -415,26 +415,20 @@ import { Plugins } from '@capacitor/core';
 let originalStorage: any;
 ...
 beforeEach(() => {
-  originalStorage = Plugins.Storage;
-  Plugins.Storage = jasmine.createSpyObj('Storage', {
-    get: Promise.resolve(),
-    set: Promise.resolve(),
-  });
   initializeTestData();
   TestBed.configureTestingModule({
     imports: [HttpClientTestingModule],
   });
   httpTestingController = TestBed.inject(HttpTestingController);
   service = TestBed.inject(TeaService);
-  (Plugins.Storage.get as any)
+  spyOn(Storage, 'get')
+    .and.returnValue(Promise.resolve({ value: '0' }))
     .withArgs({ key: 'rating1' })
-    .and.returnValue(Promise.resolve({ value: '4' }));
-  // repeat for all expectedTeas with a non-zero rating
-  // the key is `rating${id}}`
-});
-
-afterEach(() => {
-  Plugins.Storage = originalStorage;
+    .and.returnValue(Promise.resolve({ value: '4' }))
+    // repeat for all expectedTeas with a non-zero rating
+    // the key is `rating${id}}`
+    .withArgs({ key: 'rating6' })
+    .and.returnValue(Promise.resolve({ value: '5' }));
 });
 ```
 
@@ -471,7 +465,6 @@ The first step is to make our private `convert()` method async and then grab the
 ```typescript
   private async convert(res: any): Promise<Tea> {
     // eslint-disable-next-line @typescript-eslint/naming-convention
-    const { Storage } = Plugins;
     const rating = await Storage.get({ key: `rating${res.id}` });
     return {
       ...res,
@@ -510,11 +503,12 @@ Here is the test covering our requirements:
 ```typescript
 describe('save', () => {
   it('saves the value', () => {
+    spyOn(Storage, 'set');
     const tea = { ...expectedTeas[4] };
     tea.rating = 4;
     service.save(tea);
-    expect(Plugins.Storage.set).toHaveBeenCalledTimes(1);
-    expect(Plugins.Storage.set).toHaveBeenCalledWith({
+    expect(Storage.set).toHaveBeenCalledTimes(1);
+    expect(Storage.set).toHaveBeenCalledWith({
       key: 'rating5',
       value: '4',
     });
@@ -566,7 +560,7 @@ The `src/app/store/reducers/data.reducer.spec.ts` file defines some test teas. A
 
 ```TypeScript
   {
-    description: 'Tea Details ChangeRating Success: sets the rating for the tea',
+    description: 'Tea Details Change Rating Success: sets the rating for the tea',
     action: teaDetailsChangeRatingSuccess({ tea: {...teas[1], rating: 3} }),
     begin: { teas },
     end: { teas: [teas[0], { ...teas[1], rating: 3 }, teas[2]] },
@@ -605,7 +599,7 @@ The effect that we require is pretty straight forward:
 
 ```TypeScript
   describe('teaRatingChanged$', () => {
-    it('save the tea', done => {
+    it('saves the tea', done => {
       const teaService = TestBed.inject(TeaService);
       actions$ = of(teaDetailsChangeRating({ tea: teas[1], rating: 5 }));
       effects.teaRatingChanged$.subscribe(() => {
