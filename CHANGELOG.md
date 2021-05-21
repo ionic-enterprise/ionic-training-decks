@@ -1,3 +1,10 @@
+## [4.10.1](https://github.com/ionic-team/ionic-training-decks/compare/v4.10.0...v4.10.1) (2021-05-21)
+
+### Bug Fixes
+
+- **angular/vue:** fix spelling errors ([800bcdb](https://github.com/ionic-team/ionic-training-decks/commit/800bcdb9a44c977a2574124e50036a9ed70a45da))
+- **identity vault:** update the browser vault classes ([086e7fd](https://github.com/ionic-team/ionic-training-decks/commit/086e7fd3135b5c675364a16d7f09f7c287d61232))
+
 # [4.10.0](https://github.com/ionic-team/ionic-training-decks/compare/v4.8.3...v4.10.0) (2021-05-21)
 
 ### Features
