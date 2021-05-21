@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 
-import { author, version, dependencies } from '../../../package.json';
+import packageInfo from '../../../package.json';
 
 @Component({
   selector: 'app-about',
@@ -17,12 +17,15 @@ export class AboutPage implements OnInit {
 
   ngOnInit() {
     const verSpec = /[\^~]/;
-    this.author = author;
-    this.applicationVersion = version;
-    this.capacitorVersion = dependencies['@capacitor/core'].replace(
+    this.author = packageInfo.author;
+    this.applicationVersion = packageInfo.version;
+    this.capacitorVersion = packageInfo.dependencies['@capacitor/core'].replace(
       verSpec,
       '',
     );
-    this.frameworkVersion = dependencies['@ionic/angular'].replace(verSpec, '');
+    this.frameworkVersion = packageInfo.dependencies['@ionic/angular'].replace(
+      verSpec,
+      '',
+    );
   }
 }

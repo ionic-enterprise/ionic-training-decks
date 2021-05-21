@@ -1,6 +1,5 @@
 import { enableProdMode } from '@angular/core';
 import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
-import '@capacitor/core';
 import * as hljs from 'highlight.js';
 import marked from 'marked';
 import { AppModule } from './app/app.module';
