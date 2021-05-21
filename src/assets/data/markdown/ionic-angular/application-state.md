@@ -18,7 +18,7 @@ Create the following folders, either from the CLI or fromm your favirote IDE:
 mkdir src/app/store src/app/store/effects src/app/store/reducers src/app/store/selectors
 ```
 
-Create a `src/app/store/reducers/index.ts` file with an empty State definition. This is where we will slowly build up the definition of our appliation state as well as the reducers that act upon it. We _could_ do that directly in this file, but we will not. Rather we will use a very modulare format as we go.
+Create a `src/app/store/reducers/index.ts` file with an empty State definition. This is where we will slowly build up the definition of our application state as well as the reducers that act upon it. We _could_ do that directly in this file, but we will not. Rather we will use a very modular format as we go.
 
 ```TypeScript
 import { ActionReducerMap, MetaReducer } from '@ngrx/store';
@@ -100,7 +100,7 @@ Let's think about the actions our application will take with regard to authentic
 - Login Succeeded - Taken by the Authentication API (does not exist yet) when the login succeeds
 - Login Failed - Taken by the Authentication API (does not exist yet) when the login fails
 
-Most of the actors do not exist yet, but we know what actions they will take once they do exist, so let's code that up in our store. Coding up these actions really just define the actions that other parts of our app can "dispatch". The do not, in themselves, acutally _do_ anything.
+Most of the actors do not exist yet, but we know what actions they will take once they do exist, so let's code that up in our store. Coding up these actions really just define the actions that other parts of our app can "dispatch". The do not, in themselves, actually _do_ anything.
 
 Create a `src/app/store/actions.ts` file with the following contents:
 
@@ -131,11 +131,11 @@ export const logoutFailure = createAction(
 
 As you can see, this is really just registering what the actions are as well as what their payload will be if they have one (see the `login` action).
 
-For now, we will have a single file that defines all of our actions. We may want to split that out at some point in the future, but for now a single file will be just fine. Remember that actions are based on events within our application, so if we do get to a point of breaking them in to multiple files, it makes more sense to define them around the various parts of our application, which may or may corespond to various slices of the state.
+For now, we will have a single file that defines all of our actions. We may want to split that out at some point in the future, but for now a single file will be just fine. Remember that actions are based on events within our application, so if we do get to a point of breaking them in to multiple files, it makes more sense to define them around the various parts of our application, which may or may correspond to various slices of the state.
 
 ## Reducers
 
-A reducer is a pure synchronous function that listens for actions to be dispatched and then modifies the state acorrdingly.
+A reducer is a pure synchronous function that listens for actions to be dispatched and then modifies the state accordingly.
 They should also be the only function that modify that portion of the state. For this reason, I like to define the state and the reducer that acts upon it in the same file.
 
 Being pure synchronous functions also make them fairly easy to test.
@@ -274,7 +274,7 @@ Then the code to make this work (added to the `createReducer()`, just like the l
 
 Notice that the payload of the action (if there is a payload) is also passed to the handler (`{ session }`, `{ errorMessage }`). The `login` action has a payload as well, but we didn't use it in the handler because the reducer doesn't need the payload. In the case of the login action, the `effect` will need to payload.
 
-Finally, we have the logout actions. I will give you the tests and let you write the action hooks in the reducer. Note that I grouped tese tests in their own `describe()`. This is just so I could define the session that is used once rather than in each test.
+Finally, we have the logout actions. I will give you the tests and let you write the action hooks in the reducer. Note that I grouped these tests in their own `describe()`. This is just so I could define the session that is used once rather than in each test.
 
 ```TypeScript
 describe('logout actions', () => {
@@ -353,7 +353,7 @@ describe('logout actions', () => {
   }),
 ```
 
-Once we are done, we need to update the main reducers file (`src/app/store/reucers/index.ts`) to include our `auth` state as well as the reducer for it:
+Once we are done, we need to update the main reducers file (`src/app/store/reducers/index.ts`) to include our `auth` state as well as the reducer for it:
 
 ```TypeScript
 import { AuthState, reducer as authReducer } from './auth.reducer';
@@ -398,7 +398,7 @@ The reducers and the selectors are the only things we will export from there.
 
 ## Effects
 
-Effects listen for actions, and when those actions are dispatched, perform specific tasks. These tasks are usually asychronous. The effect will typically dispatch other actions when the task(s) complete.
+Effects listen for actions, and when those actions are dispatched, perform specific tasks. These tasks are usually asynchronous. The effect will typically dispatch other actions when the task(s) complete.
 
 The most common use case for us will be to make HTTP requests to either fetch or save data.
 
@@ -740,7 +740,7 @@ import { Store } from '@ngrx/store';
 import { login } from '@app/store/actions';
 ```
 
-Notice that we need to click the sign on button. We don't have a function for that, so let's create one down by the `setInput()` fuction we already have:
+Notice that we need to click the sign on button. We don't have a function for that, so let's create one down by the `setInput()` function we already have:
 
 ```TypeScript
 const click = (button: HTMLElement) => {
@@ -854,7 +854,7 @@ Then the following is added to the page's template within the `.error-message` d
 
 We have not learned about the `async` pipe yet. It will subscribe to the observable and also handle the unsubscription when the element is removed from the DOM.
 
-At this point have a look at the login page and notice that there is absolutely zero logic in it that does not directly pertain to the user interaction with the page itself. This is what we are striving for. Each portion of the the application should be single purpose, focused, and as simple as possible. You can also see that throughout the store itself. Once you understand how the pieces all fit together, then peices themselves should always be small, simple, and focused.
+At this point have a look at the login page and notice that there is absolutely zero logic in it that does not directly pertain to the user interaction with the page itself. This is what we are striving for. Each portion of the the application should be single purpose, focused, and as simple as possible. You can also see that throughout the store itself. Once you understand how the pieces all fit together, the pieces themselves should always be small, simple, and focused.
 
 ## Debugging Tools (Optional)
 

@@ -1,6 +1,6 @@
-# Phase 1: Install and Cofigure Capacitor
+# Phase 1: Install and Configure Capacitor
 
-Installing and cnfiguring Capacitor is a multi-step process, but each step is very small. The full set of steps looks like this:
+Installing and configuring Capacitor is a multi-step process, but each step is very small. The full set of steps looks like this:
 
 ```bash
 # Step 1

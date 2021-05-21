@@ -1,6 +1,6 @@
 # Lab: Access Native APIs
 
-There are serveral ways to access native functionality from your Ionic Framework application:
+There are several ways to access native functionality from your Ionic Framework application:
 
 - Use a Capacitor API
 - Use a Capacitor Plugin
@@ -13,7 +13,7 @@ In this lab you will learn how to use the Capacitor APIs
 
 ## Switch to Capacitor APIs
 
-The App Component is currently using Cordova plugins and Ionic Native Community Edition wrappers in order to hide the splashscreen and configure the status bar. We should favor using Capacitor APIs when we can. Let's switch over to using the Capacitor APIs.
+The App Component is currently using Cordova plugins and Ionic Native Community Edition wrappers in order to hide the splash screen and configure the status bar. We should favor using Capacitor APIs when we can. Let's switch over to using the Capacitor APIs.
 
 - <a href="https://capacitorjs.com/docs/apis/splash-screen" target="_blank">Splash Screen API</a>
 - <a href="https://capacitorjs.com/docs/apis/status-bar" target="_blank">Status Bar API</a>

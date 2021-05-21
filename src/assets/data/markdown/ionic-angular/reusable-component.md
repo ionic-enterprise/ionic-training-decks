@@ -8,7 +8,7 @@ In this lab you will:
 
 ## Create the `SharedModule`
 
-A common convension in Angular application is to use a <a href="https://angular.io/guide/ngmodule-faq#sharedmodule" target="_blank">`SharedModule`</a> containing components, directives, and pipes that are used throughout the application.
+A common convention in Angular application is to use a <a href="https://angular.io/guide/ngmodule-faq#sharedmodule" target="_blank">`SharedModule`</a> containing components, directives, and pipes that are used throughout the application.
 
 Create a shared module, and then create the rating component in the same folder
 
@@ -94,7 +94,7 @@ First let's just get a row of five stars out there:
 </div>
 ```
 
-Next, add a `rating` property to the class and give it a value greather than zero but less then 5. Change the markup to that number of filled in stars with the rest being outline stars.
+Next, add a `rating` property to the class and give it a value greater than zero but less then 5. Change the markup to that number of filled in stars with the rest being outline stars.
 
 ```html
 <div>
@@ -139,7 +139,7 @@ ion-icon:last-child {
 
 If we make our component implement the `ControlValueAccessor` interface, it will automatically work in forms nicely and support two-way bindings with `[(ngModel)]`.
 
-First let's scafold out the code a little to get the boiler-plate stuff:
+First let's scaffold out the code a little to get the boiler-plate stuff:
 
 ```typescript
 import { Component, forwardRef, Input, HostBinding } from '@angular/core';
@@ -183,7 +183,7 @@ export class RatingComponent implements ControlValueAccessor {
 
 Some of the ES6 imports are not used at this point, but we will add stuff later for that.
 
-Let's also scafold the test. This one will be a little more complex because we want to test out how the component behaves when it is used, so we will need to create a host component for our tests.
+Let's also scaffold the test. This one will be a little more complex because we want to test out how the component behaves when it is used, so we will need to create a host component for our tests.
 
 ```typescript
 import { waitForAsync, ComponentFixture, TestBed } from '@angular/core/testing';
@@ -281,7 +281,7 @@ Then let's create the code. For now, `ratingClicked()` just needs to call throug
 
 #### Allow the Component to be Disabled
 
-It would be good if we could allow this component to be disabled. When we do this, we should reduce the opacity to make it look "grayed out", and we should diabled clicks. Add a test to the "when enabled" section of the test.
+It would be good if we could allow this component to be disabled. When we do this, we should reduce the opacity to make it look "grayed out", and we should disabled clicks. Add a test to the "when enabled" section of the test.
 
 ```typescript
 it('sets the opacity to 1', () => {
@@ -351,7 +351,7 @@ Our component is now ready for use.
 
 ## Save the Rating
 
-We need to modify the `TeaService` to both save and retrieve the rating for each tea. Our backend API does not currently support the rating on a tea, so we will store this data localy using the Capacitor Storage API. Our tasks for this will include:
+We need to modify the `TeaService` to both save and retrieve the rating for each tea. Our backend API does not currently support the rating on a tea, so we will store this data locally using the Capacitor Storage API. Our tasks for this will include:
 
 - Add an optional `rating` property to the `Tea` model
 - Modify the tea service
@@ -406,7 +406,7 @@ resultTeas = expectedTeas.map((t: Tea) => {
 
 We will use the Capacitor Storage plugin, so we will mock that. There are multiple ways that we could store the ratings. We will just go with the very simple strategy of using a key of `ratingX` where `X` is the `ID` of the tea.
 
-In the main `beforeEach()`, spy on `Storage.get()` returning a default of `{ vaule: '0' }` and add non-zero values for various ratings depending on the changes you made to the test data above.
+In the main `beforeEach()`, spy on `Storage.get()` returning a default of `{ value: '0' }` and add non-zero values for various ratings depending on the changes you made to the test data above.
 
 ```typescript
 ...
@@ -434,18 +434,18 @@ beforeEach(() => {
 
 We are also going to have to combine code that returns an `Observable` with code that resolves a `Promise`. In order to deal with this cleanly, wrap the tests that perform a `flush()` in the `fakeAsync` zone and call `tick()` after the `flush()` as such:
 
-```typecript
-    it('adds an image to each', fakeAsync(() => {
-      let teas: Array<Tea>;
-      service.getAll().subscribe(t => (teas = t));
-      const req = httpTestingController.expectOne(
-        `${environment.dataService}/tea-categories`,
-      );
-      req.flush(resultTeas);
-      tick();
-      httpTestingController.verify();
-      expect(teas).toEqual(expectedTeas);
-    }));
+```typescript
+it('adds an image to each', fakeAsync(() => {
+  let teas: Array<Tea>;
+  service.getAll().subscribe(t => (teas = t));
+  const req = httpTestingController.expectOne(
+    `${environment.dataService}/tea-categories`,
+  );
+  req.flush(resultTeas);
+  tick();
+  httpTestingController.verify();
+  expect(teas).toEqual(expectedTeas);
+}));
 ```
 
 You will need to import `fakeAsync` and `tick`:
@@ -491,7 +491,7 @@ But this makes our `getAll()` method unhappy. We are not returning an Observable
 Reading that code from the inside out:
 
 - `convert()` takes a raw tea and converts it to our model, but needs to do so async, so it returns a promise of that conversion
-- `Promise.all()` takes all of those promises of conversions and groups them into a single promise that resolvs to an array of teas once all of the inner promises resolve
+- `Promise.all()` takes all of those promises of conversions and groups them into a single promise that resolve to an array of teas once all of the inner promises resolve
 - `mergeMap()` converts that promise to an Observable and returns it instead of the original Observable from the HTTP call
 
 #### Save the Rating
@@ -590,7 +590,7 @@ Here is one way of doing that:
   })),
 ```
 
-#### Efffect
+#### Effect
 
 The effect that we require is pretty straight forward:
 

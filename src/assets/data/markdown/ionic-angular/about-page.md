@@ -14,7 +14,7 @@ Modify the application's `tsconfig.json` file to the code to resolve JSON files.
 ...
 ```
 
-This will allow us to read the `package.json` file and get some important informtion from it:
+This will allow us to read the `package.json` file and get some important information from it:
 
 ```typescript
 import { Component, OnInit } from '@angular/core';
@@ -75,7 +75,7 @@ In the template file for the about page, do the following:
 
 ## Move the Logout Logic
 
-Currently, the logout logic is on the first page. Once the user has logged in, it is doubtful they will need to logout, so it would make more sense to put that functionallity on a page like the "My Account" page, or "My Profile". We don't have one of those, but the about page will do for now.
+Currently, the logout logic is on the first page. Once the user has logged in, it is doubtful they will need to logout, so it would make more sense to put that functionality on a page like the "My Account" page, or "My Profile". We don't have one of those, but the about page will do for now.
 
 Here is the full test:
 

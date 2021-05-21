@@ -6,7 +6,7 @@ In this lab you will use Capacitor to access a native API. Specifically, the soc
 
 We can use various <a href="https://capacitorjs.com/docs/plugins" target="_blank">Capacitor Plugins</a> in order to provide access to native APIs. We have already done this to a certain degree with our use of the <a href="https://capacitorjs.com/docs/apis/storage" target="_blank">Storage</a> plugin. That plugin, however, works completely behind the scenes, so we can't really "experience" anything with it.
 
-Some plugins, though, provide native functionallity that the user interacts with directly. The <a href="https://capacitorjs.com/docs/apis/share" target="_blank">Social Sharing</a> plugin is one of those. In this lab we will update the code to use that plugin to allow us to share tea tasting notes with our friends.
+Some plugins, though, provide native functionality that the user interacts with directly. The <a href="https://capacitorjs.com/docs/apis/share" target="_blank">Social Sharing</a> plugin is one of those. In this lab we will update the code to use that plugin to allow us to share tea tasting notes with our friends.
 
 ```bash
 npm i @capacitor/share
@@ -49,9 +49,9 @@ At this point, the button should display and be clickable, but it is not functio
 
 ### Share Only on Devices
 
-The designers have let us know that they only want this functionallity available when users are running in a mobile context, so let't take care of making sure the button is only visible in that context.
+The designers have let us know that they only want this functionality available when users are running in a mobile context, so let's take care of making sure the button is only visible in that context.
 
-We will start with the test. First, import the `Platform` servcie from `@ionic/angular` and provide a mock for it where we set up the testing module.
+We will start with the test. First, import the `Platform` service from `@ionic/angular` and provide a mock for it where we set up the testing module.
 
 ```TypeScript
 import { IonicModule, ModalController, Platform } from '@ionic/angular';
@@ -117,12 +117,12 @@ import { ModalController, Platform } from '@ionic/angular';
 
 ### Enable When Enough Information Exists
 
-In order to share a rating, we need to have at least the brand, name, and rating entered. The button should be disabed until these are entered.
+In order to share a rating, we need to have at least the brand, name, and rating entered. The button should be disabled until these are entered.
 
-First we will test for it. This test belongs right after the `is avialable` test within the `in a mobile context` describe that we just created above.
+First we will test for it. This test belongs right after the `is available` test within the `in a mobile context` describe that we just created above.
 
 ```TypeScript
-      it('is not allowed until a brand, name, and rating have all beeen entered', () => {
+      it('is not allowed until a brand, name, and rating have all been entered', () => {
         const button = fixture.debugElement.query(By.css('#share-button'));
         expect(button.nativeElement.disabled).toBeTrue();
 

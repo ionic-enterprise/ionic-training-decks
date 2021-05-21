@@ -68,7 +68,7 @@ We will then import the `vaultService` into the `AuthenticationService` and set 
 
 ## Fix the Browser Support
 
-That is really all we need to do in order to combine Auth Connect and Identity Vault but there is _one_ problem. This no longer works in the browser, and we realy would like to use the browser for almost all of our development efforts. The problem is that Identity Vault uses hardware APIs in order to encrypt and store the data. That hardware and the associated APIs do not exist within the browser. To get around this, we will create a substitue vault service that uses Capacitor's Storage plugin to store the keys.
+That is really all we need to do in order to combine Auth Connect and Identity Vault but there is _one_ problem. This no longer works in the browser, and we really would like to use the browser for almost all of our development efforts. The problem is that Identity Vault uses hardware APIs in order to encrypt and store the data. That hardware and the associated APIs do not exist within the browser. To get around this, we will create a substitute vault service that uses Capacitor's Storage plugin to store the keys.
 
 The services that are required are boiler-plate, so let's just download them rather than going through writing them:
 

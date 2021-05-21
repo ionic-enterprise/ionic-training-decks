@@ -29,7 +29,7 @@ Also, open the test for each page and remove the `forRoot()` from the `IonicModu
 
 ## Tabs
 
-Tabs are one of two very common navigation syles within native applications. The other is side-menu navigation. A tabs navigation page will have a row of tabs either at the top or the bottom of the page. Each tab will contain a set of stacked pages. We have this stacked paradigm right now with the `TeaDetailsPage` rendering stacked on top of the `TeaPage`. This same idea carries over to tabbed navigation only each tab will have its own stack.
+Tabs are one of two very common navigation styles within native applications. The other is side-menu navigation. A tabs navigation page will have a row of tabs either at the top or the bottom of the page. Each tab will contain a set of stacked pages. We have this stacked paradigm right now with the `TeaDetailsPage` rendering stacked on top of the `TeaPage`. This same idea carries over to tabbed navigation only each tab will have its own stack.
 
 This application will have a small number of distinct sections, so tabs make the most sense.
 
@@ -155,7 +155,7 @@ If you click on the tabs at the bottom of the page, you should load each individ
 
 #### Step 3: Move the Details Page
 
-Click on the the "Tea" tab and then click on a tea panel. The `TeaDetailsPage` is displayed but it is not rendered in the tabs page. Rather it is rendererd in the root router outlet. Not so magical... 🌧
+Click on the the "Tea" tab and then click on a tea panel. The `TeaDetailsPage` is displayed but it is not rendered in the tabs page. Rather it is rendered in the root router outlet. Not so magical... 🌧
 
 This page should really be a route under the `TeaPage`, so let's move it to the `tea-routing.module.ts` file and add it as a sibling of the main route that is defined there. That routing file should now look like this:
 

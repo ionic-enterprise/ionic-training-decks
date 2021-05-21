@@ -1,13 +1,13 @@
 # Other Auth Modes
 
-In the last section, we implemented Identy Vault using the `SecureStorage` auth mode. This auth mode simply stores the information in a secure location without ever locking it. In this section we will explore the other auth modes that are available to us.
+In the last section, we implemented Identity Vault using the `SecureStorage` auth mode. This auth mode simply stores the information in a secure location without ever locking it. In this section we will explore the other auth modes that are available to us.
 
 ## Auth Modes
 
 Identity Vault supports multiple different authentication of modes. The most commonly used modes are:
 
 - **`SecureStorage`**: data is stored in a secure location on the device, but the vault is never locked. With this vault, the data stored in the vault is always accessible so long as the user has unlocked the device via a secure method.
-- **`PasscodeOnly`**: the vault is locked after the application has been in the background for a specified period of time or when the application is closed. With this mode, the user will be prompted to supply a custom PIN for the session. This data stored in the vault will only be accessible after the unser unlocks the vault via the supplied PIN.
+- **`PasscodeOnly`**: the vault is locked after the application has been in the background for a specified period of time or when the application is closed. With this mode, the user will be prompted to supply a custom PIN for the session. This data stored in the vault will only be accessible after the user unlocks the vault via the supplied PIN.
 - **`BiometricOnly`**: the vault is locked after the application has been in the background for a specified period of time or when the application is closed. With this mode, the data stored in the vault is only accessible after the user unlocks the vault with a the biometric authentication mechanism supported by the device.
 - **`BiometricAndPasscode`**: the vault is locked after the application has been in the background for a specified period of time or when the application is closed. With this mode, the data stored in the vault is only accessible after the user unlocks the vault with a the biometric authentication mechanism supported by the device. A session PIN is established at the time the session is stored, and is used as a backup for cases where biometric authentication fails or is not available.
 - **`InMemoryOnly`**: the session is never stored in the vault. It is simply cleared whenever the application is closed or has been in the background `lockAfter` number of millisecond.

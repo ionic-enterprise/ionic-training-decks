@@ -7,7 +7,7 @@ In this lab, you will:
 
 ## Stacked Navigation
 
-Ionic supports the common mobile paradigm of stacked navigation, where one page is logically displayed over the top of another page. In this lab we will see that paradigm in action by creating a simple "details" page for each of our teas. This page will start simple, but we will add more inforamtion to it later.
+Ionic supports the common mobile paradigm of stacked navigation, where one page is logically displayed over the top of another page. In this lab we will see that paradigm in action by creating a simple "details" page for each of our teas. This page will start simple, but we will add more information to it later.
 
 ## The Tea Details Page
 
@@ -185,7 +185,7 @@ Notice how we are building upon the other selectors.
 
 #### Reading the ID Parameter
 
-Now that we are navigating to the tea-details page with an ID parameter, we need to modify `src/app/tea-details/tea-details.page.ts` to read the parameter and get the tea informtion for that ID. To accomplish this we will need to use the Angular Components Router's `ActivedRoute` service and our store. We will also eventually make use of the `NavController`.
+Now that we are navigating to the tea-details page with an ID parameter, we need to modify `src/app/tea-details/tea-details.page.ts` to read the parameter and get the tea information for that ID. To accomplish this we will need to use the Angular Components Router's `ActivedRoute` service and our store. We will also eventually make use of the `NavController`.
 
 In the `src/app/tea-details/tea-details.page.spec.ts` file, set up the `TestBed` to inject mocks for these services.
 
@@ -217,7 +217,7 @@ You will need to adjust your import statements accordingly.
 
 We would like to write most of our tests from the point of view of the end user requirements, which would basically mean that we verify that we get the tea and display it properly without getting into implementation details, but we do have _one_ test that works out best if we just scratch the surface a bit on the implementation details, so we will start there:
 
-Create an `initiallization` section in the test. Also, since we will need to do some setup within the initialization tests, remove the `fixture.detectChanges();` line from the main `beforeEach()`. That call will run the initialization, and we want to delay its execution until after our test setup code has run.
+Create an `initialization` section in the test. Also, since we will need to do some setup within the initialization tests, remove the `fixture.detectChanges();` line from the main `beforeEach()`. That call will run the initialization, and we want to delay its execution until after our test setup code has run.
 
 ```TypeScript
   describe('initialization', () => {
@@ -245,7 +245,7 @@ Create an `initiallization` section in the test. Also, since we will need to do 
 
 **Note:** remember to remove the `fixture.detectChanges()` call from the top-level `beforeEach()`.
 
-The code that satisifes that test looks like this:
+The code that satisfies that test looks like this:
 
 ```TypeScript
 import { Component, OnInit } from '@angular/core';

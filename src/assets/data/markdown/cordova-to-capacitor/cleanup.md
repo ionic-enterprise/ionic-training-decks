@@ -101,7 +101,7 @@ describe('initialization', () => {
 });
 ```
 
-You should now clean up any unsed imports or variable declarations you may have. Your `AppComponent` tests will be failing at this point, but we will fix that next.
+You should now clean up any unused imports or variable declarations you may have. Your `AppComponent` tests will be failing at this point, but we will fix that next.
 
 ### Modify `src/app/app.component.ts`
 
@@ -219,7 +219,7 @@ As you can see from the comments here, we don't actually need to install any of 
 $ npm uninstall cordova-plugin-whitelist cordova-plugin-statusbar cordova-plugin-device cordova-plugin-splashscreen cordova-plugin-ionic-webview cordova-plugin-ionic-keyboard
 ```
 
-We are also no longer using any of the `@ionic-native` stuff (in your own project, you may or may not be still using some `@ionic-native` packages, so only remove `@ionic-native/core` here if all other `@ionic-native` packages are beging removed):
+We are also no longer using any of the `@ionic-native` stuff (in your own project, you may or may not be still using some `@ionic-native` packages, so only remove `@ionic-native/core` here if all other `@ionic-native` packages are being removed):
 
 ```bash
 $ npm uninstall @ionic-native/core @ionic-native/status-bar @ionic-native/splash-screen

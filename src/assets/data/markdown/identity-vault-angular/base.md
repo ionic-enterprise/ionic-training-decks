@@ -1,6 +1,6 @@
 # Install the Base Application
 
-We will start with a very simple starter appication and enhance it to securely store our session data via Ionic Identity Vault. The application we will use is a basic Ionic tabs based starter with a little code added that will eventually allow us to access some information from a REST API so we can display the information in the app.
+We will start with a very simple starter application and enhance it to securely store our session data via Ionic Identity Vault. The application we will use is a basic Ionic tabs based starter with a little code added that will eventually allow us to access some information from a REST API so we can display the information in the app.
 
 ## Clone
 
@@ -58,20 +58,20 @@ The tab 2 page uses the tea service to obtain tea related data from our REST API
 
 The auth guard is intended to guard our route by disallowing navigation if we are not currently authenticated. Currently, it does nothing and just returns `true`, allowing us through.
 
-### HTTP Ineterceptors
+### HTTP Interceptors
 
 Our application contains two HTTP interceptors: an auth interceptor and an unauth interceptor.
 
 The auth interceptor modifies outbound requests. It adds a bearer token to the `Authorization` header of any request that requires a token. For our application, this is any request other than a `login` request.
 
-The unauth interceptor examines inbout responses looking for 401 (unauthorized) errors. If it finds one, it redirects the user to the login page. **Note:** this is what is currently causing us to redirect to the login page when we try to access the tab 2 page. The flow looks something like this:
+The unauth interceptor examines inbound responses looking for 401 (unauthorized) errors. If it finds one, it redirects the user to the login page. **Note:** this is what is currently causing us to redirect to the login page when we try to access the tab 2 page. The flow looks something like this:
 
 1. the auth guard is a do nothing guard at this point and lets us in
 1. the page uses the tea service to try to get some tea info
 1. the tea service makes the request
-1. the auth interceptor cannnot find a token, so it does not append a bearer token
+1. the auth interceptor cannot find a token, so it does not append a bearer token
 1. the request is sent to the REST API
-1. the REST API rejects to unauthorzied request with a 401 error code
+1. the REST API rejects to unauthorized request with a 401 error code
 1. the unauth interceptor examines the response, sees the 401 error code, and redirects the user to the login page
 
 ## Conclusion

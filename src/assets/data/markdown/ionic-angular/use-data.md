@@ -28,7 +28,7 @@ export const initialLoadFailure = createAction(
 
 ### A New State Slice for the Data
 
-We already have a slice of state for the authentication system. Let's aslo create one for the data. For our small app we will just have those two slices, one for `auth` and one for the rest of the `data`.
+We already have a slice of state for the authentication system. Let's also create one for the data. For our small app we will just have those two slices, one for `auth` and one for the rest of the `data`.
 
 We have been defining the state slices along with the reducers, so create a file called `src/app/store/reducers/data.reducer.ts` with the following initial contents:
 
@@ -89,7 +89,7 @@ At this point we can update the `src/app/store/reducers/index.ts` file so this s
 
 ### Reducers
 
-For this sllice, we will need the reducer to handle the following actions:
+For this slice, we will need the reducer to handle the following actions:
 
 - `LoginSuccess` - set the loading flag, clear any old error message
 - `SessionRestored` - set the loading flag, clear any old error message
@@ -215,7 +215,7 @@ describe('Initial Load Success', () => {
 });
 ```
 
-But notice how repetative those tests are. Let's see if we can do better. Looking at the tests, they all:
+But notice how repetitive those tests are. Let's see if we can do better. Looking at the tests, they all:
 
 - have a description
 - create an action,
@@ -269,7 +269,7 @@ it('returns the default state', () => {
 );
 ```
 
-That is a lot less repetative code, and will be a lot easier to maintain as our state grows.
+That is a lot less repetitive code, and will be a lot easier to maintain as our state grows.
 
 With the tests in place, we are ready to update the `dataReducer` in `src/app/store/reducers/data.reducer.ts`. I will provide one of the action handlers, and let you fill in the others.
 
@@ -281,7 +281,7 @@ With the tests in place, we are ready to update the `dataReducer` in `src/app/st
   })),
 ```
 
-Have a peek at the auth reducer if you get stuck. If you get _realy_ stuck the code will be provided in the conclusion section of this lab.
+Have a peek at the auth reducer if you get stuck. If you get _really_ stuck the code will be provided in the conclusion section of this lab.
 
 ### Effects
 
@@ -524,7 +524,7 @@ Then the code:
           ),
 ```
 
-At this point, our effect is getting the data and is then returning the proper action to dispatch. Thus remove the `{ dispatch: false },` from the effect. That was just there to avoid an infinite loop when all we were doing was the `tap`. Speaking of which, the `tap` opeator should no longer be used, so go clean up your imports and you can then call the store mods done.
+At this point, our effect is getting the data and is then returning the proper action to dispatch. Thus remove the `{ dispatch: false },` from the effect. That was just there to avoid an infinite loop when all we were doing was the `tap`. Speaking of which, the `tap` operator should no longer be used, so go clean up your imports and you can then call the store mods done.
 
 ## The Tea Page
 
@@ -541,7 +541,7 @@ If you get stuck, check the code in the Conclusion section. Remember to update t
 
 ### Update the Test
 
-A lot of what we need for the test is already there. We just need to modify the setup to include the data slice in the state and then overridde the teas selector to return the test tea data.
+A lot of what we need for the test is already there. We just need to modify the setup to include the data slice in the state and then override the teas selector to return the test tea data.
 
 ```diff
 --- a/src/app/tea/tea.page.spec.ts
@@ -646,7 +646,7 @@ You can now remove the fake data from the Tea Page and clean up your imports if 
 
 ## The Tea Clearing Challenge
 
-Testing this out in the browser everything _appears_ to run fine, but run it with Redux DevTools open and have a look at the state after logging off. The data is left over. For this app, that probalby is not a big deal, but in something like a banking app you don't want user A to log out and then have user B log in with user A's data still hanging out, even if for a short while.
+Testing this out in the browser everything _appears_ to run fine, but run it with Redux DevTools open and have a look at the state after logging off. The data is left over. For this app, that probably is not a big deal, but in something like a banking app you don't want user A to log out and then have user B log in with user A's data still hanging out, even if for a short while.
 
 **Code Challenge:** update the data reducer to clear the tea data upon `LogoutSuccess`. Start with a test, and then write the code. Both are included at the end of this page.
 
@@ -654,7 +654,7 @@ Testing this out in the browser everything _appears_ to run fine, but run it wit
 
 In the last two labs, we have learned how to to get data via a service and then how to use that service within our pages. Be sure to commit your changes.
 
-Here is the code for the data recuder:
+Here is the code for the data reducer:
 
 ```TypeScript
 export const reducer = createReducer(

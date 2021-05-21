@@ -22,7 +22,7 @@ export * from './session-vault/session-vault.service';
 
 ## Install the Storage Plugin
 
-We are going to use `@capacitor/storage` to persist the session data between invokations of the application.
+We are going to use `@capacitor/storage` to persist the session data between invocations of the application.
 
 ```bash
 npm i @capacitor/storage
@@ -119,7 +119,7 @@ describe('SessionVaultService', () => {
 
 ### Craft the Service
 
-As we start crafting the service, we will do so in a TDD fashion. First write a test that verifies a requirment, then create the code to make the test pass. Be sure to add each test within the appropriate `describe()` block.
+As we start crafting the service, we will do so in a TDD fashion. First write a test that verifies a requirement, then create the code to make the test pass. Be sure to add each test within the appropriate `describe()` block.
 
 #### Login
 
@@ -461,14 +461,14 @@ import { State } from '@app/store';
 
 ## A Note on Security
 
-We should be careful about what we are storing in local storage and then trusting. The token isn't bad. If someone tampers with it, it is extrememly likely that it will be invalid. The bigger issue would be if we were, for example, storing authorization information with the session and then trusting that to be correct. A user could easily update local storage in that case to, for example, give themselves admin access.
+We should be careful about what we are storing in local storage and then trusting. The token isn't bad. If someone tampers with it, it is extremely likely that it will be invalid. The bigger issue would be if we were, for example, storing authorization information with the session and then trusting that to be correct. A user could easily update local storage in that case to, for example, give themselves admin access.
 
 Basically:
 
 - do not rely on locally stored information, always get it from the backend
 - the backend should _always_ assume the front end is compromised and not to be trusted
 
-Here we are just storing the user's name, etc. and are not using anything other than the token for security puroses. As has already been noted, tampering with the key invalidates it, so it cannot be used to gain elevated access.
+Here we are just storing the user's name, etc. and are not using anything other than the token for security purposes. As has already been noted, tampering with the key invalidates it, so it cannot be used to gain elevated access.
 
 ## Conclusion
 

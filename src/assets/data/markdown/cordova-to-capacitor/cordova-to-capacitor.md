@@ -161,7 +161,7 @@ If `cordova-res` produces any warnings with this step, you can ignore them.
 
 #### Run the App
 
-At this point, you are able to view your Capacitor application by loading it in either Xcode or Android Studio and running it on a devie or emulator. Use `ionic cap open` to open the appropriate IDE.
+At this point, you are able to view your Capacitor application by loading it in either Xcode or Android Studio and running it on a device or emulator. Use `ionic cap open` to open the appropriate IDE.
 
 ```bash
 $ ionic cap open ios

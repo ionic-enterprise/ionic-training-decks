@@ -16,7 +16,7 @@ npx cap update
 
 ## Configuration
 
-Often, the most difficult part of setting up Auth Connect is simply making sure you have the OIDC provider configured correction and then properly translating that configuration into the Auth Connect configuration. Please refer to <a href="https://ionic.io/docs/auth-connect/aws-cognito" target="_blank">our setup guides</a> for information on how to configure your provider. The informtion that each provider needs is generally the same with some minor differences, so if your provider is not listed you should be able to get started by looking at one of the other providers. Auth0 is the most standard of the bunch so is very likely a good place to start.
+Often, the most difficult part of setting up Auth Connect is simply making sure you have the OIDC provider configured correction and then properly translating that configuration into the Auth Connect configuration. Please refer to <a href="https://ionic.io/docs/auth-connect/aws-cognito" target="_blank">our setup guides</a> for information on how to configure your provider. The information that each provider needs is generally the same with some minor differences, so if your provider is not listed you should be able to get started by looking at one of the other providers. Auth0 is the most standard of the bunch so is very likely a good place to start.
 
 Once we have the OIDC provider configured properly, we need to configure Auth Connect such that it knows about the OIDC provider. We have a <a href="https://github.com/ionic-team/cs-demo-ac-providers" target="_blank">sample application</a> that will help in this regard. This application is focused solely on the login and logout flows and making sure that the configuration is correct. For this reason we suggest modifying this application for your OIDC provider and working with the configuration within the application. This will then make it easier to integrate the proper configuration into your own application.
 
@@ -171,21 +171,21 @@ The most common mistake made when setting up Auth Connect is with the `redirectU
 - the `redirectUri` and `logoutUrl` should be valid routes in the application
 - the `redirectUri` and `logoutUrl` will not be routed to unless `implicitLogin` is set to `CURRENT`, otherwise Auth Connect will handle the callback from the OIDC provider
 - actual routing in your application (unless you are using `implicitLogin: 'CURRENT'`) can be handled via a couple of different strategies:
-  - via the `onLoginSuccess()` and `onLogout()` envent handlers
-  - programatically after awaiting the `login()` or `logout()` calls
+  - via the `onLoginSuccess()` and `onLogout()` event handlers
+  - programmatically after awaiting the `login()` or `logout()` calls
 - these values will likely take the form of `http://localhost:8100/login` in development
 - these values will likely take the form of `https://yourapp.yourcompany.com/login` in production
 
-**Note:** for `implicitLogin: 'CURRENT'` your app will handle the callback <a href="https://github.com/ionic-team/demo-authconnect-auth0/blob/master/src/app/login/login.page.ts" target="_blank">as shown here</a>. The implicit `CURRENT` flow increases the complexity of your application due to how it works, and is not covered by this training. Please consult with the Ioinic Customer Success team if you are thinking of using this flow.
+**Note:** for `implicitLogin: 'CURRENT'` your app will handle the callback <a href="https://github.com/ionic-team/demo-authconnect-auth0/blob/master/src/app/login/login.page.ts" target="_blank">as shown here</a>. The implicit `CURRENT` flow increases the complexity of your application due to how it works, and is not covered by this training. Please consult with the Ionic Customer Success team if you are thinking of using this flow.
 
 **Mobile**
 
-- the `redirectUri` and `logoutUrl` do not need to be meaninful within your application
+- the `redirectUri` and `logoutUrl` do not need to be meaningful within your application
 - these values will likely take the form of `com.company.app://callback` in both development and production
 
 Notice the schema used in the `redirectUri` and `logoutUrl` on mobile. The only requirement here is that it is something that is unique to your application. Otherwise, it can be anything you want it to be so long as it matches a URI you have set on in the OIDC provider configuration as valid.
 
-In general, a schema like `msauth` like we are using for the training is not very good. You should use something far more specicific such as the budle ID of your application. For the training app, however, you have to use `msauth` as we have configured above. The reason for this is that this is out the OIDC provider we are using is configured.
+In general, a schema like `msauth` like we are using for the training is not very good. You should use something far more specific such as the bundle ID of your application. For the training app, however, you have to use `msauth` as we have configured above. The reason for this is that this is out the OIDC provider we are using is configured.
 
 ## Testing
 

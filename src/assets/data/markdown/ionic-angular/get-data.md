@@ -87,7 +87,7 @@ describe('TeaService', () => {
 
 **Scenario:** the API team is not sure exactly how they are going to provide image data. That is still being debated. But they are getting us the rest of the data, and the data is consistent with consistent IDs, so we can add our own images for the time being via our service.
 
-We are going to need some test data. For our application, the data we get back from the server looks like the test data that we provided for the page, only it does not have an image assciated with it. Let's initialize an array of teas called `expectedTeas` using that data.
+We are going to need some test data. For our application, the data we get back from the server looks like the test data that we provided for the page, only it does not have an image associated with it. Let's initialize an array of teas called `expectedTeas` using that data.
 
 First, create `expectedTeas` and `resultTeas` variables within the main `describe()` for the test (in the same area where the other variables are declared):
 
@@ -253,7 +253,7 @@ The code that you have for this method looks like this:
   }
 ```
 
-The problem here is that there is a lot for future you to parse when you come back to maintain this. The method is reponsible for more tha one thing: getting the data, and doing the convertion. Let's fix that by abstracting the code that does the convertion on a tea object into a local `convert()` method.
+The problem here is that there is a lot for future you to parse when you come back to maintain this. The method is responsible for more tha one thing: getting the data, and doing the conversion. Let's fix that by abstracting the code that does the conversion on a tea object into a local `convert()` method.
 
 When you are done, the code should look more like this:
 

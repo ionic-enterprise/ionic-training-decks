@@ -134,7 +134,7 @@ However, there are a couple of problems:
 
 ## The Information Page (tab1)
 
-The first thing we need to do is import our authenticvation service. We will also need to import the `onIonViewWillEnter` composition hook from `@ionic/vue`.
+The first thing we need to do is import our authentication service. We will also need to import the `onIonViewWillEnter` composition hook from `@ionic/vue`.
 
 ```TypeScript
 import { authenticationService } from '@/services/AuthenticationService';
@@ -202,11 +202,11 @@ Let's update the guard to make sure we are authenticated before we ever get to t
 
 At this point, Ionic Auth Connect is fully configured and our authentication flow is working properly.
 
-However, we are using the default storage for the tokens, which means that we are using `localstorage` in all cases. This default behavior is only inteded to ease development and is not meant or production cases.
+However, we are using the default storage for the tokens, which means that we are using `localstorage` in all cases. This default behavior is only intended to ease development and is not meant or production cases.
 
 The reason this is not a good option for production is that on mobile devices the OS can and will wipe that data out whenever it feels like it needs the memory. Ionic Auth Connect offers a couple of better options, however:
 
 - create your own service that implements the <a href="https://ionic.io/docs/auth-connect/api#tokenstorageprovider" target="_blank">token storage provider</a> interface
-- use <a href="https://ionic.io/docs/identity-vault">Ioinc Identity Vault</a>
+- use <a href="https://ionic.io/docs/identity-vault">Ionic Identity Vault</a>
 
 We suggest the latter. It is your easiest and most secure option. We will look at integrating it in the next section.

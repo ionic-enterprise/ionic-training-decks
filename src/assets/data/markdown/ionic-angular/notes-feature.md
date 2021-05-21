@@ -111,7 +111,7 @@ describe('TastingNotesService', () => {
       httpTestingController.verify();
     });
 
-    it('saves an existinsg note', () => {
+    it('saves an existing note', () => {
       service
         .save({
           id: 7,
@@ -479,7 +479,7 @@ Finally, add the code to the reducer:
 
 #### Effects
 
-For our tests, we will need some test data as well, so add the same test data that we added to the data recuder tests.
+For our tests, we will need some test data as well, so add the same test data that we added to the data reducer tests.
 
 ```TypeScript
 const notes: Array<TastingNote> = [
@@ -1274,7 +1274,7 @@ describe('TastingNotesPage', () => {
       fixture.detectChanges();
       const items = fixture.debugElement.queryAll(By.css('ion-item'));
       expect(items.length).toEqual(2);
-      expect(items[0].nativeElement.textContent).toContain('Bently');
+      expect(items[0].nativeElement.textContent).toContain('Bentley');
       expect(items[1].nativeElement.textContent).toContain('Lipton');
     });
   });
@@ -1289,7 +1289,7 @@ describe('TastingNotesPage', () => {
     testData = [
       {
         id: 73,
-        brand: 'Bently',
+        brand: 'Bentley',
         name: 'Brown Label',
         notes: 'Essentially OK',
         rating: 3,

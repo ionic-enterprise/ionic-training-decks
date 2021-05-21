@@ -1,6 +1,6 @@
 # Install the Base Application
 
-We will start with a very simple starter appication and enhance it to securely store our session data via Ionic Identity Vault. The application we will use is a basic Ionic tabs based starter with a little code added that will eventually allow us to access some information from a REST API so we can display the information in the app.
+We will start with a very simple starter application and enhance it to securely store our session data via Ionic Identity Vault. The application we will use is a basic Ionic tabs based starter with a little code added that will eventually allow us to access some information from a REST API so we can display the information in the app.
 
 ## Clone
 
@@ -50,14 +50,14 @@ The API service abstracts the Axios configuration required to access our backend
 
 Of special note are the two interceptors defined here, one on outgoing request and the other on incoming responses. The request interceptor modifies outbound requests by adding a bearer token to the `Authorization` header.
 
-The response interceptor examines inbout responses looking for 401 (unauthorized) errors. If it finds one, it redirects the user to the login page. **Note:** this is what is currently causing us to redirect to the login page when we try to access the tab 2 page. The flow looks something like this:
+The response interceptor examines inbound responses looking for 401 (unauthorized) errors. If it finds one, it redirects the user to the login page. **Note:** this is what is currently causing us to redirect to the login page when we try to access the tab 2 page. The flow looks something like this:
 
 1. the auth guard is a do nothing guard at this point and lets us in
 1. the tab2 page uses the tea service to try to get some tea info
 1. the tea service makes the request
-1. the request interceptor cannnot find a token, so it does not append a bearer token
+1. the request interceptor cannot find a token, so it does not append a bearer token
 1. the request is sent to the REST API
-1. the REST API rejects to unauthorzied request with a 401 error code
+1. the REST API rejects to unauthorized request with a 401 error code
 1. the response interceptor examines the response, sees the 401 error code, and redirects the user to the login page
 
 ### Tea Service

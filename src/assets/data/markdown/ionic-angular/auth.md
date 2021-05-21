@@ -197,7 +197,7 @@ interface LoginResponse extends Session {
 }
 ```
 
-Then the body of the `login()` method is changed to map the respose as such:
+Then the body of the `login()` method is changed to map the response as such:
 
 ```typescript
 return this.http
@@ -338,7 +338,7 @@ Remember to add to `src/app/core/testing.ts`
 
 ## HTTP Interceptors
 
-Outgoing requests needs to have the token added to the headers, and incoming responses needeed to be checked for 401 errors. It is best to handle these sorts of things in a centralized location. This is a perfect job for HTTP Interceptors.
+Outgoing requests needs to have the token added to the headers, and incoming responses needed to be checked for 401 errors. It is best to handle these sorts of things in a centralized location. This is a perfect job for HTTP Interceptors.
 
 ```bash
 ionic g s core/http-interceptors/auth-interceptor --skipTests
@@ -546,7 +546,7 @@ Update the `TestBed` to provide a mock authentication service:
 Then we need to update the `login$` tests. We need to:
 
 - add a test that verifies we call the `AuthenticationService`
-- redifine how success and failure are detected by making it dependent on the outcome of the `login()` call (we reflect this in the tests by adding the `beforeEach()` setup methods to the 'on login success' and 'on login failure' tests, representing success and failure responses from our backend)
+- redefine how success and failure are detected by making it dependent on the outcome of the `login()` call (we reflect this in the tests by adding the `beforeEach()` setup methods to the 'on login success' and 'on login failure' tests, representing success and failure responses from our backend)
 - add a set of tests for when a hard error occurs with the login (for example, a 500 error from the server)
 
 ```TypeScript

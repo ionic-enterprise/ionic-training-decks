@@ -76,7 +76,7 @@ ionic cap open ios
 
 ## Update the Splash Screen and Application Icon
 
-Before taking this step, make sure you have `cordova-res` installed globally by typing `cordova-res --version`. If you do not have it instsalled, run the following command:
+Before taking this step, make sure you have `cordova-res` installed globally by typing `cordova-res --version`. If you do not have it installed, run the following command:
 
 ```bash
 npm i -g cordova-res

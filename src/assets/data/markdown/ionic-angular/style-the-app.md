@@ -43,7 +43,7 @@ Now have a look in `src/global.scss`. Currently, it contains several imports as 
 
 But _should_ we actually put our global styling directly here? It is convenient when we just have a few styles. A real-world application, however, is likely to have a fair amount of styling. In such cases, we should create a set of SCSS files and import them here.
 
-For our app, though, we will just put the global styles directly into this file. We will not have enough styling yet to justify seperate files.
+For our app, though, we will just put the global styles directly into this file. We will not have enough styling yet to justify separate files.
 
 ### Shadow DOM
 
@@ -255,7 +255,7 @@ ion-list-header {
 
 Nice!
 
-We have a couple of other components where we need to set a specific color. Namely the tabs as well as the footer area on the login page. To modify the color of spcific components, we can set the color attribute as such: `color="primary"`. Let's use this to set our colors:
+We have a couple of other components where we need to set a specific color. Namely the tabs as well as the footer area on the login page. To modify the color of specific components, we can set the color attribute as such: `color="primary"`. Let's use this to set our colors:
 
 **`src/app/login/login.page.html`**
 

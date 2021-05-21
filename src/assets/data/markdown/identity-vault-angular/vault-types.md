@@ -1,13 +1,13 @@
 # Other Auth Modes
 
-In the last section, we implemented Identy Vault using the `SecureStorage` auth mode. This auth mode simply stores the information in a secure location without ever locking it. In this section we will explore the other auth modes that are available to us.
+In the last section, we implemented Identity Vault using the `SecureStorage` auth mode. This auth mode simply stores the information in a secure location without ever locking it. In this section we will explore the other auth modes that are available to us.
 
 ## Auth Modes
 
 Identity Vault supports multiple different authentication of modes. The most commonly used modes are:
 
 - **`SecureStorage`**: data is stored in a secure location on the device, but the vault is never locked. With this vault, the data stored in the vault is always accessible so long as the user has unlocked the device via a secure method.
-- **`PasscodeOnly`**: the vault is locked after the application has been in the background for a specified period of time or when the application is closed. With this mode, the user will be prompted to supply a custom PIN for the session. This data stored in the vault will only be accessible after the unser unlocks the vault via the supplied PIN.
+- **`PasscodeOnly`**: the vault is locked after the application has been in the background for a specified period of time or when the application is closed. With this mode, the user will be prompted to supply a custom PIN for the session. This data stored in the vault will only be accessible after the user unlocks the vault via the supplied PIN.
 - **`BiometricOnly`**: the vault is locked after the application has been in the background for a specified period of time or when the application is closed. With this mode, the data stored in the vault is only accessible after the user unlocks the vault with a the biometric authentication mechanism supported by the device.
 - **`BiometricAndPasscode`**: the vault is locked after the application has been in the background for a specified period of time or when the application is closed. With this mode, the data stored in the vault is only accessible after the user unlocks the vault with a the biometric authentication mechanism supported by the device. A session PIN is established at the time the session is stored, and is used as a backup for cases where biometric authentication fails or is not available.
 - **`InMemoryOnly`**: the session is never stored in the vault. It is simply cleared whenever the application is closed or has been in the background `lockAfter` number of millisecond.
@@ -159,10 +159,10 @@ export class LoginPage implements OnInit {
 
 ## Native Modifications
 
-In order to build this for an iOS device, you will need to supply a value for `NSFaceIDUsageDescription` with a message explaining why you want to use Face ID when getting the user's permissions. Thest easiest way to do this is:
+In order to build this for an iOS device, you will need to supply a value for `NSFaceIDUsageDescription` with a message explaining why you want to use Face ID when getting the user's permissions. The easiest way to do this is:
 
 - `npx cap open ios`
-- open the `Info.plst` file in `Xcode`
+- open the `Info.plist` file in `Xcode`
 - add and entry for `NSFaceIDUsageDescription` with a value like "Use Face ID to unlock the application"
 
 Build the application and deploy it to a device.
@@ -193,7 +193,7 @@ Let's fix this by navigating to tab number three (which does not require authent
 While we are responding to events like this, let's also cache the session in our service so we don't always have to go to the vault to get it. To do this, we will need to:
 
 1. define a private property to cache the session as such: `private currentSession: Session | undefined;`
-1. override the `login()` method to set the `currentSession` in addition to performing the base class functionallity
+1. override the `login()` method to set the `currentSession` in addition to performing the base class functionality
 1. override the `restoreSession()` method return the `currentSession` if it is set, and otherwise check with the vault
 1. clear `currentSession` when the vault is locked
 1. set `currentSession` when the session is restored
@@ -224,4 +224,4 @@ Build the application an test it out on a device.
 
 ## Conclusion
 
-We now have an application that allows the user to pick whichever authentication mode works best for them. Try the "Session PIN Unlock" option, though. Notice how the PIN experiance is not very ideal. We can customize that, which is exactly what we will do in the next section.
+We now have an application that allows the user to pick whichever authentication mode works best for them. Try the "Session PIN Unlock" option, though. Notice how the PIN experience is not very ideal. We can customize that, which is exactly what we will do in the next section.

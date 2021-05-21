@@ -169,7 +169,7 @@ import { Tea } from '@app/models';
       name: 'Black',
       image: 'assets/img/black.jpg',
       description:
-        'A fully oxidized tea, black teas have a dark color and a full robust and pronounced flavor. Blad teas tend ' +
+        'A fully oxidized tea, black teas have a dark color and a full robust and pronounced flavor. Black teas tend ' +
         'to have a higher caffeine content than other teas.'
     },
     {
@@ -186,14 +186,14 @@ import { Tea } from '@app/models';
       image: 'assets/img/oolong.jpg',
       description:
         'Oolong teas are partially oxidized, giving them a flavor that is not as robust as black teas but also ' +
-        'not as suble as green teas. Oolong teas often have a flowery fragrance.'
+        'not as subtle as green teas. Oolong teas often have a flowery fragrance.'
     },
     {
       id: 5,
       name: 'Dark',
       image: 'assets/img/dark.jpg',
       description:
-        'From the Hunan and Sichuan provinces of China, dark teas are flavorful aged probiotic teas that steeps ' +
+        'From the Hunan and Sichuan provinces of China, dark teas are flavorful aged pro-biotic teas that steeps ' +
         'up very smooth with slightly sweet notes.'
     },
     {
@@ -241,7 +241,7 @@ In `src/app/tea/tea.page.html` place the following inside of the `ion-content`:
 
 This creates a list of cards. Angular's `ngFor` structural directive to render the sample template for each item in the `teaData` collection. That looks pretty good, at least when viewed at a phone resolution, but what about other form factors? Those do not look quite as nice. We will fix that shortly, but first go back to an iPhone form factor.
 
-If you look closely, though, we lost the "Large Title" scolling effect we had on the "Home" page. Have a look at the HTML for the "Home" page. There are a few key items we need to bring over:
+If you look closely, though, we lost the "Large Title" scrolling effect we had on the "Home" page. Have a look at the HTML for the "Home" page. There are a few key items we need to bring over:
 
 - the `[translucent]="true"` property binding in the `ion-header`
 - the `[fullscreen]="true"` property binding in the `ion-content`
@@ -290,7 +290,7 @@ Our app looks good when viewed at a phone resolution, but if we modify Chrome to
 1. show two columns of tea cards side by side on an iPad
 1. expand the columns to four on even wider screens, such as an iPad in landscape mode or our desktop
 
-Enter the <a href="https://ionicframework.com/docs/layout/grid" target="_blank">responsive grid</a>. By default, the resonsive grid shows rows of 12 columns each. However, we want to show at most rows of four columns. Luckily, there are some simple mechanisms in place that will allow us to do that, but first let's message our data a little.
+Enter the <a href="https://ionicframework.com/docs/layout/grid" target="_blank">responsive grid</a>. By default, the responsive grid shows rows of 12 columns each. However, we want to show at most rows of four columns. Luckily, there are some simple mechanisms in place that will allow us to do that, but first let's message our data a little.
 
 We currently have a list of X number of teas (currently 7, but once we start getting data from a backend service it could really be any number). Let's begin by breaking that up into a matrix with a maximum of 4 teas in each row. That means we will have two rows, the first with four columns and the second with three.
 

@@ -39,7 +39,7 @@ Please note that this **only** applies to Android. No such options exist for iOS
 
 ## Session PIN Fallback
 
-When unlocking the vault, our application uses biometric authentication if it is available, and a session PIN if biometrics is not available. It does this by setting the `AuthMode` to `BiomtricOnly` or `PasscodeOnly` upon login. It is also possible to use a mode called `BiometricAndPasscode`. The way this will behave is:
+When unlocking the vault, our application uses biometric authentication if it is available, and a session PIN if biometrics is not available. It does this by setting the `AuthMode` to `BiometricOnly` or `PasscodeOnly` upon login. It is also possible to use a mode called `BiometricAndPasscode`. The way this will behave is:
 
 - Upon login, the user will be asked to enter a PIN
 - When unlocking the vault:
@@ -78,9 +78,9 @@ It would also be possible to allow the user to change how the session is stored 
 
 If you couple all of this with the Capacitor [Storage API](https://capacitorjs.com/docs/apis/storage) you can also store the user's current choices so it can be used by default for future sessions (the current session automatically keeps track of how it is configured).
 
-## Mutliple Vaults
+## Multiple Vaults
 
-In our application, we are using one vault, the `IdentityService`. It is possible to have mutiple vaults by creating multiple services that extend `IonicIdentityVaultUser` and pass a `VaultDescriptor` to the constructor of the base class in order to give each vault a unique ID.
+In our application, we are using one vault, the `IdentityService`. It is possible to have multiple vaults by creating multiple services that extend `IonicIdentityVaultUser` and pass a `VaultDescriptor` to the constructor of the base class in order to give each vault a unique ID.
 
 Here is an example:
 
@@ -106,11 +106,11 @@ This can be used for multiple different scenarios. For example, let's say that u
 
 ## A "Real World" Example
 
-We also have a more "real world" demo that shows Identity Vault being integrated into a non-trivial application that is using NgRX for state management as well as other "real world" application paradigms. The app itself is relativily small so that it is approachable, but is complex enough to show how Identity Vault can be integrated into a more typical application.
+We also have a more "real world" demo that shows Identity Vault being integrated into a non-trivial application that is using NgRX for state management as well as other "real world" application paradigms. The app itself is relatively small so that it is approachable, but is complex enough to show how Identity Vault can be integrated into a more typical application.
 
-If you have a look at the end code in the [Identity Vault branch](https://github.com/ionic-team/tea-taster-angular/tree/feature/identity-vault) you will see that we have implemented some of what was discussed here. We have done that for demo purposes only. It is not a perscribed workflow, but one that you can use as a starting point for your own.
+If you have a look at the end code in the [Identity Vault branch](https://github.com/ionic-team/tea-taster-angular/tree/feature/identity-vault) you will see that we have implemented some of what was discussed here. We have done that for demo purposes only. It is not a prescribed workflow, but one that you can use as a starting point for your own.
 
-Please play around with some of these options and see how they work within the demo application. Note that the approach taken here is not the only valid approach to take. Rather, it is the approach that works for _this_ application. It is a common approach that will work in many instsances, but there are areas in the workflow that you may want to change in your own application.
+Please play around with some of these options and see how they work within the demo application. Note that the approach taken here is not the only valid approach to take. Rather, it is the approach that works for _this_ application. It is a common approach that will work in many instances, but there are areas in the workflow that you may want to change in your own application.
 
 ## Conclusion
 

@@ -16,7 +16,7 @@ npx cap update
 
 ## A Simple Vault Service
 
-In order to ingegrate Identity Vault into our application, we will extend the `IonicIdentityVaultUser` class that is provided by Identity Vault. Using this class, we will configure the vault and interact with it.
+In order to integrate Identity Vault into our application, we will extend the `IonicIdentityVaultUser` class that is provided by Identity Vault. Using this class, we will configure the vault and interact with it.
 
 When integrating Identity Vault into an existing application, there is quite often a service that is a natural choice to convert. We already have a `VaultService` and we will convert it to use Identity Vault. Most other applications have a service that manages the the current session. Other common names for these services are `IdentityService` or `SessionService`. Whatever this service is in your existing system is a good candidate. In many cases, you can modify this service to extend Identity Vault. This has the advantage of needing to make few changes throughout the rest of the appliction as the workflow for how the current session information is obtained is already defined.
 
@@ -51,7 +51,7 @@ Note the first parameter: `{ ready: () => Promise.resolve() }`. Identity Vault e
 This is what our configuration means:
 
 - `unlockOnAccess`: if the vault is locked, unlock the vault when the application attempts to access the session. If this value is false, the application will need to call `unlock()` itself. This value is typically `true` unless you want fine-grained control over the unlock workflow.
-- `hideScreenOnBackground`: setting this option `true` results in a privacy screen being displayed rather than a snaphot of the application when it is in the background.
+- `hideScreenOnBackground`: setting this option `true` results in a privacy screen being displayed rather than a snapshot of the application when it is in the background.
 - `lockAfter`: the number of milliseconds to wait before locking the vault when the application is in the background.
 - `authMode`: the method to use to unlock the vault. In the case of `SecureStorage`, the session will be stored in a secure location, but the vault will never lock.
 
