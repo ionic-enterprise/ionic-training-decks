@@ -1,3 +1,9 @@
+# [4.10.0](https://github.com/ionic-team/ionic-training-decks/compare/v4.8.3...v4.10.0) (2021-05-21)
+
+### Features
+
+- **angular:** update trainings for Cap3 ([98d7a7e](https://github.com/ionic-team/ionic-training-decks/commit/98d7a7e81146b10e42cccd626efd3aee65ef4dbd))
+
 ## [4.9.3](https://github.com/ionic-team/ionic-training-decks/compare/v4.9.2...v4.9.3) (2021-05-14)
 
 ## [4.9.2](https://github.com/ionic-team/ionic-training-decks/compare/v4.9.1...v4.9.2) (2021-05-10)
