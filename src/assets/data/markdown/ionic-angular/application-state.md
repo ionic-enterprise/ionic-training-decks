@@ -100,7 +100,7 @@ Let's think about the actions our application will take with regard to authentic
 - Login Succeeded - Taken by the Authentication API (does not exist yet) when the login succeeds
 - Login Failed - Taken by the Authentication API (does not exist yet) when the login fails
 
-Most of the actors do not exist yet, but we know what actions they will take once they do exist, so let's code that up in our store. Coding up these actions really just define the actions that other parts of our app can "dispatch". The do not, in themselves, actually _do_ anything.
+Most of the actors do not exist yet, but we know what actions they will take once they do exist, so let's code that up in our store. Coding up these actions really just define the actions that other parts of our app can "dispatch". They do not, in themselves, actually _do_ anything.
 
 Create a `src/app/store/actions.ts` file with the following contents:
 

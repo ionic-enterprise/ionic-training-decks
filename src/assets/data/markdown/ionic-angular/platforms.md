@@ -117,7 +117,7 @@ I like to have my build do a copy for me. For this reason, I do a `cap copy` wit
 
 ```JSON
   "scripts": {
-    "build": "ng build --prod && cap copy",
+    "build": "ng build --configuration production && cap copy",
     "e2e": "ng e2e",
     "lint": "ng lint",
     "ng": "ng",
