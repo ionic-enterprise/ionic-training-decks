@@ -237,7 +237,7 @@ const LoginPage: React.FC = () => {
     handleSubmit,
     control,
     formState: { errors, isDirty, isValid },
-  } = useForm({ mode: 'onTouched' });
+  } = useForm({ mode: 'onChange' });
 
   return (
     ...
@@ -255,11 +255,10 @@ Next we will make use of the `Controller` component. Modify the `<form>` of the 
     <IonItem>
       <IonLabel position="floating">E-Mail Address</IonLabel>
       <Controller
-        render={({ field: { onChange, value, onBlur } }) => (
+        render={({ field: { onChange, value } }) => (
           <IonInput
             data-testid="email-input"
             onIonChange={e => onChange(e.detail.value!)}
-            onIonBlur={onBlur}
             value={value}
             type="email"
           />
@@ -278,11 +277,10 @@ Next we will make use of the `Controller` component. Modify the `<form>` of the 
     <IonItem>
       <IonLabel position="floating">Password</IonLabel>
       <Controller
-        render={({ field: { onChange, value, onBlur } }) => (
+        render={({ field: { onChange, value } }) => (
           <IonInput
             data-testid="password-input"
             onIonChange={e => onChange(e.detail.value!)}
-            onIonBlur={onBlur}
             value={value}
             type="password"
           />
@@ -302,7 +300,6 @@ There is quite a bit going on here, so let's break it down:
 - We use the `Controller` component to define the parameters of our input fields, such as their default values and validation logic
 - The `render` prop of the `Controller` component allows us to utilize Ionic Framework components within React Form Hook's library
 - The `onIonChange` event handles the changing of the input fields; in our cases we will delegate that responsibility to the `Controller` component
-- We also delegate responsibility for the blur event to the `Controller` component
 - Input validation rules are set on the `rules` prop of the `Controller` component
 
 React Form Hook's `Controller` component can take some getting used to. However, the pattern you see above is safe to use when building your own forms outside of this training.
@@ -335,7 +332,6 @@ describe('<LoginPage />', () => {
       const email = getByTestId(/email-input/);
       await waitFor(() => {
         fireEvent.ionChange(email, 'test@test.com');
-        fireEvent.ionBlur(email);
       });
       expect(button.disabled).toBeTruthy();
     });
@@ -346,7 +342,6 @@ describe('<LoginPage />', () => {
       const password = getByTestId(/password-input/);
       await waitFor(() => {
         fireEvent.ionChange(password, 'P@ssword123');
-        fireEvent.ionBlur(password);
       });
       expect(button.disabled).toBeTruthy();
     });
@@ -358,9 +353,7 @@ describe('<LoginPage />', () => {
       const password = getByTestId(/password-input/);
       await waitFor(() => {
         fireEvent.ionChange(email, 'test@test.com');
-        fireEvent.ionBlur(email);
         fireEvent.ionChange(password, 'P@ssword123');
-        fireEvent.ionBlur(password);
       });
       expect(button.disabled).toBeFalsy();
     });
@@ -414,7 +407,6 @@ describe('error messages', () => {
     const email = getByTestId(/email-input/);
     await waitFor(() => {
       fireEvent.ionChange(email, 'test@test.com');
-      fireEvent.ionBlur(email);
       fireEvent.ionChange(email, '');
     });
     expect(errors).toHaveTextContent(/E-Mail Address is required/);
