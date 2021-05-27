@@ -128,7 +128,7 @@ The `login()` method is called at login and stores the session via the Capacitor
 ```typescript
 describe('login', () => {
   it('saves the session in storage', async () => {
-    spyOn(Storge, 'set');
+    spyOn(Storage, 'set');
     const session: Session = {
       user: {
         id: 42,

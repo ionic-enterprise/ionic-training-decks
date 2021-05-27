@@ -48,7 +48,7 @@ index af456b5..e6c9e39 100644
  @NgModule({
 ```
 
-We see that a `login` route was automatically added for us. Let's see if that works by changing the route in our browser to 'http://localhost:8100/login'. We should be able to navigate to that location just fine. We won't see me, but we can tell that the route is actually working.
+We see that a `login` route was automatically added for us. Let's see if that works by changing the route in our browser to 'http://localhost:8100/login'. We should be able to navigate to that location just fine. We won't see it, but we can tell that the route is actually working.
 
 ## Mock the UI
 
@@ -259,7 +259,7 @@ The user should not be able to click the "Sign In" button if the form itself is 
 Let's use our tests to define when the button should be enabled and disabled.
 
 ```TypeScript
-  describe('signon button', () => {
+  describe('signin button', () => {
     let button: HTMLIonButtonElement;
     let email: HTMLIonInputElement;
     let password: HTMLIonInputElement;
