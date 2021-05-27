@@ -15,13 +15,11 @@ Most applications have more than one page. Our application will eventually have 
 
 In this training, we will use [React Hook Form](https://react-hook-form.com/) as our form library of choice. It is lightweight library that provides us with easy-to-use validation and integrates well with Ionic Framework input components.
 
-Terminate any running terminal instances, then install the following dependencies:
+Terminate any running terminal instances, then install the following dependency:
 
 ```bash
-$ npm install react-hook-form mutationobserver-shim
+$ npm install react-hook-form
 ```
-
-This will install React Hook Form and a helper dependency needed to test the library.
 
 Speaking of testing, let's add a dependency that will help us test Ionic Framework components. Certain Ionic Framework components contain attributes/events that React Testing Library isn't aware of.
 
@@ -30,7 +28,7 @@ Speaking of testing, let's add a dependency that will help us test Ionic Framewo
 Install it with the following terminal command:
 
 ```bash
-$ npm install @ionic/react-test-utils --legacy-peer-deps
+$ npm install @ionic/react-test-utils
 ```
 
 Finally, open `src/setupTests.ts` and add the following lines of code:
@@ -38,7 +36,6 @@ Finally, open `src/setupTests.ts` and add the following lines of code:
 **`src/setupTests.ts`**
 
 ```TypeScript
-require('mutationobserver-shim');
 import { mockIonicReact } from '@ionic/react-test-utils';
 mockIonicReact();
 ```
@@ -240,7 +237,7 @@ const LoginPage: React.FC = () => {
     handleSubmit,
     control,
     formState: { errors, isDirty, isValid },
-  } = useForm({ mode: 'onChange' });
+  } = useForm({ mode: 'onTouched' });
 
   return (
     ...
@@ -258,10 +255,11 @@ Next we will make use of the `Controller` component. Modify the `<form>` of the 
     <IonItem>
       <IonLabel position="floating">E-Mail Address</IonLabel>
       <Controller
-        render={({ field: { onChange, value } }) => (
+        render={({ field: { onChange, value, onBlur } }) => (
           <IonInput
             data-testid="email-input"
             onIonChange={e => onChange(e.detail.value!)}
+            onIonBlur={onBlur}
             value={value}
             type="email"
           />
@@ -280,10 +278,11 @@ Next we will make use of the `Controller` component. Modify the `<form>` of the 
     <IonItem>
       <IonLabel position="floating">Password</IonLabel>
       <Controller
-        render={({ field: { onChange, value } }) => (
+        render={({ field: { onChange, value, onBlur } }) => (
           <IonInput
             data-testid="password-input"
             onIonChange={e => onChange(e.detail.value!)}
+            onIonBlur={onBlur}
             value={value}
             type="password"
           />
@@ -303,11 +302,12 @@ There is quite a bit going on here, so let's break it down:
 - We use the `Controller` component to define the parameters of our input fields, such as their default values and validation logic
 - The `render` prop of the `Controller` component allows us to utilize Ionic Framework components within React Form Hook's library
 - The `onIonChange` event handles the changing of the input fields; in our cases we will delegate that responsibility to the `Controller` component
+- We also delegate responsibility for the blur event to the `Controller` component
 - Input validation rules are set on the `rules` prop of the `Controller` component
 
 React Form Hook's `Controller` component can take some getting used to. However, the pattern you see above is safe to use when building your own forms outside of this training.
 
-And of course, I recommend taking a look through the [React Form Hook Controller documentation](https://react-hook-form.com/api#Controller).
+And of course, I recommend taking a look through the <a href="https://react-hook-form.com/api#Controller" target="_blank">React Form Hook Controller documentation</a>.
 
 ### Disabling the Sign In Button
 
@@ -332,27 +332,35 @@ describe('<LoginPage />', () => {
     it('is disabled with just an e-mail address', async () => {
       const { getByTestId } = render(<LoginPage />);
       const button = getByTestId(/submit-button/) as HTMLIonButtonElement;
-      const email = getByTestId(/email-input/) as HTMLIonInputElement;
-      await waitFor(() => fireEvent.ionChange(email, 'test@test.com'));
+      const email = getByTestId(/email-input/);
+      await waitFor(() => {
+        fireEvent.ionChange(email, 'test@test.com');
+        fireEvent.ionBlur(email);
+      });
       expect(button.disabled).toBeTruthy();
     });
 
     it('is disabled with just a password', async () => {
       const { getByTestId } = render(<LoginPage />);
       const button = getByTestId(/submit-button/) as HTMLIonButtonElement;
-      const password = getByTestId(/password-input/) as HTMLIonInputElement;
-      await waitFor(() => fireEvent.ionChange(password, 'P@ssword123'));
+      const password = getByTestId(/password-input/);
+      await waitFor(() => {
+        fireEvent.ionChange(password, 'P@ssword123');
+        fireEvent.ionBlur(password);
+      });
       expect(button.disabled).toBeTruthy();
     });
 
     it('is enabled with both an email address and a password', async () => {
       const { getByTestId } = render(<LoginPage />);
       const button = getByTestId(/submit-button/) as HTMLIonButtonElement;
-      const email = getByTestId(/email-input/) as HTMLIonInputElement;
-      const password = getByTestId(/password-input/) as HTMLIonInputElement;
+      const email = getByTestId(/email-input/);
+      const password = getByTestId(/password-input/);
       await waitFor(() => {
         fireEvent.ionChange(email, 'test@test.com');
+        fireEvent.ionBlur(email);
         fireEvent.ionChange(password, 'P@ssword123');
+        fireEvent.ionBlur(password);
       });
       expect(button.disabled).toBeFalsy();
     });
@@ -406,6 +414,7 @@ describe('error messages', () => {
     const email = getByTestId(/email-input/);
     await waitFor(() => {
       fireEvent.ionChange(email, 'test@test.com');
+      fireEvent.ionBlur(email);
       fireEvent.ionChange(email, '');
     });
     expect(errors).toHaveTextContent(/E-Mail Address is required/);

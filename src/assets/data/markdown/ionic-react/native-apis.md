@@ -3,7 +3,6 @@
 In this lab, you will learn how to:
 
 - Access native functionality with Capacitor
-- Use the built-in Capacitor APIs to leverage native functionality
 - Detect which platform the application is currently running on
 - Create and use mock objects for unit testing
 
@@ -11,73 +10,83 @@ In this lab, you will learn how to:
 
 There are several ways Capacitor can access native functionality:
 
-- Using Capacitor APIs
-- Installing and using Capacitor plugins
-- Installing and using Cordova plugins
-- Creating custom Capacitor plugins within native platform projects
+- Install and use an official Capacitor plugin
+- Install and use a community Capacitor plugin
+- Install and use a Cordova plugin
+- Create a custom Capacitor plugin
 
-We will make use of the out-of-the-box Capacitor APIs throughout this training to access native functionality.
+Throughout this training we will exclusively use the set of <a href="https://capacitorjs.com/docs/apis" target="_blank">Capacitor Official Plugins</a>.
 
-## The Splash Screen
+## The Splash Screen Plugin
 
-Capacitor applications are set to automatically hide the splash screen once the application starts. In some cases it makes sense to run some startup logic before the splash screen is hidden. We will run into such a case in a later lab, for now we will use the <a href="https://capacitorjs.com/docs/apis/splash-screen" target="_blank">Splash Screen API</a> to programmatically hide the splash screen from our application code.
+Capacitor applications are set to automatically hide the splash screen once the application starts. In certain scenarios it makes sense to run some startup logic in our application while the splash screen is still visible, and then dismiss the splash screen once that logic has finished running. This will be the case in the application we build.
 
-To programmatically hide the splash screen we need to make modifications to the existing Capacitor configuration in addition to adding initialization logic to the `<App />` component.
+The splash screen can be programmatically hidden (or shown) through the use of the <a href="https://capacitorjs.com/docs/apis/splash-screen" target="_blank">Splash Screen Capacitor API plugin</a>.
+
+Install the plugin into your application:
+
+```bash
+$ npm install @capacitor/splash-screen
+$ npx cap sync
+```
 
 ### Update Capacitor Configuration
 
-Open `capacitor.config.json`. Notice that under `plugins` there is an entry for `SplashScreen` configuration where `launchShowDuration` is set to zero. We no longer need that configuration property; replace it with the `launchAutoHide` property:
+Some Capacitor plugins have options that configure how the plugin works at runtime. Plugin configuration options are added to the application's `capacitor.config.ts` file.
 
-**`capacitor.config.json`**
+Update the application's `CapacitorConfig` object so it does not dismiss the splash screen at application launch:
 
-```JSON
-{
-  ...
-  "plugins": {
-    "SplashScreen": {
-      "launchAutoHide": false
-    }
+**`capacitor.config.ts`**
+
+```TypeScript
+import { CapacitorConfig } from '@capacitor/cli';
+
+const config: CapacitorConfig = {
+  appId: 'io.ionic.teataster',
+  appName: 'Tea Tasting Notes',
+  webDir: 'build',
+  bundledWebRuntime: false,
+  plugins: {
+    SplashScreen: {
+      launchAutoHide: false,
+    },
   },
-  ...
-}
-```
+};
 
-This configuration property on the `SplashScreen` API tells Capacitor to prevent any sort of automatic hiding of the application's splash screen.
+export default config;
+```
 
 ### Programmatically Hide the Splash Screen
 
-Start by refactoring `App.test.tsx` to follow the pattern we established for the home page. Additionally, we will need to add the imports required to test the Capacitor Splash Screen API. Capacitor APIs are defined on the `Plugins` object of the `@capacitor/core` module:
+Start by refactoring `App.test.tsx` to follow the pattern we established for the home page. Additionally, we will need to add the import required to test the splash screen plugin:
 
 **`App.test.tsx`**
 
 ```TypeScript
 import { render } from '@testing-library/react';
-import { Plugins } from '@capacitor/core';
+import { SplashScreen } from '@capacitor/splash-screen';
 import App from './App';
 
-describe('<App />', () => {
-
-});
+describe('<App />', () => { });
 ```
 
-The functionality of the Splash Screen API needs to be _mocked_ in order to test any logic that runs them. Introduce setup and teardown code to mock the API. A test will be added to assert that `SplashScreen.hide()` has been called:
+The functionality of the splash screen plugin needs to be mocked in order to test pieces of logic that call it. Introduce setup and teardown code to mock the plugin's API, and add a test to assert that `SplashScreen.hide()` has been called:
 
 ```TypeScript
 import { render } from '@testing-library/react';
-import { Plugins } from '@capacitor/core';
+import { SplashScreen } from '@capacitor/splash-screen';
 import App from './App';
 
+jest.mock('@capacitor/splash-screen');
+
 describe('<App />', () => {
-  beforeEach(() => {
-    (Plugins.SplashScreen as any) = jest.fn();
-    (Plugins.SplashScreen.hide as any) = jest.fn();
-  });
+  beforeEach(() => (SplashScreen.hide = jest.fn()));
 
   describe('initialization', () => {
     it('should hide the splash screen', () => {
       const { container } = render(<App />);
       expect(container).toBeDefined();
-      expect(Plugins.SplashScreen.hide).toHaveBeenCalledTimes(1);
+      expect(SplashScreen.hide).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -91,14 +100,11 @@ The test fails as we have not implemented any logic. Let's go ahead and implemen
 
 ```TypeScript
 import { useEffect } from 'react';
-import { Plugins } from '@capacitor/core';
+import { SplashScreen } from '@capacitor/splash-screen';
 ...
 
 const App: React.FC = () => {
-  useEffect(() => {
-    const { SplashScreen } = Plugins;
-    SplashScreen.hide();
-  }, []);
+  useEffect(() => { SplashScreen.hide(); }, []);
 
   return (
     <IonApp>
@@ -120,16 +126,17 @@ The Ionic Framework contains functionality to detect what platform the applicati
 
 ### Mocking `isPlatform`
 
-Like the Capacitor Splash Screen API, we need to mock the `isPlatform` function such that it returns values our tests expect to test against:
+Like the Splash Screen Capacitor API plugin, we need a mock for the `isPlatform` function such that it returns values our tests expect to test against:
 
 **`App.test.tsx`**
 
 ```TypeScript
 import { render } from '@testing-library/react';
-import { Plugins } from '@capacitor/core';
+import { SplashScreen } from '@capacitor/splash-screen';
 import { isPlatform } from '@ionic/react';
 import App from './App';
 
+jest.mock('@capacitor/splash-screen');
 jest.mock('@ionic/react', () => {
   const actual = jest.requireActual('@ionic/react');
   return { ...actual, isPlatform: jest.fn() };
@@ -146,7 +153,7 @@ describe('in an Android context', () => {
   it('should hide the splash screen', () => {
     const { container } = render(<App />);
     expect(container).toBeDefined();
-    expect(Plugins.SplashScreen.hide).toHaveBeenCalledTimes(1);
+    expect(SplashScreen.hide).toHaveBeenCalledTimes(1);
   });
 });
 
@@ -155,7 +162,7 @@ describe('in an iOS context', () => {
   it('should hide the splash screen', () => {
     const { container } = render(<App />);
     expect(container).toBeDefined();
-    expect(Plugins.SplashScreen.hide).toHaveBeenCalledTimes(1);
+    expect(SplashScreen.hide).toHaveBeenCalledTimes(1);
   });
 });
 
@@ -164,7 +171,7 @@ describe('in a web context', () => {
   it('should not hide the splash screen', () => {
     const { container } = render(<App />);
     expect(container).toBeDefined();
-    expect(Plugins.SplashScreen.hide).not.toHaveBeenCalled();
+    expect(SplashScreen.hide).not.toHaveBeenCalled();
   });
 });
 ```
@@ -178,16 +185,13 @@ Looking through the <a href="https://ionicframework.com/docs/react/platform#plat
 Let's take this knowledge to update the `useEffect` in `App.tsx` to check if the application is being run in the `capacitor` platform:
 
 ```TypeScript
-useEffect(() => {
-  if (isPlatform('capacitor')) {
-    const { SplashScreen } = Plugins;
-    SplashScreen.hide();
-  }
-}, []);
+useEffect(() => { if (isPlatform('capacitor')) SplashScreen.hide(); }, []);
 ```
+
+**Note:** `import` statements may be omitted from code samples for brevity. Most IDEs will prompt you when your code is using functionality from a module that needs to be imported. Should you get stuck with any imports, please let your instructor know.
 
 ## Conclusion
 
-We have learned how to utilize Capacitor APIs in order to easily access native APIs and how to detect the platform the application is running on.
+We have learned how to utilize Capacitor plugins in order to easily access native APIs and how to detect the platform the application is running on.
 
 Build the application for a mobile device and give it a try! Next we will mock a user interface.
