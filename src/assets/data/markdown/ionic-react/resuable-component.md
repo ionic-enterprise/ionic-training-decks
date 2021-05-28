@@ -377,9 +377,11 @@ Then update the setup code in order to mock the `Storage` Capacitor API. When mo
 
 ```TypeScript
 ...
+jest.mock('@capacitor/storage');
+...
 describe('useTea', () => {
    beforeEach(() => {
-    (Plugins.Storage.get as any) = jest.fn(({ key }: { key: string }) => {
+    (Storage.get as any) = jest.fn(({ key }: { key: string }) => {
       switch (key) {
         case 'rating1':
           return Promise.resolve({ value: 1 });
@@ -407,7 +409,6 @@ First update `fromJsonToTea()`:
 ```TypeScript
   ...
   const fromJsonToTea = async (obj: any): Promise<Tea> => {
-    const { Storage } = Plugins;
     const rating = await Storage.get({ key: `rating${obj.id}` });
     return {
       ...obj,
@@ -462,7 +463,7 @@ describe('useTea', () => {
   });
 
   describe('save tea', () => {
-    beforeEach(() => (Plugins.Storage.set) = jest.fn());
+    beforeEach(() => (Storage.set as any) = jest.fn());
 
     it('saves the rating', async () => {
       const tea = { ...expectedTeas[4] };
@@ -471,8 +472,8 @@ describe('useTea', () => {
       await act(async () => {
         await result.current.saveTea(tea);
       });
-      expect(Plugins.Storage.set).toHaveBeenCalledTimes(1);
-      expect(Plugins.Storage.set).toHaveBeenCalledWith({
+      expect(Storage.set).toHaveBeenCalledTimes(1);
+      expect(Storage.set).toHaveBeenCalledWith({
         key: 'rating5',
         value: '4',
       });
@@ -491,7 +492,6 @@ To make this test pass, add a new method `saveTea()` to the `useTea` hook:
 export const useTea = () => {
   ...
   const saveTea = async (tea: Tea): Promise<void> => {
-    const { Storage } = Plugins;
     return Storage.set({
       key: `rating${tea.id}`,
       value: tea.rating?.toString() || '0',

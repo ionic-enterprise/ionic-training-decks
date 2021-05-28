@@ -19,14 +19,14 @@ The first thing we will use the Ionic CLI for is to start a new application. Ope
 Lets start our application via whichever technique you want.
 
 1. At the command line, change directories to a starting directory. I use `~/Projects/Training`
-2. Enter the following command: `ionic start tea-taster blank --type=react`
+2. Enter the following command: `ionic start tea-taster blank --type=react --capacitor`
 3. Alternatively, you could just enter `ionic start` and let the command line ask you for what it needs
 
 **Example:**
 
 ```bash
 $ cd ~/Projects/Training
-$ ionic start tea-taster blank --type=react
+$ ionic start tea-taster blank --type=react --capacitor
 ```
 
 Let's take a look at some of these options more closely:
@@ -34,8 +34,7 @@ Let's take a look at some of these options more closely:
 - The third option is the name of the application.
 - The forth option (`blank`) tells the Ionic CLI to use the `blank` starter. We have three basic starters: `blank`, `tabs`, and `sidemenu`. The main difference is the main style of navigation.
 - The `--type` option specifies the type of application to create. Options include: `angular`, `react`, `vue`, `ionic-angular`, and `ionic1`.
-
-**Note:** The `ionic-angular` and `ionic1` options will generate an Ionic Framework v3 or Ionic Framework v1 application respectively. Those versions of the Ionic Framework are no longer supported, so pick those options at your own risk!
+- The `--capacitor` option tells the command line to integrate Capacitor as the native bridge.
 
 Once the application has been generated, let's start the development server:
 
@@ -61,14 +60,16 @@ Modify your `package.json` file. I suggest moving the `description` up to the to
   "name": "tea-taster",
   "description": "Tea Tasting Notes",
   "version": "0.0.1",
-  "author": "Ionic Framework",
-  "homepage": "https://ionicframework.com/",
+  "author": {
+    "name": "Ionic",
+    "url": "https://ionic.io"
+  },
+  "private": true,
   "scripts": {
     ...
     "postinstall": "husky install",
     ...
   },
-  "private": true,
   "dependencies": {
     ...
   },

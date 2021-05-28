@@ -15,13 +15,11 @@ Most applications have more than one page. Our application will eventually have 
 
 In this training, we will use [React Hook Form](https://react-hook-form.com/) as our form library of choice. It is lightweight library that provides us with easy-to-use validation and integrates well with Ionic Framework input components.
 
-Terminate any running terminal instances, then install the following dependencies:
+Terminate any running terminal instances, then install the following dependency:
 
 ```bash
-$ npm install react-hook-form mutationobserver-shim
+$ npm install react-hook-form
 ```
-
-This will install React Hook Form and a helper dependency needed to test the library.
 
 Speaking of testing, let's add a dependency that will help us test Ionic Framework components. Certain Ionic Framework components contain attributes/events that React Testing Library isn't aware of.
 
@@ -30,7 +28,7 @@ Speaking of testing, let's add a dependency that will help us test Ionic Framewo
 Install it with the following terminal command:
 
 ```bash
-$ npm install @ionic/react-test-utils --legacy-peer-deps
+$ npm install @ionic/react-test-utils
 ```
 
 Finally, open `src/setupTests.ts` and add the following lines of code:
@@ -38,7 +36,6 @@ Finally, open `src/setupTests.ts` and add the following lines of code:
 **`src/setupTests.ts`**
 
 ```TypeScript
-require('mutationobserver-shim');
 import { mockIonicReact } from '@ionic/react-test-utils';
 mockIonicReact();
 ```
@@ -307,7 +304,7 @@ There is quite a bit going on here, so let's break it down:
 
 React Form Hook's `Controller` component can take some getting used to. However, the pattern you see above is safe to use when building your own forms outside of this training.
 
-And of course, I recommend taking a look through the [React Form Hook Controller documentation](https://react-hook-form.com/api#Controller).
+And of course, I recommend taking a look through the <a href="https://react-hook-form.com/api#Controller" target="_blank">React Form Hook Controller documentation</a>.
 
 ### Disabling the Sign In Button
 
@@ -332,24 +329,28 @@ describe('<LoginPage />', () => {
     it('is disabled with just an e-mail address', async () => {
       const { getByTestId } = render(<LoginPage />);
       const button = getByTestId(/submit-button/) as HTMLIonButtonElement;
-      const email = getByTestId(/email-input/) as HTMLIonInputElement;
-      await waitFor(() => fireEvent.ionChange(email, 'test@test.com'));
+      const email = getByTestId(/email-input/);
+      await waitFor(() => {
+        fireEvent.ionChange(email, 'test@test.com');
+      });
       expect(button.disabled).toBeTruthy();
     });
 
     it('is disabled with just a password', async () => {
       const { getByTestId } = render(<LoginPage />);
       const button = getByTestId(/submit-button/) as HTMLIonButtonElement;
-      const password = getByTestId(/password-input/) as HTMLIonInputElement;
-      await waitFor(() => fireEvent.ionChange(password, 'P@ssword123'));
+      const password = getByTestId(/password-input/);
+      await waitFor(() => {
+        fireEvent.ionChange(password, 'P@ssword123');
+      });
       expect(button.disabled).toBeTruthy();
     });
 
     it('is enabled with both an email address and a password', async () => {
       const { getByTestId } = render(<LoginPage />);
       const button = getByTestId(/submit-button/) as HTMLIonButtonElement;
-      const email = getByTestId(/email-input/) as HTMLIonInputElement;
-      const password = getByTestId(/password-input/) as HTMLIonInputElement;
+      const email = getByTestId(/email-input/);
+      const password = getByTestId(/password-input/);
       await waitFor(() => {
         fireEvent.ionChange(email, 'test@test.com');
         fireEvent.ionChange(password, 'P@ssword123');

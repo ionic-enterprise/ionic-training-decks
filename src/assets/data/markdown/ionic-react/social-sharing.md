@@ -6,7 +6,7 @@ In this lab, you will use Capacitor to access native social sharing APIs.
 
 We can use various <a href="https://capacitorjs.com/docs/plugins" target="_blank">Capacitor Plugins</a> in order to provide access to native APIs. We have already made use of these to a certain degree with our use of the <a href="https://capacitorjs.com/docs/apis/storage" target="_blank">Storage</a> and <a href="https://capacitorjs.com/docs/apis/splash-screen" target="_blank">Splash Screen</a> plugins. These plugins work behind the scenes, so we can't really "experience" anything with them.
 
-Some other plugins provide native functionality that users can interact with directly.The <a href="https://capacitorjs.com/docs/apis/share" target="_blank">Social Sharing</a> plugin among them. In this lab we will update the code to use that plugin to allow us to share tea tasting notes with our friends.
+Some other plugins provide native functionality that users can interact with directly. The <a href="https://capacitorjs.com/docs/apis/share" target="_blank">Share Capacitor plugin</a> among them. In this lab we will update the code to use that plugin to allow us to share tea tasting notes with our friends.
 
 While we are on the subject of plugins, Capacitor has been designed to also work with Cordova plugins. When choosing a plugin, we suggest favoring Capacitor plugins over Cordova plugins.
 
@@ -24,6 +24,13 @@ Let's update the sliding items from the last lab so that it displays a trashcan 
 >
   <IonIcon icon={trashBin} />
 </IonItemOption>
+```
+
+Install the Share Capacitor API plugin to your application:
+
+```bash
+$ npm install @capacitor/share
+$ npx cap sync
 ```
 
 ## Sharing a Tasting Note
@@ -64,10 +71,12 @@ First, the Capacitor Social Sharing API needs to be mocked in our unit test. Upd
 **`src/tasting-notes/TastingNotesPage.test.tsx`**
 
 ```TypeScript
+...
+jest.mock('@capacitor/share');
+...
 beforeEach(() => {
   mockGetNotes = jest.fn(async () => mockNotes);
-  (Plugins.Share as any) = jest.fn();
-  (Plugins.Share.share as any) = jest.fn();
+  Share.share = jest.fn();
 });
 ```
 
@@ -79,7 +88,7 @@ describe('sharing a note', () => {
     const { getByTestId } = render(<TastingNotesPage />);
     const item = await waitFor(() => getByTestId(/share0/));
     fireEvent.click(item);
-    await waitFor(() => expect(Plugins.Share.share).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(Share.share).toHaveBeenCalledTimes(1));
   });
 
   it('shares the brand, name, rating, and notes', async () => {
@@ -87,7 +96,7 @@ describe('sharing a note', () => {
     const item = await waitFor(() => getByTestId(/share0/));
     fireEvent.click(item);
     await waitFor(() =>
-      expect(Plugins.Share.share).toHaveBeenCalledWith({
+      expect(Share.share).toHaveBeenCalledWith({
         title: 'Lipton: Yellow Label',
         text: `Overly acidic, highly tannic flavor Rated 1/5 stars`,
         dialogTitle: `Share Yellow Label's tasting note`,
@@ -104,7 +113,6 @@ Finally, implement `handleSharedNote` in `TastingNotesPage.tsx`.
 
 ```TypeScript
 const handleShareNote = async (note: TastingNote) => {
-  const { Share } = Plugins;
   const { brand, name, rating, notes } = note;
   await Share.share({
     title: `${brand}: ${name}`,

@@ -61,19 +61,20 @@ Do the same for `useAuthentication.test.tsx`:
 
 ```TypeScript
 import Axios from 'axios';
-import { Plugins } from '@capacitor/core';
+import { Storage } from '@capacitor/storage';
 import { renderHook, act, cleanup } from '@testing-library/react-hooks';
 import { useAuthentication } from './useAuthentication';
 import { AuthProvider } from './AuthContext';
 import { mockSession } from './__mocks__/mockSession';
 
+jest.mock('@capacitor/storage');
+
 const wrapper = ({ children }: any) => <AuthProvider>{children}</AuthProvider>;
 
 describe('useAuthentication', () => {
   beforeEach(() => {
-    (Plugins.Storage as any) = jest.fn();
-    (Plugins.Storage.get as any) = jest.fn(async () => ({ value: null }));
-    (Plugins.Storage.set as any) = jest.fn(async () => ({}));
+    Storage.get = jest.fn(async () => ({ value: null }));
+    (Storage.set as any) = jest.fn(async () => ({}));
     (Axios.post as any) = jest.fn(async () => ({
       data: {
         success: true,
@@ -83,9 +84,7 @@ describe('useAuthentication', () => {
     }));
   });
 
-  describe('login', (username: string, password: string) => {
-
-  });
+  describe('login', () => { });
 
   describe('logout', () => {});
 
@@ -128,8 +127,8 @@ describe('on success', () => {
     );
     await waitForNextUpdate();
     await act(() => result.current.login('test@test.com', 'P@ssword!'));
-    expect(Plugins.Storage.set).toHaveBeenCalledTimes(1);
-    expect(Plugins.Storage.set).toHaveBeenCalledWith({
+    expect(Storage.set).toHaveBeenCalledTimes(1);
+    expect(Storage.set).toHaveBeenCalledWith({
       key: 'auth-token',
       value: mockSession.token,
     });
@@ -176,7 +175,6 @@ Consult the <a href="https://capacitorjs.com/docs/apis/storage" target="_blank">
 const login = async (username: string, password: string): Promise<void> => {
   // 1. Dispatch the LOGIN action
   try {
-    const { Storage } = Plugins;
     const url = `${process.env.REACT_APP_DATA_SERVICE}/login`;
     const { data } = await Axios.post(url, { username, password });
 
@@ -208,10 +206,8 @@ Replace the existing logout `describe()` block in `useAuthentication.test.tsx` w
 ```TypeScript
 describe('logout', () => {
   beforeEach(() => {
-    (Plugins.Storage.remove as any) = jest.fn(async () => ({}));
-    (Plugins.Storage.get as any) = jest.fn(async () => ({
-      value: mockSession.token,
-    }));
+    (Storage.remove as any) = jest.fn(async () => ({}));
+    Storage.get = jest.fn(async () => ({ value: mockSession.token }));
     (Axios.get as any) = jest.fn(async () => ({ data: mockSession.user }));
   });
 
@@ -236,10 +232,8 @@ describe('logout', () => {
       );
       await waitForNextUpdate();
       await act(() => result.current.logout());
-      expect(Plugins.Storage.remove).toHaveBeenCalledTimes(1);
-      expect(Plugins.Storage.remove).toHaveBeenCalledWith({
-        key: 'auth-token',
-      });
+      expect(Storage.remove).toHaveBeenCalledTimes(1);
+      expect(Storage.remove).toHaveBeenCalledWith({ key: 'auth-token' });
     });
 
     it('clears the session', async () => {
@@ -279,7 +273,6 @@ The partial `logout()` implementation for `useAuthentication.tsx` is below. Cons
 const logout = async (): Promise<void> => {
     // 1. Dispatch the LOGOUT action
     try {
-      const { Storage } = Plugins;
       const url = `${process.env.REACT_APP_DATA_SERVICE}/logout`;
       const headers = { Authorization: 'Bearer ' + state.session!.token };
 
@@ -314,7 +307,7 @@ const LoginPage: React.FC = () => {
   } = useForm<{
     email: string;
     password: string;
-  }>({ mode: 'onChange' });
+  }>({ mode: 'onTouched' });
   ...
 };
 export default LoginPage;
@@ -368,7 +361,7 @@ const LoginPage: React.FC = () => {
 
   return (
     ...
-    <div className="error-message">
+    <div className="error-message" data-testid="errors">
       ...
       <div>
         {errors.password?.type === 'required' && 'Password is required'}

@@ -3,7 +3,7 @@
 In this lab, you will learn how to:
 
 - Use environment variables to configure dynamic values
-- Use the Capacitor Storage API
+- Use the Storage Capacitor API plugin
 - Use state management to share data across the application
 - Make network requests using Axios
 
@@ -11,7 +11,7 @@ In this lab, you will learn how to:
 
 In the last lab we created a login page but it doesn't do much. Our application is missing a way to store, retrieve, and share user identity information across the application.
 
-In this lab we will use the Capacitor Storage API to store and retrieve information about the user using the application and manage the state of the user identity so the application knows when a user is signed in, signed out, etc.
+In this lab we will use the <a href="https://capacitorjs.com/docs/apis/storage" target="_blank">Storage Capacitor API plugin</a> to store and retrieve information about the user using the application and manage the state of the user identity so the application knows when a user is signed in, signed out, etc.
 
 ### Side-Note: State Management Options
 
@@ -20,6 +20,15 @@ React provides the tools to implement state management out-of-the-box. It is imp
 ## Prerequisites
 
 Before we get started with this lab there are a few additions we need to make to the project. If you have any processes running (`ionic serve` and/or `npm test`) terminate them.
+
+### Install the Storage Capacitor API Plugin
+
+Install the Storage Capacitor API plugin to your application:
+
+```bash
+$ npm install @capacitor/storage
+$ npx cap sync
+```
 
 ### Set up Environment Variables
 
@@ -348,14 +357,14 @@ Now, write unit tests for this scenario:
 ```TypeScript
 ...
 import { mockSession } from './__mocks__/mockSession';
-import { Plugins } from '@capacitor/core';
+import { Storage } from '@capacitor/storage';
 import Axios from 'axios';
+
+jest.mock('@capacitor/storage');
 ...
 describe('<AuthProvider />', () => {
-  beforeEach(() => {
-    (Plugins.Storage as any) = jest.fn();
-    (Plugins.Storage.get as any) = jest.fn(async () => ({ value: null }));
-  });
+    beforeEach(() => (Storage.get = jest.fn(async () => ({ value: null }))));
+
 
   it('displays the loader when initializing', async () => {
     ...
@@ -363,17 +372,15 @@ describe('<AuthProvider />', () => {
 
   describe('when a token is stored', () => {
     beforeEach(() => {
-      (Plugins.Storage.get as any) = jest.fn(async () => ({
-        value: mockSession.token,
-      }));
+      Storage.get = jest.fn(async () => ({ value: mockSession.token }));
       (Axios.get as any) = jest.fn(async () => ({ data: mockSession.user }));
     });
 
     it('obtains the token from storage', async () => {
       render(ComponentTree);
       await waitFor(() => {
-        expect(Plugins.Storage.get).toHaveBeenCalledTimes(1);
-        expect(Plugins.Storage.get).toHaveBeenCalledWith({ key: 'auth-token' });
+        expect(Storage.get).toHaveBeenCalledTimes(1);
+        expect(Storage.get).toHaveBeenCalledWith({ key: 'auth-token' });
       });
     });
 
@@ -421,7 +428,6 @@ The tests are all in place, let's finish implementing the `useEffect` in `AuthCo
 ```TypeScript
 ...
 useEffect(() => {
-  const { Storage } = Plugins;
   (async () => {
     try {
       const { value: token } = await Storage.get({ key: 'auth-token' });

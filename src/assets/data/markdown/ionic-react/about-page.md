@@ -50,7 +50,7 @@ const AboutPage: React.FC = () => {
           </IonItem>
           <IonItem>
             <IonLabel>Author</IonLabel>
-            <IonNote slot="end">{author}</IonNote>
+            <IonNote slot="end">{author.name}</IonNote>
           </IonItem>
         </IonList>
       </IonContent>
