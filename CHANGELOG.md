@@ -1,3 +1,9 @@
+## [4.11.1](https://github.com/ionic-team/ionic-training-decks/compare/v4.11.0...v4.11.1) (2021-06-01)
+
+### Bug Fixes
+
+- **identity vault:** update the browser vault classes ([2d3e8f9](https://github.com/ionic-team/ionic-training-decks/commit/2d3e8f91332ada3a9f1cb71075d7b003fa84c9aa))
+
 # [4.11.0](https://github.com/ionic-team/ionic-training-decks/compare/v4.9.3...v4.11.0) (2021-05-28)
 
 ### Bug Fixes
