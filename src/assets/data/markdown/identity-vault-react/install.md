@@ -31,7 +31,7 @@ Two classes need to be created. They both will reside in the `src/app/core/vault
 The `BrowserVault` is based on the JavaScript interface for the Identity Vault itself. It contains all of the same methods that the actual Vault does. Many of these methods are just stubs. A few need to perform actions, however. For the most part, these actions involve storing and retrieving the authentication token using the Capacitor Storage API. A common implementation looks like this:
 
 ```TypeScript
-import { Plugins } from '@capacitor/core';
+import { Storage } from '@capacitor/storage';
 import {
   IdentityVault,
   PluginConfiguration,
@@ -66,10 +66,11 @@ export class BrowserVault implements IdentityVault {
     return BrowserVault.instance;
   }
 
+  async setHideScreenOnBackground(enabled: boolean): Promise<void> {}
+
   async unsubscribe(): Promise<void> {}
 
   async clear(): Promise<void> {
-    const { Storage } = Plugins;
     await Storage.clear();
   }
 
@@ -80,7 +81,6 @@ export class BrowserVault implements IdentityVault {
   }
 
   async isInUse(): Promise<boolean> {
-    const { Storage } = Plugins;
     return !!(await Storage.get({ key: 'session' }));
   }
 
@@ -103,23 +103,19 @@ export class BrowserVault implements IdentityVault {
   }
 
   async storeValue(key: string, value: any): Promise<void> {
-    const { Storage } = Plugins;
     await Storage.set({ key, value: JSON.stringify(value) });
   }
 
   async getValue(key: string): Promise<any> {
-    const { Storage } = Plugins;
     const { value } = await Storage.get({ key });
     return JSON.parse(value!);
   }
 
   async removeValue(key: string): Promise<void> {
-    const { Storage } = Plugins;
     await Storage.remove({ key });
   }
 
   async getKeys(): Promise<Array<string>> {
-    const { Storage } = Plugins;
     const { keys } = await Storage.keys();
     return keys;
   }
@@ -210,4 +206,4 @@ Create a `src/app/core/vault/BrowserVaultPlugin.ts` file with the above contents
 
 ## Conclusion
 
-Now that Identity Vault has been installed, it is time to modify the application to use Identity Vault. We will do this in baby steps. Our first step will just be to get the application working essetially as it is today, except using Idenity Vault for the storage of the session information.
+Now that Identity Vault has been installed, it is time to modify the application to use Identity Vault. We will do this in baby steps. Our first step will just be to get the application working essentially as it is today, except using Identity Vault for the storage of the session information.
