@@ -4,7 +4,7 @@ At this point, the application has a well defined workflow for determining how t
 
 ## Create the PIN Dialog
 
-Since this isn't a trainig on "How to Create a Modal Dialog", let's just steal some code for that 😃
+Since this isn't a training on "How to Create a Modal Dialog", let's just steal some code for that 😃
 
 Just grab the PIN dialog files from the <a href="https://github.com/ionic-team/tea-taster-react/tree/feature/identity-vault/src/pin-dialog" target="_blank">completed example</a> for this training and copy it into your application.
 
