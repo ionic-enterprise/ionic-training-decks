@@ -76,7 +76,7 @@ The unauth interceptor examines inbound responses looking for 401 (unauthorized)
 
 ## Conclusion
 
-This is our starting point. Our goal will be to create an authentication service that will establish our session and then integrate Identity Vault with our application to securely store the session information. When we are done, the flow will look like this:
+The authentication flow does not work at this point. This is our starting point. Our goal will be to create an authentication service that will establish our session and then integrate Identity Vault with our application to securely store the session information. When we are done, the flow will look like this:
 
 When not logged in:
 

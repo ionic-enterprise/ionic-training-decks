@@ -71,12 +71,12 @@ export class AuthenticationService {
 }
 ```
 
-## A Simple Vault
+## A Simple Session Service
 
 Once we get the session information from our authentication service, we will need a place to store it so we can access it from the rest of our application. Let's create such a service now:
 
 ```bash
-ionic generate service core/vault --skipTests
+ionic generate service core/session --skipTests
 ```
 
 For now, we will just store the session information in memory.
@@ -88,26 +88,26 @@ import { Session } from '../models';
 @Injectable({
   providedIn: 'root',
 })
-export class VaultService {
+export class SessionService {
   private session: Session;
 
   constructor() {}
 
-  async login(session: Session): Promise<void> {
+  async set(session: Session): Promise<void> {
     this.session = session;
   }
 
-  async restoreSession(): Promise<Session> {
+  async get(): Promise<Session> {
     return this.session;
   }
 
-  async logout(): Promise<void> {
+  async clear(): Promise<void> {
     this.session = null;
   }
 }
 ```
 
-Ignore the the naming of the methods as well as the fact that they are all `async` when they don't need to be. We'll just call that _foreshadowing_ for now... 🤓
+Ignore the the fact that the methods are all `async` when they don't need to be. We'll just call that _foreshadowing_ for now... 🤓
 
 ## The Rest of the App
 
@@ -115,13 +115,13 @@ Now that we have the basics in place, let's modify the rest of the application t
 
 ### Auth Interceptor
 
-The purpose of the auth interceptor is to modify outgoing requests to include the auth token in the `Authorization` header as a bearer token. Now that we have a token, we can get the token from the vault and add it to the outbound requests:
+The purpose of the auth interceptor is to modify outgoing requests to include the auth token in the `Authorization` header as a bearer token. Now that we have a token, we can get the token from the session and add it to the outbound requests:
 
-You will need to inject the `VaultService` and then update the `getToken()` method as such:
+You will need to inject the `SessionService` and then update the `getToken()` method as such:
 
 ```TypeScript
   private async getToken(): Promise<string | undefined> {
-    const session = await this.vault.restoreSession();
+    const session = await this.session.get();
     return session?.token;
   }
 ```
@@ -134,7 +134,7 @@ The Auth Guard exists to prevent navigation to certain pages unless the user is 
 import { Injectable } from '@angular/core';
 import { CanActivate } from '@angular/router';
 import { NavController } from '@ionic/angular';
-import { VaultService } from './vault.service';
+import { SessionService } from './session.service';
 
 @Injectable({
   providedIn: 'root',
@@ -142,11 +142,11 @@ import { VaultService } from './vault.service';
 export class AuthGuardService implements CanActivate {
   constructor(
     private navController: NavController,
-    private vault: VaultService,
+    private session: SessionService,
   ) {}
 
   async canActivate(): Promise<boolean> {
-    const isLoggedIn = !!(await this.vault.restoreSession());
+    const isLoggedIn = !!(await this.session.get());
     if (!isLoggedIn) {
       this.navController.navigateRoot(['/', 'login']);
     }
@@ -159,13 +159,13 @@ Now if the user is not logged in but tries to navigate to a page that requires a
 
 ### Login Page
 
-From the login page, we need to perform the login and then store the session in the vault if the login is successful. First, inject the `AuthenticationService` and the `VaultService`. Then modify the `signIn()` method as such:
+From the login page, we need to perform the login and then store the session the login is successful. First, inject the `AuthenticationService` and the `SessionService`. Then modify the `signIn()` method as such:
 
 ```TypeScript
   signIn() {
     this.authentication.login(this.email, this.password).subscribe(session => {
       if (session) {
-        this.vault.login(session);
+        this.session.set(session);
         this.navController.navigateRoot('/');
       }
     });
@@ -181,11 +181,11 @@ At this point, we can try the login and it should work. Use the following creden
 
 We can now login and go to tab 2 if we wish. But the first tab still shows us as logged out. We would also like to be able to log out from this page if we are currently logged in. Let's fix that now.
 
-First, inject the `AuthenticationService` and `VaultService`. With that in place, we can use `ionViewWillEnter()` to get the current session, and we can modify the `logout()` method to perform the logout and clear the session from the vault.
+First, inject the `AuthenticationService` and `SessionService`. With that in place, we can use `ionViewWillEnter()` to get the current session, and we can modify the `logout()` method to perform the logout and clear the session.
 
 ```TypeScript
   async ionViewWillEnter() {
-    const session = await this.vault.restoreSession();
+    const session = await this.session.get();
     this.currentUser = session?.user;
   }
 
@@ -194,7 +194,7 @@ First, inject the `AuthenticationService` and `VaultService`. With that in place
       .logout()
       .pipe(
         tap(() => {
-          this.vault.logout();
+          this.session.clear();
           this.navController.navigateRoot(['/', 'login']);
         }),
       )

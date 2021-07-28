@@ -349,7 +349,7 @@
               "file": "install"
             },
             {
-              "title": "Other Auth Modes",
+              "title": "Other Vault Types",
               "file": "vault-types"
             },
             {
@@ -421,7 +421,7 @@
               "file": "install"
             },
             {
-              "title": "Other Auth Modes",
+              "title": "Other Vault Types",
               "file": "vault-types"
             },
             {

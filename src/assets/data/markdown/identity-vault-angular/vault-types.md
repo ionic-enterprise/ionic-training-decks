@@ -1,160 +1,105 @@
 # Other Auth Modes
 
-In the last section, we implemented Identity Vault using the `SecureStorage` auth mode. This auth mode simply stores the information in a secure location without ever locking it. In this section we will explore the other auth modes that are available to us.
+In the last section, we implemented Identity Vault using the `SecureStorage` vault type. This type of vault simply stores the information in a secure location without ever locking it. In this section we will explore the other types of vaults that are available to us.
 
-## Auth Modes
+## Vault Types
 
-Identity Vault supports multiple different authentication of modes. The most commonly used modes are:
+Identity Vault supports multiple different types of vaults:
 
-- **`SecureStorage`**: data is stored in a secure location on the device, but the vault is never locked. With this vault, the data stored in the vault is always accessible so long as the user has unlocked the device via a secure method.
-- **`PasscodeOnly`**: the vault is locked after the application has been in the background for a specified period of time or when the application is closed. With this mode, the user will be prompted to supply a custom PIN for the session. This data stored in the vault will only be accessible after the user unlocks the vault via the supplied PIN.
-- **`BiometricOnly`**: the vault is locked after the application has been in the background for a specified period of time or when the application is closed. With this mode, the data stored in the vault is only accessible after the user unlocks the vault with a the biometric authentication mechanism supported by the device.
-- **`BiometricAndPasscode`**: the vault is locked after the application has been in the background for a specified period of time or when the application is closed. With this mode, the data stored in the vault is only accessible after the user unlocks the vault with a the biometric authentication mechanism supported by the device. A session PIN is established at the time the session is stored, and is used as a backup for cases where biometric authentication fails or is not available.
-- **`InMemoryOnly`**: the session is never stored in the vault. It is simply cleared whenever the application is closed or has been in the background `lockAfter` number of millisecond.
+- **`VaultType.SecureStorage`**: Securely store the data in the key chain, but do not lock it.
+- **`VaultType.DeviceSecurity`**: When the vault is locked, it needs to be unlocked via a mechanism provided by the device.
+- **`VaultType.CustomPasscode`**: When the vault is locked, it needs to be unlocked via a custom method provided by the application. This is typically done in the form of a custom PIN dialog.
+- **`VaultType.InMemory`**: The data is never persisted. As a result, if the application is locked or restarted, the data is gone.
 
-## Specifying the Authentication Mode
+In addition to the vault types, if `DeviceSecurity` is used, it is further refined by the `deviceSecurityType`, which can be any of the following values:
 
-Currently, we are setting the authentication mode when we instantiate the vault. This is a poor time to do this, so let's remove that line of code:
+- **`DeviceSecurityType.Biometrics`**: Use the biometric authentication type specified by the device.
+- **`DeviceSecurityType.SystemPasscode`**: Use the system passcode entry screen.
+- **`DeviceSecurityType.Both`**: Use `Biometrics` with the `SystemPasscode` as a backup when `Biometrics` fails.
 
-```diff
---- a/src/app/core/vault.service.ts
-+++ b/src/app/core/vault.service.ts
-@@ -20,7 +20,6 @@ export class VaultService extends IonicIdentityVaultUser<Session> {
-       unlockOnAccess: true,
-       hideScreenOnBackground: true,
-       lockAfter: 5000,
--      authMode: AuthMode.SecureStorage,
-     });
-   }
+## Changing the Vault Type
+
+When we create the vault, we create it as a `VaultType.SecureStorage` vault, which is a solid choice as a starting point since it will securely store the token without locking it.
+
+```TypeScript
+    const config: IdentityVaultConfig = {
+      key: 'io.ionic.trainglabng',
+      type: VaultType.SecureStorage,
+      deviceSecurityType: DeviceSecurityType.None,
+      lockAfterBackgrounded: 5000,
+      unlockVaultOnLoad: false,
+    };
 ```
 
-Have a look at the login page, and you will see that we are calling `this.vault.login(session);` only passing the session. This will register our session with the vault using the current auth mode. This method can take a second parameter, which is the authentication mode to use. Let's modify the login page to pass that value.
+We can change the Vault Type at runtime. However the `VaultType` values do not really mean anything to the user, so what we will do is first figure out terms that make sense in the user's space and then translate that to specific types of vaults.
 
-First, modify `login.page.html` to present the user with some options for the authentication mode. Add the following markup within the `ion-list`
+From a user's perspective, they may want to use any of the following behaviors:
+
+- Never lock the application. There is no timeout.
+- Force the user to log in again after a timeout.
+- Allow the application to be unlocked via the system passcode after a timeout.
+- Allow the application to be unlocked via biometrics after a timeout, but use the system passcode as a backup.
+
+Let's define these types in `src/app/core/session.service.ts`:
+
+```TypeScript
+export type LockMode = 'NeverLock' | 'ForceLogin' | 'Biometrics' | 'SystemPasscode';
+```
+
+We will allow the user to specify the locking mode when they log in. There are multiple ways that this can be done, but for simplicity we will use a simple `ion-select` under the password entry in `src/app/login/login.page.html`.
 
 ```html
-<ion-item *ngIf="displayLockingOptions">
+<ion-item>
   <ion-label>Session Locking</ion-label>
-  <ion-select id="auth-mode-select" name="auth-mode" [(ngModel)]="authMode">
+  <ion-select id="lock-mode-select" name="lock-mode" [(ngModel)]="lockMode">
     <ion-select-option
-      *ngFor="let authMode of authModes"
-      [value]="authMode.mode"
-      >{{authMode.label}}</ion-select-option
+      *ngFor="let lockMode of lockModes"
+      [value]="lockMode.mode"
+      >{{lockMode.label}}</ion-select-option
     >
   </ion-select>
 </ion-item>
 ```
 
-Next, modify `login.page.ts` to populate the data we need for the `ion-select` we just added:
+Let's add the code to support that in the TypeScript file:
 
 ```TypeScript
-  authMode: AuthMode;
-  authModes: Array<{ mode: AuthMode; label: string }> = [
+  lockMode: LockMode;
+  lockModes: Array<{ mode: LockMode; label: string }> = [
     {
-      mode: AuthMode.PasscodeOnly,
-      label: 'Session PIN Unlock',
+      mode: 'NeverLock',
+      label: 'Never Lock the App',
     },
     {
-      mode: AuthMode.SecureStorage,
-      label: 'Never Lock Session',
-    },
-    {
-      mode: AuthMode.InMemoryOnly,
-      label: 'Force Login',
+      mode: 'ForceLogin',
+      label: 'Force a New Login',
     },
   ];
-  displayLockingOptions: boolean;
 ```
 
-In the same file, update the `ngOnInit()` to determine if we need to display the options since this is really only an option if we are running on mobile. We will also query the vault to determine if biometric authentication is available, meaning that the device supports it and the user has properly enabled it. If so, we will add that as the first option. You will need to inject the `Platform` service in the constructor.
+## The `Device` API
+
+We only included the first two lock modes because they are supported on all devices. The user, however, may not have their system passcode set up. Further they may either be running on a device that does not support biometrics or it may not currently be available (perhaps they have not set it up yet).
+
+We can use the device API to determine if these lock modes can be used and conditionally add them to the `lockModes` array:
 
 ```TypeScript
+import { Device } from '@ionic-enterprise/identity-vault';
+...
   async ngOnInit() {
-    this.displayLockingOptions = this.platform.is('hybrid');
-    if (await this.vault.isBiometricsAvailable()) {
-      this.authModes = [
-        {
-          mode: AuthMode.BiometricOnly,
-          label: 'Biometric Unlock',
-        },
-        ...this.authModes,
-      ];
+    if (await Device.isBiometricsEnabled()) {
+      this.lockModes.push({
+        mode: 'Biometrics',
+        label: 'Use Biometrics',
+      });
     }
-    this.authMode = this.authModes[0].mode;
-  }
-```
-
-Finally, we will pass the chosen authentication mode to the vault when we register the current session:
-
-```TypeScript
-        this.vault.login(session, this.authMode);
-```
-
-Putting all of the code together, it looks like this:
-
-```TypeScript
-import { Component, OnInit } from '@angular/core';
-import { AuthMode } from '@ionic-enterprise/identity-vault';
-import { NavController, Platform } from '@ionic/angular';
-import { AuthenticationService } from '../core';
-import { VaultService } from '../core/vault.service';
-
-@Component({
-  selector: 'app-login',
-  templateUrl: './login.page.html',
-  styleUrls: ['./login.page.scss'],
-})
-export class LoginPage implements OnInit {
-  email: string;
-  password: string;
-
-  authMode: AuthMode;
-  authModes: Array<{ mode: AuthMode; label: string }> = [
-    {
-      mode: AuthMode.PasscodeOnly,
-      label: 'Session PIN Unlock',
-    },
-    {
-      mode: AuthMode.SecureStorage,
-      label: 'Never Lock Session',
-    },
-    {
-      mode: AuthMode.InMemoryOnly,
-      label: 'Force Login',
-    },
-  ];
-  displayLockingOptions: boolean;
-
-  constructor(
-    private authentication: AuthenticationService,
-    private navController: NavController,
-    private platform: Platform,
-    private vault: VaultService,
-  ) {}
-
-  async ngOnInit() {
-    this.displayLockingOptions = this.platform.is('hybrid');
-    if (await this.vault.isBiometricsAvailable()) {
-      this.authModes = [
-        {
-          mode: AuthMode.BiometricOnly,
-          label: 'Biometric Unlock',
-        },
-        ...this.authModes,
-      ];
+    if (await Device.isBiometricsEnabled()) {
+      this.lockModes.push({
+        mode: 'Biometrics',
+        label: 'Use Biometrics',
+      });
     }
-    this.authMode = this.authModes[0].mode;
   }
-
-  signIn() {
-    this.authentication.login(this.email, this.password).subscribe(session => {
-      if (session) {
-        this.vault.login(session, this.authMode);
-        this.navController.navigateRoot('/');
-      }
-    });
-  }
-}
 ```
 
 ## Native Modifications

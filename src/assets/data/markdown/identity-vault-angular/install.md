@@ -14,112 +14,90 @@ npm i @ionic-enterprise/identity-vault
 npx cap update
 ```
 
-## A Simple Vault Service
+## Add the Vault
 
-In order to integrate Identity Vault into our application, we will extend the `IonicIdentityVaultUser` class that is provided by Identity Vault. Using this class, we will configure the vault and interact with it.
-
-When integrating Identity Vault into an existing application, there is quite often a service that is a natural choice to convert. We already have a `VaultService` and we will convert it to use Identity Vault. Most other applications have a service that manages the the current session. Other common names for these services are `IdentityService` or `SessionService`. Whatever this service is in your existing system is a good candidate. In many cases, you can modify this service to extend Identity Vault. This has the advantage of needing to make few changes throughout the rest of the appliction as the workflow for how the current session information is obtained is already defined.
-
-In our tutorial application, we will convert the `VaultService` to extend `IonicIdentityVaultUser`.
+In order to integrate Identity Vault into our application, we will create a vault object within our session service and modify the methods within the service to use it.
 
 ```TypeScript
 import { Injectable } from '@angular/core';
+import { Capacitor } from '@capacitor/core';
 import {
-  AuthMode,
-  IonicIdentityVaultUser,
+  BrowserVault,
+  DeviceSecurityType,
+  IdentityVaultConfig,
+  Vault,
+  VaultType,
 } from '@ionic-enterprise/identity-vault';
-import { Platform } from '@ionic/angular';
 import { Session } from '../models';
 
 @Injectable({
   providedIn: 'root',
 })
-export class VaultService extends IonicIdentityVaultUser<Session> {
-  constructor(platform: Platform) {
-    super(platform, {
-      unlockOnAccess: true,
-      hideScreenOnBackground: true,
-      lockAfter: 5000,
-      authMode: AuthMode.SecureStorage,
-    });
+export class SessionService {
+  private session: Session | undefined;
+  private sessionKey = 'session';
+  private vault: Vault | BrowserVault;
+
+  constructor() {
+    const config: IdentityVaultConfig = {
+      key: 'io.ionic.trainglabng',
+      type: VaultType.SecureStorage,
+      deviceSecurityType: DeviceSecurityType.None,
+      lockAfterBackgrounded: 5000,
+      unlockVaultOnLoad: false,
+    };
+
+    this.vault = Capacitor.isNativePlatform()
+      ? new Vault(config)
+      : new BrowserVault(config);
+  }
+
+  async set(session: Session): Promise<void> {
+    this.session = session;
+    return this.vault.setValue(this.sessionKey, session);
+  }
+
+  async get(): Promise<Session | undefined> {
+    if (!this.session) {
+      this.session = await this.vault.getValue(this.sessionKey);
+    }
+    return this.session;
+  }
+
+  async clear(): Promise<void> {
+    this.session = undefined;
+    this.vault.clear();
   }
 }
 ```
 
 This is what our configuration means:
 
-- `unlockOnAccess`: if the vault is locked, unlock the vault when the application attempts to access the session. If this value is false, the application will need to call `unlock()` itself. This value is typically `true` unless you want fine-grained control over the unlock workflow.
-- `hideScreenOnBackground`: setting this option `true` results in a privacy screen being displayed rather than a snapshot of the application when it is in the background.
-- `lockAfter`: the number of milliseconds to wait before locking the vault when the application is in the background.
-- `authMode`: the method to use to unlock the vault. In the case of `SecureStorage`, the session will be stored in a secure location, but the vault will never lock.
+- `key`: This is just the way that Identity Vault identifies this entry in the key storage area on the device. This value needs to be different for each vault within the application. Most applications only have a single vault.
+- `type`: The type of vault determines the mechanism used for locking the vault. In this case, we are using `VaultType.SecureStorage`, which securely stores the session data but never locks it. We will explore other vault types later.
+- `deviceSecurityType`: The deviceSecurityType determines the exact type of device security (Biometrics or Passcode) to use when using device security to lock the vault. We aren't using device security (yet), so we just specify `None`. We could also leave this unspecified in this case if we wanted to.
+- `lockAfterBackgrounded`: The number of milliseconds that the app is in the background before the vault will be locked. We are setting this to 5 seconds. This will matter when we start using a `VaultType` that locks the vault.
+- `unlockVaultOnLoad`: If this is `true` we will try to unlock the vault when the application loads. With a value of `false`, attempting to unlock a locked vault is delayed until the data in the vault first needs to be accessed.
 
-**Note:** with `authMode: AuthMode.SecureStorage` it does not _really_ matter if we set `unlockOnAccess` to `true` or to `false`, but as we modify this application it will matter, so we are just setting it `true` because we will eventually want that behavior.
+For a full explanation of all of the configuration options, please see <a href="https://ionic.io/docs/identity-vault/interfaces/identityvaultconfig" target="_blank">the IdentityVaultConfig documentation</a>.
 
-For a full explanation of all of the configuration options, please see <a href="https://ionic.io/docs/identity-vault/api#vaultoptions" target="_blank">the VaultOptions documentation</a>.
-
-If you build and run the application on a device at this point, you should be able to log in and have your session persist after you close and restart the application.
+If you build and run the application at this point, you should be able to log in and have your session persist after you close and restart the application.
 
 ## Supporting the Browser
 
-Since Identity Vault is used to store the authentication tokens in a secure location on mobile devices and since there is no such thing as a secure storage mechanism in the browser, Identity Vault does not, by default, work in the browser. However, we would still like to be able to use the browser as our primary platform when doing development. In order to do this, we will need to create a fake "browser vault" plugin and service. The reason it is fake is that the web does not actually have a secure vault location where data like this can be stored. Instead, we will create services that use the same interface as the Vault users. This fake plugin will then use `@capacitor/storage` as its storage mechanism.
-
-The classes themselves are boiler-plate, so let's just download them rather than going through writing it:
-
-- `npm i @capacitor/storage`
-- <a download href="/assets/packages/ionic-angular/browser-vault.zip">Download the zip file</a>
-- unzip the file somewhere
-- copy the `browser-vault.service.ts` and `browser-vault.plugin.ts` files from where you unpacked them to `src/app/core`
-
-Finally, in the `VaultService` class, inject the `BrowserVaultPlugin` and override the `getPlugin()` method to use the real plugin if the application is run in a hybrid mobile context, and the fake "browser vault" otherwise.
-
-When completed, the service will now look like this:
+Take note of the following line:
 
 ```TypeScript
-import { Injectable } from '@angular/core';
-import {
-  AuthMode,
-  IonicIdentityVaultUser,
-  IonicNativeAuthPlugin,
-} from '@ionic-enterprise/identity-vault';
-import { Platform } from '@ionic/angular';
-import { Session } from '../models';
-import { BrowserVaultPlugin } from './browser-vault.plugin';
-
-@Injectable({
-  providedIn: 'root',
-})
-export class VaultService extends IonicIdentityVaultUser<Session> {
-  constructor(
-    private browserVaultPlugin: BrowserVaultPlugin,
-    platform: Platform,
-  ) {
-    super(platform, {
-      unlockOnAccess: true,
-      hideScreenOnBackground: true,
-      lockAfter: 5000,
-      authMode: AuthMode.SecureStorage,
-    });
-  }
-
-  getPlugin(): IonicNativeAuthPlugin {
-    if ((this.platform as Platform).is('hybrid')) {
-      return super.getPlugin();
-    }
-    return this.browserVaultPlugin;
-  }
-}
+    this.vault = Capacitor.isNativePlatform()
+      ? new Vault(config)
+      : new BrowserVault(config);
 ```
 
-Now when you run in the browser, the application will use the `BrowserVaultPlugin` and `BrowserVaultService` classes to store the keys in a way that the browser can consume them.
+The `Vault` only works on iOS and Android since they have a secure storage mechanism, but not on the browser since it does not. As a result, we only instantiate a `Vault` if we are running on a native platform.
 
-**Side Note**
+One of the biggest advantages of using Ionic, however, is the ability to develop our app using standard web based workflows, which includes running in the browser rather than on a device. In order to facilitate this, you can use the `BrowserVault`. The `BrowserVault` uses `localstorage` to store the session information, and it never locks since there is no lock/unlock mechanism that is available.
 
-You may be wondering why we are doing the following cast: `this.platform as Platform`. Here is what is happening:
-
-- The base class has a protected member called `platform` that is set to the first parameter passed during construction.
-- Within Identity Vault, this `platform` is typed to `{ ready: () => Promise<any> }`, and not the full `@ionic/angular` `Platform` service, which would tie IV to `@ionic/angular`. We want Identity Vault to be usable with any framework.
-- The `Platform` service from `@ionic/angular` meets the contract, so that is what we pass.
-- We know what we passed, and we need to access other methods from it, so it is safe for us to cast it back to gain access to those methods.
+As such, using `BrowserVault` is intended _only_ for development purposes.
 
 ## Conclusion
 
