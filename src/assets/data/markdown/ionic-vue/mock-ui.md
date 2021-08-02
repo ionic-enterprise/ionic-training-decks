@@ -147,71 +147,9 @@ Now that we have renamed the Home view and fixed up the routes, I have a coding 
 
 Let's mock up how the Ionic components will be used in the Tea view. This allows us to test out exactly what our data should look like and also allows us to concentrate on the styling without worrying about other moving parts. This is a common technique used when laying out the interface for an application.
 
-### Test Prep
-
-As of this writing, we will need to start mounting this component with the `router` in order to get around an issue with the `navManager` not being injected. Luckily, this is fairly easy.
-
-First, create a router object in a `beforeEach()`:
-
-```diff
---- a/tests/unit/views/TeaList.spec.ts
-+++ b/tests/unit/views/TeaList.spec.ts
--import { mount } from '@vue/test-utils';
-+import { mount, VueWrapper } from '@vue/test-utils';
-import TeaList from '@/views/TeaList.vue';
-
- describe('TeaList.vue', () => {
-+  let wrapper: VueWrapper<any>;
-+  beforeEach(() => {
-+    wrapper = mount(TeaList);
-+  });
-+
-   it('displays the title', () => {
--    const wrapper = mount(TeaList);
-     const titles = wrapper.findAllComponents('ion-title');
-     expect(titles).toHaveLength(2);
-     expect(titles[0].text()).toBe('Teas');
-     expect(titles[1].text()).toBe('Teas');
-   });
-
-   it('displays the default text', () => {
--    const wrapper = mount(TeaList);
-     const container = wrapper.find('#container');
-     expect(container.text()).toContain('Ready to create an app?');
-   });
- });
-```
-
-```typescript
-import { mount, VueWrapper } from '@vue/test-utils';
-import { createRouter, createWebHistory } from '@ionic/vue-router';
-import TeaList from '@/views/TeaList.vue';
-
-describe('TeaList.vue', () => {
-  let router: any;
-  let wrapper: VueWrapper<any>;
-  beforeEach(async () => {
-    router = createRouter({
-      history: createWebHistory(process.env.BASE_URL),
-      routes: [{ path: '/', component: TeaList }],
-    });
-    router.push('/');
-    await router.isReady();
-    wrapper = mount(TeaList, {
-      global: {
-        plugins: [router],
-      },
-    });
-  });
-...
-});
-```
-
-Then, remove everywhere else that we are current mounting the `Tea` component since we are doing it in the test setup.
-
 ### Mock the Data
 
-Switching away from the test and to the view code, within the `<script>` tag, add a `data()` method to the object passed to `defineComponent()`. This method returns an object that defines the data used by the component. Add the method as follows:
+Switching away from the test and to the view code, within the `<script>` tag, add a `data()` method to the the component's Props object (the object passed to `defineComponent()`). This method returns an object that defines the data used by the component. Add the method as follows:
 
 ```typescript
   data() {
@@ -280,7 +218,7 @@ Switching away from the test and to the view code, within the `<script>` tag, ad
 
 **Note:** If we were further along, we probably would have created fake data in the Vuex store for the application, but we have not talked about Vuex yet, so we will just hard code the data like this for now.
 
-### Experiement with a List
+### Experiment with a List
 
 Now that we have a list of teas, we need to figure out how to display this information. One component that seems natural is to use a <a href="https://ionicframework.com/docs/api/card" target="_blank">card</a> to display each tea in the list. Let's see how that looks. Before doing this, use your browser's dev-tools to emulate an iPhone.
 
@@ -305,13 +243,39 @@ The add the following markup where the `<div id="container">` used to be (under 
 </ion-list>
 ```
 
-**Note:** don't worry about adding the child components to the components list yet. We are still just playing with our UI, and what we have done above is enough for now.
-
 This looks nice on an iPhone form factor, but try some others. Try an iPad Pro, for example. Or just close the devtools and look at it as a web page with desktop resolution. In both of those cases, the cards just look "big." Clearly a more responsive design is called for.
+
+Close the devtools for now. Let's just worry about the desktop sized layout for now.
+
+### The Components List
+
+If you examine the console, you will notice several warnings having to do with failing to resolve a component. The problem here is that we are using some components but have not imported or declared them yet. If you look at the code, you will see a couple of places where the child components are specified:
+
+```typescript
+import {
+  IonContent,
+  IonHeader,
+  IonPage,
+  IonTitle,
+  IonToolbar,
+} from '@ionic/vue';
+```
+
+```typescript
+  components: {
+    IonContent,
+    IonHeader,
+    IonPage,
+    IonTitle,
+    IonToolbar,
+  },
+```
+
+Ultimately you will need to make sure the components you are using are included here so that everything works properly. For now, though, we are just playing trying to figure out how we want this to look, so let's forgo that for now until we know _exactly_ which components we will _actually_ be using.
 
 ### Use a Responsive Grid
 
-We _could_ just limit the size of the cards so they wouldn't get so big, but that would just be a waste of screen space on larger devices. Clearly we are not going to go with a list, so let's remove the markup we just added.
+We _could_ just limit the size of the cards so they would not get so big, but that would just be a waste of screen space on larger devices. Clearly we are not going to go with a list, so let's remove the markup we just added.
 
 What we really need is a way to do the following:
 
@@ -319,13 +283,13 @@ What we really need is a way to do the following:
 1. show two columns of tea cards side by side on an iPad
 1. expand the columns to four on even wider screens, such as an iPad in landscape mode or our desktop
 
-Enter the <a href="https://ionicframework.com/docs/layout/grid" target="_blank">responsive grid</a>. By default, the resonsive grid shows rows containing 12 columns. Elements within the rows can be contained either within a single column or spread across multiple columns allowing for a very flexible layout within the row.
+Enter the <a href="https://ionicframework.com/docs/layout/grid" target="_blank">responsive grid</a>. By default, the responsive grid shows rows containing 12 columns. Elements within the rows can be contained either within a single column or spread across multiple columns allowing for a very flexible layout within the row.
 
-In our case we want to show at most four columns of cards per row for high resolution tablets. As the form factor changes, we want the number of columns to change. On lower resolution tablets we would like to display only two columns per row, and on phone resoutions we would like just a single column of cards. Luckily, there are some simple mechanisms in place that will allow us to do that, but first let's think about how we want the grid to work at the highest resolutions and then express that in some tests.
+In our case we want to show at most four columns of cards per row for high resolution tablets. As the form factor changes, we want the number of columns to change. On lower resolution tablets we would like to display only two columns per row, and on phone resolutions we would like just a single column of cards. Luckily, there are some simple mechanisms in place that will allow us to do that, but first let's think about how we want the grid to work at the highest resolutions and then express that in some tests.
 
 First, we no longer need the test that expects the content of our "#container" so remove that test case.
 
-Let's lay this test out for our current mock data (which has seven teas), and our highest resoution layout, which will have four teas per row, so our layout will result in two rows, the first with four columns and the second with three columns. We will need tests like this:
+Let's lay this test out for our current mock data (which has seven teas), and our highest resolution layout, which will have four teas per row, so our layout will result in two rows, the first with four columns and the second with three columns. We will need tests like this:
 
 ```typescript
 describe('with seven teas', () => {
@@ -339,6 +303,7 @@ Let's fill out the first test:
 
 ```typescript
 it('displays two rows', () => {
+  const wrapper = mount(TeaList);
   const rows = wrapper.findAllComponents('ion-grid ion-row');
   expect(rows).toHaveLength(2);
 });
@@ -383,18 +348,20 @@ We can then update the view's template accordingly. Add the following markup eit
 </ion-grid>
 ```
 
-Make sure you add `IonGrid` and `IonRow` to the list of child components.
+We _will_ want to use this, so make sure you add `IonGrid` and `IonRow` to the list of child components. You may as well add `IonCol` at this point as well. If we have rows, we will have columns.
 
 Now let's display the columns properly, first updating the tests:
 
 ```typescript
 it('displays four columns in the first row', () => {
+  const wrapper = mount(TeaList);
   const rows = wrapper.findAllComponents('ion-grid ion-row');
   const cols = rows[0].findAllComponents('ion-col');
   expect(cols).toHaveLength(4);
 });
 
 it('displays three columns in the second row', () => {
+  const wrapper = mount(TeaList);
   const rows = wrapper.findAllComponents('ion-grid ion-row');
   const cols = rows[1].findAllComponents('ion-col');
   expect(cols).toHaveLength(3);
@@ -415,11 +382,9 @@ Verify that we have two failing tests. Now we can update the template by adding 
 </ion-grid>
 ```
 
-Rember to add IonCol to the list of our child components.
+**Note:** the `size="3"` tells the column to take up three columns in the row. Remember that each row contains 12 columns and that elements in the row can be spread across multiple columns. We only want at most four columns per row. Thus, each column we supply should be spread across three of the columns in the row.
 
-**Note:** the `size="3"` tells the column to take up three colunns in the row. Remember that each row contains 12 columns and that elements in the row can be spread across mutliple columns. We only want at most four columns per row. Thus, each column we supply should be spread across three of the columns in the row.
-
-Now that we have the grid layed out, we can add our card template. We will just use the card template from our `ion-list` that we had added above.
+Now that we have the grid laid out, we can add our card template. We will just use the card template from our `ion-list` that we had added above.
 
 ```typescript
 import { Tea } from '@/models';
@@ -427,6 +392,7 @@ import { Tea } from '@/models';
   describe('with seven teas', () => {
     ...
     it('displays the name in the title', () => {
+      const wrapper = mount(TeaList);
       const teas = wrapper.vm.teaData as Array<Tea>;
       const cols = wrapper.findAllComponents('ion-col');
       cols.forEach((c, idx) => {
@@ -436,6 +402,7 @@ import { Tea } from '@/models';
     });
 
     it('displays the description in the content', () => {
+      const wrapper = mount(TeaList);
       const teas = wrapper.vm.teaData as Array<Tea>;
       const cols = wrapper.findAllComponents('ion-col');
       cols.forEach((c, idx) => {

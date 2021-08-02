@@ -2,11 +2,13 @@
 
 In this lab you will use Capacitor to access a native API. Specifically, the social sharing APIs on iOS and Android devices.
 
+**Note:** this is an "extra credit" lab and can be skipped without affecting the main functionality of the application. It adds a neat feature, though... 🤓
+
 ## Capacitor Native API Plugins
 
 We can use various <a href="https://capacitorjs.com/docs/plugins" target="_blank">Capacitor Plugins</a> in order to provide access to native APIs. We have already done this to a certain degree with our use of the <a href="https://capacitorjs.com/docs/apis/storage" target="_blank">Storage</a> plugin. That plugin, however, works completely behind the scenes, so we can't really "experience" anything with it.
 
-Some plugins, though, provide native functionallity that the user interacts with directly. The <a href="https://capacitorjs.com/docs/apis/share" target="_blank">Social Sharing</a> plugin is one of those. In this lab we will update the code to use that plugin to allow us to share tea tasting notes with our friends.
+Some plugins, though, provide native functionality that the user interacts with directly. The <a href="https://capacitorjs.com/docs/apis/share" target="_blank">Social Sharing</a> plugin is one of those. In this lab we will update the code to use that plugin to allow us to share tea tasting notes with our friends.
 
 While we are on the subject of plugins, Capacitor has been designed to also work with Cordova plugins. When choosing a plugin, we suggest favoring Capacitor plugins over Cordova plugins.
 
@@ -40,32 +42,18 @@ The first thing we will do is add a sharing button to the top of our `AppTasting
       ...
       const allowShare = computed( () => true);
       const sharingIsAvailable = computed(() => true);
-      async function share() {
+      const share = async (): Promise<void> => {
         return;
       }
       ...
       return {
-        brand,
-        name,
-        notes,
-        rating,
-        teaCategoryId,
-        v,
-
-        teas,
-        buttonLabel,
-        title,
-
-        allowSubmit,
-        cancel,
-        submit,
-
+        ...
+        shareOutline,
+        ...
         allowShare,
         sharingIsAvailable,
         share,
-
-        close,
-        shareOutline,
+        ...
       };
     },
   });
@@ -76,7 +64,7 @@ At this point, the button should display and be clickable, but it is not functio
 
 ### Share Only on Devices
 
-The designers have let us know that they only want this functionallity available when users are running in a mobile context, so let't take care of making sure the button is only visible in that context.
+The designers have let us know that they only want this functionality available when users are running in a mobile context, so let't take care of making sure the button is only visible in that context.
 
 We will start with the test. First, import the `isPlatform` function from `@ionic/vue` and mock it. This get's a little tricky as you need to mock all of `@ionic/vue` using the actual implementation for most of it.
 
@@ -107,6 +95,12 @@ At this point we can start creating the tests for the button. Note the special c
         );
       });
 
+      afterEach(() => {
+        (isPlatform as any).mockImplementation(
+          (key: string) => key === 'hybrid',
+        );
+      });
+
       it('does not exist', () => {
         const modal = mount(AppTastingNoteEditor, {
           global: {
@@ -133,7 +127,7 @@ const sharingIsAvailable = computed(() => isPlatform('hybrid'));
 
 ### Enable When Enough Information Exists
 
-In order to share a rating, we need to have at least the brand, name, and rating entered. The button should be disabed until these are entered.
+In order to share a rating, we need to have at least the brand, name, and rating entered. The button should be disabled until these are entered.
 
 First we will test for it. This test belongs right after the `exists` test within the `share button` describe that we just created above.
 
@@ -167,19 +161,34 @@ const allowShare = computed(
 
 ## Share the Note
 
-The final step is to call the share API when the button is clicked. Let's update the test. First we will need to import the `Plugins` object and mock `@capacitor/core`.
+The final step is to call the share API when the button is clicked. Let's update the test. First we will need to create a manual mock for the plugin similar to the one we already have for `@capacitor/storage`:
+
+**`__mocks__/@capacitor/share.ts`**
+
+```typescript
+export const Share = {
+  share: jest.fn().mockResolvedValue(undefined),
+};
+```
+
+Install the plugin so it is available to us:
+
+```bash
+$ npm i @capacitor/share
+```
+
+Import and mock the plugin in the `tests/unit/components/AppTastingNotes.spec.ts` test file:
 
 ```TypeScript
-import { Plugins } from '@capacitor/core';
+import { Share } from '@capacitor/share';
 ...
-jest.mock('@capacitor/core');
+jest.mock('@capacitor/share');
 ```
 
 Then we will add a test within the `share button` describe block.
 
 ```TypeScript
     it('calls the share plugin when pressed', async () => {
-      const { Share } = Plugins;
       const button = wrapper.findComponent('[data-testid="share-button"]');
       const brand = wrapper.findComponent('[data-testid="brand-input"]');
       const name = wrapper.findComponent('[data-testid="name-input"]');
@@ -201,11 +210,10 @@ Then we will add a test within the `share button` describe block.
     });
 ```
 
-We can then add the code fill out the `share()` accordingly. You will also have to add a line importing the `Plugins` object from `@capacitor/core`:
+We can then add the code fill out the `share()` accordingly:
 
 ```TypeScript
     async function share() {
-      const { Share } = Plugins;
       await Share.share({
         title: `${brand.value}: ${name.value}`,
         text: `I gave ${brand.value}: ${name.value} ${rating.value} stars on the Tea Taster app`,
@@ -214,6 +222,8 @@ We can then add the code fill out the `share()` accordingly. You will also have 
       });
     }
 ```
+
+You will also have to add a line importing the `Share` object from `@capacitor/share`.
 
 ## Conclusion
 

@@ -7,7 +7,7 @@ In this lab, you will:
 
 ## Stacked Navigation
 
-Ionic supports the common mobile paradigm of stacked navigation, where one page is logically displayed over the top of another page. In this lab we will see that paradigm in action by creating a simple "details" page for each of our teas. This page will start simple, but we will add more inforamtion to it later.
+Ionic supports the common mobile paradigm of stacked navigation, where one page is logically displayed over the top of another page. In this lab we will see that paradigm in action by creating a simple "details" page for each of our teas. This page will start simple, but we will add more information to it later.
 
 ## Starting Code
 
@@ -16,31 +16,31 @@ Let's start with some fairly boilerplate starting code for a page.
 First the test in `tests/unit/views/TeaDetails.spec.ts`
 
 ```TypeScript
-import { mount, VueWrapper } from '@vue/test-utils';
-import { createRouter, createWebHistory } from '@ionic/vue-router';
-import store from '@/store';
+import useAuth from '@/use/auth';
 import TeaDetails from '@/views/TeaDetails.vue';
+import { createRouter, createWebHistory } from '@ionic/vue-router';
+import { mount, VueWrapper } from '@vue/test-utils';
+import { Router } from 'vue-router';
 
 describe('TeaDetails.vue', () => {
-  let router: any;
-  let wrapper: VueWrapper<any>;
+  let router: Router;
 
-  beforeEach(async () => {
-    store.dispatch = jest.fn();
+  const mountView = async (): Promise<VueWrapper<typeof TeaDetails>> => {
     router = createRouter({
       history: createWebHistory(process.env.BASE_URL),
       routes: [{ path: '/', component: TeaDetails }],
     });
     router.push('/');
     await router.isReady();
-    wrapper = mount(TeaDetails, {
+    return mount(TeaDetails, {
       global: {
-        plugins: [router, store],
+        plugins: [router],
       },
     });
-  });
+  };
 
-  it('renders', () => {
+  it('renders', async () => {
+    const wrapper = await mountView();
     const header = wrapper.findComponent('ion-header');
     const content = wrapper.findComponent('ion-content');
     expect(header.exists()).toBe(true);
@@ -65,12 +65,18 @@ Then the page itself in `src/views/TeaDetails.vue`
 </template>
 
 <script lang="ts">
-import { IonContent, IonHeader, IonTitle, IonToolbar } from '@ionic/vue';
+import {
+  IonContent,
+  IonHeader,
+  IonPage,
+  IonTitle,
+  IonToolbar,
+} from '@ionic/vue';
 import { defineComponent } from 'vue';
 
 export default defineComponent({
   name: 'TeaDetails',
-  components: { IonContent, IonHeader, IonTitle, IonToolbar },
+  components: { IonContent, IonHeader, IonPage, IonTitle, IonToolbar },
 });
 </script>
 
@@ -93,7 +99,8 @@ Now that we have a details page, let's set up the navigation to the page and the
 We want to navigate from the `TeaList` page to the `TeaDetails` page. A logical choice for the trigger is to use a click on the tea's card to start the navigation. Let's write a test for that in `tests/unit/views.TeaList.spec.ts`.
 
 ```TypeScript
-  it('goes to the tea details page when a tea card is clicked', () => {
+  it('navigates to the tea details page when a tea card is clicked', async () => {
+    const wrapper = await mountView();
     const cards = wrapper.findAllComponents('ion-card');
     router.push = jest.fn();
     cards[3].trigger('click');
@@ -137,87 +144,182 @@ In other cases this is less important because you should always have a valid nav
 
 Now that we have the navigation in place, let's grab the tea and display it.
 
-First we need to noodle out what our main test setup in `tests/unit/view/TeaDetails.spec.ts` should look like. We know that we will need to do the following:
+### Update the Composition Function
 
-- get the `id` parameter from our route
-- call the `find` getter from the `teas` store module to find the proper tea
-
-Luckily, the `router` and `store` setup are already in our `beforeEach()`, so let's just modify it slightly to define the route properly when we create the router. We will also need to ensure our tea store has data we can find.
+To grab the proper tea, it would be handy to have a `find` function go grab the tea based on the ID:
 
 ```typescript
-...
-import { Tea } from '@/models';
-...
-  let tea: Tea;
-
-  beforeEach(async () => {
-    tea = {
-      id: 4,
-      name: 'Purple Tea',
-      description: 'Is this actually a thing?',
-      image: '/assets/img/nope.jpg',
-    };
-    store.commit('teas/SET', [tea]);
-    ...
-    router = createRouter({
-      history: createWebHistory(process.env.BASE_URL),
-      routes: [{ path: '/teas/tea/:id', component: TeaDetails }],
-    });
-    router.push('/teas/tea/4');
-    ...
-  });
+const find = async (id: number): Promise<Tea | undefined> => {
+  // This will be replaced with code that actually does things...
+  return undefined;
+};
 ```
 
-**Note:** some of the above is new code and some is chaning existing code, so don't just copy-paste.
+The requirements for this function are:
 
-Add the following code to the object we pass to the `defineComponent()` call in `TeaDetails.vue`:
+- If the teas have not been fetched yet, it should fetch them before doing the search.
+- If the teas have been fetched, it should just search those teas without hitting the network again.
+- If a tea with the given ID does not exist, it should return `undefined`.
+
+Expressed as a set of tests, those requirements look like this:
+
+```typescript
+describe('find', () => {
+  const { client } = useBackendAPI();
+  const { find, refresh, teas } = useTea();
+
+  beforeEach(() => {
+    teas.value = [];
+    (client.get as any).mockResolvedValue({ data: httpResultTeas });
+  });
+
+  it('refreshes the tea data if it has not been loaded yet', async () => {
+    const t = await find(6);
+    expect(teas.value.length).toEqual(8);
+    expect(t).toEqual({
+      id: 6,
+      name: 'Puer',
+      image: 'assets/img/puer.jpg',
+      description: 'Puer tea description.',
+    });
+  });
+
+  it('finds the tea from the existing teas', async () => {
+    await refresh();
+    jest.clearAllMocks();
+    const t = await find(4);
+    expect(t).toEqual({
+      id: 4,
+      name: 'Oolong',
+      image: 'assets/img/oolong.jpg',
+      description: 'Oolong tea description.',
+    });
+    expect(client.get).not.toHaveBeenCalled();
+  });
+
+  it('returns undefined if the tea does not exist', async () => {
+    expect(await find(42)).toBeUndefined();
+  });
+});
+```
+
+1. Add those tests to `tests/unit/use/tea.spec.ts`.
+1. Add the `find` from above to `src/use/tea.ts` and fill in the logic.
+1. Be sure to return the `find` in the default function exported by `src/use/tea.ts`.
+1. Include a `find` mock in `src/use/__mocks__/tea.ts`.
+
+### Update the Details View
+
+#### Create the Tests
+
+First we need to figure out what our main test setup in `tests/unit/view/TeaDetails.spec.ts` should look like. We know that we will need to do the following:
+
+- Get the `id` parameter from our route.
+- Call the `find` from `useTeas()` to find the proper tea.
+
+The `router` setup is already a part of the `mountView()` function. We just need to make a couple of minor tweaks to the actual paths that are used:
+
+```typescript
+router = createRouter({
+  history: createWebHistory(process.env.BASE_URL),
+  routes: [{ path: '/teas/tea/:id', component: TeaDetails }],
+});
+router.push('/teas/tea/3');
+```
+
+**Note:** the above is a change to existing code, so don't just copy-paste. Just change the paths.
+
+- `import useTea from '@/use/tea';`
+- `jest.mock('@/use/tea');`
+- a `beforeEach()` that sets up the data and the mocks
+
+```typescript
+beforeEach(() => {
+  const { find, teas } = useTea();
+  teas.value = [
+    {
+      id: 1,
+      name: 'Green',
+      image: 'assets/img/green.jpg',
+      description: 'Green tea description.',
+    },
+    {
+      id: 2,
+      name: 'Black',
+      image: 'assets/img/black.jpg',
+      description: 'Black tea description.',
+    },
+    {
+      id: 3,
+      name: 'Herbal',
+      image: 'assets/img/herbal.jpg',
+      description: 'Herbal Infusion description.',
+    },
+    {
+      id: 4,
+      name: 'Oolong',
+      image: 'assets/img/oolong.jpg',
+      description: 'Oolong tea description.',
+    },
+  ];
+  (find as any).mockResolvedValue(teas.value[2]);
+  jest.clearAllMocks();
+});
+```
+
+Now that we are set up to get data, let's add a couple of tests. These tests show that we get the correct data, and that we then display the correct data within the correct element in the DOM.
+
+```typescript
+it('finds the tea specified in the route', async () => {
+  const { find } = useTea();
+  await mountView();
+  expect(find).toHaveBeenCalledTimes(1);
+  expect(find).toHaveBeenCalledWith(3);
+});
+
+it('renders the tea name', async () => {
+  const wrapper = await mountView();
+  const name = wrapper.find('[data-testid="name"]');
+  expect(name.text()).toBe('Herbal');
+});
+
+it('renders the tea description', async () => {
+  const wrapper = await mountView();
+  const description = wrapper.find('[data-testid="description"]');
+  expect(description.text()).toBe('Herbal Infusion description.');
+});
+```
+
+#### Update the View
+
+Within `src/views/TeaDetails.vue` we need to do the following:
+
+- Add `ref` to the import from vue.
+- `import { useRoute } from 'vue-router';`
+- `import { Tea } from '@/models';`
+- `import useTea from '@/use/tea';`
+- Create a `setup()` function like we have in our other views.
+
+Within the setup, we know we need to use the `params` object to grab the `id`. We then need to use the `id` to `find()` the tea and return the tea so we can use it in the template.
+
+Here is some of that in place, with a TODO for you to finish it up.
 
 ```typescript
   setup() {
     const { params } = useRoute();
     const id = parseInt(params.id as string, 10);
-    return { id };
+    const tea = ref<Tea | undefined>();
+
+    // TODO:
+    // 1 - destructure the find() from useTea()
+    // 2 - use find() to find the tea based on the id
+    // 3 - set the tea.value
+    //
+    // Note that find() is async, and setup() is not, so you will need to deal with that in some manner.
+    // FWIW, using "then()" is old-school, but very clean in this case.
+
+    return { tea };
   },
-```
-
-You will also need to add a couple of imports within the `script` tag:
-
-```typescript
-import { useRoute } from 'vue-router';
-import { mapGetters } from 'vuex';
-
-import { Tea } from '@/models';
-```
-
-Then we need to add a couple of computed properties:
-
-```typescript
-  computed: {
-    ...mapGetters('teas', ['find']),
-    tea(): Tea {
-      return this.find(this.id);
-    },
-  },
-```
-
-What are we doing here?
-
-- We grab the parameters from the route
-- Then we parse the `id` parameter into an integer (parameters are always strings otherwise)
-- The computed properties map the getter we just created and then use it to ultimately return the tea we are looking for
-
-Our tests should be passing at this point. Switching back to them, we can add a couple more. We won't get too specific about how we render this in case we want to change things up in the future, but we will just add a couple of simple tests that show things are wired up correctly.
-
-```typescript
-it('renders the tea name', () => {
-  const name = wrapper.find('[data-testid="name"]');
-  expect(name.text()).toBe('Purple Tea');
-});
-
-it('renders the tea description', () => {
-  const description = wrapper.find('[data-testid="description"]');
-  expect(description.text()).toBe('Is this actually a thing?');
-});
 ```
 
 Within the view we can then add the following markup. Add this inside the `ion-content`. Also, add the `ion-padding` class to the `ion-content`.
@@ -232,7 +334,7 @@ Within the view we can then add the following markup. Add this inside the `ion-c
 </div>
 ```
 
-Be sure to also update our list of components for anything new we added (this should just be `IonImg`, unless something was missed earlier).
+Be sure to also update our list of components for anything new we added (this should just be `IonImg`, unless something was missed earlier). At this point, your tests should be passing without error or warning.
 
 We should also style that image just a tad to make sure it is not too big:
 

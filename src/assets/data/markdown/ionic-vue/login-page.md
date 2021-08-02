@@ -9,19 +9,15 @@ In this lab, you will learn how to:
 
 ## Create the Page
 
-First we will create a unit test for our new page. This test will have start with one simple test that verifies the correct title is displayed. This essentially just shows that the page itself can be mounted and rendered. Create a `tests/unit/views/Login.spec.ts` file with the following contents:
+First we will create a unit test for our new page. This test will start with one simple test that verifies the correct title is displayed. This essentially just shows that the page itself can be mounted and rendered. Create a `tests/unit/views/Login.spec.ts` file with the following contents:
 
 ```typescript
-import { mount, VueWrapper } from '@vue/test-utils';
 import Login from '@/views/Login.vue';
+import { mount } from '@vue/test-utils';
 
 describe('Login.vue', () => {
-  let wrapper: VueWrapper<any>;
-  beforeEach(async () => {
-    wrapper = mount(Login);
-  });
-
   it('displays the title', () => {
+    const wrapper = mount(Login);
     const titles = wrapper.findAllComponents('ion-title');
     expect(titles).toHaveLength(1);
     expect(titles[0].text()).toBe('Login');
@@ -44,12 +40,20 @@ Let's just start with a skeleton page that will display the inputs properly and 
       <ion-list>
         <ion-item>
           <ion-label position="floating">Email</ion-label>
-          <ion-input type="email" data-testid="email-input"></ion-input>
+          <ion-input
+            type="email"
+            name="email"
+            data-testid="email-input"
+          ></ion-input>
         </ion-item>
 
         <ion-item>
           <ion-label position="floating">Password</ion-label>
-          <ion-input type="password" data-testid="password-input"></ion-input>
+          <ion-input
+            type="password"
+            name="password"
+            data-testid="password-input"
+          ></ion-input>
         </ion-item>
       </ion-list>
     </ion-content>
@@ -127,154 +131,80 @@ Form validation is not built in to Vue, but there are a couple of libraries that
 
 Both of these libraries work well and are highly capable of doing the job. The question comes down to which one will work best for your team and your application.
 
-For the purpose of this training application, we will use Vuelidate. It is light-weight, easy to configure, and does exactly what we need it to do.
+For the purpose of this training application, we will use Vee-Validate. It is light-weight, easy to configure, and does exactly what we need it to do.
 
-### Install Vuelidate
+### Install Vee-Validate
 
-We will need to install two packages: `@vuelidate/core` and `@vuelidate/validators`. As of the time of this writing, these two packages are both in Alpha. We will not worry about that, though, as testing shows that they are working fine for our needs.
+We will need to install two packages: `vee-validate@next` and `yup`. The last package is completely optional, but we will use it in this application to avoid having to write our own validations.
 
 ```bash
-$ npm i @vuelidate/{core,validators}
-```
-
-Next we will need to perform some simple setup in our `src/main.ts` file as well as any unit tests we have for components that will use Vuelidate (currently just ``).
-
-In `src/main.ts`, import the `VuelidatePlugin` and use it when we create the app.
-
-```TypeScript
-import { VuelidatePlugin } from '@vuelidate/core';
-...
-const app = createApp(App).use(IonicVue).use(router).use(VuelidatePlugin);
-```
-
-In `tests/unit/views/Login.spec.ts`, import the `VuelidatePlugin` and list it as a plugin when mounting the component.
-
-```TypeScript
-import { VuelidatePlugin } from '@vuelidate/core';
-...
-    wrapper = mount(Login, {
-      global: {
-        plugins: [VuelidatePlugin],
-      },
-    });
+$ npm i vee-validate@next yup
 ```
 
 ### Set up the Models
 
-Switching back to the view file, we have two bits of information to get from the user. Their email address and their password. So let's add `ref()` objects for those in our `setup()`. Be sure to import the `ref()` function.
+Switching back to the view file, we have two bits of information to get from the user: their email address and their password. We will use the `useField` composition API from to create the models for those inputs. The string passed to the `useField()` function is the value for the associated input's `name`.
 
 ```TypeScript
-import { defineComponent, ref } from 'vue';
+import { useForm, useField } from 'vee-validate';
 ...
 export default defineComponent({
 ...
   setup() {
-    const email = ref('');
-    const password = ref('');
+    const { value: email } = useField('email');
+    const { value: password } = useField('password');
 
-    return { email, logInOutline, password };
-  }
+    return { logInOutline, email, password };
+  },
 });
 ```
 
-Since Vuelidate works on the models, it makes sense that we will need to define our validations in a similar manner. So let's think about what validations may be required for each of these values. First, both values are required. Second, the `email` must have a valid email address format. Let's set those up.
+Let's also hook up the `v-model` on the inputs at this point. For example:
+
+```html
+<ion-input
+  type="email"
+  name="email"
+  v-model="email"
+  data-testid="email-input"
+></ion-input>
+```
+
+With Vee-Validate, we will create a validation schema that defines how to validate the fields in our form. To do this, we will also use a library called `yup` to help us with our validations.
 
 ```TypeScript
 ...
-import { useVuelidate } from '@vuelidate/core';
-import { email as validEmail, required } from '@vuelidate/validators';
+import { object as yupObject, string as yupString } from 'yup';
 ...
 
 export default defineComponent({
 ...
   setup() {
-    const email = ref('');
-    const password = ref('');
+    const validationSchema = yupObject({
+      email: yupString().required().email().label("Email Address"),
+      password: yupString().required().label("Password"),
+    });
 
-    const rules = {
-      email: { validEmail, required },
-      password: { required },
-    };
-    const v = useVuelidate(rules, { email, password });
+    const { errors } = useForm({ validationSchema });
 
-    return { email, logInOutline, password, v };
-  }
+    const { value: email } = useField("email");
+    const { value: password } = useField("password");
+
+    return { logInOutline, email, password, errors };
+  },
 });
 ```
 
-This configuration exposed an object for us called `v` and we can have a look at it now by adding `<pre>{{ v }}</pre>` at the end of the `ion-content` area of our Login page, right after the `ion-list` that contains our inputs. Do that now and have a look at it in the browser. You should see an object like this:
+This configuration exposed an object for us called `errors` and we can have a look at it now by adding `<pre>{{ errors }}</pre>` at the end of the `ion-content` area of our Login page, right after the `ion-list`. Do that now and have a look at it in the browser. You should see an object like this:
 
 ```JSON
 {
-  "$dirty": false,
-  "$model": null,
-  "$error": false,
-  "$errors": [],
-  "$invalid": false,
-  "$anyDirty": false,
-  "$pending": false,
-  "email": {
-    "$dirty": false,
-    "email": {
-      "$message": "Value is not a valid email address",
-      "$params": {},
-      "$pending": false,
-      "$invalid": false
-    },
-    "required": {
-      "$message": "Value is required",
-      "$params": {},
-      "$pending": false,
-      "$invalid": false
-    },
-    "$invalid": false,
-    "$pending": false,
-    "$error": false,
-    "$errors": [],
-    "$model": "",
-    "$anyDirty": false
-  },
-  "password": {
-    "$dirty": false,
-    "required": {
-      "$message": "Value is required",
-      "$params": {},
-      "$pending": false,
-      "$invalid": false
-    },
-    "$invalid": false,
-    "$pending": false,
-    "$error": false,
-    "$errors": [],
-    "$model": "",
-    "$anyDirty": false
-  }
+  "email": "Email Address must be a valid email",
+  "password": "Password is a required field"
 }
 ```
 
-Notice that the `email` and `password` objects both have a `$model` value. This property is directly tied to the reference objects we created and configured in our `setup()` method, so we can use it as a `v-model` in our inputs. Let's configured our inputs right now to use it.
-
-```html
-<ion-item>
-  <ion-label position="floating">Email</ion-label>
-  <ion-input
-    type="email"
-    v-model.trim="v.email.$model"
-    data-testid="email-input"
-  ></ion-input>
-</ion-item>
-
-<ion-item>
-  <ion-label position="floating">Password</ion-label>
-  <ion-input
-    type="password"
-    v-model.trim="v.password.$model"
-    data-testid="password-input"
-  ></ion-input>
-</ion-item>
-```
-
-Play around with entering text in the email and password inputs and note how the `$v` objects changes depending on the shape of the data. Now change the `<pre>` tag to display `$v.$errors` and play around some more.
+Play around with entering text in the email and password inputs and note how the `errors` object changes depending on the shape of the data.
 
 ### Display Messages
 
@@ -284,32 +214,52 @@ Now that we have a good idea of how the validations are working, remove the `<pr
 <div class="error-message ion-padding" data-testid="message-area"></div>
 ```
 
-Create a test that shows that our validations are set up properly by verifying that the user receives proper messages as they enter their data.
+Vee-validate does all of its work asynchronously, so we need to wait for all of the promises to complete before we check any message values. We will use a library called "flush-promises" to help us out here.
+
+```bash
+$ npm i -D flush-promises
+```
+
+We can then add the following import to the top of our `tests/unit/views/Login.spec.ts` file:
+
+```typescript
+import flushPromises from 'flush-promises';
+```
+
+We can now create a test that shows that our validations are set up properly by verifying that the user receives proper messages as they enter their data.
 
 ```TypeScript
   it('displays messages as the user enters invalid data', async () => {
+    const wrapper = mount(Login);
     const email = wrapper.findComponent('[data-testid="email-input"]');
     const password = wrapper.findComponent('[data-testid="password-input"]');
     const msg = wrapper.find('[data-testid="message-area"]');
 
+    await flushPromises();
     expect(msg.text()).toBe('');
 
     await email.setValue('foobar');
-    expect(msg.text()).toBe('email: Value is not a valid email address');
+    await flushPromises();
+    expect(msg.text()).toBe('Email Address must be a valid email');
 
     await email.setValue('');
-    expect(msg.text()).toBe('email: Value is required');
+    await flushPromises();
+    expect(msg.text()).toBe('Email Address is a required field');
 
     await email.setValue('foobar@baz.com');
+    await flushPromises();
     expect(msg.text()).toBe('');
 
     await password.setValue('mypassword');
+    await flushPromises();
     expect(msg.text()).toBe('');
 
     await password.setValue('');
-    expect(msg.text()).toBe('password: Value is required');
+    await flushPromises();
+    expect(msg.text()).toBe('password: Value is a required field');
 
     await password.setValue('mypassword');
+    await flushPromises();
     expect(msg.text()).toBe('');
   });
 ```
@@ -318,20 +268,17 @@ We can then fill in the `message-area` with some markup that processes our error
 
 ```html
 <div class="error-message ion-padding" data-testid="message-area">
-  <div v-for="(error, idx) of v.$errors" :key="idx">
-    {{ error.$property }}: {{ error.$message }}
-  </div>
+  <div v-for="(error, idx) of errors" :key="idx">{{ error }}</div>
 </div>
 ```
-
-**Note**: would could easily <a href="https://vuelidate-next.netlify.app/custom_validators.html#custom-error-messages">customize the messages</a> if we wanted to, but for now let's just use the out-of-the-box messages.
 
 Let's also give our error messages a little styling (globally) by adding the following within `App.vue`
 
 ```css
 <style>
 .error-message {
-  color: var(--ion-color-danger, ##ff0000);
+  color: var(--ion-color-danger, #ff0000);
+  font-size: small;
 }
 </style>
 ```
@@ -342,25 +289,46 @@ We also need to disable the button until we have valid data that has been entere
 
 ```typescript
 it('has a disabled signin button until valid data is entered', async () => {
+  const wrapper = mount(Login);
   const button = wrapper.findComponent('[data-testid="signin-button"]');
   const email = wrapper.findComponent('[data-testid="email-input"]');
   const password = wrapper.findComponent('[data-testid="password-input"]');
 
+  await flushPromises();
   expect(button.attributes().disabled).toBe('true');
 
   await email.setValue('foobar');
+  await flushPromises();
   expect(button.attributes().disabled).toBe('true');
 
   await password.setValue('mypassword');
+  await flushPromises();
   expect(button.attributes().disabled).toBe('true');
 
   await email.setValue('foobar@baz.com');
+  await flushPromises();
   expect(button.attributes().disabled).toBe('false');
 });
 ```
 
-We then need to set the `disabled` property on the button. A binding such as the following ought to do the trick: `:disabled="!password || !email || v.$invalid"`
+The `useForm()` function returns an object called `meta` that contains data about the form's validation state. Let's grab that in our `setup()` and expose it to our view's template:
+
+```typescript
+    const { errors, meta } = useForm({ validationSchema });
+    ...
+
+    return { logInOutline, email, password, errors, meta };
+```
+
+We can then bind the button's `disabled` attribute to be disabled so long as the form is not valid:
+
+```html
+<ion-button expand="full" data-testid="signin-button" :disabled="!meta.valid">
+  Sign In
+  <ion-icon slot="end" :icon="logInOutline"></ion-icon>
+</ion-button>
+```
 
 ## Conclusion
 
-We now have a (mostly) funcitonal login page. The only problems are that we have to manually navigate to it, and it doesn't actuall perform the login. Before we fix that far we are going to need to need to create a couple of services. We will do that next.
+We now have a (mostly) functional login page. The only problems are that we have to manually navigate to it, and it doesn't actually perform the login. Before we fix that far we are going to need to need to create a couple of services. We will do that next.

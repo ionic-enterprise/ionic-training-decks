@@ -33,21 +33,12 @@ However, that is a lot of extra typing for something a developer will be doing e
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
+    "lint": "vue-cli-service lint",
+    "prepare": "husky install",
     "test:dev": "vue-cli-service test:unit --watch",
     "test:unit": "vue-cli-service test:unit",
-    "test:e2e": "vue-cli-service test:e2e",
-    "lint": "vue-cli-service lint"
+    "test:e2e": "vue-cli-service test:e2e"
   },
-```
-
-Note the addition of the `test:dev` script. Right now, we have one test and it references a component that doesn't actually exist. Let's simplify that test a bit so we can test our new script:
-
-```typescript
-describe('HelloWorld.vue', () => {
-  it('works', () => {
-    expect(true).toBe(true);
-  });
-});
 ```
 
 Run the following command:
@@ -56,32 +47,18 @@ Run the following command:
 $ npm run test:dev
 ```
 
-Jest should run our one test (which should pass) and then wait for changes. Try changing a one of the `true` values to `false`. The test should re-run and fail. Change the value back to `true` and the test should pass again. We have our general workflow in place. Leave the test runner running. Next we will start to add tests for our components.
+Jest should run our tests and then wait for changes. We have not changed anything, so it doesn't _actually_ run any tests. Let's make some changes to the `tests/unit/example.spec.ts` file. Add some junk to the `toMatch()` string and save the file. The test should fail. Remove the junk text that was just added. The tests should pass again.
+
+Try changing a one of the `true` values to `false`. The test should re-run and fail. Change the value back to `true` and the test should pass again. We have our general workflow in place. Leave the test runner running. Next we will start to add tests for our components.
 
 ## Scaffold the Tests for Our Application
 
-Our one current test does nothing. We really would like to have our various components tested. Here is what we currently have:
+Our one current test does is not well organized. It is a nice example, but it is not going to scale well. We currently have the following comonents:
 
 - `App.vue`
 - `views/Home.vue`
 
-These components do not currently do much, so now is a really good time to scaffold the tests for them so we can build the tests up as we go. On the filesystem, we will build a structure of unit tests under `tests/unit` that mimics our file structure under `src`. This keeps the tests out of the way of our code while still keeping them easy to find.
-
-### Configuration
-
-Before we start coding our tests, we need to add one line to our `jest.config.js` file:
-
-```JavaScript
-module.exports = {
-  preset: '@vue/cli-plugin-unit-jest/presets/typescript-and-babel',
-  transformIgnorePatterns: ["/node_modules/(?!\@ionic/vue)"],
-  transform: {
-    '^.+\\.vue$': 'vue-jest'
-  }
-}
-```
-
-Note the <a href="https://jestjs.io/docs/en/tutorial-react-native#transformignorepatterns-customization" target="_blank">`transformIgnorePatterns`</a> line. This tells `jest` to transform any of the `@ionic/vue` modules while continuing to ignore the rest of the items under `node_modules`.
+These components do not currently do much, so now is a really good time to scaffold the tests for them so we can build the tests up as we go. On the file system, we will build a structure of unit tests under `tests/unit` that mimics our file structure under `src`. This keeps the tests out of the way of our code while still making them easy to find.
 
 ### App.vue
 
@@ -107,9 +84,14 @@ There is not much else we can effectively test here, so let's move on to the Hom
 
 ### Home.vue
 
-Have a look at `src/views/Home.vue`. What shoud we test here? We do not want to write too many tests, since we will be changing this all some time soon. Let's just test that the header has a proper title and that the container div has the text we expect. When we change this page later, the title test will still be valid, but the "container" one will require some heavy modification.
+The `tests/unit/example.spec.ts` test is testing `Home.vue`, so let's just start with a little housekeeping to make this more obvious:
 
-Create a file called `tests/unit/views/Home.spec.ts` with the following contents:
+- `mkdir tests/unit/views`
+- `git mv tests/unit/example.spec.ts tests/unit/views/Home.spec.ts`
+
+Have a look at `src/views/Home.vue`. What should we test here? We do not want to write too many tests, since we will be changing this all some time soon. Let's just test that the header has a proper title and that the container div has the text we expect. When we change this page later, the title test will still be valid, but the "container" one will require some heavy modification.
+
+Let's just make a slight modification to `tests/unit/views/Home.spec.ts`:
 
 ```typescript
 import { mount } from '@vue/test-utils';
@@ -134,17 +116,13 @@ describe('Home.vue', () => {
 
 There are few key items to note with this test.
 
-- The tests use `mount()` instead of `shallowMount()` since we want to query some actual DOM content in this case.
+- The test was already using `mount()` instead of `shallowMount()`. This is because we want to query some actual DOM content.
 - The family of "find" methods take CSS selectors and find the matching item(s) returning either a `Wrapper` or `WrapperArray`
   - `find` - find the first element matching the selector
   - `findComponent` - find the first Vue component matching the selector
   - `findAll` - find all of the elements matching the selector
   - `findAllComponents` - find all of the Vue components matching the selector
 - The Home page has two titles and they must should match. We find them both and check them.
-
-## Clean-up
-
-The `tests/unit/example.spec.ts` is not testing anything in your application and is no longer very useful to us, so let's just remove it.
 
 ## Conclusion
 

@@ -44,27 +44,33 @@ export default defineComponent({
 
 Adjust the name and the `ion-title` based on the page. Do not worry about adding routes for these pages yet. We will address that in a bit.
 
-Add a couple of simple tests for the views that were just created. Create them under `tests/unit/views` using the same naming convension that we have been using already. Use the following as a template. For the About page you can simplify that even further as we will not need to use the store in the About page.
+Add a couple of simple tests for the views that were just created. Create them under `tests/unit/views` using the same naming convention that we have been using already. Use the following as a template. For the About page you can simplify that even further as we will not need to use the store in the About page.
 
 ```TypeScript
-let tea: Tea;
-import { mount, VueWrapper } from '@vue/test-utils';
 import TastingNotes from '@/views/TastingNotes.vue';
-import store from '@/store';
+import { createRouter, createWebHistory } from '@ionic/vue-router';
+import { mount, VueWrapper } from '@vue/test-utils';
+import { Router } from 'vue-router';
 
 describe('TastingNotes.vue', () => {
-  let wrapper: VueWrapper<any>;
+  let router: Router;
 
-  beforeEach(async () => {
-    store.dispatch = jest.fn();
-    wrapper = mount(TastingNotes, {
+  const mountView = async (): Promise<VueWrapper<typeof TastingNotes>> => {
+    router = createRouter({
+      history: createWebHistory(process.env.BASE_URL),
+      routes: [{ path: '/', component: TastingNotes }],
+    });
+    router.push('/');
+    await router.isReady();
+    return mount(TastingNotes, {
       global: {
-        plugins: [store],
+        plugins: [router],
       },
     });
-  });
+  };
 
-  it('displays the title', () => {
+  it('displays the title', async () => {
+    const wrapper = await mountView();
     const titles = wrapper.findAllComponents('ion-title');
     expect(titles).toHaveLength(1);
     expect(titles[0].text()).toBe('Tasting Notes');
@@ -74,7 +80,7 @@ describe('TastingNotes.vue', () => {
 
 ## Tabs
 
-Tabs are one of two very common navigation syles within native applications. The other is side-menu navigation. A tabs navigation page will have a row of tabs either at the top or the bottom of the page. Each tab will contain a set of stacked pages. We have this stacked paradigm right now with the `TeaDetails` page rendering stacked on top of the `TeaList` page. This same idea carries over to tabbed navigation only each tab will have its own stack.
+Tabs is one of two very common navigation paradigms within native applications. The other is side-menu navigation. A tabs navigation page will have a row of tabs either at the top or the bottom of the page. Each tab will contain a set of stacked pages. We have the stacked paradigm right now with the `TeaDetails` page rendering stacked on top of the `TeaList` page. This same idea carries over to tabbed navigation only each tab will have its own stack.
 
 This application will have a small number of distinct sections, so tabs make the most sense.
 
@@ -138,12 +144,6 @@ export default defineComponent({
 This page will be rendered with a row of tabs on the bottom of the page. The top portion of the page contains a router outlet that will be used to render the pages displayed by the individual tabs.
 
 ### Update the Routes
-
-**Special Note:** as of the time of this writing, there is a bug in `@ionic/vue`. A fix will be released in v6. Read <a href="https://github.com/ionic-team/ionic-framework/issues/22519#issuecomment-747719763" target="_blank">this note</a> and install the dev version that is mentioned there. This will no longer be required once v6 is released. This also means the documentation we tell you to look at next is wrong for the long term. We will follow the long term direction, however.
-
-```TypeScript
-$ npm i @ionic/vue@5.6.0-dev.202012172118.e3a05bf @ionic/vue-router@5.6.0-dev.202012172118.e3a05bf
-```
 
 Have a look at the documentation on <a href="https://ionicframework.com/docs/vue/navigation#shared-urls-versus-nested-routes" target="_blank">Shared URLs vs. Nested Routes</a>. Here is what we currently have for our routes. Note that we currently have an example of using shared URLs in our routes. When we add the tabs, we will also have some nested routes.
 

@@ -14,7 +14,7 @@ If you type `ionic --help` at the terminal prompt you get a list of the availabl
 
 ## Create the Application
 
-The first thing we will use the Ionic CLI for is to start a new application. Type `ionic start --help` to get some instructions on how the `start` command works as well as some expamples on how to use it. Notice that it has two basic modes of operation. You an either enter the command with a complete set of options, at which point the start operation will run all of the way through without asking questions, or you can supply a partial set of options, and the `start` command will prompt you for the information that it needs. If you just type `ionic start`, it will prompt for all of the information.
+The first thing we will use the Ionic CLI for is to start a new application. Type `ionic start --help` to get some instructions on how the `start` command works as well as some examples on how to use it. Notice that it has two basic modes of operation. You an either enter the command with a complete set of options, at which point the start operation will run all of the way through without asking questions, or you can supply a partial set of options, and the `start` command will prompt you for the information that it needs. If you just type `ionic start`, it will prompt for all of the information.
 
 Lets start our application via whichever technique you want.
 
@@ -32,7 +32,7 @@ $ ionic start tea-taster blank --type=vue
 Let's look at some of those options more closely.
 
 - The third option is the name of the application.
-- The forth option, `blank` tells Ioinic to use the `blank` starter. We have three basic starters: `blank`, `tabs`, and `sidemenu`. The main difference is the main style of navigation.
+- The forth option, `blank` tells Ionic to use the `blank` starter. We have three basic starters: `blank`, `tabs`, and `sidemenu`. The main difference is the main style of navigation.
 - The `--type` option specifies the type of application to create. Options include `angular`, `react`, `vue`, `ionic-angular`, and `ionic1`. The `ionic-angular` type is an Ionic v3 application.
 - The application will use Capacitor for the native layer
 
@@ -64,7 +64,7 @@ Modify your `package.json` file. I suggest moving the `description` up to the to
   "homepage": "https://ionicframework.com/",
   "scripts": {
     ...
-    "postinstall": "husky install",
+    "prepare": "husky install",
     ...
   },
   "private": true,
@@ -83,7 +83,7 @@ Modify your `package.json` file. I suggest moving the `description` up to the to
 Initialize Husky:
 
 ```bash
-$ nxp husky install
+$ npx husky install
 ```
 
 By default, the git hooks handled by `husky` are stored in the `.husky` directory. Let's add a couple now:
@@ -93,7 +93,7 @@ $ npx husky add .husky/pre-commit "npx pretty-quick --staged"
 $ npx husky add .husky/pre-push "npm run lint"
 ```
 
-This will ensure our code is properly fomatted before each commit. It will also ensure that our code does not have any linting errors before we push it out to the `origin` repo. It would also be good to run the unit tests in the `pre-push` hook, but we have not gotten that far yet.
+This will ensure our code is properly formatted before each commit. It will also ensure that our code does not have any linting errors before we push it out to the `origin` repo. It would also be good to run the unit tests in the `pre-push` hook, but we have not gotten that far yet.
 
 Finally, make sure all of our source is formatted properly.
 
@@ -118,4 +118,4 @@ In either case, the Vue CLI does all the heavy lifting, so use whichever command
 
 ## Conclusion
 
-Congratulations on creating your `@ionic/vue` application. Next we will explore unit tests and discuss how they can help us in our development lifecycle.
+Congratulations on creating your `@ionic/vue` application. Next we will explore unit tests and discuss how they can help us in our development life cycle.

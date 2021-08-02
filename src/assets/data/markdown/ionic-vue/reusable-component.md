@@ -52,27 +52,11 @@ describe('AppRating.vue', () => {
 
 In order to see the component as we develop it, let's start using it right away in our `TeaDetails` page:
 
-```html
-<template>
-...
-        <h1 data-testid="name">{{ tea.name }}</h1>
-        <p data-testid="description">{{ tea.description }}</p>
-        <app-rating data-testid="rating"></app-rating>
-...
-</template>
+- Add `<app-rating data-testid="rating"></app-rating>` under the description
+- `import AppRating from '@/components/AppRating.vue';`
+- add `AppRating` to the components list
 
-<script lang="ts">
-...
-import AppRating from '@/components/AppRating.vue';
-
-export default defineComponent({
-  name: 'TeaDetails',
-  components: {
-    AppRating,
-...
-```
-
-Navigte to the `TeaDetails` page and verify that you see "Rating Component is Working" after the description for the tea.
+Navigate to the `TeaDetails` page and verify that you see "Rating Component is Working" after the description for the tea.
 
 ### Build up the UI
 
@@ -102,7 +86,7 @@ export default defineComponent({
 
 Now let's start simple and build this up one step at a time.
 
-In the `TeaDetails.vue` file, add a `ratings` data item and bind that to the `app-rating` component. In addition to our unit tests, this will help us visually test that everything is working as we go.
+In the `src/views/TeaDetails.vue` file, add a `ratings` data item and bind that to the `app-rating` component. In addition to our unit tests, this will help us visually test that everything is working as we go.
 
 ```html
 <template>
@@ -112,13 +96,10 @@ In the `TeaDetails.vue` file, add a `ratings` data item and bind that to the `ap
 </template>
 
 <script>
-  ...
-    data() {
-      return {
-        rating: 0,
-      };
-    },
-  ...
+  // TODO: within the setup(), you will need:
+  //    const rating = ref(0)
+  //    you will also need to return it in the return object of setup()
+  //    add that code...
 </script>
 ```
 
@@ -148,6 +129,8 @@ This test should fail at this point. We will now start replacing the contents of
 </div>
 ```
 
+Be sure to add `IonIcon` to the list of components used here. We have examples of how this is specified with our existing views.
+
 If we look at a tea details page in the browser we should see five outlined stars instead of our prior "Rating Component is Working" text that we had before.
 
 Next, let's make tye component respect the modelValue property. First the test:
@@ -161,11 +144,18 @@ Next, let's make tye component respect the modelValue property. First the test:
   });
 ```
 
-To get this test to pass, the icon binding in the template changes a bit:
+To get this test to pass, the icon binding in the template changes a bit. It currently looks like this:
 
 ```html
-:icon="n <= modelValue ? star : starOutline"
+:icon="starOutline"
 ```
+
+Change that binding such that:
+
+- The first `modelValue` icons use `star`
+- The rest use `starOutline`
+
+**Hint:** you will use a JavaScript hook operator. `n` will count up from 1 to 5.
 
 Once you have a passing test, change the `rating` value in `TeaDetails.vue` a couple of times and verify that the proper number of stars are indeed filled in.
 
@@ -178,8 +168,8 @@ The easiest way to test this is to trigger a click and look for the proper event
     const icons = wrapper.findAllComponents('ion-icon');
     icons[2].trigger('click');
     const updateModelValueCalls = wrapper.emitted('update:modelValue');
-    expect(updateModelValueCalls.length).toBe(1);
-    expect(updateModelValueCalls[0]).toEqual([3]);
+    expect(updateModelValueCalls?.length).toBe(1);
+    expect(updateModelValueCalls && updateModelValueCalls[0]).toEqual([3]);
   });
 ```
 
@@ -189,7 +179,7 @@ Add the following event handler to the icon in order to handle the click events:
 @click="$emit('update:modelValue', n)"
 ```
 
-**Important:** be sure to also add an `emits: ['update:modelValue'],` property in the `defineComponent()` config object.
+**Important:** be sure to also add an `emits: ['update:modelValue']` property in the `defineComponent()` config object.
 
 Try this out in the `TeaDetails` page in the browser. You should now be able to click on the value and it will change. Neat! 🥳
 

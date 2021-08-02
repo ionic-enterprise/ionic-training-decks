@@ -2,7 +2,7 @@
 
 In this lab, you will further explore how to style your application.
 
-**Note:** the first half of this lab is just explanation, so do not try to put the CSS samples anywhere. The second half will apply all of this to our app.
+**Note:** the first half of this lab is just explanation, so do not try to put the CSS samples anywhere. The second half will apply all of this to our app. If you want to skip all of the explanation, look for the section titled **Putting it All Together**.
 
 ## A Note on iOS and Material Design Styling
 
@@ -112,7 +112,7 @@ The design team has started giving us design requirements. Mostly the color sche
 
 ### Global Styles
 
-Up to now, we have done very minimal styling to our app. We have one global style, which we placed in `src/App.vue`, which is OK for trvial apps, but not very managable for production scale apps. Let's fix that now.
+Up to now, we have done very minimal styling to our app. We have one global style, which we placed in `src/App.vue`, which is OK for trivial apps, but not very manageable for production scale apps. Let's fix that now.
 
 1. Create a `src/theme/styles.css` file.
 1. Import this new file in `src/main.ts` using the current import of `src/theme/variables.css` as a guide.
@@ -298,6 +298,8 @@ We have a couple of other components where we need to set a specific color. Name
 ```
 
 ### Other Styles
+
+The design team would like a few other styles applied throughout our app.
 
 First, our design team wants a slightly more obvious radius on our cards. Since this is in the light DOM we can use traditional styling techniques to accomplish this.
 

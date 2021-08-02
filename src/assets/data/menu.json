@@ -211,12 +211,8 @@
               "file": "login-page"
             },
             {
-              "title": "Authentication Services",
-              "file": "auth-services"
-            },
-            {
-              "title": "Session State",
-              "file": "session-state"
+              "title": "Authentication Logic",
+              "file": "auth-logic"
             },
             {
               "title": "Authentication Workflow",
