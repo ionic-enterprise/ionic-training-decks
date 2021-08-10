@@ -42,9 +42,7 @@ const login = async (username: string, password: string): Promise<void> => {
     if (!data.success) throw new Error('Failed to log in.');
 
     const session = { token: data.token, user: data.user };
-    const mode = (await vault.isBiometricsAvailable())
-      ? AuthMode.BiometricOnly
-      : AuthMode.PasscodeOnly;
+    const mode = (await vault.isBiometricsAvailable()) ? AuthMode.BiometricOnly : AuthMode.PasscodeOnly;
 
     await vault.login(session, mode);
     dispatch({ type: 'LOGIN_SUCCESS', session });
@@ -302,11 +300,7 @@ export const AuthProvider: React.FC = ({ children }) => {
     dispatch({ type: 'CLEAR_SESSION' });
   };
 
-  return (
-    <AuthContext.Provider value={{ state, dispatch, vault }}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={{ state, dispatch, vault }}>{children}</AuthContext.Provider>;
 };
 ```
 

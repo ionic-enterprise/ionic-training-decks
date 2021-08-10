@@ -28,74 +28,70 @@ describe('TabsPage', () => {
       component = fixture.componentInstance;
 
       const activatedRoute = TestBed.inject(ActivatedRoute);
-      (activatedRoute.snapshot.paramMap.get as any)
-        .withArgs('section')
-        .and.returnValue('ionic-framework');
+      (activatedRoute.snapshot.paramMap.get as any).withArgs('section').and.returnValue('ionic-framework');
       const menuItemsService = TestBed.inject(MenuItemsService);
-      (menuItemsService.page as any)
-        .withArgs('ionic-framework')
-        .and.returnValue({
-          name: 'ionic-framework',
-          icon: 'logo-ionic',
-          title: 'Ionic Framework',
-          tabs: [
-            {
-              name: 'angular',
-              title: 'Angular',
-              icon: 'logo-angular',
-              folder: 'ionic-angular',
-              file: 'intro',
-              pages: [
-                {
-                  title: 'Get Started',
-                  file: 'start',
-                },
-                {
-                  title: 'Unit Tests',
-                  file: 'unit-tests',
-                },
-                {
-                  title: 'Switch Scale',
-                  file: 'ionic-storage',
-                },
-                {
-                  title: 'On Push Change Detection',
-                  file: 'change-detection',
-                },
-              ],
-            },
-            {
-              name: 'react',
-              title: 'React',
-              icon: 'logo-react',
-              folder: 'ionic-react',
-              file: 'intro',
-              pages: [
-                {
-                  title: 'Get Started',
-                  file: 'start',
-                },
-                {
-                  title: 'Unit Tests',
-                  file: 'unit-tests',
-                },
-                {
-                  title: 'Style the App',
-                  file: 'style',
-                },
-                {
-                  title: 'Add Loading Indicator',
-                  file: 'loading-indicator',
-                },
-                {
-                  title: 'Switch Scale',
-                  file: 'toggle-scale',
-                },
-              ],
-            },
-          ],
-        });
-    }),
+      (menuItemsService.page as any).withArgs('ionic-framework').and.returnValue({
+        name: 'ionic-framework',
+        icon: 'logo-ionic',
+        title: 'Ionic Framework',
+        tabs: [
+          {
+            name: 'angular',
+            title: 'Angular',
+            icon: 'logo-angular',
+            folder: 'ionic-angular',
+            file: 'intro',
+            pages: [
+              {
+                title: 'Get Started',
+                file: 'start',
+              },
+              {
+                title: 'Unit Tests',
+                file: 'unit-tests',
+              },
+              {
+                title: 'Switch Scale',
+                file: 'ionic-storage',
+              },
+              {
+                title: 'On Push Change Detection',
+                file: 'change-detection',
+              },
+            ],
+          },
+          {
+            name: 'react',
+            title: 'React',
+            icon: 'logo-react',
+            folder: 'ionic-react',
+            file: 'intro',
+            pages: [
+              {
+                title: 'Get Started',
+                file: 'start',
+              },
+              {
+                title: 'Unit Tests',
+                file: 'unit-tests',
+              },
+              {
+                title: 'Style the App',
+                file: 'style',
+              },
+              {
+                title: 'Add Loading Indicator',
+                file: 'loading-indicator',
+              },
+              {
+                title: 'Switch Scale',
+                file: 'toggle-scale',
+              },
+            ],
+          },
+        ],
+      });
+    })
   );
 
   it('should create', () => {

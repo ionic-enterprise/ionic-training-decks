@@ -73,7 +73,7 @@ describe('when a token exists in the state', () => {
     store.overrideSelector(selectAuthToken, '294905993');
   });
 
-  it('does not navigate', done => {
+  it('does not navigate', (done) => {
     const navController = TestBed.inject(NavController);
     service.canActivate().subscribe(() => {
       expect(navController.navigateRoot).not.toHaveBeenCalled();
@@ -81,8 +81,8 @@ describe('when a token exists in the state', () => {
     });
   });
 
-  it('emits true', done => {
-    service.canActivate().subscribe(response => {
+  it('emits true', (done) => {
+    service.canActivate().subscribe((response) => {
       expect(response).toBe(true);
       done();
     });
@@ -120,7 +120,7 @@ describe('when a token does not exist in the state', () => {
             email: 'test@test.org',
           },
           token: '19940059fkkf039',
-        }),
+        })
       );
     });
 
@@ -129,7 +129,7 @@ describe('when a token does not exist in the state', () => {
   });
 
   describe('without a stored session', () => {
-    it('navigates to the login page', done => {
+    it('navigates to the login page', (done) => {
       const navController = TestBed.inject(NavController);
       service.canActivate().subscribe(() => {
         expect(navController.navigateRoot).toHaveBeenCalledTimes(1);
@@ -138,8 +138,8 @@ describe('when a token does not exist in the state', () => {
       });
     });
 
-    it('emits false', done => {
-      service.canActivate().subscribe(response => {
+    it('emits false', (done) => {
+      service.canActivate().subscribe((response) => {
         expect(response).toBe(false);
         done();
       });
@@ -158,11 +158,11 @@ export class AuthGuardService implements CanActivate {
     return this.store.pipe(
       select(selectAuthToken),
       take(1),
-      mergeMap(token => (token ? of(token) : this.vault.restoreSession())),
-      map(value => !!value),
-      tap(sessionExists => {
+      mergeMap((token) => (token ? of(token) : this.vault.restoreSession())),
+      map((value) => !!value),
+      tap((sessionExists) => {
         // navigation logic goes here...
-      }),
+      })
     );
   }
 }

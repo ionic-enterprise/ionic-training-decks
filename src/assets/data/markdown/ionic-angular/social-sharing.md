@@ -21,12 +21,7 @@ The first thing we will do is add a sharing button to the top of our `src/app/ta
 
 ```html
 <ion-buttons slot="primary">
-  <ion-button
-    *ngIf="sharingIsAvailable"
-    [disabled]="!allowSharing"
-    id="share-button"
-    (click)="share()"
-  >
+  <ion-button *ngIf="sharingIsAvailable" [disabled]="!allowSharing" id="share-button" (click)="share()">
     <ion-icon slot="icon-only" name="share-outline"></ion-icon>
   </ion-button>
   ... // Cancel button is already here...

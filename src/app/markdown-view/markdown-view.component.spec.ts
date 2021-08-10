@@ -17,7 +17,7 @@ describe('MarkdownViewComponent', () => {
       fixture = TestBed.createComponent(MarkdownViewComponent);
       component = fixture.componentInstance;
       fixture.detectChanges();
-    }),
+    })
   );
 
   it('should create', () => {

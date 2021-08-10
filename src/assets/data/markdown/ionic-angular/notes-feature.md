@@ -47,10 +47,7 @@ export interface TastingNote {
 
 ```typescript
 import { TestBed } from '@angular/core/testing';
-import {
-  HttpClientTestingModule,
-  HttpTestingController,
-} from '@angular/common/http/testing';
+import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 
 import { TastingNotesService } from './tasting-notes.service';
 import { environment } from '@env/environment';
@@ -74,9 +71,7 @@ describe('TastingNotesService', () => {
   describe('get all', () => {
     it('gets the user tasting notes', () => {
       service.getAll().subscribe();
-      const req = httpTestingController.expectOne(
-        `${environment.dataService}/user-tasting-notes`,
-      );
+      const req = httpTestingController.expectOne(`${environment.dataService}/user-tasting-notes`);
       expect(req.request.method).toEqual('GET');
       httpTestingController.verify();
     });
@@ -85,9 +80,7 @@ describe('TastingNotesService', () => {
   describe('delete', () => {
     it('removes the specific note', () => {
       service.delete(4).subscribe();
-      const req = httpTestingController.expectOne(
-        `${environment.dataService}/user-tasting-notes/4`,
-      );
+      const req = httpTestingController.expectOne(`${environment.dataService}/user-tasting-notes/4`);
       expect(req.request.method).toEqual('DELETE');
       httpTestingController.verify();
     });
@@ -104,9 +97,7 @@ describe('TastingNotesService', () => {
           teaCategoryId: 3,
         })
         .subscribe();
-      const req = httpTestingController.expectOne(
-        `${environment.dataService}/user-tasting-notes`,
-      );
+      const req = httpTestingController.expectOne(`${environment.dataService}/user-tasting-notes`);
       expect(req.request.method).toEqual('POST');
       httpTestingController.verify();
     });
@@ -122,9 +113,7 @@ describe('TastingNotesService', () => {
           teaCategoryId: 3,
         })
         .subscribe();
-      const req = httpTestingController.expectOne(
-        `${environment.dataService}/user-tasting-notes/7`,
-      );
+      const req = httpTestingController.expectOne(`${environment.dataService}/user-tasting-notes/7`);
       expect(req.request.method).toEqual('POST');
       httpTestingController.verify();
     });
@@ -149,15 +138,11 @@ export class TastingNotesService {
   constructor(private http: HttpClient) {}
 
   getAll(): Observable<Array<TastingNote>> {
-    return this.http.get<Array<TastingNote>>(
-      `${environment.dataService}/user-tasting-notes`,
-    );
+    return this.http.get<Array<TastingNote>>(`${environment.dataService}/user-tasting-notes`);
   }
 
   delete(id: number): Observable<void> {
-    return this.http.delete<void>(
-      `${environment.dataService}/user-tasting-notes/${id}`,
-    );
+    return this.http.delete<void>(`${environment.dataService}/user-tasting-notes/${id}`);
   }
 
   save(note: TastingNote): Observable<TastingNote> {
@@ -1107,48 +1092,21 @@ export class TastingNoteEditorComponent implements OnInit {
   <form #notesEditorForm="ngForm">
     <ion-item>
       <ion-label position="floating">Brand</ion-label>
-      <ion-input
-        id="brand-input"
-        name="brand"
-        [(ngModel)]="brand"
-        #brandInput="ngModel"
-        required
-      ></ion-input>
+      <ion-input id="brand-input" name="brand" [(ngModel)]="brand" #brandInput="ngModel" required></ion-input>
     </ion-item>
     <ion-item>
       <ion-label position="floating">Name</ion-label>
-      <ion-input
-        id="name-input"
-        name="name"
-        [(ngModel)]="name"
-        #nameInput="ngModel"
-        required
-      ></ion-input>
+      <ion-input id="name-input" name="name" [(ngModel)]="name" #nameInput="ngModel" required></ion-input>
     </ion-item>
     <ion-item>
       <ion-label>Type</ion-label>
-      <ion-select
-        name="tea-type-select"
-        [(ngModel)]="teaCategoryId"
-        #teaTypeSelect="ngModel"
-        required
-      >
-        <ion-select-option
-          *ngFor="let t of teaCategories$ | async"
-          value="{{ t.id }}"
-          >{{ t.name }}</ion-select-option
-        >
+      <ion-select name="tea-type-select" [(ngModel)]="teaCategoryId" #teaTypeSelect="ngModel" required>
+        <ion-select-option *ngFor="let t of teaCategories$ | async" value="{{ t.id }}">{{ t.name }}</ion-select-option>
       </ion-select>
     </ion-item>
     <ion-item>
       <ion-label>Rating</ion-label>
-      <app-rating
-        [(ngModel)]="rating"
-        id="rating-input"
-        name="rating"
-        #ratingInput="ngModel"
-        required
-      ></app-rating>
+      <app-rating [(ngModel)]="rating" id="rating-input" name="rating" #ratingInput="ngModel" required></app-rating>
     </ion-item>
     <ion-item>
       <ion-label position="floating">Notes</ion-label>
@@ -1166,12 +1124,7 @@ export class TastingNoteEditorComponent implements OnInit {
 
 <ion-footer>
   <ion-toolbar>
-    <ion-button
-      expand="full"
-      [disabled]="!notesEditorForm.form.valid"
-      (click)="save()"
-      >{{ buttonLabel }}</ion-button
-    >
+    <ion-button expand="full" [disabled]="!notesEditorForm.form.valid" (click)="save()">{{ buttonLabel }}</ion-button>
   </ion-toolbar>
 </ion-footer>
 ```

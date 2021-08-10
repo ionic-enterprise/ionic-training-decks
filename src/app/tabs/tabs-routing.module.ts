@@ -10,13 +10,11 @@ const routes: Routes = [
     children: [
       {
         path: ':tabName',
-        loadChildren: () =>
-          import('../page/page.module').then(m => m.PagePageModule),
+        loadChildren: () => import('../page/page.module').then((m) => m.PagePageModule),
       },
       {
         path: ':tabName/page',
-        loadChildren: () =>
-          import('../page/page.module').then(m => m.PagePageModule),
+        loadChildren: () => import('../page/page.module').then((m) => m.PagePageModule),
       },
     ],
   },

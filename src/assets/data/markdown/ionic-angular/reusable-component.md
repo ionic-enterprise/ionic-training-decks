@@ -56,13 +56,7 @@ import { TeaDetailsPage } from './tea-details.page';
 import { SharedModule } from '@app/shared';
 
 @NgModule({
-  imports: [
-    CommonModule,
-    FormsModule,
-    IonicModule,
-    SharedModule,
-    TeaDetailsPageRoutingModule,
-  ],
+  imports: [CommonModule, FormsModule, IonicModule, SharedModule, TeaDetailsPageRoutingModule],
   declarations: [TeaDetailsPage],
 })
 export class TeaDetailsPageModule {}
@@ -98,10 +92,7 @@ Next, add a `rating` property to the class and give it a value greater than zero
 
 ```html
 <div>
-  <ion-icon
-    *ngFor="let n of [1, 2, 3, 4, 5]"
-    [name]="n > (rating || 0) ? 'star-outline' : 'star'"
-  ></ion-icon>
+  <ion-icon *ngFor="let n of [1, 2, 3, 4, 5]" [name]="n > (rating || 0) ? 'star-outline' : 'star'"></ion-icon>
 </div>
 ```
 
@@ -194,12 +185,7 @@ import { IonicModule } from '@ionic/angular';
 import { RatingComponent } from './rating.component';
 
 @Component({
-  template: ` <app-rating
-    [(ngModel)]="rating"
-    [disabled]="disabled"
-    (ngModelChange)="onChange()"
-  >
-  </app-rating>`,
+  template: ` <app-rating [(ngModel)]="rating" [disabled]="disabled" (ngModelChange)="onChange()"> </app-rating>`,
 })
 class TestHostComponent {
   disabled = false;
@@ -226,7 +212,7 @@ describe('RatingComponent', () => {
       hostComponent = fixture.componentInstance;
       ratingEl = fixture.nativeElement.querySelector('app-rating');
       fixture.detectChanges();
-    }),
+    })
   );
 
   it('should create', () => {
@@ -437,10 +423,8 @@ We are also going to have to combine code that returns an `Observable` with code
 ```typescript
 it('adds an image to each', fakeAsync(() => {
   let teas: Array<Tea>;
-  service.getAll().subscribe(t => (teas = t));
-  const req = httpTestingController.expectOne(
-    `${environment.dataService}/tea-categories`,
-  );
+  service.getAll().subscribe((t) => (teas = t));
+  const req = httpTestingController.expectOne(`${environment.dataService}/tea-categories`);
   req.flush(resultTeas);
   tick();
   httpTestingController.verify();

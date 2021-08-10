@@ -605,10 +605,7 @@ export class TeaPage implements OnInit {
 In the HTML, change the binding to use the observable and `async` pipe
 
 ```html
-<ion-row
-  *ngFor="let teaRow of teas$ | async"
-  class="ion-align-items-stretch"
-></ion-row>
+<ion-row *ngFor="let teaRow of teas$ | async" class="ion-align-items-stretch"></ion-row>
 ```
 
 After making those changes, all of your tests should still pass.

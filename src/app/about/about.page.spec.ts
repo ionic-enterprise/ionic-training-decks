@@ -17,7 +17,7 @@ describe('AboutPage', () => {
       fixture = TestBed.createComponent(AboutPage);
       component = fixture.componentInstance;
       fixture.detectChanges();
-    }),
+    })
   );
 
   it('should create', () => {

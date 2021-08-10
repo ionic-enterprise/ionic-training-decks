@@ -306,11 +306,7 @@ Now that we have the tests, let's update the HTML with the proper bindings.
 ```html
 <ion-footer>
   <ion-toolbar>
-    <ion-button
-      id="signin-button"
-      expand="full"
-      [disabled]="!loginForm.form.valid"
-      (click)="signIn()"
+    <ion-button id="signin-button" expand="full" [disabled]="!loginForm.form.valid" (click)="signIn()"
       >Sign In
       <ion-icon slot="end" name="log-in-outline"></ion-icon>
     </ion-button>
@@ -387,15 +383,11 @@ Now let's update the form. Add the following to the lower portion of the form, a
 ```html
 <div class="error-message">
   <div *ngIf="emailInput.invalid && (emailInput.dirty || emailInput.touched)">
-    <div *ngIf="emailInput.errors.email">
-      E-Mail Address must have a valid format
-    </div>
+    <div *ngIf="emailInput.errors.email">E-Mail Address must have a valid format</div>
     <div *ngIf="emailInput.errors.required">E-Mail Address is required</div>
   </div>
 
-  <div
-    *ngIf="passwordInput.invalid && (passwordInput.dirty || passwordInput.touched)"
-  >
+  <div *ngIf="passwordInput.invalid && (passwordInput.dirty || passwordInput.touched)">
     <div *ngIf="passwordInput.errors.required">Password is required</div>
   </div>
 </div>

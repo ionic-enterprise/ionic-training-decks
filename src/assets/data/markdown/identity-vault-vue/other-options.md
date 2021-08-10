@@ -34,7 +34,7 @@ super(
     hideScreenOnBackground: true,
     allowSystemPinFallback: true,
     shouldClearVaultAfterTooManyFailedAttempts: false,
-  },
+  }
 );
 ```
 
@@ -101,7 +101,7 @@ super(
   {
     username: 'MyDefaultUser',
     vaultId: 'dbEncryptionKeyVault',
-  },
+  }
 );
 ```
 

@@ -1,8 +1,5 @@
 import { TestBed, waitForAsync } from '@angular/core/testing';
-import {
-  HttpClientTestingModule,
-  HttpTestingController,
-} from '@angular/common/http/testing';
+import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 
 import { MenuItemsService } from './menu-items.service';
 import { MenuItem } from '@app/models';
@@ -41,7 +38,7 @@ describe('MenuItemsService', () => {
         service.load();
         const req = httpTestingController.expectOne('assets/data/menu.json');
         req.flush(testMenu);
-      }),
+      })
     );
 
     describe('main menu', () => {
@@ -97,33 +94,23 @@ describe('MenuItemsService', () => {
       });
 
       it('handles a course and tab', () => {
-        expect(service.url('something', 'react')).toEqual(
-          '/course/something/tabs/react',
-        );
+        expect(service.url('something', 'react')).toEqual('/course/something/tabs/react');
       });
 
       it('handles a course, tab, and page', () => {
-        expect(service.url('something', 'react', 4)).toEqual(
-          '/course/something/tabs/react/page/4',
-        );
+        expect(service.url('something', 'react', 4)).toEqual('/course/something/tabs/react/page/4');
       });
 
       it('handles a course and page', () => {
-        expect(service.url('something', '', 4)).toEqual(
-          '/course/something/page/4',
-        );
+        expect(service.url('something', '', 4)).toEqual('/course/something/page/4');
       });
 
       it('handles a course, tab, and page 0', () => {
-        expect(service.url('something', 'react', 0)).toEqual(
-          '/course/something/tabs/react/page/0',
-        );
+        expect(service.url('something', 'react', 0)).toEqual('/course/something/tabs/react/page/0');
       });
 
       it('handles a course and page 0', () => {
-        expect(service.url('something', '', 0)).toEqual(
-          '/course/something/page/0',
-        );
+        expect(service.url('something', '', 0)).toEqual('/course/something/page/0');
       });
     });
 
@@ -141,49 +128,33 @@ describe('MenuItemsService', () => {
       });
 
       it('is the course and first tab if there is no file but there are tabs', () => {
-        expect(service.redirectUrl('ionic-framework')).toEqual(
-          '/course/ionic-framework/tabs/angular',
-        );
+        expect(service.redirectUrl('ionic-framework')).toEqual('/course/ionic-framework/tabs/angular');
       });
 
       it('is the course and first page of the first tab if there is no file for the first tab', () => {
-        expect(service.redirectUrl('pwa')).toEqual(
-          '/course/pwa/tabs/angular/page/0',
-        );
+        expect(service.redirectUrl('pwa')).toEqual('/course/pwa/tabs/angular/page/0');
       });
 
       it('is just the course if there is a file and pages for it', () => {
-        expect(service.redirectUrl('cordova-to-capacitor')).toEqual(
-          '/course/cordova-to-capacitor',
-        );
+        expect(service.redirectUrl('cordova-to-capacitor')).toEqual('/course/cordova-to-capacitor');
       });
 
       it('is the course and first page if there is not file and not tabs but there are pages', () => {
-        const course = testMenu.pages.find(
-          x => x.name === 'cordova-to-capacitor',
-        );
+        const course = testMenu.pages.find((x) => x.name === 'cordova-to-capacitor');
         delete course.file;
-        expect(service.redirectUrl('cordova-to-capacitor')).toEqual(
-          '/course/cordova-to-capacitor/page/0',
-        );
+        expect(service.redirectUrl('cordova-to-capacitor')).toEqual('/course/cordova-to-capacitor/page/0');
       });
 
       it('uses the tab name if given', () => {
-        expect(service.redirectUrl('ionic-framework', 'react')).toEqual(
-          '/course/ionic-framework/tabs/react',
-        );
+        expect(service.redirectUrl('ionic-framework', 'react')).toEqual('/course/ionic-framework/tabs/react');
       });
 
       it('reverts to the first tab if the tab name is not valid', () => {
-        expect(service.redirectUrl('ionic-framework', 'vue')).toEqual(
-          '/course/ionic-framework/tabs/angular',
-        );
+        expect(service.redirectUrl('ionic-framework', 'vue')).toEqual('/course/ionic-framework/tabs/angular');
       });
 
       it('goes to the first page of the tabs if the tab has no file', () => {
-        expect(service.redirectUrl('pwa', 'react')).toEqual(
-          '/course/pwa/tabs/react/page/0',
-        );
+        expect(service.redirectUrl('pwa', 'react')).toEqual('/course/pwa/tabs/react/page/0');
       });
     });
 
@@ -205,9 +176,7 @@ describe('MenuItemsService', () => {
 
       it('returns undefined with an invalid page', () => {
         expect(service.page('ionic-framework', 'nuxy', 4)).toBeUndefined();
-        expect(
-          service.page('cordova-to-capacitor', 'angular', 1),
-        ).toBeUndefined();
+        expect(service.page('cordova-to-capacitor', 'angular', 1)).toBeUndefined();
       });
 
       it('returns a course page', () => {
@@ -215,21 +184,15 @@ describe('MenuItemsService', () => {
       });
 
       it('returns a tab page', () => {
-        expect(service.page('ionic-framework', 'angular')).toEqual(
-          testMenu.pages[1].tabs[0],
-        );
+        expect(service.page('ionic-framework', 'angular')).toEqual(testMenu.pages[1].tabs[0]);
       });
 
       it('returns a tab sub-page', () => {
-        expect(service.page('ionic-framework', 'angular', 2)).toEqual(
-          testMenu.pages[1].tabs[0].pages[2],
-        );
+        expect(service.page('ionic-framework', 'angular', 2)).toEqual(testMenu.pages[1].tabs[0].pages[2]);
       });
 
       it('returns a course sub-page', () => {
-        expect(service.page('cordova-to-capacitor', '', 1)).toEqual(
-          testMenu.pages[3].pages[1],
-        );
+        expect(service.page('cordova-to-capacitor', '', 1)).toEqual(testMenu.pages[3].pages[1]);
       });
     });
 
@@ -251,9 +214,7 @@ describe('MenuItemsService', () => {
 
       it('returns undefined with an invalid page', () => {
         expect(service.folder('ionic-framework', 'nuxy', 4)).toBeUndefined();
-        expect(
-          service.page('cordova-to-capacitor', 'angular', 1),
-        ).toBeUndefined();
+        expect(service.page('cordova-to-capacitor', 'angular', 1)).toBeUndefined();
       });
 
       it('returns the folder name for a course', () => {
@@ -270,9 +231,7 @@ describe('MenuItemsService', () => {
         expect(service.folder('pwa', 'react', 0)).toEqual('ionic-react-pwa');
         expect(service.folder('pwa', 'angular', 2)).toEqual('links');
         expect(service.folder('pwa', 'react', 2)).toEqual('links');
-        expect(service.folder('cordova-to-capacitor', '', 2)).toEqual(
-          'cordova-to-capacitor',
-        );
+        expect(service.folder('cordova-to-capacitor', '', 2)).toEqual('cordova-to-capacitor');
       });
     });
   });

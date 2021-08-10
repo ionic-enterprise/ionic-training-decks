@@ -108,10 +108,7 @@ describe('show details page', () => {
   it('passes the details page and the ID', () => {
     const navController = TestBed.inject(NavController);
     click(card);
-    expect(navController.navigateForward).toHaveBeenCalledWith([
-      'tea-details',
-      teas[2].id,
-    ]);
+    expect(navController.navigateForward).toHaveBeenCalledWith(['tea-details', teas[2].id]);
   });
 });
 ```
@@ -207,7 +204,7 @@ beforeEach(
     fixture = TestBed.createComponent(TeaDetailsPage);
     component = fixture.componentInstance;
     fixture.detectChanges();
-  }),
+  })
 );
 ```
 

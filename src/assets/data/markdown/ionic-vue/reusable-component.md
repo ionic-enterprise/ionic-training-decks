@@ -124,8 +124,7 @@ This test should fail at this point. We will now start replacing the contents of
 
 ```html
 <div>
-  <ion-icon v-for="n in [1, 2, 3, 4, 5]" :key="n" :icon="starOutline">
-  </ion-icon>
+  <ion-icon v-for="n in [1, 2, 3, 4, 5]" :key="n" :icon="starOutline"> </ion-icon>
 </div>
 ```
 

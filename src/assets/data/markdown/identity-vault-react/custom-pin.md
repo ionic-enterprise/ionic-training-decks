@@ -53,10 +53,8 @@ For simplicity, I put those lines right above the `AuthProvider` function. It is
 Next, let's start overriding `onPasscodeRequest()` such that it will handle the callback we created. Add the following method below `vault.onVaultLocked()`:
 
 ```typescript
-vault.onPasscodeRequest = async (
-  _isPasscodeSetRequest: boolean,
-): Promise<string | undefined> => {
-  return new Promise(resolve => {
+vault.onPasscodeRequest = async (_isPasscodeSetRequest: boolean): Promise<string | undefined> => {
+  return new Promise((resolve) => {
     passcodeRequestCallback = (value: string) => {
       resolve(value || '');
     };

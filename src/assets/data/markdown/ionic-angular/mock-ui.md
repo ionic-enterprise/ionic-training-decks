@@ -445,9 +445,7 @@ But there is one last thing. This will always display four columns, which will l
 Change the `ion-col` properties as such:
 
 ```html
-<ion-col *ngFor="let tea of teaRow" size="12" size-md="6" size-xl="3">
-  ...
-</ion-col>
+<ion-col *ngFor="let tea of teaRow" size="12" size-md="6" size-xl="3"> ... </ion-col>
 ```
 
 Now as you change the type of device that is being emulated, the layout adapts accordingly.

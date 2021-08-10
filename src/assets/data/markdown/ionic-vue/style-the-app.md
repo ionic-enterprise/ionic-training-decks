@@ -246,10 +246,7 @@ The first requirement from our design team is that the pages should have a gradi
 
 @media (prefers-color-scheme: dark) {
   .main-content {
-    --background: linear-gradient(
-      var(--ion-background-color),
-      var(--ion-color-secondary)
-    );
+    --background: linear-gradient(var(--ion-background-color), var(--ion-color-secondary));
   }
 }
 ```

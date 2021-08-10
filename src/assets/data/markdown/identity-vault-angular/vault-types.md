@@ -52,11 +52,7 @@ We will allow the user to specify the locking mode when they log in. There are m
 <ion-item>
   <ion-label>Session Locking</ion-label>
   <ion-select id="lock-mode-select" name="lock-mode" [(ngModel)]="lockMode">
-    <ion-select-option
-      *ngFor="let lockMode of lockModes"
-      [value]="lockMode.mode"
-      >{{lockMode.label}}</ion-select-option
-    >
+    <ion-select-option *ngFor="let lockMode of lockModes" [value]="lockMode.mode">{{lockMode.label}}</ion-select-option>
   </ion-select>
 </ion-item>
 ```

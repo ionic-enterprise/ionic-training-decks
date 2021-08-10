@@ -171,9 +171,7 @@ Create a `describe` for the "get all" functionality. All of our tests for the `g
 ```typescript
 it('gets the tea categories', () => {
   service.getAll().subscribe();
-  const req = httpTestingController.expectOne(
-    `${environment.dataService}/tea-categories`,
-  );
+  const req = httpTestingController.expectOne(`${environment.dataService}/tea-categories`);
   expect(req.request.method).toEqual('GET');
   httpTestingController.verify();
 });
@@ -196,10 +194,8 @@ As sometimes happens, the backend team has not quite figured out how they want t
 ```typescript
 it('adds an image to each', () => {
   let teas: Array<Tea>;
-  service.getAll().subscribe(t => (teas = t));
-  const req = httpTestingController.expectOne(
-    `${environment.dataService}/tea-categories`,
-  );
+  service.getAll().subscribe((t) => (teas = t));
+  const req = httpTestingController.expectOne(`${environment.dataService}/tea-categories`);
   req.flush(resultTeas);
   httpTestingController.verify();
   expect(teas).toEqual(expectedTeas);

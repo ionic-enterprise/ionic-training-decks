@@ -255,7 +255,7 @@ const baseURL = 'https://cs-demo-api.herokuapp.com';
 const client = axios.create({
   baseURL,
   headers: {
-    'Accept': 'application/json',
+    Accept: 'application/json',
     'Content-Type': 'application/json',
   },
 });

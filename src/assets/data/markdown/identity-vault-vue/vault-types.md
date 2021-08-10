@@ -37,10 +37,7 @@ First, modify the `template` to present the user with some options for the authe
 <ion-item v-if="displayAuthMode">
   <ion-label>Session Locking</ion-label>
   <ion-select v-model="authMode" data-testid="auth-mode-select">
-    <ion-select-option
-      v-for="authMode of authModes"
-      :value="authMode.mode"
-      :key="authMode.mode"
+    <ion-select-option v-for="authMode of authModes" :value="authMode.mode" :key="authMode.mode"
       >{{ authMode.label }}</ion-select-option
     >
   </ion-select>

@@ -402,9 +402,7 @@ Here is the markup for the footer:
 ```html
 <ion-footer>
   <ion-toolbar>
-    <ion-button expand="full" data-testid="submit-button" @click="submit"
-      >Add</ion-button
-    >
+    <ion-button expand="full" data-testid="submit-button" @click="submit">Add</ion-button>
   </ion-toolbar>
 </ion-footer>
 ```
@@ -420,20 +418,12 @@ Let's start filling out the form. We already have one simple form, the `LoginPag
     <ion-list>
       <ion-item>
         <ion-label position="floating">Brand</ion-label>
-        <ion-input
-          name="brand"
-          v-model="brand"
-          data-testid="brand-input"
-        ></ion-input>
+        <ion-input name="brand" v-model="brand" data-testid="brand-input"></ion-input>
       </ion-item>
 
       <ion-item>
         <ion-label position="floating">Name</ion-label>
-        <ion-input
-          name="name"
-          v-model="name"
-          data-testid="name-input"
-        ></ion-input>
+        <ion-input name="name" v-model="name" data-testid="name-input"></ion-input>
       </ion-item>
     </ion-list>
   </ion-content>
@@ -531,14 +521,8 @@ Then we can switch back to `src/components/AppTastingNoteEditor.vue` and add the
   ...
   <ion-item>
     <ion-label>Type</ion-label>
-    <ion-select
-      name="teaCategoryId"
-      data-testid="tea-type-select"
-      v-model.number="teaCategoryId"
-    >
-      <ion-select-option v-for="t of teas" :value="t.id" :key="t.id"
-        >{{ t.name }}</ion-select-option
-      >
+    <ion-select name="teaCategoryId" data-testid="tea-type-select" v-model.number="teaCategoryId">
+      <ion-select-option v-for="t of teas" :value="t.id" :key="t.id">{{ t.name }}</ion-select-option>
     </ion-select>
   </ion-item>
   ...
@@ -602,11 +586,7 @@ Add a rating:
   ...
   <ion-item>
     <ion-label>Rating</ion-label>
-    <app-rating
-      name="rating"
-      v-model.number="rating"
-      data-testid="rating-input"
-    ></app-rating>
+    <app-rating name="rating" v-model.number="rating" data-testid="rating-input"></app-rating>
   </ion-item>
   ...
 </template>
@@ -646,12 +626,7 @@ And finally, add a text area for some free-form notes on the tea we just tasted:
   ...
   <ion-item>
     <ion-label position="floating">Notes</ion-label>
-    <ion-textarea
-      name="notes"
-      data-testid="notes-textbox"
-      v-model="notes"
-      rows="5"
-    ></ion-textarea>
+    <ion-textarea name="notes" data-testid="notes-textbox" v-model="notes" rows="5"></ion-textarea>
   </ion-item>
   ...
 </template>
@@ -1308,7 +1283,7 @@ describe('an existing note', () => {
 const merge = async (note: TastingNote): Promise<TastingNote> => {
   const url = endpoint + (note.id ? `/${note.id}` : '');
   const { data } = await client.post(url, note);
-  const idx = notes.value.findIndex(n => n.id === data.id);
+  const idx = notes.value.findIndex((n) => n.id === data.id);
   if (idx > -1) {
     notes.value[idx] = data;
   } else {
@@ -1343,7 +1318,7 @@ describe('remove', () => {
 ```typescript
 const remove = async (note: TastingNote): Promise<void> => {
   await client.delete(`${endpoint}/${note.id}`);
-  const idx = notes.value.findIndex(n => n.id === note.id);
+  const idx = notes.value.findIndex((n) => n.id === note.id);
   notes.value.splice(idx, 1);
 };
 ```

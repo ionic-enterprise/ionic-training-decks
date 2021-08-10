@@ -184,9 +184,7 @@ describe('restore session', () => {
       token: '19940059fkkf039',
     };
     beforeEach(() => {
-      spyOn(Storage, 'get').and.returnValue(
-        Promise.resolve({ value: JSON.stringify(session) }),
-      );
+      spyOn(Storage, 'get').and.returnValue(Promise.resolve({ value: JSON.stringify(session) }));
     });
 
     it('resolves the session', async () => {

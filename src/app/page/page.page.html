@@ -11,11 +11,7 @@
         <ion-icon slot="icon-only" name="chevron-forward"></ion-icon>
       </ion-button>
       <ion-button [disabled]="disableMenu" (click)="showMenu($event)">
-        <ion-icon
-          slot="icon-only"
-          ios="ellipsis-horizontal"
-          md="ellipsis-vertical"
-        ></ion-icon>
+        <ion-icon slot="icon-only" ios="ellipsis-horizontal" md="ellipsis-vertical"></ion-icon>
       </ion-button>
     </ion-buttons>
     <ion-title>{{title}}</ion-title>
@@ -25,10 +21,6 @@
 <ion-content [fullscreen]="true">
   <div class="ion-padding" id="container">
     <div class="ion-text-center error-message">{{ errorMessage }}</div>
-    <app-markdown-view
-      *ngIf="file"
-      [folder]="folder"
-      [file]="file"
-    ></app-markdown-view>
+    <app-markdown-view *ngIf="file" [folder]="folder" [file]="file"></app-markdown-view>
   </div>
 </ion-content>

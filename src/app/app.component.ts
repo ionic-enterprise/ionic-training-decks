@@ -16,7 +16,7 @@ export class AppComponent implements OnInit {
     private applicationService: ApplicationService,
     private menuItems: MenuItemsService,
     private navController: NavController,
-    private platform: Platform,
+    private platform: Platform
   ) {
     this.initializeApp();
   }
@@ -56,7 +56,7 @@ export class AppComponent implements OnInit {
   }
 
   private setSelectedMenuItem(course: string) {
-    this.selectedIndex = this.appPages.findIndex(x => x.name === course);
+    this.selectedIndex = this.appPages.findIndex((x) => x.name === course);
     if (this.selectedIndex < 0) {
       this.selectedIndex = 0;
       this.navController.navigateRoot(this.appPages[0].url);

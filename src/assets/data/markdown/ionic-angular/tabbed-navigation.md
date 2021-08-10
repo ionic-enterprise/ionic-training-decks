@@ -125,20 +125,15 @@ const routes: Routes = [
     children: [
       {
         path: 'about',
-        loadChildren: () =>
-          import('../about/about.module').then(m => m.AboutPageModule),
+        loadChildren: () => import('../about/about.module').then((m) => m.AboutPageModule),
       },
       {
         path: 'tasting-notes',
-        loadChildren: () =>
-          import('../tasting-notes/tasting-notes.module').then(
-            m => m.TastingNotesPageModule,
-          ),
+        loadChildren: () => import('../tasting-notes/tasting-notes.module').then((m) => m.TastingNotesPageModule),
       },
       {
         path: 'tea',
-        loadChildren: () =>
-          import('../tea/tea.module').then(m => m.TeaPageModule),
+        loadChildren: () => import('../tea/tea.module').then((m) => m.TeaPageModule),
       },
     ],
   },
@@ -174,10 +169,7 @@ const routes: Routes = [
   },
   {
     path: 'tea-details',
-    loadChildren: () =>
-      import('../tea-details/tea-details.module').then(
-        m => m.TeaDetailsPageModule,
-      ),
+    loadChildren: () => import('../tea-details/tea-details.module').then((m) => m.TeaDetailsPageModule),
   },
 ];
 
@@ -194,12 +186,7 @@ Now we need to adjust the routes for the navigation in the `TeaPage`. In the `Te
 it('passes the details page and the ID', () => {
   const navController = TestBed.inject(NavController);
   component.showDetailsPage(42);
-  expect(navController.navigateForward).toHaveBeenCalledWith([
-    'tabs',
-    'tea',
-    'tea-details',
-    42,
-  ]);
+  expect(navController.navigateForward).toHaveBeenCalledWith(['tabs', 'tea', 'tea-details', 42]);
 });
 ```
 

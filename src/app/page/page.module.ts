@@ -11,14 +11,7 @@ import { MarkdownViewModule } from '@app/markdown-view/markdown-view.module';
 import { PageMenuModule } from '@app/page-menu/page-menu.module';
 
 @NgModule({
-  imports: [
-    CommonModule,
-    FormsModule,
-    IonicModule,
-    PagePageRoutingModule,
-    MarkdownViewModule,
-    PageMenuModule,
-  ],
+  imports: [CommonModule, FormsModule, IonicModule, PagePageRoutingModule, MarkdownViewModule, PageMenuModule],
   declarations: [PagePage],
 })
 export class PagePageModule {}

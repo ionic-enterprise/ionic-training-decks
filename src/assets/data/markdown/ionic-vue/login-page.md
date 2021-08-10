@@ -40,20 +40,12 @@ Let's just start with a skeleton page that will display the inputs properly and 
       <ion-list>
         <ion-item>
           <ion-label position="floating">Email</ion-label>
-          <ion-input
-            type="email"
-            name="email"
-            data-testid="email-input"
-          ></ion-input>
+          <ion-input type="email" name="email" data-testid="email-input"></ion-input>
         </ion-item>
 
         <ion-item>
           <ion-label position="floating">Password</ion-label>
-          <ion-input
-            type="password"
-            name="password"
-            data-testid="password-input"
-          ></ion-input>
+          <ion-input type="password" name="password" data-testid="password-input"></ion-input>
         </ion-item>
       </ion-list>
     </ion-content>
@@ -162,12 +154,7 @@ export default defineComponent({
 Let's also hook up the `v-model` on the inputs at this point. For example:
 
 ```html
-<ion-input
-  type="email"
-  name="email"
-  v-model="email"
-  data-testid="email-input"
-></ion-input>
+<ion-input type="email" name="email" v-model="email" data-testid="email-input"></ion-input>
 ```
 
 With Vee-Validate, we will create a validation schema that defines how to validate the fields in our form. To do this, we will also use a library called `yup` to help us with our validations.

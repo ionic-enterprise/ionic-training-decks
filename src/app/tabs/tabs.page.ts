@@ -11,10 +11,7 @@ import { MenuItem } from '@app/models';
 export class TabsPage implements OnInit {
   section: MenuItem;
 
-  constructor(
-    private route: ActivatedRoute,
-    private menuItems: MenuItemsService,
-  ) {}
+  constructor(private route: ActivatedRoute, private menuItems: MenuItemsService) {}
 
   ngOnInit() {
     const sectionName = this.route.snapshot.paramMap.get('section');

@@ -7,10 +7,7 @@ import { RouterTestingModule } from '@angular/router/testing';
 import { AppComponent } from './app.component';
 import { createNavControllerMock, createPlatformMock } from '@test/mocks';
 import { MenuItemsService, ApplicationService } from '@app/core';
-import {
-  createMenuItemsServiceMock,
-  createAppliationServiceMock,
-} from '@app/core/testing';
+import { createMenuItemsServiceMock, createAppliationServiceMock } from '@app/core/testing';
 
 describe('AppComponent', () => {
   beforeEach(
@@ -29,7 +26,7 @@ describe('AppComponent', () => {
         ],
         imports: [RouterTestingModule.withRoutes([])],
       }).compileComponents();
-    }),
+    })
   );
 
   it('should create the app', async () => {

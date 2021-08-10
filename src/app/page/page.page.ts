@@ -29,7 +29,7 @@ export class PagePage implements OnInit {
     private activatedRoute: ActivatedRoute,
     private menuItems: MenuItemsService,
     private navController: NavController,
-    private popoverController: PopoverController,
+    private popoverController: PopoverController
   ) {}
 
   async ngOnInit() {
@@ -40,9 +40,7 @@ export class PagePage implements OnInit {
       this.setPageProperties();
     } else {
       if (!this.pageParamExists() && this.hasPages()) {
-        this.navController.navigateRoot(
-          this.menuItems.redirectUrl(this.sectionParam, this.tabParam),
-        );
+        this.navController.navigateRoot(this.menuItems.redirectUrl(this.sectionParam, this.tabParam));
       } else {
         this.showErrorMessage();
       }
@@ -57,16 +55,12 @@ export class PagePage implements OnInit {
     const menu = await this.popoverController.create({
       component: PageMenuComponent,
       event: evt,
-      componentProps: { menuItems: this.section.pages.map(p => p.title) },
+      componentProps: { menuItems: this.section.pages.map((p) => p.title) },
     });
     await menu.present();
     const res = await menu.onWillDismiss();
     if (res.role === 'select') {
-      const url = this.menuItems.url(
-        this.sectionParam,
-        this.tabParam,
-        res.data,
-      );
+      const url = this.menuItems.url(this.sectionParam, this.tabParam, res.data);
       this.navController.navigateRoot(url);
     }
   }
@@ -88,21 +82,13 @@ export class PagePage implements OnInit {
 
   private getPages() {
     this.section = this.menuItems.page(this.sectionParam, this.tabParam);
-    this.page = this.menuItems.page(
-      this.sectionParam,
-      this.tabParam,
-      this.pageIdx,
-    );
+    this.page = this.menuItems.page(this.sectionParam, this.tabParam, this.pageIdx);
   }
 
   private setPageProperties() {
     this.title = this.page.title;
     this.file = this.page.file;
-    this.folder = this.menuItems.folder(
-      this.sectionParam,
-      this.tabParam,
-      this.pageIdx,
-    );
+    this.folder = this.menuItems.folder(this.sectionParam, this.tabParam, this.pageIdx);
   }
 
   private showErrorMessage() {
@@ -113,15 +99,9 @@ export class PagePage implements OnInit {
   private setupNavigation() {
     const newPage = this.pageParamExists() ? this.pageIdx + 1 : 0;
     this.next =
-      newPage < this.section.pages.length
-        ? this.menuItems.url(this.sectionParam, this.tabParam, newPage)
-        : undefined;
+      newPage < this.section.pages.length ? this.menuItems.url(this.sectionParam, this.tabParam, newPage) : undefined;
     if (this.pageIdx) {
-      this.prev = this.menuItems.url(
-        this.sectionParam,
-        this.tabParam,
-        this.pageIdx - 1,
-      );
+      this.prev = this.menuItems.url(this.sectionParam, this.tabParam, this.pageIdx - 1);
     }
     this.disableMenu = false;
   }

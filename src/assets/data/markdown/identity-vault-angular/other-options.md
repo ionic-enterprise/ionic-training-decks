@@ -98,7 +98,7 @@ super(
   {
     username: 'MyDefaultUser',
     vaultId: 'dbEncryptionKeyVault',
-  },
+  }
 );
 ```
 

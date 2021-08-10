@@ -112,7 +112,7 @@ describe('AboutPage', () => {
       fixture = TestBed.createComponent(AboutPage);
       component = fixture.componentInstance;
       fixture.detectChanges();
-    }),
+    })
   );
 
   it('should create', () => {
@@ -121,9 +121,7 @@ describe('AboutPage', () => {
 
   describe('logout button', () => {
     it('dispatches the logout button', () => {
-      const button = fixture.debugElement.query(
-        By.css('[data-testid="logout-button"]'),
-      );
+      const button = fixture.debugElement.query(By.css('[data-testid="logout-button"]'));
       const store = TestBed.inject(Store);
       spyOn(store, 'dispatch');
       click(button.nativeElement);

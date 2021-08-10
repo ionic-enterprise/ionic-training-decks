@@ -19,13 +19,7 @@ export class AboutPage implements OnInit {
     const verSpec = /[\^~]/;
     this.author = packageInfo.author;
     this.applicationVersion = packageInfo.version;
-    this.capacitorVersion = packageInfo.dependencies['@capacitor/core'].replace(
-      verSpec,
-      '',
-    );
-    this.frameworkVersion = packageInfo.dependencies['@ionic/angular'].replace(
-      verSpec,
-      '',
-    );
+    this.capacitorVersion = packageInfo.dependencies['@capacitor/core'].replace(verSpec, '');
+    this.frameworkVersion = packageInfo.dependencies['@ionic/angular'].replace(verSpec, '');
   }
 }

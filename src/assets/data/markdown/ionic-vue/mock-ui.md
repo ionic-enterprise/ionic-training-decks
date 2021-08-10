@@ -252,13 +252,7 @@ Close the devtools for now. Let's just worry about the desktop sized layout for 
 If you examine the console, you will notice several warnings having to do with failing to resolve a component. The problem here is that we are using some components but have not imported or declared them yet. If you look at the code, you will see a couple of places where the child components are specified:
 
 ```typescript
-import {
-  IonContent,
-  IonHeader,
-  IonPage,
-  IonTitle,
-  IonToolbar,
-} from '@ionic/vue';
+import { IonContent, IonHeader, IonPage, IonTitle, IonToolbar } from '@ionic/vue';
 ```
 
 ```typescript
@@ -340,11 +334,7 @@ We can then update the view's template accordingly. Add the following markup eit
 
 ```html
 <ion-grid>
-  <ion-row
-    class="ion-align-items-stretch"
-    v-for="(row, index) in teaRows"
-    :key="index"
-  ></ion-row>
+  <ion-row class="ion-align-items-stretch" v-for="(row, index) in teaRows" :key="index"></ion-row>
 </ion-grid>
 ```
 
@@ -372,11 +362,7 @@ Verify that we have two failing tests. Now we can update the template by adding 
 
 ```html
 <ion-grid>
-  <ion-row
-    class="ion-justify-content-center ion-align-items-stretch"
-    v-for="(row, index) in teaRows"
-    :key="index"
-  >
+  <ion-row class="ion-justify-content-center ion-align-items-stretch" v-for="(row, index) in teaRows" :key="index">
     <ion-col v-for="tea of row" size="3" :key="tea.id"></ion-col>
   </ion-row>
 </ion-grid>
@@ -451,13 +437,7 @@ But there is one last thing. This will always display four columns, which will l
 Change the `ion-col` properties as such:
 
 ```html
-<ion-col
-  v-for="tea of row"
-  size="12"
-  size-md="6"
-  size-xl="3"
-  :key="tea.id"
-></ion-col>
+<ion-col v-for="tea of row" size="12" size-md="6" size-xl="3" :key="tea.id"></ion-col>
 ```
 
 Now as you change the type of device that is being emulated, the layout adapts accordingly.

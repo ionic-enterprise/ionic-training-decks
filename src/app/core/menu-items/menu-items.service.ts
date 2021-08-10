@@ -15,7 +15,7 @@ export class MenuItemsService {
     icon: string;
     url: string;
   }> {
-    return this.items.map(item => ({
+    return this.items.map((item) => ({
       name: item.name,
       title: item.title,
       icon: item.icon || 'reader',
@@ -47,9 +47,9 @@ export class MenuItemsService {
   }
 
   page(courseName: string, tabName?: string, pageIndex?: number): MenuItem {
-    let page = this.items.find(x => x.name === courseName);
+    let page = this.items.find((x) => x.name === courseName);
     if (page && tabName) {
-      page = page.tabs && page.tabs.find(x => x.name === tabName);
+      page = page.tabs && page.tabs.find((x) => x.name === tabName);
     }
     if (page && (pageIndex || pageIndex === 0)) {
       page = page.pages && page.pages[pageIndex];
@@ -74,11 +74,10 @@ export class MenuItemsService {
 
   redirectUrl(courseName: string, tabName?: string): string {
     let path = '';
-    const course = this.items.find(x => x.name === courseName);
+    const course = this.items.find((x) => x.name === courseName);
     const tab =
       course &&
-      ((course.tabs && course.tabs.find(x => x.name === tabName)) ||
-        (!course.file && course.tabs && course.tabs[0]));
+      ((course.tabs && course.tabs.find((x) => x.name === tabName)) || (!course.file && course.tabs && course.tabs[0]));
 
     if (course) {
       path += `/course/${course.name}`;

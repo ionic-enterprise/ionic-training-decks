@@ -62,10 +62,7 @@ With the initial shape of our API in place, we are better informed in how to set
 
 ```typescript
 import { TestBed } from '@angular/core/testing';
-import {
-  HttpTestingController,
-  HttpClientTestingModule,
-} from '@angular/common/http/testing';
+import { HttpTestingController, HttpClientTestingModule } from '@angular/common/http/testing';
 
 import { AuthenticationService } from './authentication.service';
 
@@ -102,9 +99,7 @@ Let's build up the login on step at a time following TDD. With each code pair, a
 ```typescript
 it('POSTs the login', () => {
   service.login('thank.you@forthefish.com', 'solongDude').subscribe();
-  const req = httpTestingController.expectOne(
-    `${environment.dataService}/login`,
-  );
+  const req = httpTestingController.expectOne(`${environment.dataService}/login`);
   expect(req.request.method).toEqual('POST');
   req.flush({});
   httpTestingController.verify();
@@ -120,9 +115,7 @@ return this.http.post<Session>(`${environment.dataService}/login`, {});
 ```typescript
 it('passes the credentials in the body', () => {
   service.login('thank.you@forthefish.com', 'solongDude').subscribe();
-  const req = httpTestingController.expectOne(
-    `${environment.dataService}/login`,
-  );
+  const req = httpTestingController.expectOne(`${environment.dataService}/login`);
   expect(req.request.body).toEqual({
     username: 'thank.you@forthefish.com',
     password: 'solongDude',
@@ -168,12 +161,8 @@ The folloing `3.1` step should then be nested within the `describe()` that was j
 ```typescript
 it('emits the session', fakeAsync(() => {
   let session: Session;
-  service
-    .login('thank.you@forthefish.com', 'solongDude')
-    .subscribe(r => (session = r));
-  const req = httpTestingController.expectOne(
-    `${environment.dataService}/login`,
-  );
+  service.login('thank.you@forthefish.com', 'solongDude').subscribe((r) => (session = r));
+  const req = httpTestingController.expectOne(`${environment.dataService}/login`);
   req.flush(response);
   tick();
   httpTestingController.verify();
@@ -206,10 +195,10 @@ return this.http
     password,
   })
   .pipe(
-    map(res => {
+    map((res) => {
       delete res.success;
       return res;
-    }),
+    })
   );
 ```
 
@@ -230,12 +219,8 @@ describe('on failure', () => {
 
 ```typescript
 it('emits undefined', fakeAsync(() => {
-  service
-    .login('thank.you@forthefish.com', 'solongDude')
-    .subscribe(r => expect(r).toEqual(undefined));
-  const req = httpTestingController.expectOne(
-    `${environment.dataService}/login`,
-  );
+  service.login('thank.you@forthefish.com', 'solongDude').subscribe((r) => expect(r).toEqual(undefined));
+  const req = httpTestingController.expectOne(`${environment.dataService}/login`);
   req.flush(response);
   tick();
   httpTestingController.verify();
@@ -282,12 +267,12 @@ export class AuthenticationService {
         password,
       })
       .pipe(
-        map(res => {
+        map((res) => {
           if (res.success) {
             delete res.success;
             return res;
           }
-        }),
+        })
       );
   }
 
@@ -306,9 +291,7 @@ The logout is easier, and now you have a model for the code. So I will provide t
 ```typescript
 it('POSTs the logout', () => {
   service.logout().subscribe();
-  const req = httpTestingController.expectOne(
-    `${environment.dataService}/logout`,
-  );
+  const req = httpTestingController.expectOne(`${environment.dataService}/logout`);
   req.flush({});
   httpTestingController.verify();
   expect(true).toBe(true); // Prevents Jasmine warning
@@ -352,12 +335,7 @@ Be sure to update the `src/core/index.ts` file.
 ```typescript
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import {
-  HttpEvent,
-  HttpInterceptor,
-  HttpHandler,
-  HttpRequest,
-} from '@angular/common/http';
+import { HttpEvent, HttpInterceptor, HttpHandler, HttpRequest } from '@angular/common/http';
 import { select, Store } from '@ngrx/store';
 import { selectAuthToken, State } from '@app/store';
 import { mergeMap, take, tap } from 'rxjs/operators';
@@ -366,14 +344,11 @@ import { mergeMap, take, tap } from 'rxjs/operators';
 export class AuthInterceptor implements HttpInterceptor {
   constructor(private store: Store<State>) {}
 
-  intercept(
-    req: HttpRequest<any>,
-    next: HttpHandler,
-  ): Observable<HttpEvent<any>> {
+  intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     return this.store.pipe(
       select(selectAuthToken),
       take(1),
-      tap(token => {
+      tap((token) => {
         if (token && this.requestRequiresToken(req)) {
           req = req.clone({
             setHeaders: {
@@ -383,7 +358,7 @@ export class AuthInterceptor implements HttpInterceptor {
           });
         }
       }),
-      mergeMap(() => next.handle(req)),
+      mergeMap(() => next.handle(req))
     );
   }
 
@@ -397,13 +372,7 @@ export class AuthInterceptor implements HttpInterceptor {
 
 ```typescript
 import { Injectable } from '@angular/core';
-import {
-  HttpErrorResponse,
-  HttpEvent,
-  HttpInterceptor,
-  HttpHandler,
-  HttpRequest,
-} from '@angular/common/http';
+import { HttpErrorResponse, HttpEvent, HttpInterceptor, HttpHandler, HttpRequest } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { Store } from '@ngrx/store';
@@ -414,10 +383,7 @@ import { State } from '@app/store';
 export class UnauthInterceptor implements HttpInterceptor {
   constructor(private store: Store<State>) {}
 
-  intercept(
-    req: HttpRequest<any>,
-    next: HttpHandler,
-  ): Observable<HttpEvent<any>> {
+  intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     return next.handle(req).pipe(
       tap(
         (event: HttpEvent<any>) => {},
@@ -425,8 +391,8 @@ export class UnauthInterceptor implements HttpInterceptor {
           if (err instanceof HttpErrorResponse && err.status === 401) {
             // What should we do here?
           }
-        },
-      ),
+        }
+      )
     );
   }
 }
