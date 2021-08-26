@@ -9,7 +9,7 @@ export function createOverlayElementMock(name: string) {
     dismiss: Promise.resolve(),
     onDidDismiss: Promise.resolve(),
     onWillDismiss: Promise.resolve(),
-    present: Promise.resolve()
+    present: Promise.resolve(),
   });
 }
 
@@ -17,13 +17,13 @@ export function createOverlayControllerMock(name: string, element?: any) {
   return jasmine.createSpyObj(name, {
     create: Promise.resolve(element),
     dismiss: undefined,
-    getTop: Promise.resolve(element)
+    getTop: Promise.resolve(element),
   });
 }
 
 export function createPlatformMock() {
   return jasmine.createSpyObj<Platform>('Platform', {
     is: false,
-    ready: Promise.resolve('ready')
+    ready: Promise.resolve('ready'),
   });
 }
