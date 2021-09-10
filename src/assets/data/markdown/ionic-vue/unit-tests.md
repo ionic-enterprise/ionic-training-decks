@@ -100,7 +100,7 @@ import Home from '@/views/Home.vue';
 describe('Home.vue', () => {
   it('displays the title', () => {
     const wrapper = mount(Home);
-    const titles = wrapper.findAllComponents('ion-title');
+    const titles = wrapper.findAll('ion-title');
     expect(titles).toHaveLength(2);
     expect(titles[0].text()).toBe('Blank');
     expect(titles[1].text()).toBe('Blank');
@@ -117,12 +117,15 @@ describe('Home.vue', () => {
 There are few key items to note with this test.
 
 - The test was already using `mount()` instead of `shallowMount()`. This is because we want to query some actual DOM content.
-- The family of "find" methods take CSS selectors and find the matching item(s) returning either a `Wrapper` or `WrapperArray`
-  - `find` - find the first element matching the selector
-  - `findComponent` - find the first Vue component matching the selector
-  - `findAll` - find all of the elements matching the selector
-  - `findAllComponents` - find all of the Vue components matching the selector
+- The "find" methods take CSS selectors and find the matching item(s) returning either a `DOMWrapper` or array of `DOMWrapper`.
+  - `find` - find the DOM first element matching the selector
+  - `findAll` - find all of the DOM elements matching the selector
 - The Home page has two titles and they must should match. We find them both and check them.
+
+The Vue test utilities also provide "findComponent" methods (not shown here) which are used to access Vue components. They return a `VueWrapper` or an array of `VueWrapper`. We will use these to obtain wrappers to the Vue component when we need to perform an operation that we cannot perform via the DOM element. These functions are:
+
+- `findComponent` - find the first Vue component matching the selector
+- `findAllComponents` - find all of the Vue components matching the selector
 
 ## Conclusion
 

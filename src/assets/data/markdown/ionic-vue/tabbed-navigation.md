@@ -71,7 +71,7 @@ describe('TastingNotes.vue', () => {
 
   it('displays the title', async () => {
     const wrapper = await mountView();
-    const titles = wrapper.findAllComponents('ion-title');
+    const titles = wrapper.findAll('ion-title');
     expect(titles).toHaveLength(1);
     expect(titles[0].text()).toBe('Tasting Notes');
   });

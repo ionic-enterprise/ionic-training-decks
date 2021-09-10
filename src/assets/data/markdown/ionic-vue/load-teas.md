@@ -235,11 +235,9 @@ Remove that line, and update the comparison to use `teas.value`. Here is a `diff
      it('displays the name in the title', async () => {
        const wrapper = await mountView();
 -      const teas = wrapper.vm.teaData as Array<Tea>;
-       const cols = wrapper.findAllComponents('ion-col');
+       const cols = wrapper.find('ion-col');
        cols.forEach((c, idx) => {
-         const title = c.findComponent(
-           'ion-card ion-card-header ion-card-title',
-         );
+         const title = c.find('ion-card ion-card-header ion-card-title');
 -        expect(title.text()).toBe(teas[idx].name);
 +        expect(title.text()).toBe(teas.value[idx].name);
        });

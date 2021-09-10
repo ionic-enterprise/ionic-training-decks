@@ -41,8 +41,8 @@ describe('TeaDetails.vue', () => {
 
   it('renders', async () => {
     const wrapper = await mountView();
-    const header = wrapper.findComponent('ion-header');
-    const content = wrapper.findComponent('ion-content');
+    const header = wrapper.find('ion-header');
+    const content = wrapper.find('ion-content');
     expect(header.exists()).toBe(true);
     expect(content.exists()).toBe(true);
   });
@@ -101,7 +101,7 @@ We want to navigate from the `TeaList` page to the `TeaDetails` page. A logical 
 ```TypeScript
   it('navigates to the tea details page when a tea card is clicked', async () => {
     const wrapper = await mountView();
-    const cards = wrapper.findAllComponents('ion-card');
+    const cards = wrapper.findAll('ion-card');
     router.push = jest.fn();
     cards[3].trigger('click');
     expect(router.push).toHaveBeenCalledTimes(1);

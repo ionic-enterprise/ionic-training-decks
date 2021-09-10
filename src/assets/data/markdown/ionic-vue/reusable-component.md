@@ -113,7 +113,7 @@ describe('AppRating.vue', () => {
 ...
 
   it('renders five empty stars', () => {
-    const icons = wrapper.findAllComponents('ion-icon');
+    const icons = wrapper.findAllComponents({ name: 'ion-icon' });
     expect(icons.length).toBe(5);
     icons.forEach(icon => expect(icon.vm.icon).toEqual(starOutline));
   });
@@ -136,7 +136,7 @@ Next, let's make tye component respect the modelValue property. First the test:
 
 ```TypeScript
   it('fills in the first 3 stars', async () => {
-    const icons = wrapper.findAllComponents('ion-icon');
+    const icons = wrapper.findAllComponents({ name: 'ion-icon' });
     await wrapper.setProps({modelValue: 3});
     expect(icons.length).toBe(5);
     icons.forEach((icon, idx) => expect(icon.vm.icon).toEqual(idx < 3 ? star : starOutline));
@@ -164,7 +164,7 @@ The easiest way to test this is to trigger a click and look for the proper event
 
 ```TypeScript
   it('emits the model value update event on clicks', () => {
-    const icons = wrapper.findAllComponents('ion-icon');
+    const icons = wrapper.findAll('ion-icon');
     icons[2].trigger('click');
     const updateModelValueCalls = wrapper.emitted('update:modelValue');
     expect(updateModelValueCalls?.length).toBe(1);

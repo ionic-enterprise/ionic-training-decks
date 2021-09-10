@@ -108,7 +108,7 @@ However, our test still refers to our Tea view as "Home", and that will be confu
    it('displays the title', () => {
 -    const wrapper = mount(Home);
 +    const wrapper = mount(TeaList);
-     const titles = wrapper.findAllComponents('ion-title');
+     const titles = wrapper.findAll('ion-title');
      expect(titles).toHaveLength(2);
      expect(titles[0].text()).toBe('Blank');
 @@ -11,7 +11,7 @@ describe('Home.vue', () => {
@@ -298,7 +298,7 @@ Let's fill out the first test:
 ```typescript
 it('displays two rows', () => {
   const wrapper = mount(TeaList);
-  const rows = wrapper.findAllComponents('ion-grid ion-row');
+  const rows = wrapper.findAll('ion-grid ion-row');
   expect(rows).toHaveLength(2);
 });
 ```
@@ -345,15 +345,15 @@ Now let's display the columns properly, first updating the tests:
 ```typescript
 it('displays four columns in the first row', () => {
   const wrapper = mount(TeaList);
-  const rows = wrapper.findAllComponents('ion-grid ion-row');
-  const cols = rows[0].findAllComponents('ion-col');
+  const rows = wrapper.findAll('ion-grid ion-row');
+  const cols = rows[0].findAll('ion-col');
   expect(cols).toHaveLength(4);
 });
 
 it('displays three columns in the second row', () => {
   const wrapper = mount(TeaList);
-  const rows = wrapper.findAllComponents('ion-grid ion-row');
-  const cols = rows[1].findAllComponents('ion-col');
+  const rows = wrapper.findAll('ion-grid ion-row');
+  const cols = rows[1].findAll('ion-col');
   expect(cols).toHaveLength(3);
 });
 ```
@@ -380,9 +380,9 @@ import { Tea } from '@/models';
     it('displays the name in the title', () => {
       const wrapper = mount(TeaList);
       const teas = wrapper.vm.teaData as Array<Tea>;
-      const cols = wrapper.findAllComponents('ion-col');
+      const cols = wrapper.findAll('ion-col');
       cols.forEach((c, idx) => {
-        const title = c.findComponent('ion-card ion-card-header ion-card-title');
+        const title = c.find('ion-card ion-card-header ion-card-title');
         expect(title.text()).toBe(teas[idx].name);
       });
     });
@@ -390,9 +390,9 @@ import { Tea } from '@/models';
     it('displays the description in the content', () => {
       const wrapper = mount(TeaList);
       const teas = wrapper.vm.teaData as Array<Tea>;
-      const cols = wrapper.findAllComponents('ion-col');
+      const cols = wrapper.findAll('ion-col');
       cols.forEach((c, idx) => {
-        const title = c.findComponent('ion-card ion-card-content');
+        const title = c.find('ion-card ion-card-content');
         expect(title.text()).toBe(teas[idx].description);
       });
     });

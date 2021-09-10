@@ -312,7 +312,7 @@ describe('adding a new note', () => {
 
   it('displays the modal', async () => {
     const wrapper = await mountView();
-    const button = wrapper.findComponent('[data-testid="add-note-button"]');
+    const button = wrapper.find('[data-testid="add-note-button"]');
     await button.trigger('click');
     expect(modal.present).toHaveBeenCalledTimes(1);
   });
@@ -402,7 +402,9 @@ Here is the markup for the footer:
 ```html
 <ion-footer>
   <ion-toolbar>
-    <ion-button expand="full" data-testid="submit-button" @click="submit">Add</ion-button>
+    <ion-button expand="full" data-testid="submit-button" @click="submit"
+      >Add</ion-button
+    >
   </ion-toolbar>
 </ion-footer>
 ```
@@ -418,12 +420,20 @@ Let's start filling out the form. We already have one simple form, the `LoginPag
     <ion-list>
       <ion-item>
         <ion-label position="floating">Brand</ion-label>
-        <ion-input name="brand" v-model="brand" data-testid="brand-input"></ion-input>
+        <ion-input
+          name="brand"
+          v-model="brand"
+          data-testid="brand-input"
+        ></ion-input>
       </ion-item>
 
       <ion-item>
         <ion-label position="floating">Name</ion-label>
-        <ion-input name="name" v-model="name" data-testid="name-input"></ion-input>
+        <ion-input
+          name="name"
+          v-model="name"
+          data-testid="name-input"
+        ></ion-input>
       </ion-item>
     </ion-list>
   </ion-content>
@@ -504,8 +514,8 @@ describe('AppTastingNoteEditor.vue', () => {
   });
   ...
   it('binds the teas in the select', () => {
-    const select = wrapper.findComponent('[data-testid="tea-type-select"]');
-    const opts = select.findAllComponents('ion-select-option');
+    const select = wrapper.find('[data-testid="tea-type-select"]');
+    const opts = select.findAll('ion-select-option');
     expect(opts.length).toBe(3);
     expect(opts[0].text()).toBe('Green');
     expect(opts[1].text()).toBe('Black');
@@ -521,8 +531,14 @@ Then we can switch back to `src/components/AppTastingNoteEditor.vue` and add the
   ...
   <ion-item>
     <ion-label>Type</ion-label>
-    <ion-select name="teaCategoryId" data-testid="tea-type-select" v-model.number="teaCategoryId">
-      <ion-select-option v-for="t of teas" :value="t.id" :key="t.id">{{ t.name }}</ion-select-option>
+    <ion-select
+      name="teaCategoryId"
+      data-testid="tea-type-select"
+      v-model.number="teaCategoryId"
+    >
+      <ion-select-option v-for="t of teas" :value="t.id" :key="t.id"
+        >{{ t.name }}</ion-select-option
+      >
     </ion-select>
   </ion-item>
   ...
@@ -586,7 +602,11 @@ Add a rating:
   ...
   <ion-item>
     <ion-label>Rating</ion-label>
-    <app-rating name="rating" v-model.number="rating" data-testid="rating-input"></app-rating>
+    <app-rating
+      name="rating"
+      v-model.number="rating"
+      data-testid="rating-input"
+    ></app-rating>
   </ion-item>
   ...
 </template>
@@ -626,7 +646,12 @@ And finally, add a text area for some free-form notes on the tea we just tasted:
   ...
   <ion-item>
     <ion-label position="floating">Notes</ion-label>
-    <ion-textarea name="notes" data-testid="notes-textbox" v-model="notes" rows="5"></ion-textarea>
+    <ion-textarea
+      name="notes"
+      data-testid="notes-textbox"
+      v-model="notes"
+      rows="5"
+    ></ion-textarea>
   </ion-item>
   ...
 </template>
@@ -670,9 +695,9 @@ We have built up the validations as we went. Let's just add a simple test to ver
 import flushPromises from 'flush-promises';
   ...
   it('displays messages as the user enters invalid data', async () => {
-    const brand = wrapper.findComponent('[data-testid="brand-input"]');
-    const name = wrapper.findComponent('[data-testid="name-input"]');
-    const notes = wrapper.findComponent('[data-testid="notes-textbox"]');
+    const brand = wrapper.find('[data-testid="brand-input"]').findComponent({ name: 'ion-input' });
+    const name = wrapper.find('[data-testid="name-input"]').findComponent({ name: 'ion-input' });
+    const notes = wrapper.find('[data-testid="notes-textbox"]').findComponent({ name: 'ion-textarea' });
     const msg = wrapper.find('[data-testid="message-area"]');
 
     await flushPromises();
@@ -727,13 +752,13 @@ Test:
 ```TypeScript
   describe('submit button', () => {
     it('is disabled until valid data is entered', async () => {
-      const brand = wrapper.findComponent('[data-testid="brand-input"]');
-      const name = wrapper.findComponent('[data-testid="name-input"]');
-      const teaType = wrapper.findComponent('[data-testid="tea-type-select"]');
-      const rating = wrapper.findComponent('[data-testid="rating-input"]');
-      const notes = wrapper.findComponent('[data-testid="notes-textbox"]');
+      const brand = wrapper.find('[data-testid="brand-input"]').findComponent({ name: 'ion-input' });
+      const name = wrapper.find('[data-testid="name-input"]').findComponent({ name: 'ion-input' });
+      const teaType = wrapper.find('[data-testid="tea-type-select"]').findComponent({ name: 'ion-select' });
+      const rating = wrapper.find('[data-testid="rating-input"]').findComponent({ name: 'ion-input' });
+      const notes = wrapper.find('[data-testid="notes-textbox"]').findComponent({ name: 'ion-textarea' });
 
-      const button = wrapper.findComponent('[data-testid="submit-button"]');
+      const button = wrapper.find('[data-testid="submit-button"]');
 
       await flushPromises();
       expect(button.attributes().disabled).toBe('true');
@@ -789,13 +814,11 @@ Within the "submit button" describe block we will add another group of test for 
 ```TypeScript
     describe('on click', () => {
       beforeEach(async () => {
-        const brand = wrapper.findComponent('[data-testid="brand-input"]');
-        const name = wrapper.findComponent('[data-testid="name-input"]');
-        const teaType = wrapper.findComponent(
-          '[data-testid="tea-type-select"]',
-        );
-        const rating = wrapper.findComponent('[data-testid="rating-input"]');
-        const notes = wrapper.findComponent('[data-testid="notes-textbox"]');
+        const brand = wrapper.find('[data-testid="brand-input"]').findComponent({ nane: 'ion-input' });
+        const name = wrapper.find('[data-testid="name-input"]').findComponent({ name: 'ion-input' });
+        const teaType = wrapper.find('[data-testid="tea-type-select"]').findComponent({ name: 'ion-select' });
+        const rating = wrapper.find('[data-testid="rating-input"]').findComponent({ name: 'app-rating' });
+        const notes = wrapper.find('[data-testid="notes-textbox"]').findComponent({ name: 'ion-textarea' });
 
         await brand.setValue('foobar');
         await name.setValue('mytea');
@@ -806,7 +829,7 @@ Within the "submit button" describe block we will add another group of test for 
 
       it('merges the tasting note', async () => {
         const { merge } = useTastingNotes();
-        const button = wrapper.findComponent('[data-testid="submit-button"]');
+        const button = wrapper.find('[data-testid="submit-button"]');
         await button.trigger('click');
 
         expect(merge).toHaveBeenCalledTimes(1);
@@ -820,7 +843,7 @@ Within the "submit button" describe block we will add another group of test for 
       });
 
       it('closes the modal', async () => {
-        const button = wrapper.findComponent('[data-testid="submit-button"]');
+        const button = wrapper.find('[data-testid="submit-button"]');
 
         expect(modalController.dismiss).not.toHaveBeenCalled();
         await button.trigger('click');
@@ -835,13 +858,13 @@ The cancel button tests will be similar, but with no data setup. We also will ex
   describe('cancel button', () => {
     it('does not merge', async () => {
       const { merge } = useTastingNotes();
-      const button = wrapper.findComponent('[data-testid="cancel-button"]');
+      const button = wrapper.find('[data-testid="cancel-button"]');
       await button.trigger('click');
       expect(merge).not.toHaveBeenCalled();
     });
 
     it('closes the modal', async () => {
-      const button = wrapper.findComponent('[data-testid="cancel-button"]');
+      const button = wrapper.find('[data-testid="cancel-button"]');
 
       expect(modalController.dismiss).not.toHaveBeenCalled();
       await button.trigger('click');
@@ -932,8 +955,8 @@ Our requirements are that if a note exists for this user, we display it in the l
 ```TypeScript
   it('displays the notes', async () => {
     const wrapper = await mountView();
-    const list = wrapper.findComponent('[data-testid="notes-list"]');
-    const items = list.findAllComponents('ion-item');
+    const list = wrapper.find('[data-testid="notes-list"]');
+    const items = list.findAll('ion-item');
     expect(items.length).toBe(3);
     expect(items[0].text()).toContain('Lipton');
     expect(items[0].text()).toContain('Green Tea');
@@ -1000,7 +1023,7 @@ First, we should modify the title based on whether we are doing an add or an upd
 
 ```TypeScript
   it('displays an appropriate title', async () => {
-    const title = wrapper.findComponent('ion-title');
+    const title = wrapper.find('ion-title');
     expect(title.text()).toBe('Add New Tasting Note');
     await wrapper.setProps({ noteId: 42 });
     expect(title.text()).toBe('Tasting Note');
@@ -1109,7 +1132,7 @@ When saving the note, the value passed to the `merge()` should include the ID. H
 ```TypeScript
       it('includes the ID if it set', async () => {
         const { merge } = useTastingNotes();
-        const button = wrapper.findComponent('[data-testid="submit-button"]');
+        const button = wrapper.find('[data-testid="submit-button"]');
         await wrapper.setProps({noteId: 4273});
         await button.trigger('click');
 
@@ -1199,7 +1222,7 @@ First we will update the "displays the title" test in `tests/unit/views/TastingN
 
 ```diff
    it('displays the title', () => {
-     const titles = wrapper.findAllComponents('ion-title');
+     const titles = wrapper.findAll('ion-title');
 -    expect(titles).toHaveLength(1);
 +    expect(titles).toHaveLength(2);
      expect(titles[0].text()).toBe('Tasting Notes');
@@ -1283,7 +1306,7 @@ describe('an existing note', () => {
 const merge = async (note: TastingNote): Promise<TastingNote> => {
   const url = endpoint + (note.id ? `/${note.id}` : '');
   const { data } = await client.post(url, note);
-  const idx = notes.value.findIndex((n) => n.id === data.id);
+  const idx = notes.value.findIndex(n => n.id === data.id);
   if (idx > -1) {
     notes.value[idx] = data;
   } else {
@@ -1318,7 +1341,7 @@ describe('remove', () => {
 ```typescript
 const remove = async (note: TastingNote): Promise<void> => {
   await client.delete(`${endpoint}/${note.id}`);
-  const idx = notes.value.findIndex((n) => n.id === note.id);
+  const idx = notes.value.findIndex(n => n.id === note.id);
   notes.value.splice(idx, 1);
 };
 ```

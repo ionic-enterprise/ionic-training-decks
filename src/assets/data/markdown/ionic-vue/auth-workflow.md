@@ -33,7 +33,7 @@ describe('Login.vue', () => {
 
   it('displays the title', async () => {
     const wrapper = await mountView();
-    const titles = wrapper.findAllComponents('ion-title');
+    const titles = wrapper.findAll('ion-title');
     expect(titles).toHaveLength(1);
     expect(titles[0].text()).toBe('Login');
   });
@@ -71,15 +71,15 @@ describe('clicking on the signin button', () => {
   let wrapper: VueWrapper<typeof Login>;
   beforeEach(async () => {
     wrapper = await mountView();
-    const email = wrapper.findComponent('[data-testid="email-input"]');
-    const password = wrapper.findComponent('[data-testid="password-input"]');
+    const email = wrapper.find('[data-testid="email-input"]').findComponent({ name: 'ion-input' });
+    const password = wrapper.find('[data-testid="password-input"]').findComponent({ name: 'ion-input' });
     await email.setValue('test@test.com');
     await password.setValue('test');
   });
 
   it('performs the login', async () => {
     const { login } = useAuth();
-    const button = wrapper.findComponent('[data-testid="signin-button"]');
+    const button = wrapper.find('[data-testid="signin-button"]');
     button.trigger('click');
     expect(login).toHaveBeenCalledTimes(1);
     expect(login).toHaveBeenCalledWith('test@test.com', 'test');
@@ -92,7 +92,7 @@ describe('clicking on the signin button', () => {
     });
 
     it('does not show an error', async () => {
-      const button = wrapper.findComponent('[data-testid="signin-button"]');
+      const button = wrapper.find('[data-testid="signin-button"]');
       const msg = wrapper.find('[data-testid="message-area"]');
       button.trigger('click');
       await flushPromises();
@@ -100,7 +100,7 @@ describe('clicking on the signin button', () => {
     });
 
     it('navigates to the root page', async () => {
-      const button = wrapper.findComponent('[data-testid="signin-button"]');
+      const button = wrapper.find('[data-testid="signin-button"]');
       router.replace = jest.fn();
       button.trigger('click');
       await flushPromises();
@@ -116,7 +116,7 @@ describe('clicking on the signin button', () => {
     });
 
     it('does not show an error', async () => {
-      const button = wrapper.findComponent('[data-testid="signin-button"]');
+      const button = wrapper.find('[data-testid="signin-button"]');
       const msg = wrapper.find('[data-testid="message-area"]');
       button.trigger('click');
       await flushPromises();
@@ -124,7 +124,7 @@ describe('clicking on the signin button', () => {
     });
 
     it('navigates to the root page', async () => {
-      const button = wrapper.findComponent('[data-testid="signin-button"]');
+      const button = wrapper.find('[data-testid="signin-button"]');
       router.replace = jest.fn();
       button.trigger('click');
       await flushPromises();
@@ -217,7 +217,7 @@ Now let's make that button actually do something. Specifically, let's make it lo
     it('performs a logout when the logout button is clicked', async () => {
       const { logout } = useAuth();
       const wrapper = await mountView();
-      const button = wrapper.findComponent('[data-testid="logout-button"]');
+      const button = wrapper.find('[data-testid="logout-button"]');
       router.replace = jest.fn();
       await button.trigger('click');
       expect(logout).toHaveBeenCalledTimes(1);
@@ -225,7 +225,7 @@ Now let's make that button actually do something. Specifically, let's make it lo
 
     it('navigates to the login after the logout action is complete', async () => {
       const wrapper = await mountView();
-      const button = wrapper.findComponent('[data-testid="logout-button"]');
+      const button = wrapper.find('[data-testid="logout-button"]');
       router.replace = jest.fn();
       await button.trigger('click');
       expect(router.replace).toHaveBeenCalledTimes(1);

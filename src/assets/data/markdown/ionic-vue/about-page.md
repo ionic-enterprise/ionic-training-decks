@@ -76,7 +76,7 @@ We start by moving the logout related tests from the `TeaList` view's test to th
 it('performs a logout when the logout button is clicked', async () => {
   const { logout } = useAuth();
   const wrapper = await mountView();
-  const button = wrapper.findComponent('[data-testid="logout-button"]');
+  const button = wrapper.find('[data-testid="logout-button"]');
   router.replace = jest.fn();
   await button.trigger('click');
   expect(logout).toHaveBeenCalledTimes(1);
@@ -84,7 +84,7 @@ it('performs a logout when the logout button is clicked', async () => {
 
 it('navigates to the login after the logout action is complete', async () => {
   const wrapper = await mountView();
-  const button = wrapper.findComponent('[data-testid="logout-button"]');
+  const button = wrapper.find('[data-testid="logout-button"]');
   router.replace = jest.fn();
   await button.trigger('click');
   expect(router.replace).toHaveBeenCalledTimes(1);

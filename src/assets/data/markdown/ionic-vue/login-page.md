@@ -218,8 +218,8 @@ We can now create a test that shows that our validations are set up properly by 
 ```TypeScript
   it('displays messages as the user enters invalid data', async () => {
     const wrapper = mount(Login);
-    const email = wrapper.findComponent('[data-testid="email-input"]');
-    const password = wrapper.findComponent('[data-testid="password-input"]');
+    const email = wrapper.find('[data-testid="email-input"]').findComponent({ name: 'ion-input' });
+    const password = wrapper.find('[data-testid="password-input"]').findComponent({ name: 'ion-input' });
     const msg = wrapper.find('[data-testid="message-area"]');
 
     await flushPromises();
@@ -277,9 +277,9 @@ We also need to disable the button until we have valid data that has been entere
 ```typescript
 it('has a disabled signin button until valid data is entered', async () => {
   const wrapper = mount(Login);
-  const button = wrapper.findComponent('[data-testid="signin-button"]');
-  const email = wrapper.findComponent('[data-testid="email-input"]');
-  const password = wrapper.findComponent('[data-testid="password-input"]');
+  const button = wrapper.find('[data-testid="signin-button"]');
+  const email = wrapper.find('[data-testid="email-input"]').findComponent({ name: 'ion-input' });
+  const password = wrapper.find('[data-testid="password-input"]').findComponent({ name: 'ion-input' });
 
   await flushPromises();
   expect(button.attributes().disabled).toBe('true');
