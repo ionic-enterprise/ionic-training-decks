@@ -1,3 +1,10 @@
+## [5.0.1](https://github.com/ionic-team/ionic-training-decks/compare/v5.0.0...v5.0.1) (2021-09-13)
+
+### Bug Fixes
+
+- **vue:** apply changes for the latest test utils ([a57858f](https://github.com/ionic-team/ionic-training-decks/commit/a57858f600a20bf6031a3e796860b93a63cb01c5))
+- **workflow:** specify node 16 ([7656198](https://github.com/ionic-team/ionic-training-decks/commit/7656198a7354fa27eb66080d5b4c4c3d0ed85ccd))
+
 # [5.0.0](https://github.com/ionic-team/ionic-training-decks/compare/v4.1.1...v5.0.0) (2021-08-26)
 
 ### Bug Fixes
