@@ -10,113 +10,15 @@ Let's jump right in.
 
 ## Replace Plugins
 
-The first thing we should do in our cleanup efforts is to look for opportunities to use <a href="https://github.com/capacitor-community/" target="_blank">Capacitor Plugins</a> and <a href="https://capacitorjs.com/docs/apis" target="_blank">Capacitor's built in plugin APIs</a> instead of using Cordova plugins.
+The first thing we should do in our cleanup efforts is to look for opportunities to use <a href="https://capacitorjs.com/docs/apis" target="_blank">Capacitor Plugins</a> or <a href="https://github.com/capacitor-community/" target="_blank">Capacitor Community Plugins</a> instead of using Cordova plugins.
 
-In the case of our application, the only Cordova plugins that are actively being used are the status bar and splash screen plugins. Both of these should be replaced with Capacitor Plugin API calls. This change involves the following modifications:
+In the case of our application, none of the Cordova plugins are being called from within our application. If we were doing something like setting the style from within the `AppComponent`, for example, though, we would want to replace the `@ionic-native` / Cordova code with calls to the Capacitor plugin instead. Here is an example of what this might look like:
 
-- Modify the `AppComponent` test to expect Capacitor API calls
-- Modify the `AppComponent` itself to call the Capacitor APIs
-- Modify the `AppComponentModule` to no longer provide the `@ionic-native` wrappers for the Cordova plugins
-
-### Modify `src/app/app.component.spec.ts`
-
-Import the `Plugins` object from `@capacitor/core`. In our case, we will also be styling the status bar, so we will need to import the `StatusBarStyle` enumeration.
-
-```typescript
-import { Plugins, StatusBarStyle } from '@capacitor/core';
-```
-
-Replace the current `beforeEach()` portion of the test with the following code:
-
-```typescript
-let originalSplashScreen: any;
-let originalStatusBar: any;
-
-beforeEach(async(() => {
-  originalStatusBar = Plugins.StatusBar;
-  originalSplashScreen = Plugins.SplashScreen;
-  Plugins.StatusBar = jasmine.createSpyObj('StatusBar', ['setStyle']);
-  Plugins.SplashScreen = jasmine.createSpyObj('SplashScreen', ['hide']);
-  TestBed.configureTestingModule({
-    declarations: [AppComponent],
-    schemas: [CUSTOM_ELEMENTS_SCHEMA],
-    providers: [
-      {
-        provide: Platform,
-        useFactory: () => jasmine.createSpyObj('Platform', { is: false }),
-      },
-    ],
-  }).compileComponents();
-}));
-
-afterEach(() => {
-  Plugins.StatusBar = originalStatusBar;
-  Plugins.SplashScreen = originalSplashScreen;
-});
-```
-
-Replace the `should initialize the app` test with the following set of tests:
-
-```typescript
-describe('initialization', () => {
-  let platform: Platform;
-  beforeEach(() => {
-    platform = TestBed.inject(Platform);
-  });
-
-  describe('in a hybrid mobile context', () => {
-    beforeEach(() => {
-      (platform.is as any).withArgs('hybrid').and.returnValue(true);
-    });
-
-    it('styles the status bar', () => {
-      TestBed.createComponent(AppComponent);
-      expect(Plugins.StatusBar.setStyle).toHaveBeenCalledTimes(1);
-      expect(Plugins.StatusBar.setStyle).toHaveBeenCalledWith({
-        style: StatusBarStyle.Light,
-      });
-    });
-
-    it('hides the splash screen', () => {
-      TestBed.createComponent(AppComponent);
-      expect(Plugins.SplashScreen.hide).toHaveBeenCalledTimes(1);
-    });
-  });
-
-  describe('in a web context', () => {
-    beforeEach(() => {
-      (platform.is as any).withArgs('hybrid').and.returnValue(false);
-    });
-
-    it('does not style the status bar', () => {
-      TestBed.createComponent(AppComponent);
-      expect(Plugins.StatusBar.setStyle).not.toHaveBeenCalled();
-    });
-
-    it('does not hide the splash screen', () => {
-      TestBed.createComponent(AppComponent);
-      expect(Plugins.SplashScreen.hide).not.toHaveBeenCalled();
-    });
-  });
-});
-```
-
-You should now clean up any unused imports or variable declarations you may have. Your `AppComponent` tests will be failing at this point, but we will fix that next.
-
-### Modify `src/app/app.component.ts`
-
-You need to modify the `AppComponent` as such:
-
-- You no longer need to import the `@ionic-native` services
-- You need to call the Capacitor Plugin APIs instead of the `@ionic-native` services
-
-Your final code should look like this:
+**Note:** do not actually do this, this is just a sample of what this _would_ look like if we needed to do this.
 
 ```typescript
 import { Component } from '@angular/core';
-
-import { Platform } from '@ionic/angular';
-import { Plugins, StatusBarStyle } from '@capacitor/core';
+import { StatusBar, Style } from '@capacitor/status-bar';
 
 @Component({
   selector: 'app-root',
@@ -124,26 +26,24 @@ import { Plugins, StatusBarStyle } from '@capacitor/core';
   styleUrls: ['app.component.scss'],
 })
 export class AppComponent {
-  constructor(private platform: Platform) {
-    this.initializeApp();
+  constructor() {
+    this.initApplication();
   }
 
-  initializeApp() {
-    if (this.platform.is('hybrid')) {
-      const { SplashScreen, StatusBar } = Plugins;
-      SplashScreen.hide();
-      StatusBar.setStyle({ style: StatusBarStyle.Light });
-    }
+  private initApplication() {
+    StatusBar.setStyle({ style: Style.Light });
   }
 }
 ```
 
-### Modify `src/app/app.module.ts`
+## Clean Up `src/app/app.module.ts`
 
-Since nothing is referencing the `@ionic-native` services any more, they no longer need to be provided. Remove all references to them in this file as well.
+If your application was using some `@ionic-native` services that have all been replaced by Capacitor plugins, then you will very likely need to remove them from here as well.
 
 - Remove the ES6 imports of them
 - Remove the code that adds them to the `providers` array
+
+In our case we have nothing to remove.
 
 ## Configure Plugins
 
@@ -156,18 +56,18 @@ This step may or may not be required for your project. For the base Cordova proj
 
 ### Handling Cordova Plugin Preferences
 
-If any of your Cordova plugins require preferences to be set the `config.xml` file, those preferences should be set in the `cordova` section of the `capacitor.config.json` file. These should have been automatically copied over for you during Phase 1, but you may want to double check them. Here is what I have in my project:
+If any of your Cordova plugins require preferences to be set the `config.xml` file, those preferences should be set in the `cordova` section of the `capacitor.config.ts` file. These should have been automatically copied over for you during Phase 1, but you may want to double check them. Here is what I have in my project:
 
-```JSON
-  "cordova": {
-    "preferences": {
-      "ScrollEnabled": "false",
-      "BackupWebStorage": "none",
-      "SplashMaintainAspectRatio": "true",
-      "FadeSplashScreenDuration": "300",
-      "SplashShowOnlyFirstTime": "false",
-      "SplashScreen": "screen",
-      "SplashScreenDelay": "3000"
+```typescript
+  cordova: {
+    preferences: {
+      ScrollEnabled: 'false',
+      BackupWebStorage: 'none',
+      SplashMaintainAspectRatio: 'true',
+      FadeSplashScreenDuration: '300',
+      SplashShowOnlyFirstTime: 'false',
+      SplashScreen: 'screen',
+      SplashScreenDelay: '3000'
     }
   }
 ```
@@ -199,6 +99,8 @@ Some plugins require installation time variable. If you have a plugin like this,
 In this step, you will:
 
 - Remove unused plugins
+- Remove the Cordova platforms
+- Remove unused `@ionic/native` services
 - Modify the `package.json` file
 - Remove unused files from the filesystem
 
@@ -219,11 +121,17 @@ As you can see from the comments here, we don't actually need to install any of 
 $ npm uninstall cordova-plugin-whitelist cordova-plugin-statusbar cordova-plugin-device cordova-plugin-splashscreen cordova-plugin-ionic-webview cordova-plugin-ionic-keyboard
 ```
 
-We are also no longer using any of the `@ionic-native` stuff (in your own project, you may or may not be still using some `@ionic-native` packages, so only remove `@ionic-native/core` here if all other `@ionic-native` packages are being removed):
+### Remove the Cordova Platforms
+
+You will no longer be building the application using the Cordova platforms so you can remove them now.
 
 ```bash
-$ npm uninstall @ionic-native/core @ionic-native/status-bar @ionic-native/splash-screen
+$ npm uninstall cordova-android cordova-ios
 ```
+
+### Remove Unused `@ionic-native` Services
+
+Our project is not using any `@ionic-native` stuff, but now is a good time to make sure you have removed any `@ionic-native` packages that are associated with the plugins that you removed. In ideal situations, you will have removed all Cordova plugins and can remove all `@ionic-native` packages including `@ionic-native/core`. In other situations you may still be using some Cordova plugins and need to keep a few of the packages around. In that case, do not remove `@ionic-native/core`.
 
 ### Modify the `package.json` File
 
@@ -254,31 +162,30 @@ While you are in there, find the build script. I like to add a `cap copy` comman
     "build": "ng build && cap copy",
 ```
 
-### Modify the `capacitor.config.json` File
+### Modify the `capacitor.config.ts` File
 
-Remember all of those preferences that were copied over when we initially added the Capacitor integration? They look like this in the `capacitor.config.json` file:
+Remember all of those preferences that were copied over when we initially added the Capacitor integration? They look like this in the `capacitor.config.ts` file:
 
-```JSON
-  "cordova": {
-    "preferences": {
-      "ScrollEnabled": "false",
-      "BackupWebStorage": "none",
-      "SplashMaintainAspectRatio": "true",
-      "FadeSplashScreenDuration": "300",
-      "SplashShowOnlyFirstTime": "false",
-      "SplashScreen": "screen",
-      "SplashScreenDelay": "3000"
+```typescript
+  cordova: {
+    preferences: {
+      ScrollEnabled: 'false',
+      BackupWebStorage: 'none',
+      SplashMaintainAspectRatio: 'true',
+      FadeSplashScreenDuration: '300',
+      SplashShowOnlyFirstTime: 'false',
+      SplashScreen: 'screen',
+      SplashScreenDelay: '3000'
     }
   }
 ```
 
 Since we were able to remove all of the Cordova plugins in this project, we don't need any of those any more. So let's just remove the preferences but leave the actual object in the JSON in case we need them for a new plugin we add later.
 
-```JSON
-  "cordova": {
-    "preferences": {
-    }
-  }
+```typescript
+  cordova: {
+    preferences: {},
+  },
 ```
 
 **Note:** In your own project, you may still need some preferences based on which Cordova plugins you still have left.

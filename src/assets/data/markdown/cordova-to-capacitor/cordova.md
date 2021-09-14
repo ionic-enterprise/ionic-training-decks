@@ -24,3 +24,10 @@ $ ionic cordova platform add android
 ```
 
 We now have a fully functional, though minimal, Cordova application. In the next section, we will perform phase one of our conversion: installing and configuring Capacitor.
+
+At this point, make sure everything is committed to your git repository in case we need to fallback to this state:
+
+```bash
+$ git add .
+$ git commit -m "I am so ready to convert to Capacitor"
+```

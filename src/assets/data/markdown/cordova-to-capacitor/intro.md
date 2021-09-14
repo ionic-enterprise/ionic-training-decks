@@ -6,7 +6,7 @@ There are two main phases of any conversion from Cordova to Capacitor: Basic Con
 
 ## Phase 1: Basic Configuration
 
-The goal of this phase is to get Capacitor installed in your project and the native projects created and building. This phase generally takes 15 minutes or less to complete, and often results in a fully functional application. Here are the full steps to this phase:
+The goal of this phase is to get Capacitor installed in your project and the native projects created and building. This phase generally takes 15 minutes or less to complete, and often results in a fully functional application. Here are the full steps that you will perform (this will be done as part of the next page in this tutorial):
 
 ```bash
 # Step 1
