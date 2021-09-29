@@ -1,3 +1,9 @@
+# [5.1.0](https://github.com/ionic-team/ionic-training-decks/compare/v5.0.2...v5.1.0) (2021-09-29)
+
+### Features
+
+- **analytics:** add firebase analytics ([e6443f6](https://github.com/ionic-team/ionic-training-decks/commit/e6443f64cfc1429fd5994a1598b3e986b51c2b51))
+
 ## [5.0.2](https://github.com/ionic-team/ionic-training-decks/compare/v5.0.1...v5.0.2) (2021-09-15)
 
 ### Bug Fixes
