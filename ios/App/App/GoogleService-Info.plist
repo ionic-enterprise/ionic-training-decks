@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>963541232275-3qqah1fvvkf1g8nlsedl5bdfd6f5gg9d.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.963541232275-3qqah1fvvkf1g8nlsedl5bdfd6f5gg9d</string>
+	<key>API_KEY</key>
+	<string>AIzaSyDj9i-VbJebSrBdHyiUoTXx2cXVxmJ2FO8</string>
+	<key>GCM_SENDER_ID</key>
+	<string>963541232275</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>io.ionic.trainingdecks</string>
+	<key>PROJECT_ID</key>
+	<string>ionic-training-decks</string>
+	<key>STORAGE_BUCKET</key>
+	<string>ionic-training-decks.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:963541232275:ios:890067ff233f7cd8e07b66</string>
+	<key>DATABASE_URL</key>
+	<string>https://ionic-training-decks.firebaseio.com</string>
+</dict>
+</plist>

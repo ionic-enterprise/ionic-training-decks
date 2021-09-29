@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
+import { ApplicationService, MenuItemsService } from '@app/core';
 import { NavController, Platform } from '@ionic/angular';
-
-import { MenuItemsService, ApplicationService } from '@app/core';
+import { FirebaseAnalytics } from '@capacitor-community/firebase-analytics';
 
 @Component({
   selector: 'app-root',
@@ -25,6 +25,17 @@ export class AppComponent implements OnInit {
     if (!this.platform.is('hybrid')) {
       this.applicationService.registerForUpdates();
     }
+
+    await FirebaseAnalytics.initializeFirebase({
+      apiKey: 'AIzaSyD9Pz3SsC3yXD_LqE7Ur7WWzppD2_WLTH8',
+      authDomain: 'ionic-training-decks.firebaseapp.com',
+      databaseURL: 'https://ionic-training-decks.firebaseio.com',
+      projectId: 'ionic-training-decks',
+      storageBucket: 'ionic-training-decks.appspot.com',
+      messagingSenderId: '963541232275',
+      appId: '1:963541232275:web:c327a3151655f94fe07b66',
+      measurementId: 'G-NHPMQK52RD',
+    });
   }
 
   async ngOnInit() {

@@ -1,14 +1,18 @@
 [
-	{
-		"pkg": "@capacitor/app",
-		"classpath": "com.capacitorjs.plugins.app.AppPlugin"
-	},
-	{
-		"pkg": "@capacitor/haptics",
-		"classpath": "com.capacitorjs.plugins.haptics.HapticsPlugin"
-	},
-	{
-		"pkg": "@capacitor/keyboard",
-		"classpath": "com.capacitorjs.plugins.keyboard.KeyboardPlugin"
-	}
+  {
+    "pkg": "@capacitor-community/firebase-analytics",
+    "classpath": "com.getcapacitor.community.firebaseanalytics.FirebaseAnalytics"
+  },
+  {
+    "pkg": "@capacitor/app",
+    "classpath": "com.capacitorjs.plugins.app.AppPlugin"
+  },
+  {
+    "pkg": "@capacitor/haptics",
+    "classpath": "com.capacitorjs.plugins.haptics.HapticsPlugin"
+  },
+  {
+    "pkg": "@capacitor/keyboard",
+    "classpath": "com.capacitorjs.plugins.keyboard.KeyboardPlugin"
+  }
 ]

@@ -1,5 +1,6 @@
 import { Component, OnInit, Input } from '@angular/core';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import { FirebaseAnalytics } from '@capacitor-community/firebase-analytics';
 
 import marked from 'marked';
 
@@ -21,6 +22,14 @@ export class MarkdownViewComponent implements OnInit {
   }
 
   private async loadMarkdown() {
+    FirebaseAnalytics.logEvent({
+      name: 'select_content',
+      params: {
+        section: this.folder,
+        file: this.file,
+      },
+    });
+
     const data = await fetch(`/assets/data/markdown${this.folder ? '/' + this.folder : ''}/${this.file}.md`);
     this.markup = this.sanitizer.bypassSecurityTrustHtml(marked(await data.text()));
   }
