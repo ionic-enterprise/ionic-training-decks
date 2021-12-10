@@ -92,6 +92,7 @@ Create a `src/views/Tabs.vue` file with the following contents:
 <template>
   <ion-page>
     <ion-tabs>
+      <ion-router-outlet></ion-router-outlet>
       <ion-tab-bar slot="bottom">
         <ion-tab-button tab="teas" href="/tabs/teas">
           <ion-label>Tea</ion-label>
@@ -115,6 +116,7 @@ import {
   IonIcon,
   IonLabel,
   IonPage,
+  IonRouterOutlet,
   IonTabBar,
   IonTabButton,
   IonTabs,
@@ -128,6 +130,7 @@ export default defineComponent({
     IonIcon,
     IonLabel,
     IonPage,
+    IonRouterOutlet,
     IonTabBar,
     IonTabButton,
     IonTabs,

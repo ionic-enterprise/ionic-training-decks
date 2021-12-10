@@ -289,6 +289,7 @@ We have a couple of other components where we need to set a specific color. Name
 
 ```html
 <ion-tabs>
+  <ion-router-output></ion-router-output>
   <ion-tab-bar color="tertiary" slot="bottom">
     <ion-tab-button tab="teas" href="/tabs/teas"></ion-tab-button></ion-tab-bar
 ></ion-tabs>
