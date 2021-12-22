@@ -1,7 +1,7 @@
 import { enableProdMode } from '@angular/core';
 import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
 import hljs from 'highlight.js';
-import marked from 'marked';
+import { marked } from 'marked';
 import { AppModule } from './app/app.module';
 import { environment } from './environments/environment';
 

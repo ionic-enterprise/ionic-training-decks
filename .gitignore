@@ -1,3 +1,4 @@
+/.angular/cache
 dist/
 !www/favicon.ico
 www/

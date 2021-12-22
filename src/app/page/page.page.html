@@ -4,10 +4,10 @@
       <ion-menu-button></ion-menu-button>
     </ion-buttons>
     <ion-buttons slot="primary">
-      <ion-button [disabled]="!prev" routerDirection="back" [routerLink]="prev">
+      <ion-button [disabled]="!prev" (click)="goPrev()">
         <ion-icon slot="icon-only" name="chevron-back"></ion-icon>
       </ion-button>
-      <ion-button [disabled]="!next" [routerLink]="next">
+      <ion-button [disabled]="!next" (click)="goNext()">
         <ion-icon slot="icon-only" name="chevron-forward"></ion-icon>
       </ion-button>
       <ion-button [disabled]="disableMenu" (click)="showMenu($event)">

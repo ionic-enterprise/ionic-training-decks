@@ -65,6 +65,18 @@ export class PagePage implements OnInit {
     }
   }
 
+  goNext() {
+    if (this.next) {
+      this.navController.navigateForward(this.next);
+    }
+  }
+
+  goPrev() {
+    if (this.prev) {
+      this.navController.navigateBack(this.prev);
+    }
+  }
+
   private hasFile(): boolean {
     return !!(this.page && this.page.file);
   }

@@ -9,6 +9,8 @@ import { MenuItem } from '@app/models';
 export class MenuItemsService {
   private items: Array<MenuItem>;
 
+  constructor(private http: HttpClient) {}
+
   get mainMenu(): Array<{
     name: string;
     title: string;
@@ -22,8 +24,6 @@ export class MenuItemsService {
       url: this.redirectUrl(item.name),
     }));
   }
-
-  constructor(private http: HttpClient) {}
 
   async courses(): Promise<Array<MenuItem>> {
     return this.items;

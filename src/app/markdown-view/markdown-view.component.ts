@@ -1,8 +1,7 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { FirebaseAnalytics } from '@capacitor-community/firebase-analytics';
-
-import marked from 'marked';
+import { marked } from 'marked';
 
 @Component({
   selector: 'app-markdown-view',

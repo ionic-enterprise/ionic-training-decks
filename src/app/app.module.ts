@@ -13,7 +13,6 @@ import { MenuItemsService } from './core';
 
 @NgModule({
   declarations: [AppComponent],
-  entryComponents: [],
   imports: [
     BrowserModule,
     HttpClientModule,
