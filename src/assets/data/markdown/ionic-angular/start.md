@@ -19,14 +19,14 @@ The first thing we will use the Ionic CLI for is to start a new application. Typ
 Lets start our application via whichever technique you want.
 
 1. At the command line, change directories in to a starting directory. I use `~/Projects/Training`
-1. Enter the following command: `ionic start tea-taster blank --type=angular --capacitor`
+1. Enter the following command: `ionic start tea-taster blank --type=angular`
 1. Alternatively, you could just enter `ionic start` and let the command line ask you for what it needs
 
 **Example:**
 
 ```bash
 cd ~/Projects/Training
-ionic start tea-taster blank --type=angular --capacitor
+ionic start tea-taster blank --type=angular
 ```
 
 Let's look at some of those options more closely.
@@ -34,7 +34,6 @@ Let's look at some of those options more closely.
 - The third option is the name of the application.
 - The forth option, `blank` tells Ionic to use the `blank` starter. We have three basic starters: `blank`, `tabs`, and `sidemenu`. The main difference is the main style of navigation.
 - The `--type` option specifies the type of application to create. Options include `angular`, `react`, `ionic-angular`, and `ionic1`. The `ionic-angular` type is an Ionic v3 application.
-- The `--capacitor` options tells the command line to integrate Capacitor as the native bridge. You could also choose Cordova, or nothing at all.
 
 Once the application has been generated, let's start the development server:
 
@@ -64,7 +63,7 @@ Modify your `package.json` file. I suggest moving the `description` up to the to
   "homepage": "https://ionicframework.com/",
   "scripts": {
     ...
-    "postinstall": "husky install",
+    "prepare": "husky install",
     ...
   },
   "private": true,

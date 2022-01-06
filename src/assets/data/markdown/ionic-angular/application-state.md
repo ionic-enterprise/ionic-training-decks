@@ -10,9 +10,11 @@ The first thing that we need to do is install <a href="https://ngrx.io/">NgRX</a
 npx ng add @ngrx/store@latest
 ```
 
+**Note:** you may need to make sure the `eslint` related dependencies are up to date.
+
 ## Boilerplate Setup
 
-Create the following folders, either from the CLI or fromm your favirote IDE:
+Create the following folders, either from the CLI or fromm your favorite IDE:
 
 ```bash
 mkdir src/app/store src/app/store/effects src/app/store/reducers src/app/store/selectors
@@ -100,7 +102,7 @@ Let's think about the actions our application will take with regard to authentic
 - Login Succeeded - Taken by the Authentication API (does not exist yet) when the login succeeds
 - Login Failed - Taken by the Authentication API (does not exist yet) when the login fails
 
-Most of the actors do not exist yet, but we know what actions they will take once they do exist, so let's code that up in our store. Coding up these actions really just define the actions that other parts of our app can "dispatch". They do not, in themselves, actually _do_ anything.
+Most of the actors do not exist yet, but we know what actions they will take once they do exist, so let's code that up in our store. This just defines the actions that other parts of our app can "dispatch". The actions do not, in themselves, actually _do_ anything.
 
 Create a `src/app/store/actions.ts` file with the following contents:
 
@@ -129,16 +131,15 @@ export const logoutFailure = createAction(
 );
 ```
 
-As you can see, this is really just registering what the actions are as well as what their payload will be if they have one (see the `login` action).
+As you can see, this is just registering the actions as well as defining what their payload will be if for actions that have a payload (see the `login` action).
 
 For now, we will have a single file that defines all of our actions. We may want to split that out at some point in the future, but for now a single file will be just fine. Remember that actions are based on events within our application, so if we do get to a point of breaking them in to multiple files, it makes more sense to define them around the various parts of our application, which may or may correspond to various slices of the state.
 
 ## Reducers
 
-A reducer is a pure synchronous function that listens for actions to be dispatched and then modifies the state accordingly.
-They should also be the only function that modify that portion of the state. For this reason, I like to define the state and the reducer that acts upon it in the same file.
+A reducer is a pure synchronous function that listens for actions to be dispatched and then modifies the state accordingly. A reducer should also be the only function that modifies its portion of the state. For this reason, I like to define the state and the reducer that acts upon it in the same file.
 
-Being pure synchronous functions also make them fairly easy to test.
+Being pure synchronous functions also make them easy to test.
 
 Let's start with a boiler plate test in `src/app/store/reducers/auth.reducer.spec.ts`:
 
@@ -182,7 +183,7 @@ export const reducer = createReducer(
 );
 ```
 
-The reducer listens for actions and then modifies the state accordingly. So let's start with our login action and figure out how it should affect the state. This action is taken by the login page, and it informs the store that we are initiating the login process. So all it needs to do is set the loading flag to true and clear any existing error message from a previous attempt (actually initiating the process will be done by something called an `effect` and we will get to that later).
+The reducer listens for actions and then modifies the state accordingly. So let's start with our login action and figure out how it should affect the state. This action is taken by the login page, and it informs the store that we are initiating the login process. So all it needs to do is set the loading flag to true and clear any existing error message from a previous attempt (initiating the login process, which is asynchronous and thus not appropriate for a reducer, will be done by something called an `effect` and we will get to that later).
 
 We first express that requirement in our test. Notice that the reducer takes arguments consisting of the current state and the action being performed.
 
@@ -211,7 +212,7 @@ Then we express it in our code by adding a listener for that action to the reduc
 ```TypeScript
 export const reducer = createReducer(
   initialState,
-  on(Actions.login, state => ({
+  on(Actions.login, (state): AuthState => ({
     ...state,
     loading: true,
     errorMessage: '',
@@ -219,7 +220,7 @@ export const reducer = createReducer(
 );
 ```
 
-So, on the `Actions.login` action, we take our current state state transform it such that the `loading` property is set to `true` and the `errorMessage` property is set to an empty string. All other properties in our state stay the way the are.
+So, on the `Actions.login` action, we take our current state and transform it such that the `loading` property is set to `true` and the `errorMessage` property is set to an empty string. All other properties in our state stay the way the are.
 
 The `LoginSuccess` and `LoginFailure` actions will be dispatched by the `effect` that handles the login API call. Neither the `effect` nor the API service exist yet, but we can still add a handler for these actions to our reducer since we know how they should affect the state.
 
@@ -260,19 +261,19 @@ describe('Login Failure', () => {
 Then the code to make this work (added to the `createReducer()`, just like the last time):
 
 ```TypeScript
-  on(Actions.loginSuccess, (state, { session }) => ({
+  on(Actions.loginSuccess, (state, { session }): AuthState => ({
     ...state,
     session,
     loading: false,
   })),
-  on(Actions.loginFailure, (state, { errorMessage }) => ({
+  on(Actions.loginFailure, (state, { errorMessage }): AuthState => ({
     ...state,
     loading: false,
     errorMessage,
   })),
 ```
 
-Notice that the payload of the action (if there is a payload) is also passed to the handler (`{ session }`, `{ errorMessage }`). The `login` action has a payload as well, but we didn't use it in the handler because the reducer doesn't need the payload. In the case of the login action, the `effect` will need to payload.
+Notice that the payload of the action (if there is a payload) is also passed to the handler (`{ session }`, `{ errorMessage }`). The `login` action has a payload as well, but we didn't use it in the handler because the reducer doesn't need the payload. In the case of the login action, the `effect` will need to use the payload.
 
 Finally, we have the logout actions. I will give you the tests and let you write the action hooks in the reducer. Note that I grouped these tests in their own `describe()`. This is just so I could define the session that is used once rather than in each test.
 
@@ -341,14 +342,16 @@ describe('logout actions', () => {
 });
 ```
 
-**Challenge:** add the hooks for these actions to the reducer, like we did for the login related actions. Refer the login actions as a guide. If you really get stuck on something, example implementations are included at the end of this section.
+**Challenge:** add the hooks for these actions to the reducer, like we did for the login related actions. Refer to the login actions as a guide. If you really get stuck, example implementations are included at the end of this section.
 
 **Hint:** for the `LogoutSuccess` we need to remove the session. That code looks like this:
 
 ```TypeScript
-  on(Actions.logoutSuccess, state => {
-    const newState = {...state, loading: false};
-    delete newState.session;
+  on(Actions.logoutSuccess, (state): AuthState => {
+    const { session, ...newState } = {
+      ...state,
+      loading: false,
+    };
     return newState;
   }),
 ```
@@ -372,10 +375,11 @@ export const reducers: ActionReducerMap<State> = {
 Selectors are used to get data from the state. These are generally straight forward enough that we will not bother with tests. Here are the selectors we will start with for the `auth` state. Put this in `src/app/store/selectors/auth.selectors.ts`
 
 ```TypeScript
-import { createSelector, createFeatureSelector } from '@ngrx/store';
+import { createSelector } from '@ngrx/store';
+import { State } from '@app/store';
 import { AuthState } from '@app/store/reducers/auth.reducer';
 
-export const selectAuth = createFeatureSelector('auth');
+export const selectAuth = (state: State) => state.auth;
 export const selectAuthToken = createSelector(selectAuth, (state: AuthState) => state.session?.token);
 export const selectAuthLoading = createSelector(selectAuth, (state: AuthState) => state.loading);
 export const selectAuthErrorMessage = createSelector(selectAuth, (state: AuthState) => state.errorMessage);
@@ -418,11 +422,10 @@ Under `src/app/store/effects` create the following files:
 
 ```TypeScript
 import { TestBed } from '@angular/core/testing';
-import { provideMockActions } from '@ngrx/effects/testing';
-import { Observable } from 'rxjs';
 import { NavController } from '@ionic/angular';
-
+import { provideMockActions } from '@ngrx/effects/testing';
 import { createNavControllerMock } from '@test/mocks';
+import { Observable } from 'rxjs';
 import { AuthEffects } from './auth.effects';
 
 describe('AuthEffects', () => {
@@ -450,12 +453,11 @@ describe('AuthEffects', () => {
 
 ```TypeScript
 import { Injectable } from '@angular/core';
+import { login, loginSuccess } from '@app/store/actions';
 import { NavController } from '@ionic/angular';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { of } from 'rxjs';
 import { exhaustMap } from 'rxjs/operators';
-
-import { login, loginSuccess } from '@app/store/actions';
 
 @Injectable()
 export class AuthEffects {
@@ -589,7 +591,7 @@ To this:
       ),
 ```
 
-As you can see, it performs our fake login, creating an Observable out of the Promise. When that is emitted, it is mapped into a `loginSuccess()` action with the session as the payload. If an error occurs, we instead emit a `loginFailure()` action with the error message. Those are the actions that will then be dispatched to the store by `@ngrx/effects`.
+This performs our fake login, creating an Observable out of the Promise. When that is emitted, it is mapped into a `loginSuccess()` action with the session as the payload. If an error occurs, we instead emit a `loginFailure()` action with the error message. Those are the actions that will then be dispatched to the store by `@ngrx/effects`.
 
 #### The `loginSuccess$` Effect
 
@@ -642,6 +644,34 @@ import { catchError, exhaustMap, map, tap } from 'rxjs/operators';
 ```
 
 Notice the `{ dispatch: false }`. This tells NgRX to not bother dispatching anything after this effect runs. Without this we would either dispatch the action we just handled, causing an infinite loop, or would have to create some kind of action that didn't really do anything, which is just extra work.
+
+#### Linting
+
+If you run `npm run lint` at this point, you will get a warning in this file:
+
+```
+> tea-taster@0.0.1 lint
+> ng lint
+
+
+Linting "app"...
+
+/home/kensodemann/Projects/Training/tea-taster/src/app/store/effects/auth.effects.ts
+  12:5  warning  The callback of `Effect` should be wrapped in a block statement  ngrx/prefer-effect-callback-in-block-statement
+  25:7  warning  The callback of `Effect` should be wrapped in a block statement  ngrx/prefer-effect-callback-in-block-statement
+```
+
+If you fix that in the code, you will get a lint error about the block statement being unnecessary. We need to disable one or other other. I have chosen to disable the `ngrx/prefer-effect-callback-in-block-statement` rule globally by turning it off in the `.eslintrc.json` file where `plugin:ngrx/recommended` is brought in:
+
+```json
+{
+  "files": ["*.ts"],
+  "extends": ["plugin:ngrx/recommended"],
+  "rules": {
+    "ngrx/prefer-effect-callback-in-block-statement": "off"
+  }
+}
+```
 
 ### Register the Effects
 
@@ -706,8 +736,6 @@ We can then inject the store into the page:
 @@ -1,4 +1,7 @@
  import { Component } from '@angular/core';
 +import { Store } from '@ngrx/store';
-+
-+import { State } from '@app/store';
 
  @Component({
    selector: 'app-login',
@@ -716,7 +744,7 @@ We can then inject the store into the page:
    password: string;
 
 -  constructor() {}
-+  constructor(private store: Store<State>) {}
++  constructor(private store: Store) {}
 
    signIn() {
      console.log('signin', this.email, this.password);
@@ -732,15 +760,14 @@ In order to test that the proper action is dispatched, we will need to:
 - click the sign on button
 - verify the dispatch was called with the login action
 
-First, we will need a couple of imports. `Store` so we can provide that to the `TestBed` to get the object created for that class, and `login` so we can verify that action was taken.
+First, we will need a couple of imports to our `src/app/login/login.page.spec.ts` file. `Store` so we can query the `TestBed` for our mock store, and `login` so we can verify that the `login` action was taken.
 
 ```TypeScript
 import { Store } from '@ngrx/store';
-...
 import { login } from '@app/store/actions';
 ```
 
-Notice that we need to click the sign on button. We don't have a function for that, so let's create one down by the `setInput()` function we already have:
+The testing steps outlined above state that we need to click the sign on button. We don't have a function for that, so let's create one down by the `setInput()` function we already have:
 
 ```TypeScript
 const click = (button: HTMLElement) => {
@@ -780,7 +807,9 @@ The changes to the login page's class are straight forward:
 
 #### Display the Error Message
 
-The test uses some NgRX utilities to mock the selector, sets its value, and verifies that our page reacts correctly. The test itself belongs inside of the "error messages" describe block.
+So far, we have let the store know that a login action has occurred. But how will the page know the results of that login? It will know that information by observing specific portions of the overall application state that it is interested in. We will start by observing the authentication related error messages.
+
+The following test uses some NgRX utilities to mock the selector, sets its value, and verifies that our page reacts correctly. This test belongs inside of the "error messages" describe block in `src/app/login/login.page.spec.ts`.
 
 ```TypeScript
 ...
@@ -808,7 +837,7 @@ import { selectAuthErrorMessage } from '@app/store';
     });
 ```
 
-The code is then straight forward. First the page's class is modified to observe the selector:
+In the code, we then need to observe the selector:
 
 ```TypeScript
 --- a/src/app/login/login.page.ts
@@ -846,21 +875,21 @@ The code is then straight forward. First the page's class is modified to observe
    }
 ```
 
-Then the following is added to the page's template within the `.error-message` div:
+The following is added to the page's template within the `.error-message` div:
 
 ```HTML
 <div>{{ errorMessage$ | async }}</div>
 ```
 
-We have not learned about the `async` pipe yet. It will subscribe to the observable and also handle the unsubscription when the element is removed from the DOM.
+We have not learned about the `async` pipe yet. It will subscribe to the observable and also handle the unsubscription when the element is removed from the DOM. Also, the `$` at the end of `errorMessage$` is a common convention for class properties that are Observables, but it is not required.
 
-At this point have a look at the login page and notice that there is absolutely zero logic in it that does not directly pertain to the user interaction with the page itself. This is what we are striving for. Each portion of the the application should be single purpose, focused, and as simple as possible. You can also see that throughout the store itself. Once you understand how the pieces all fit together, the pieces themselves should always be small, simple, and focused.
+At this point have a look at the login page and notice that this only logic in the page directly pertains to the user interaction with the page itself. There is no logic surrounding the mechanics of how the login works or anything like that. All of that business logic will eventually be the concern of the store and the service layer. It should never be the concern of any page or component. The proper separation of concerns is a very important best-practice to follow as you architect your application.
 
 ## Debugging Tools (Optional)
 
 You can use <a href="https://ngrx.io/guide/store-devtools" target="_blank">@ngrx/store-devtools</a> in conjunction with the <a href="https://github.com/zalmoxisus/redux-devtools-extension/" target="_blank">Redux Devtools Extension</a> to help debug your application as you develop the store. Have a look at the installation instructions if you are interested.
 
-You do not need to install this now (or ever). You can wait until you find that you need it.
+Installing these tools is not a requirement. However, they are very useful for debugging the application state.
 
 ## Conclusion
 

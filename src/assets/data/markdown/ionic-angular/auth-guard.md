@@ -37,7 +37,7 @@ export class AuthGuardService implements CanActivate {
 
 ### Configure the Testing Module
 
-We know that we are going to be checking to see if we have an identity and that we may have to navigate to the login page. So let's set up the module such that the `Store`, `SessionVaultService`, and `NavController` are both provided as mocks by adding a `providers` array to the `TestBed.configureTestingModule()` call.
+We know that we are going to be checking to see if we have an identity and that we may have to navigate to the login page. So let's set up the module such that the `Store`, `SessionVaultService`, and `NavController` are all provided as mocks by adding a `providers` array to the `TestBed.configureTestingModule()` call.
 
 ```typescript
 ...
@@ -155,10 +155,10 @@ export class AuthGuardService implements CanActivate {
   constructor() {} // inject the store, nav controller, and session vault here as private
 
   canActivate(): Observable<boolean> {
-    return this.store.pipe(
-      select(selectAuthToken),
+    return this.store.select(selectAuthToken).pipe(
       take(1),
-      mergeMap((token) => (token ? of(token) : this.vault.restoreSession())),
+      mergeMap((token) => (token ? of(token) : this.sessionVault.restoreSession())),
+      // eslint-disable-next-line ngrx/avoid-mapping-selectors
       map((value) => !!value),
       tap((sessionExists) => {
         // navigation logic goes here...
@@ -174,26 +174,35 @@ Be sure to replace the comments with the actual logic. I had to leave _something
 
 Any route that requires the user to be logged in should have the guard. At this time, that is only the `tea` page, so let's hook up the guard in that page's routing module (`src/app/tea/tea-routing.module.ts`).
 
+**Note:** most of this code should exist already. Just add the `AuthGuardService` related bits. If yours routing module is slightly different, have a look and determine if you would like to change any of it.
+
 ```typescript
 import { NgModule } from '@angular/core';
-import { RouterModule, Routes } from '@angular/router';
-
-import { TeaPage } from './tea.page';
+import { PreloadAllModules, RouterModule, Routes } from '@angular/router';
 import { AuthGuardService } from '@app/core';
 
 const routes: Routes = [
   {
     path: '',
-    component: TeaPage,
+    redirectTo: 'tea',
+    pathMatch: 'full',
+  },
+  {
+    path: 'tea',
+    loadChildren: () => import('./tea/tea.module').then((m) => m.TeaPageModule),
     canActivate: [AuthGuardService],
+  },
+  {
+    path: 'login',
+    loadChildren: () => import('./login/login.module').then((m) => m.LoginPageModule),
   },
 ];
 
 @NgModule({
-  imports: [RouterModule.forChild(routes)],
+  imports: [RouterModule.forRoot(routes, { preloadingStrategy: PreloadAllModules })],
   exports: [RouterModule],
 })
-export class TeaPageRoutingModule {}
+export class AppRoutingModule {}
 ```
 
 ## Conclusion

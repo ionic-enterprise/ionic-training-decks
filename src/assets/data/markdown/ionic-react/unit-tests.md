@@ -29,7 +29,7 @@ I suggest adding additional test script configurations in the `package.json` fil
   "start": "react-scripts start",
   "build": "react-scripts build",
   "eject": "react-scripts eject",
-  "postinstall": "husky install",
+  "prepare": "husky install",
   "test": "react-scripts test",
   "test:ci": "export CI=true; react-scripts test",
   "test:cov": "export CI=true; react-scripts test --coverage",

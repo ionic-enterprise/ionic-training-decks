@@ -305,15 +305,20 @@ describe('when disabled', () => {
 
 In order to get these tests to pass, add the following code to the `rating.component.ts` file:
 
-First, before the constructor, add this:
+First add this:
 
 ```typescript
   @Input() disabled = false;
+
+  constructor() {}
+
   @HostBinding('style.opacity')
   get opacity(): number {
     return this.disabled ? 0.25 : 1;
   }
 ```
+
+**Note:** In order to keep lint happy, the `opacity()` getter needs to be after the constructor. Your class already has a constructor, so make sure you don't have two constructors after this.
 
 Next, modify `ratingClicked()` to only do anything if the component is not disabled:
 
@@ -381,12 +386,12 @@ The rating is not part of the data coming back from our API, so the API results 
 
 ```typescript
 resultTeas = expectedTeas.map((t: Tea) => {
-  const tea = { ...t };
-  delete tea.image;
-  delete tea.rating;
+  const { image, rating, ...tea } = t;
   return tea;
 });
 ```
+
+We should have a failing test at this point.
 
 ##### Set up the Storage Mock
 
@@ -396,9 +401,7 @@ In the main `beforeEach()`, spy on `Storage.get()` returning a default of `{ val
 
 ```typescript
 ...
-import { Plugins } from '@capacitor/core';
-...
-let originalStorage: any;
+import { Storage } from '@capacitor/storage';
 ...
 beforeEach(() => {
   initializeTestData();
@@ -442,23 +445,24 @@ That test case should probably have a more generic name as well. Something like 
 
 ##### Write the Code
 
-At this point, you should have a failing test. Update the code in `src/app/core/tea/tea.service.ts` to make it pass.
+At this point, you should still have a failing test. Update the code in `src/app/core/tea/tea.service.ts` to make it pass.
 
 The first step is to make our private `convert()` method async and then grab the rating from storage:
 
 ```typescript
   private async convert(res: any): Promise<Tea> {
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    const rating = await Storage.get({ key: `rating${res.id}` });
+    const { value } = await Storage.get({ key: `rating${res.id}` });
     return {
       ...res,
       image: `assets/img/${this.images[res.id - 1]}.jpg`,
-      rating: parseInt((rating && rating.value) || '0', 10),
+      rating: parseInt(value || '0', 10),
     };
   }
 ```
 
-But this makes our `getAll()` method unhappy. We are not returning an Observable of an array of promises of tea, but we want an array of teas, not just the promise of eventually getting tea. We can use a `mergeMap()` in conjunction with a `Promise.all()` to fix this:
+Make sure you `import { Storage } from '@capacitor/storage';`.
+
+But this makes our `getAll()` method unhappy. We are now returning an Observable of an array of promises of tea, but we want an array of teas, not just the promise of eventually getting tea. We can use a `mergeMap()` in conjunction with a `Promise.all()` to fix this:
 
 ```typescript
   getAll(): Observable<Array<Tea>> {
@@ -504,8 +508,6 @@ The code to add to the `TeaService` in order to accomplish this is straight forw
 
 ```typescript
   save(tea: Tea): Promise<void> {
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    const { Storage } = Plugins;
     return Storage.set({
       key: `rating${tea.id}`,
       value: tea.rating.toString(),
@@ -513,7 +515,7 @@ The code to add to the `TeaService` in order to accomplish this is straight forw
   }
 ```
 
-Be sure to update the mock factory for this service to reflect the new method.
+**Important:** Be sure to update the mock factory for this service to reflect the new method.
 
 ### Update the Store
 
@@ -560,7 +562,7 @@ The `src/app/store/reducers/data.reducer.spec.ts` file defines some test teas. A
 Here is one way of doing that:
 
 ```TypeScript
-  on(Actions.teaDetailsChangeRatingSuccess, (state, { tea }) => {
+  on(Actions.teaDetailsChangeRatingSuccess, (state, { tea }): DataState => {
     const teas = [...state.teas];
     const idx = state.teas.findIndex(t => t.id === tea.id);
     if (idx > -1) {
@@ -568,7 +570,7 @@ Here is one way of doing that:
     }
     return { ...state, teas };
   }),
-  on(Actions.teaDetailsChangeRatingFailure, (state, { errorMessage }) => ({
+  on(Actions.teaDetailsChangeRatingFailure, (state, { errorMessage }): DataState => ({
     ...state,
     errorMessage,
   })),
@@ -664,19 +666,28 @@ Now that everything is fully operational, let's update the `TeaDetailsPage` to u
 
 The first thing we will need to do is get the current rating when we select the tea. We need to do this because we cannot just bind directly to `tea.rating` in our view. The component modifying that value would directly modify the state, and that is not allowed.
 
-Add a rating to our test tea.
+Add a rating to our test teas.
 
 ```TypeScript
-      store.overrideSelector(selectTea, {
-        id: 7,
-        name: 'White',
-        description: 'Often looks like frosty silver pine needles',
-        image: 'imgs/white.png',
-        rating: 4,
-      });
+      store.overrideSelector(selectTeas, [
+        {
+          id: 7,
+          name: 'White',
+          description: 'Often looks like frosty silver pine needles',
+          image: 'imgs/white.png',
+          rating: 4,
+        },
+        {
+          id: 42,
+          name: 'Green',
+          description: 'Delecate flavor',
+          image: 'imgs/green.png',
+          rating: 3,
+        },
+      ]);
 ```
 
-Then add a test to verify the initialization of the rating value. Similar to the previously modified test, this is also in the "initialization" describe block
+Then add a test to verify the initialization of the rating value. This is in the "initialization" describe block.
 
 ```TypeScript
     it('initializes the rating', () => {
@@ -685,15 +696,13 @@ Then add a test to verify the initialization of the rating value. Similar to the
     });
 ```
 
-Then in the code we can tap into the Observable pipeline and grab the rating:
+In the code we can tap into the Observable pipeline and grab the rating:
 
 ```TypeScript
 ...
   rating: number;
 ...
-    this.tea$ = this.store
-      .select(selectTea, { id })
-      .pipe(tap(tea => (this.rating = tea && tea.rating)));
+    this.tea$ = this.store.select(selectTea(id)).pipe(tap((tea) => (this.rating = tea.rating)));
 ```
 
 We can then bind the rating in the template:
@@ -709,32 +718,28 @@ We can then bind the rating in the template:
 When the user clicks on the rating component, we need to dispatch the change to the store. Here is the test, code, and template markup change.
 
 ```TypeScript
-describe('rating click', () => {
-  let store: MockStore;
-  let tea: Tea;
-  beforeEach(() => {
-    tea = {
+  describe('rating click', () => {
+    let store: MockStore;
+    const tea = {
       id: 7,
       name: 'White',
       description: 'Often looks like frosty silver pine needles',
       image: 'imgs/white.png',
       rating: 4,
     };
-    store = TestBed.inject(Store) as MockStore;
-    store.overrideSelector(selectTea, tea);
-    fixture.detectChanges();
-  });
+    beforeEach(() => {
+      store = TestBed.inject(Store) as MockStore;
+      fixture.detectChanges();
+    });
 
-  it('dispatches a rating change action', () => {
-    spyOn(store, 'dispatch');
-    component.rating = 3;
-    component.changeRating(tea);
-    expect(store.dispatch).toHaveBeenCalledTimes(1);
-    expect(store.dispatch).toHaveBeenCalledWith(
-      teaDetailsChangeRating({ tea, rating: 3 }),
-    );
+    it('dispatches a rating change action', () => {
+      spyOn(store, 'dispatch');
+      component.rating = 3;
+      component.changeRating(tea);
+      expect(store.dispatch).toHaveBeenCalledTimes(1);
+      expect(store.dispatch).toHaveBeenCalledWith(teaDetailsChangeRating({ tea, rating: 3 }));
+    });
   });
-});
 ```
 
 ```TypeScript

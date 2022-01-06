@@ -98,16 +98,11 @@ The web context test fails, of course, because our `sharingIsAvailable` getter i
 ```TypeScript
 import { ModalController, Platform } from '@ionic/angular';
 ...
+  constructor(private modalController: ModalController, private platform: Platform, private store: Store) {}
+...
   get sharingIsAvailable(): boolean {
     return this.platform.is('hybrid');
   }
-...
-  constructor(
-    private modalController: ModalController,
-    private platform: Platform,
-    private tastingNotesService: TastingNotesService,
-    private teaService: TeaService,
-  ) {}
 ```
 
 ### Enable When Enough Information Exists
@@ -195,7 +190,6 @@ We can then add the code fill out the `share()` accordingly. You will also have 
 
 ```TypeScript
   async share(): Promise<void> {
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     await Share.share({
       title: `${this.brand}: ${this.name}`,
       text: `I gave ${this.brand}: ${this.name} ${this.rating} stars on the Tea Taster app`,

@@ -30,7 +30,7 @@ Be sure to add it to the `src/app/core/index.ts`.
 
 ### Interface Setup
 
-Just like the last time, we will start the actual coding by figuring out the initial shape of our API. Update `src/app/core/authentication/authentication.service.ts` to contain the following methods:
+Just like when we created the session vault service, we will start the actual coding by figuring out the initial shape of our API. Update `src/app/core/authentication/authentication.service.ts` to contain the following methods:
 
 ```typescript
 import { Injectable } from '@angular/core';
@@ -88,11 +88,20 @@ describe('AuthenticationService', () => {
 });
 ```
 
-**Note:** This is just a template to get you started. As you go through this, you will need to do some things on your own, such as importing various objects and operators from the appropriate libraries (often `@angular/core/testing` or `rxjs/operators`). You can use your editor's automatic import feature or you can manually add the import. You will not be told by the labs when you need them, but your editor will let you know. This is an item that you will have to start figuring out as if you were working on your own application at this time.
+**Note:** This is just a template to get you started. As you go through this, you will need to do some things on your own, such as importing various objects and operators from the appropriate libraries (often `@angular/core/testing` or `rxjs/operators`). You can use your editor's automatic import feature or you can manually add the import. You will not be told by the labs when you need them, but your editor will let you know.
 
 ### login
 
-Let's build up the login on step at a time following TDD. With each code pair, add the first set of code within the `describe('login', ...)` and add the second set of code within the `login()` method in the newly generated service.
+Let's build up the login on step at a time following TDD. With each step, two code blocks are given. The first code block is the test case for a requirement, and it belongs within the `describe('login', ...)` block of your newly created test file. The second code block is the code that satisfies the requirement, and it belongs in the `login()` method in your new service class.
+
+This exercise demonstrates how code is built up baby-step by baby-step using TDD. It may seem tedious at first, but the advantages of this process are:
+
+- You only need to concentrate on one small piece of logic at a time.
+- As a result, the resulting code tends to be easier to understand.
+- You end up with a full set of tests for the code.
+- As a result, it is easier to refactor the resulting code as needed to make it more readable and maintainable.
+
+Readability and maintainability are far more important than initial development time when it comes to the long-term costs associated with a project. Following TDD is one way to help keep the long-term costs of the project in check.
 
 #### Step 1 - POST the Login
 
@@ -154,7 +163,7 @@ describe('on success', () => {
 });
 ```
 
-The folloing `3.1` step should then be nested within the `describe()` that was just created.
+The following `3.1` step should then be nested within the `describe()` that was just created.
 
 ##### Step 3.1 - Emit the Session
 
@@ -195,9 +204,9 @@ return this.http
     password,
   })
   .pipe(
-    map((res) => {
-      delete res.success;
-      return res;
+    map((res: LoginResponse) => {
+      const { success, ...session } = res;
+      return session;
     })
   );
 ```
@@ -230,12 +239,12 @@ it('emits undefined', fakeAsync(() => {
 That just takes one minor tweak in the `map()`:
 
 ```TypeScript
-        map(res => {
-          if (res.success) {
-            delete res.success;
-            return res;
-          }
-        }),
+      map((res: LoginResponse) => {
+        const { success, ...session } = res;
+        if (success) {
+          return session;
+        }
+      })
 ```
 
 In case you got lost at any step, here is the complete code so far:
@@ -267,10 +276,10 @@ export class AuthenticationService {
         password,
       })
       .pipe(
-        map((res) => {
-          if (res.success) {
-            delete res.success;
-            return res;
+        map((res: LoginResponse) => {
+          const { success, ...session } = res;
+          if (success) {
+            return session;
           }
         })
       );
@@ -337,16 +346,15 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { HttpEvent, HttpInterceptor, HttpHandler, HttpRequest } from '@angular/common/http';
 import { select, Store } from '@ngrx/store';
-import { selectAuthToken, State } from '@app/store';
+import { selectAuthToken } from '@app/store';
 import { mergeMap, take, tap } from 'rxjs/operators';
 
 @Injectable()
 export class AuthInterceptor implements HttpInterceptor {
-  constructor(private store: Store<State>) {}
+  constructor(private store: Store) {}
 
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-    return this.store.pipe(
-      select(selectAuthToken),
+    return this.store.select(selectAuthToken).pipe(
       take(1),
       tap((token) => {
         if (token && this.requestRequiresToken(req)) {
@@ -368,6 +376,8 @@ export class AuthInterceptor implements HttpInterceptor {
 }
 ```
 
+This interceptor modifies the pipeline such that the token is added to the `Authorization` header if a token exists and the request requires a token. Have a look at `requestRequiresToken()`. The regular expression that is evaluated essentially states that every request requires a token with the exception of the `login` request.
+
 ### The Unauth Interceptor - Handle 401 Errors
 
 ```typescript
@@ -377,11 +387,9 @@ import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { Store } from '@ngrx/store';
 
-import { State } from '@app/store';
-
 @Injectable()
 export class UnauthInterceptor implements HttpInterceptor {
-  constructor(private store: Store<State>) {}
+  constructor(private store: Store) {}
 
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     return next.handle(req).pipe(
@@ -398,13 +406,15 @@ export class UnauthInterceptor implements HttpInterceptor {
 }
 ```
 
-**Note:** What should we do when we have a 401 error? Well, we really should inform the store, but we don't really have a an action for that, so let's add one really quick:
+This interceptor applies its logic to the pipeline after the request has been made. That is, it applies to the response. It is looking for 401 errors. What should we do when we have a 401 error? Well, we really should inform the store, but we don't really have a an action for that, so let's add one really quick:
+
+Add the following action in `src/app/store/actions.ts`:
 
 ```TypeScript
 export const unauthError = createAction('[Auth API] unauthenticated error');
 ```
 
-We will also need to update the auth reducer to modify the state for the new action. All it needs to do is remove the session from the state since the session is not valid.
+We will also need to update the auth reducer to modify the state for the new action. All it needs to do is remove the session from the state since the session is not valid. First the test (`src/app/store/reducers/auth.reducer.spec.ts`):
 
 ```TypeScript
   describe('Unauth Error', () => {
@@ -432,12 +442,13 @@ We will also need to update the auth reducer to modify the state for the new act
   });
 ```
 
+Then the code:
+
 ```TypeScript
-  on(Actions.unauthError, state => {
-    const newState = { ...state };
-    delete newState.session;
+  on(Actions.unauthError, (state): AuthState => {
+    const { session, ...newState } = state;
     return newState;
-  }),
+  })
 ```
 
 Finally, we need a `unauthError$` effect. It needs to clear the storage and dispatch the fact that we are in a logged out state (LogoutSuccess). This should be added to the auth effects.
@@ -485,7 +496,7 @@ this.store.dispatch(unauthError());
 
 ### Hookup the Interceptors
 
-Provide the interceptors to the `providers` array in the `app.module.ts` file. This ensures that they are used by the whole application. The `HTTP_INTERCEPTORS` array needs to be imported from `@angluar/common/http`.
+Add the interceptors to the `providers` array in the `app.module.ts` file. This ensures that they are used by the whole application. The `HTTP_INTERCEPTORS` array needs to be imported from `@angluar/common/http`.
 
 ```typescript
     { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
@@ -496,7 +507,7 @@ While we are in there, we should also add `HttpClientModule` (also from `@angula
 
 ## Update the Store
 
-There is one part of our store that performs asynchronous data actions, and that is the `effects`. Assuming we laid out the rest of our application properly, the only part of our authentication flow that should need to change is the operation of the effects.
+There is one part of our store that performs asynchronous data actions such as the login and logout methods we just added to our `AuthenticationService`, and that is the `effects`. Assuming we laid out the rest of our application properly, the only part of our authentication flow that should need to change is the operation of the effects.
 
 ### The Auth Effects Tests
 
@@ -517,6 +528,7 @@ Then we need to update the `login$` tests. We need to:
 
 ```TypeScript
   describe('login$', () => {
+    // This is a new test, add it
     it('performs a login operation', done => {
       const auth = TestBed.inject(AuthenticationService);
       (auth.login as any).and.returnValue(of(undefined));
@@ -529,6 +541,7 @@ Then we need to update the `login$` tests. We need to:
     });
 
     describe('on login success', () => {
+      // Add the beforeEach() to redifine success, leave tests as-is
       beforeEach(() => {
         const auth = TestBed.inject(AuthenticationService);
         (auth.login as any).and.returnValue(
@@ -547,6 +560,7 @@ Then we need to update the `login$` tests. We need to:
     });
 
     describe('on login failure', () => {
+      // Add the beforeEach() to redifine failure, leave tests as-is
       beforeEach(() => {
         const auth = TestBed.inject(AuthenticationService);
         (auth.login as any).and.returnValue(of(undefined));
@@ -554,6 +568,8 @@ Then we need to update the `login$` tests. We need to:
       ...
     });
 
+    // These are all new tests that define how the store will react
+    // in the case that we get an HTTP error (like a 503, for example)
     describe('on a hard error', () => {
       beforeEach(() => {
         const auth = TestBed.inject(AuthenticationService);
@@ -648,7 +664,7 @@ Turning our attention to the code, the first thing we need to do is inject the `
   ) {}
 ```
 
-Then we can modify the logic in the `login$` effect:
+Then we can modify the logic in the `login$` effect. These diff's are offered as a guide. Please make similar modifications in your code rather than copy-pasting. Your starting code may be slightly different:
 
 ```diff
      this.actions$.pipe(
@@ -677,8 +693,6 @@ Then we can modify the logic in the `login$` effect:
        ),
 ```
 
-You can completely remove the private `fakeLogin()` method at this point.
-
 We can also modify the logic in the `logout$` effect:
 
 ```diff
@@ -698,11 +712,81 @@ We can also modify the logic in the `logout$` effect:
    );
 ```
 
-Test this out in the application. Note from the "network" tab in the devtools that you are now using actual calls to the backend for the login and the logout.
+**Note:** the auth effects class probably has some unused code and imports at this point. Be sure to clean that up.
 
-Also note that you were able to use the store to fake the login for a period of time, and then when the time was right you were able to switch over to using the backend API but only had to change the effects that handle them, the rest of your application was able to continue functioning as-is. This is an important tool that you can utilize in your own development.
+## Ooops!! Something Broke!
 
-At this point, it would be a good idea to look for unused imports, etc. and clean any of that up.
+Test this out in the application. Ooops!! It looks like something is wrong. Nothing is showing up.
+
+Open the devtools and have a look at the console. You should see an error something like this:
+
+```
+NullInjectorError: R3InjectorError(AppModule)[EffectsRootModule -> InjectionToken @ngrx/effects Root Effects -> AuthEffects -> AuthenticationService -> HttpClient -> HttpClient -> HttpClient]:
+  NullInjectorError: No provider for HttpClient!
+    at NullInjector.get (:8100/vendor.js:76705:27)
+    at R3Injector.get (:8100/vendor.js:76872:33)
+    at R3Injector.get (:8100/vendor.js:76872:33)
+    at R3Injector.get (:8100/vendor.js:76872:33)
+    at injectInjectorOnly (:8100/vendor.js:70360:33)
+    at ɵɵinject (:8100/vendor.js:70364:61)
+    at Object.AuthenticationService_Factory [as factory] (ng:///AuthenticationService/ɵfac.js:4:49)
+    at R3Injector.hydrate (:8100/vendor.js:77042:35)
+    at R3Injector.get (:8100/vendor.js:76861:33)
+    at injectInjectorOnly (:8100/vendor.js:70360:33)
+```
+
+This is because we are using the Angular HTTP Client, but we never registered it with Angular's injector. Open `src/app/app.module.ts` and add an import for `HttpClientModule` to the `imports[...]` array that is part of the base `@NgModule`. Here is what mine currently looks like:
+
+```typescript
+import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
+import { NgModule } from '@angular/core';
+import { BrowserModule } from '@angular/platform-browser';
+import { RouteReuseStrategy } from '@angular/router';
+import { AuthInterceptor, UnauthInterceptor } from '@app/core';
+import { metaReducers, reducers } from '@app/store';
+import { AuthEffects } from '@app/store/effects';
+import { environment } from '@env/environment';
+import { IonicModule, IonicRouteStrategy } from '@ionic/angular';
+import { EffectsModule } from '@ngrx/effects';
+import { StoreModule } from '@ngrx/store';
+import { StoreDevtoolsModule } from '@ngrx/store-devtools';
+import { AppRoutingModule } from './app-routing.module';
+import { AppComponent } from './app.component';
+
+@NgModule({
+  declarations: [AppComponent],
+  entryComponents: [],
+  imports: [
+    AppRoutingModule,
+    BrowserModule,
+    HttpClientModule,
+    IonicModule.forRoot(),
+    StoreModule.forRoot(reducers, {
+      metaReducers,
+      runtimeChecks: {
+        strictStateImmutability: true,
+        strictActionImmutability: true,
+      },
+    }),
+    EffectsModule.forRoot([AuthEffects]),
+    StoreDevtoolsModule.instrument({ maxAge: 25, logOnly: environment.production, autoPause: true }),
+  ],
+  providers: [
+    { provide: RouteReuseStrategy, useClass: IonicRouteStrategy },
+    { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
+    { provide: HTTP_INTERCEPTORS, useClass: UnauthInterceptor, multi: true },
+  ],
+  bootstrap: [AppComponent],
+})
+export class AppModule {}
+```
+
+Test this out in the application again. Note from the "network" tab in the devtools that you are now using actual calls to the backend for the login and the logout.
+
+To successfully log in, use the following credentials:
+
+- email: `test@ionic.io`
+- password: `Ion54321`
 
 ## Conclusion
 

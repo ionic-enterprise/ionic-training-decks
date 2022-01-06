@@ -10,7 +10,7 @@ In this lab, you will learn how to:
 
 ## Install the Images
 
-There are several images we would like to display for our teas, but these assets to do not exist yet. <a download href="/assets/packages/ionic-angular/img.zip">Download the images</a> and unpack the zip file under `src/assets`, creating an `img` folder with the images in them.
+In an Angular application, any items installed under `src/assets` will automatically be copied by the build process such that they are available for our application to use. There are several images we would like to display for our teas, but these assets to do not exist yet. <a download href="/assets/packages/ionic-angular/img.zip">Download the images</a> and unpack the zip file under `src/assets`, creating an `img` folder with the images in them.
 
 **Note:** the specifics on doing this depends on the type of machine you are using. On a Mac:
 
@@ -25,7 +25,7 @@ Let's mock up how the Ionic components will be used in the tea page. This allows
 
 ### Tea Model
 
-Create a model to define the data for a given tea.
+TypeScript gives us the ability to model the shape of our data and enforce consistent data models throughout our system. Create a model to define the data for a given tea.
 
 - Create a `src/app/models` folder
 - Add a `src/app/models/tea.ts` file
@@ -86,27 +86,6 @@ Open the `tsconfig.json` file and add the following lines under the `baseUrl` se
 
 This tells TypeScript exactly which directory, relative to the `baseUrl`, to use when it finds one of the mappings in an `import` statement.
 
-#### Other TypeScript Config Cleanup
-
-Remember when we did the `npm run build` and got warnings like the following?
-
-```
-WARNING in /Users/kensodemann/Projects/Training/tea-taster/src/test.ts is part of the TypeScript compilation but it's unused.
-Add only entry points to the 'files' or 'include' properties in your tsconfig.
-```
-
-That is because there are certain files that are under `src` that are either part of the testing infrastructure or are used to replace other files during production builds and thus should not be directly included in the build. Let's modify the build to ignore those files.
-
-Open the `tsconfig.app.json` file and modify the `exclude` section as such:
-
-```JSON
-  "exclude": [
-    "src/**/environment.prod.ts",
-    "src/**/*.spec.ts",
-    "src/**/test.ts"
-  ]
-```
-
 ### The Tea Page
 
 #### Replacing the Home Page
@@ -135,13 +114,13 @@ import { PreloadAllModules, RouterModule, Routes } from '@angular/router';
 
 const routes: Routes = [
   {
-    path: 'tea',
-    loadChildren: () => import('./tea/tea.module').then( m => m.TeaPageModule)
-  },
-  {
     path: '',
     redirectTo: 'tea',
     pathMatch: 'full'
+  },
+  {
+    path: 'tea',
+    loadChildren: () => import('./tea/tea.module').then( m => m.TeaPageModule)
   },
 ];
 ...
@@ -152,9 +131,6 @@ const routes: Routes = [
 We do not have a connection to a back end service to get any data for our application. So for now we will just add some data directly to our page so we have something to work with. Just copy-paste the following into your `TeaPage` class.
 
 ```TypeScript
-...
-import { Tea } from '@app/models';
-...
   teaData: Array<Tea> = [
     {
       id: 1,
@@ -215,6 +191,12 @@ import { Tea } from '@app/models';
   ];
 ```
 
+You will also need to import the `Tea` model that we created:
+
+```typescript
+import { Tea } from '@app/models';
+```
+
 **Note:** If we were further along, we probably would have created a thing called a "service" and had it return fake data using the same sort of interface it would use to return real data, but we haven't talked about services yet in this training.
 
 #### Create a List of Cards
@@ -239,7 +221,7 @@ In `src/app/tea/tea.page.html` place the following inside of the `ion-content`:
 </ion-list>
 ```
 
-This creates a list of cards. Angular's `ngFor` structural directive to render the sample template for each item in the `teaData` collection. That looks pretty good, at least when viewed at a phone resolution, but what about other form factors? Those do not look quite as nice. We will fix that shortly, but first go back to an iPhone form factor.
+This creates a list of cards. Angular's `ngFor` structural directive is used to render the sample template for each item in the `teaData` collection. That looks pretty good, at least when viewed at a phone resolution, but what about other form factors? Those do not look quite as nice. We will fix that shortly, but first go back to an iPhone form factor.
 
 If you look closely, though, we lost the "Large Title" scrolling effect we had on the "Home" page. Have a look at the HTML for the "Home" page. There are a few key items we need to bring over:
 
@@ -286,11 +268,11 @@ import { By } from '@angular/platform-browser';
 
 Our app looks good when viewed at a phone resolution, but if we modify Chrome to emulate some other form factor such as an iPad or iPad Pro, then it looks a little weird. The Cards are huge. It would be better if we could:
 
-1. show a single list on a phone
-1. show two columns of tea cards side by side on an iPad
-1. expand the columns to four on even wider screens, such as an iPad in landscape mode or our desktop
+1. Show a single list on a phone.
+1. Show two columns of tea cards side by side on an iPad.
+1. Expand the columns to four on even wider screens, such as an iPad in landscape mode or our desktop.
 
-Enter the <a href="https://ionicframework.com/docs/layout/grid" target="_blank">responsive grid</a>. By default, the responsive grid shows rows of 12 columns each. However, we want to show at most rows of four columns. Luckily, there are some simple mechanisms in place that will allow us to do that, but first let's message our data a little.
+Enter the <a href="https://ionicframework.com/docs/layout/grid" target="_blank">responsive grid</a>. By default, the responsive grid shows rows of 12 columns each. However, we want to show at most four columns per row. Luckily, there are some simple mechanisms in place that will allow us to do that, but first let's massage our data a little.
 
 We currently have a list of X number of teas (currently 7, but once we start getting data from a backend service it could really be any number). Let's begin by breaking that up into a matrix with a maximum of 4 teas in each row. That means we will have two rows, the first with four columns and the second with three.
 
@@ -314,7 +296,7 @@ describe('TeaPage', () => {
   const initializeTestData = () => {
     teas = [
       // Remember those tea records we hard coded into the page?
-      // Copy those records here.
+      // Copy those records here and assign them to the "teas" array.
     ];
   }
 });
@@ -327,7 +309,7 @@ There are two ways that we could go with the test for this:
 1. Figure out what the class needs to do to the data to produce a matrix of teas for the grid and test that.
 1. Test that the component renders the grid properly.
 
-The first set of tests would be testing an implementation detail, and therefor is not ideal. The second test more accurately reflects the requirement for the page from the user's perspective, and that is what is important, so we will write the test from the perspective. This also has the advantage of being a more robust test since the implementation details may change but the requirements for what we display to the user will likely stay the same.
+The first set of tests would be testing an implementation detail, and therefor is not ideal. The second test more accurately reflects the requirement for the page from the user's perspective, and that is what is important. As such, we will write the test from that perspective. This also has the advantage of being a more robust test since the implementation details may change but the requirements for what we display to the user will likely stay the same.
 
 ```TypeScript
 ...

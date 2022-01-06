@@ -14,7 +14,9 @@ There are a couple of preliminary items that we need to get out of the way first
 - Create a data service that performs HTTP requests
 - Add the notes to the store
 
-These are a few things we have done multiple times now, so I will just give you the code to move things along. If you are still unsure on these items, though, please review the code that is provided here.
+**Important:** These are a few things we have done multiple times now, so I will just give you the code to move things along. That means that the first part of this lab is very "copy-paste" centric. If you are unsure on any of the items, though, please take the time to review the code that is being pasted in.
+
+Once we have a good skeleton in place, we will get back to doing new things that are far less "copy-paste."
 
 ### Create Some Entities
 
@@ -399,27 +401,27 @@ Then add the new test cases that we need:
 Finally, add the code to the reducer:
 
 ```TypeScript
-  on(Actions.notesPageLoaded, state => ({
+  on(Actions.notesPageLoaded, (state): DataState => ({
     ...state,
     loading: true,
     errorMessage: '',
   })),
-  on(Actions.notesPageLoadedSuccess, (state, { notes }) => ({
+  on(Actions.notesPageLoadedSuccess, (state, { notes }): DataState => ({
     ...state,
     loading: false,
     notes,
   })),
-  on(Actions.notesPageLoadedFailure, (state, { errorMessage }) => ({
+  on(Actions.notesPageLoadedFailure, (state, { errorMessage }): DataState => ({
     ...state,
     loading: false,
     errorMessage,
   })),
-  on(Actions.noteSaved, state => ({
+  on(Actions.noteSaved, (state): DataState => ({
     ...state,
     loading: true,
     errorMessage: '',
   })),
-  on(Actions.noteSavedSuccess, (state, { note }) => {
+  on(Actions.noteSavedSuccess, (state, { note }): DataState => {
     const notes = [...state.notes];
     const idx = notes.findIndex(n => n.id === note.id);
     if (idx > -1) {
@@ -433,17 +435,17 @@ Finally, add the code to the reducer:
       loading: false,
     };
   }),
-  on(Actions.noteSavedFailure, (state, { errorMessage }) => ({
+  on(Actions.noteSavedFailure, (state, { errorMessage }): DataState => ({
     ...state,
     loading: false,
     errorMessage,
   })),
-  on(Actions.noteDeleted, state => ({
+  on(Actions.noteDeleted, (state): DataState => ({
     ...state,
     loading: true,
     errorMessage: '',
   })),
-  on(Actions.noteDeletedSuccess, (state, { note }) => {
+  on(Actions.noteDeletedSuccess, (state, { note }): DataState => {
     const notes = [...state.notes];
     const idx = notes.findIndex(n => n.id === note.id);
     if (idx > -1) {
@@ -455,7 +457,7 @@ Finally, add the code to the reducer:
       loading: false,
     };
   }),
-  on(Actions.noteDeletedFailure, (state, { errorMessage }) => ({
+  on(Actions.noteDeletedFailure, (state, { errorMessage }): DataState => ({
     ...state,
     loading: false,
     errorMessage,
@@ -720,7 +722,10 @@ Once that is in place, we can create test for the following workflows:
               noteDeletedFailure({
                 errorMessage: 'Error in data load, check server logs',
               }),
-            ),
+         2 export const selectNotes = createSelector(selectData, (state: DataState) => state.notes);
+  1 export const selectNote = (id: number) =>
+  0   createSelector(selectNotes, (notes: Array<TastingNote>) => notes.find((t) => t.id === id));
+     ),
           ),
         ),
       ),
@@ -745,15 +750,9 @@ For selectors, we need one to get all of the notes and one to get a specific not
 ```TypeScript
 import { TastingNote, Tea } from '@app/models';
 ...
-export const selectNotes = createSelector(
-  selectData,
-  (state: DataState) => state.notes,
-);
-export const selectNote = createSelector(
-  selectNotes,
-  (notes: Array<TastingNote>, props: { id: number }) =>
-    notes.find(t => t.id === props.id),
-);
+export const selectNotes = createSelector(selectData, (state: DataState) => state.notes);
+export const selectNote = (id: number) =>
+  createSelector(selectNotes, (notes: Array<TastingNote>) => notes.find((t) => t.id === id));
 ```
 
 ### The Editor Component
@@ -1007,7 +1006,7 @@ import { Observable } from 'rxjs';
 import { Store } from '@ngrx/store';
 
 import { TastingNote, Tea } from '@app/models';
-import { selectTeas, State } from '@app/store';
+import { selectTeas } from '@app/store';
 import { ModalController } from '@ionic/angular';
 import { noteSaved } from '@app/store/actions';
 
@@ -1027,6 +1026,8 @@ export class TastingNoteEditorComponent implements OnInit {
 
   teaCategories$: Observable<Array<Tea>>;
 
+  constructor(private modalController: ModalController, private store: Store) {}
+
   get title(): string {
     return this.note ? 'Tasting Note' : 'Add New Tasting Note';
   }
@@ -1034,11 +1035,6 @@ export class TastingNoteEditorComponent implements OnInit {
   get buttonLabel(): string {
     return this.note ? 'Update' : 'Add';
   }
-
-  constructor(
-    private modalController: ModalController,
-    private store: Store<State>,
-  ) {}
 
   ngOnInit() {
     this.teaCategories$ = this.store.select(selectTeas);
@@ -1269,7 +1265,7 @@ import { Observable } from 'rxjs';
 import { Store } from '@ngrx/store';
 
 import { TastingNote } from '@app/models';
-import { selectNotes, State } from '@app/store';
+import { selectNotes } from '@app/store';
 import { notesPageLoaded } from '@app/store/actions';
 
 @Component({
@@ -1281,7 +1277,7 @@ export class TastingNotesPage implements OnInit {
   notes$: Observable<Array<TastingNote>>;
 
   constructor(
-    private store: Store<State>,
+    private store: Store,
   ) {}
 
   ngOnInit() {
@@ -1344,7 +1340,7 @@ In `src/app/tasting-notes/tasting-notes.page.ts` inject the same items that we j
   constructor(
     private modalController: ModalController,
     private routerOutlet: IonRouterOutlet,
-    private store: Store<State>,
+    private store: Store,
   ) {}
 ```
 
@@ -1481,26 +1477,16 @@ The quick and dirty way to get this test to pass is to copy the `newNote()` meth
 But that is a lot of repeated code with just a one line difference. Let's refactor that a bit:
 
 ```TypeScript
-  async newNote(): Promise<void> {
+  newNote(): Promise<void> {
     return this.displayEditor();
   }
 
-  async updateNote(note: TastingNote): Promise<void> {
+  updateNote(note: TastingNote): Promise<void> {
     return this.displayEditor(note);
   }
 
   private async displayEditor(note?: TastingNote): Promise<void> {
-    const opt = {
-      component: TastingNoteEditorComponent,
-      backdropDismiss: false,
-      swipeToClose: true,
-      presentingElement: this.routerOutlet.nativeEl,
-    };
-
-    const modal = await (note
-      ? this.modalController.create({ ...opt, componentProps: { note } })
-      : this.modalController.create(opt));
-    return modal.present();
+    // Filling in this code is left as an exercise for you
   }
 ```
 
@@ -1512,7 +1498,7 @@ The final feature we will add is the ability to delete a note. We will keep this
 
 We will use a contruct called a <a ref="https://ionicframework.com/docs/api/item-sliding" target="_blank">item sliding</a> to essentially "hide" the delete button behind the item. That way the user has to slide the item over in order to expose the button and do a delete.
 
-Using this results in a little be of rework in how the item is rendered and bound on the `TastingNotesPage`:
+Doing this results in a little bit of rework in how the item is rendered and bound on the `TastingNotesPage`:
 
 ```HTML
     <ion-item-sliding *ngFor="let note of notes$ | async">

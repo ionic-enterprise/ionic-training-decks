@@ -87,7 +87,7 @@ Get those in place. At that point, your challenge is to add the items that make 
 - we have the actions and reducers for the logout, but we have no effects
   - write a test for the `logout$` effect
   - write the `logout$` effect
-  - write a test for the `logoutSuccess$` effect
+  - write a test for the `logoutSuccess$` effect (the path navigated to should be `/login`)
   - write the `logoutSuccess$` effect
 
 **Hint #1:** at this time, the `logout$` effect only needs to do two things:
@@ -95,7 +95,7 @@ Get those in place. At that point, your challenge is to add the items that make 
 - clear the session
 - dispatch the `logoutSuccess` event.
 
-This makes the tests for it similar to the "on login success" tests for the `login$` effect, only without all of the argument passing and checking since the `logout` related actions and methods do not take arguments.
+This makes the tests for it similar to the "on login success" tests for the `login$` effect, only without all of the argument passing and checking since the `logout` related actions and methods do not take arguments. Also, the session is cleared instead of saved.
 
 **Hint #2:** `logoutSuccess$` is a lot like `loginSuccess$` with only the details of the action and the actual path navigated to differing. This makes `loginSuccess$` a pretty good model for what you need to do.
 

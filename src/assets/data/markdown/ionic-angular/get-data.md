@@ -49,7 +49,7 @@ export class TeaService {
 
 Angular's <a href="https://angular.io/api/common/http/HttpClient" target="_blank">HttpClient</a> service is very flexible and has several options for working with RESTful data. We will not go into full details, as that could be a full course on its own. You have already seen a couple of cases where we use the POST method to log in and out of the application. In this service we will only be using GET method to retrieve data.
 
-You should see one test failing. That is the test for this service, and it is failing because the testing module does not know how to inject the `HttpClient` service. The `@angular/common/http/testing` library will be used to mock the `HttpClient` for our tests. Some simple setup will fix that.
+You should see one test failing. That is the test for this service, and it is failing because the testing module does not know how to inject the `HttpClient` service. The `@angular/common/http/testing` library will be used to mock the `HttpClient` for our tests. Here is the configuration needed to rectify that:
 
 ```TypeScript
 import { TestBed } from '@angular/core/testing';
@@ -81,7 +81,7 @@ describe('TeaService', () => {
 
 ## Getting the Data
 
-**Note:** this is just a reminder that as you go through these steps you _will_ need to adjust your imports, importing in new items that you are using and remove items that are no longer being used. In some cases, multiple modules will contain a thing with any given name. Make sure you are importing the correct one. If you are unsure, please be sure to ask.
+**Note:** this is just a reminder that as you go through these steps you will need to adjust your imports, importing in new items that you are using and remove items that are no longer being used. In some cases, multiple modules will contain a thing with any given name. Make sure you are importing the correct one. If you are unsure, please be sure to ask.
 
 ### Initialize the Test Data
 
@@ -94,9 +94,11 @@ First, create `expectedTeas` and `resultTeas` variables within the main `describ
 ```typescript
 ...
   let expectedTeas: Array<Tea>;
-  let resultTeas: Array<Tea>;
+  let resultTeas: Array<any>;
 ...
 ```
+
+**Note:** to be absolutely correct, we should have created a type for the shape of the `Tea` coming back from the API. That would be a good tech-debt-reduction task for the future. For now, we will roll with this.
 
 We can then use `expectedTeas` to manufacture a set of `resultTeas` by deleting the `image`. The `resultTeas` will be the result of our API call. Create the following function at the bottom of the main `describe()` function callback.
 
@@ -153,8 +155,7 @@ const initializeTestData = () => {
     },
   ];
   resultTeas = expectedTeas.map((t: Tea) => {
-    const tea = { ...t };
-    delete tea.image;
+    const { image, ...tea } = t;
     return tea;
   });
 };
@@ -185,7 +186,7 @@ Write the minimal code required to make that test pass. Basically, this:
   }
 ```
 
-The `as any` is only needed here to make TypeScript happy. It will be removed later.
+The casting to `any` is only needed here to make TypeScript happy. It will be removed later.
 
 #### Test #2 - Convert the Data
 
@@ -263,7 +264,7 @@ When you are done, the code should look more like this:
 
 Make sure your tests are still passing. That makes it clear that we are grabbing the teas from the API and returning them after a mapping process. The details of that convertion then are left to the `convert()` method, and everything is tidy and is only responsible for one thing.
 
-The point of what we just did is that it is OK for things to get a little messy while you are working out exactly how it should work. However, before you call the code "done" you should clean it up to make it easier to maintain, and properly written unit tests will help you ensure you are doing that clean-up correctly.
+**Best Practice:** The point of what we just did is that it is OK for things to get a little messy while you are working out exactly how it should work. However, before you call the code "done" you should clean it up to make it easier to maintain. Having properly written unit tests will help you ensure you are doing that clean-up correctly.
 
 ## Create a Mock Factory
 

@@ -67,7 +67,7 @@ Modify your `package.json` file. I suggest moving the `description` up to the to
   "private": true,
   "scripts": {
     ...
-    "postinstall": "husky install",
+    "prepare": "husky install",
     ...
   },
   "dependencies": {

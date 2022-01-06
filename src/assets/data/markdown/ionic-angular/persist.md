@@ -4,7 +4,7 @@ In this lab you will learn how to:
 
 - Create an Angular service
 - Use the Capacitor Storage API
-- Add more actions to our store
+- Add more actions to the store
 
 ## Create the Session Vault Service
 
@@ -70,7 +70,7 @@ Edit the `tsconfig.spec.json` file and add a `paths` parameter to the `compilerO
     }
 ```
 
-Note that this is exactly like the `paths` we added to the base `tsconfig.json` file in order to avoid relative routes in the imports. The change here is the addition of the `@capacitor/*` value.
+Note that this is exactly like the `paths` we added to the base `tsconfig.json` file in order to avoid relative routes in the imports. The change here is the addition of the `@capacitor/*` value. This change tells the build system that when it sees a statement like `import { Foo } from @capacitor/foo`, it should look in the `__mocks__/@capacitor` directory for `foo.ts` rather than under `node_modules`. Since it is in `tsconfig.spec.ts`, it will only do this when building for unit testing.
 
 Next, create a `__mocks__/@capacitor` folder in the project's root and add a `storage.ts` file with the following contents:
 
@@ -88,12 +88,11 @@ const Storage = new MockStorage();
 export { Storage };
 ```
 
-Now we can begin creating the test:
+Now we can begin creating the test for our new `SessionVaultService` in `src/app/core/session-vault/session-vault.service.spec.ts`. Start by importing `Storage` and `Session` as shown and by adding `describe` blocks for each of our public methods:
 
 ```TypeScript
 import { TestBed } from '@angular/core/testing';
 import { Storage } from '@capacitor/storage';
-
 import { Session } from '@app/models';
 import { SessionVaultService } from './session-vault.service';
 
@@ -148,7 +147,7 @@ describe('login', () => {
 });
 ```
 
-The code for this then looks like the following:
+The code for this in the service class then looks like the following:
 
 ```TypeScript
   async login(session: Session): Promise<void> {
@@ -197,14 +196,14 @@ describe('restore session', () => {
       spyOn(Storage, 'get').and.returnValue(Promise.resolve({ value: null }));
     });
 
-    it('resolves without a session', async () => {
+    it('resolves null', async () => {
       expect(await service.restoreSession()).toEqual(null);
     });
   });
 });
 ```
 
-**Challenge:** write the code for this method. Check with the <a href="https://capacitorjs.com/docs/apis/storage" target="_blank">Storage Plugin</a> docs if you get stuck.
+**Challenge:** write the code for this method based on the requirements that are defined by this set of tests. Check with the <a href="https://capacitorjs.com/docs/apis/storage" target="_blank">Storage Plugin</a> docs if you get stuck.
 
 #### Logout
 
@@ -227,6 +226,8 @@ describe('logout', () => {
 
 ## Session Vault Service Mock Factory
 
+Eventually, we will want to use this service in other modules. In order to maintain isolation in those other modules, this also means that we will need to be able to easily mock this service. One easy to use method to do this is to create a mock factory side-by-side with the service.
+
 Add a `src/app/core/session-vault/session-vault.service.mock.ts` file and inside of it create a factory used to build mock `SessionVaultService` objects for testing.
 
 ```typescript
@@ -244,18 +245,6 @@ Also create a `testing` barrel file called `src/app/core/testing.ts` that will e
 export * from './session-vault/session-vault.service.mock';
 ```
 
-Try an `npm run build` and notice that it fails because it is trying to bring the mock in and cannot fine Jasmine. The build should not bring in any of our testing stuff. The `tsconfig.app.json` will need to be updated to ignore the mocks and the testing barrel file in the app builds.
-
-```typescript
-  "exclude": [
-    "src/**/environment.prod.ts",
-    "src/**/*.mock.ts",
-    "src/**/*.spec.ts",
-    "src/**/testing.ts",
-    "src/**/test.ts"
-  ]
-```
-
 ## Integrate with the Store
 
 There are two tasks we currently need to perform within the store:
@@ -265,7 +254,13 @@ There are two tasks we currently need to perform within the store:
 
 ### Handle Login
 
-Let's start with the easy one. We need to save the session when the login succeeds and do nothing when it fails. The first thing to do is create tests in `src/app/store/effects/auth.effects.spec.ts` that express these requirements:
+Let's start with the easy one. We need to save the session when the login succeeds and do nothing when it fails. The first thing to do is create tests in `src/app/store/effects/auth.effects.spec.ts` that express these requirements.
+
+A couple of notes on the following code:
+
+- **Do not** add the `beforeEach`. It already exists. You are adding the `SessionVaultService` provider to it.
+- The `describe()` blocks already exist, they are there to guide you as to where the tests go.
+- Reminder: the `...` is just a placeholder for other code that may be in the file.
 
 ```TypeScript
 ...
@@ -322,7 +317,7 @@ import { createSessionVaultServiceMock } from '@app/core/testing';
 ...
 ```
 
-In the code, we can add a `tap()` to our observable pipeline that will fulfill these requirements:
+In the code, we can add a `tap()` to our observable pipeline that will fulfill these requirements. Note that a lot of this code already exists, you are just adding to it, so please don't copy-paste:
 
 ```TypeScript
 ...
@@ -357,6 +352,8 @@ export const sessionRestored = createAction(
 
 The reducer (`src/app/store/reducers/auth.reducer.*`) should handle this action by setting the session in the state.
 
+**Test:**
+
 ```TypeScript
 describe('Session Restored', () => {
   it('sets the session', () => {
@@ -379,11 +376,16 @@ describe('Session Restored', () => {
 });
 ```
 
+**Code:**
+
 ```TypeScript
-  on(Actions.sessionRestored, (state, { session }) => ({
-    ...state,
-    session,
-  })),
+  on(
+    Actions.sessionRestored,
+    (state, { session }): AuthState => ({
+      ...state,
+      session,
+    })
+  )
 ```
 
 Finally, modify the `SessionVaultService` to dispatch this action whenever a session is restored.
@@ -436,10 +438,8 @@ The code to accomplish this while still satisfying the other tests looks like th
 import { Store } from '@ngrx/store';
 import { sessionRestored } from '@app/store/actions';
 ...
-import { State } from '@app/store';
-...
 
-  constructor(private store: Store<State>) {}
+  constructor(private store: Store) {}
 
 ...
 
@@ -459,7 +459,7 @@ import { State } from '@app/store';
 
 ## A Note on Security
 
-We should be careful about what we are storing in local storage and then trusting. The token isn't bad. If someone tampers with it, it is extremely likely that it will be invalid. The bigger issue would be if we were, for example, storing authorization information with the session and then trusting that to be correct. A user could easily update local storage in that case to, for example, give themselves admin access.
+We should be careful about what we are storing in local storage and then trusting. The token isn't too bad. If someone tampers with it, it is extremely likely that it will be invalid. The bigger issue would be if we were, for example, storing authorization information with the session and then trusting that to be correct. A user could easily update local storage in that case to, for example, give themselves admin access.
 
 Basically:
 
@@ -467,6 +467,8 @@ Basically:
 - the backend should _always_ assume the front end is compromised and not to be trusted
 
 Here we are just storing the user's name, etc. and are not using anything other than the token for security purposes. As has already been noted, tampering with the key invalidates it, so it cannot be used to gain elevated access.
+
+Our implementation still has an issue where someone _could_ gain access to the device and steal the authentication token. Protecting yourself from that scenario is where using a product like <a href="https://ionic.io/docs/identity-vault" _target="blank">Identity Vault</a> comes in to play. We are not ready for that yet, but we _have_ architected our application such that we can easily replace `@capacitor/storage` with something else in the future if we decide to. This is why we are so careful to separate our concerns and make sure every module within our system has a single responsibility.
 
 ## Conclusion
 

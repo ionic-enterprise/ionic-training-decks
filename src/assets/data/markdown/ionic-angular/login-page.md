@@ -9,6 +9,8 @@ In this lab, you will learn how to:
 
 ## Generate the Page
 
+The `ionic generate` command allows you to generate serveral different types of objects: components, pages, pipes, services, etc. It ties into the Angular `ng generate` command and builds on top of it with some of its own schematics. One of those schematics is for the `page` object. Let's create a page now:
+
 ```bash
 $ ionic generate page login
 ```
@@ -48,7 +50,7 @@ index af456b5..e6c9e39 100644
  @NgModule({
 ```
 
-We see that a `login` route was automatically added for us. Let's see if that works by changing the route in our browser to 'http://localhost:8100/login'. We should be able to navigate to that location just fine. We won't see it, but we can tell that the route is actually working.
+We see that a `login` route was automatically added for us. Let's see if that works by changing the route in our browser to 'http://localhost:8100/login'. We should be able to navigate to that location just fine. The page is blank, but we can tell that the route is actually working.
 
 ## Mock the UI
 
@@ -73,6 +75,8 @@ import { By } from '@angular/platform-browser';
 ```
 
 Notice that the test fails, but we are about to fix that.
+
+**Note:** Angular's test server often does not pick up new `*.spec.ts` files so you may need to kill the existing `npm test` run and restart it to see the failed test.
 
 Let's mock up what we would like this page to look like. We know we are going to need a form in which to enter our e-mail and our password, along with a button to press when the user is ready to log in, so let's start by updating the `src/app/login/login.page.html` file.
 
@@ -141,11 +145,13 @@ Finally, the button. It really should:
 </ion-footer>
 ```
 
+Pay particular attention to the `slot` on the `ion-icon` (`slot="end"`). A slot defines where a child element will be positioned in the parent element. The button component (parent) <a href="https://ionicframework.com/docs/api/button#slots" target="_blank">defines various slots</a>. The child component (`ion-icon` in this case) specifies which slot to use <a href="https://developer.mozilla.org/en-US/docs/Web/Web_Components/Using_templates_and_slots#adding_flexibility_with_slots" target=_blank>via the slot attribute</a>. We point it out here only because it sometimes is a source of confusion for developers who are new to the `slot` paradigm.
+
 ## Form Handling
 
 ### Set Up the Page Class
 
-For now the `LoginPage` class does not have to do much. It just needs to have a couple of properties to bind the input fields to and a handler for the button, though that handler will not really do anything yet.
+For now the `LoginPage` class does not have to do much. It just needs to have a couple of properties to bind to the input fields. It also needs a handler for the button. At this time, the handler will just output a message to the console.
 
 ```TypeScript
 import { Component } from '@angular/core';
@@ -171,7 +177,7 @@ export class LoginPage {
 
 Switch back to the test file. The bindings should be tested to make sure they are done correctly. Here are the tests for the Email Address input. Add these and then create similar tests for the password input. You will have to import `fakeAsync` and `tick` from `@angular/core/testing`.
 
-Notice how we are using the `nativeElement` along with standard JavaScript DOM APIs in these tests. We could have also used the `debugElement` and used its `.query(By.css(...))` syntax like before, and then gone down to the native element for the rest of the test. You can use whichever method you are most comfortable with combined with whatever is going to best meet the needs of your test. In these tests we need the HTML element, so I just went that route right away.
+Notice how we are using the `nativeElement` along with standard JavaScript DOM APIs in these tests. We could have also used the `debugElement` and used its `.query(By.css(...))` syntax like before, and then gone down to the native element for the rest of the test. You can use whichever method you are most comfortable with. You should also take into consideration which methodology is going to work best within your test. In these tests we need the HTML element, so I just went that route right away.
 
 ```TypeScript
   describe('email input binding', () => {
@@ -329,7 +335,15 @@ const setInputValue = (input: HTMLIonInputElement, value: string) => {
 };
 ```
 
-With that in place, clean up the tests.
+With that in place, clean up the tests. Your tests should now look more like this:
+
+```typescript
+it('updates the component model when the input changes', () => {
+  const input = fixture.nativeElement.querySelector('#password-input');
+  setInputValue(input, 'MyPas$Word');
+  expect(component.password).toEqual('MyPas$Word');
+});
+```
 
 ### Display Error Messages
 

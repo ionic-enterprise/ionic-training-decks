@@ -168,17 +168,14 @@ ion-img {
 
 NgRX selectors allow us to <a href="https://ngrx.io/guide/store/selectors#using-selectors-with-props" target="_blank">pass properties</a> to them. We can use this in order to craft a selector that will observe a specific tea within the state.
 
-Open `src/app/store/selectors/data.selectors.ts` and add the following selector:
+Open `src/app/store/selectors/data.selectors.ts` and add the following selector factory:
 
 ```TypeScript
-export const selectTea = createSelector(
-  selectTeas,
-  (teas: Array<Tea>, props: { id: number }) =>
-    teas.find(t => t.id === props.id),
-);
+export const selectTea = (id: number) =>
+  createSelector(selectTeas, (teas: Array<Tea>) => teas.find((t) => t.id === id));
 ```
 
-Notice how we are building upon the other selectors.
+Notice how we are building upon the other selectors. Also notice that `selectTea` is not itself a selector, but a factory that creates a selector.
 
 #### Reading the ID Parameter
 
@@ -212,30 +209,37 @@ You will need to adjust your import statements accordingly.
 
 **Note:** We are not going to directly use the `NavController` but it will get used indirectly when we add the `ion-back-button` so we need the mock for it.
 
-We would like to write most of our tests from the point of view of the end user requirements, which would basically mean that we verify that we get the tea and display it properly without getting into implementation details, but we do have _one_ test that works out best if we just scratch the surface a bit on the implementation details, so we will start there:
-
 Create an `initialization` section in the test. Also, since we will need to do some setup within the initialization tests, remove the `fixture.detectChanges();` line from the main `beforeEach()`. That call will run the initialization, and we want to delay its execution until after our test setup code has run.
+
+In the `beforeEach()`, we need to set up the current route so it has an ID on it. We also need to set up the data returned via our selectors. Since `selectTea` is not itself a selector, but is a factory, we will override the selector that it relies on. We can then write our first test.
 
 ```TypeScript
   describe('initialization', () => {
     let store: MockStore
     beforeEach(() => {
       const route = TestBed.inject(ActivatedRoute);
-      (route.snapshot.paramMap.get as any).withArgs('id').and.returnValue('42');
+      (route.snapshot.paramMap.get as any).withArgs('id').and.returnValue('7');
       store = TestBed.inject(Store) as MockStore;
-      store.overrideSelector(selectTea, {
-        id: 7,
-        name: 'White',
-        description: 'Often looks like frosty silver pine needles',
-        image: 'imgs/white.png',
-      });
+      store.overrideSelector(selectTeas, [
+        {
+          id: 7,
+          name: 'White',
+          description: 'Often looks like frosty silver pine needles',
+          image: 'imgs/white.png',
+        },
+        {
+          id: 42,
+          name: 'Green',
+          description: 'Delecate flavor',
+          image: 'imgs/green.png',
+        },
+      ]);
     });
 
-    it('selects the tea based on the route', () => {
-      spyOn(store, 'select').and.callThrough();
+    it('binds the name', () => {
       fixture.detectChanges();
-      expect(store.select).toHaveBeenCalledTimes(1);
-      expect(store.select).toHaveBeenCalledWith(selectTea, { id: 42 });
+      const el = fixture.debugElement.query(By.css('[data-testid="name"]'));
+      expect(el.nativeElement.textContent.trim()).toBe('White');
     });
   });
 ```
@@ -247,7 +251,6 @@ The code that satisfies that test looks like this:
 ```TypeScript
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 
 import { Tea } from '@app/models';
@@ -261,7 +264,7 @@ import { selectTea, State } from '@app/store';
 export class TeaDetailsPage implements OnInit {
   tea$: Observable<Tea>;
 
-  constructor(private route: ActivatedRoute, private store: Store<State>) {}
+  constructor(private route: ActivatedRoute, private store: Store) {}
 
   ngOnInit() {
     const id = parseInt(this.route.snapshot.paramMap.get('id'), 10);
@@ -270,17 +273,7 @@ export class TeaDetailsPage implements OnInit {
 }
 ```
 
-We can now do a couple more "user" centric tests by checking a couple of the bindings. Here is the test for the name binding:
-
-```TypeScript
-    it('binds the name', () => {
-      fixture.detectChanges();
-      const el = fixture.debugElement.query(By.css('[data-testid="name"]'));
-      expect(el.nativeElement.textContent.trim()).toBe('White');
-    });
-```
-
-**Challenge:** add a similar test for the description. Both of these tests should go inside the "initialization" describe.
+**Challenge:** add a similar test for the description.
 
 #### Navigating Back from the Details Page
 

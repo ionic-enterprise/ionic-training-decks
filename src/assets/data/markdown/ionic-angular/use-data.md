@@ -53,7 +53,7 @@ export const initialState: DataState = {
 export const reducer = createReducer(initialState);
 ```
 
-As well as a starting test file for it (`src/app/store/reducers/data.reducer.spec.ts`)
+Also create a starting test file for it (`src/app/store/reducers/data.reducer.spec.ts`)
 
 ```TypeScript
 import { initialState, reducer } from './data.reducer';
@@ -130,6 +130,8 @@ const teas: Array<Tea> = [
   },
 ];
 ```
+
+Add this data to the top of the newly created test file, before the `it()`.
 
 With the data in place, and using what we did for the `auth` slice as a guide we _could_ write some tests (**Do not write these tests**):
 
@@ -222,7 +224,7 @@ But notice how repetitive those tests are. Let's see if we can do better. Lookin
 - start with a specific state
 - end with a specific state
 
-So, we could abstract that out in to some data for each test and have a single test function that does the work. Further, since it would be nice to only have to specify the parts of state that differ from the initial state. That way, if we add to the state, our tests don't need to change. Let's do that now:
+So, we could abstract that out in to some data for each test and have a single test function that does the work. Further, it would be nice to only have to specify the parts of state that differ from the initial state. That way, if we add to the state, our tests don't need to change. Let's do that now:
 
 ```TypeScript
 const createState = (stateChanges: {
@@ -274,7 +276,7 @@ That is a lot less repetitive code, and will be a lot easier to maintain as our 
 With the tests in place, we are ready to update the `dataReducer` in `src/app/store/reducers/data.reducer.ts`. I will provide one of the action handlers, and let you fill in the others.
 
 ```TypeScript
-  on(Actions.initialLoadSuccess, (state, {teas}) => ({
+  on(Actions.initialLoadSuccess, (state, {teas}): DataState => ({
     ...state,
     loading: false,
     teas: [...teas]
@@ -415,7 +417,7 @@ const teas: Array<Tea> = [
 ];
 ```
 
-We can then add our first test:
+We can then add our first test for `sessionLoaded$`:
 
 ```TypeScript
   [
@@ -528,7 +530,7 @@ At this point, our effect is getting the data and is then returning the proper a
 
 ## The Tea Page
 
-If you run the application in the browser and have a look at the network tab, you will see we are loading our teas (or tea-categories, as the endpoint is called) from the backend. If you have a look with the Redux DevTools, you should also see that the "teas" are populated in the "data" slice of our state. So, now we just need to use those teas.
+If you run the application in the browser and have a look at the network tab, you will see we are loading our teas from the backend. If you have a look with the Redux DevTools, you should also see that the "teas" are populated in the "data" slice of our state. So, now we just need to use those teas.
 
 ### Create Selectors
 
@@ -559,7 +561,7 @@ A lot of what we need for the test is already there. We just need to modify the 
  import { TeaPage } from './tea.page';
  import { Tea } from '@app/models';
  import { logout } from '@app/store/actions';
-+import { selectTeas } from '@app/store/selectors';
++import { selectTeas } from '@app/store';
 
  describe('TeaPage', () => {
    let component: TeaPage;
@@ -647,31 +649,55 @@ Testing this out in the browser everything _appears_ to run fine, but run it wit
 
 **Code Challenge:** update the data reducer to clear the tea data upon `LogoutSuccess`. Start with a test, and then write the code. Both are included at the end of this page.
 
+## The Matrix Challenge
+
+If you run `npm run lint` on the code right now, you will see the following issue:
+
+```
+Linting "app"...
+
+/home/kensodemann/Projects/Training/tea-taster/src/app/tea/tea.page.ts
+  20:53  warning  Map logic at the selector level instead  ngrx/avoid-mapping-selectors
+
+✖ 1 problem (0 errors, 1 warning)
+```
+
+The problem is that the page itself is transforming the data coming back from the state. It is better to have our selectors massage the data for us.
+
+**Code Challenge:** Remove the need for the map in our page. Do this by:
+
+- Create a `toMatrix()` function in `src/app/store/selectors/data.selectors.ts` using the one in our `TeaPage` as a model.
+- Create a `selectTeasMatrix` selector in that same file. It should build upon `selectTeas` by applying the `toMatrix()` transform on the `selectTeas` result.
+- Update the `TeaPage` to use the new selector. Note that you do not need to update your test since `selectTeasMatrix` builds upon `selectTeas`.
+- Clean up the `TeaPage` code.
+
+**Note:** you could argue that the data selectors are sufficiently complex at this point that they should have their own tests. I can buy that, but for now I am just going to rely on tests we have in place.
+
 ## Conclusion
 
 In the last two labs, we have learned how to to get data via a service and then how to use that service within our pages. Be sure to commit your changes.
 
-Here is the code for the data reducer:
+Here is the initial code for the data reducer:
 
 ```TypeScript
 export const reducer = createReducer(
   initialState,
-  on(Actions.loginSuccess, state => ({
+  on(Actions.loginSuccess, (state): DataState => ({
     ...state,
     loading: true,
     errorMessage: '',
   })),
-  on(Actions.sessionRestored, state => ({
+  on(Actions.sessionRestored, (state): DataState => ({
     ...state,
     loading: true,
     errorMessage: '',
   })),
-  on(Actions.initialLoadFailure, (state, {errorMessage}) => ({
+  on(Actions.initialLoadFailure, (state, {errorMessage})): DataState => ({
     ...state,
     loading: false,
     errorMessage,
   })),
-  on(Actions.initialLoadSuccess, (state, {teas}) => ({
+  on(Actions.initialLoadSuccess, (state, {teas})): DataState => ({
     ...state,
     loading: false,
     teas: [...teas]
@@ -679,7 +705,7 @@ export const reducer = createReducer(
 );
 ```
 
-The following is the data selectors:
+Here is the initial code for the data selectors:
 
 ```TypeScript
 import { createSelector, createFeatureSelector } from '@ngrx/store';
@@ -692,7 +718,7 @@ export const selectTeas = createSelector(
 );
 ```
 
-The final TeaPage code:
+Here is the initial code for the tea page:
 
 ```TypeScript
 import { Component, OnInit } from '@angular/core';
@@ -746,7 +772,7 @@ export class TeaPage implements OnInit {
 }
 ```
 
-For the tea clearing challenge, first add the following case to the array of tests we process
+For the tea clearing challenge, first add the following case to the array of tests:
 
 ```TypeScript
   {
@@ -760,8 +786,67 @@ For the tea clearing challenge, first add the following case to the array of tes
 Then add the code that modifies the state:
 
 ```TypeScript
-  on(Actions.logoutSuccess, state => ({
+  on(Actions.logoutSuccess, (state): DataState => ({
     ...state,
     teas: [],
   })),
+```
+
+For the matrix challenge, here are the final versions of the data selectors and the tea page:
+
+```typescript
+import { createSelector } from '@ngrx/store';
+import { State } from '@app/store';
+import { DataState } from '@app/store/reducers/data.reducer';
+import { Tea } from '@app/models';
+
+const toMatrix = (tea: Array<Tea>): Array<Array<Tea>> => {
+  const matrix: Array<Array<Tea>> = [];
+  let row = [];
+  tea.forEach((t) => {
+    row.push(t);
+    if (row.length === 4) {
+      matrix.push(row);
+      row = [];
+    }
+  });
+
+  if (row.length) {
+    matrix.push(row);
+  }
+
+  return matrix;
+};
+
+export const selectData = (state: State) => state.data;
+export const selectTeas = createSelector(selectData, (state: DataState) => state.teas);
+export const selectTeasMatrix = createSelector(selectTeas, (teas: Array<Tea>) => toMatrix(teas));
+```
+
+```typescript
+import { Component, OnInit } from '@angular/core';
+import { Tea } from '@app/models';
+import { selectTeasMatrix } from '@app/store';
+import { logout } from '@app/store/actions';
+import { Store } from '@ngrx/store';
+import { Observable } from 'rxjs';
+
+@Component({
+  selector: 'app-tea',
+  templateUrl: './tea.page.html',
+  styleUrls: ['./tea.page.scss'],
+})
+export class TeaPage implements OnInit {
+  teas$: Observable<Array<Array<Tea>>>;
+
+  constructor(private store: Store) {}
+
+  ngOnInit() {
+    this.teas$ = this.store.select(selectTeasMatrix);
+  }
+
+  logout() {
+    this.store.dispatch(logout());
+  }
+}
 ```
