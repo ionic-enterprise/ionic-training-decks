@@ -1,3 +1,13 @@
+## [5.1.1](https://github.com/ionic-team/ionic-training-decks/compare/v5.1.0...v5.1.1) (2022-01-17)
+
+### Bug Fixes
+
+- **vue:** add a router outlet to the tabs ([b568497](https://github.com/ionic-team/ionic-training-decks/commit/b5684972da6ec84981bd3d8427fccf10ca79359a))
+
+### Features
+
+- **angular:** update the training for Ionic 6 and NG 13 ([500f8ce](https://github.com/ionic-team/ionic-training-decks/commit/500f8ce787f55e1a4c41b3c2175e7b92b7c19774))
+
 # [5.1.0](https://github.com/ionic-team/ionic-training-decks/compare/v5.0.2...v5.1.0) (2021-09-29)
 
 ### Features
