@@ -24,12 +24,11 @@ The test for this service is straight forward. We won't verify that the page acu
 
 ```typescript
 import { TestBed } from '@angular/core/testing';
-import { AlertController } from '@ionic/angular';
 import { SwUpdate } from '@angular/service-worker';
-
-import { ApplicationService } from './application.service';
-import { Subject } from 'rxjs';
+import { AlertController } from '@ionic/angular';
 import { createOverlayControllerMock, createOverlayElementMock } from '@test/mocks';
+import { Subject } from 'rxjs';
+import { ApplicationService } from './application.service';
 
 describe('ApplicationService', () => {
   let alert: HTMLIonAlertElement;
@@ -40,7 +39,7 @@ describe('ApplicationService', () => {
         {
           provide: SwUpdate,
           useFactory: () => ({
-            available: new Subject(),
+            versionUpdates: new Subject(),
           }),
         },
         {
@@ -63,13 +62,29 @@ describe('ApplicationService', () => {
       service.registerForUpdates();
     });
 
-    it('asks the user if they would like an update', () => {
+    it('asks the user if they would like an update on VERSION_READY', () => {
       const update = TestBed.inject(SwUpdate);
       const alertController = TestBed.inject(AlertController);
       expect(alertController.create).not.toHaveBeenCalled();
-      (update.available as any).next();
+      (update.versionUpdates as any).next({ type: 'VERSION_READY' });
       expect(alertController.create).toHaveBeenCalledTimes(1);
       expect(alertController.create).toHaveBeenCalled();
+    });
+
+    it('does not ask the user on VERSION_INSTALLATION_FAILED', () => {
+      const update = TestBed.inject(SwUpdate);
+      const alertController = TestBed.inject(AlertController);
+      expect(alertController.create).not.toHaveBeenCalled();
+      (update.versionUpdates as any).next({ type: 'VERSION_INSTALLATION_FAILED' });
+      expect(alertController.create).not.toHaveBeenCalled();
+    });
+
+    it('does not ask the user on VERSION_DETECTED', () => {
+      const update = TestBed.inject(SwUpdate);
+      const alertController = TestBed.inject(AlertController);
+      expect(alertController.create).not.toHaveBeenCalled();
+      (update.versionUpdates as any).next({ type: 'VERSION_DETECTED' });
+      expect(alertController.create).not.toHaveBeenCalled();
     });
   });
 });
@@ -83,6 +98,7 @@ The code itself is also straight forward.
 import { Injectable } from '@angular/core';
 import { AlertController } from '@ionic/angular';
 import { SwUpdate } from '@angular/service-worker';
+import { filter } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root',
@@ -91,14 +107,14 @@ export class ApplicationService {
   constructor(private alertController: AlertController, private update: SwUpdate) {}
 
   registerForUpdates() {
-    this.update.available.subscribe(() => this.promptUser());
+    this.update.versionUpdates.pipe(filter((evt) => evt.type === 'VERSION_READY')).subscribe(() => this.promptUser());
   }
 
   private async promptUser() {
     const alert = await this.alertController.create({
       header: 'Update Available',
       message:
-        'An update is available for this application. Would you like to restart this application to get the update?',
+        'An update is available for this application. Would you like to restart this application to get the update?     ',
       buttons: [
         { text: 'Yes', role: 'confirm' },
         { text: 'No', role: 'cancel' },
@@ -110,7 +126,6 @@ export class ApplicationService {
       this.update.activateUpdate().then(() => document.location.reload());
     }
   }
-}
 ```
 
 Create a mock factory (filename: `application.service.mock.ts`) using one of the others service's mock factories as model if you need to. Make sure you update the `src/app/core/index.ts` and `src/app/core/testing.ts` files.

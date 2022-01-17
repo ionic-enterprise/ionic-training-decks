@@ -14,7 +14,7 @@ In this lab you will learn:
 
 If you participated in the three-day Ionic Angular Framework training, then you should already have a copy of the application on your machine. If you do not already have the application, you will need to follow these steps:
 
-1. Clone the repository: <a href="https://github.com/ionic-team/tea-taster-angular" target"\_blank">https://github.com/ionic-team/tea-taster-angular</a>
+1. Clone the repository: <a href="https://github.com/ionic-team/tea-taster-angular" target="\_blank">https://github.com/ionic-team/tea-taster-angular</a>
 1. `cd tea-taster-angular`
 1. `npm i`
 1. `npm run build`
@@ -25,13 +25,13 @@ If you participated in the three-day Ionic Angular Framework training, then you 
 
 We have been building our application for the web using `ng serve` (or a command that ultimately runs `ng serve`), but that is all virtual. It does not actually write the files out to disk so we can serve them in some other way. If you would like to test this for yourself, remove the `www/` directory (if it exists) and start the development server. The usual build steps occur, and you can view your application, but no `www/` folder is generated.
 
-To build for the web, use `ionic build --prod`. This will build the application into the `www/` folder.
+To build for the web, use `ng build --configuration production`. This will build the application into the `www/` folder.
 
-Since this is something that will be done often, and I suggest adding it as a script in your `package.json` file. Here is my full set of scripts for this project:
+Since this is something that will be done often, and I suggest adding it as a script in your `package.json` file. Here is my full set of scripts for this project (this should already be configured properly from the starting repo):
 
 ```JSON
   "scripts": {
-    "build": "ng build --prod && cap copy",
+    "build": "ng build --configuration production && cap copy",
     "e2e": "ng e2e",
     "lint": "ng lint",
     "ng": "ng",
@@ -41,8 +41,6 @@ Since this is something that will be done often, and I suggest adding it as a sc
     "test:debug": "ng test"
   },
 ```
-
-Now running `npm run build` will result in a build that is ready to be served as a web application.
 
 ## Host the Application on Firebase
 
@@ -72,7 +70,7 @@ From the `tea-taster-angular` root directory, run `firebase init` which will wal
 
 At this point, you are ready to build and deploy.
 
-- `npm run build:prod` - if you didn't already do this above
+- `npm run build` - if you didn't already do this above
 - `firebase deploy`
 
 The deploy process should look something like this:
