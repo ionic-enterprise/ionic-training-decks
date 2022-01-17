@@ -1,3 +1,9 @@
+## [5.1.2](https://github.com/ionic-team/ionic-training-decks/compare/v5.1.1...v5.1.2) (2022-01-17)
+
+### Features
+
+- **angular:** update the pwa training ([c3b5b38](https://github.com/ionic-team/ionic-training-decks/commit/c3b5b386ae43137a486be9bad24dab9df777a707))
+
 ## [5.1.1](https://github.com/ionic-team/ionic-training-decks/compare/v5.1.0...v5.1.1) (2022-01-17)
 
 ### Bug Fixes
