@@ -318,6 +318,18 @@
       ]
     },
     {
+      "name": "design-systems",
+      "title": "Design Systems",
+      "folder": "cordova-to-capacitor",
+      "icon": "logo-stencil",
+      "pages": [
+        {
+          "title": "Introduction",
+          "file": "intro"
+        }
+      ]
+    },
+    {
       "name": "cordova-to-capacitor",
       "title": "Cordova to Capacitor",
       "folder": "cordova-to-capacitor",
