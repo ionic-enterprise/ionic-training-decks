@@ -320,7 +320,7 @@
     {
       "name": "design-systems",
       "title": "Design Systems",
-      "folder": "cordova-to-capacitor",
+      "folder": "design-systems",
       "icon": "logo-stencil",
       "pages": [
         {
