@@ -29,6 +29,18 @@ From a frontend coding perspective, perceptual patterns are typically expressed 
 
 A design system often encapsulates other types of patterns as well, such as procedural patterns that define the various work flows within applications, or domain patterns that define aspects of applications within a specific domain such as e-commerce, banking, or transportation.
 
+### Design Language
+
+A design language defines how the patterns used within a product (or set of products) is expressed across multiple teams and disciplines. A commonly understood language is the basis for clearly communicating the design goals and ensuring they are implemented consistently.
+
+In order for a design language to be effective, it must meet the following criteria:
+
+- It contains terms that are shared across functional teams. For example, a "Sequence" is called a "Sequence" by all of the teams, and is not called a "Sequence" by one team and "Timeline" by another team.
+- When a term like "Sequence" is used, it should mean the same thing to _everyone_.
+- _Everyone_ should include all teams, including sales, marketing, product management, etc.
+- _Everyone_ should also include people in the user domain. An effective design language bridges the gap between how your teams express the design of the application(s) and the user's model of how they use the application(s).
+- A good design language can and will evolve over time.
+
 ### Style Guide
 
 A style guide defines stylistic items such as element styles, icons, typography, and colors. Styles guides tend to focus on the definition perceptual patterns.
@@ -37,9 +49,7 @@ A style guide defines stylistic items such as element styles, icons, typography,
 
 A pattern library is a tool used to organize and share design patterns as well as provide guidance for their usage. A pattern library contains the definition of functional and perceptual design patterns as well as information on the proper way to apply those patterns.
 
-### Design Language
-
-A design language defines how the patterns used within a product (or set of products) is expressed across multiple teams and disciplines. A commonly understood language is the basis for clearly communicating of the design goals and ensuring they are implemented consistently.
+A well laid out pattern library uses the shared design language to express these patterns and practices.
 
 ### Design System
 
