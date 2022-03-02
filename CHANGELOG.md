@@ -1,3 +1,9 @@
+## [5.1.3](https://github.com/ionic-team/ionic-training-decks/compare/v5.1.2...v5.1.3) (2022-03-02)
+
+### Features
+
+- **vue:** update the training for the latest Vue and Ionic versions ([5a1236b](https://github.com/ionic-team/ionic-training-decks/commit/5a1236b05862bbe2aa5c95bd3c7d4418b17e705d))
+
 ## [5.1.2](https://github.com/ionic-team/ionic-training-decks/compare/v5.1.1...v5.1.2) (2022-01-17)
 
 ### Features
