@@ -31,6 +31,20 @@ jest.mock('@/use/auth');
 describe('Login.vue', () => {
   let router: Router;
 
+  const mountView = async (): Promise<VueWrapper<any>> => {
+    router = createRouter({
+      history: createWebHistory(process.env.BASE_URL),
+      routes: [{ path: '/', component: LoginPage }],
+    });
+    router.push('/');
+    await router.isReady();
+    return mount(LoginPage, {
+      global: {
+        plugins: [router],
+      },
+    });
+  };
+
   it('displays the title', async () => {
     const wrapper = await mountView();
     const titles = wrapper.findAll('ion-title');
@@ -39,20 +53,6 @@ describe('Login.vue', () => {
   });
 
   // Other test cases exists here and will need similar mods to the one above.
-
-  const mountView = async (): Promise<VueWrapper<typeof Login>> => {
-    router = createRouter({
-      history: createWebHistory(process.env.BASE_URL),
-      routes: [{ path: '/', component: Login }],
-    });
-    router.push('/');
-    await router.isReady();
-    return mount(Login, {
-      global: {
-        plugins: [router],
-      },
-    });
-  };
 });
 ```
 
@@ -68,11 +68,11 @@ Now we are ready to define the requirements via a set of tests:
 
 ```typescript
 describe('clicking on the signin button', () => {
-  let wrapper: VueWrapper<typeof Login>;
+  let wrapper: VueWrapper<any>;
   beforeEach(async () => {
     wrapper = await mountView();
-    const email = wrapper.find('[data-testid="email-input"]').findComponent({ name: 'ion-input' });
-    const password = wrapper.find('[data-testid="password-input"]').findComponent({ name: 'ion-input' });
+    const email = wrapper.findComponent('[data-testid="email-input"]');
+    const password = wrapper.findComponent('[data-testid="password-input"]');
     await email.setValue('test@test.com');
     await password.setValue('test');
   });
@@ -115,7 +115,7 @@ describe('clicking on the signin button', () => {
       (login as any).mockResolvedValue(false);
     });
 
-    it('does not show an error', async () => {
+    it('shows an error', async () => {
       const button = wrapper.find('[data-testid="signin-button"]');
       const msg = wrapper.find('[data-testid="message-area"]');
       button.trigger('click');
@@ -123,7 +123,7 @@ describe('clicking on the signin button', () => {
       expect(msg.text()).toBe('Invalid email and/or password');
     });
 
-    it('navigates to the root page', async () => {
+    it('does not navigate', async () => {
       const button = wrapper.find('[data-testid="signin-button"]');
       router.replace = jest.fn();
       button.trigger('click');
@@ -134,7 +134,7 @@ describe('clicking on the signin button', () => {
 });
 ```
 
-For the code, here are the pieces. It is up to you to find the correct spot in `src/views/Login.vue` to place each of these pieces.
+For the code, here are the pieces. It is up to you to find the correct spot in `src/views/LoginPage.vue` to place each of these pieces.
 
 First the one-liners:
 
@@ -155,7 +155,7 @@ Now we can define and expose our click handler. This is done within the `setup()
 
     const signinClicked = async () => {
       // Code Challenge: call the login and react to the resolved value
-      // Basically, make the tests we wrote pass
+      // Use the tests we wrote to figure out the code to write
     };
 
     return {
@@ -241,18 +241,9 @@ Test that out in the browser. The full flow should now work.
 
 There are some routes within our app where we do not want to allow users to go unless they are logged in. Let's create a guard for that. All of this work will be done within `src/router/index.js`
 
-First, let's write the guard itself. Add a `checkAuthStatus()` function to the top of the file. You will need to import a few more items, so I put the imports in here as well.
+First, let's write the guard itself. Add a `checkAuthStatus()` function to the top of the file, after the imports.
 
 ```TypeScript
-import { createRouter, createWebHistory } from '@ionic/vue-router';
-import {
-  NavigationGuardNext,
-  RouteRecordRaw,
-  RouteLocationNormalized,
-} from 'vue-router';
-import useSession from '@/use/session';
-import TeaList from '../views/TeaList.vue';
-
 const { getSession } = useSession();
 
 const checkAuthStatus = async (
@@ -268,7 +259,12 @@ const checkAuthStatus = async (
 };
 ```
 
-The guts of that function are:
+You will need to add a couple of imports for this to compile:
+
+- Add: `import useSession from '@/use/session';`
+- Add `RouteLocationNormalized` and `NavigationGuardNext` to the existing import from `vue-router`
+
+The guts of the `checkAuthStatus()` function are:
 
 - If we do not have a session, use `to.matched` to check each segment of the target route. If at least one segment in the route requires authentication redirect to the Login page.
 - Otherwise (either we have a session, or no segments required authentication), continue to the next hook in the pipeline.
@@ -301,7 +297,7 @@ At this point, if you logout and the try to manually go to either `http://localh
 
 ## Add Interceptors
 
-We need to intercept outgoing requests and add the token if we have one. We also need to take a look at responses coming back from the server, and if we get a 401 we need to clear our store state as it is invalid. Make the appropriate modifications to `src/services/api.ts`.
+We need to intercept outgoing requests and add the token if we have one. We also need to take a look at responses coming back from the server, and if we get a 401 we need to clear our store state as it is invalid. Make the appropriate modifications to `src/use/backend-api.ts`.
 
 You will need to update the imports.
 
@@ -311,15 +307,15 @@ import axios, { AxiosRequestConfig } from 'axios';
 import router from '@/router';
 import useSession from '@/services/useSession';
 
-const { getSession, clearSession } = useSession();
+const { clearSession, getSession } = useSession();
 ```
 
-After the client is created, you will need to add the interceptors.
+After the client is created, but before the module is exported, you will need to add the interceptors.
 
 ```TypeScript
 client.interceptors.request.use(async (config: AxiosRequestConfig) => {
   const session = await getSession();
-  if (session && session.token) {
+  if (session && session.token && config.headers) {
     config.headers.Authorization = `Bearer ${session.token}`;
   }
   return config;
@@ -341,10 +337,10 @@ client.interceptors.response.use(
 We have been developing for a bit now, but have not run `lint` at all. I suggest running lint early and often. At the very least, before any commit to `main` (or `master`) we should run `lint` and clean up any issues in our code. Let's do that now:
 
 ```bash
-$ npm run lint
+npm run lint
 ```
 
-I have several errors. You may have more or fewer, depending on how you have followed along in the labs. Fix any linting issues that you have now. If you have any questions about how to fix anything, let's discuss them.
+You may or may not have any issues, depending on how you have followed along in the labs. Fix any linting issues that you have now. If you have any questions about how to fix anything, let's discuss them.
 
 ## Conclusion
 

@@ -4,6 +4,8 @@ In this lab you will use Capacitor to access a native API. Specifically, the soc
 
 **Note:** this is an "extra credit" lab and can be skipped without affecting the main functionality of the application. It adds a neat feature, though... 🤓
 
+**Important Note:** Due to a bug in the Vue testing framework, as soon as `isPlatform()` is called from the code, all unit tests for the component that uses it will stop working. As a result, we will currently skip all of the tests for `AppTastingNoteEditor` (make the main describe look like this: `describe.skip('AppTastingNoteEditor.vue', () => {`). This will hopefully be resolved by the Vue Test Utilities team soon. This lab still creates all of the tests, but none of them will be run.
+
 ## Capacitor Native API Plugins
 
 We can use various <a href="https://capacitorjs.com/docs/plugins" target="_blank">Capacitor Plugins</a> in order to provide access to native APIs. We have already done this to a certain degree with our use of the <a href="https://capacitorjs.com/docs/apis/storage" target="_blank">Storage</a> plugin. That plugin, however, works completely behind the scenes, so we can't really "experience" anything with it.
@@ -14,7 +16,7 @@ While we are on the subject of plugins, Capacitor has been designed to also work
 
 ## Add a Button
 
-The first thing we will do is add a sharing button to the top of our `AppTastingNotes` modal component, to the left of the cancel button. We will also include stubs for the computed properties and methods that we need. While we are in the `setup()` routine, let's reorganize the return object so like items are grouped together.
+The first thing we will do is add a sharing button to the top of our `AppTastingNotes` modal component, to the left of the cancel button. We will also include stubs for the computed properties and methods that we need.
 
 ```html
 <template>
@@ -47,12 +49,11 @@ The first thing we will do is add a sharing button to the top of our `AppTasting
       }
       ...
       return {
-        ...
-        shareOutline,
-        ...
         allowShare,
-        sharingIsAvailable,
+        ...
         share,
+        shareOutline,
+        sharingIsAvailable,
         ...
       };
     },
@@ -77,10 +78,9 @@ jest.mock('@ionic/vue', () => {
 });
 ```
 
-In the main `beforeEach()`, create a mock implementation that defaults to us running in a mobile context. We will do this in the code by passing the "hybrid" flag, so just compare the value sent to "hybrid".
+In the main `beforeEach()`, create a mock implementation that defaults to us running in a mobile context. We will do this in the code by passing the "hybrid" flag, so just compare the value sent to "hybrid". Do this before mounting the component (towards the end of the `beforeEach()`).
 
 ```TypeScript
-  beforeEach(async () => {
     (isPlatform as any).mockImplementation((key: string) => key === 'hybrid');
 ```
 
@@ -138,16 +138,20 @@ First we will test for it. This test belongs right after the `exists` test withi
       const name = wrapper.findComponent('[data-testid="name-input"]');
       const rating = wrapper.findComponent('[data-testid="rating-input"]');
 
-      expect(button.attributes().disabled).toBe('true');
+      await flushPromises();
+      await waitForExpect(() => expect((button.element as HTMLIonButtonElement).disabled).toBe(true));
 
       await brand.setValue('foobar');
-      expect(button.attributes().disabled).toBe('true');
+      await flushPromises();
+      await waitForExpect(() => expect((button.element as HTMLIonButtonElement).disabled).toBe(true));
 
       await name.setValue('mytea');
-      expect(button.attributes().disabled).toBe('true');
+      await flushPromises();
+      await waitForExpect(() => expect((button.element as HTMLIonButtonElement).disabled).toBe(true));
 
       await rating.setValue(2);
-      expect(button.attributes().disabled).toBe('false');
+      await flushPromises();
+      await waitForExpect(() => expect((button.element as HTMLIonButtonElement).disabled).toBe(false));
     });
 ```
 
@@ -189,7 +193,7 @@ Then we will add a test within the `share button` describe block.
 
 ```TypeScript
     it('calls the share plugin when pressed', async () => {
-      const button = wrapper.findComponent('[data-testid="share-button"]');
+      const button = wrapper.find('[data-testid="share-button"]');
       const brand = wrapper.findComponent('[data-testid="brand-input"]');
       const name = wrapper.findComponent('[data-testid="name-input"]');
       const rating = wrapper.findComponent('[data-testid="rating-input"]');
@@ -213,7 +217,7 @@ Then we will add a test within the `share button` describe block.
 We can then add the code fill out the `share()` accordingly:
 
 ```TypeScript
-    async function share() {
+    async function share(): Promise<void> {
       await Share.share({
         title: `${brand.value}: ${name.value}`,
         text: `I gave ${brand.value}: ${name.value} ${rating.value} stars on the Tea Taster app`,

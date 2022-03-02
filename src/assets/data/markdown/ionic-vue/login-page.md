@@ -9,23 +9,23 @@ In this lab, you will learn how to:
 
 ## Create the Page
 
-First we will create a unit test for our new page. This test will start with one simple test that verifies the correct title is displayed. This essentially just shows that the page itself can be mounted and rendered. Create a `tests/unit/views/Login.spec.ts` file with the following contents:
+First we will create a unit test for our new page. This test will start with one simple test that verifies the correct title is displayed. This essentially just shows that the page itself can be mounted and rendered. Create a `tests/unit/views/LoginPage.spec.ts` file with the following contents:
 
 ```typescript
-import Login from '@/views/Login.vue';
-import { mount } from '@vue/test-utils';
+import LoginPage from '@/views/LoginPage.vue';
+import { mount, VueWrapper } from '@vue/test-utils';
 
-describe('Login.vue', () => {
+describe('LoginPage.vue', () => {
   it('displays the title', () => {
-    const wrapper = mount(Login);
-    const titles = wrapper.findAllComponents('ion-title');
+    const wrapper = mount(LoginPage);
+    const titles = wrapper.findAllComponents('ion-title') as Array<VueWrapper>;
     expect(titles).toHaveLength(1);
     expect(titles[0].text()).toBe('Login');
   });
 });
 ```
 
-Let's just start with a skeleton page that will display the inputs properly and has a nice button on the bottom.
+For the contents of `src/views/LoginPage.vue`, let's just start with a skeleton page that will display the inputs properly and has a nice button on the bottom.
 
 ```html
 <template>
@@ -80,7 +80,7 @@ Let's just start with a skeleton page that will display the inputs properly and 
   import { defineComponent } from 'vue';
 
   export default defineComponent({
-    name: 'Login',
+    name: 'LoginPage',
     components: {
       IonButton,
       IonContent,
@@ -104,15 +104,12 @@ Let's just start with a skeleton page that will display the inputs properly and 
 
 ## Routing
 
-We would like to lazy load the Login view using the `/login` path. Open the `src/router/index.ts` file and add the following configuration for that route:
+We would like to lazy load the LoginPage view using the `/login` path. Open the `src/router/index.ts` file and add the route. This will look a lot like the existing `/tea` route with the following changes:
 
-```typescript
-  {
-    path: '/login',
-    name: 'Login',
-    component: () => import('@/views/Login.vue'),
-  },
-```
+- the `path` and `name` will be different
+- in order to perform lazy loading, the `component` will be specified as: `component: () => import('@/views/LoginPage.vue')`
+
+You can test that you have the route set up properly by replacing `/teas` with `/login` in the URL bar of your browser.
 
 ## Validations
 
@@ -130,12 +127,12 @@ For the purpose of this training application, we will use Vee-Validate. It is li
 We will need to install two packages: `vee-validate@next` and `yup`. The last package is completely optional, but we will use it in this application to avoid having to write our own validations.
 
 ```bash
-$ npm i vee-validate@next yup
+npm i vee-validate@next yup
 ```
 
 ### Set up the Models
 
-Switching back to the view file, we have two bits of information to get from the user: their email address and their password. We will use the `useField` composition API from to create the models for those inputs. The string passed to the `useField()` function is the value for the associated input's `name`.
+Switching back to the view file, we have two bits of information to get from the user: their email address and their password. We will use the `useField` composition API from vee-validate to create the models for those inputs. The string passed to the `useField()` function is the value for the associated input's `name`.
 
 ```TypeScript
 import { useForm, useField } from 'vee-validate';
@@ -204,10 +201,10 @@ Now that we have a good idea of how the validations are working, remove the `<pr
 Vee-validate does all of its work asynchronously, so we need to wait for all of the promises to complete before we check any message values. We will use a library called "flush-promises" to help us out here.
 
 ```bash
-$ npm i -D flush-promises
+npm i -D flush-promises
 ```
 
-We can then add the following import to the top of our `tests/unit/views/Login.spec.ts` file:
+We can then add the following import to the top of our `tests/unit/views/LoginPage.spec.ts` file:
 
 ```typescript
 import flushPromises from 'flush-promises';
@@ -217,9 +214,9 @@ We can now create a test that shows that our validations are set up properly by 
 
 ```TypeScript
   it('displays messages as the user enters invalid data', async () => {
-    const wrapper = mount(Login);
-    const email = wrapper.find('[data-testid="email-input"]').findComponent({ name: 'ion-input' });
-    const password = wrapper.find('[data-testid="password-input"]').findComponent({ name: 'ion-input' });
+    const wrapper = mount(LoginPage);
+    const email = wrapper.findComponent('[data-testid="email-input"]');
+    const password = wrapper.findComponent('[data-testid="password-input"]');
     const msg = wrapper.find('[data-testid="message-area"]');
 
     await flushPromises();
@@ -276,25 +273,25 @@ We also need to disable the button until we have valid data that has been entere
 
 ```typescript
 it('has a disabled signin button until valid data is entered', async () => {
-  const wrapper = mount(Login);
+  const wrapper = mount(LoginPage);
   const button = wrapper.find('[data-testid="signin-button"]');
-  const email = wrapper.find('[data-testid="email-input"]').findComponent({ name: 'ion-input' });
-  const password = wrapper.find('[data-testid="password-input"]').findComponent({ name: 'ion-input' });
+  const email = wrapper.findComponent('[data-testid="email-input"]');
+  const password = wrapper.findComponent('[data-testid="password-input"]');
 
   await flushPromises();
-  expect(button.attributes().disabled).toBe('true');
+  await waitForExpect(() => expect((button.element as HTMLIonButtonElement).disabled).toBe(true));
 
   await email.setValue('foobar');
   await flushPromises();
-  expect(button.attributes().disabled).toBe('true');
+  await waitForExpect(() => expect((button.element as HTMLIonButtonElement).disabled).toBe(true));
 
   await password.setValue('mypassword');
   await flushPromises();
-  expect(button.attributes().disabled).toBe('true');
+  await waitForExpect(() => expect((button.element as HTMLIonButtonElement).disabled).toBe(true));
 
   await email.setValue('foobar@baz.com');
   await flushPromises();
-  expect(button.attributes().disabled).toBe('false');
+  await waitForExpect(() => expect((button.element as HTMLIonButtonElement).disabled).toBe(false));
 });
 ```
 
@@ -315,6 +312,14 @@ We can then bind the button's `disabled` attribute to be disabled so long as the
   <ion-icon slot="end" :icon="logInOutline"></ion-icon>
 </ion-button>
 ```
+
+### Code Challenge: Computed Values
+
+Have a look at how we are binding the `disabled` attribute: `:disabled="!meta.valid"`. That is not very easy to read. Future you will have to go down to the code to figure out what `meta` means. It would be better if the binding was more like `:disabled="!formIsValid"`.
+
+The most natural way to compute a value based on another and ensure that the view is updated properly is to use Vue's <a href="https://v3.vuejs.org/guide/reactivity-computed-watchers.html#computed-values" target="_blank">Computed Values</a>. We saw one way of creating a computed value when we mocked the tea data, but we can also create them within the `setup()` method.
+
+Create a computed value named `formIsValid` and bind it instead. Note that `meta` is a <a href="https://v3.vuejs.org/guide/reactivity-fundamentals.html#creating-standalone-reactive-values-as-refs" target="_blank">reactive value</a>. As such you will need to get at its data via its `value` property.
 
 ## Conclusion
 

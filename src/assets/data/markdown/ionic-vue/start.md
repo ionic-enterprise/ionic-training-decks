@@ -25,22 +25,22 @@ Lets start our application via whichever technique you want.
 **Example:**
 
 ```bash
-$ cd ~/Projects/Training
-$ ionic start tea-taster blank --type=vue
+cd ~/Projects/Training
+ionic start tea-taster blank --type=vue
 ```
 
 Let's look at some of those options more closely.
 
 - The third option is the name of the application.
-- The forth option, `blank` tells Ionic to use the `blank` starter. We have three basic starters: `blank`, `tabs`, and `sidemenu`. The main difference is the main style of navigation.
+- The forth option, `blank` tells Ionic to use the `blank` starter. We have three basic starters: `blank`, `tabs`, and `sidemenu`. The main difference is the style of navigation.
 - The `--type` option specifies the type of application to create. Options include `angular`, `react`, `vue`, `ionic-angular`, and `ionic1`. The `ionic-angular` type is an Ionic v3 application.
-- The application will use Capacitor for the native layer
+- The application will use Capacitor for the native layer by default. Cordova is not supported for Vue applications.
 
 Once the application has been generated, let's start the development server:
 
 ```bash
-$ cd tea-taster
-$ ionic serve
+cd tea-taster
+ionic serve
 ```
 
 ## Enforce Consistent Styling
@@ -50,7 +50,7 @@ $ ionic serve
 Prettier itself is an opinionated code formatter, and Ionic has its own opinions on how it is best configured, so let's install both Prettier and Ionic's Prettier configuration. We will also install <a href="https://www.npmjs.com/package/husky" target="_blank">husky</a> and <a href="https://www.npmjs.com/package/pretty-quick" target="_blank">pretty-quick</a>. This will allow us to set up a commit hook to make sure Prettier is run with each commit. After that we don't have to waste brain cycles thinking about code formatting ever again.
 
 ```bash
-$ npm install -D @ionic/prettier-config husky prettier pretty-quick
+npm install -D @ionic/prettier-config husky prettier pretty-quick
 ```
 
 Modify your `package.json` file. I suggest moving the `description` up to the top and giving it a reasonable value, and then adding the Prettier config portion to the bottom. For example:
@@ -83,14 +83,16 @@ Modify your `package.json` file. I suggest moving the `description` up to the to
 Initialize Husky:
 
 ```bash
-$ npx husky install
+npm run prepare
 ```
+
+**Note:** we also could have run `npx husky install` but using the `prepare` script ensures that we have it set up properly.
 
 By default, the git hooks handled by `husky` are stored in the `.husky` directory. Let's add a couple now:
 
 ```bash
-$ npx husky add .husky/pre-commit "npx pretty-quick --staged"
-$ npx husky add .husky/pre-push "npm run lint"
+npx husky add .husky/pre-commit "npx pretty-quick --staged"
+npx husky add .husky/pre-push "npm run lint"
 ```
 
 This will ensure our code is properly formatted before each commit. It will also ensure that our code does not have any linting errors before we push it out to the `origin` repo. It would also be good to run the unit tests in the `pre-push` hook, but we have not gotten that far yet.
@@ -98,12 +100,12 @@ This will ensure our code is properly formatted before each commit. It will also
 Finally, make sure all of our source is formatted properly.
 
 ```bash
-$ npx prettier --write src
+npx prettier --write src tests
 ```
 
 At this point all of the source should be formatting properly and will remain so automatically with each commit.
 
-**Note:** the default eslint configuration does not at this time conflict with the `prettier` configuration. However, it is possible that some configurations may. If that is the case, you may want to look into using <a href="https://github.com/prettier/eslint-config-prettier" target="_blank">eslint-config-prettier</a> which will help make the two systems play nice together.
+**Note:** the default eslint configuration does not currently conflict with the `prettier` configuration. However, it is possible that some configurations may. If that is the case, you may want to look into using <a href="https://github.com/prettier/eslint-config-prettier" target="_blank">eslint-config-prettier</a> which will help make the two systems play nice together.
 
 ## Side Note: `ionic serve` vs. `npm run serve`
 

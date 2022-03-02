@@ -4,7 +4,7 @@ In this lab, you will learn how to create a composition function that will be us
 
 ## Create a Tea Function
 
-The first thing we need to to is create some templates for our function and test.
+The first thing we need to to is create some templates for our unit test and composition function.
 
 **`tests/unit/use/tea.spec.ts`**
 
@@ -78,7 +78,7 @@ const refresh = async (): Promise<void> => {
 };
 ```
 
-But there is a bit of a problem. The data that comes back from the API is not in the shape we want for our application. This is a common issue that needs to be handled in the logic. Specifically, the backend team has not decided how to handle the tea images yet, so what we will do for now is map the images to our own set of assets based on the IDs of the tea.
+But there is a bit of a problem. The data that comes back from the API is not in the shape we want for our application. This is a common issue that needs to be handled in the application logic. Specifically, the backend team has not decided how to handle the tea images yet, so what we will do for now is map the images to our own set of assets based on the IDs of the tea.
 
 This is where the second requirement, the requirement to transform the data, comes in to play. In our tests, let's express the difference between the two formats as two different sets of data: the raw HTTP data, and the expected data. Update the `initializeTestData()` method as such:
 
@@ -135,8 +135,8 @@ This is where the second requirement, the requirement to transform the data, com
       },
     ];
     httpResultTeas = expectedTeas.map((t: Tea) => {
-      const tea: any = { ...t };
-      delete tea.image;
+      /* eslint-disable-next-line @typescript-eslint/no-unused-vars */
+      const { image, ...tea } = { ...t };
       return tea;
     });
   }
@@ -164,7 +164,7 @@ interface RawData {
   description: string;
 }
 
-const unpackData = (data: Array<RawData>): Array<Tea> => {
+const unpack = (data: Array<RawData>): Array<Tea> => {
   return [];
 }
 ```
@@ -172,10 +172,10 @@ const unpackData = (data: Array<RawData>): Array<Tea> => {
 We can then also update the promise handling in our `getAll()` to ensure the transform is called if we have data:
 
 ```TypeScript
-      .then(res => res.data && unpackData(res.data));
+      .then(res => unpack(res.data || []));
 ```
 
-Looking at the data we have coming back, we have eight tea categories with IDs 1 through 8, so for this data it it pretty easy to map the tea to an image using the ID. First, create an array of the image names in the right order (this can either be global to the file or within the `unpackData()` function):
+Looking at the data we have coming back, we have eight tea categories with IDs 1 through 8, so for this data it it pretty easy to map the tea to an image using the ID. First, create an array of the image names in the right order (this can either be global to the file or within the `unpack()` function):
 
 ```TypeScript
 const images: Array<string> = [
@@ -190,7 +190,7 @@ const images: Array<string> = [
 ];
 ```
 
-Then in `unpackData()` map the data, adding in the image property in the format required:
+Then in `unpack()` map the data, adding in the image property in the format required:
 
 ```TypeScript
   return data.map(t => ({ ...t, image: `assets/img/${images[t.id - 1]}.jpg` }));
@@ -198,17 +198,21 @@ Then in `unpackData()` map the data, adding in the image property in the format 
 
 Obviously, this is a fairly contrived example and it does not compensate for changes such as someone adding a tea category or changing the IDs in some way, etc. However, let's say that in the future the backend team decides to add a "Type Code" to the tea category that does a better job of mapping this tea to an image within your system, you only have to go to this service to make that change.
 
-The same applies of this decide to shorten the property names in order to save on bytes going over the air. You still only need to change this service. The rest of your system is insulated from the external API changes by the use of this composition function.
+The same applies if, for example, the backend team decides to shorten the property names in order to save on bytes going over the air. You still only need to change this service. The rest of your system is insulated from the external API changes by the use of this composition function.
 
 At this point, we should create a `src/use/__mocks__/tea.ts` as well. You should be an old hand at that by now, but for this one you will also need to supply the `teas` reactive value as such: `teas: ref<Array<Tea>>([]),`
 
 ## Update the Tea List Page
 
-Now that we have this put together, we can update the `TeaList` page to show the actual teas from our API rather than the hard coded teas that are being displayed right now.
+Now that we have this put together, we can update the `TeaList` page to show the actual teas from our API rather than the hard coded teas that are being displayed right now. Open the `src/views/TeaListPage.vue` and `tests/unit/views/TeaListPage.spec.ts` files in your editor.
 
 ### Modify the Test
 
-Modify the test first. Since we are not changing anything about how the page works, but are only changing the source of our data, so we need to modify the test to load that source (our composition function) up front.
+Modify the test first. Since we are not changing anything about how the page works, but are only changing the source of our data, we need to modify the test to make sure the new data source has data in it. We will:
+
+- Import the mock of the composition function we just created. Note that jest hoists the `jest.mock('@/use/tea')`, which is why that can be _after_ the actual import.
+- Get the `teas` array from it.
+- Set the `value` of the `teas` array.
 
 ```TypeScript
 import useTea from '@/use/tea';
@@ -218,16 +222,16 @@ jest.mock('@/use/tea');
   const { teas } = useTea();
   ...
 
-  beforeEach(async () => {
+  beforeEach(() => {
     teas.value = [
-      // Copy the tea data from the `TeaList.vue` file to here...
+      // Copy the tea data from the `TeaListPage.vue` file to here...
     ];
     jest.clearAllMocks();
   });
   ...
 ```
 
-There are also a couple of tests that grab the list of teas from the view's view model for comparison purposes. You can identify them by having a like this this in them: `const teas = wrapper.vm.teaData as Array<Tea>;`
+There are also a couple of tests that grab the list of teas from the view's view model for comparison purposes. You can identify them by having a line like this in them: `const teas = wrapper.vm.teaData as Array<Tea>;`
 
 Remove that line, and update the comparison to use `teas.value`. Here is a `diff` for one such test to give you an idea of the change required:
 
@@ -266,16 +270,16 @@ Let's attach the view code in a methodic, orderly fashion.
 
 At this point, we need to figure out the logic for the computed value we added in our `setup()`. Note that we currently have a `computed:` section outside of our `setup()`. It contains a `teaRows()` function that has _almost_ exactly what we want with one minor modification:
 
+What we need to do to finish this up is the following:
+
+1. Copy the code from the original `teaRows()` function to the body of our `const teaRows = computed(() => {});` computed value.
+1. Change `this.teaData` to `teas.value` as noted in the `diff` below.
+1. Remove the old `computed:` section.
+
 ```diff
 -      this.teaData.forEach(t => {
 +      teas.value.forEach(t => {
 ```
-
-So, what we need to do to finish this up is the following:
-
-1. Copy the code from the `teaRows()` function to the body of our `const teaRows = computed(() => {});` computed value.
-1. Change `this.teaData` to `teas.value` as noted in the above `diff`.
-1. Remove the old `computed:` section.
 
 At this point, the old styled `computed:` and `data()` sections should be gone, and all of the logic to fetch our teas and transform the array into a matrix should be contained within our `setup()` routine. All of our tests should be passing, and when we run the code in the browser we should see eight teas displayed.
 

@@ -19,6 +19,8 @@ There are several images we would like to display for our teas, but these assets
 1. Remove the `img.zip` file
 1. Find the favicon.png file and move it into `public/assets/icon`
 
+If you are running the application in the browser, you should notice that the icon in the browser tab has now changed. However, the tab still says "Ionic App." To change that, you can edit the `public/index.html` file and change the `title`.
+
 ## Model the Data
 
 Before we mock up the UI for the main page, let's define the data model for our teas:
@@ -45,8 +47,8 @@ export * from './Tea';
 
 We have done some work already with the Home page. Rather than start over, let's just rename that to be our TeaList page. This is a multi-part process as follows:
 
-- Move the view file: `git mv src/views/Home.vue src/views/TeaList.vue`
-- Move the test file: `git mv tests/unit/views/Home.spec.ts tests/unit/views/TeaList.spec.ts`
+- Move the view file: `git mv src/views/HomePage.vue src/views/TeaListPage.vue`
+- Move the test file: `git mv tests/unit/views/HomePage.spec.ts tests/unit/views/TeaListPage.spec.ts`
 - Fix the routing.
 - Fix the tests.
 - Make minor updates to the code.
@@ -55,11 +57,11 @@ First move the files as noted above. You can also just rename them in your IDE i
 
 ### Fix the Routing
 
-The routing is set up in `src/router/index.ts`. When we renamed the Vue file from Home to Tea, we broke the import statement. In reality all we _have_ to do is fix that statement, like this:
+The routing is set up in `src/router/index.ts`. When we renamed the Vue file from HomePage to TeaListPage, we broke the import statement. In reality all we _have_ to do is fix that statement, like this:
 
 ```diff
--import Home from '../views/Home.vue';
-+import Home from '../views/TeaList.vue';
+-import HomePage from '../views/HomePage.vue';
++import HomePage from '../views/TeaListPage.vue';
 ```
 
 In the long run, though, that would be confusing. While we are in there we should also update the routes so they are more descriptive for our application. We should also use a more descriptive name for the component. As a result, do this instead:
@@ -67,8 +69,8 @@ In the long run, though, that would be confusing. While we are in there we shoul
 ```diff
  import { createRouter, createWebHistory } from '@ionic/vue-router';
  import { RouteRecordRaw } from 'vue-router';
--import Home from '../views/Home.vue';
-+import TeaList from '../views/TeaList.vue';
+-import HomePage from '../views/HomePage.vue';
++import TeaListPage from '../views/TeaListPage.vue';
 
  const routes: Array<RouteRecordRaw> = [
    {
@@ -79,58 +81,57 @@ In the long run, though, that would be confusing. While we are in there we shoul
    {
 -    path: '/home',
 -    name: 'Home',
--    component: Home,
+-    component: HomePage,
 +    path: '/teas',
 +    name: 'Tea List',
-+    component: TeaList,
++    component: TeaLisPage,
    },
  ];
 ```
 
 ### Fix the Tests
 
-Similar to the routes, all we _really_ need to do with the test is fix the import in `tests/unit/views/Tea.spec.ts`:
+Similar to the routes, all we _really_ need to do with the test is fix the import in `tests/unit/views/TeaListPage.spec.ts`:
 
 ```diff
--import Home from '@/views/Home.vue';
-+import Home from '@/views/TeaList.vue';
+-import HomePage from '@/views/HomePage.vue';
++import HomePage from '@/views/TeaListPage.vue';
 ```
 
 However, our test still refers to our Tea view as "Home", and that will be confusing long term, so let's fix the test properly:
 
 ```diff
  import { mount } from '@vue/test-utils';
--import Home from '@/views/Home.vue';
-+import TeaList from '@/views/TeaList.vue';
+-import HomePage from '@/views/HomePage.vue';
++import TeaListPage from '@/views/TeaListPage.vue';
 
--describe('Home.vue', () => {
-+describe('TeaList.vue', () => {
+-describe('HomePage.vue', () => {
++describe('TeaListPage.vue', () => {
    it('displays the title', () => {
--    const wrapper = mount(Home);
-+    const wrapper = mount(TeaList);
+-    const wrapper = mount(HomePage);
++    const wrapper = mount(TeaListPage);
      const titles = wrapper.findAll('ion-title');
      expect(titles).toHaveLength(2);
      expect(titles[0].text()).toBe('Blank');
-@@ -11,7 +11,7 @@ describe('Home.vue', () => {
    });
 
    it('displays the default text', () => {
--    const wrapper = mount(Home);
-+    const wrapper = mount(TeaList);
+-    const wrapper = mount(HomePage);
++    const wrapper = mount(TeaListPage);
      const container = wrapper.find('#container');
      expect(container.text()).toContain('Ready to create an app?');
 ```
 
 ### Update the View
 
-There is not much to update in `src/views/TeaList.vue`. We just need to update the name of the component to avoid future confusion:
+There is not much to update in `src/views/TeaListPage.vue`. We just need to update the name of the component to avoid future confusion:
 
 ```diff
  import { defineComponent } from 'vue';
 
  export default defineComponent({
--  name: 'Home',
-+  name: 'TeaList',
+-  name: 'HomePage',
++  name: 'TeaListPage',
    components: {
      IonContent,
      IonHeader,
@@ -149,7 +150,22 @@ Let's mock up how the Ionic components will be used in the Tea view. This allows
 
 ### Mock the Data
 
-Switching away from the test and to the view code, within the `<script>` tag, add a `data()` method to the the component's Props object (the object passed to `defineComponent()`). This method returns an object that defines the data used by the component. Add the method as follows:
+One way of handling data in a Vue component is to use the <a href="https://v3.vuejs.org/api/options-data.html#data-2" target="_blank">`data()`</a> function. The definition of our page component currently looks like this:
+
+```typescript
+export default defineComponent({
+  name: 'TeaListPage',
+  components: {
+    IonContent,
+    IonHeader,
+    IonPage,
+    IonTitle,
+    IonToolbar,
+  },
+});
+```
+
+Add a `data()` function to that configuration object as follows:
 
 ```typescript
   data() {
@@ -168,7 +184,7 @@ Switching away from the test and to the view code, within the `<script>` tag, ad
           name: 'Black',
           image: 'assets/img/black.jpg',
           description:
-            'A fully oxidized tea, black teas have a dark color and a full robust and pronounced flavor. Blad teas tend ' +
+            'A fully oxidized tea, black teas have a dark color and a full robust and pronounced flavor. Black teas tend ' +
             'to have a higher caffeine content than other teas.'
         },
         {
@@ -185,7 +201,7 @@ Switching away from the test and to the view code, within the `<script>` tag, ad
           image: 'assets/img/oolong.jpg',
           description:
             'Oolong teas are partially oxidized, giving them a flavor that is not as robust as black teas but also ' +
-            'not as suble as green teas. Oolong teas often have a flowery fragrance.'
+            'not as subtle as green teas. Oolong teas often have a flowery fragrance.'
         },
         {
           id: 5,
@@ -208,7 +224,7 @@ Switching away from the test and to the view code, within the `<script>` tag, ad
           image: 'assets/img/white.jpg',
           description:
             'White tea is produced using very young shoots with no oxidation process. White tea has an extremely ' +
-            'delicate flavor that is sweet and fragrent. White tea should be steeped at lower temperatures for ' +
+            'delicate flavor that is sweet and fragrant. White tea should be steeped at lower temperatures for ' +
             'short periods of time.'
         },
       ],
@@ -216,7 +232,7 @@ Switching away from the test and to the view code, within the `<script>` tag, ad
   },
 ```
 
-**Note:** If we were further along, we probably would have created fake data in the Vuex store for the application, but we have not talked about Vuex yet, so we will just hard code the data like this for now.
+**Note:** If we were further along, we probably would have created fake data in a composition API service, but we have not talked about of that yet.
 
 ### Experiment with a List
 
@@ -243,9 +259,9 @@ The add the following markup where the `<div id="container">` used to be (under 
 </ion-list>
 ```
 
-This looks nice on an iPhone form factor, but try some others. Try an iPad Pro, for example. Or just close the devtools and look at it as a web page with desktop resolution. In both of those cases, the cards just look "big." Clearly a more responsive design is called for.
+This looks nice on an iPhone form factor, but try some others. Try an iPad Pro, for example. Toggle device emulation off in the devtools and look at it as a web page with desktop resolution. In both of those cases, the cards just look "big." Clearly a more responsive design is called for.
 
-Close the devtools for now. Let's just worry about the desktop sized layout for now.
+Leave device emulation off in the devtools. Let's just worry about the desktop sized layout for now.
 
 ### The Components List
 
@@ -277,13 +293,13 @@ What we really need is a way to do the following:
 1. show two columns of tea cards side by side on an iPad
 1. expand the columns to four on even wider screens, such as an iPad in landscape mode or our desktop
 
-Enter the <a href="https://ionicframework.com/docs/layout/grid" target="_blank">responsive grid</a>. By default, the responsive grid shows rows containing 12 columns. Elements within the rows can be contained either within a single column or spread across multiple columns allowing for a very flexible layout within the row.
+Enter the <a href="https://ionicframework.com/docs/layout/grid" target="_blank">responsive grid</a>. By default, the responsive grid shows rows containing 12 columns. Elements within the rows can be contained either within a single column or spread across multiple columns allowing for a very flexible layout within each row.
 
 In our case we want to show at most four columns of cards per row for high resolution tablets. As the form factor changes, we want the number of columns to change. On lower resolution tablets we would like to display only two columns per row, and on phone resolutions we would like just a single column of cards. Luckily, there are some simple mechanisms in place that will allow us to do that, but first let's think about how we want the grid to work at the highest resolutions and then express that in some tests.
 
-First, we no longer need the test that expects the content of our "#container" so remove that test case.
+We no longer need the test that expects the content of our "#container" so remove that test case.
 
-Let's lay this test out for our current mock data (which has seven teas), and our highest resolution layout, which will have four teas per row, so our layout will result in two rows, the first with four columns and the second with three columns. We will need tests like this:
+We will lay out this test for our current mock data (which has seven teas), and our highest resolution, which will have four teas per row. In this case, our page is expected to render two rows, the first with four columns and the second with three columns. We will need tests like this:
 
 ```typescript
 describe('with seven teas', () => {
@@ -297,7 +313,7 @@ Let's fill out the first test:
 
 ```typescript
 it('displays two rows', () => {
-  const wrapper = mount(TeaList);
+  const wrapper = mount(TeaListPage);
   const rows = wrapper.findAll('ion-grid ion-row');
   expect(rows).toHaveLength(2);
 });
@@ -338,23 +354,18 @@ We can then update the view's template accordingly. Add the following markup eit
 </ion-grid>
 ```
 
-We _will_ want to use this, so make sure you add `IonGrid` and `IonRow` to the list of child components. You may as well add `IonCol` at this point as well. If we have rows, we will have columns.
-
 Now let's display the columns properly, first updating the tests:
 
 ```typescript
 it('displays four columns in the first row', () => {
-  const wrapper = mount(TeaList);
+  const wrapper = mount(TeaListPage);
   const rows = wrapper.findAll('ion-grid ion-row');
   const cols = rows[0].findAll('ion-col');
   expect(cols).toHaveLength(4);
 });
 
 it('displays three columns in the second row', () => {
-  const wrapper = mount(TeaList);
-  const rows = wrapper.findAll('ion-grid ion-row');
-  const cols = rows[1].findAll('ion-col');
-  expect(cols).toHaveLength(3);
+  // Using the above test as a model, write your own test here...
 });
 ```
 
@@ -368,9 +379,9 @@ Verify that we have two failing tests. Now we can update the template by adding 
 </ion-grid>
 ```
 
-**Note:** the `size="3"` tells the column to take up three columns in the row. Remember that each row contains 12 columns and that elements in the row can be spread across multiple columns. We only want at most four columns per row. Thus, each column we supply should be spread across three of the columns in the row.
+**Note:** the `size="3"` tells the column to take up three columns in the row. Remember that each row contains 12 physical columns and that `ion-col` components in the row can be spread across multiple physical columns. We only want at most four columns per row. Thus, each `ion-col` component we supply should be spread across three of the physical columns in the row.
 
-Now that we have the grid laid out, we can add our card template. We will just use the card template from our `ion-list` that we had added above.
+Now that we have the grid laid out, we can add our card template. We will just use the card template from our `ion-list` that we had added above. First let's add the tests for that.
 
 ```typescript
 import { Tea } from '@/models';
@@ -378,7 +389,7 @@ import { Tea } from '@/models';
   describe('with seven teas', () => {
     ...
     it('displays the name in the title', () => {
-      const wrapper = mount(TeaList);
+      const wrapper = mount(TeaListPage);
       const teas = wrapper.vm.teaData as Array<Tea>;
       const cols = wrapper.findAll('ion-col');
       cols.forEach((c, idx) => {
@@ -388,7 +399,7 @@ import { Tea } from '@/models';
     });
 
     it('displays the description in the content', () => {
-      const wrapper = mount(TeaList);
+      const wrapper = mount(TeaListPage);
       const teas = wrapper.vm.teaData as Array<Tea>;
       const cols = wrapper.findAll('ion-col');
       cols.forEach((c, idx) => {
@@ -408,9 +419,12 @@ With the test in place, we can make the following modifications to the view:
   - IonCardContent
   - IonCardHeader
   - IonCardTitle
+  - IonCol
   - IonImg
+  - IonGrid
+  - IonRow
 
-This loops through the rows and for each row displays a column for each tea in that row. That looks great on a iPad Pro, though the cards are all different sizes and look a little crowded. We can fix that with some simple CSS in the view.
+This loops through the rows and for each row displays a column for each tea in that row. That looks great on a iPad Pro, though the cards are all different sizes and look a little crowded. We can fix that with a little styling in the view. You can replace the styling that is currently there.
 
 ```scss
 <style scoped>
@@ -428,17 +442,23 @@ Note the `scoped` attribute. That limits the effects of this CSS to only the vie
 
 Now each card takes up its full cell height, and there is some margin between the rows. Nice!
 
-But there is one last thing. This will always display four columns, which will look very squished on a phone. Recall that we wanted two columns on lower resolution tablets and a single column on phones. The grid provides breakpoints that allow us to set the column sizes based on the size of the screen. Let's do the following:
+There is one last thing. The current layout will always display four columns, which will look very squished on a phone. Recall that we wanted two columns on lower resolution tablets and a single column on phones. The grid provides breakpoints that allow us to set the column sizes based on the size of the screen. Let's do the following:
 
 - smaller devices: column size 12 -> each column takes up the whole "row"
 - large devices: column size 6 -> each column takes up half of the "row" (2 columns per "row")
 - extra large devices: column size 3 -> each column takes up a quarter of the "row" (4 columns per "row")
 
-Change the `ion-col` properties as such:
+The `ion-col` element currently has a single `size` attribute with a value of `3`:
 
 ```html
-<ion-col v-for="tea of row" size="12" size-md="6" size-xl="3" :key="tea.id"></ion-col>
+<ion-col v-for="tea of row" size="3" :key="tea.id"></ion-col>
 ```
+
+Change the `ion-col` element to include the following `size` attributes instead:
+
+- `size`: 12
+- `size-md`: 6
+- `size-xl`: 3
 
 Now as you change the type of device that is being emulated, the layout adapts accordingly.
 

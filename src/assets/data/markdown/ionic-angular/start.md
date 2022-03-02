@@ -32,8 +32,9 @@ ionic start tea-taster blank --type=angular
 Let's look at some of those options more closely.
 
 - The third option is the name of the application.
-- The forth option, `blank` tells Ionic to use the `blank` starter. We have three basic starters: `blank`, `tabs`, and `sidemenu`. The main difference is the main style of navigation.
+- The forth option, `blank` tells Ionic to use the `blank` starter. We have three basic starters: `blank`, `tabs`, and `sidemenu`. The main difference is the style of navigation.
 - The `--type` option specifies the type of application to create. Options include `angular`, `react`, `ionic-angular`, and `ionic1`. The `ionic-angular` type is an Ionic v3 application.
+- The application will use Capacitor for the native layer by default.
 
 Once the application has been generated, let's start the development server:
 
@@ -82,8 +83,10 @@ Modify your `package.json` file. I suggest moving the `description` up to the to
 Initialize Husky:
 
 ```bash
-npx husky install
+npm run prepare
 ```
+
+**Note:** we also could have run `npx husky install` but using the `prepare` script ensures that we have it set up properly.
 
 By default, the git hooks handled by `husky` are stored in the `.husky` directory. Let's add a couple now:
 

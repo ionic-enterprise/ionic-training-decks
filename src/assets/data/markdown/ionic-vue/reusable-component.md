@@ -7,7 +7,7 @@ In this lab you will:
 
 ## The Ratings Component
 
-We will be creating a reusable component that is used to give up to a five-star rating to a tea. Since this component will be usable throughout our application we will follow <a href="https://v3.vuejs.org/style-guide/#base-component-names-strongly-recommended" target="_blank">Vue guidelines</a> and prefix the component name with `App`.
+We will be creating a reusable component that is used to give up to a five-star rating to a tea. Since this component will be usable throughout our application we will follow <a href="https://vuejs.org/style-guide/rules-strongly-recommended.html#base-component-names" target="_blank">Vue guidelines</a> and prefix the component name with `App`.
 
 ### Create the Component Skeleton
 
@@ -86,7 +86,7 @@ export default defineComponent({
 
 Now let's start simple and build this up one step at a time.
 
-In the `src/views/TeaDetails.vue` file, add a `ratings` data item and bind that to the `app-rating` component. In addition to our unit tests, this will help us visually test that everything is working as we go.
+In the `src/views/TeaDetailsPage.vue` file, add a `ratings` data item and bind that to the `app-rating` component. In addition to our unit tests, this will help us visually test that everything is working as we go.
 
 ```html
 <template>
@@ -156,7 +156,7 @@ Change that binding such that:
 
 **Hint:** you will use a JavaScript hook operator. `n` will count up from 1 to 5.
 
-Once you have a passing test, change the `rating` value in `TeaDetails.vue` a couple of times and verify that the proper number of stars are indeed filled in.
+Once you have a passing test, change the `rating` value in `TeaDetailsPage.vue` a couple of times and verify that the proper number of stars are indeed filled in.
 
 The final bit is to get the component to respond to click events. In order to fulfill the `v-model` contract, the component needs to emit `update:ModelValue` with the proper payload whenever an event occurs that would change the model value.
 

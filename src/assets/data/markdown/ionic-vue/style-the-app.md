@@ -6,11 +6,11 @@ In this lab, you will further explore how to style your application.
 
 ## A Note on iOS and Material Design Styling
 
-The Ionic Framework automatically adapts between styling that matches the iOS Human Interface Guidelines and Android's Material Design. We _highly_ suggest that you keep this paradigm in place. It allows your customers to see the application in a manner that makes sense to them on whatever platform they are on. The best practice here is to style your application in a way that injects your own branding without interfering with the native styling that makes the application look "at home" on each platform.
+The Ionic Framework automatically adapts between styling that matches the iOS Human Interface Guidelines and Android's Material Design. We _highly_ suggest that you keep this paradigm in place. It allows your customers to see the application in a manner that makes sense to them on whatever platform they are on. The best practice with regard to this is to style your application in a way that injects your own branding without interfering with the native styling. This makes the application look "at home" on each platform.
 
 ## Styling
 
-Our design team has come back to use with some requirements about how the application should look. Luckily these are fairly light weight suggestions for now, but we are going to want to start thinking about how we want to accomplish what the design team requires.
+Our design team has come back to us with some requirements about how the application should look. Luckily these are fairly light weight suggestions for now, but we are going to want to start thinking about how we will accomplish what the design team requires.
 
 ### Scoped CSS vs. Global CSS
 
@@ -44,27 +44,17 @@ Now look at `src/App.vue`. It has a style tag without the `scoped`, which will r
 </style>
 ```
 
-But _should_ we actually put our global styling here? It was convenient when we just had this one style, but now we will have more. I am going to argue no, we should not put it here. Rather, we should create a set of CSS files and import them in `src/main.ts`. Let's fix that now.
-
-Create a `src/theme/styles.css` file and modify the `src/main.ts` to import it just like is currently done for the `src/theme/variables.css` file.
-
-Move the following style from `src/App.vue` to the `src/theme/styles.css` file:
-
-```css
-.error-message {
-  color: var(--ion-color-danger, ##ff0000);
-}
-```
+But _should_ we actually put our global styling here? It was convenient when we just had this one style, but now we will have more. I am going to argue no, we should not put it here. Rather, we should create a set of CSS files and import them in `src/main.ts`. We will fix this later.
 
 ### Shadow DOM
 
-Most of the components in the Ionic Framework use <a href="https://developer.mozilla.org/en-US/docs/Web/Web_Components/Using_shadow_DOM" target="_blank">Shadow DOM</a>. This works very similar to the `scoped` discussion above, allowing the framework developers to apply styling to the individual components without having that styling bleed out into other components. This also allows you as a developer to use the component without having to worry about the details of the component's construction when styling your own application.
+Most of the components in the Ionic Framework use <a href="https://developer.mozilla.org/en-US/docs/Web/Web_Components/Using_shadow_DOM" target="_blank">Shadow DOM</a>. This works in a way very similar to the `scoped` discussion above, allowing the framework developers to apply styling to the individual components without having that styling bleed out into other components. This also allows you as a developer to use the component without having to worry about the details of the component's structure when styling your own application.
 
 However, it also means that different techniques must be employed when styling these components. The authors of the components must provide you with a styling API that defines the ways in which they intend for you to be able to style these components. The two mechanisms that make this possible are `CSS Custom Properties` (also called `CSS Variables`) and `Shadow Parts`.
 
 ### Light DOM
 
-There really is no official term called "Light DOM" but it is a term that is common referred to items outside of a shadow root that you can style via traditional means. Even for many components that use shadow DOM you are still able to apply "light DOM" styling to them. For example:
+There is no official term called "Light DOM" but it is a term that commonly refers to items outside of a shadow root that you can style via traditional means. Even for many components that use shadow DOM you are still able to apply "light DOM" styling to them. For example:
 
 ```css
 ion-card {
@@ -76,7 +66,7 @@ The `ion-card` uses shadow DOM, but that is for the internal structure. The bord
 
 ### CSS Custom Properties
 
-The Ionic Framework makes heavy use of CSS Custom Properties. They are used to define the color scheme, default padding, etc. They are also used heavily in order to style individual components. Have a look at the <a href="https://ionicframework.com/docs/api/button#css-custom-properties">CSS Custom Properties for a button</a> as an example. This defines an API for the ways in which the framework authors intend for you to be able to style a button. You can do so as such:
+The Ionic Framework makes heavy use of <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/--*" target="_blank">CSS Custom Properties</a>. They are used to define the color scheme, default padding, etc. They are also used heavily in order to style individual components. Have a look at the <a href="https://ionicframework.com/docs/api/button#css-custom-properties">CSS Custom Properties for a button</a> as an example. This defines an API for the ways in which the framework authors intend for you to be able to style a button. You can do so as such:
 
 ```css
 ion-button {
@@ -88,11 +78,11 @@ This will apply a 75% opacity to all buttons in the application. You probably wa
 
 ### Shadow Parts
 
-A newer specification is <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/::part">Shadow Parts</a>. This allows the component author to tag specific parts of the component as something you can apply styles to as if it were in the light DOM. This allows component developers to still restrict how a component can be styled without having to redefine all of the ways an underlying element can be styled via a CSS Custom Property.
+A newer specification is <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/::part" target="_blank">Shadow Parts</a>. This allows the component author to tag specific parts of the component as something you can apply styles to as if it were in the light DOM. This allows component developers to still restrict how a component can be styled without having to redefine all of the ways an underlying element can be styled via a CSS Custom Property.
 
-As a result, users of the component can still style the component in ways that they are used do styling things, while still being protected from the implementation details of how the component itself is rendered internally.
+As a result, users of the component can still style the component in ways that they are used to styling things, while still being protected from the implementation details of how the component itself is rendered internally.
 
-Have a look at the <a href="https://ionicframework.com/docs/api/select#css-shadow-parts">Shadow Parts of a Select</a>. Notice that the various parts of a select are abstracted into parts that you can access and style, but you do not have to worry about the details of exactly how the component itself was constructed.
+Have a look at the <a href="https://ionicframework.com/docs/api/select#css-shadow-parts" target="_blank">Shadow Parts of a Select</a>. Notice that the various parts of a select are abstracted into parts that you can access and style, but you do not have to worry about the details of exactly how the component itself was constructed.
 
 This allows you to style the icon, for example, as such:
 
@@ -153,7 +143,7 @@ Given the base color (`#ac9d83` in this case), you can use our <a href="https://
 
 #### Handling Dark Mode
 
-The framework can automatically adjust for dark mode on browsers that support it. Scroll down to the line that has `@media (prefers-color-scheme: dark)` in it. The properties that are defined within there are for dark mode.
+The framework can automatically adjust for dark mode on browsers that support it. Scroll down to the line that has `@media (prefers-color-scheme: dark)` in it. The values defined within this section define how our application looks in dark mode.
 
 Notice that it has the same set of colors defined there, only with different values for use in dark mode. Use the <a href="https://ionicframework.com/docs/theming/color-generator" target="_blank">Color Generator</a> and the Dark Mode theme colors above to determine the values that we should use here, and then update the file.
 
@@ -237,7 +227,7 @@ There is also a set of other colors for both iOS and Material Design. For these,
 
 #### Applying the Colors
 
-The first requirement from our design team is that the pages should have a gradient background, going from from white to `--ion-color-secondary` for the light theme, or `--ion-background-color` to `--ion-color-secondary` for dark theme. We will do this via a class. Add the following to the `src/theme/styles.css` file.
+The first requirement from our design team is that the pages should have a gradient background, going from from white to the secondary color for the light theme, or from the background color to the secondary color for the dark theme. We will do this via a class. Add the following to the `src/theme/styles.css` file.
 
 ```css
 .main-content {
@@ -275,7 +265,7 @@ ion-list-header {
 
 Nice!
 
-We have a couple of other components where we need to set a specific color. Namely the tabs as well as the footer area on the login page. To modify the color of spcific components, we can set the color attribute as such: `color="primary"`. Let's use this to set our colors:
+We have a couple of other components where we need to set a specific color. Namely the tabs as well as the footer area on the login page. To modify the color of specific components, we can set the color attribute as such: `color="primary"`. Let's use this to set our colors:
 
 **`src/views/Login.vue`**
 

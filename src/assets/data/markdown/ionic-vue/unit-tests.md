@@ -11,7 +11,7 @@ The starter application was built with some minimal test scaffolding. However, a
 To run the existing unit test, run the following command:
 
 ```bash
-$ npm run test:unit
+npm run test:unit
 ```
 
 There are two things we should note right away:
@@ -24,7 +24,7 @@ The first item we will fix as we go.
 For the second item, it would be nice if we could run the tests continuously during our development process and have them re-run each time we make a change. We _could_ do that with the following command:
 
 ```bash
-$ npm run test:unit -- --watch
+npm run test:unit -- --watch
 ```
 
 However, that is a lot of extra typing for something a developer will be doing every day, so let's add a script to our `package.json` file to make our developer's lives easier.
@@ -44,7 +44,7 @@ However, that is a lot of extra typing for something a developer will be doing e
 Run the following command:
 
 ```bash
-$ npm run test:dev
+npm run test:dev
 ```
 
 Jest should run our tests and then wait for changes. We have not changed anything, so it doesn't _actually_ run any tests. Let's make some changes to the `tests/unit/example.spec.ts` file. Add some junk to the `toMatch()` string and save the file. The test should fail. Remove the junk text that was just added. The tests should pass again.
@@ -53,16 +53,18 @@ Try changing a one of the `true` values to `false`. The test should re-run and f
 
 ## Scaffold the Tests for Our Application
 
-Our one current test does is not well organized. It is a nice example, but it is not going to scale well. We currently have the following comonents:
+We currently have a single test in `tests/unit/example.spec.ts`. It is a nice example, but it is not going to scale well. Since unit tests are intended to test the various parts of our system in isolation, it makes sense that the file structure for our tests will resemble the file structure of our application.
+
+Our application currently has the following components:
 
 - `App.vue`
-- `views/Home.vue`
+- `views/HomePage.vue`
 
 These components do not currently do much, so now is a really good time to scaffold the tests for them so we can build the tests up as we go. On the file system, we will build a structure of unit tests under `tests/unit` that mimics our file structure under `src`. This keeps the tests out of the way of our code while still making them easy to find.
 
 ### App.vue
 
-Have a look at `src/App.vue`. It does not do much that is testable, but we can make sure that it renders, so let's create a test that does just that. Create a file called `tests/unit/App.spec.ts`. Note that this follows the path and general naming convension of our `src`, but the `spec.ts` extension let's jest know that this is a TypeScript unit test file.
+Have a look at `src/App.vue`. It does not do much that is testable, but we can make sure that it renders, so let's create a test that does just that. Create a file called `tests/unit/App.spec.ts`. Note that this follows the path and general naming convention of our `src`, but the `spec.ts` extension lets jest know that this is a TypeScript unit test file.
 
 ```typescript
 import { shallowMount } from '@vue/test-utils';
@@ -76,30 +78,30 @@ describe('App.vue', () => {
 });
 ```
 
-Let's take a closer look at this test. First, we <a href="https://vue-test-utils.vuejs.org/guides/common-tips.html#shallow-mounting">shallow mount</a> the component. This renders the component within a virtual DOM test wrapper so we can access it and query its contents. However, it stubs any child components, making the test more efficient than if we did a full `mount`.
+Let's take a closer look at this test. First, we <a href="https://vue-test-utils.vuejs.org/guides/common-tips.html#shallow-mounting" target="_blank">shallow mount</a> the component. This renders the component within a virtual DOM test wrapper so we can access it and query its contents. However, it stubs any child components, making the test more efficient than if we did a full `mount`.
 
 Next we make sure the wrapper is not empty by calling `exists()` on it. Had our component failed to render, we probably would have gotten exceptions out of the test, but even if we did not the wrapper would certainly be empty. Since it is not empty and we did not get any exceptions, we can assume the App component renders.
 
 There is not much else we can effectively test here, so let's move on to the Home page.
 
-### Home.vue
+### HomePage.vue
 
-The `tests/unit/example.spec.ts` test is testing `Home.vue`, so let's just start with a little housekeeping to make this more obvious:
+The `tests/unit/example.spec.ts` test is testing `HomePage.vue`, so let's just start with a little housekeeping to make this more obvious:
 
 - `mkdir tests/unit/views`
-- `git mv tests/unit/example.spec.ts tests/unit/views/Home.spec.ts`
+- `git mv tests/unit/example.spec.ts tests/unit/views/HomePage.spec.ts`
 
-Have a look at `src/views/Home.vue`. What should we test here? We do not want to write too many tests, since we will be changing this all some time soon. Let's just test that the header has a proper title and that the container div has the text we expect. When we change this page later, the title test will still be valid, but the "container" one will require some heavy modification.
+Have a look at `src/views/HomePage.vue`. What should we test here? We do not want to write too many tests, since we will be changing this all some time soon. Let's just test that the header has a proper title and that the container div has the text we expect. When we change this page later, the title test will still be valid, but the "container" one will require some heavy modification.
 
-Let's just make a slight modification to `tests/unit/views/Home.spec.ts`:
+Let's just make a slight modification to `tests/unit/views/HomePage.spec.ts`:
 
 ```typescript
 import { mount } from '@vue/test-utils';
-import Home from '@/views/Home.vue';
+import HomePage from '@/views/HomePage.vue';
 
-describe('Home.vue', () => {
+describe('HomePage.vue', () => {
   it('displays the title', () => {
-    const wrapper = mount(Home);
+    const wrapper = mount(HomePage);
     const titles = wrapper.findAll('ion-title');
     expect(titles).toHaveLength(2);
     expect(titles[0].text()).toBe('Blank');
@@ -107,7 +109,7 @@ describe('Home.vue', () => {
   });
 
   it('displays the default text', () => {
-    const wrapper = mount(Home);
+    const wrapper = mount(HomePage);
     const container = wrapper.find('#container');
     expect(container.text()).toContain('Ready to create an app?');
   });

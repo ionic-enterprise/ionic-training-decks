@@ -13,26 +13,26 @@ Ionic supports the common mobile paradigm of stacked navigation, where one page 
 
 Let's start with some fairly boilerplate starting code for a page.
 
-First the test in `tests/unit/views/TeaDetails.spec.ts`
+First the test in `tests/unit/views/TeaDetailsPage.spec.ts`
 
 ```TypeScript
 import useAuth from '@/use/auth';
-import TeaDetails from '@/views/TeaDetails.vue';
+import TeaDetailsPage from '@/views/TeaDetailsPage.vue';
 import { createRouter, createWebHistory } from '@ionic/vue-router';
 import { mount, VueWrapper } from '@vue/test-utils';
 import { Router } from 'vue-router';
 
-describe('TeaDetails.vue', () => {
+describe('TeaDetailsPage.vue', () => {
   let router: Router;
 
-  const mountView = async (): Promise<VueWrapper<typeof TeaDetails>> => {
+  const mountView = async (): Promise<VueWrapper<any>> => {
     router = createRouter({
       history: createWebHistory(process.env.BASE_URL),
-      routes: [{ path: '/', component: TeaDetails }],
+      routes: [{ path: '/', component: TeaDetailsPage }],
     });
     router.push('/');
     await router.isReady();
-    return mount(TeaDetails, {
+    return mount(TeaDetailsPage, {
       global: {
         plugins: [router],
       },
@@ -49,7 +49,7 @@ describe('TeaDetails.vue', () => {
 });
 ```
 
-Then the page itself in `src/views/TeaDetails.vue`
+Then the page itself in `src/views/TeaDetailsPage.vue`
 
 ```HTML
 <template>
@@ -75,7 +75,7 @@ import {
 import { defineComponent } from 'vue';
 
 export default defineComponent({
-  name: 'TeaDetails',
+  name: 'TeaDetailsPage',
   components: { IonContent, IonHeader, IonPage, IonTitle, IonToolbar },
 });
 </script>
@@ -85,18 +85,13 @@ export default defineComponent({
 
 ## Navigating
 
-Now that we have a details page, let's set up the navigation to the page and then back again. The first thing we should do is set up the route to the page. From URL perspective, it makes sense that the page should be a child to the `/teas` route. Also, since we will be displaying a particular tea it makes sense that the tea's ID should be part of the route. Add the following route in the `src/router/index.ts` file:
+Now that we have a details page, let's set up the navigation to the page and then back again. The first thing we should do is set up the route to the page. From URL perspective, it makes sense that the page should be a child to the `/teas` route. Also, since we will be displaying a particular tea it makes sense that the tea's ID should be part of the route. Add a route in the `src/router/index.ts` file. It will be similar to the existing `/teas` route with the following differences:
 
-```TypeScript
-  {
-    path: '/teas/tea/:id',
-    name: 'Tea Details',
-    component: () => import('@/views/TeaDetails.vue'),
-    meta: { requiresAuth: true },
-  },
-```
+- The path will be `/teas/tea/:id`.
+- We want to lazy load the page. The `TeaListPage` is loaded eagerly. To lazy load the page, use this syntax for the `component` property: `() => import('@/views/TeaDetailsPage.vue')`.
+- The name should be different, give it reasonable name.
 
-We want to navigate from the `TeaList` page to the `TeaDetails` page. A logical choice for the trigger is to use a click on the tea's card to start the navigation. Let's write a test for that in `tests/unit/views.TeaList.spec.ts`.
+We want to navigate from the `TeaListPage` page to the `TeaDetailsPage` page. A logical choice for the trigger is to use a click on the tea's card to start the navigation. Let's write a test for that in `tests/unit/views.TeaListPage.spec.ts`.
 
 ```TypeScript
   it('navigates to the tea details page when a tea card is clicked', async () => {
@@ -111,13 +106,13 @@ We want to navigate from the `TeaList` page to the `TeaDetails` page. A logical 
 
 Based on how we have the test set up, we know we should have seven `ion-card` elements, and we know what order they will be displayed in since we are controlling the state. Our test triggers a click on the 4th card and expects the proper `router.push()` call to occur.
 
-Now that we have a failing test, let's make that click occur in the `TeaList.vue` file.
+Now that we have a failing test, let's make that click occur in the `TeaListPage.vue` file.
 
 ```HTML
 <ion-card button @click="$router.push(`/teas/tea/${tea.id}`)">
 ```
 
-If we click on that, we get to the details page, but we have no way to get back. Let's fix that now. Add the following markup to the `TeaDetails.vue` file. Add it within the `ion-toolbar`.
+If we click on that, we get to the details page, but we have no way to get back. Let's fix that now. Add the following markup to the `TeaDetailsPage.vue` file. Add it within the `ion-toolbar`.
 
 ```html
 <ion-buttons slot="start">
@@ -125,9 +120,11 @@ If we click on that, we get to the details page, but we have no way to get back.
 </ion-buttons>
 ```
 
-Be sure to update the `components` object appropriately where we define the component. What will happen here is that when we navigate from the `TeaList` page to the `TeaDetails` page, the current `IonRouterOutlet` creates a navigation stack and knows that we have a page to go back to. It thus renders a back button in the toolbar for us (remember, iOS has no hardware backbutton so you need to deal with this in software).
+Be sure to update the `components` object appropriately where we define the component.
 
-What happens if we refresh while we are on the details page? We no longer have the back button because there is no stack, only this page. However, we know we want to go to the `TeaList` page, so we can set a default on the back button:
+Now when we navigate from the `TeaListPage` page to the `TeaDetailsPage` page, the current `IonRouterOutlet` creates a navigation stack and knows that we have a page to go back to. It thus renders a back button in the toolbar for us (remember, iOS has no hardware back button so you need to deal with this in software).
+
+What happens if we refresh while we are on the details page? We no longer have the back button because there is no stack, only this page. However, we know we want to go to the `TeaListPage` page, so we can set a default on the back button:
 
 ```html
 <ion-back-button defaultHref="/teas" />
@@ -146,7 +143,7 @@ Now that we have the navigation in place, let's grab the tea and display it.
 
 ### Update the Composition Function
 
-To grab the proper tea, it would be handy to have a `find` function go grab the tea based on the ID:
+To grab the proper tea, it would be handy to have a `find` function in `src/use/tea.ts` that would go grab the tea based on the ID:
 
 ```typescript
 const find = async (id: number): Promise<Tea | undefined> => {
@@ -212,26 +209,28 @@ describe('find', () => {
 
 #### Create the Tests
 
-First we need to figure out what our main test setup in `tests/unit/view/TeaDetails.spec.ts` should look like. We know that we will need to do the following:
+First we need to figure out what our test setup in `tests/unit/view/TeaDetails.spec.ts` should look like. We know that we will need to do the following in the code:
 
 - Get the `id` parameter from our route.
 - Call the `find` from `useTeas()` to find the proper tea.
 
-The `router` setup is already a part of the `mountView()` function. We just need to make a couple of minor tweaks to the actual paths that are used:
+The `router` is already being configured in the `mountView()` function. We just need to make a couple of minor tweaks to the actual paths that are used:
 
 ```typescript
 router = createRouter({
   history: createWebHistory(process.env.BASE_URL),
-  routes: [{ path: '/teas/tea/:id', component: TeaDetails }],
+  routes: [{ path: '/teas/tea/:id', component: TeaDetailsPage }],
 });
 router.push('/teas/tea/3');
 ```
 
 **Note:** the above is a change to existing code, so don't just copy-paste. Just change the paths.
 
-- `import useTea from '@/use/tea';`
-- `jest.mock('@/use/tea');`
-- a `beforeEach()` that sets up the data and the mocks
+Next, we need to configure the tea data so the `find()` call we need to make in the code will be testable. This involves the following steps:
+
+- Import the `useTea()` function: `import useTea from '@/use/tea';`
+- Mock the `useTea()` implementation: `jest.mock('@/use/tea');`
+- Add a `beforeEach()` that sets up the data and the mocks.
 
 ```typescript
 beforeEach(() => {
@@ -292,7 +291,7 @@ it('renders the tea description', async () => {
 
 #### Update the View
 
-Within `src/views/TeaDetails.vue` we need to do the following:
+Within `src/views/TeaDetailsPage.vue` we need to do the following:
 
 - Add `ref` to the import from vue.
 - `import { useRoute } from 'vue-router';`
@@ -346,6 +345,8 @@ We should also style that image just a tad to make sure it is not too big:
   }
 </style>
 ```
+
+That should complete our details page. Try it out in the browser and make sure everything works well. Try different mobile footprints via the devtools as well.
 
 ## Conclusion
 

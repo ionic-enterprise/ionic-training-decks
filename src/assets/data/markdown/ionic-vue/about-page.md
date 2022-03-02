@@ -6,7 +6,7 @@ Every good app gives credit where credit is due. We will use a traditional "Abou
 
 ## Get the Data
 
-Modify the application's `tsconfig.json` file to the code to resolve JSON files:
+Modify the application's `tsconfig.json` file to allow the code to resolve JSON files:
 
 ```json
   "compilerOptions": {
@@ -20,10 +20,11 @@ This will allow us to read the `package.json` file and get some important inform
 **Note:** You may need to add the `author` node to the `package.json` file. You can just your your name like this: `"author": "Jackie Smith",`.
 
 ```typescript
-  import { author, description, name, version } from '../../package.json';
+  import packageInfo from '../../package.json';
 
 ...
     setup() {
+      const { author, description, name, version } = packageInfo;
       return { author, description, name, version };
     },
 ```

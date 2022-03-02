@@ -43,7 +43,7 @@ First create two files that will serve as the shells for our test and compsable 
 `tests/unit/use/session.spec.ts`
 
 ```typescript
-import SessionVaultService from '@/services/SessionVaultService';
+import useSession from '@/use/session';
 import { Session } from '@/models';
 
 describe('useSession', () => {
@@ -76,11 +76,17 @@ import { Session } from '@/models';
 const key = 'session';
 let session: Session | undefined;
 
-const clearSession = async (): Promise<void> {}
+const clearSession = async (): Promise<void> => {
+  null;
+};
 
-const getSession = async (): Promise<Session | undefined> { return session; }
+const getSession = async (): Promise<Session | undefined> => {
+  return session;
+};
 
-const setSession = async (): Promise<void> {}
+const setSession = async (): Promise<void> => {
+  null;
+};
 
 export default () => {
   return {
@@ -101,14 +107,14 @@ export default jest.fn().mockReturnValue({
 });
 ```
 
-**Note:** The `src/use/__mocks__/session.ts` file will be used to facilitate mocking this compsable function effevctively in other unit tests.
+**Note:** The `src/use/__mocks__/session.ts` file will be used to facilitate mocking this composable function effectively in other unit tests.
 
 ### Install `@capacitor/storage`
 
 We will use <a href="https://capacitorjs.com/docs/apis/storage" target="_blank">`@capacitor/storage`</a> to persist the session information, so let's install it:
 
 ```bash
-$ npm i @capacitor/storage
+npm i @capacitor/storage
 ```
 
 Also create a <a href="https://jestjs.io/docs/manual-mocks" target="_blank">manual mock</a> for it. This will make the testing easier:
@@ -122,6 +128,8 @@ export const Storage = {
 };
 ```
 
+The manual mock should be created as `__mocks__/@capacitor/storage.ts` under the application's root directory.
+
 ### Setting the Session
 
 When we set the session, we have two requirements:
@@ -129,7 +137,7 @@ When we set the session, we have two requirements:
 - We should be able to retrieve the session again.
 - The session should be stored using `@capacitor/storage`.
 
-Let's express those requirements as tests. Note that the value stored <a href="https://capacitorjs.com/docs/apis/storage#setoptions" target="_blank">must be a string</a>. As such we need to stringify the session object.
+Let's express those requirements as tests. Note that the value stored <a href="https://capacitorjs.com/docs/apis/storage#setoptions" target="_blank">must be a string</a>. As such we need to stringify the session object. Make sure that you `import { Storage } from '@capacitor/storage';` at the top of the file.
 
 ```typescript
 describe('setSession', () => {
@@ -151,14 +159,11 @@ describe('setSession', () => {
 });
 ```
 
-The code required for this is:
+The code required to satisfy these tests is left as an exercise for the reader. Here is a synopsis if what you need to do:
 
-```typescript
-const setSession = async (s: Session): Promise<void> => {
-  session = s;
-  return Storage.set({ key, value: JSON.stringify(s) });
-};
-```
+- The signature of `setSession` needs to be updated to take a parameter of type `Session`.
+- The file global `session` needs to be set to the passed value.
+- The `setSession` function needs to return the result of calling `Storage.set()` (be sure to import `Storage`). The signature for `Storage.set()` is `set({ key: string, value: string }), so the passed session will need to be converted from an object to a string via `JSON.stringify()`.
 
 ### Clearing the Session
 
@@ -235,14 +240,14 @@ describe('getSession', () => {
 });
 ```
 
-**Coding Challenge:** write the code to satisfy these requirements.
+**Coding Challenge:** write the code to satisfy these requirements. Remember that the value was processed with `JSON.stringify` on the way in to storage, so it will need to be parsed on the way back out.
 
 ## Using Axios for HTTP Calls
 
 We will be using <a href="https://www.npmjs.com/package/axios" target="_blank">Axios</a> to make our HTTP calls. As such, we will need to install it.
 
 ```bash
-$ npm i axios
+npm i axios
 ```
 
 We will also create a single Axios instance for our backend API. Create a `src/use/backend-api.ts` file with the following contents:
@@ -412,10 +417,10 @@ One way to translate that into code is to update our `login()` function as such:
 const login = async (email: string, password: string): Promise<boolean> => {
   const response = await client.post('/login', { username: email, password });
   if (response.data.success) {
-    session.value = {
+    setSession({
       user: response.data.user,
       token: response.data.token,
-    };
+    });
     return true;
   }
   return false;
@@ -449,7 +454,7 @@ describe('logout', () => {
 **Coding Challenge:** This is a two part challenge:
 
 1. Write the code for both of the test cases above.
-1. Write the code that satisfies the test.
+1. Write the code that satisfies the tests.
 
 ### Create an Auth Mock
 
