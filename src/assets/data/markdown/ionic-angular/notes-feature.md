@@ -714,7 +714,7 @@ Once that is in place, we can create test for the following workflows:
   noteDeleted$ = createEffect(() =>
     this.actions$.pipe(
       ofType(noteDeleted),
-      mergeMap(action =>
+      mergeMap((action) =>
         this.tastingNotesService.delete(action.note.id).pipe(
           map(() => noteDeletedSuccess({ note: action.note })),
           catchError(() =>
@@ -722,10 +722,7 @@ Once that is in place, we can create test for the following workflows:
               noteDeletedFailure({
                 errorMessage: 'Error in data load, check server logs',
               }),
-         2 export const selectNotes = createSelector(selectData, (state: DataState) => state.notes);
-  1 export const selectNote = (id: number) =>
-  0   createSelector(selectNotes, (notes: Array<TastingNote>) => notes.find((t) => t.id === id));
-     ),
+            ),
           ),
         ),
       ),
@@ -1496,7 +1493,7 @@ Try clicking on an existing note to make sure that you can properly update it.
 
 The final feature we will add is the ability to delete a note. We will keep this one simple and make it somewhat hidden so that it isn't too easy for a user to delete a note.
 
-We will use a contruct called a <a ref="https://ionicframework.com/docs/api/item-sliding" target="_blank">item sliding</a> to essentially "hide" the delete button behind the item. That way the user has to slide the item over in order to expose the button and do a delete.
+We will use a construct called a <a ref="https://ionicframework.com/docs/api/item-sliding" target="_blank">item sliding</a> to essentially "hide" the delete button behind the item. That way the user has to slide the item over in order to expose the button and do a delete.
 
 Doing this results in a little bit of rework in how the item is rendered and bound on the `TastingNotesPage`:
 
