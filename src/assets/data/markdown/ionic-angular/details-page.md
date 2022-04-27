@@ -215,7 +215,7 @@ In the `beforeEach()`, we need to set up the current route so it has an ID on it
 
 ```TypeScript
   describe('initialization', () => {
-    let store: MockStore
+    let store: MockStore;
     beforeEach(() => {
       const route = TestBed.inject(ActivatedRoute);
       (route.snapshot.paramMap.get as any).withArgs('id').and.returnValue('7');
@@ -268,7 +268,7 @@ export class TeaDetailsPage implements OnInit {
 
   ngOnInit() {
     const id = parseInt(this.route.snapshot.paramMap.get('id'), 10);
-    this.tea$ = this.store.select(selectTea, { id });
+    this.tea$ = this.store.select(selectTea(id));
   }
 }
 ```
