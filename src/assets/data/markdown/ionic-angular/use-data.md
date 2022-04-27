@@ -631,10 +631,10 @@ You can now replace the manufactured Observable with the observable select from 
    }
 
    ngOnInit() {
--    this.teas$ = of(this.teaData).pipe(map(teas => this.teaMatrix(teas)));
+-    this.teas$ = of(this.teaData).pipe(map(teas => this.toMatrix(teas)));
 +    this.teas$ = this.store
 +      .select(selectTeas)
-+      .pipe(map(teas => this.teaMatrix(teas)));
++      .pipe(map(teas => this.toMatrix(teas)));
    }
  }
 ```
