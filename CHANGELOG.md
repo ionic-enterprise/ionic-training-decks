@@ -1,3 +1,5 @@
+## [5.1.7](https://github.com/ionic-team/ionic-training-decks/compare/v5.1.6...v5.1.7) (2022-04-27)
+
 ## [5.1.6](https://github.com/ionic-team/ionic-training-decks/compare/v5.1.5...v5.1.6) (2022-04-27)
 
 ## [5.1.5](https://github.com/ionic-team/ionic-training-decks/compare/v5.1.4...v5.1.5) (2022-04-19)
