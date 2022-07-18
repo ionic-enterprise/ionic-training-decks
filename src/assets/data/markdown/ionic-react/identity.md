@@ -3,7 +3,7 @@
 In this lab, you will learn how to:
 
 - Use environment variables to configure dynamic values
-- Use the Storage Capacitor API plugin
+- Use the Preferences Capacitor API plugin
 - Use state management to share data across the application
 - Make network requests using Axios
 
@@ -11,7 +11,7 @@ In this lab, you will learn how to:
 
 In the last lab we created a login page but it doesn't do much. Our application is missing a way to store, retrieve, and share user identity information across the application.
 
-In this lab we will use the <a href="https://capacitorjs.com/docs/apis/storage" target="_blank">Storage Capacitor API plugin</a> to store and retrieve information about the user using the application and manage the state of the user identity so the application knows when a user is signed in, signed out, etc.
+In this lab we will use the <a href="https://capacitorjs.com/docs/apis/preferences" target="_blank">Preferences Capacitor API plugin</a> to store and retrieve information about the user using the application and manage the state of the user identity so the application knows when a user is signed in, signed out, etc.
 
 ### Side-Note: State Management Options
 
@@ -21,12 +21,12 @@ React provides the tools to implement state management out-of-the-box. It is imp
 
 Before we get started with this lab there are a few additions we need to make to the project. If you have any processes running (`ionic serve` and/or `npm test`) terminate them.
 
-### Install the Storage Capacitor API Plugin
+### Install the Preferences Capacitor API Plugin
 
-Install the Storage Capacitor API plugin to your application:
+Install the Preferences Capacitor API plugin to your application:
 
 ```bash
-$ npm install @capacitor/storage
+$ npm install @capacitor/preferences
 $ npx cap sync
 ```
 
@@ -84,30 +84,30 @@ export interface Session {
 
 ## Building State
 
-Start by creating a new folder under `src/core` named `auth`. It needs three files, `AuthContext.tsx`, `AuthContext.test.tsx`, and `index.ts`. We will first focus on `AuthContext.tsx`.
+Start by creating a new folder under `src/core` named `session`. It needs two files, `SessionProvider.tsx` and `index.ts`. We will first focus on `SessionProvider.tsx`.
 
 ### State Definition
 
 What information would be useful for components in our application to know about the user's identity? The user's `Session` for sure, but it would also be nice if a component knew if any of our actions in managing this piece of state were in the process of `loading` or if any of our actions caused an `error`.
 
-Define an interface for `AuthState` within `AuthContext.tsx`:
+Define an interface for `SessionState` within `SessionProvider.tsx`:
 
-**`src/core/auth/AuthContext.tsx`**
+**`src/core/session/SessionProvider.tsx`**
 
 ```TypeScript
 import { Session } from '../models';
 
-interface AuthState {
+interface SessionState {
   session?: Session;
   loading: boolean;
   error: string;
 }
 ```
 
-There needs to be an initial value for this state. Define it under the `AuthState` interface:
+There needs to be an initial value for this state. Define it under the `SessionState` interface:
 
 ```TypeScript
-const initialState: AuthState = {
+const initialState: SessionState = {
   session: undefined,
   loading: false,
   error: '',
@@ -118,10 +118,10 @@ const initialState: AuthState = {
 
 What actions can happen to the application that would cause the state to change? A few are obvious -- sign in, sign out -- but there should also be a way to restore the state if the user closes the app without signing out and a way to clear out the session if it is expired.
 
-Under `initialState`, add the `AuthAction` type:
+Under `initialState`, add the `SessionAction` type:
 
 ```TypeScript
-export type AuthAction =
+export type SessionAction =
   | { type: 'CLEAR_SESSION' }
   | { type: 'RESTORE_SESSION'; session: Session }
   | { type: 'LOGIN' }
@@ -136,13 +136,10 @@ export type AuthAction =
 
 With our state and actions defined we can now write a reducer function that updates the state upon the _dispatch_ of an action.
 
-Under the `AuthAction` type, add the following function:
+Under the `SessionAction` type, add the following function:
 
 ```TypeScript
-const reducer = (
-  state: AuthState = initialState,
-  action: AuthAction,
-): AuthState => {
+const reducer = (state: SessionState = initialState, action: SessionAction): SessionState => {
   switch (action.type) {
     case 'CLEAR_SESSION':
       return { ...state, session: undefined };
@@ -177,30 +174,30 @@ A React Context consists of two pieces:
 
 ### Context
 
-First we should define the Context we want to be accessible by child components. At the end of `AuthContext.tsx`, add the following code:
+First we should define the Context we want to be accessible by child components. At the end of `SessionProvider.tsx`, add the following code:
 
-**`src/core/auth/AuthContext.tsx`**
+**`src/core/session/SessionProvider.tsx`**
 
 ```TypeScript
-export const AuthContext = createContext<{
+export const SessionContext = createContext<{
   state: typeof initialState;
-  dispatch: (action: AuthAction) => void;
+  dispatch: (action: SessionAction) => void;
 }>({
   state: initialState,
   dispatch: () => {},
 });
 ```
 
-The code above declares that we want to share both the `state` (of type `AuthState`) as well as a way to `dispatch` the actions created (of type `AuthAction`).
+The code above declares that we want to share both the `state` (of type `SessionState`) as well as a way to `dispatch` the actions created (of type `SessionAction`).
 
 ### Provider
 
 The Context's Provider returns a React component that allows any child components within it access to the Context created above. This can be a confusing concept at first, so let's write it out and use it in our application to gain a better understanding of this concept.
 
-Add the following code after `AuthContext`, importing any modules along the way:
+Add the following code after `SessionContext`, importing any modules along the way:
 
 ```TypeScript
-export const AuthProvider: React.FC = ({ children }) => {
+export const SessionProvider: React.FC = ({ children }) => {
   const [initializing, setInitializing] = useState<boolean>(true);
   const [state, dispatch] = useReducer(reducer, initialState);
 
@@ -209,30 +206,30 @@ export const AuthProvider: React.FC = ({ children }) => {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ state, dispatch }}>
+    <SessionContext.Provider value={{ state, dispatch }}>
       {initializing ? <IonSpinner name="dots" data-testid="initializing" /> : children}
-    </AuthContext.Provider>
+    </SessionContext.Provider>
   );
 };
 ```
 
-We will go back and implement the `useEffect` shortly. Let's go ahead and use the `<AuthProvider />` component in our application:
+We will go back and implement the `useEffect` shortly. Let's go ahead and use the `<SessionProvider />` component in our application:
 
-1. Export all from `./AuthContext` in `src/core/auth/index.ts`
+1. Export all from `./SessionContext` in `src/core/session/index.ts`
 2. Modify `src/App.tsx` to match the changes below
 
 **`src/App.tsx`**
 
 ```TypeScript
 ...
-import { AuthProvider } from './core/auth';
+import { SessionProvider } from './core/session';
 ...
 const App: React.FC = () => {
   useEffect( ... );
 
   return (
     <IonApp>
-      <AuthProvider>
+      <SessionProvider>
         <IonReactRouter>
           <IonRouterOutlet>
             <Route exact path="/tea">
@@ -246,20 +243,28 @@ const App: React.FC = () => {
             </Route>
           </IonRouterOutlet>
         </IonReactRouter>
-      </AuthProvider>
+      </SessionProvider>
     </IonApp>
   );
 };
 ...
 ```
 
-We also need to make some slight modifications to `App.test.tsx`.
+Inserting the `<SessionProvider />` into our component tree impacts the tests we wrote for the `<App />` component. Ideally, we would like to test `<App />` in isolation, ensuring that only the Splash Screen behavior is tested; not additional functionality such as user authentication or routing. We can create a manual mock for `<SessionProvider />` to use in `App.test.tsx`.
 
-**Challenge:** In `src/App.test.tsx` make each individual unit test `async` and modify the statement in each test where container is expected to be defined to the following:
+Create a new file `src/core/session/__mocks__/SessionProvider.tsx` and populate it with the following code:
 
 ```TypeScript
-  await waitFor(() => expect(container).toBeDefined());
+export const SessionProvider: React.FC = () => <div></div>;
 ```
+
+Then add the following line of code to `App.test.tsx`, after the mock for `@ionic/react`:
+
+```TypeScript
+jest.mock('./core/session/SessionProvider');
+```
+
+Tests within `App.test.tsx` will swap out the actual implementation of `<SessionProvider />` for the mock.
 
 Take a look at your app running on `https://localhost:8100`. We make use of the Ionic Framework's `<IonSpinner />` component to indicate to application users that we are initializing their user identity. There is no logic being processed at this point to switch the UI from the animation to the actual application. We will implement that logic now.
 
@@ -276,64 +281,58 @@ Regardless of the outcome, we should display the application once this operation
 
 ### Switching from the Initialization State
 
-Start by testing `<AuthProvider />` to verify that the loader is displayed while initializing:
+Start by testing `<SessionProvider />` to verify that the loader is displayed while initializing:
 
-**`src/core/auth/AuthContext.test.tsx`**
+**`src/core/session/SessionProvider.test.tsx`**
 
 ```TypeScript
 import { useContext } from 'react';
 import { render, waitFor } from '@testing-library/react';
-import { AuthContext, AuthProvider } from './AuthContext';
+import { SessionContext, SessionProvider } from './SessionProvider';
 
 const MockConsumer: React.FC = () => {
-  const { state } = useContext(AuthContext);
+  const { state } = useContext(SessionContext);
   return <div data-testid="session">{JSON.stringify(state.session)}</div>;
 };
 
 const ComponentTree = (
-  <AuthProvider>
+  <SessionProvider>
     <MockConsumer />
-  </AuthProvider>
+  </SessionProvider>
 );
 
-describe('<AuthProvider />', () => {
+describe('<SessionProvider />', () => {
   it('displays the loader when initializing', async () => {
-    const { getByTestId } = render(ComponentTree);
-    expect(getByTestId(/initializing/)).toBeInTheDocument();
-    await waitFor(() => expect(getByTestId(/session/)).toBeInTheDocument());
+    render(ComponentTree);
+    expect(screen.getByTestId(/initializing/)).toBeInTheDocument();
+    expect(await screen.findByTestId(/session/)).toBeInTheDocument();
   });
 });
 ```
 
-Make the test pass by adding the following code inside the `useEffect` statement in `AuthContext.tsx`, replacing the comment there.
+Make the test pass by adding a timeout that sets initializing to false inside the `useEffect` statement in `SessionProvider.tsx`, replacing the comment there.
 
-**`src/core/auth/AuthContext.tsx`**
+**`src/core/session/SessionProvider.tsx`**
 
 ```TypeScript
-(async () => {
-  try {
-    setTimeout(() => setInitializing(false), 500);
-  } catch (error) {
-    setInitializing(false);
-  }
-})();
+useEffect(() => {
+  setTimeout(() => setInitializing(false), 500);
+}, []);
 ```
-
-Fetching data from the Capacitor Storage API, as well as making HTTP network requests, are asynchronous operations so we are wrapping the `try/catch` block inside an IIFE (immediately invoked function expression). Don't worry about the timeout, we will replace that shortly. It is there temporarily otherwise `setInitializing(false)` is called too early and the test fails.
 
 If you go back to the served application and refresh the page, you should see our loading prompt for half-a-second, then we are redirected to the list of teas.
 
 ### When a Token is Stored
 
-If a user's session can be restored `<AuthProvider />` should do the following:
+If a user's session can be restored `<SessionProvider />` should do the following:
 
-1. Obtain the token from the Capacitor Storage API
+1. Obtain the token from the Capacitor Preferences API
 2. Make a GET request to fetch the user's information
 3. Dispatch the `RESTORE_SESSION` action
 
-Before we start writing unit tests for this scenario, let's create a fixture we can use in our tests. Create a new folder under `src/core/auth` named `__mocks__`. This will prevent the folder from being included in production builds of the application. Inside it, create a file named `mockSession.ts`.
+Before we start writing unit tests for this scenario, let's create a fixture we can use in our tests. Create a new folder under `src/core/session` named `__fixtures__`. This will prevent the folder from being included in production builds of the application. Inside it, create a file named `mockSession.ts`.
 
-**`src/core/auth/__mocks__/mockSession.ts`**
+**`src/core/session/__fixtures__/mockSession.ts`**
 
 ```TypeScript
 import { Session } from '../../models';
@@ -352,19 +351,20 @@ export const mockSession: Session = {
 
 Now, write unit tests for this scenario:
 
-**`src/core/auth/AuthContext.test.tsx`**
+**`src/core/session/SessionProvider.test.tsx`**
 
 ```TypeScript
 ...
-import { mockSession } from './__mocks__/mockSession';
-import { Storage } from '@capacitor/storage';
+import { Preferences } from '@capacitor/preferences';
 import Axios from 'axios';
+import { mockSession } from './__fixtures__/mockSession';
 
-jest.mock('@capacitor/storage');
+jest.mock('@capacitor/preferences');
+jest.mock('axios');
+const mockedAxios = axios as jest.Mocked<typeof axios>;
 ...
-describe('<AuthProvider />', () => {
-    beforeEach(() => (Storage.get = jest.fn(async () => ({ value: null }))));
-
+describe('<SessionProvider />', () => {
+  beforeEach(() => (Preferences.get = jest.fn(async () => ({ value: null }))));
 
   it('displays the loader when initializing', async () => {
     ...
@@ -372,31 +372,27 @@ describe('<AuthProvider />', () => {
 
   describe('when a token is stored', () => {
     beforeEach(() => {
-      Storage.get = jest.fn(async () => ({ value: mockSession.token }));
-      (Axios.get as any) = jest.fn(async () => ({ data: mockSession.user }));
+      Preferences.get = jest.fn(async () => ({ value: mockSession.token }));
+      mockedAxios.get.mockResolvedValue({data: mockSession.user })
     });
 
     it('obtains the token from storage', async () => {
       render(ComponentTree);
-      await waitFor(() => {
-        expect(Storage.get).toHaveBeenCalledTimes(1);
-        expect(Storage.get).toHaveBeenCalledWith({ key: 'auth-token' });
-      });
+      await waitFor(() => expect(Preferences.get).toHaveBeenCalledTimes(1));
+      expect(Preferences.get).toHaveBeenCalledWith({ key: 'auth-token' });
     });
 
     it('GETs the user profile', async () => {
       render(ComponentTree);
       const headers = { Authorization: 'Bearer ' + mockSession.token };
       const url = `${process.env.REACT_APP_DATA_SERVICE}/users/current`;
-      await waitFor(() => {
-        expect(Axios.get).toHaveBeenCalledTimes(1);
-        expect(Axios.get).toHaveBeenCalledWith(url, { headers });
-      });
+      await waitFor(() => expect(mockedAxios.get).toHaveBeenCalledTimes(1));
+      expect(mockedAxios.get).toHaveBeenCalledWith(url, { headers });
     });
 
     it('sets the session', async () => {
-      const { getByTestId } = render(ComponentTree);
-      const session = await waitFor(() => getByTestId('session'));
+      render(ComponentTree);
+      const session = await screen.findByTestId(/session/);
       expect(session.textContent).toEqual(JSON.stringify(mockSession));
     });
   });
@@ -407,13 +403,13 @@ describe('<AuthProvider />', () => {
 
 ### When a Token is Not Stored
 
-If a token is not available or is unable to be restored we should simply dispatch the `CLEAR_SESSION` action. The `describe()` block for this can be found below. Add it to `AuthContext.test.tsx`.
+If a token is not available or is unable to be restored we should simply dispatch the `CLEAR_SESSION` action. The `describe()` block for this can be found below. Add it to `SessionProvider.test.tsx`.
 
 ```TypeScript
 describe('when a token is not stored', () => {
   it('does not set the session', async () => {
-    const { getByTestId } = render(ComponentTree);
-    const session = await waitFor(() => getByTestId('session'));
+    render(ComponentTree);
+    const session = await screen.findByTestId(/session/);
     expect(session.textContent).toEqual('');
   });
 });
@@ -421,31 +417,41 @@ describe('when a token is not stored', () => {
 
 ### Implementation
 
-The tests are all in place, let's finish implementing the `useEffect` in `AuthContext.tsx`:
+The tests are all in place, let's finish implementing the `useEffect` in `SessionProvider.tsx`:
 
-**`src/core/auth/AuthContext.tsx`**
+**`src/core/session/SessionProvider.tsx`**
 
 ```TypeScript
 ...
 useEffect(() => {
-  (async () => {
-    try {
-      const { value: token } = await Storage.get({ key: 'auth-token' });
-      if (!token) throw new Error('Token not found.');
-
-      const headers = { Authorization: 'Bearer ' + token };
-      const url = `${process.env.REACT_APP_DATA_SERVICE}/users/current`;
-      const { data: user } = await Axios.get(url, { headers });
-      dispatch({ type: 'RESTORE_SESSION', session: { token, user } });
-      setInitializing(false);
-    } catch (error) {
-      dispatch({ type: 'CLEAR_SESSION' });
-      setInitializing(false);
-    }
-  })();
+    attemptSessionRestore().finally(() => setInitializing(false));
 }, []);
+
+const attemptSessionRestore = async () => {
+  try {
+    const { value: token } = await Preferences.get({ key: 'auth-token' });
+    if (!token) throw new Error('Token not found.');
+
+    const headers = { Authorization: 'Bearer ' + token };
+    const url = `${process.env.REACT_APP_DATA_SERVICE}/users/current`;
+    const { data: user } = await axios.get(url, { headers });
+    dispatch({ type: 'RESTORE_SESSION', session: { token, user } });
+  } catch (error) {
+    dispatch({ type: 'CLEAR_SESSION' });
+  }
+};
 ...
 ```
+
+**Note:** `useEffect` can only run synchronous code. In order to take advantage of the `try/catch` syntax, we abstract the logic to attempt to restore the user's session into a separate method.
+
+Your tests should now pass. However, now the Splash Screen tests in `App.test.tsx` fail! We can fix this by appending `await waitFor()` to the first `expect` statement, like so:
+
+```TypeScript
+await waitFor(() => expect(container).toBeDefined());
+```
+
+**Challenge:** Go ahead and update the failing tests in `App.test.tsx` such that they pass.
 
 ## Conclusion
 

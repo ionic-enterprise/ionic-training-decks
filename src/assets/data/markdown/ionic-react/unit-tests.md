@@ -30,10 +30,10 @@ I suggest adding additional test script configurations in the `package.json` fil
   "build": "react-scripts build",
   "eject": "react-scripts eject",
   "prepare": "husky install",
-  "test": "react-scripts test",
-  "test:ci": "export CI=true; react-scripts test",
-  "test:cov": "export CI=true; react-scripts test --coverage",
-  "test:upd": "export CI=true; react-scripts test --updateSnapshot"
+  "test": "react-scripts test --transformIgnorePatterns 'node_modules/(?!(@ionic/react|@ionic/react-router|@ionic/core|@stencil/core|ionicons)/)'",
+  "test:ci": "export CI=true; npm run test",
+  "test:cov": "export CI=true; npm run test -- --coverage",
+  "test:upd": "exportCI=true; npm run test -- --updateSnapshot"
 },
 ```
 

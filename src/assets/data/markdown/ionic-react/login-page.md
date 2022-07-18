@@ -37,6 +37,9 @@ Finally, open `src/setupTests.ts` and add the following lines of code:
 
 ```TypeScript
 import { mockIonicReact } from '@ionic/react-test-utils';
+import { setupIonicReact } from '@ionic/react';
+
+setupIonicReact();
 mockIonicReact();
 ```
 
@@ -58,6 +61,11 @@ import {
   IonTitle,
   IonToolbar,
 } from '@ionic/react';
+
+type LoginInputs = {
+  email: string;
+  password: string;
+};
 
 const LoginPage: React.FC = () => {
   return (
@@ -90,32 +98,24 @@ export default LoginPage;
 
 To make our login page accessible, we need to add an entry to the `IonReactRouter` residing in `App.tsx`:
 
-```TypeScript
+```JSX
 ...
-import LoginPage from './login/LoginPage';
+<IonApp>
+  <IonReactRouter>
+    <IonRouterOutlet>
+      <Route exact path="/login">
+        <LoginPage />
+      </Route>
+      <Route exact path="/tea">
+        <TeaPage />
+      </Route>
+      <Route exact path="/">
+        <Redirect to="/tea" />
+      </Route>
+    </IonRouterOutlet>
+  </IonReactRouter>
+</IonApp>
 ...
-const App: React.FC = () => {
-  ...
-  return (
-    <IonApp>
-      <IonReactRouter>
-        <IonRouterOutlet>
-         <Route exact path="/tea">
-            <TeaPage />
-          </Route>
-          <Route exact path="/login">
-            <LoginPage />
-          </Route>
-          <Route exact path="/">
-            <Redirect to="/tea" />
-          </Route>
-        </IonRouterOutlet>
-      </IonReactRouter>
-    </IonApp>
-  );
-};
-
-export default App;
 ```
 
 Let's make sure this works by changing the route in our browser to http://localhost:8100/login. There's not much to see, but we can see that the route is actually working.
@@ -126,35 +126,31 @@ Let's mock up what we would like the login page to look like. We know we are goi
 
 **`src/login/LoginPage.tsx`**
 
+Replace the contents within `<IonContent>` with the following:
+
 ```JSX
-<IonPage>
-  ...
-  <IonContent>
-    <IonHeader collapse="condense">
-    ...
-    </IonHeader>
+<form>
+  <IonList>
+    <IonItem>
+      <IonLabel>E-Mail Address</IonLabel>
+      <IonInput />
+    </IonItem>
+    <IonItem>
+      <IonLabel>Password</IonLabel>
+      <IonInput />
+    </IonItem>
+  </IonList>
+</form>
+```
 
-    <form>
-      <IonList>
-        <IonItem>
-          <IonLabel>E-Mail Address</IonLabel>
-          <IonInput />
-        </IonItem>
-        <IonItem>
-          <IonLabel>Password</IonLabel>
-          <IonInput />
-        </IonItem>
-      </IonList>
-    </form>
-  </IonContent>
+Under `</IonContent>`, add the following code to create a footer:
 
-  <IonFooter>
-    <IonToolbar>
-      <IonButton>Sign In</IonButton>
-    </IonToolbar>
-  </IonFooter>
-
-</IonPage>
+```JSX
+<IonFooter>
+  <IonToolbar>
+    <IonButton>Sign In</IonButton>
+  </IonToolbar>
+</IonFooter>
 ```
 
 Well, that's a start, but let's pretty it up a bit. First, let's use the "floating" style labels like this: `<IonLabel position="floating">Some Label</IonLabel>`.
@@ -237,7 +233,7 @@ const LoginPage: React.FC = () => {
     handleSubmit,
     control,
     formState: { errors, isDirty, isValid },
-  } = useForm({ mode: 'onChange' });
+  } = useForm<LoginInputs>({ mode: 'onChange' });
 
   return (
     ...
@@ -313,49 +309,43 @@ Application users should not be able to click the "Sign In" button if the form i
 Let's write unit tests that define when the button should be enabled or disabled:
 
 ```TypeScript
-import { render, waitFor } from '@testing-library/react';
-import { ionFireEvent as fireEvent } from '@ionic/react-test-utils';
+import { render, waitFor, screen } from '@testing-library/react';
+import { ionFireEvent as fireEvent, waitForIonicReact } from '@ionic/react-test-utils';
 import LoginPage from './LoginPage';
 
 describe('<LoginPage />', () => {
   ...
   describe('sign in button', () => {
     it('starts disabled', () => {
-      const { getByTestId } = render(<LoginPage />);
-      const button = getByTestId(/submit-button/) as HTMLIonButtonElement;
+      render(<LoginPage />);
+      const button = screen.getByTestId(/submit-button/) as HTMLIonButtonElement;
       expect(button.disabled).toBeTruthy();
     });
 
     it('is disabled with just an e-mail address', async () => {
-      const { getByTestId } = render(<LoginPage />);
-      const button = getByTestId(/submit-button/) as HTMLIonButtonElement;
-      const email = getByTestId(/email-input/);
-      await waitFor(() => {
-        fireEvent.ionChange(email, 'test@test.com');
-      });
-      expect(button.disabled).toBeTruthy();
+      render(<LoginPage />);
+      const button = screen.getByTestId(/submit-button/) as HTMLIonButtonElement;
+      const email = screen.getByTestId(/email-input/) as HTMLIonInputElement;
+      fireEvent.ionChange(email, 'test@test.com');
+      await waitFor(() => expect(button.disabled).toBeTruthy());
     });
 
     it('is disabled with just a password', async () => {
-      const { getByTestId } = render(<LoginPage />);
-      const button = getByTestId(/submit-button/) as HTMLIonButtonElement;
-      const password = getByTestId(/password-input/);
-      await waitFor(() => {
-        fireEvent.ionChange(password, 'P@ssword123');
-      });
-      expect(button.disabled).toBeTruthy();
+      render(<LoginPage />);
+      const button = screen.getByTestId(/submit-button/) as HTMLIonButtonElement;
+      const password = screen.getByTestId(/password-input/) as HTMLIonInputElement;
+      fireEvent.ionChange(password, 'P@ssword123');
+      await waitFor(() => expect(button.disabled).toBeTruthy());
     });
 
-    it('is enabled with both an email address and a password', async () => {
-      const { getByTestId } = render(<LoginPage />);
-      const button = getByTestId(/submit-button/) as HTMLIonButtonElement;
-      const email = getByTestId(/email-input/);
-      const password = getByTestId(/password-input/);
-      await waitFor(() => {
-        fireEvent.ionChange(email, 'test@test.com');
-        fireEvent.ionChange(password, 'P@ssword123');
-      });
-      expect(button.disabled).toBeFalsy();
+    it('is enabled with both an email address and password', async () => {
+      render(<LoginPage />);
+      const button = screen.getByTestId(/submit-button/) as HTMLIonButtonElement;
+      const email = screen.getByTestId(/email-input/) as HTMLIonInputElement;
+      const password = screen.getByTestId(/password-input/) as HTMLIonInputElement;
+      fireEvent.ionChange(email, 'test@test.com');
+      fireEvent.ionChange(password, 'P@ssword123');
+      await waitFor(() => expect(button.disabled).toBeFalsy());
     });
   });
 });
@@ -395,37 +385,35 @@ Define tests to account for when error messages should be displayed. Add the fol
 
 ```TypeScript
 describe('error messages', () => {
-  it('starts with no error messages', () => {
-    const { getByTestId } = render(<LoginPage />);
-    const errors = getByTestId(/errors/);
+ it('starts with no error messages', () => {
+    render(<LoginPage />);
+    const errors = screen.getByTestId(/errors/);
     expect(errors).toHaveTextContent('');
   });
 
   it('displays an error if the e-mail address is dirty and empty', async () => {
-    const { getByTestId } = render(<LoginPage />);
-    const errors = getByTestId(/errors/);
-    const email = getByTestId(/email-input/);
-    await waitFor(() => {
-      fireEvent.ionChange(email, 'test@test.com');
-      fireEvent.ionChange(email, '');
-    });
-    expect(errors).toHaveTextContent(/E-Mail Address is required/);
+    render(<LoginPage />);
+    const errors = screen.getByTestId(/errors/);
+    const email = screen.getByTestId(/email-input/) as HTMLIonInputElement;
+    fireEvent.ionChange(email, 'test@test.com');
+    fireEvent.ionChange(email, '');
+    await waitFor(() => expect(errors).toHaveTextContent(/E-Mail Address is required/));
   });
 
   it('displays an error message if the e-mail address has an invalid format', async () => {
-    const { getByTestId } = render(<LoginPage />);
-    const errors = getByTestId(/errors/);
-    // Fill in this test.
-    expect(errors).toHaveTextContent(
-      /E-Mail Address must have a valid format/,
-    );
+    render(<LoginPage />);
+    const errors = screen.getByTestId(/errors/);
+    const email = screen.getByTestId(/email-input/) as HTMLIonInputElement;
+    fireEvent.ionChange(email, 'test@test');
+    await waitFor(() => expect(errors).toHaveTextContent(/E-Mail Address must have a valid format/));
   });
 
   it('displays an error message if the password is dirty and empty', async () => {
-    const { getByTestId } = render(<LoginPage />);
-    const errors = getByTestId(/errors/);
+    render(<LoginPage />);
+    const errors = screen.getByTestId(/errors/);
+    const password = screen.getByTestId(/password-input/) as HTMLIonInputElement;
     // Fill in this test.
-    expect(errors).toHaveTextContent(/Password is required/);
+    await waitFor(() => expect(errors).toHaveTextContent(/Password is required/));
   });
 });
 ```

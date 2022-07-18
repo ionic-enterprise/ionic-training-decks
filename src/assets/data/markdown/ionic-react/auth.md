@@ -18,28 +18,28 @@ In order to test React hooks we need to add additional dependencies to our proje
 
 ```bash
 $ npm install @testing-library/react-hooks
-$ npm install --save-dev react-test-renderer
+$ npm install --save-dev react-test-renderer@^17.0.0
 ```
 
 Remember to terminate and restart any running processes for the new dependencies to be picked up.
 
-## useAuthentication Hook
+## useSession Hook
 
-Add two additional files to `src/core/auth`: `useAuthentication.tsx` and `useAuthentication.test.tsx`. Update `src/core/auth/index.ts` accordingly.
+Add two additional files to `src/core/session`: `useSession.tsx` and `useSession.test.tsx`. Update `src/core/session/index.ts` accordingly.
 
-Populate `useAuthentication.tsx` with the following "interface":
+Populate `useSession.tsx` with the following "interface":
 
-**`src/core/auth/useAuthentication.tsx`**
+**`src/core/session/useSession.tsx`**
 
 ```TypeScript
 import { useContext } from "react";
-import { AuthContext } from "./AuthContext";
+import { SessionContext } from "./SessionProvider";
 
-export const useAuthentication = () => {
-  const { state, dispatch } = useContext(AuthContext);
+export const useSession = () => {
+  const { state, dispatch } = useContext(SessionContext);
 
   if (state === undefined) {
-    throw new Error('useAuthentication must be used with an AuthProvider');
+    throw new Error('useSession must be used within a SessionProvider');
   }
 
   const login = async (): Promise<void> => { };
@@ -55,38 +55,35 @@ export const useAuthentication = () => {
 };
 ```
 
-Do the same for `useAuthentication.test.tsx`:
+Do the same for `useSession.test.tsx`:
 
-**`src/core/auth/useAuthentication.test.tsx`**
+**`src/core/session/useSession.test.tsx`**
 
 ```TypeScript
-import Axios from 'axios';
-import { Storage } from '@capacitor/storage';
+import axios from 'axios';
+import { Preferences } from '@capacitor/preferences';
 import { renderHook, act, cleanup } from '@testing-library/react-hooks';
-import { useAuthentication } from './useAuthentication';
-import { AuthProvider } from './AuthContext';
-import { mockSession } from './__mocks__/mockSession';
+import { useSession } from './useSession';
+import { SessionProvider } from './SessionProvider';
+import { mockSession } from './__fixtures__/mockSession';
 
-jest.mock('@capacitor/storage');
+jest.mock('@capacitor/preferences');
+jest.mock('axios');
+const mockedAxios = axios as jest.Mocked<typeof axios>;
 
-const wrapper = ({ children }: any) => <AuthProvider>{children}</AuthProvider>;
+const wrapper = ({ children }: any) => <SessionProvider>{children}</SessionProvider>;
 
-describe('useAuthentication', () => {
+describe('useSession()', () => {
   beforeEach(() => {
-    Storage.get = jest.fn(async () => ({ value: null }));
-    (Storage.set as any) = jest.fn(async () => ({}));
-    (Axios.post as any) = jest.fn(async () => ({
-      data: {
-        success: true,
-        token: mockSession.token,
-        user: mockSession.user,
-      },
-    }));
+    Preferences.get = jest.fn(async () => ({ value: null }));
+    Preferences.set = jest.fn(async () => void 0);
+    const { token, user } = mockSession;
+    mockedAxios.post.mockResolvedValue({ data: { success: true, token, user } });
   });
 
   describe('login', () => { });
 
-  describe('logout', () => {});
+  describe('logout', () => { })
 
   afterEach(() => jest.restoreAllMocks());
 });
@@ -101,44 +98,30 @@ When a user attempts to sign into our application the following needs to happen:
 3. On success, store the session token in the Capacitor Storage API and dispatch `LOGIN_SUCCESS`
 4. On failure, dispatch `LOGIN_FAILURE`
 
-The unit tests for these scenarios are found below. Add them inside the login `describe()` block in `useAuthentication.test.tsx` in addition to adding any required imports.
+The unit tests for these scenarios are found below. Add them inside the login `describe()` block in `useSession.test.tsx` in addition to adding any required imports.
 
 ```TypeScript
 it('POSTs the login request', async () => {
   const url = `${process.env.REACT_APP_DATA_SERVICE}/login`;
-  const { result, waitForNextUpdate } = renderHook(
-    () => useAuthentication(),
-    { wrapper },
-  );
+  const { result, waitForNextUpdate } = renderHook(() => useSession(), { wrapper });
   await waitForNextUpdate();
   await act(() => result.current.login('test@test.com', 'P@ssword!'));
-  expect(Axios.post).toHaveBeenCalledTimes(1);
-  expect(Axios.post).toHaveBeenCalledWith(url, {
-    username: 'test@test.com',
-    password: 'P@ssword!',
-  });
+  expect(mockedAxios.post).toHaveBeenCalledTimes(1);
+  const [username, password] = ['test@test.com', 'P@ssword!'];
+  expect(mockedAxios.post).toHaveBeenCalledWith(url, { username, password });
 });
 
 describe('on success', () => {
   it('stores the token in storage', async () => {
-    const { result, waitForNextUpdate } = renderHook(
-      () => useAuthentication(),
-      { wrapper },
-    );
+    const { result, waitForNextUpdate } = renderHook(() => useSession(), { wrapper });
     await waitForNextUpdate();
     await act(() => result.current.login('test@test.com', 'P@ssword!'));
-    expect(Storage.set).toHaveBeenCalledTimes(1);
-    expect(Storage.set).toHaveBeenCalledWith({
-      key: 'auth-token',
-      value: mockSession.token,
-    });
+    expect(Preferences.set).toHaveBeenCalledTimes(1);
+    expect(Preferences.set).toHaveBeenCalledWith({ key: 'auth-token', value: mockSession.token });
   });
 
   it('sets the session', async () => {
-    const { result, waitForNextUpdate } = renderHook(
-      () => useAuthentication(),
-      { wrapper },
-    );
+    const { result, waitForNextUpdate } = renderHook(() => useSession(), { wrapper });
     await waitForNextUpdate();
     await act(() => result.current.login('test@test.com', 'P@ssword!'));
     expect(result.current.session).toEqual(mockSession);
@@ -146,17 +129,10 @@ describe('on success', () => {
 });
 
 describe('on failure', () => {
-  beforeEach(() => {
-    (Axios.post as any) = jest.fn(async () => ({
-      data: { success: false },
-    }));
-  });
+  beforeEach(() => mockedAxios.post.mockResolvedValue({ data: { success: false } }));
 
-  it('sets the error', async () => {
-    const { result, waitForNextUpdate } = renderHook(
-      () => useAuthentication(),
-      { wrapper },
-    );
+  it('sets an error', async () => {
+    const { result, waitForNextUpdate } = renderHook(() => useSession(), { wrapper });
     await waitForNextUpdate();
     await act(() => result.current.login('test@test.com', 'P@ssword!'));
     expect(result.current.error).toEqual('Failed to log in.');
@@ -166,9 +142,9 @@ describe('on failure', () => {
 
 Now let's wire up the function. The `login()` function will be partially provided to you. Your **challenge** is to complete it's implementation and make the tests pass.
 
-Consult the <a href="https://capacitorjs.com/docs/apis/storage" target="_blank">Capacitor Storage API</a> documentation if you get stuck. If you need assistance, please let your instructor know.
+Consult the <a href="https://capacitorjs.com/docs/apis/preferences" target="_blank">Capacitor Preferences API</a> documentation if you get stuck. If you need assistance, please let your instructor know.
 
-**`src/core/auth/useAuthentication.tsx`**
+**`src/core/session/useSession.tsx`**
 
 ```TypeScript
 ...
@@ -176,14 +152,14 @@ const login = async (username: string, password: string): Promise<void> => {
   // 1. Dispatch the LOGIN action
   try {
     const url = `${process.env.REACT_APP_DATA_SERVICE}/login`;
-    const { data } = await Axios.post(url, { username, password });
+    const { data } = await axios.post(url, { username, password });
 
     if (!data.success) throw new Error('Failed to log in.');
 
-    // 2. Store data.token in Capacitor Storage using 'auth-token' as the key
+    // 2. Store data.token in Capacitor Preferences using 'auth-token' as the key
     const session = { token: data.token, user: data.user };
     // 3. Dispatch the LOGIN_SUCCESS action
-  } catch (error) {
+  } catch (error: any) {
     // 4. Dispatch the LOGIN_FAILURE action. 'error.message' should be sent as the error parameter
   }
 };
@@ -201,65 +177,50 @@ When the user wants to sign out of the application the following must occur:
 
 The process followed for `login()` will be used for the `logout()` method. You will first be given the unit tests for the logout `describe()` block then a partial implementation of the `logout()` method to complete.
 
-Replace the existing logout `describe()` block in `useAuthentication.test.tsx` with the following:
+Replace the existing logout `describe()` block in `useSession.test.tsx` with the following:
 
 ```TypeScript
 describe('logout', () => {
   beforeEach(() => {
-    (Storage.remove as any) = jest.fn(async () => ({}));
-    Storage.get = jest.fn(async () => ({ value: mockSession.token }));
-    (Axios.get as any) = jest.fn(async () => ({ data: mockSession.user }));
+    Preferences.remove = jest.fn(async () => void 0);
+    Preferences.get = jest.fn(async () => ({ value: mockSession.token }));
+    mockedAxios.get.mockResolvedValue({ data: mockSession.user });
   });
 
   it('POSTs the logout request', async () => {
     const url = `${process.env.REACT_APP_DATA_SERVICE}/logout`;
     const headers = { Authorization: 'Bearer ' + mockSession.token };
-    const { result, waitForNextUpdate } = renderHook(
-      () => useAuthentication(),
-      { wrapper },
-    );
+    const { result, waitForNextUpdate } = renderHook(() => useSession(), { wrapper });
     await waitForNextUpdate();
     await act(() => result.current.logout());
-    expect(Axios.post).toHaveBeenCalledTimes(1);
-    expect(Axios.post).toHaveBeenCalledWith(url, null, { headers });
+    expect(mockedAxios.post).toHaveBeenCalledTimes(1);
+    expect(mockedAxios.post).toHaveBeenCalledWith(url, null, { headers });
   });
 
   describe('on success', () => {
     it('removes the token from storage', async () => {
-      const { result, waitForNextUpdate } = renderHook(
-        () => useAuthentication(),
-        { wrapper },
-      );
+      const { result, waitForNextUpdate } = renderHook(() => useSession(), { wrapper });
       await waitForNextUpdate();
       await act(() => result.current.logout());
-      expect(Storage.remove).toHaveBeenCalledTimes(1);
-      expect(Storage.remove).toHaveBeenCalledWith({ key: 'auth-token' });
+      expect(Preferences.remove).toHaveBeenCalledTimes(1);
+      expect(Preferences.remove).toHaveBeenCalledWith({ key: 'auth-token' });
     });
 
     it('clears the session', async () => {
-      const { result, waitForNextUpdate } = renderHook(
-        () => useAuthentication(),
-        { wrapper },
-      );
+      const { result, waitForNextUpdate } = renderHook(() => useSession(), { wrapper });
       await waitForNextUpdate();
-      expect(result.current.session).toEqual(mockSession);
       await act(() => result.current.logout());
       expect(result.current.session).toBeUndefined();
     });
   });
 
   describe('on failure', () => {
-    it('sets the error', async () => {
-      const { result, waitForNextUpdate } = renderHook(
-        () => useAuthentication(),
-        { wrapper },
-      );
-      await waitForNextUpdate();
-      await act(() => result.current.login('test@test.com', 'P@ssword!'));
-      expect(result.current.session).toEqual(mockSession);
-      (Axios.post as any) = jest.fn(async () => {
+    it('sets an error', async () => {
+      mockedAxios.post.mockImplementationOnce(() => {
         throw new Error('Failed to log out');
       });
+      const { result, waitForNextUpdate } = renderHook(() => useSession(), { wrapper });
+      await waitForNextUpdate();
       await act(() => result.current.logout());
       expect(result.current.error).toEqual('Failed to log out');
     });
@@ -267,7 +228,7 @@ describe('logout', () => {
 });
 ```
 
-The partial `logout()` implementation for `useAuthentication.tsx` is below. Consult the <a href="https://capacitorjs.com/docs/apis/storage" target="_blank">Capacitor Storage API</a> documentation if you get stuck. If you need assistance, please let your instructor know.
+The partial `logout()` implementation for `useSession.tsx` is below. Consult the <a href="https://capacitorjs.com/docs/apis/preferences" target="_blank">Capacitor Preferences API</a> documentation if you get stuck. If you need assistance, please let your instructor know.
 
 ```TypeScript
 const logout = async (): Promise<void> => {
@@ -276,7 +237,7 @@ const logout = async (): Promise<void> => {
       const url = `${process.env.REACT_APP_DATA_SERVICE}/logout`;
       const headers = { Authorization: 'Bearer ' + state.session!.token };
 
-      await Axios.post(url, null, { headers });
+      await axios.post(url, null, { headers });
       // 2. Remove 'auth-token' from Capacitor Storage
       // 3. Dispatch the LOGOUT_SUCCESS action
     } catch (error) {
@@ -291,38 +252,20 @@ Now that our hook is complete, it's start to let our pages consume it. We'll sta
 
 ### Wiring up Login
 
-Open `src/login/LoginPage.tsx` and take a look at the button that handles submission. Currently, it only prints out the form data to the console - and the data isn't typed either!
+Open `src/login/LoginPage.tsx` and take a look at the button that handles submission. Currently, it only prints out the form data to the console.
 
-Let's type our form data. Make the following modifications where we destructure `useForm()`:
-
-**`src/login/LoginPage.tsx`**
+Let's import our `useSession()` hook so that we can call our login function:
 
 ```TypeScript
 ...
 const LoginPage: React.FC = () => {
-  const {
-    handleSubmit,
-    control,
-    formState: { errors, isDirty, isValid },
-  } = useForm<{
-    email: string;
-    password: string;
-  }>({ mode: 'onTouched' });
-  ...
-};
-export default LoginPage;
-```
-
-Now we need to import our `useAuthentication()` hook so that we can call our login function:
-
-```TypeScript
-...
-const LoginPage: React.FC = () => {
-  const { login } = useAuthentication();
+  const { login } = useSession();
+  const history = useHistory();
   const { handleSubmit, control, formState: {...}} = useForm<{...}>({...});
 
-  const handleLogin = async (data: { email: string; password: string }) => {
+  const handleLogin = async (data: LoginInputs) => {
     await login(data.email, data.password);
+    history.replace('/tea');
   };
 
   return (
@@ -342,22 +285,18 @@ const LoginPage: React.FC = () => {
 export default LoginPage;
 ```
 
-Finally, we want to redirect the user to the tea page after they have signed in. However, if the sign in failed, we should also print the `error` from `useAuthentication()`. To programmatically redirect the user, we will need to pull in the `useHistory()` hook provided by React Router.
+If the sign in failed, we should print the `error` from `useSession()`. In order to programmatically redirect a signed-in user who navigates to `http://localhost:8100/login` we will need to add a `useEffect`.
 
 Make the following changes:
 
 ```TypeScript
 ...
-import { useHistory } from 'react-router';
-
 const LoginPage: React.FC = () => {
-  const { login, session, error } = useAuthentication();
+  const { login, session, error } = useSession();
   const history = useHistory();
   ...
 
-  useEffect(() => {
-    session && history.replace('/tea');
-  }, [session, history]);
+  useEffect(() => session && history.replace('/tea'), [history, session]);
 
   return (
     ...
@@ -387,11 +326,11 @@ Let's go ahead and write the logic to handle signing out:
 ```TypeScript
 ...
 import { useHistory } from 'react-router';
-import { useAuthentication } from '../core/auth';
+import { useSession } from '../core/auth';
 ...
 
 const TeaPage: React.FC = () => {
-  const { logout } = useAuthentication();
+  const { logout } = useSession();
   const history = useHistory();
 
   const handleLogout = async () => {
@@ -410,79 +349,48 @@ export default TeaPage;
 
 Now we can sign in and out of our application, but there is one problem left. Unauthenticated users can still view the tea page. Ideally, they should be redirected to the login page to login first.
 
-There's a few ways we could approach this. We could use `useAuthentication()` to check the authentication `status` on the tea page, and navigate the user to the login page if they aren't signed in - but that won't scale as we add more pages to our application. We could check the status on the main `<App />` component and redirect the user to the login page there - but that would cause unneccesary component re-renders.
+There's a few ways we could approach this. We could use `useSession()` to check the authentication `status` on the tea page, and navigate the user to the login page if they aren't signed in - but that won't scale as we add more pages to our application. We could check the status on the main `<App />` component and redirect the user to the login page there - but that would cause unneccesary component re-renders.
 
 What if we "extended" the `Route` component and added in logic to check the user's current authentication status?
 
 ### `PrivateRoute` Component
 
-Start by creating a new file in `src/core/auth` named `PrivateRoute.tsx`:
+Start by creating a new file in `src/core/session` named `PrivateRoute.tsx`:
 
-**`src/core/auth/PrivateRoute.tsx`**
+**`src/core/session/PrivateRoute.tsx`**
 
 ```TypeScript
-import React from 'react';
-import { Route, Redirect, RouteProps } from 'react-router';
-import { useAuthentication } from './useAuthentication';
+import { Redirect } from 'react-router';
+import { useSession } from './useSession';
 
-export const PrivateRoute: React.FC = () => {
-  const { session } = useAuthentication();
+export const PrivateRoute = ({ children }: any) => {
+  const { session } = useSession();
 
-  return <Route render={() => <Redirect to="/login" />} />;
+  if (!session) {
+    return <Redirect to="/login" />;
+  }
+
+  return children;
 };
 ```
 
-Here we are getting the current session of the user and using `render` to redirect them to the login page, satisfying the case where the user is unauthenticated.
-
-The `Route` component can take in additional props; if we want to treat our `ProtectedRoute` component as if it extends `Route` we should accommodate those props too:
-
-```TypeScript
-...
-export const PrivateRoute: React.FC<RouteProps> = ({ ...rest }) => {
-  const { status } = useAuthentication();
-
-  return <Route {...rest} render={() => <Redirect to="/login" />} />;
-};
-```
-
-We'll use the spread operator to set the `rest` of props passed in to `PrivateRoute` on the inner `Route` component, which makes our component comparable to subclassing in OOP (i.e., `PrivateRoute extends Route`).
-
-Now we just need a way to render pages when the user is authenticated. We should create a prop named `component`:
-
-```TypeScript
-...
-interface PrivateRouteProps extends RouteProps {
-  component: React.ComponentType<any>;
-}
-
-export const PrivateRoute: React.FC<PrivateRouteProps> = ({
-  component: Component,
-  ...rest
-}) => {
-  const { session } = useAuthentication();
-
-  return (
-    <Route
-      {...rest}
-      render={props => session ? <Component {...props} /> : <Redirect to="/login" /> }
-    />
-  );
-};
-```
-
-Don't forget to update the barrel file for `src/core/auth` and let's start using the component.
+Don't forget to update the barrel file for `src/core/session` and let's start using the component.
 
 ### Using `PrivateRoute`
 
 Using our `PrivateRoute` component is trivial, it's a drop-in replacement for `Route`.
 
-Open `src/App.tsx` and add the import for `PrivateRoute` then replace the `Route` component for the `/tea` path with the following line:
+Open `src/App.tsx` and add wrap `<TeaPage />` with our `<PrivateRoute />` component:
 
 ```JSX
-<PrivateRoute exact path="/tea" component={TeaPage} />
+<Route exact path="/tea">
+  <PrivateRoute>
+    <TeaPage />
+  </PrivateRoute>
+</Route>
 ```
 
-That's literally it. Head to Chrome, sign out of the application you have to and try to navigate to the tea page by modifying the URL bar. We'll always be taken to the login page unless we are logged in.
+That's it. Head to Chrome, sign out of the application you have to and try to navigate to the tea page by modifying the URL bar. We'll always be taken to the login page unless we are logged in.
 
 ## Conclusion
 
