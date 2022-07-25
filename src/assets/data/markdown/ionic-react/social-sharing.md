@@ -68,27 +68,6 @@ First, the Capacitor Social Sharing API needs to be mocked in our unit test.
 
 Add a `describe()` block for 'sharing a note' as a sibling to the 'initialization' describe block, with the following tests:
 
-**`src/tasting-notes/TastingNotesPage.test.tsx`**
-
-```TypeScript
-
-
-```
-
-Update the `beforeEach()` block in `TastingNotesPage.test.tsx` to the following:
-
-```TypeScript
-...
-jest.mock('@capacitor/share');
-...
-beforeEach(() => {
-  mockGetNotes = jest.fn(async () => mockNotes);
-  Share.share = jest.fn();
-});
-```
-
-Next, add a `describe()` block for 'sharing a note' as a sibling to the 'initialization', 'add a new note', and 'update an existing note' describe blocks.
-
 ```TypeScript
 describe('sharing a note', () => {
   beforeEach(() => (Share.share = jest.fn()));
