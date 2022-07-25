@@ -144,10 +144,7 @@ Insert the `<AuthInterceptorProvider />` component between `<SessionProvider>` a
 
 ## Tea Data Provider
 
-The backend data service has two endpoints to be leveraged for the Tea feature:
-
-- An endpoint that returns the entire list of teas
-- An endpoint that returns data for a single tea item
+The backend data service has an endpoint that returns the entire list of teas.
 
 Create two new files in `src/tea` named `TeaProvider.tsx` and `TeaProvider.test.tsx`.
 
@@ -163,13 +160,9 @@ import { Tea } from '../shared/models';
 export const TeaContext = createContext<{
   teas: Tea[];
   getTeas: () => Promise<void>;
-  getTeaById: (id: number) => Promise<Tea | undefined>;
 }>({
   teas: [],
    getTeas: () => {
-    throw new Error('Method not implemented');
-  },
-  getTeaById: () => {
     throw new Error('Method not implemented');
   },
 });
@@ -180,19 +173,17 @@ export const TeaProvider: React.FC = ({ children }) => {
 
   const getTeas = async () => {};
 
-  const getTeaById = async (id: number) => undefined;
-
-  return <TeaContext.Provider value={{ teas, getTeaById }}>{children}</TeaContext.Provider>;
+  return <TeaContext.Provider value={{ teas }}>{children}</TeaContext.Provider>;
 };
 
 export const useTea = () => {
-  const { teas, getTeas, getTeaById } = useContext(TeaContext);
+  const { teas, getTeas } = useContext(TeaContext);
 
   if (teas === undefined) {
     throw new Error('useTea must be used within a TeaProvider');
   }
 
-  return { teas, getTeas, getTeaById };
+  return { teas, getTeas };
 };
 ```
 
@@ -216,8 +207,6 @@ const wrapper = ({ children }: any) => <TeaProvider>{children}</TeaProvider>;
 
 describe('useTea()', () => {
   describe('get all teas', () => {});
-
-  describe('get a specific tea', () => {});
 
   afterEach(() => jest.restoreAllMocks());
 });
@@ -304,17 +293,17 @@ Let's place some setup logic for our "get all teas" tests in `TeaProvider.test.t
 ```TypeScript
 ...
 describe('useTea()', () => {
-describe('get all teas', () => {
-  beforeEach(() => mockedAxios.get.mockResolvedValue({ data: resultTeas() }));
+  describe('get all teas', () => {
+    beforeEach(() => mockedAxios.get.mockResolvedValue({ data: resultTeas() }));
 
-  it('GETs the teas from the backend', async () => {
-    const { result } = renderHook(() => useTea(), { wrapper });
-    await act(() => result.current.getTeas());
-    expect(mockedAxios.get).toHaveBeenCalledTimes(1);
-    expect(mockedAxios.get).toHaveBeenCalledWith('/tea-categories');
+    it('GETs the teas from the backend', async () => {
+      const { result } = renderHook(() => useTea(), { wrapper });
+      await act(() => result.current.getTeas());
+      expect(mockedAxios.get).toHaveBeenCalledTimes(1);
+      expect(mockedAxios.get).toHaveBeenCalledWith('/tea-categories');
+    });
   });
-});
-...
+  ...
 });
 ```
 
@@ -369,79 +358,6 @@ Then, update `getTeas` like so:
 ```
 
 Our tests should now pass.
-
-### Getting a Specific Tea
-
-Start by filling out the describe block for "get a specific tea":
-
-**`src/tea/TeaProvider.test.tsx`**
-
-```TypeScript
-...
-describe('get a specific tea', () => {
-  beforeEach(() => mockedAxios.get.mockResolvedValue({ data: resultTeas()[0] }));
-
-  it('GETs the specific tea from the backend', async () => {
-    const { result } = renderHook(() => useTea(), { wrapper });
-    await result.current.getTeaById(1);
-    expect(mockedAxios.get).toHaveBeenCalledTimes(1);
-    expect(mockedAxios.get).toHaveBeenCalledWith('/tea-categories/1');
-  });
-
-  it('returns the specific tea', async () => {
-    const { result } = renderHook(() => useTea(), { wrapper });
-    await result.current.getTeaById(1);
-  });
-});
-```
-
-**Challenge:** Your next challenge is to implement `getTeaById()` to make the test pass. The URL will be `/tea-categories/${id}`.
-
-Let's refactor the common bits out:
-
-**`src/tea/TeaProvider.test.tsx`**
-
-```TypeScript
-...
-const getTeas = async () => {
-  const { data } = await api.get('/tea-categories');
-  const teas = data.map((tea: Tea) => fromJsonToTea(tea));
-  setTeas(teas);
-};
-
-const getTeaById = async (id: number) => {
-  const { data } = await api.get(`/tea-categories/${id}`);
-  return fromJsonToTea(data);
-};
-
-const fromJsonToTea = (obj: any): Tea => ({ ...obj, image: require(`../assets/images/${images[obj.id - 1]}.jpg`) });
-...
-```
-
-There's one final step we should take: wrapping the `getTeas()` and `getTeaById()` methods in a `useCallback` hook:
-
-```TypeScript
-const getTeas = useCallback(async () => {
-  const { data } = await api.get('/tea-categories');
-  const teas = data.map((tea: Tea) => fromJsonToTea(tea));
-  setTeas(teas);
-}, [api]);
-
-const getTeaById = useCallback(async (id: number) => {
-  const { data } = await api.get(`/tea-categories/${id}`);
-  return fromJsonToTea(data);
-}, [api]);
-```
-
-We will be running these methods within `useEffect` hooks, making them part of a dependency list. Before we wrapped these methods with the `useCallback` hook these methods are not referentially equal to themselves.
-
-This would cause the following `useEffect` to run infinitely:
-
-```TypeScript
-useEffect(() => { getTeas(); }, [getTeas]);
-```
-
-`useCallback` allows React to memoize the functions, making `getTeas === getTeas`, and eliminating the problem.
 
 ### Supplying the Provider
 

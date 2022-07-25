@@ -17,7 +17,7 @@ Start by creating a new folder in `src/shared` named `components` and add a barr
 
 ## Create the Rating Component
 
-Let's create a subfolder within `src/shared/components` called `rating`. Inside this folder, create the following files: `Rating.tsx`, `Rating.test.tsx`, and `Rating.css`.
+Inside `src/shared/components`, create the following files: `Rating.tsx`, `Rating.test.tsx`, and `Rating.css`.
 
 Fill `Rating.tsx` with the following boilerplate code:
 
@@ -99,13 +99,9 @@ import './Rating.css';
 
 export const Rating: React.FC = () => {
   return (
-    <div className="rating">
-      {[1, 2, 3, 4, 5].map((_, idx) => (
-        <IonIcon
-          data-testid={`Rate ${num} stars`}
-          key={idx}
-          icon={star}
-        />
+    <div className="rating" data-testid="rating">>
+      {[1, 2, 3, 4, 5].map((num, idx) => (
+        <IonIcon data-testid={`Rate ${num} stars`} key={idx} icon={star} />
       ))}
     </div>
   );
@@ -117,19 +113,17 @@ export const Rating: React.FC = () => {
 Change the component's markup so that the number of filled in starts matches the initial rating and the rest are outlined stars:
 
 ```JSX
-{[1, 2, 3, 4, 5].map((num, idx) => (
-  <IonIcon
-    data-testid={`Rate ${num} stars`}
-    key={idx}
-    icon={num <= rating ? star : starOutline}
-  />
-))}
-};
+ <div className="rating" data-testid="rating">>
+  {[1, 2, 3, 4, 5].map((num, idx) => (
+    <IonIcon data-testid={`Rate ${num} stars`} key={idx} icon={num <= rating ? star : starOutline} />
+  ))}
+</div>
 ```
 
 Add an `onClick` handler that will change the rating when the user clicks on a star:
 
 ```JSX
+ <div className="rating" data-testid="rating">>
   {[1, 2, 3, 4, 5].map((num, idx) => (
     <IonIcon
       data-testid={`Rate ${num} stars`}
@@ -138,6 +132,7 @@ Add an `onClick` handler that will change the rating when the user clicks on a s
       onClick={() => setRating(num)}
     />
   ))}
+</div>
 ```
 
 Try clicking different rating values. So far so good!
@@ -183,15 +178,7 @@ interface RatingProps {
   disabled?: boolean;
   onRatingChange: (rating: number) => any;
 }
-
-export const Rating: React.FC<RatingProps> = ({
-  initialRating = 0,
-  disabled = false,
-  onRatingChange
-}) => {
-  const [rating, setRating] = useState<number>(0);
-  ...
-};
+...
 ```
 
 The only prop that the consumer _needs_ to provide is `onRatingChange`. Default values for the optional props `initialRating` and `disabled` are provided.
@@ -202,12 +189,8 @@ Update the component to use `RatingProps`:
 import { useEffect, useState } from 'react';
 ...
 
-export const Rating: React.FC<RatingProps> = ({
-  initialRating = 0,
-  disabled = false,
-  onRatingChange,
-}) => {
-  const [rating, setRating] = useState<number>(0);
+export const Rating: React.FC<RatingProps> = ({ initialRating = 0, disabled = false, onRatingChange }) => {
+  const [rating, setRating] = useState<number>(1);
 
   useEffect(() => setRating(initialRating), [initialRating]);
 
@@ -217,7 +200,7 @@ export const Rating: React.FC<RatingProps> = ({
   };
 
   return (
-    <div className="rating" style={{ opacity: disabled ? 0.25 : 1 }}>
+    <div className="rating" style={{ opacity: disabled ? 0.25 : 1 }} data-testid="rating">
       {[1, 2, 3, 4, 5].map((num, idx) => (
         <IonIcon
           data-testid={`Rate ${num} stars`}
@@ -253,7 +236,7 @@ describe('<Rating />', () => {
 Fill out the `when enabled` describe block with the following:
 
 ```TypeScript
-  ...
+...
   describe('when enabled', () => {
     let props: any;
 
@@ -265,38 +248,29 @@ Fill out the `when enabled` describe block with the following:
     });
 
     it('sets the opacity to 1', () => {
-      const { container } = render(<Rating {...props} />);
-      const rating = container.querySelector('.rating') as HTMLDivElement;
+      render(<Rating {...props} />);
+      const rating = screen.getByTestId(/rating/) as HTMLDivElement;
       expect(rating.style.opacity).toEqual('1');
     });
 
     it('sets the rating on click', async () => {
-      const { getByTestId } = render(<Rating {...props} />);
-      const fourStars = getByTestId('Rate 4 stars');
+      render(<Rating {...props} />);
+      const fourStars = screen.getByTestId(/Rate 4 stars/);
       fireEvent.click(fourStars);
-      expect(props.onRatingChange).toHaveBeenCalledWith(4);
-    });
-
-    it('calls the change handler on click', async () => {
-      const { getByTestId } = render(<Rating {...props} />);
-      const fourStars = getByTestId('Rate 4 stars');
-      fireEvent.click(fourStars);
-      expect(props.onRatingChange).toHaveBeenCalledTimes(1);
+      await waitFor(() => expect(props.onRatingChange).toHaveBeenCalledTimes(1));
+      expect(props.onRatingChange).toBeCalledWith(4);
     });
   });
-  ...
+...
 ```
 
 Then the "when disabled" block:
 
 ```TypeScript
-  ...
+...
   describe('when disabled', () => {
     let props: any;
-
-    beforeEach(() => {
-      props = { onRatingChange: jest.fn(), disabled: true };
-    });
+    beforeEach(() => (props = { onRatingChange: jest.fn(), disabled: true }));
 
     it('renders consistently', () => {
       const { asFragment } = render(<Rating {...props} />);
@@ -304,24 +278,17 @@ Then the "when disabled" block:
     });
 
     it('sets the opacity to 0.25', () => {
-      const { container } = render(<Rating {...props} />);
-      const rating = container.querySelector('.rating') as HTMLDivElement;
+      render(<Rating {...props} />);
+      const rating = screen.getByTestId(/rating/) as HTMLDivElement;
       expect(rating.style.opacity).toEqual('0.25');
     });
-
-    it('does not call the change handler on click', () => {
-      const { getByTestId } = render(<Rating {...props} />);
-      const fourStars = getByTestId('Rate 4 stars');
-      fireEvent.click(fourStars);
-      expect(props.onRatingChange).not.toHaveBeenCalled();
-    });
   });
-  ...
+...
 ```
 
 ## Saving the Rating
 
-We need a way to save and retrieve the rating of each tea supplied by the user. Our backend data service does not currently support saving/storing tea ratings so we will store this data locally using the Capacitor Storage API.
+We need a way to save and retrieve the rating of each tea supplied by the user. Our backend data service does not currently support saving/storing tea ratings so we will store this data locally using the Capacitor Preferences API.
 
 ### Update the Tea Model
 
@@ -341,7 +308,7 @@ export interface Tea {
 
 ### Get the Rating
 
-Add ratings to each of the `expectedTeas` items in `src/tea/__mocks__/mockTea.ts`.
+Add ratings to each of the `expectedTeas` items in `src/tea/__fixtures__/mockTea.ts`.
 
 **Example:**
 
@@ -349,7 +316,7 @@ Add ratings to each of the `expectedTeas` items in `src/tea/__mocks__/mockTea.ts
 {
   id: 1,
   name: 'Green',
-  image: require(`../../assets/images/green.jpg`).default,
+  image: require(`../../assets/images/green.jpg`),
   description: 'Green tea description.',
   rating: 4,
 }
@@ -371,31 +338,27 @@ const resultTeas = () => {
 };
 ```
 
-Then update the setup code in order to mock the `Storage` Capacitor API. When mocking the `get()` function, the return values will need to match however you set the ratings in the test data:
+Then update the setup code in order to mock the `Preferences` Capacitor API. When mocking the `get()` function, the return values will need to match however you set the ratings in the test data:
 
-**`src/tea/useTea.test.tsx`**
+**`src/tea/TeaProvider.test.tsx`**
 
 ```TypeScript
 ...
-jest.mock('@capacitor/storage');
+jest.mock('@capacitor/preferences');
 ...
-describe('useTea', () => {
-   beforeEach(() => {
-    (Storage.get as any) = jest.fn(({ key }: { key: string }) => {
-      switch (key) {
-        case 'rating1':
-          return Promise.resolve({ value: 1 });
+describe('useTea()', () => {
+  beforeEach(() => (Preferences.get = jest.fn(async ({ key }) => {
+    switch (key) {
+      case 'rating1':
+        return { value: '1' };
         // Repeat for all expectedTeas with a non-zero rating.
         // The key is `rating${id}`
-        default:
-          return Promise.resolve();
-      }
-    });
-  });
+      default:
+        return { value: '0' };
+    }
+  })));
 
-  describe('get all teas', () => {
-    ...
-  });
+  describe('get all teas', () => { ... });
   ...
 });
 ```
@@ -404,55 +367,38 @@ The unit tests for `useTea` now fail. We will update the hook to make them pass.
 
 First update `fromJsonToTea()`:
 
-**`src/tea/useTea.tsx`**
+**`src/tea/TeaProvider.tsx`**
 
 ```TypeScript
-  ...
-  const fromJsonToTea = async (obj: any): Promise<Tea> => {
-    const rating = await Storage.get({ key: `rating${obj.id}` });
-    return {
-      ...obj,
-      image: require(`../assets/images/${images[obj.id - 1]}.jpg`).default,
-      rating: parseInt(rating?.value || '0', 10),
-    };
+const fromJsonToTea = async (obj: any): Promise<Tea> => {
+  const rating = await Preferences.get({ key: `rating${obj.id}` });
+  return {
+    ...obj,
+    image: require(`../assets/images/${images[obj.id - 1]}.jpg`),
+    rating: parseInt(rating?.value || '0', 10),
   };
-  ...
+};
 ```
 
-Next update `getTeaById()`:
+Then update `getTeas()`:
 
 ```TypeScript
-const getTeaById = useCallback(
-  async (id: number): Promise<Tea> => {
-    const url = `/tea-categories/${id}`;
-    const { data } = await instance.get(url);
-    return await fromJsonToTea(data);
-  },
-  [instance],
-);
-```
-
-Finally update `getTeas()`:
-
-```TypeScript
-const getTeas = useCallback(async (): Promise<Tea[]> => {
-  const url = `/tea-categories`;
-  const { data } = await instance.get(url);
-  return Promise.all(
-    data.map(async (item: any) => await fromJsonToTea(item)),
-  );
-}, [instance]);
+const getTeas = useCallback(async () => {
+  const { data } = await api.get('/tea-categories');
+  const teas = await Promise.all(data.map(async (item: any) => await fromJsonToTea(item)));
+  setTeas(teas);
+}, [api]);
 ```
 
 Now all our tests pass.
 
-### Saving to Storage
+### Saving to Preferences
 
 Saving is pretty straightforward. Our `saveTea()` method will take a full `Tea` model but we will only save the rating, since the tea item itself is currently read-only.
 
 Start by adding the describe block for "save tea":
 
-**`src/tea/useTea.test.tsx`**
+**`src/tea/TeaProvider.test.tsx`**
 
 ```TypeScript
 ...
@@ -463,44 +409,60 @@ describe('useTea', () => {
   });
 
   describe('save tea', () => {
-    beforeEach(() => (Storage.set as any) = jest.fn());
+    beforeEach(() => {
+      mockedAxios.get.mockResolvedValue({ data: resultTeas() });
+      Preferences.set = jest.fn();
+    });
 
     it('saves the rating', async () => {
-      const tea = { ...expectedTeas[4] };
-      tea.rating = 4
-      const { result } = renderHook(() => useTea());
-      await act(async () => {
-        await result.current.saveTea(tea);
-      });
-      expect(Storage.set).toHaveBeenCalledTimes(1);
-      expect(Storage.set).toHaveBeenCalledWith({
-        key: 'rating5',
-        value: '4',
-      });
+      const tea = { ...expectedTeas[4], rating: 1 };
+      const { result, waitForNextUpdate } = renderHook(() => useTea(), { wrapper });
+      await waitForNextUpdate();
+      await act(async () => await result.current.saveTea(tea));
+      expect(Preferences.set).toHaveBeenCalledTimes(1);
+      expect(Preferences.set).toHaveBeenCalledWith({ key: 'rating5', value: '1' });
+      expect(result.current.teas.find((t) => t.id === tea.id)?.rating).toEqual(1);
     });
   });
   ...
 });
 ```
 
-To make this test pass, add a new method `saveTea()` to the `useTea` hook:
+To make this test pass, first we need to update `TeaContext`:
 
-**`src/tea/useTea.tsx`**
+**`src/tea/TeaProvider.tsx`**
 
 ```TypeScript
-...
-export const useTea = () => {
-  ...
-  const saveTea = async (tea: Tea): Promise<void> => {
-    return Storage.set({
-      key: `rating${tea.id}`,
-      value: tea.rating?.toString() || '0',
-    });
-  };
-  ...
-  return { getTeas, getTeaById, saveTea };
+export const TeaContext = createContext<{
+  teas: Tea[];
+  getTeas: () => Promise<void>;
+  saveTea: (tea: Tea) => Promise<void>;
+}>({
+  teas: [],
+  getTeas: () => {
+    throw new Error('Method not implemented');
+  },
+  saveTea: () => {
+    throw new Error('Method not implemented');
+  },
+});
+```
+
+Then, we need to add and export the `saveTea()` function within `<TeaProvider />`:
+
+```TypeScript
+const saveTea = async (tea: Tea): Promise<void> => {
+  const rating = tea.rating?.toString() || '0';
+  Preferences.set({ key: `rating${tea.id}`, value: rating });
+  const idx = teas.findIndex((t) => t.id === tea.id);
+  teas[idx] = tea;
+  setTeas(teas);
 };
 ```
+
+Finally, we need to destructure then return this function within the `useTea()` hook.
+
+**Challenge:** Make the test pass by updating the `useTea()` hook.
 
 ## Update the Details Page
 
@@ -518,7 +480,7 @@ Go ahead and make the following changes to the tea details page.
 ...
 const TeaDetailsPage: React.FC = () => {
   ...
-  const { getTeaById, saveTea } = useTea();
+  const { teas, saveTea } = useTea();
   ...
   return (
     ...

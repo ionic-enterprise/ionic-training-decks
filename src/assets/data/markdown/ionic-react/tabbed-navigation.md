@@ -84,16 +84,22 @@ Create a new file `src/Tabs.tsx` and fill it in with the following code:
 **`src/Tabs.tsx`**
 
 ```TypeScript
-import { RouteComponentProps } from 'react-router';
+import React from 'react';
+import { Redirect, Route, useRouteMatch } from 'react-router';
 import { IonRouterOutlet, IonTabBar, IonTabs } from '@ionic/react';
 
-const Tabs: React.FC<RouteComponentProps> = ({ match }) => (
-  <IonTabs>
-    <IonRouterOutlet></IonRouterOutlet>
-    <IonTabBar slot="bottom"></IonTabBar>
-  </IonTabs>
-);
+const Tabs: React.FC = () => {
+  const { url } = useRouteMatch();
+
+  return (
+    <IonTabs>
+      <IonRouterOutlet></IonRouterOutlet>
+      <IonTabBar slot="bottom"></IonTabBar>
+    </IonTabs>
+  );
+};
 export default Tabs;
+
 ```
 
 ### Routes
@@ -101,10 +107,22 @@ export default Tabs;
 Open `App.tsx` and replace the routes inside `<IonRouterOutlet>` with the following:
 
 ```JSX
-<Route exact path="/login" component={LoginPage} />
-<PrivateRoute path="/tabs" component={Tabs} />
-<Route exact path="/" render={() => <Redirect to="/login" />} />
+<Route exact path="/login">
+  <LoginPage />
+</Route>
+<Route path="/tabs">
+  <PrivateRoute>
+    <TeaProvider>
+      <Tabs />
+    </TeaProvider>
+  </PrivateRoute>
+</Route>
+<Route exact path="/">
+  <Redirect to="/login" />
+</Route>
 ```
+
+Remove `<TeaProvider />` from `App.tsx`. We will move it into `<Tabs />`.
 
 Sign out of the application if you are signed in. Replace the `/login` portion of the URL so that it is just `/` (our default route). Sign in, then change the URL so that the path is `/tabs`. You should see any empty-ish screen.
 
@@ -119,11 +137,21 @@ However, `/login` will remain `/login` (since the login page will not be accessi
 Now open `Tabs.tsx` back up so we can add our tab-based routes. Place the following code inside `<IonRouterOutlet />`:
 
 ```JSX
-<Route exact path={match.url} render={() => <Redirect to={`${match.url}/tea`} />} />
-<PrivateRoute exact path={`${match.url}/tea`} component={TeaPage} />
-<PrivateRoute exact path={`${match.url}/about`} component={AboutPage} />
-<PrivateRoute exact path={`${match.url}/tasting-notes`} component={TastingNotesPage} />
-<PrivateRoute path={`${match.url}/tea/details/:id`} component={TeaDetailsPage} />
+<Route exact path={url}>
+  <Redirect to={`${url}/tea`} />
+</Route>
+<Route exact path={`${url}/tea`}>
+  <TeaPage />
+</Route>
+<Route path={`${url}/tea/details/:id`}>
+  <TeaDetailsPage />
+</Route>
+<Route exact path={`${url}/tasting-notes`}>
+  <TastingNotesPage />
+</Route>
+<Route exact path={`${url}/about`}>
+  <AboutPage />
+</Route>
 ```
 
 An Ionic Framework application can have multiple `<IonRouterOutlet />` components:
@@ -142,15 +170,15 @@ Now it's time to fill out the `<IonTabBar />` component:
 
 ```JSX
 <IonTabBar slot="bottom">
-  <IonTabButton tab="tea" href={`${match.url}/tea`}>
+  <IonTabButton tab="tea" href={`${url}/tea`}>
     <IonIcon icon={leaf} />
     <IonLabel>Tea</IonLabel>
   </IonTabButton>
-  <IonTabButton tab="tasting-notes" href={`${match.url}/tasting-notes`}>
+  <IonTabButton tab="tasting-notes" href={`${url}/tasting-notes`}>
     <IonIcon icon={documentText} />
     <IonLabel>Tasting Notes</IonLabel>
   </IonTabButton>
-  <IonTabButton tab="about" href={`${match.url}/about`}>
+  <IonTabButton tab="about" href={`${url}/about`}>
     <IonIcon icon={informationCircle} />
     <IonLabel>About</IonLabel>
   </IonTabButton>
@@ -163,10 +191,11 @@ Click the tea tab and click any of the cards. Oops...
 
 ## Navigation Cleanup
 
-There's two places we need to cleanup navigation, it's not such a heavy lift.
+There's three places we need to cleanup navigation, it's not such a heavy lift.
 
 1. Open `src/tea/TeaPage.tsx` and edit `/tea/details/${id}` to be `/tabs/tea/details/${id}`.
 2. Open `src/login/LoginPage.tsx` and edit `/tea` to be `/tabs`.
+3. Open `src/tea/details/TeaDetails.tsx` and edit `/tea` to be `/tabs/tea`.
 
 _Now_ we have fully functioning tab-based navigation!
 
