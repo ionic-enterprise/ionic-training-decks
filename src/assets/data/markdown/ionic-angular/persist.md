@@ -3,7 +3,7 @@
 In this lab you will learn how to:
 
 - Create an Angular service
-- Use the Capacitor Storage API
+- Use the Capacitor Preferences API
 - Add more actions to the store
 
 ## Create the Session Vault Service
@@ -20,12 +20,12 @@ Create `src/app/core/index.ts`. This is the barrel file for all of our `core` se
 export * from './session-vault/session-vault.service';
 ```
 
-## Install the Storage Plugin
+## Install the Preferences Plugin
 
-We are going to use `@capacitor/storage` to persist the session data between invocations of the application.
+We are going to use `@capacitor/preferences` to persist the session data between invocations of the application.
 
 ```bash
-npm i @capacitor/storage
+npm i @capacitor/preferences
 ```
 
 ### Interface Setup
@@ -72,10 +72,10 @@ Edit the `tsconfig.spec.json` file and add a `paths` parameter to the `compilerO
 
 Note that this is exactly like the `paths` we added to the base `tsconfig.json` file in order to avoid relative routes in the imports. The change here is the addition of the `@capacitor/*` value. This change tells the build system that when it sees a statement like `import { Foo } from @capacitor/foo`, it should look in the `__mocks__/@capacitor` directory for `foo.ts` rather than under `node_modules`. Since it is in `tsconfig.spec.ts`, it will only do this when building for unit testing.
 
-Next, create a `__mocks__/@capacitor` folder in the project's root and add a `storage.ts` file with the following contents:
+Next, create a `__mocks__/@capacitor` folder in the project's root and add a `preferences.ts` file with the following contents:
 
 ```TypeScript
-class MockStorage {
+class MockPreferences {
   async remove(opt: { key: string }): Promise<void> {}
   async set(opt: { key: string; value: string | undefined }): Promise<void> {}
   async get(opt: { key: string }): Promise<{ value: string | null }> {
@@ -83,16 +83,16 @@ class MockStorage {
   }
 }
 
-const Storage = new MockStorage();
+const Preferences = new MockPreferences();
 
-export { Storage };
+export { Preferences };
 ```
 
-Now we can begin creating the test for our new `SessionVaultService` in `src/app/core/session-vault/session-vault.service.spec.ts`. Start by importing `Storage` and `Session` as shown and by adding `describe` blocks for each of our public methods:
+Now we can begin creating the test for our new `SessionVaultService` in `src/app/core/session-vault/session-vault.service.spec.ts`. Start by importing `Preferences` and `Session` as shown and by adding `describe` blocks for each of our public methods:
 
 ```TypeScript
 import { TestBed } from '@angular/core/testing';
-import { Storage } from '@capacitor/storage';
+import { Preferences } from '@capacitor/preferences';
 import { Session } from '@app/models';
 import { SessionVaultService } from './session-vault.service';
 
@@ -122,12 +122,12 @@ As we start crafting the service, we will do so in a TDD fashion. First write a 
 
 #### Login
 
-The `login()` method is called at login and stores the session via the Capacitor Storage plugin.
+The `login()` method is called at login and stores the session via the Capacitor Preferences plugin.
 
 ```typescript
 describe('login', () => {
-  it('saves the session in storage', async () => {
-    spyOn(Storage, 'set');
+  it('saves the session in preferences', async () => {
+    spyOn(Preferences, 'set');
     const session: Session = {
       user: {
         id: 42,
@@ -138,8 +138,8 @@ describe('login', () => {
       token: '19940059fkkf039',
     };
     await service.login(session);
-    expect(Storage.set).toHaveBeenCalledTimes(1);
-    expect(Storage.set).toHaveBeenCalledWith({
+    expect(Preferences.set).toHaveBeenCalledTimes(1);
+    expect(Preferences.set).toHaveBeenCalledWith({
       key: 'auth-session',
       value: JSON.stringify(session),
     });
@@ -151,23 +151,23 @@ The code for this in the service class then looks like the following:
 
 ```TypeScript
   async login(session: Session): Promise<void> {
-    await Storage.set({ key: this.key, value: JSON.stringify(session) });
+    await Preferences.set({ key: this.key, value: JSON.stringify(session) });
   }
 ```
 
-Be sure to import `Storage` from `@capacitor/storage` at the top of your file.
+Be sure to import `Preferences` from `@capacitor/preferences` at the top of your file.
 
 #### Restore Session
 
-The `restoreSession()` method is used to get the session via the Capacitor Storage plugin.
+The `restoreSession()` method is used to get the session via the Capacitor Preferences plugin.
 
 ```typescript
 describe('restore session', () => {
-  it('gets the session from storage', async () => {
-    spyOn(Storage, 'get').and.returnValue(Promise.resolve({ value: null }));
+  it('gets the session from preferences', async () => {
+    spyOn(Preferences, 'get').and.returnValue(Promise.resolve({ value: null }));
     await service.restoreSession();
-    expect(Storage.get).toHaveBeenCalledTimes(1);
-    expect(Storage.get).toHaveBeenCalledWith({
+    expect(Preferences.get).toHaveBeenCalledTimes(1);
+    expect(Preferences.get).toHaveBeenCalledWith({
       key: 'auth-session',
     });
   });
@@ -183,7 +183,7 @@ describe('restore session', () => {
       token: '19940059fkkf039',
     };
     beforeEach(() => {
-      spyOn(Storage, 'get').and.returnValue(Promise.resolve({ value: JSON.stringify(session) }));
+      spyOn(Preferences, 'get').and.returnValue(Promise.resolve({ value: JSON.stringify(session) }));
     });
 
     it('resolves the session', async () => {
@@ -193,7 +193,7 @@ describe('restore session', () => {
 
   describe('without a session', () => {
     beforeEach(() => {
-      spyOn(Storage, 'get').and.returnValue(Promise.resolve({ value: null }));
+      spyOn(Preferences, 'get').and.returnValue(Promise.resolve({ value: null }));
     });
 
     it('resolves null', async () => {
@@ -203,26 +203,26 @@ describe('restore session', () => {
 });
 ```
 
-**Challenge:** write the code for this method based on the requirements that are defined by this set of tests. Check with the <a href="https://capacitorjs.com/docs/apis/storage" target="_blank">Storage Plugin</a> docs if you get stuck.
+**Challenge:** write the code for this method based on the requirements that are defined by this set of tests. Check with the <a href="https://capacitorjs.com/docs/apis/preferences" target="_blank">Preferences Plugin</a> docs if you get stuck.
 
 #### Logout
 
-The Logout() method is called at logout and removes the session from storage.
+The Logout() method is called at logout and removes the session from preferences.
 
 ```typescript
 describe('logout', () => {
-  it('clears the storage', async () => {
-    spyOn(Storage, 'remove');
+  it('clears the preferences', async () => {
+    spyOn(Preferences, 'remove');
     await service.logout();
-    expect(Storage.remove).toHaveBeenCalledTimes(1);
-    expect(Storage.remove).toHaveBeenCalledWith({
+    expect(Preferences.remove).toHaveBeenCalledTimes(1);
+    expect(Preferences.remove).toHaveBeenCalledWith({
       key: 'auth-session',
     });
   });
 });
 ```
 
-**Challenge:** write the code for this method. Check with the <a href="https://capacitorjs.com/docs/apis/storage" target="_blank">Storage API</a> docs if you get stuck.
+**Challenge:** write the code for this method. Check with the <a href="https://capacitorjs.com/docs/apis/preferences" target="_blank">Preferences API</a> docs if you get stuck.
 
 ## Session Vault Service Mock Factory
 
@@ -444,7 +444,7 @@ import { sessionRestored } from '@app/store/actions';
 ...
 
   async restoreSession(): Promise<Session> {
-    const { value } = await Storage.get({ key: this.key });
+    const { value } = await Preferences.get({ key: this.key });
     const session = JSON.parse(value);
 
     if (session) {
@@ -468,7 +468,7 @@ Basically:
 
 Here we are just storing the user's name, etc. and are not using anything other than the token for security purposes. As has already been noted, tampering with the key invalidates it, so it cannot be used to gain elevated access.
 
-Our implementation still has an issue where someone _could_ gain access to the device and steal the authentication token. Protecting yourself from that scenario is where using a product like <a href="https://ionic.io/docs/identity-vault" _target="blank">Identity Vault</a> comes in to play. We are not ready for that yet, but we _have_ architected our application such that we can easily replace `@capacitor/storage` with something else in the future if we decide to. This is why we are so careful to separate our concerns and make sure every module within our system has a single responsibility.
+Our implementation still has an issue where someone _could_ gain access to the device and steal the authentication token. Protecting yourself from that scenario is where using a product like <a href="https://ionic.io/docs/identity-vault" _target="blank">Identity Vault</a> comes in to play. We are not ready for that yet, but we _have_ architected our application such that we can easily replace `@capacitor/preferences` with something else in the future if we decide to. This is why we are so careful to separate our concerns and make sure every module within our system has a single responsibility.
 
 ## Conclusion
 

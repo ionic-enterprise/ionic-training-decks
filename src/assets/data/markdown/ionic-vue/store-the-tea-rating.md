@@ -6,7 +6,7 @@ In this lab you will further explore our data service and data store in order to
 
 Now that we have the rating set up, let's look at doing something with the data.
 
-The first challenge that we have is that our backend API does not have a place to store individual user ratings on a tea. Perhaps it will at some point, but it does not right now. To get around this, we will use Capacitor's Storage plugin to store the data in a local mechanism, either on-device when running in a mobile context or in `localstorage` when running in a web context. This will involve updating the `useTea` composition function as follows:
+The first challenge that we have is that our backend API does not have a place to store individual user ratings on a tea. Perhaps it will at some point, but it does not right now. To get around this, we will use Capacitor's Preferences plugin to store the data in a local mechanism, either on-device when running in a mobile context or in `localstorage` when running in a web context. This will involve updating the `useTea` composition function as follows:
 
 - add a `rate()` method
 - update the `refresh()` to include the rating
@@ -37,7 +37,7 @@ In the `tests/unit/use/tea.spec.ts` file there are also a few preliminary items 
 - a couple of "find" tests expect a specific tea, add the `rating` there as well
 - update the creation of `httpResultTeas` to remove the `result` just like we do the `image`
 - add a `describe('rate')` block for the saving of the rating, but leave it empty for now
-- `import { Storage } from @capacitor/storage;`
+- `import { Preferences } from @capacitor/preferences;`
 
 In `src/use/tea.ts`, add the rating setting it to zero in `unpackData()`. Also, create the shell of the `rate()` method as such (be sure to return it from the `default` function as well as to the `src/use/__mocks__/tea.ts` file):
 
@@ -49,7 +49,7 @@ At this point we are ready to start implementing the changes.
 
 ### Implement the Rate Function
 
-When the rating is saved using `@capacitor/storage`, we will use a key of `ratingID` where ID is the value of the tea's ID. The test for this looks like the following (this should go in the "rate" `describe` block.
+When the rating is saved using `@capacitor/preferences`, we will use a key of `ratingID` where ID is the value of the tea's ID. The test for this looks like the following (this should go in the "rate" `describe` block.
 
 ```TypeScript
   describe('rate', () => {
@@ -57,8 +57,8 @@ When the rating is saved using `@capacitor/storage`, we will use a key of `ratin
 
     it('saves the value', async () => {
       await rate(5, 4);
-      expect(Storage.set).toHaveBeenCalledTimes(1);
-      expect(Storage.set).toHaveBeenCalledWith({
+      expect(Preferences.set).toHaveBeenCalledTimes(1);
+      expect(Preferences.set).toHaveBeenCalledWith({
         key: 'rating5',
         value: '4',
       });
@@ -106,7 +106,7 @@ When we fetch the tea data in our service, we currently transform it to set the 
 
 First, pick some teas in our `expectedTeas` array to have non-zero ratings. I suggest just picking three or so of them to have the non-zero ratings. The teas with the zero ratings represent the teas that have not yet been rated. If you picked teas that are also used in the `find()` tests, but sure to update those tests accordingly. We should now have failing tests.
 
-We will be using the Storage API's `get()` method to get the proper data. In the main `beforeEach()`, mock the `Storage.get` method with a `mockImplementation()` to return the proper values for each key based on the `expectedTeas`. What the "proper value" is depends highly upon which `expectedTeas` you chose to have a non-zero ratings value. Thus your code will almost certainly be slightly different.
+We will be using the Preferences API's `get()` method to get the proper data. In the main `beforeEach()`, mock the `Preferences.get` method with a `mockImplementation()` to return the proper values for each key based on the `expectedTeas`. What the "proper value" is depends highly upon which `expectedTeas` you chose to have a non-zero ratings value. Thus your code will almost certainly be slightly different.
 
 **before:**
 
@@ -123,7 +123,7 @@ beforeEach(() => {
 beforeEach(() => {
   initializeTestData();
   jest.clearAllMocks();
-  (Storage.get as any).mockImplementation(async (opt: GetOptions) => {
+  (Preferences.get as any).mockImplementation(async (opt: GetOptions) => {
     let value = null;
     switch (opt.key) {
       case 'rating3':
@@ -154,7 +154,7 @@ const unpackData = (data: Array<RawData>): Promise<Array<Tea>> => {
 };
 
 const transform = async (data: RawData): Promise<Tea> => {
-  const { value } = await Storage.get({ key: `rating${data.id}` });
+  const { value } = await Preferences.get({ key: `rating${data.id}` });
   return {
     ...data,
     rating: parseInt(value || '0', 10),
@@ -220,8 +220,8 @@ describe('rate', () => {
 
   it('saves the value', async () => {
     await rate(5, 4);
-    expect(Storage.set).toHaveBeenCalledTimes(1);
-    expect(Storage.set).toHaveBeenCalledWith({
+    expect(Preferences.set).toHaveBeenCalledTimes(1);
+    expect(Preferences.set).toHaveBeenCalledWith({
       key: 'rating5',
       value: '4',
     });
@@ -237,7 +237,7 @@ describe('rate', () => {
 
 ```typescript
 const rate = async (id: number, rating: number): Promise<void> => {
-  await Storage.set({ key: `rating${id}`, value: rating.toString() });
+  await Preferences.set({ key: `rating${id}`, value: rating.toString() });
   const tea = await find(id);
   if (tea) {
     tea.rating = rating;

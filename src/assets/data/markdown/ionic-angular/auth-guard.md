@@ -96,7 +96,7 @@ Add those tests within the main `describe` and then write the code that satisfie
 
 If a token does not exist in the state, we are in one of two situations:
 
-- the user _is_ actually logged in and the session needs to be restored from storage
+- the user _is_ actually logged in and the session needs to be restored from preferences
 - the user is not logged in
 
 So, we need to try and restore the session and then do whatever is appropriate.

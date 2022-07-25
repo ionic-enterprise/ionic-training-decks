@@ -201,19 +201,17 @@ describe('RatingComponent', () => {
   let ratingEl: HTMLElement;
   let fixture: ComponentFixture<TestHostComponent>;
 
-  beforeEach(
-    waitForAsync(() => {
-      TestBed.configureTestingModule({
-        declarations: [RatingComponent, TestHostComponent],
-        imports: [FormsModule, IonicModule],
-      }).compileComponents();
+  beforeEach(waitForAsync(() => {
+    TestBed.configureTestingModule({
+      declarations: [RatingComponent, TestHostComponent],
+      imports: [FormsModule, IonicModule],
+    }).compileComponents();
 
-      fixture = TestBed.createComponent(TestHostComponent);
-      hostComponent = fixture.componentInstance;
-      ratingEl = fixture.nativeElement.querySelector('app-rating');
-      fixture.detectChanges();
-    })
-  );
+    fixture = TestBed.createComponent(TestHostComponent);
+    hostComponent = fixture.componentInstance;
+    ratingEl = fixture.nativeElement.querySelector('app-rating');
+    fixture.detectChanges();
+  }));
 
   it('should create', () => {
     expect(hostComponent).toBeTruthy();
@@ -342,7 +340,7 @@ Our component is now ready for use.
 
 ## Save the Rating
 
-We need to modify the `TeaService` to both save and retrieve the rating for each tea. Our backend API does not currently support the rating on a tea, so we will store this data locally using the Capacitor Storage API. Our tasks for this will include:
+We need to modify the `TeaService` to both save and retrieve the rating for each tea. Our backend API does not currently support the rating on a tea, so we will store this data locally using the Capacitor Preferences API. Our tasks for this will include:
 
 - Add an optional `rating` property to the `Tea` model
 - Modify the tea service
@@ -393,15 +391,15 @@ resultTeas = expectedTeas.map((t: Tea) => {
 
 We should have a failing test at this point.
 
-##### Set up the Storage Mock
+##### Set up the Preferences Mock
 
-We will use the Capacitor Storage plugin, so we will mock that. There are multiple ways that we could store the ratings. We will just go with the very simple strategy of using a key of `ratingX` where `X` is the `ID` of the tea.
+We will use the Capacitor Preferences plugin, so we will mock that. There are multiple ways that we could store the ratings. We will just go with the very simple strategy of using a key of `ratingX` where `X` is the `ID` of the tea.
 
-In the main `beforeEach()`, spy on `Storage.get()` returning a default of `{ value: '0' }` and add non-zero values for various ratings depending on the changes you made to the test data above.
+In the main `beforeEach()`, spy on `Preferences.get()` returning a default of `{ value: '0' }` and add non-zero values for various ratings depending on the changes you made to the test data above.
 
 ```typescript
 ...
-import { Storage } from '@capacitor/storage';
+import { Preferences } from '@capacitor/preferences';
 ...
 beforeEach(() => {
   initializeTestData();
@@ -410,7 +408,7 @@ beforeEach(() => {
   });
   httpTestingController = TestBed.inject(HttpTestingController);
   service = TestBed.inject(TeaService);
-  spyOn(Storage, 'get')
+  spyOn(Preferences, 'get')
     .and.returnValue(Promise.resolve({ value: '0' }))
     .withArgs({ key: 'rating1' })
     .and.returnValue(Promise.resolve({ value: '4' }))
@@ -447,11 +445,11 @@ That test case should probably have a more generic name as well. Something like 
 
 At this point, you should still have a failing test. Update the code in `src/app/core/tea/tea.service.ts` to make it pass.
 
-The first step is to make our private `convert()` method async and then grab the rating from storage:
+The first step is to make our private `convert()` method async and then grab the rating from preferences:
 
 ```typescript
   private async convert(res: any): Promise<Tea> {
-    const { value } = await Storage.get({ key: `rating${res.id}` });
+    const { value } = await Preferences.get({ key: `rating${res.id}` });
     return {
       ...res,
       image: `assets/img/${this.images[res.id - 1]}.jpg`,
@@ -460,7 +458,7 @@ The first step is to make our private `convert()` method async and then grab the
   }
 ```
 
-Make sure you `import { Storage } from '@capacitor/storage';`.
+Make sure you `import { Preferences } from '@capacitor/preferences';`.
 
 But this makes our `getAll()` method unhappy. We are now returning an Observable of an array of promises of tea, but we want an array of teas, not just the promise of eventually getting tea. We can use a `mergeMap()` in conjunction with a `Promise.all()` to fix this:
 
@@ -491,12 +489,12 @@ Here is the test covering our requirements:
 ```typescript
 describe('save', () => {
   it('saves the value', () => {
-    spyOn(Storage, 'set');
+    spyOn(Preferences, 'set');
     const tea = { ...expectedTeas[4] };
     tea.rating = 4;
     service.save(tea);
-    expect(Storage.set).toHaveBeenCalledTimes(1);
-    expect(Storage.set).toHaveBeenCalledWith({
+    expect(Preferences.set).toHaveBeenCalledTimes(1);
+    expect(Preferences.set).toHaveBeenCalledWith({
       key: 'rating5',
       value: '4',
     });
@@ -508,7 +506,7 @@ The code to add to the `TeaService` in order to accomplish this is straight forw
 
 ```typescript
   save(tea: Tea): Promise<void> {
-    return Storage.set({
+    return Preferences.set({
       key: `rating${tea.id}`,
       value: tea.rating.toString(),
     });
