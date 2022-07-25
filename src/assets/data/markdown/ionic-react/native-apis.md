@@ -149,7 +149,7 @@ Remove the 'should hide the splash screen' test from the 'initialization' descri
 
 ```TypeScript
 describe('in an Android context', () => {
-  beforeEach(() => (isPlatform as any).mockImplementation(() => true));
+  beforeEach(() => (isPlatform as jest.Mock).mockImplementation(() => true));
   it('should hide the splash screen', () => {
     const { container } = render(<App />);
     expect(container).toBeDefined();
@@ -158,7 +158,7 @@ describe('in an Android context', () => {
 });
 
 describe('in an iOS context', () => {
-  beforeEach(() => (isPlatform as any).mockImplementation(() => true));
+  beforeEach(() => (isPlatform as jest.Mock).mockImplementation(() => true));
   it('should hide the splash screen', () => {
     const { container } = render(<App />);
     expect(container).toBeDefined();
@@ -167,7 +167,7 @@ describe('in an iOS context', () => {
 });
 
 describe('in a web context', () => {
-  beforeEach(() => (isPlatform as any).mockImplementation(() => false));
+  beforeEach(() => (isPlatform as jest.Mock).mockImplementation(() => false));
   it('should not hide the splash screen', () => {
     const { container } = render(<App />);
     expect(container).toBeDefined();

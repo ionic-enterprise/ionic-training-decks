@@ -4,7 +4,7 @@ In this lab, you will use Capacitor to access native social sharing APIs.
 
 ## Capacitor Native API Plugins
 
-We can use various <a href="https://capacitorjs.com/docs/plugins" target="_blank">Capacitor Plugins</a> in order to provide access to native APIs. We have already made use of these to a certain degree with our use of the <a href="https://capacitorjs.com/docs/apis/storage" target="_blank">Storage</a> and <a href="https://capacitorjs.com/docs/apis/splash-screen" target="_blank">Splash Screen</a> plugins. These plugins work behind the scenes, so we can't really "experience" anything with them.
+We can use various <a href="https://capacitorjs.com/docs/plugins" target="_blank">Capacitor Plugins</a> in order to provide access to native APIs. We have already made use of these to a certain degree with our use of the <a href="https://capacitorjs.com/docs/apis/preferences" target="_blank">Preferences</a> and <a href="https://capacitorjs.com/docs/apis/splash-screen" target="_blank">Splash Screen</a> plugins. These plugins work behind the scenes, so we can't really "experience" anything with them.
 
 Some other plugins provide native functionality that users can interact with directly. The <a href="https://capacitorjs.com/docs/apis/share" target="_blank">Share Capacitor plugin</a> among them. In this lab we will update the code to use that plugin to allow us to share tea tasting notes with our friends.
 
@@ -17,11 +17,7 @@ Let's update the sliding items from the last lab so that it displays a trashcan 
 **`src/tasting-notes/TastingNotesPage.tsx`**
 
 ```JSX
-<IonItemOption
-  color="danger"
-  onClick={() => handleDeleteNote(note.id!)}
-  slot="icon-only"
->
+<IonItemOption color="danger" onClick={() => handleDeleteNote(note.id!)} slot="icon-only">
   <IonIcon icon={trashBin} />
 </IonItemOption>
 ```
@@ -51,9 +47,9 @@ const handleShareNote = async (note: TastingNote) => {
 ...
 ```
 
-Then add the option to the `<IonItemOptions />` component.
+Then add the option to the `<IonItemOptions />` component. Add it _before_ the delete option:
 
-```TypeScript
+```JSX
 <IonItemOption
   data-testid={`share${idx}`}
   color="secondary"
@@ -66,46 +62,45 @@ Then add the option to the `<IonItemOptions />` component.
 
 ### Using the Plugin
 
-First, the Capacitor Social Sharing API needs to be mocked in our unit test. Update the `beforeEach()` block in `TastingNotesPage.test.tsx` to the following:
+First, the Capacitor Social Sharing API needs to be mocked in our unit test.
 
-**`src/tasting-notes/TastingNotesPage.test.tsx`**
+**Challenge:** Add the appropriate code to `TastingNotesPage.test.tsx` to mock `@capacitor/share`.
 
-```TypeScript
-...
-jest.mock('@capacitor/share');
-...
-beforeEach(() => {
-  mockGetNotes = jest.fn(async () => mockNotes);
-  Share.share = jest.fn();
-});
-```
-
-Next, add a `describe()` block for 'sharing a note' as a sibling to the 'initialization', 'add a new note', and 'update an existing note' describe blocks.
+Add a `describe()` block for 'sharing a note' as a sibling to the 'initialization' describe block, with the following tests:
 
 ```TypeScript
 describe('sharing a note', () => {
+  beforeEach(() => (Share.share = jest.fn()));
+
   it('calls the share plugin when called', async () => {
-    const { getByTestId } = render(<TastingNotesPage />);
-    const item = await waitFor(() => getByTestId(/share0/));
+    render(<TastingNotesPage />);
+    const item = await screen.findByTestId(/share0/);
     fireEvent.click(item);
-    await waitFor(() => expect(Share.share).toHaveBeenCalledTimes(1));
+    expect(Share.share).toHaveBeenCalledTimes(1);
   });
 
   it('shares the brand, name, rating, and notes', async () => {
-    const { getByTestId } = render(<TastingNotesPage />);
-    const item = await waitFor(() => getByTestId(/share0/));
+    render(<TastingNotesPage />);
+    await waitForIonicReact();
+    const item = await screen.findByTestId(/share0/);
     fireEvent.click(item);
-    await waitFor(() =>
-      expect(Share.share).toHaveBeenCalledWith({
-        title: 'Lipton: Yellow Label',
-        text: `Overly acidic, highly tannic flavor Rated 1/5 stars`,
-        dialogTitle: `Share Yellow Label's tasting note`,
-        url: 'https://tea-taster-training.web.app',
-      }),
-    );
+    expect(Share.share).toHaveBeenCalledWith({
+      title: 'Lipton: Yellow Label',
+      text: `Overly acidic, highly tannic flavor Rated 4/5 stars`,
+      dialogTitle: `Share Yellow Label's tasting note`,
+      url: 'https://tea-taster-training.web.app',
+    });
   });
 });
 ```
+
+Note that we need to import `waitForIonicReact` from `@ionic/react-test-utils` for the latter test. This function ensures that Ionic Framework components contain all their proper classes before proceeding. In most cases, this function is not needed. If you find a test failing with the error:
+
+```bash
+Jest worker encountered 4 child process exceptions, exceeding retry limit
+```
+
+You may be able to resolve the issue by awaiting `waitForIonicReact`.
 
 Finally, implement `handleSharedNote` in `TastingNotesPage.tsx`.
 

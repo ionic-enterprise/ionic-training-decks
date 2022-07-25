@@ -9,7 +9,7 @@ In this lab, you will learn how to:
 
 ## Update the Configuration
 
-When a platform is added or updated to a Capacitor project, information in `capacitor.config.json` is used to generate some information within the project files. Some of this information should be changed up front:
+When a platform is added or updated to a Capacitor project, information in `capacitor.config.ts` is used to generate some information within the project files. Some of this information should be changed up front:
 
 - The `appId` should be changed to something unique like `com.mycompany.teataster`
 - `appName` should be changed to the application's display name

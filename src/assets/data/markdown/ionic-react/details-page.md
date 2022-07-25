@@ -18,18 +18,18 @@ Let's fill the files in with some shell code:
 **`src/tea/details/TeaDetailsPage.test.tsx`**
 
 ```TypeScript
-import { render, waitFor } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import TeaDetailsPage from './TeaDetailsPage';
 
 describe('<TeaDetailsPage />', () => {
-  it('displays the header', async () => {
+  it('displays the header', () => {
     const { container } = render(<TeaDetailsPage />);
-    await waitFor(() => expect(container).toHaveTextContent(/Details/));
+    expect(container).toHaveTextContent(/Details/);
   });
 
-  it('renders consistently', async () => {
+  it('renders consistently', () => {
     const { asFragment } = render(<TeaDetailsPage />);
-    await waitFor(() => expect(asFragment()).toMatchSnapshot());
+    expect(asFragment()).toMatchSnapshot();
   });
 });
 ```
@@ -37,13 +37,7 @@ describe('<TeaDetailsPage />', () => {
 **`src/tea/details/TeaDetailsPage.tsx`**
 
 ```TypeScript
-import {
-  IonContent,
-  IonHeader,
-  IonPage,
-  IonTitle,
-  IonToolbar,
-} from '@ionic/react';
+import { IonContent, IonHeader, IonPage, IonTitle, IonToolbar } from '@ionic/react';
 
 const TeaDetailsPage: React.FC = () => {
   return (
@@ -68,21 +62,22 @@ export default TeaDetailsPage;
 
 ## Adding the Details Route
 
-Head over to `App.tsx`. We need to add an additional route inside our `<IonRouterOutlet>`:
+Head over to `App.tsx`. We need to add an additional route inside our `<IonRouterOutlet>`, after the tea route and before the `/` route:
 
 **`src/App.tsx`**
 
 ```JSX
+...
 <IonRouterOutlet>
-  <PrivateRoute exact path="/tea" component={TeaPage} />
-  <PrivateRoute path="/tea/details/:id" component={TeaDetailsPage} />
-  <Route exact path="/login">
-    <LoginPage />
+ ...
+  <Route path="/tea/details/:id">
+    <PrivateRoute>
+      <TeaDetailsPage />
+    </PrivateRoute>
   </Route>
-  <Route exact path="/">
-    <Redirect to="/tea" />
-  </Route>
+...
 </IonRouterOutlet>
+...
 ```
 
 With a little URL hacking you should be able to navigate to this page, but you will need to supply an ID like this: `/tea/details/1`. Pretty neat!
@@ -96,22 +91,17 @@ Modify the `<IonCard>` component in `TeaPage.tsx` by adding the following props:
 **`src/tea/TeaPage.tsx`**
 
 ```JSX
-<IonCard button onClick={() => showDetailsPage(tea.id)}>
+<IonCard button onClick={() => navToDetailsPage(tea.id)}>
 ```
 
 The `button` prop which adds some styling to the card, making it behave in a "clickable" fashion.
 
-Next let's define `showDetailsPage()`. Add the following code below the `useEffect` block:
+Next let's define `navToDetailsPage()`. Add the following function:
 
 ```TypeScript
-const TeaPage: React.FC = () => {
-  ...
-  const showDetailsPage = (id: number) => {
-    history.push(`/tea/details/${id}`);
-  }
-  ...
+const navToDetailsPage = (id: number) => {
+  history.push(`/tea/details/${id}`);
 };
-export default TeaPage;
 ```
 
 Notice that we're calling `history.push()` whereas we've seen `history.replace()`. When signing a user in or signing a user out, we want to replace the entire history stack (so they can't go back to an invalid application state). In this case however, we want to push a new route onto the stack so the application user can go back to our tea page if they desire.
@@ -177,23 +167,16 @@ We know that we want to fetch the details of the tea with the ID specified in ou
 
 ```TypeScript
 import { ... } from '@ionic/react';
-import { useState, useEffect } from 'react';
-import { useParams } from 'react-router';
-import { Tea } from '../../shared/models';
-import { useTea } from '../useTea';
+...
 
 const TeaDetailsPage: React.FC = () => {
-  const { id } = useParams<{ id: string }>();
-  const { getTeaById } = useTea();
+   const { id } = useParams<{ id: string }>();
+  const { teas } = useTea();
   const [tea, setTea] = useState<Tea | undefined>(undefined);
 
   useEffect(() => {
-    const init = async () => {
-      const tea = await getTeaById(parseInt(id, 10));
-      setTea(tea);
-    };
-    init();
-  }, [id, getTeaById]);
+    setTea(teas.find((t) => t.id === parseInt(id, 10)));
+  }, [id, teas]);
 
   return (
     ...
@@ -202,25 +185,20 @@ const TeaDetailsPage: React.FC = () => {
 export default TeaDetailsPage;
 ```
 
-Our tests don't know how to handle calling `getTeaById` so let's fix that:
+We'll also need to mock the `useTea()` hook within our tests:
+
 **`src/tea/details/TeaDetailsPage.test.tsx`**
 
 ```TypeScript
 ...
+const mockTeas = expectedTeas;
 jest.mock('react-router', () => ({
- ...
+  useParams: () => ({ id: 1 }),
 }));
-const mockTea = expectedTeas[0];
-jest.mock('../useTea', () => ({
-  useTea: () => ({
-    getTeas: jest.fn(),
-    getTeaById: jest.fn(() => Promise.resolve(mockTea)),
-  }),
+jest.mock('../TeaProvider', () => ({
+  useTea: () => ({ teas: mockTeas }),
 }));
-
-describe('<TeaDetailsPage />', () => {
-  ...
-});
+...
 ```
 
 Once complete, let's write some additional unit tests to ensure that the content we want to display properly renders in our tea details page:
@@ -228,14 +206,14 @@ Once complete, let's write some additional unit tests to ensure that the content
 ```TypeScript
 describe('<TeaDetailsPage />', () => {
   ...
-  it('renders the tea name', async () => {
+  it('renders the tea name', () => {
     const { container } = render(<TeaDetailsPage />);
-    await waitFor(() => expect(container).toHaveTextContent(mockTea.name));
+    expect(container).toHaveTextContent(mockTeas[0].name);
   });
 
-  it('renders the tea description', async () => {
+  it('renders the tea description', () => {
     const { container } = render(<TeaDetailsPage />);
-    await waitFor(() => expect(container).toHaveTextContent(mockTea.description));
+    expect(container).toHaveTextContent(mockTeas[0].description);
   });
 });
 ```

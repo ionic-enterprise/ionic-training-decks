@@ -19,14 +19,14 @@ The first thing we will use the Ionic CLI for is to start a new application. Ope
 Lets start our application via whichever technique you want.
 
 1. At the command line, change directories to a starting directory. I use `~/Projects/Training`
-2. Enter the following command: `ionic start tea-taster blank --type=react --capacitor`
+2. Enter the following command: `ionic start tea-taster blank --type=react`
 3. Alternatively, you could just enter `ionic start` and let the command line ask you for what it needs
 
 **Example:**
 
 ```bash
 $ cd ~/Projects/Training
-$ ionic start tea-taster blank --type=react --capacitor
+$ ionic start tea-taster blank --type=react
 ```
 
 Let's take a look at some of these options more closely:

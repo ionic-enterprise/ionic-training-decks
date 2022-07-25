@@ -7,9 +7,9 @@ In this lab you will learn how to:
 
 ## Overview
 
-With our custom tea hook built and tested, it's time to replace our mock tea data with the real deal.
+In the last lab, we created a React Context provider that holds the state the application will use for tea data. A custom hook was created to allow components to access the provider's API. It's time to replace our application's mock tea data with the real deal.
 
-### Refactor
+## Refactor
 
 Let's start by cleaning up `TeaPage.tsx` a bit. Make the following changes:
 
@@ -18,88 +18,86 @@ Let's start by cleaning up `TeaPage.tsx` a bit. Make the following changes:
 3. Remove `teaData`. In `TeaList.test.tsx`, import and use `expectedTeas` from `./__mocks__/mockTeas` instead
 4. Finally update the `makes a tea matrix` test to compensate for the changes made
 
-### Mocking `useTea`
+## Prime Tea Data
 
-We need a way to mock the `useTea()` hook created in the last lab. Go ahead and add the following code to `TeaPage.test.tsx` after the import statements and before the describe block:
+We will be utilizing the tea data on multiple pages of the application. We can save the end user bandwidth by making this call once, and using the data stored within `<TeaProvider />`. There is one consideration we have to make, the user must be signed in for us to successfully make the network call.
+
+The `<TeaProvider />` loads whether the user is signed in or not, so it wouldn't be appropriate to set up a `useEffect` on `<TeaProvider />` to initially load the tea data. However, we will not call the `useTea` hook until we're on a page where we know a user is signed in, so we use it to prime our tea data.
+
+Make the following change to the `useTea` hook:
+
+**`src/tea/TeaProvider.tsx`**
+
+```TypeScript
+export const useTea = () => {
+  const { teas, getTeas, getTeaById } = useContext(TeaContext);
+
+  if (teas === undefined) {
+    throw new Error('useTea must be used within a TeaProvider');
+  }
+
+  useEffect(() => {
+    !teas.length && getTeas();
+  }, [teas, getTeas]);
+
+  return { teas };
+};
+```
+
+Note that we are no longer exposing `getTeas` to components. They'll have no reason to need to invoke this method.
+
+We should also add some functionality to reset the list of teas if the user session is no longer valid:
+
+```TypeScript
+...
+const { session } = useSession();
+
+useEffect(() => {
+  session === undefined && setTeas([]);
+}, [session]);
+...
+```
+
+These modifications will break the unit tests we have in place to test the `useTea()` hook. Update the unit tests so that they pass:
+
+**`src/tea/TeaProvider.test.tsx`**
+
+```TypeScript
+...
+  it('GETs the teas from the backend', async () => {
+    const { waitForNextUpdate } = renderHook(() => useTea(), { wrapper });
+    await waitForNextUpdate();
+    expect(mockedAxios.get).toHaveBeenCalledWith('/tea-categories');
+  });
+
+  it('adds an image to each tea item', async () => {
+    const { result, waitForNextUpdate } = renderHook(() => useTea(), { wrapper });
+    await waitForNextUpdate();
+    expect(result.current.teas).toEqual(expectedTeas);
+  });
+...
+```
+
+## Binding the Tea Data
+
+Binding the data is quite simple, and we don't have to modify any of the unit tests within `TeaPage.test.tsx`. We do, however, have to mock the `useTea()` hook.
+
+Add the following mock to `TeaPage.test.tsx`:
 
 **`src/tea/TeaPage.test.tsx`**
 
 ```TypeScript
 const mockTeas = expectedTeas;
-jest.mock('./useTea', () => ({
-  useTea: () => ({
-    getTeas: jest.fn(() => Promise.resolve(mockTeas)),
-    getTeaById: jest.fn(),
-  }),
+jest.mock('./TeaProvider', () => ({
+  useTea: () => ({ teas: mockTeas }),
 }));
 ```
 
-### Fetching the Data
-
-When the user first enters the tea page, we want to fetch the list of teas from the backend data service. This process will be partially completed for you, it will be up to you to finish the implementation.
-
-**`src/tea/TeaPage.tsx`**
-
-```TypeScript
-// Todo: Import useState from the 'react' module.
-...
-import { useTea } from './useTea';
-...
-const TeaPage: React.FC = () => {
-  const { getTeas } = useTea();
-  const [teas, setTeas] = useState<Tea[]>([]);
-  ...
-  useEffect(() => {
-    (async () => {
-      const teas = await getTeas();
-      setTeas(teas);
-    })();
-  }, [getTeas]);
-
-  const handleLogout = async () => {
-    ...
-  };
-
-  // Todo: Update the component to use the list of teas from the component's state.
-  return (...);
-};
-export default TeaPage;
-```
-
-Once complete, you should notice that our tests are throwing an error:
-
-```bash
-Warning: An update to TeaPage inside a test was not wrapped in act(...).
-```
-
-Let's go ahead and fix that:
-
-**`src/tea/TeaPage.test.tsx`**
-
-```TypeScript
-...
-describe('<TeaPage />', () => {
-  it('displays the header', async () => {
-    const { container } = render(<TeaPage />);
-    await waitFor(() => expect(container).toHaveTextContent(/Tea/));
-  });
-
-  it('renders consistently', async () => {
-    const { asFragment } = render(<TeaPage />);
-    await waitFor(() => expect(asFragment()).toMatchSnapshot());
-  });
-
-  describe('initialization', () => {
-    ...
-  });
-});
-```
-
-That will fix our test cases. Don't forget to update your snapshots!
+**Challenge:** Update `TeaPage.tsx` such that it pulls and displays the list of teas from `useTea()`.
 
 ### Side-note: Reference Material
 
-I strongly urge you to read <a href="https://overreacted.io/a-complete-guide-to-useeffect/" target="_blank">A Complete Guide to useEffect</a> by Dan Abramov at a later time. It's a comprehensive guide to the `useEffect()` hook and answers several questions, including "How do I correctly fetch data inside useEffect?".
+As we continue to make use of built-in React hooks, such as `useEffect()`, I strongly urge a reading of <a href="https://overreacted.io/a-complete-guide-to-useeffect/" target="_blank">A Complete Guide to useEffect</a> by Dan Abramov at a later time. This article is a comprehensive guide to `useEffect()` and answers several questions that come with using it.
 
 ## Conclusion
 
