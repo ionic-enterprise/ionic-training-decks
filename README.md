@@ -75,14 +75,14 @@ Given the structure of the application, please only go one level deep with the t
 
 A `release` npm script has been created to make the release process easy. It will ask you a few basic questions and then do all of the work. There are just a few items to make sure of first:
 
-- make sure you are on the `master` branch
-- make sure all changes have been pushed to `master` and that you have all changes from `origin`
+- make sure you are on the `main` branch
+- make sure all changes have been pushed to `main` and that you have all changes from `origin`
 - make sure you are logged in to `firebase` as the `support@ionic.io` user
 
 Once you have done that, type `npm run release`, answer a couple of questions, and you are off to the races.
 
 ```bash
-➜  ionic-training-decks git:(master) ✗ firebase login
+➜  ionic-training-decks git:(main) ✗ firebase login
 Already logged in as support@ionic.io
-➜  ionic-training-decks git:(master) ✗ npm run release
+➜  ionic-training-decks git:(main) ✗ npm run release
 ```
