@@ -265,7 +265,7 @@ const LoginPage: React.FC = () => {
 
   const handleLogin = async (data: LoginInputs) => {
     await login(data.email, data.password);
-    history.replace('/tea');
+    session && history.replace('/tea');
   };
 
   return (

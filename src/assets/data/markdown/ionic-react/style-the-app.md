@@ -28,7 +28,7 @@ Have a look at the bottom of the `src/shared/components/rating/Rating.css` file.
 }
 ```
 
-Notice the `.rating` class in the selector. This effectively scopes the styling to the Rating compoent since it is the only one with the `rating` class. Without such a convention, these styles would end up applying to _every_ `ion-icon` in the application.
+Notice the `.rating` class in the selector. This effectively scopes the styling to the Rating component since it is the only one with the `rating` class. Without such a convention, these styles would end up applying to _every_ `ion-icon` in the application.
 
 For most of our styling, we want a more global scope, but we would not put such styling in a component's CSS file like we did here. The reason is, that while it may actually apply globally it would be very difficult for developers to track and find. Rather, the best practice is to:
 
@@ -45,7 +45,7 @@ Have a look at `src/theme/global.css`. It currently contains:
 }
 ```
 
-We will expand this shortly to contain more styles. As the styles grow, we will want to look at splitting them out into seperate files that are imported here, but for now we can just add our styles to the `global.css` file.
+We will expand this shortly to contain more styles. As the styles grow, we will want to look at splitting them out into separate files that are imported here, but for now we can just add our styles to the `global.css` file.
 
 ### Shadow DOM
 
@@ -275,7 +275,7 @@ We have a couple of other components where we need to set a specific color. Name
 ```JSX
     </IonRouterOutlet>
     <IonTabBar color="tertiary" slot="bottom">
-      <IonTabButton tab="tea" href={`${match.url}/tea`}>
+      <IonTabButton tab="tea" href={`${url}/tea`}>
 ```
 
 ### Other Styles
