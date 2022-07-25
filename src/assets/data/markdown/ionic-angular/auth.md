@@ -451,11 +451,11 @@ Then the code:
   })
 ```
 
-Finally, we need a `unauthError$` effect. It needs to clear the storage and dispatch the fact that we are in a logged out state (LogoutSuccess). This should be added to the auth effects.
+Finally, we need a `unauthError$` effect. It needs to clear the preferences and dispatch the fact that we are in a logged out state (LogoutSuccess). This should be added to the auth effects.
 
 ```TypeScript
   describe('unauthError$', () => {
-    it('clears the session from storage', done => {
+    it('clears the session from preferences', done => {
       const sessionVaultService = TestBed.inject(SessionVaultService);
       actions$ = of(unauthError());
       effects.unauthError$.subscribe(() => {
@@ -628,7 +628,7 @@ For the `logout$` effect, we need to add a test verifying we are performing the 
         );
       });
 
-      it('does not clear the session from storage', done => {
+      it('does not clear the session from preferences', done => {
         const sessionVaultService = TestBed.inject(SessionVaultService);
         actions$ = of(logout());
         effects.logout$.subscribe(() => {

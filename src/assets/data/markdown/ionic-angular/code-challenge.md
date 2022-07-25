@@ -126,7 +126,7 @@ As promised, here is one way to test the `logout$` effect:
    });
 +
 +  describe('logout$', () => {
-+    it('clears the session from storage', done => {
++    it('clears the session from preferences', done => {
 +      const sessionVaultService = TestBed.inject(SessionVaultService);
 +      actions$ = of(logout());
 +      effects.logout$.subscribe(() => {

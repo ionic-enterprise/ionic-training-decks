@@ -8,7 +8,7 @@ In this lab you will use Capacitor to access a native API. Specifically, the soc
 
 ## Capacitor Native API Plugins
 
-We can use various <a href="https://capacitorjs.com/docs/plugins" target="_blank">Capacitor Plugins</a> in order to provide access to native APIs. We have already done this to a certain degree with our use of the <a href="https://capacitorjs.com/docs/apis/storage" target="_blank">Storage</a> plugin. That plugin, however, works completely behind the scenes, so we can't really "experience" anything with it.
+We can use various <a href="https://capacitorjs.com/docs/plugins" target="_blank">Capacitor Plugins</a> in order to provide access to native APIs. We have already done this to a certain degree with our use of the <a href="https://capacitorjs.com/docs/apis/preferences" target="_blank">Preferences</a> plugin. That plugin, however, works completely behind the scenes, so we can't really "experience" anything with it.
 
 Some plugins, though, provide native functionality that the user interacts with directly. The <a href="https://capacitorjs.com/docs/apis/share" target="_blank">Social Sharing</a> plugin is one of those. In this lab we will update the code to use that plugin to allow us to share tea tasting notes with our friends.
 
@@ -165,7 +165,7 @@ const allowShare = computed(
 
 ## Share the Note
 
-The final step is to call the share API when the button is clicked. Let's update the test. First we will need to create a manual mock for the plugin similar to the one we already have for `@capacitor/storage`:
+The final step is to call the share API when the button is clicked. Let's update the test. First we will need to create a manual mock for the plugin similar to the one we already have for `@capacitor/preferences`:
 
 **`__mocks__/@capacitor/share.ts`**
 

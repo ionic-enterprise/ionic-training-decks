@@ -34,7 +34,7 @@ Be sure to update `src/models/index.ts`
 
 ## The `useSession` Composition Function
 
-When the user logs in, they establish a session. The session contains information about the user as well as the user's current authentication token. We will use a composable function to manage this session. Further, we will use the `@capacitor/storage` plugin to persist the information.
+When the user logs in, they establish a session. The session contains information about the user as well as the user's current authentication token. We will use a composable function to manage this session. Further, we will use the `@capacitor/preferences` plugin to persist the information.
 
 ### Test and Function Shells
 
@@ -109,18 +109,18 @@ export default jest.fn().mockReturnValue({
 
 **Note:** The `src/use/__mocks__/session.ts` file will be used to facilitate mocking this composable function effectively in other unit tests.
 
-### Install `@capacitor/storage`
+### Install `@capacitor/preferences`
 
-We will use <a href="https://capacitorjs.com/docs/apis/storage" target="_blank">`@capacitor/storage`</a> to persist the session information, so let's install it:
+We will use <a href="https://capacitorjs.com/docs/apis/preferences" target="_blank">`@capacitor/preferences`</a> to persist the session information, so let's install it:
 
 ```bash
-npm i @capacitor/storage
+npm i @capacitor/preferences
 ```
 
 Also create a <a href="https://jestjs.io/docs/manual-mocks" target="_blank">manual mock</a> for it. This will make the testing easier:
 
 ```typescript
-export const Storage = {
+export const Preferences = {
   get: jest.fn().mockResolvedValue({ value: undefined }),
   set: jest.fn().mockResolvedValue(undefined),
   remove: jest.fn().mockResolvedValue(undefined),
@@ -128,16 +128,16 @@ export const Storage = {
 };
 ```
 
-The manual mock should be created as `__mocks__/@capacitor/storage.ts` under the application's root directory.
+The manual mock should be created as `__mocks__/@capacitor/preferences.ts` under the application's root directory.
 
 ### Setting the Session
 
 When we set the session, we have two requirements:
 
 - We should be able to retrieve the session again.
-- The session should be stored using `@capacitor/storage`.
+- The session should be stored using `@capacitor/preferences`.
 
-Let's express those requirements as tests. Note that the value stored <a href="https://capacitorjs.com/docs/apis/storage#setoptions" target="_blank">must be a string</a>. As such we need to stringify the session object. Make sure that you `import { Storage } from '@capacitor/storage';` at the top of the file.
+Let's express those requirements as tests. Note that the value stored <a href="https://capacitorjs.com/docs/apis/preferences#setoptions" target="_blank">must be a string</a>. As such we need to stringify the session object. Make sure that you `import { Preferences } from '@capacitor/preferences';` at the top of the file.
 
 ```typescript
 describe('setSession', () => {
@@ -150,8 +150,8 @@ describe('setSession', () => {
   it('stores the session', async () => {
     const { setSession } = useSession();
     await setSession(testSession);
-    expect(Storage.set).toHaveBeenCalledTimes(1);
-    expect(Storage.set).toHaveBeenCalledWith({
+    expect(Preferences.set).toHaveBeenCalledTimes(1);
+    expect(Preferences.set).toHaveBeenCalledWith({
       key: 'session',
       value: JSON.stringify(testSession),
     });
@@ -163,14 +163,14 @@ The code required to satisfy these tests is left as an exercise for the reader. 
 
 - The signature of `setSession` needs to be updated to take a parameter of type `Session`.
 - The file global `session` needs to be set to the passed value.
-- The `setSession` function needs to return the result of calling `Storage.set()` (be sure to import `Storage`). The signature for `Storage.set()` is `set({ key: string, value: string }), so the passed session will need to be converted from an object to a string via `JSON.stringify()`.
+- The `setSession` function needs to return the result of calling `Preferences.set()` (be sure to import `Preferences`). The signature for `Preferences.set()` is `set({ key: string, value: string }), so the passed session will need to be converted from an object to a string via `JSON.stringify()`.
 
 ### Clearing the Session
 
 The requirements for clearing the session are just the opposite:
 
 - We should not be able to retrieve the session after it is cleared.
-- The session should be removed from `@capacitor/storage`.
+- The session should be removed from `@capacitor/preferences`.
 
 ```typescript
 describe('clearSession', () => {
@@ -185,11 +185,11 @@ describe('clearSession', () => {
     expect(await getSession()).toBeUndefined();
   });
 
-  it('removes the session fromm storage', async () => {
+  it('removes the session fromm preferences', async () => {
     const { clearSession } = useSession();
     await clearSession();
-    expect(Storage.remove).toHaveBeenCalledTimes(1);
-    expect(Storage.remove).toHaveBeenCalledWith({ key: 'session' });
+    expect(Preferences.remove).toHaveBeenCalledTimes(1);
+    expect(Preferences.remove).toHaveBeenCalledWith({ key: 'session' });
   });
 });
 ```
@@ -200,7 +200,7 @@ describe('clearSession', () => {
 
 We already have tests showing that `getSession()` behaves properly with and without a session. What we need to show in addition is:
 
-- We retrieve the session from storage if it is not currently cached.
+- We retrieve the session from preferences if it is not currently cached.
 - We used the cached version if it has been cached via a prior "get".
 - We used the cached version if it has been cached via a prior "set".
 
@@ -211,36 +211,36 @@ describe('getSession', () => {
     await clearSession();
   });
 
-  it('gets the session from storage', async () => {
+  it('gets the session from preferences', async () => {
     const { getSession } = useSession();
-    (Storage.get as any).mockResolvedValue({
+    (Preferences.get as any).mockResolvedValue({
       value: JSON.stringify(testSession),
     });
     expect(await getSession()).toEqual(testSession);
-    expect(Storage.get).toHaveBeenCalledTimes(1);
-    expect(Storage.get).toHaveBeenCalledWith({ key: 'session' });
+    expect(Preferences.get).toHaveBeenCalledTimes(1);
+    expect(Preferences.get).toHaveBeenCalledWith({ key: 'session' });
   });
 
   it('caches the retrieved session', async () => {
     const { getSession } = useSession();
-    (Storage.get as any).mockResolvedValue({
+    (Preferences.get as any).mockResolvedValue({
       value: JSON.stringify(testSession),
     });
     await getSession();
     await getSession();
-    expect(Storage.get).toHaveBeenCalledTimes(1);
+    expect(Preferences.get).toHaveBeenCalledTimes(1);
   });
 
   it('caches the session set via setSession', async () => {
     const { getSession, setSession } = useSession();
     await setSession(testSession);
     expect(await getSession()).toEqual(testSession);
-    expect(Storage.get).not.toHaveBeenCalled();
+    expect(Preferences.get).not.toHaveBeenCalled();
   });
 });
 ```
 
-**Coding Challenge:** write the code to satisfy these requirements. Remember that the value was processed with `JSON.stringify` on the way in to storage, so it will need to be parsed on the way back out.
+**Coding Challenge:** write the code to satisfy these requirements. Remember that the value was processed with `JSON.stringify` on the way in to preferences, so it will need to be parsed on the way back out.
 
 ## Using Axios for HTTP Calls
 
