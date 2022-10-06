@@ -172,7 +172,7 @@ Be sure to replace the comments with the actual logic. I had to leave _something
 
 ## Hookup the Guard
 
-Any route that requires the user to be logged in should have the guard. At this time, that is only the `tea` page, so let's hook up the guard in that page's routing module (`src/app/tea/tea-routing.module.ts`).
+Any route that requires the user to be logged in should have the guard. At this time, that is only the `tea` page, so let's hook up the guard in the app's routing module (`src/app/app-routing.module.ts`).
 
 **Note:** most of this code should exist already. Just add the `AuthGuardService` related bits. If yours routing module is slightly different, have a look and determine if you would like to change any of it.
 
