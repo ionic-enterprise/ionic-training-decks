@@ -3,8 +3,8 @@
 In this lab, you will:
 
 - Update the Capacitor configuration
-- Update the splash screen and application icon
 - Add the iOS and Android platforms
+- Update the splash screen and application icon
 - Build and run the application on both platforms
 
 ## Update the Configuration
@@ -76,40 +76,26 @@ ionic cap open ios
 
 ## Update the Splash Screen and Application Icon
 
-Before taking this step, make sure you have `cordova-res` installed globally by typing `cordova-res --version`. If you do not have it installed, run the following command:
+Capacitor has a tool called <a href="https://www.npmjs.com/package/@capacitor/assets" target="_blank">`@capacitor/assets`</a> that creates all of the icons that the native applications need. This tool will also generate the icons that are needed if we decide to deploy our application as a PWA.
+
+In order to use this tool, we need to install it as a dev dependency:
 
 ```bash
-npm i -g cordova-res
+npm i -D @capacitor/assets
 ```
 
-`cordova-res` is a tool that is used to create icon and splash screen images. Despite the name, it can be used both with Apache Cordova and Capacitor applications.
-
-The application should have its own splash screen and icon rather than using the default that Ionic supplies for you. Ionic provides a service that will take two source image files and create all of the resources that your application will require. Follow these guidelines:
-
-- Keep the images simple and clear
-- You can supply source images in any of these formats: `.png`, `.psd`, `.ai`
-- Icon - at least 1024x1024 pixels
-- Splashscreen - at least 2732x2732 pixels with a simple image that is centered and no bigger than 1200x1200 pixels to facilitate reasonable display on all devices
-
-For this application:
+Next, get the source image files that we need. Note that this is just our "product logo" in two versions, one for light mode and one for dark mode. Dark mode is optional.
 
 - create a `resources` directory at the root level of the application (`mkdir resources`)
 - download the following images to the newly created `resources` directory
-  - <a download href="/assets/packages/ionic-vue/icon.png">icon.png</a>
-  - <a download href="/assets/packages/ionic-vue/splash.png">splash.png</a>
-- create an `android` directory under the `resources` directory (`mkdir resources/android`)
-- download the following images to the newly created `resources/android` directory
-  - <a download href="/assets/packages/ionic-vue/icon-background.png">icon-background.png</a>
-  - <a download href="/assets/packages/ionic-vue/icon-foreground.png">icon-foreground.png</a>
+  - <a download href="/assets/packages/ionic-vue/logo.png">logo.png</a>
+  - <a download href="/assets/packages/ionic-vue/logo-dark.png">logo-dark.png</a>
 
-To generate the required resources and copy them to the native projects, use the following commands:
+To generate the required resources and copy them to the native projects, use the following command:
 
 ```bash
-cordova-res ios --skip-config --copy
-cordova-res android --skip-config --copy
+npx capacitor-assets generate --iconBackgroundColor '#f1ebe1' --splashBackgroundColor '#f1ebe1' --iconBackgroundColorDark '#110b00' --splashBackgroundColorDark '#110b00'
 ```
-
-These commands will use the source images to produce all of the various images required by the native projects and then copy them to the proper locations.
 
 ## Live Reload (Optional)
 
