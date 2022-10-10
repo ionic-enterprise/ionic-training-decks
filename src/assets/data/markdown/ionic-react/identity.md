@@ -287,7 +287,7 @@ Start by testing `<SessionProvider />` to verify that the loader is displayed wh
 
 ```TypeScript
 import { useContext } from 'react';
-import { render, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { SessionContext, SessionProvider } from './SessionProvider';
 
 const MockConsumer: React.FC = () => {
