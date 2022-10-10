@@ -12,17 +12,6 @@ State management is in place to manage the identity of the application user. It'
 
 We can also use the state created in the last lab to create a component that guards routes against unauthorized users, redirecting them to the login page should they not be authenticated.
 
-## Prerequisites
-
-In order to test React hooks we need to add additional dependencies to our project:
-
-```bash
-$ npm install @testing-library/react-hooks
-$ npm install --save-dev react-test-renderer@^17.0.0
-```
-
-Remember to terminate and restart any running processes for the new dependencies to be picked up.
-
 ## useSession Hook
 
 Add two additional files to `src/core/session`: `useSession.tsx` and `useSession.test.tsx`. Update `src/core/session/index.ts` accordingly.
@@ -62,7 +51,7 @@ Do the same for `useSession.test.tsx`:
 ```TypeScript
 import axios from 'axios';
 import { Preferences } from '@capacitor/preferences';
-import { renderHook, act, cleanup } from '@testing-library/react-hooks';
+import { renderHook, waitFor, act } from '@testing-library/react';
 import { useSession } from './useSession';
 import { SessionProvider } from './SessionProvider';
 import { mockSession } from './__fixtures__/mockSession';
@@ -103,8 +92,8 @@ The unit tests for these scenarios are found below. Add them inside the login `d
 ```TypeScript
 it('POSTs the login request', async () => {
   const url = `${process.env.REACT_APP_DATA_SERVICE}/login`;
-  const { result, waitForNextUpdate } = renderHook(() => useSession(), { wrapper });
-  await waitForNextUpdate();
+  const { result } = renderHook(() => useSession(), { wrapper });
+  await waitFor(() => expect(result.current).not.toBeNull());
   await act(() => result.current.login('test@test.com', 'P@ssword!'));
   expect(mockedAxios.post).toHaveBeenCalledTimes(1);
   const [username, password] = ['test@test.com', 'P@ssword!'];
@@ -113,16 +102,16 @@ it('POSTs the login request', async () => {
 
 describe('on success', () => {
   it('stores the token in storage', async () => {
-    const { result, waitForNextUpdate } = renderHook(() => useSession(), { wrapper });
-    await waitForNextUpdate();
+    const { result } = renderHook(() => useSession(), { wrapper });
+    await waitFor(() => expect(result.current).not.toBeNull());
     await act(() => result.current.login('test@test.com', 'P@ssword!'));
     expect(Preferences.set).toHaveBeenCalledTimes(1);
     expect(Preferences.set).toHaveBeenCalledWith({ key: 'auth-token', value: mockSession.token });
   });
 
   it('sets the session', async () => {
-    const { result, waitForNextUpdate } = renderHook(() => useSession(), { wrapper });
-    await waitForNextUpdate();
+    const { result } = renderHook(() => useSession(), { wrapper });
+    await waitFor(() => expect(result.current).not.toBeNull());
     await act(() => result.current.login('test@test.com', 'P@ssword!'));
     expect(result.current.session).toEqual(mockSession);
   });
@@ -132,8 +121,8 @@ describe('on failure', () => {
   beforeEach(() => mockedAxios.post.mockResolvedValue({ data: { success: false } }));
 
   it('sets an error', async () => {
-    const { result, waitForNextUpdate } = renderHook(() => useSession(), { wrapper });
-    await waitForNextUpdate();
+    const { result } = renderHook(() => useSession(), { wrapper });
+    await waitFor(() => expect(result.current).not.toBeNull());
     await act(() => result.current.login('test@test.com', 'P@ssword!'));
     expect(result.current.error).toEqual('Failed to log in.');
   });
@@ -190,8 +179,8 @@ describe('logout', () => {
   it('POSTs the logout request', async () => {
     const url = `${process.env.REACT_APP_DATA_SERVICE}/logout`;
     const headers = { Authorization: 'Bearer ' + mockSession.token };
-    const { result, waitForNextUpdate } = renderHook(() => useSession(), { wrapper });
-    await waitForNextUpdate();
+    const { result } = renderHook(() => useSession(), { wrapper });
+    await waitFor(() => expect(result.current).not.toBeNull());
     await act(() => result.current.logout());
     expect(mockedAxios.post).toHaveBeenCalledTimes(1);
     expect(mockedAxios.post).toHaveBeenCalledWith(url, null, { headers });
@@ -199,16 +188,16 @@ describe('logout', () => {
 
   describe('on success', () => {
     it('removes the token from storage', async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useSession(), { wrapper });
-      await waitForNextUpdate();
+      const { result } = renderHook(() => useSession(), { wrapper });
+      await waitFor(() => expect(result.current).not.toBeNull());
       await act(() => result.current.logout());
       expect(Preferences.remove).toHaveBeenCalledTimes(1);
       expect(Preferences.remove).toHaveBeenCalledWith({ key: 'auth-token' });
     });
 
     it('clears the session', async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useSession(), { wrapper });
-      await waitForNextUpdate();
+      const { result } = renderHook(() => useSession(), { wrapper });
+      await waitFor(() => expect(result.current).not.toBeNull());
       await act(() => result.current.logout());
       expect(result.current.session).toBeUndefined();
     });
@@ -219,8 +208,8 @@ describe('logout', () => {
       mockedAxios.post.mockImplementationOnce(() => {
         throw new Error('Failed to log out');
       });
-      const { result, waitForNextUpdate } = renderHook(() => useSession(), { wrapper });
-      await waitForNextUpdate();
+      const { result } = renderHook(() => useSession(), { wrapper });
+      await waitFor(() => expect(result.current).not.toBeNull());
       await act(() => result.current.logout());
       expect(result.current.error).toEqual('Failed to log out');
     });
@@ -259,7 +248,7 @@ Let's import our `useSession()` hook so that we can call our login function:
 ```TypeScript
 ...
 const LoginPage: React.FC = () => {
-  const { login } = useSession();
+  const { login, session } = useSession();
   const history = useHistory();
   const { handleSubmit, control, formState: {...}} = useForm<{...}>({...});
 
@@ -326,7 +315,7 @@ Let's go ahead and write the logic to handle signing out:
 ```TypeScript
 ...
 import { useHistory } from 'react-router';
-import { useSession } from '../core/auth';
+import { useSession } from '../core/session';
 ...
 
 const TeaPage: React.FC = () => {
