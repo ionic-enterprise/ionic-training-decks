@@ -197,7 +197,7 @@ The Context's Provider returns a React component that allows any child component
 Add the following code after `SessionContext`, importing any modules along the way:
 
 ```TypeScript
-export const SessionProvider: React.FC = ({ children }) => {
+export const SessionProvider: React.FC<PropsWithChildren> = ({ children }) => {
   const [initializing, setInitializing] = useState<boolean>(true);
   const [state, dispatch] = useReducer(reducer, initialState);
 
