@@ -1,3 +1,14 @@
+# [5.3.0](https://github.com/ionic-team/ionic-training-decks/compare/v5.1.3...v5.3.0) (2022-10-10)
+
+### Bug Fixes
+
+- replace "master" with "main" ([d2a90f6](https://github.com/ionic-team/ionic-training-decks/commit/d2a90f671d5c6b43061ea943440fbc809953dcd4))
+
+### Features
+
+- **logos:** switch all trainings to use @capacitor/assets ([#79](https://github.com/ionic-team/ionic-training-decks/issues/79)) ([8ef632d](https://github.com/ionic-team/ionic-training-decks/commit/8ef632d75c63e3919660e98ac9ca079a1daa97b3))
+- **react:** update to Ionic 6 + Capacitor 4 ([f690c21](https://github.com/ionic-team/ionic-training-decks/commit/f690c21b77a318e9a8b5d0aea5d1eb422f06ed8a))
+
 ## [5.2.1](https://github.com/ionic-team/ionic-training-decks/compare/v5.2.0...v5.2.1) (2022-10-06)
 
 # [5.2.0](https://github.com/ionic-team/ionic-training-decks/compare/v4.1.1...v5.2.0) (2022-07-25)
