@@ -1,6 +1,6 @@
 # Lab: Store the Tea Rating
 
-In this lab you will further explore our data service and data store in order to implement the saving and retrieval of the user's tea ratings.
+In this lab you will further explore our tea composable function in order to implement the saving and retrieval of the user's tea ratings.
 
 ## Overall Strategy
 
@@ -13,9 +13,9 @@ The first challenge that we have is that our backend API does not have a place t
 
 Finally, we will need to update the `TeaDetails` page to display the correct rating when the page is displayed, and to save any rating changes.
 
-By laying everything like this, we allow for change in our system without breaking a lot of code. For example, if the backend API is later changed such that we _can_ store the ratings, the only thing that needs to change is the `useTea` composition function. We would just change how the `rate()` and `refresh()` access the ratings data. Nothing else in the system needs to change.
+By laying out everything like this, we allow for change in our system without breaking a lot of code. For example, if the backend API is later changed such that we _can_ store the ratings, the only thing that needs to change is the `useTea` composition function. We would just change how the `rate()` and `refresh()` access the ratings data. Nothing else in the system needs to change.
 
-It is a best practice to always have a layer of code in your system that insulates the rest of the application from change.
+It is a best practice to always have layers of code in your system that insulate the rest of the application from change.
 
 ## `useTea` Modifications
 
@@ -27,22 +27,24 @@ Three tests are using the `Tea` model when creating test data.
 
 - `tests/unit/views/TeaDetailsPage.spec.ts`
 - `tests/unit/views/TeaListPage.spec.ts`
-- `tests/unit/use/tea.spec.ts`
+- `tests/unit/composables/tea.spec.ts`
 
 Update the `TeaDetailsPage` and `TeaListPage` tests to include a `rating` in any defined `Tea` model. Use any number between 0 and 5 for each tea.
 
-In the `tests/unit/use/tea.spec.ts` file there are also a few preliminary items to handle:
+In the `tests/unit/composables/tea.spec.ts` file there are also a few preliminary items to handle:
 
-- add a rating to each Tea model (use a value of zero for now)
+- when adding a rating to each Tea model, use a value of zero for now
 - a couple of "find" tests expect a specific tea, add the `rating` there as well
 - update the creation of `httpResultTeas` to remove the `result` just like we do the `image`
 - add a `describe('rate')` block for the saving of the rating, but leave it empty for now
 - `import { Preferences } from @capacitor/preferences;`
 
-In `src/use/tea.ts`, add the rating setting it to zero in `unpackData()`. Also, create the shell of the `rate()` method as such (be sure to return it from the `default` function as well as to the `src/use/__mocks__/tea.ts` file):
+In `src/composables/tea.ts`, add the rating setting it to zero in `unpackData()`. Also, create the shell of the `rate()` method as such (be sure to return it from the `default` function as well as to the `src/composables/__mocks__/tea.ts` file):
 
 ```typescript
-const rate = async (id: number, rating: number): Promise<void> => {};
+const rate = async (id: number, rating: number): Promise<void> => {
+  null;
+};
 ```
 
 At this point we are ready to start implementing the changes.
@@ -66,7 +68,7 @@ When the rating is saved using `@capacitor/preferences`, we will use a key of `r
   });
 ```
 
-Add the code to accomplish this in `src/use/tea.ts`:
+Add the code to accomplish this in `src/composables/tea.ts`:
 
 ```TypeScript
 const rate = async (id: number, rating: number): Promise<void> => {
@@ -90,7 +92,7 @@ You should add a `beforeEach()` section within the `describe('rate')` like this:
 ```typescript
 beforeEach(() => {
   const { client } = useBackendAPI();
-  (client.get as any).mockResolvedValue({ data: httpResultTeas });
+  (client.get as jest.Mock).mockResolvedValue({ data: httpResultTeas });
 });
 ```
 
@@ -104,7 +106,7 @@ Your test will then perform the following tasks:
 
 When we fetch the tea data in our service, we currently transform it to set the `image`. We also need to add a transform to set the rating. The test for this is pretty straight forward.
 
-First, pick some teas in our `expectedTeas` array to have non-zero ratings. I suggest just picking three or so of them to have the non-zero ratings. The teas with the zero ratings represent the teas that have not yet been rated. If you picked teas that are also used in the `find()` tests, but sure to update those tests accordingly. We should now have failing tests.
+First, pick some teas in our `expectedTeas` array to have non-zero ratings. I suggest just picking three or so of them to have the non-zero ratings. The teas with the zero ratings represent the teas that have not yet been rated. If you picked teas that are also used in the `find()` tests, be sure to update those tests accordingly. We should now have failing tests.
 
 We will be using the Preferences API's `get()` method to get the proper data. In the main `beforeEach()`, mock the `Preferences.get` method with a `mockImplementation()` to return the proper values for each key based on the `expectedTeas`. What the "proper value" is depends highly upon which `expectedTeas` you chose to have a non-zero ratings value. Thus your code will almost certainly be slightly different.
 
@@ -123,7 +125,7 @@ beforeEach(() => {
 beforeEach(() => {
   initializeTestData();
   jest.clearAllMocks();
-  (Preferences.get as any).mockImplementation(async (opt: GetOptions) => {
+  (Preferences.get as jest.Mock).mockImplementation(async (opt: GetOptions) => {
     let value = null;
     switch (opt.key) {
       case 'rating3':
@@ -141,7 +143,9 @@ beforeEach(() => {
 });
 ```
 
-Now for ths transform itself. Here is where things get a little complicated. Here is what we are doing in a nut-shell:
+_Note:_ you need to import `GetOptions` from `@capacitor/preferences`.
+
+Now for the transform itself. Here is where things get a little complicated. Here is what we are doing in a nut-shell:
 
 - Create a `transform()` method that transforms the tea, this needs to be done asynchronously now.
 - Since we are doing things asynchronously, the `unpackData()` needs to return a promise of the tea array.
@@ -215,7 +219,7 @@ describe('rate', () => {
     // main beforeEach() and clean up the rest of the tests accordingly. Doing so
     // is left as an exercise for the reader.
     const { client } = useBackendAPI();
-    (client.get as any).mockResolvedValue({ data: httpResultTeas });
+    (client.get as jest.Mock).mockResolvedValue({ data: httpResultTeas });
   });
 
   it('saves the value', async () => {
@@ -245,47 +249,30 @@ const rate = async (id: number, rating: number): Promise<void> => {
 };
 ```
 
-Here is the diff for the `TeaDetailsPage` coding in case you need it.
+Here is the code from the `script` section of the `TeaDetailsPage` in case you need it.
 
-```diff
-diff --git a/src/views/TeaDetailsPage.vue b/src/views/TeaDetailsPage.vue
-index e21cd23..b651134 100644
---- a/src/views/TeaDetailsPage.vue
-+++ b/src/views/TeaDetailsPage.vue
-@@ -16,7 +16,11 @@
-         </div>
-         <h1 data-testid="name">{{ tea.name }}</h1>
-         <p data-testid="description">{{ tea.description }}</p>
--        <app-rating data-testid="rating" v-model="rating"></app-rating>
-+        <app-rating
-+          data-testid="rating"
-+          v-model="rating"
-+          @click="ratingClicked"
-+        ></app-rating>
-       </div>
-     </ion-content>
-   </ion-page>
-@@ -58,10 +62,20 @@ export default defineComponent({
-     const tea = ref<Tea | undefined>();
-     const rating = ref(0);
+```typescript
+import { ref } from 'vue';
+import { IonBackButton, IonButtons, IonContent, IonHeader, IonImg, IonPage, IonTitle, IonToolbar } from '@ionic/vue';
+import { useRoute } from 'vue-router';
+import { Tea } from '@/models';
+import useTea from '@/composables/tea';
+import AppRating from '@/components/AppRating.vue';
 
-+    const ratingClicked = () => {
-+      const { rate } = useTea();
-+      if (tea.value) {
-+        rate(tea.value.id, rating.value);
-+      }
-+    };
-+
-     const { find } = useTea();
--    find(id).then(t => (tea.value = t));
-+    find(id).then(t => {
-+      tea.value = t;
-+      rating.value = (t && t.rating) || 0;
-+    });
+const { params } = useRoute();
+const id = parseInt(params.id as string, 10);
+const tea = ref<Tea | undefined>();
+const rating = ref(0);
 
--    return { rating, tea };
-+    return { rating, tea, ratingClicked };
-   },
- });
- </script>
+const { find, rate } = useTea();
+find(id).then((t) => {
+  tea.value = t;
+  rating.value = t.rating;
+});
+
+const ratingClicked = () => {
+  if (tea.value) {
+    rate(tea.value.id, rating.value);
+  }
+};
 ```

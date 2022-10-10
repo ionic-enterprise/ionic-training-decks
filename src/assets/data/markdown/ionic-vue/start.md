@@ -83,10 +83,10 @@ Modify your `package.json` file. I suggest moving the `description` up to the to
 Initialize Husky:
 
 ```bash
-npm run prepare
+npm install
 ```
 
-**Note:** we also could have run `npx husky install` but using the `prepare` script ensures that we have it set up properly.
+**Note:** we also could have run `npx husky install` but using `install` ensures that we have set up the `prepare` properly.
 
 By default, the git hooks handled by `husky` are stored in the `.husky` directory. Let's add a couple now:
 
@@ -95,7 +95,7 @@ npx husky add .husky/pre-commit "npx pretty-quick --staged"
 npx husky add .husky/pre-push "npm run lint"
 ```
 
-This will ensure our code is properly formatted before each commit. It will also ensure that our code does not have any linting errors before we push it out to the `origin` repo. It would also be good to run the unit tests in the `pre-push` hook, but we have not gotten that far yet.
+This will ensure our code is properly formatted before each commit. It will also ensure that our code does not have any linting errors before we push it out to the `origin` repo. It is also a good idea to run the unit tests in the `pre-push` hook, but we have not gotten that far yet.
 
 Finally, make sure all of our source is formatted properly.
 

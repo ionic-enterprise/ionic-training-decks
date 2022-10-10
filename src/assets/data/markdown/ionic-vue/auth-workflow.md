@@ -10,25 +10,26 @@ In this lab you will add the following capabilities:
 
 ## Modify the View Tests
 
-We will begin using the router from within the views. As a result, we will need to refactor how the view is mounted within our tests. In `tests/unit/views/Login.spec.ts` and `tests/unit/views/TeaList.spec.ts`, make the following modifications:
+We will begin using the router from within the views. As a result, we will need to refactor how the view is mounted within our tests. In `tests/unit/views/LoginPage.spec.ts` and `tests/unit/views/TeaList.spec.ts`, make the following modifications:
 
 - Import `createRouter`, `createWebHistory`, and `Router` from `vue-router`.
 - Create a method called `mountView` that is responsible for setting up the router and mounting the view.
 - Replace the current `mount()` calls in the tests with `mountView()` calls. Note that since `mountView()` is `async`, this will require making all of the tests `async`.
-- Mock the `useAuth` composition function that we created.
+- Import `useAuth` from `@/composables/auth`.
+- Mock the `useAuth` composition function that we imported.
 
-Here is an example from the `Login` test. Make similar modifications to the `TeaList` test as well.
+Here is an example from the `LoginPage` test. Make similar modifications to the `TeaList` test as well.
 
 ```typescript
-import Login from '@/views/Login.vue';
-import { mount, VueWrapper } from '@vue/test-utils';
-import flushPromises from 'flush-promises';
+import LoginPage from '@/views/LoginPage.vue';
+import { flushPromises, mount, VueWrapper } from '@vue/test-utils';
+import waitForExpect from 'wait-for-expect';
 import { createRouter, createWebHistory, Router } from 'vue-router';
-import useAuth from '@/use/auth';
+import useAuth from '@/composables/auth';
 
-jest.mock('@/use/auth');
+jest.mock('@/composables/auth');
 
-describe('Login.vue', () => {
+describe('LoginPage.vue', () => {
   let router: Router;
 
   const mountView = async (): Promise<VueWrapper<any>> => {
@@ -49,7 +50,7 @@ describe('Login.vue', () => {
     const wrapper = await mountView();
     const titles = wrapper.findAll('ion-title');
     expect(titles).toHaveLength(1);
-    expect(titles[0].text()).toBe('Login');
+    expect(titles[0].text()).toBe('LoginPage');
   });
 
   // Other test cases exists here and will need similar mods to the one above.
@@ -58,7 +59,7 @@ describe('Login.vue', () => {
 
 ## Handle the Login
 
-When the user clicks on the "Sign On" button in the Login view, we need to satisfy the following requirements:
+When the user clicks on the "Sign On" button in the LoginPage view, we need to satisfy the following requirements:
 
 - Perform the login.
 - If the login fails, we need to display an error message.
@@ -88,7 +89,7 @@ describe('clicking on the signin button', () => {
   describe('if the login succeeds', () => {
     beforeEach(() => {
       const { login } = useAuth();
-      (login as any).mockResolvedValue(true);
+      (login as jest.Mock).mockResolvedValue(true);
     });
 
     it('does not show an error', async () => {
@@ -112,7 +113,7 @@ describe('clicking on the signin button', () => {
   describe('if the login fails', () => {
     beforeEach(() => {
       const { login } = useAuth();
-      (login as any).mockResolvedValue(false);
+      (login as jest.Mock).mockResolvedValue(false);
     });
 
     it('shows an error', async () => {
@@ -138,36 +139,22 @@ For the code, here are the pieces. It is up to you to find the correct spot in `
 
 First the one-liners:
 
-- Add an `errorMessage` ref object. Be sure to expose it at the bottom of the `setup()`. You will need to add `ref` to the import from `vue`.
+- Add an `errorMessage` ref object. You will need to add `ref` to the import from `vue`.
 - Update the template to display the error message if there is one. Here is the markup: `<div v-if="errorMessage">{{ errorMessage }}</div>`. We already have an area where error messages should be displayed. This markup belong inside that area.
 - `import { useRouter } from 'vue-router';`
-- `import useAuth from '@/use/auth';`
+- `import useAuth from '@/composables/auth';`
 - Add a click event binding to the button: `@click="signinClicked"`.
 
-Now we can define and expose our click handler. This is done within the `setup()` method as such:
+Now we can define our click handler.
 
 ```typescript
-  setup() {
-    const { login } = useAuth();
-    const router = useRouter();
-    const errorMessage = ref('');
-    ...
+const { login } = useAuth();
+const router = useRouter();
 
-    const signinClicked = async () => {
-      // Code Challenge: call the login and react to the resolved value
-      // Use the tests we wrote to figure out the code to write
-    };
-
-    return {
-      logInOutline,
-      email,
-      password,
-      errors,
-      meta,
-      errorMessage,
-      signinClicked,
-    };
-  },
+const signinClicked = async () => {
+  // Code Challenge: call the login and react to the resolved value
+  // Use the tests we wrote to figure out the code to write
+};
 ```
 
 **Hints:**
@@ -194,24 +181,19 @@ Let's add the actual button first. In `src/views/TeaList.vue` add the following 
         </ion-buttons>
 ```
 
-Now we will need to go to the `script` tag and make some adjustments. First, where we are doing the imports, add the following:
+Now we will need to go to the `script setup` tag and make some adjustments. Where we are doing the imports, add the following:
 
 - add `IonButton`, `IonButtons`, and `IonIcon` to the list of components being imported
 - add `import { logOutOutline } from 'ionicons/icons';`
-
-Then, were we define the component itself:
-
-- add `IonButton`, `IonButtons`, and `IonIcon` to the `components` object
-- add a `setup()` method with the following contents
+- add a shell `loginClicked()` function
 
 ```TypeScript
-  setup() {
-    const logoutClicked = async (): Promise<void> => { }
-    return { logoutClicked, logOutOutline };
-  },
+const logoutClicked = async (): Promise<void> => { };
 ```
 
-Now let's make that button actually do something. Specifically, let's make it log us out. First we will update the test to express that requirement:
+Now let's make that button actually do something. Specifically, let's make it log us out. First we will update the `TeaListPage` test to use a `mountView` function similar to the one we created in the `LoginPage` test. Be sure to also import and mock `@/composables/auth`.
+
+With those modifications in place, we can add the tests that express our current requirements:
 
 ```TypeScript
     it('performs a logout when the logout button is clicked', async () => {
@@ -233,7 +215,7 @@ Now let's make that button actually do something. Specifically, let's make it lo
     });
 ```
 
-Back in the view's code, fill out the logic for the `logoutClicked()` function that was created within the `setup()`. **Hint:** you will need to import `useAuth` and use the `logout` function from it. You will also need to use `useRouter`. See the `Login` page for examples.
+Back in the view's code, fill out the logic for the `logoutClicked()` function that was created within the `script setup` section. **Hint:** you will need to import `useAuth` and use the `logout` function from it. You will also need to use `useRouter`. See the `LoginPage` page for examples.
 
 Test that out in the browser. The full flow should now work.
 
@@ -261,12 +243,12 @@ const checkAuthStatus = async (
 
 You will need to add a couple of imports for this to compile:
 
-- Add: `import useSession from '@/use/session';`
+- Add: `import useSession from '@/composables/session';`
 - Add `RouteLocationNormalized` and `NavigationGuardNext` to the existing import from `vue-router`
 
 The guts of the `checkAuthStatus()` function are:
 
-- If we do not have a session, use `to.matched` to check each segment of the target route. If at least one segment in the route requires authentication redirect to the Login page.
+- If we do not have a session, use `to.matched` to check each segment of the target route. If at least one segment in the route requires authentication redirect to the LoginPage page.
 - Otherwise (either we have a session, or no segments required authentication), continue to the next hook in the pipeline.
 
 Next, after we create the router, call the guard for each route change (code given in context, only add the appropriate line in your own code).
@@ -297,7 +279,7 @@ At this point, if you logout and the try to manually go to either `http://localh
 
 ## Add Interceptors
 
-We need to intercept outgoing requests and add the token if we have one. We also need to take a look at responses coming back from the server, and if we get a 401 we need to clear our store state as it is invalid. Make the appropriate modifications to `src/use/backend-api.ts`.
+We need to intercept outgoing requests and add the token if we have one. We also need to take a look at responses coming back from the server, and if we get a 401 we need to clear our store state as it is invalid. Make the appropriate modifications to `src/composables/backend-api.ts`.
 
 You will need to update the imports.
 
@@ -305,7 +287,7 @@ You will need to update the imports.
 import axios, { AxiosRequestConfig } from 'axios';
 
 import router from '@/router';
-import useSession from '@/services/useSession';
+import useSession from '@/composables/session';
 
 const { clearSession, getSession } = useSession();
 ```
@@ -334,7 +316,7 @@ client.interceptors.response.use(
 
 ## Linting
 
-We have been developing for a bit now, but have not run `lint` at all. I suggest running lint early and often. At the very least, before any commit to `main` (or `master`) we should run `lint` and clean up any issues in our code. Let's do that now:
+We have been developing for a bit now, but have not run `lint` at all (though to be fair, Vue's build process does this for us). I suggest running lint early and often. At the very least, before any commit to `main` (or `master`) we should run `lint` and clean up any issues in our code. Let's do that now:
 
 ```bash
 npm run lint

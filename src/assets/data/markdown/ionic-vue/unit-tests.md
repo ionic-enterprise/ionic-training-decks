@@ -16,7 +16,7 @@ npm run test:unit
 
 There are two things we should note right away:
 
-1. The current test fails.
+1. The current test file has a poor name.
 1. The command runs the tests once and then exits.
 
 The first item we will fix as we go.
@@ -49,7 +49,7 @@ npm run test:dev
 
 Jest should run our tests and then wait for changes. We have not changed anything, so it doesn't _actually_ run any tests. Let's make some changes to the `tests/unit/example.spec.ts` file. Add some junk to the `toMatch()` string and save the file. The test should fail. Remove the junk text that was just added. The tests should pass again.
 
-Try changing a one of the `true` values to `false`. The test should re-run and fail. Change the value back to `true` and the test should pass again. We have our general workflow in place. Leave the test runner running. Next we will start to add tests for our components.
+We have our general workflow in place. Leave the test runner running. Next we will start to add tests for our components.
 
 ## Scaffold the Tests for Our Application
 
@@ -91,7 +91,7 @@ The `tests/unit/example.spec.ts` test is testing `HomePage.vue`, so let's just s
 - `mkdir tests/unit/views`
 - `git mv tests/unit/example.spec.ts tests/unit/views/HomePage.spec.ts`
 
-Have a look at `src/views/HomePage.vue`. What should we test here? We do not want to write too many tests, since we will be changing this all some time soon. Let's just test that the header has a proper title and that the container div has the text we expect. When we change this page later, the title test will still be valid, but the "container" one will require some heavy modification.
+Have a look at `src/views/HomePage.vue`. What should we test here? We do not want to write too many tests, since we will be changing this all some time soon. Let's just test that the header has a proper title and that the container div has the text we expect.
 
 Let's just make a slight modification to `tests/unit/views/HomePage.spec.ts`:
 

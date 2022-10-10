@@ -4,8 +4,6 @@ In this lab you will use Capacitor to access a native API. Specifically, the soc
 
 **Note:** this is an "extra credit" lab and can be skipped without affecting the main functionality of the application. It adds a neat feature, though... 🤓
 
-**Important Note:** Due to a bug in the Vue testing framework, as soon as `isPlatform()` is called from the code, all unit tests for the component that uses it will stop working. As a result, we will currently skip all of the tests for `AppTastingNoteEditor` (make the main describe look like this: `describe.skip('AppTastingNoteEditor.vue', () => {`). This will hopefully be resolved by the Vue Test Utilities team soon. This lab still creates all of the tests, but none of them will be run.
-
 ## Capacitor Native API Plugins
 
 We can use various <a href="https://capacitorjs.com/docs/plugins" target="_blank">Capacitor Plugins</a> in order to provide access to native APIs. We have already done this to a certain degree with our use of the <a href="https://capacitorjs.com/docs/apis/preferences" target="_blank">Preferences</a> plugin. That plugin, however, works completely behind the scenes, so we can't really "experience" anything with it.
@@ -36,28 +34,16 @@ The first thing we will do is add a sharing button to the top of our `AppTasting
   ...
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
   ...
+  import { computed, ref } from 'vue';
   import { close, shareOutline } from 'ionicons/icons';
-    ...
-    setup() {
-      ...
-      const allowShare = computed( () => true);
-      const sharingIsAvailable = computed(() => true);
-      const share = async (): Promise<void> => {
-        return;
-      }
-      ...
-      return {
-        allowShare,
-        ...
-        share,
-        shareOutline,
-        sharingIsAvailable,
-        ...
-      };
-    },
-  });
+  ...
+  const allowShare = computed( () => true);
+  const sharingIsAvailable = ref(true);
+  const share = async (): Promise<void> => {
+    return;
+  }
 </script>
 ```
 
@@ -65,7 +51,7 @@ At this point, the button should display and be clickable, but it is not functio
 
 ### Share Only on Devices
 
-The designers have let us know that they only want this functionality available when users are running in a mobile context, so let't take care of making sure the button is only visible in that context.
+The designers have let us know that they only want this functionality available when users are running in a mobile context, so let's take care of making sure the button is only visible in that context.
 
 We will start with the test. First, import the `isPlatform` function from `@ionic/vue` and mock it. This get's a little tricky as you need to mock all of `@ionic/vue` using the actual implementation for most of it.
 
@@ -81,7 +67,7 @@ jest.mock('@ionic/vue', () => {
 In the main `beforeEach()`, create a mock implementation that defaults to us running in a mobile context. We will do this in the code by passing the "hybrid" flag, so just compare the value sent to "hybrid". Do this before mounting the component (towards the end of the `beforeEach()`).
 
 ```TypeScript
-    (isPlatform as any).mockImplementation((key: string) => key === 'hybrid');
+    (isPlatform as jest.Mock).mockImplementation((key: string) => key === 'hybrid');
 ```
 
 At this point we can start creating the tests for the button. Note the special case test for the web context. Also note that we are remounting the modal there. That is because the `isPlatform` is only going to be evaluated at that time. We aren't doing anything here that would otherwise trigger a re-evaluation.
@@ -90,23 +76,19 @@ At this point we can start creating the tests for the button. Note the special c
   describe('share button', () => {
     describe('in a web context', () => {
       beforeEach(() => {
-        (isPlatform as any).mockImplementation(
+        (isPlatform as jest.Mock).mockImplementation(
           (key: string) => key !== 'hybrid',
         );
       });
 
       afterEach(() => {
-        (isPlatform as any).mockImplementation(
+        (isPlatform as jest.Mock).mockImplementation(
           (key: string) => key === 'hybrid',
         );
       });
 
       it('does not exist', () => {
-        const modal = mount(AppTastingNoteEditor, {
-          global: {
-            plugins: [store, VuelidatePlugin],
-          },
-        });
+        const modal = mount(AppTastingNoteEditor);
         const button = modal.findComponent('[data-testid="share-button"]');
         expect(button.exists()).toBe(false);
       });
@@ -119,10 +101,10 @@ At this point we can start creating the tests for the button. Note the special c
   });
 ```
 
-The web context test fails, of course, because our `sharingIsAvailable` computed property is just returning `true` all of the time. Let's fix that now:
+The web context test fails, of course, because our `sharingIsAvailable` property is just returning `true` all of the time. Let's fix that now:
 
 ```TypeScript
-const sharingIsAvailable = computed(() => isPlatform('hybrid'));
+const sharingIsAvailable = ref(isPlatform('hybrid');
 ```
 
 ### Enable When Enough Information Exists
@@ -158,9 +140,7 @@ First we will test for it. This test belongs right after the `exists` test withi
 We can then enter the proper logic in the `allowShare` computed property:
 
 ```TypeScript
-const allowShare = computed(
-  () => !!(brand.value && name.value && rating.value),
-);
+const allowShare = computed(() => !!(brand.value && name.value && rating.value));
 ```
 
 ## Share the Note

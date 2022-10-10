@@ -6,14 +6,14 @@ In this lab, you will learn how to create a composition function that will be us
 
 The first thing we need to to is create some templates for our unit test and composition function.
 
-**`tests/unit/use/tea.spec.ts`**
+**`tests/unit/composables/tea.spec.ts`**
 
 ```TypeScript
-import useBackendAPI from '@/use/backend-api';
-import useTea from '@/use/tea';
+import useBackendAPI from '@/composables/backend-api';
+import useTea from '@/composables/tea';
 import { Tea } from '@/models';
 
-jest.mock('@/use/backend-api');
+jest.mock('@/composables/backend-api');
 
 describe('useTea', () => {
   let expectedTeas: Array<Tea>;
@@ -36,7 +36,7 @@ describe('useTea', () => {
 });
 ```
 
-**`src/use/tea.ts`**
+**`src/composables/tea.ts`**
 
 ```TypeScript
 import { ref } from 'vue';
@@ -147,7 +147,7 @@ What we have here is the `expectedTeas` with the data in the shape we want withi
 ```TypeScript
     it('transforms the tea data', async () => {
       const { refresh, teas } = useTea();
-      (client.get as any).mockResolvedValue({ data: httpResultTeas });
+      (client.get as jest.Mock).mockResolvedValue({ data: httpResultTeas });
       await refresh();
       expect(teas.value).toEqual(expectedTeas);
     });
@@ -155,7 +155,7 @@ What we have here is the `expectedTeas` with the data in the shape we want withi
 
 The HTTP `GET` returns the teas in one shape, we expect the results in the other shape.
 
-So, let's get down to coding this in `src/use/tea.ts`. The first thing we will do is define a type for the data coming back from the HTTP API and the shell of a transforming function.
+So, let's get down to coding this in `src/composables/tea.ts`. The first thing we will do is define a type for the data coming back from the HTTP API and the shell of a transforming function.
 
 ```TypeScript
 interface RawData {
@@ -200,7 +200,7 @@ Obviously, this is a fairly contrived example and it does not compensate for cha
 
 The same applies if, for example, the backend team decides to shorten the property names in order to save on bytes going over the air. You still only need to change this service. The rest of your system is insulated from the external API changes by the use of this composition function.
 
-At this point, we should create a `src/use/__mocks__/tea.ts` as well. You should be an old hand at that by now, but for this one you will also need to supply the `teas` reactive value as such: `teas: ref<Array<Tea>>([]),`
+At this point, we should create a `src/composables/__mocks__/tea.ts` as well. You should be an old hand at that by now, but for this one you will also need to supply the `teas` reactive value as such: `teas: ref<Array<Tea>>([]),`
 
 ## Update the Tea List Page
 
@@ -210,21 +210,22 @@ Now that we have this put together, we can update the `TeaList` page to show the
 
 Modify the test first. Since we are not changing anything about how the page works, but are only changing the source of our data, we need to modify the test to make sure the new data source has data in it. We will:
 
-- Import the mock of the composition function we just created. Note that jest hoists the `jest.mock('@/use/tea')`, which is why that can be _after_ the actual import.
+- Import the mock of the composition function we just created. Note that jest hoists the `jest.mock('@/composables/tea')`, which is why that can be _after_ the actual import.
 - Get the `teas` array from it.
 - Set the `value` of the `teas` array.
 
 ```TypeScript
-import useTea from '@/use/tea';
+import useTea from '@/composables/tea';
 ...
-jest.mock('@/use/tea');
+jest.mock('@/composables/tea');
   ...
   const { teas } = useTea();
   ...
 
   beforeEach(() => {
     teas.value = [
-      // Copy the tea data from the `TeaListPage.vue` file to here...
+      // Copy the tea data for seven of the teas from the `TeaListPage.vue` file to here.
+      // Only seven because we have our "with a list of seven teas" test group.
     ];
     jest.clearAllMocks();
   });
@@ -262,24 +263,10 @@ it('refreshes the tea data', async () => {
 
 Let's attach the view code in a methodic, orderly fashion.
 
-1. Our view currently has a hard-coded `data()` section. Remove that entirely.
-1. Within the `setup()`, do the following:
-   1. `const { refresh, teas } = useTea();` (you will also need to add an import)
-   1. Call `refresh()`
-   1. Add a computed value: `const teaRows = computed(() => {});` (be sure to include `teaRows` in the object returned at the end of the `setup()` function)
-
-At this point, we need to figure out the logic for the computed value we added in our `setup()`. Note that we currently have a `computed:` section outside of our `setup()`. It contains a `teaRows()` function that has _almost_ exactly what we want with one minor modification:
-
-What we need to do to finish this up is the following:
-
-1. Copy the code from the original `teaRows()` function to the body of our `const teaRows = computed(() => {});` computed value.
-1. Change `this.teaData` to `teas.value` as noted in the `diff` below.
-1. Remove the old `computed:` section.
-
-```diff
--      this.teaData.forEach(t => {
-+      teas.value.forEach(t => {
-```
+1. Add `const { refresh, teas } = useTea();` (you will also need to add an import)
+1. Call `refresh()`
+1. Modify the `teaRows` computed value to use `teas` rather than `teaData`
+1. Remove the hard coded `teaData`
 
 At this point, the old styled `computed:` and `data()` sections should be gone, and all of the logic to fetch our teas and transform the array into a matrix should be contained within our `setup()` routine. All of our tests should be passing, and when we run the code in the browser we should see eight teas displayed.
 
@@ -289,36 +276,28 @@ Our TeaList page is now getting live data from our backend. The data itself is m
 
 In case you had any issues transforming the view, here is the full code for the `setup()` function that you can use as a reference. Try to code this on your own, however, without peeking.
 
-```TypeScript
-  setup() {
-    const { logout } = useAuth();
-    const { refresh, teas } = useTea();
-    const router = useRouter();
+```typescript
+refresh();
 
-    const teaRows = computed(() => {
-      const teaMatrix: Array<Array<Tea>> = [];
-      let row: Array<Tea> = [];
-      teas.value.forEach(t => {
-        row.push(t);
-        if (row.length === 4) {
-          teaMatrix.push(row);
-          row = [];
-        }
-      });
+const logoutClicked = async () => {
+  await logout();
+  router.replace('/login');
+};
 
-      if (row.length) {
-        teaMatrix.push(row);
-      }
-      return teaMatrix;
-    });
+const teaRows = computed((): Array<Array<Tea>> => {
+  const teaMatrix: Array<Array<Tea>> = [];
+  let row: Array<Tea> = [];
+  teas.value.forEach((t) => {
+    row.push(t);
+    if (row.length === 4) {
+      teaMatrix.push(row);
+      row = [];
+    }
+  });
 
-    const logoutClicked = async (): Promise<void> => {
-      await logout();
-      router.replace('/login');
-    };
-
-    refresh();
-
-    return { logoutClicked, logOutOutline, teaRows };
-  },
+  if (row.length) {
+    teaMatrix.push(row);
+  }
+  return teaMatrix;
+});
 ```

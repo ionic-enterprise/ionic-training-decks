@@ -23,7 +23,7 @@ If we are going to have multiple tabs, we are going to need a place to navigate 
   </ion-page>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import {
   IonContent,
   IonHeader,
@@ -31,12 +31,6 @@ import {
   IonTitle,
   IonToolbar,
 } from '@ionic/vue';
-import { defineComponent } from 'vue';
-
-export default defineComponent({
-  name: 'TastingNotesPage',
-  components: { IonContent, IonHeader, IonPage, IonTitle, IonToolbar },
-});
 </script>
 
 <style scoped></style>
@@ -111,7 +105,7 @@ Create a `src/views/TabsPage.vue` file with the following contents:
   </ion-page>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import {
   IonIcon,
   IonLabel,
@@ -122,23 +116,6 @@ import {
   IonTabs,
 } from '@ionic/vue';
 import { leaf, documentText, informationCircle } from 'ionicons/icons';
-import { defineComponent } from 'vue';
-
-export default defineComponent({
-  name: 'TabsPage',
-  components: {
-    IonIcon,
-    IonLabel,
-    IonPage,
-    IonRouterOutlet,
-    IonTabBar,
-    IonTabButton,
-    IonTabs,
-  },
-  setup() {
-    return { documentText, informationCircle, leaf };
-  },
-});
 </script>
 
 <style scoped></style>
@@ -231,7 +208,7 @@ A few things to note about this:
 
 You will also have to modify a couple of the pages to compensate for the change:
 
-- in `tests/unit/views/TeaListPage.spec.ts` find the 'navigates to the tea details page when a tea card is clicked' test and change the expected route from `/teas/tea/4` to `/tabs/teas/tea/4`
+- in `tests/unit/views/TeaListPage.spec.ts` find the 'navigates to the tea details page when a tea card is clicked' test and change the expected route from `/teas/tea/4` to `/tabs/teas/tea/4` (the actual ID number may be different in your test)
 - modify the code in `src/views/TeaListPage.vue` accordingly
 - modify the `defaultHref` for the back button in the `TeaDetailsPage` view to be `/tabs/teas`
 

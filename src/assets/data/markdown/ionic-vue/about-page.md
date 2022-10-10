@@ -15,18 +15,13 @@ Modify the application's `tsconfig.json` file to allow the code to resolve JSON 
 ...
 ```
 
-This will allow us to read the `package.json` file and get some important information from it which we can then return via our `setup()` function. Note that there is no reason for this data to be reactive.
+This will allow us to read the `package.json` file and get some important information from it within our `script setup` section. Note that there is no reason for this data to be reactive.
 
 **Note:** You may need to add the `author` node to the `package.json` file. You can just your your name like this: `"author": "Jackie Smith",`.
 
 ```typescript
-  import packageInfo from '../../package.json';
-
-...
-    setup() {
-      const { author, description, name, version } = packageInfo;
-      return { author, description, name, version };
-    },
+import packageInfo from '../../package.json';
+const { author, description, name, version } = packageInfo;
 ```
 
 We can then update the template or the view.
@@ -71,29 +66,12 @@ We can then update the template or the view.
 
 Currently, the logout logic is on the first page. Once the user has logged in, it is doubtful they will need to logout, so it would make more sense to put that functionality on a page like the "My Account" page, or "My Profile". We don't have one of those, but the about page will do for now.
 
-We start by moving the logout related tests from the `TeaList` view's test to the `About` view's test. You will need to add a couple of imports, etc, but I leave that up to you at this point.
+We start by moving the logout related tests from the `TeaList` view's test to the `About` view's test. You will need to add a couple of imports, etc, but I leave that up to you at this point. The tests you need to move have descriptions like:
 
-```typescript
-it('performs a logout when the logout button is clicked', async () => {
-  const { logout } = useAuth();
-  const wrapper = await mountView();
-  const button = wrapper.find('[data-testid="logout-button"]');
-  router.replace = jest.fn();
-  await button.trigger('click');
-  expect(logout).toHaveBeenCalledTimes(1);
-});
+- 'performs a logout when the logout button is clicked'
+- 'navigates to the login after the logout action is complete'
 
-it('navigates to the login after the logout action is complete', async () => {
-  const wrapper = await mountView();
-  const button = wrapper.find('[data-testid="logout-button"]');
-  router.replace = jest.fn();
-  await button.trigger('click');
-  expect(router.replace).toHaveBeenCalledTimes(1);
-  expect(router.replace).toHaveBeenCalledWith('/login');
-});
-```
-
-I leave it up to you to move the proper code from `src/views/TeaList.vue` to `src/views/About.vue` and then clean up the `TeaList` code.
+I also leave it up to you to move the proper code from `src/views/TeaList.vue` to `src/views/About.vue` and then clean up the `TeaList` code.
 
 Be sure that:
 

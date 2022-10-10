@@ -18,13 +18,7 @@ Create a `src/components/AppRating.vue` file with the following contents:
   <div>Rating Component is Working</div>
 </template>
 
-<script lang="ts">
-  import { defineComponent } from 'vue';
-
-  export default defineComponent({
-    name: 'AppRating',
-  });
-</script>
+<script setup lang="ts"></script>
 
 <style scoped></style>
 ```
@@ -50,37 +44,31 @@ describe('AppRating.vue', () => {
 
 ### Use the Component
 
-In order to see the component as we develop it, let's start using it right away in our `TeaDetails` page:
+In order to see the component as we develop it, let's start using it right away in our `TeaDetailsPage`:
 
 - Add `<app-rating data-testid="rating"></app-rating>` under the description
 - `import AppRating from '@/components/AppRating.vue';`
-- add `AppRating` to the components list
 
-Navigate to the `TeaDetails` page and verify that you see "Rating Component is Working" after the description for the tea.
+Navigate to the `TeaDetailsPage` and verify that you see "Rating Component is Working" after the description for the tea.
 
 ### Build up the UI
 
 We don't want a component that just tells us that it works. What we want is a series of 5 stars that show us a rating. Furthermore, we want to make sure that the component works with Vue's `v-model` when we use it.
 
-Let's modify our `script` tag code to get some of that in place. What we need to do is grab the icons we need and make them available on our component. We then need to add a `modelValue` prop since that is the property that `v-model` will be setting.
+Let's modify our `script` tag code to get some of that in place. What we need to do is grab the icons we need and make them available on our component. We then need to add a `modelValue` prop since that is the property that `v-model` will be setting. The `defineEmits` is not strictly needed, but combined with defining `modelValue` it makes it obvious that we intend for this to work with `v-model`.
 
 ```TypeScript
-<script lang="ts">
-import { defineComponent } from 'vue';
+<script setup lang="ts">
 import { star, starOutline } from 'ionicons/icons';
 
-export default defineComponent({
-  name: 'AppRating',
-  props: {
+defineProps({
     modelValue: {
       type: Number,
       default: 0,
     },
-  },
-  setup() {
-    return { star, starOutline };
-  },
-});
+  });
+
+defineEmits(['update:modelValue']);
 </script>
 ```
 
@@ -91,15 +79,12 @@ In the `src/views/TeaDetailsPage.vue` file, add a `ratings` data item and bind t
 ```html
 <template>
   ...
-  <app-rating data-testid="rating" v-model="rating"></app-rating>
+  <AppRating data-testid="rating" v-model="rating"></AppRating>
   ...
 </template>
 
-<script>
-  // TODO: within the setup(), you will need:
-  //    const rating = ref(0)
-  //    you will also need to return it in the return object of setup()
-  //    add that code...
+<script setup lang="ts">
+  // TODO: define a ref variable for the rating
 </script>
 ```
 
@@ -128,11 +113,11 @@ This test should fail at this point. We will now start replacing the contents of
 </div>
 ```
 
-Be sure to add `IonIcon` to the list of components used here. We have examples of how this is specified with our existing views.
+Be sure to add the proper imports for `IonIcon` and the icons we will use.
 
 If we look at a tea details page in the browser we should see five outlined stars instead of our prior "Rating Component is Working" text that we had before.
 
-Next, let's make tye component respect the modelValue property. First the test:
+Next, let's make the component respect the modelValue property. First the test:
 
 ```TypeScript
   it('fills in the first 3 stars', async () => {
@@ -177,8 +162,6 @@ Add the following event handler to the icon in order to handle the click events:
 ```html
 @click="$emit('update:modelValue', n)"
 ```
-
-**Important:** be sure to also add an `emits: ['update:modelValue']` property in the `defineComponent()` config object.
 
 Try this out in the `TeaDetails` page in the browser. You should now be able to click on the value and it will change. Neat! 🥳
 

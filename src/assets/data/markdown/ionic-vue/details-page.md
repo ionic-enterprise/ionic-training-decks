@@ -16,7 +16,7 @@ Let's start with some fairly boilerplate starting code for a page.
 First the test in `tests/unit/views/TeaDetailsPage.spec.ts`
 
 ```TypeScript
-import useAuth from '@/use/auth';
+import useAuth from '@/composables/auth';
 import TeaDetailsPage from '@/views/TeaDetailsPage.vue';
 import { createRouter, createWebHistory } from '@ionic/vue-router';
 import { mount, VueWrapper } from '@vue/test-utils';
@@ -64,7 +64,7 @@ Then the page itself in `src/views/TeaDetailsPage.vue`
   </ion-page>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import {
   IonContent,
   IonHeader,
@@ -72,12 +72,6 @@ import {
   IonTitle,
   IonToolbar,
 } from '@ionic/vue';
-import { defineComponent } from 'vue';
-
-export default defineComponent({
-  name: 'TeaDetailsPage',
-  components: { IonContent, IonHeader, IonPage, IonTitle, IonToolbar },
-});
 </script>
 
 <style scoped></style>
@@ -106,6 +100,8 @@ We want to navigate from the `TeaListPage` page to the `TeaDetailsPage` page. A 
 
 Based on how we have the test set up, we know we should have seven `ion-card` elements, and we know what order they will be displayed in since we are controlling the state. Our test triggers a click on the 4th card and expects the proper `router.push()` call to occur.
 
+**Note:** you may need to adjust the list a bit based on exactly what your data looks like.
+
 Now that we have a failing test, let's make that click occur in the `TeaListPage.vue` file.
 
 ```HTML
@@ -120,7 +116,7 @@ If we click on that, we get to the details page, but we have no way to get back.
 </ion-buttons>
 ```
 
-Be sure to update the `components` object appropriately where we define the component.
+Be sure to update the list of components where we import them.
 
 Now when we navigate from the `TeaListPage` page to the `TeaDetailsPage` page, the current `IonRouterOutlet` creates a navigation stack and knows that we have a page to go back to. It thus renders a back button in the toolbar for us (remember, iOS has no hardware back button so you need to deal with this in software).
 
@@ -143,7 +139,7 @@ Now that we have the navigation in place, let's grab the tea and display it.
 
 ### Update the Composition Function
 
-To grab the proper tea, it would be handy to have a `find` function in `src/use/tea.ts` that would go grab the tea based on the ID:
+To grab the proper tea, it would be handy to have a `find` function in `src/composables/tea.ts` that would go grab the tea based on the ID:
 
 ```typescript
 const find = async (id: number): Promise<Tea | undefined> => {
@@ -167,7 +163,7 @@ describe('find', () => {
 
   beforeEach(() => {
     teas.value = [];
-    (client.get as any).mockResolvedValue({ data: httpResultTeas });
+    (client.get as jest.Mock).mockResolvedValue({ data: httpResultTeas });
   });
 
   it('refreshes the tea data if it has not been loaded yet', async () => {
@@ -179,6 +175,8 @@ describe('find', () => {
       image: 'assets/img/puer.jpg',
       description: 'Puer tea description.',
     });
+    expect(client.get).toHaveBeenCalledTimes(1);
+    expect(client.get).toHaveBeenCalledWith('/tea-categories');
   });
 
   it('finds the tea from the existing teas', async () => {
@@ -200,10 +198,10 @@ describe('find', () => {
 });
 ```
 
-1. Add those tests to `tests/unit/use/tea.spec.ts`.
-1. Add the `find` from above to `src/use/tea.ts` and fill in the logic.
-1. Be sure to return the `find` in the default function exported by `src/use/tea.ts`.
-1. Include a `find` mock in `src/use/__mocks__/tea.ts`.
+1. Add those tests to `tests/unit/composables/tea.spec.ts`.
+1. Add the `find` from above to `src/composables/tea.ts` and fill in the logic.
+1. Be sure to return the `find` in the default function exported by `src/composables/tea.ts`.
+1. Include a `find` mock in `src/composables/__mocks__/tea.ts`.
 
 ### Update the Details View
 
@@ -228,8 +226,8 @@ router.push('/teas/tea/3');
 
 Next, we need to configure the tea data so the `find()` call we need to make in the code will be testable. This involves the following steps:
 
-- Import the `useTea()` function: `import useTea from '@/use/tea';`
-- Mock the `useTea()` implementation: `jest.mock('@/use/tea');`
+- Import the `useTea()` function: `import useTea from '@/composables/tea';`
+- Mock the `useTea()` implementation: `jest.mock('@/composables/tea');`
 - Add a `beforeEach()` that sets up the data and the mocks.
 
 ```typescript
@@ -261,7 +259,7 @@ beforeEach(() => {
       description: 'Oolong tea description.',
     },
   ];
-  (find as any).mockResolvedValue(teas.value[2]);
+  (find as jest.Mock).mockResolvedValue(teas.value[2]);
   jest.clearAllMocks();
 });
 ```
@@ -293,35 +291,30 @@ it('renders the tea description', async () => {
 
 Within `src/views/TeaDetailsPage.vue` we need to do the following:
 
-- Add `ref` to the import from vue.
+- `import { ref } from 'vue';`
 - `import { useRoute } from 'vue-router';`
 - `import { Tea } from '@/models';`
-- `import useTea from '@/use/tea';`
-- Create a `setup()` function like we have in our other views.
+- `import useTea from '@/composables/tea';`
 
-Within the setup, we know we need to use the `params` object to grab the `id`. We then need to use the `id` to `find()` the tea and return the tea so we can use it in the template.
+Within the `script setup`, we know we need to use the `params` object to grab the `id`. We then need to use the `id` to `find()` the tea and return the tea so we can use it in the template.
 
 Here is some of that in place, with a TODO for you to finish it up.
 
 ```typescript
-  setup() {
-    const { params } = useRoute();
-    const id = parseInt(params.id as string, 10);
-    const tea = ref<Tea | undefined>();
+const { params } = useRoute();
+const id = parseInt(params.id as string, 10);
+const tea = ref<Tea | undefined>();
 
-    // TODO:
-    // 1 - destructure the find() from useTea()
-    // 2 - use find() to find the tea based on the id
-    // 3 - set the tea.value
-    //
-    // Note that find() is async, and setup() is not, so you will need to deal with that in some manner.
-    // FWIW, using "then()" is old-school, but very clean in this case.
-
-    return { tea };
-  },
+// TODO:
+// 1 - destructure the find() from useTea()
+// 2 - use find() to find the tea based on the id
+// 3 - set the tea.value
+//
+// Note that find() is async so you will need to deal with that in some manner.
+// FWIW, using "then()" is old-school, but very clean in this case.
 ```
 
-Within the view we can then add the following markup. Add this inside the `ion-content`. Also, add the `ion-padding` class to the `ion-content`.
+Within the view `template` we can then add the following markup. Add this inside the `ion-content`. Also, add the `ion-padding` class to the `ion-content`.
 
 ```html
 <div v-if="tea">

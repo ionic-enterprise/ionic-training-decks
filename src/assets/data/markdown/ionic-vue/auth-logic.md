@@ -38,12 +38,12 @@ When the user logs in, they establish a session. The session contains informatio
 
 ### Test and Function Shells
 
-First create two files that will serve as the shells for our test and compsable function. You will also need to create the proper directories for them as they do not exist yet.
+First create two files that will serve as the shells for our test and composable function. You will also need to create the proper directories for them as they do not exist yet.
 
-`tests/unit/use/session.spec.ts`
+`tests/unit/composables/session.spec.ts`
 
 ```typescript
-import useSession from '@/use/session';
+import useSession from '@/composables/session';
 import { Session } from '@/models';
 
 describe('useSession', () => {
@@ -68,7 +68,7 @@ describe('useSession', () => {
 });
 ```
 
-`src/use/session.ts`
+`src/composables/session.ts`
 
 ```typescript
 import { Session } from '@/models';
@@ -97,7 +97,7 @@ export default () => {
 };
 ```
 
-`src/use/__mocks__/session.ts`
+`src/composables/__mocks__/session.ts`
 
 ```typescript
 export default jest.fn().mockReturnValue({
@@ -107,7 +107,7 @@ export default jest.fn().mockReturnValue({
 });
 ```
 
-**Note:** The `src/use/__mocks__/session.ts` file will be used to facilitate mocking this composable function effectively in other unit tests.
+**Note:** The `src/composables/__mocks__/session.ts` file will be used to facilitate mocking this composable function effectively in other unit tests.
 
 ### Install `@capacitor/preferences`
 
@@ -213,7 +213,7 @@ describe('getSession', () => {
 
   it('gets the session from preferences', async () => {
     const { getSession } = useSession();
-    (Preferences.get as any).mockResolvedValue({
+    (Preferences.get as jest.Mock).mockResolvedValue({
       value: JSON.stringify(testSession),
     });
     expect(await getSession()).toEqual(testSession);
@@ -223,7 +223,7 @@ describe('getSession', () => {
 
   it('caches the retrieved session', async () => {
     const { getSession } = useSession();
-    (Preferences.get as any).mockResolvedValue({
+    (Preferences.get as jest.Mock).mockResolvedValue({
       value: JSON.stringify(testSession),
     });
     await getSession();
@@ -250,7 +250,16 @@ We will be using <a href="https://www.npmjs.com/package/axios" target="_blank">A
 npm i axios
 ```
 
-We will also create a single Axios instance for our backend API. Create a `src/use/backend-api.ts` file with the following contents:
+After installing this, the `transformIgnorePatterns` in `jest.config.js` need to be updated for Axios:
+
+```javascript
+module.exports = {
+  preset: '@vue/cli-plugin-unit-jest/presets/typescript-and-babel',
+  transformIgnorePatterns: ['/node_modules/(?!@ionic/vue|@ionic/vue-router|@ionic/core|@stencil/core|ionicons|axios)'],
+};
+```
+
+We will also create a single Axios instance for our backend API. Create a `src/composables/backend-api.ts` file with the following contents:
 
 ```typescript
 import axios from 'axios';
@@ -272,7 +281,7 @@ export default () => {
 };
 ```
 
-Similar to what we did with the 'useSession' composition function, we will create a mock in `src/use/__mocks__/backend-api.ts` with the following contents to make our other tests more clean:
+Similar to what we did with the 'useSession' composition function, we will create a mock in `src/composables/__mocks__/backend-api.ts` with the following contents to make our other tests more clean:
 
 ```typescript
 export default jest.fn().mockReturnValue({
@@ -301,16 +310,16 @@ We have logic in place to store the session. It is now time to create the logic 
 
 First create two files that will serve as the shells for our test and compsable function.
 
-`tests/unit/use/auth.spec.ts`
+`tests/unit/composables/auth.spec.ts`
 
 ```typescript
 import { User } from '@/models';
-import useBackendAPI from '@/use/backend-api';
-import useAuth from '@/use/auth';
-import useSession from '@/use/session';
+import useBackendAPI from '@/composables/backend-api';
+import useAuth from '@/composables/auth';
+import useSession from '@/composables/session';
 
-jest.mock('@/use/backend-api');
-jest.mock('@/use/session');
+jest.mock('@/composables/backend-api');
+jest.mock('@/composables/session');
 
 describe('useAuth', () => {
   beforeEach(() => {
@@ -319,7 +328,7 @@ describe('useAuth', () => {
 });
 ```
 
-`src/use/auth.ts`
+`src/composables/auth.ts`
 
 ```typescript
 import useBackendAPI from './backend-api';
@@ -359,13 +368,13 @@ describe('login', () => {
   const { login } = useAuth();
   const { client } = useBackendAPI();
   beforeEach(() => {
-    (client.post as any).mockResolvedValue({
+    (client.post as jest.Mock).mockResolvedValue({
       data: { success: false },
     });
   });
 
-  it('posts to the login endpoint', () => {
-    login('test@test.com', 'testpassword');
+  it('posts to the login endpoint', async () => {
+    await login('test@test.com', 'testpassword');
     expect(client.post).toHaveBeenCalledTimes(1);
     expect(client.post).toHaveBeenCalledWith('/login', {
       username: 'test@test.com',
@@ -373,8 +382,10 @@ describe('login', () => {
     });
   });
 
-  it('resolves false on an unsuccessful login', async () => {
-    expect(await login('test@test.com', 'password')).toEqual(false);
+  describe('when the login fails', () => {
+    it('resolves false', async () => {
+      expect(await login('test@test.com', 'password')).toEqual(false);
+    });
   });
 
   describe('when the login succeeds', () => {
@@ -386,7 +397,7 @@ describe('login', () => {
         lastName: 'McTest',
         email: 'test@test.com',
       };
-      (client.post as any).mockResolvedValue({
+      (client.post as jest.Mock).mockResolvedValue({
         data: {
           success: true,
           user,
@@ -395,11 +406,11 @@ describe('login', () => {
       });
     });
 
-    it('resolves true on a successful login', async () => {
+    it('resolves true', async () => {
       expect(await login('test@test.com', 'password')).toEqual(true);
     });
 
-    it('sets the session on a successful login', async () => {
+    it('sets the session', async () => {
       await login('test@test.com', 'password');
       expect(useSession().setSession).toHaveBeenCalledTimes(1);
       expect(useSession().setSession).toHaveBeenCalledWith({
@@ -441,8 +452,11 @@ describe('logout', () => {
   const { logout } = useAuth();
   const { client } = useBackendAPI();
 
-  it('posts to the login endpoint', () => {
+  it('posts to the logout endpoint', async () => {
     // TODO: Write the test
+    //   - base it on the very similar "posts to the login endpoint" test above
+    //   - endpoint is "/logout"
+    //   - the POST to that endpoint does not have a payload
   });
 
   it('clears the session', async () => {
@@ -458,7 +472,7 @@ describe('logout', () => {
 
 ### Create an Auth Mock
 
-We are going to be calling the `login()` and `logout()` methods from our views. As a result, it would be nice to have a nice consistent mock set up for them. Remember the `src/use/__mocks__/session.ts` file we created at the start of this lab? Create a very similar one called `src/use/__mocks__/auth.ts` with the `login` and `logout` mocks properly defined.
+We are going to be calling the `login()` and `logout()` methods from our views. As a result, it would be nice to have a nice consistent mock set up for them. Remember the `src/composables/__mocks__/session.ts` file we created at the start of this lab? Create a very similar one called `src/composables/__mocks__/auth.ts` with the `login` and `logout` mocks properly defined.
 
 ## Conclusion
 

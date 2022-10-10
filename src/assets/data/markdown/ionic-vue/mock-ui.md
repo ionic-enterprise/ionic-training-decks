@@ -122,19 +122,16 @@ However, our test still refers to our Tea view as "Home", and that will be confu
      expect(container.text()).toContain('Ready to create an app?');
 ```
 
+At this point, our tests and the continuous build for our development server should both be working.
+
 ### Update the View
 
-There is not much to update in `src/views/TeaListPage.vue`. We just need to update the name of the component to avoid future confusion:
+There is not much to update in `src/views/TeaListPage.vue`. We _could_ just need to update the name of the component to avoid future confusion. In the long run, however, it will be to our advantage to switch to using <a href="https://vuejs.org/api/sfc-script-setup.html" target="_blank">script setup</a>.
 
-```diff
- import { defineComponent } from 'vue';
-
- export default defineComponent({
--  name: 'HomePage',
-+  name: 'TeaListPage',
-   components: {
-     IonContent,
-     IonHeader,
+```html
+<script setup lang="ts">
+  import { IonContent, IonHeader, IonPage, IonTitle, IonToolbar } from '@ionic/vue';
+</script>
 ```
 
 ## Coding Challenge
@@ -150,87 +147,72 @@ Let's mock up how the Ionic components will be used in the Tea view. This allows
 
 ### Mock the Data
 
-One way of handling data in a Vue component is to use the <a href="https://v3.vuejs.org/api/options-data.html#data-2" target="_blank">`data()`</a> function. The definition of our page component currently looks like this:
+One way of handling data in a Vue component is to use the <a href="https://vuejs.org/api/reactivity-core.html#ref">ref()</a> to declare a reactive value. The advantage of this approach is that the component will automatically re-render when the data changes.
+
+Add a `ref()` to the `script setup` tag as follows:
 
 ```typescript
-export default defineComponent({
-  name: 'TeaListPage',
-  components: {
-    IonContent,
-    IonHeader,
-    IonPage,
-    IonTitle,
-    IonToolbar,
+const teaData = ref<Array<Tea>>([
+  {
+    id: 1,
+    name: 'Green',
+    image: 'assets/img/green.jpg',
+    description:
+      'Green teas have the oxidation process stopped very early on, leaving them with a very subtle flavor and ' +
+      'complex undertones. These teas should be steeped at lower temperatures for shorter periods of time.',
   },
-});
+  {
+    id: 2,
+    name: 'Black',
+    image: 'assets/img/black.jpg',
+    description:
+      'A fully oxidized tea, black teas have a dark color and a full robust and pronounced flavor. Black teas tend ' +
+      'to have a higher caffeine content than other teas.',
+  },
+  {
+    id: 3,
+    name: 'Herbal',
+    image: 'assets/img/herbal.jpg',
+    description:
+      'Herbal infusions are not actually "tea" but are more accurately characterized as infused beverages ' +
+      'consisting of various dried herbs, spices, and fruits.',
+  },
+  {
+    id: 4,
+    name: 'Oolong',
+    image: 'assets/img/oolong.jpg',
+    description:
+      'Oolong teas are partially oxidized, giving them a flavor that is not as robust as black teas but also ' +
+      'not as subtle as green teas. Oolong teas often have a flowery fragrance.',
+  },
+  {
+    id: 5,
+    name: 'Dark',
+    image: 'assets/img/dark.jpg',
+    description:
+      'From the Hunan and Sichuan provinces of China, dark teas are flavorful aged probiotic teas that steeps ' +
+      'up very smooth with slightly sweet notes.',
+  },
+  {
+    id: 6,
+    name: 'Puer',
+    image: 'assets/img/puer.jpg',
+    description:
+      'An aged black tea from china. Puer teas have a strong rich flavor that could be described as "woody" or "peaty."',
+  },
+  {
+    id: 7,
+    name: 'White',
+    image: 'assets/img/white.jpg',
+    description:
+      'White tea is produced using very young shoots with no oxidation process. White tea has an extremely ' +
+      'delicate flavor that is sweet and fragrant. White tea should be steeped at lower temperatures for ' +
+      'short periods of time.',
+  },
+]);
 ```
 
-Add a `data()` function to that configuration object as follows:
-
-```typescript
-  data() {
-    return {
-      teaData: [
-        {
-          id: 1,
-          name: 'Green',
-          image: 'assets/img/green.jpg',
-          description:
-            'Green teas have the oxidation process stopped very early on, leaving them with a very subtle flavor and ' +
-            'complex undertones. These teas should be steeped at lower temperatures for shorter periods of time.'
-        },
-        {
-          id: 2,
-          name: 'Black',
-          image: 'assets/img/black.jpg',
-          description:
-            'A fully oxidized tea, black teas have a dark color and a full robust and pronounced flavor. Black teas tend ' +
-            'to have a higher caffeine content than other teas.'
-        },
-        {
-          id: 3,
-          name: 'Herbal',
-          image: 'assets/img/herbal.jpg',
-          description:
-            'Herbal infusions are not actually "tea" but are more accurately characterized as infused beverages ' +
-            'consisting of various dried herbs, spices, and fruits.'
-        },
-        {
-          id: 4,
-          name: 'Oolong',
-          image: 'assets/img/oolong.jpg',
-          description:
-            'Oolong teas are partially oxidized, giving them a flavor that is not as robust as black teas but also ' +
-            'not as subtle as green teas. Oolong teas often have a flowery fragrance.'
-        },
-        {
-          id: 5,
-          name: 'Dark',
-          image: 'assets/img/dark.jpg',
-          description:
-            'From the Hunan and Sichuan provinces of China, dark teas are flavorful aged probiotic teas that steeps ' +
-            'up very smooth with slightly sweet notes.'
-        },
-        {
-          id: 6,
-          name: 'Puer',
-          image: 'assets/img/puer.jpg',
-          description:
-            'An aged black tea from china. Puer teas have a strong rich flavor that could be described as "woody" or "peaty."'
-        },
-        {
-          id: 7,
-          name: 'White',
-          image: 'assets/img/white.jpg',
-          description:
-            'White tea is produced using very young shoots with no oxidation process. White tea has an extremely ' +
-            'delicate flavor that is sweet and fragrant. White tea should be steeped at lower temperatures for ' +
-            'short periods of time.'
-        },
-      ],
-    };
-  },
-```
+**Important:** you will also need to add a couple of imports. Import 'ref' from 'vue'. Import `Tea` from `@/models`.
 
 **Note:** If we were further along, we probably would have created fake data in a composition API service, but we have not talked about of that yet.
 
@@ -265,23 +247,13 @@ Leave device emulation off in the devtools. Let's just worry about the desktop s
 
 ### The Components List
 
-If you examine the console, you will notice several warnings having to do with failing to resolve a component. The problem here is that we are using some components but have not imported or declared them yet. If you look at the code, you will see a couple of places where the child components are specified:
+If you examine the console, you will notice several warnings having to do with failing to resolve a component. The problem here is that we are using some components but have not imported or declared them yet. If you look at the code, you will see where the components are imported:
 
 ```typescript
 import { IonContent, IonHeader, IonPage, IonTitle, IonToolbar } from '@ionic/vue';
 ```
 
-```typescript
-  components: {
-    IonContent,
-    IonHeader,
-    IonPage,
-    IonTitle,
-    IonToolbar,
-  },
-```
-
-Ultimately you will need to make sure the components you are using are included here so that everything works properly. For now, though, we are just playing trying to figure out how we want this to look, so let's forgo that for now until we know _exactly_ which components we will _actually_ be using.
+**Challenge:** update that `import` list to include all of the components you are currently using. You will know when you have succeeded when there are no more warnings upon refreshing the page.
 
 ### Use a Responsive Grid
 
@@ -321,30 +293,28 @@ it('displays two rows', () => {
 
 In order to satisfy this requirement, it will be easiest if we convert our list of teas to a matrix. Let's create a computed data item that does just that. The great thing about a computed data item is that Vue will cache the value for us as well as track the dependencies for it. This means that it will only recalculate if this teas list changes.
 
-Add the following code to the Tea view's component configuration object:
+Add the following code to the Tea view's `script setup` section:
 
 ```typescript
-  computed: {
-    teaRows(): Array<Array<Tea>> {
-      const teaMatrix: Array<Array<Tea>> = [];
-      let row: Array<Tea> = [];
-      this.teaData.forEach(t => {
-        row.push(t);
-        if (row.length === 4) {
-          teaMatrix.push(row);
-          row = [];
-        }
-      });
+const teaRows = computed((): Array<Array<Tea>> => {
+  const teaMatrix: Array<Array<Tea>> = [];
+  let row: Array<Tea> = [];
+  teaData.value.forEach((t) => {
+    row.push(t);
+    if (row.length === 4) {
+      teaMatrix.push(row);
+      row = [];
+    }
+  });
 
-      if (row.length) {
-        teaMatrix.push(row);
-      }
-      return teaMatrix;
-    },
-  },
+  if (row.length) {
+    teaMatrix.push(row);
+  }
+  return teaMatrix;
+});
 ```
 
-**Note:** you will also need to import the `Tea` model as such: `import { Tea } from '@/models';` The imports are the first set of items within the `script` tag of the `.vue` file.
+**Note:** you will also need to import `computed` from `vue`.
 
 We can then update the view's template accordingly. Add the following markup either directly above or directly below the `ion-list` that we added earlier:
 
@@ -353,6 +323,10 @@ We can then update the view's template accordingly. Add the following markup eit
   <ion-row class="ion-align-items-stretch" v-for="(row, index) in teaRows" :key="index"></ion-row>
 </ion-grid>
 ```
+
+**Hint:** remember to `import` new components as you use them.
+
+Also, if you are wondering about the `ion-align-items-stretch` class, you can read more about it <a href="https://ionicframework.com/docs/layout/css-utilities#flex-container-properties" target="_blank">in our documentation</a>.
 
 Now let's display the columns properly, first updating the tests:
 
@@ -373,15 +347,15 @@ Verify that we have two failing tests. Now we can update the template by adding 
 
 ```html
 <ion-grid>
-  <ion-row class="ion-justify-content-center ion-align-items-stretch" v-for="(row, index) in teaRows" :key="index">
+  <ion-row class="ion-align-items-stretch" v-for="(row, index) in teaRows" :key="index">
     <ion-col v-for="tea of row" size="3" :key="tea.id"></ion-col>
   </ion-row>
 </ion-grid>
 ```
 
-**Note:** the `size="3"` tells the column to take up three columns in the row. Remember that each row contains 12 physical columns and that `ion-col` components in the row can be spread across multiple physical columns. We only want at most four columns per row. Thus, each `ion-col` component we supply should be spread across three of the physical columns in the row.
+**Note:** the `size="3"` tells the column component to take up three column positions in the row. Remember that each row contains 12 column positions and that `ion-col` components in the row can be spread across multiple column positions. We only want at most four columns per row. Thus, each `ion-col` component we supply should be spread across three of the column positions in the row.
 
-Now that we have the grid laid out, we can add our card template. We will just use the card template from our `ion-list` that we had added above. First let's add the tests for that.
+Now that we have the grid laid out, we can add our card template. We will just use the card template from our `ion-list` that we had added above. First let's add the tests.
 
 ```typescript
 import { Tea } from '@/models';
@@ -414,17 +388,9 @@ With the test in place, we can make the following modifications to the view:
 
 - Move the `ion-card` layout from the `ion-list` to be a child of the `ion-col` in our grid
 - Remove the rest of the `ion-list`
-- Add the following components to the components list:
-  - IonCard
-  - IonCardContent
-  - IonCardHeader
-  - IonCardTitle
-  - IonCol
-  - IonImg
-  - IonGrid
-  - IonRow
+- Ensure that the `import` of components matches the ones used in the `template`
 
-This loops through the rows and for each row displays a column for each tea in that row. That looks great on a iPad Pro, though the cards are all different sizes and look a little crowded. We can fix that with a little styling in the view. You can replace the styling that is currently there.
+The component now loops through the rows. For each row it displays a column for each tea in that row. That looks great on a large device such as an iPad Pro or standard web browser. However, the cards are all different sizes and look a little crowded. We can fix that with a little styling in the view. You can replace the styling that is currently there with the following:
 
 ```scss
 <style scoped>

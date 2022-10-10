@@ -61,7 +61,7 @@ For the contents of `src/views/LoginPage.vue`, let's just start with a skeleton 
   </ion-page>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
   import {
     IonButton,
     IonContent,
@@ -77,28 +77,6 @@ For the contents of `src/views/LoginPage.vue`, let's just start with a skeleton 
     IonToolbar,
   } from '@ionic/vue';
   import { logInOutline } from 'ionicons/icons';
-  import { defineComponent } from 'vue';
-
-  export default defineComponent({
-    name: 'LoginPage',
-    components: {
-      IonButton,
-      IonContent,
-      IonFooter,
-      IonHeader,
-      IonIcon,
-      IonInput,
-      IonItem,
-      IonLabel,
-      IonList,
-      IonPage,
-      IonTitle,
-      IonToolbar,
-    },
-    setup() {
-      return { logInOutline };
-    },
-  });
 </script>
 ```
 
@@ -116,7 +94,7 @@ You can test that you have the route set up properly by replacing `/teas` with `
 Form validation is not built in to Vue, but there are a couple of libraries that will help you with your form validation needs:
 
 - <a href="https://vuelidate-next.netlify.app/#installation" target="_blank">Vuelidate</a>: model based validate, validates the data
-- <a href="https://vee-validate.logaretm.com/v4/" target="_blank">Vee-Validate</a>: template based validation, validates the inputs
+- <a href="https://vee-validate.logaretm.com/" target="_blank">Vee-Validate</a>: template based validation, validates the inputs
 
 Both of these libraries work well and are highly capable of doing the job. The question comes down to which one will work best for your team and your application.
 
@@ -132,20 +110,13 @@ npm i vee-validate@next yup
 
 ### Set up the Models
 
-Switching back to the view file, we have two bits of information to get from the user: their email address and their password. We will use the `useField` composition API from vee-validate to create the models for those inputs. The string passed to the `useField()` function is the value for the associated input's `name`.
+Switching back to the view file, we have two bits of information to get from the user: their email address and their password. We will use the `useField` composition API from vee-validate to create the models for those inputs. The string passed to the `useField()` function is the value for the associated input's `name`. The following code belongs in the `script setup` section.
 
 ```TypeScript
 import { useForm, useField } from 'vee-validate';
 ...
-export default defineComponent({
-...
-  setup() {
-    const { value: email } = useField('email');
-    const { value: password } = useField('password');
-
-    return { logInOutline, email, password };
-  },
-});
+const { value: email } = useField<string>('email');
+const { value: password } = useField<string>('password');
 ```
 
 Let's also hook up the `v-model` on the inputs at this point. For example:
@@ -160,23 +131,15 @@ With Vee-Validate, we will create a validation schema that defines how to valida
 ...
 import { object as yupObject, string as yupString } from 'yup';
 ...
-
-export default defineComponent({
-...
-  setup() {
-    const validationSchema = yupObject({
-      email: yupString().required().email().label("Email Address"),
-      password: yupString().required().label("Password"),
-    });
-
-    const { errors } = useForm({ validationSchema });
-
-    const { value: email } = useField("email");
-    const { value: password } = useField("password");
-
-    return { logInOutline, email, password, errors };
-  },
+const validationSchema = yupObject({
+  email: yupString().required().email().label("Email Address"),
+  password: yupString().required().label("Password"),
 });
+
+const { errors } = useForm({ validationSchema });
+
+const { value: email } = useField("email");
+const { value: password } = useField("password");
 ```
 
 This configuration exposed an object for us called `errors` and we can have a look at it now by adding `<pre>{{ errors }}</pre>` at the end of the `ion-content` area of our Login page, right after the `ion-list`. Do that now and have a look at it in the browser. You should see an object like this:
@@ -198,16 +161,22 @@ Now that we have a good idea of how the validations are working, remove the `<pr
 <div class="error-message ion-padding" data-testid="message-area"></div>
 ```
 
-Vee-validate does all of its work asynchronously, so we need to wait for all of the promises to complete before we check any message values. We will use a library called "flush-promises" to help us out here.
-
-```bash
-npm i -D flush-promises
-```
-
-We can then add the following import to the top of our `tests/unit/views/LoginPage.spec.ts` file:
+Vee-validate does all of its work asynchronously, so we need to wait for all of the promises to complete before we check any message values. We will use the `flushPromises()` function from the testing utilities to help us out here, but first we will need to add it to the import from `@vue/test-utils`.
 
 ```typescript
-import flushPromises from 'flush-promises';
+import { flushPromises, mount, VueWrapper } from '@vue/test-utils';
+```
+
+Due to <a href="https://github.com/logaretm/vee-validate/issues/3538" target="_blank">a quirk in how vee-validate works</a> we will also need to install and use the <a href="https://www.npmjs.com/package/wait-for-expect" target="_blank">wait-for-expect</a> package.
+
+```
+npm i -D wait-for-expect
+```
+
+In the test:
+
+```typescript
+import waitForExpect from 'wait-for-expect';
 ```
 
 We can now create a test that shows that our validations are set up properly by verifying that the user receives proper messages as they enter their data.
@@ -220,31 +189,31 @@ We can now create a test that shows that our validations are set up properly by 
     const msg = wrapper.find('[data-testid="message-area"]');
 
     await flushPromises();
-    expect(msg.text()).toBe('');
+    await waitForExpect(() => expect(msg.text()).toBe(''));
 
     await email.setValue('foobar');
     await flushPromises();
-    expect(msg.text()).toBe('Email Address must be a valid email');
+    await waitForExpect(() => expect(msg.text()).toBe('Email Address must be a valid email'));
 
     await email.setValue('');
     await flushPromises();
-    expect(msg.text()).toBe('Email Address is a required field');
+    await waitForExpect(() => expect(msg.text()).toBe('Email Address is a required field'));
 
     await email.setValue('foobar@baz.com');
     await flushPromises();
-    expect(msg.text()).toBe('');
+    await waitForExpect(() => expect(msg.text()).toBe(''));
 
     await password.setValue('mypassword');
     await flushPromises();
-    expect(msg.text()).toBe('');
+    await waitForExpect(() => expect(msg.text()).toBe(''));
 
     await password.setValue('');
     await flushPromises();
-    expect(msg.text()).toBe('password: Value is a required field');
+    await waitForExpect(() => expect(msg.text()).toBe('Password is a required field'));
 
     await password.setValue('mypassword');
     await flushPromises();
-    expect(msg.text()).toBe('');
+    await waitForExpect(() => expect(msg.text()).toBe(''));
   });
 ```
 
@@ -295,13 +264,10 @@ it('has a disabled signin button until valid data is entered', async () => {
 });
 ```
 
-The `useForm()` function returns an object called `meta` that contains data about the form's validation state. Let's grab that in our `setup()` and expose it to our view's template:
+The `useForm()` function returns an object called `meta` that contains data about the form's validation state. Let's grab that in our `script setup` section so it is available in our view's template:
 
 ```typescript
-    const { errors, meta } = useForm({ validationSchema });
-    ...
-
-    return { logInOutline, email, password, errors, meta };
+const { errors, meta } = useForm({ validationSchema });
 ```
 
 We can then bind the button's `disabled` attribute to be disabled so long as the form is not valid:
@@ -315,11 +281,9 @@ We can then bind the button's `disabled` attribute to be disabled so long as the
 
 ### Code Challenge: Computed Values
 
-Have a look at how we are binding the `disabled` attribute: `:disabled="!meta.valid"`. That is not very easy to read. Future you will have to go down to the code to figure out what `meta` means. It would be better if the binding was more like `:disabled="!formIsValid"`.
+Have a look at how we are binding the `disabled` attribute: `:disabled="!meta.valid"`. That is not very easy to read. Future you will have to go down to the code to figure out what `meta` means. It would be better if the binding was more like `:disabled="formIsInvalid"`.
 
-The most natural way to compute a value based on another and ensure that the view is updated properly is to use Vue's <a href="https://v3.vuejs.org/guide/reactivity-computed-watchers.html#computed-values" target="_blank">Computed Values</a>. We saw one way of creating a computed value when we mocked the tea data, but we can also create them within the `setup()` method.
-
-Create a computed value named `formIsValid` and bind it instead. Note that `meta` is a <a href="https://v3.vuejs.org/guide/reactivity-fundamentals.html#creating-standalone-reactive-values-as-refs" target="_blank">reactive value</a>. As such you will need to get at its data via its `value` property.
+The most natural way to compute a value based on another and ensure that the view is updated properly is to use Vue's <a href="https://vuejs.org/api/reactivity-core.html#computed" target="_blank">Computed Values</a>. Create a computed value named `formIsInvalid` and bind it instead. Note that `meta` is a <a href="https://vuejs.org/api/reactivity-core.html#ref" target="_blank">reactive ref object</a>. As such you will need to get at the data via its `value` property.
 
 ## Conclusion
 

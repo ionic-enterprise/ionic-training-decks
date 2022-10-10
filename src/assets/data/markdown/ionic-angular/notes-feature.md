@@ -1383,7 +1383,7 @@ In our test, we will verify that the modal is properly opened:
       expect(modalController.create).toHaveBeenCalledWith({
         component: TastingNoteEditorComponent,
         backdropDismiss: false,
-        swipeToClose: true,
+        canDismiss: true,
         presentingElement: mockRouterOutlet.nativeEl as any,
       });
     });
@@ -1406,7 +1406,7 @@ The code required to perform this action is:
     const modal = await this.modalController.create({
       component: TastingNoteEditorComponent,
       backdropDismiss: false,
-      swipeToClose: true,
+      canDismiss: true,
       presentingElement: this.routerOutlet.nativeEl,
     });
     modal.present();
