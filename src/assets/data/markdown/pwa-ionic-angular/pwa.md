@@ -1,6 +1,6 @@
 # Lab: Add the PWA Goodies
 
-Let's raise that PWA scrore to 100. In this lab you will learn:
+Let's raise that PWA score to 100. In this lab you will learn:
 
 - How to optimize the Firebase hosting
 - How to install the Angular PWA library
@@ -25,7 +25,7 @@ Add the following configuration to your `firebase.json` file:
 ]
 ```
 
-When you are comlpete, the `firebase.json` file should look something like this:
+When you are complete, the `firebase.json` file should look something like this:
 
 ```JSON
 {
@@ -67,18 +67,18 @@ A PWA is built upon three key pieces of technology:
 
 The HTTPS bit is handled by Firebase Hosting. Now we will handle the last two as well as adding some polish.
 
-First, let's install Angular's PWA library:
+We need to install Angular's PWA library. Some of what the installation is going to do is going to have conflicts with work that `@capacitor/assets` already did for us. Specifically, Angular's PWA library will install some icons as well as a `src/manifest.webmanifest` file. It is that last file that is going to give us trouble, so let's move the existing one out of the way, and then install the Angular PWA tooling:
 
 ```
+git mv src/manifest.webmanifest src/manifest.webmanifest.orig
 npx ng add @angular/pwa
 ```
 
-This command did several things:
+The `ng add` command did several things:
 
 1. Installed a pre-built configurable service worker
 1. Installed a pre-defined Web App Manifest file
 1. Installed several default icons
-
 1. Modified a couple of project files to load the service worker and web app manifest
 
 Out of the box, this provides almost everything we need for our app to be served as a PWA. We need to adjust a few things:
@@ -90,23 +90,23 @@ Now is a good time to add the new files to our git repo and commit the other cha
 
 ### Install Our Icons
 
-<a download href="/assets/packages/ionic-angular/icons.zip">Download our icons</a> and unpack the zip file under `src/assets`, replacing the files in the `icons` folder.
+When we generated the original app and ran `@capacitor/assets`, icons for use in a PWA were generated in the `icons` folder. We need to replace the Angular supplied icons with our generated icons.
 
-**Note:** the specifics on doing this depends on the type of machine you are using. On a Mac:
-
-1. Drag and drop the `icons.zip` from `Downloads` into `src/assets`
-1. Remove the existing `icons` folder
-1. Double click the `icons.zip` file in `src/assets` which creates a new `icons` folder
-1. Remove the `icons.zip` file
+```
+rm -rf src/assets/icons
+git mv icons src/assets
+```
 
 ### Update the `src/manifest.webmanifest` File
 
-The default `src/manifest.webmanifest` file is complete, but it needs a couple of customizations for this application:
+The default `src/manifest.webmanifest` needs a couple of customizations for this application:
 
-- The `name` and `short_name` need to be updated
+- The `name` needs to be updated
+- The `short_name` needs to be updated
 - The `background_color` needs to be updated to match the background of the icon
+- The icons configuration needs to use the icons we just copied over
 
-Here are the changes:
+Here are the first three changes:
 
 ```diff
 $ git diff src/manifest.webmanifest
@@ -124,6 +124,8 @@ index 97f0552..6bf1d68 100644
 -  "background_color": "#fafafa",
 +  "background_color": "#f1ebe1",
 ```
+
+For the last change, replace the content of the `icons` array with the `icons` array values from `src/manifest.webmanifest.orig`. You can remove `src/manifest.webmanifest.orig` at this point.
 
 ## Configure the Service Worker
 
