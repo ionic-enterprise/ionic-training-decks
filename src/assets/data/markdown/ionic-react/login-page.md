@@ -309,7 +309,7 @@ Application users should not be able to click the "Sign In" button if the form i
 Let's write unit tests that define when the button should be enabled or disabled:
 
 ```TypeScript
-import { render, waitFor, screen } from '@testing-library/react';
+import { render, waitFor, screen, act } from '@testing-library/react';
 import { ionFireEvent as fireEvent, waitForIonicReact } from '@ionic/react-test-utils';
 import LoginPage from './LoginPage';
 
@@ -326,7 +326,7 @@ describe('<LoginPage />', () => {
       render(<LoginPage />);
       const button = screen.getByTestId(/submit-button/) as HTMLIonButtonElement;
       const email = screen.getByTestId(/email-input/) as HTMLIonInputElement;
-      fireEvent.ionChange(email, 'test@test.com');
+      await act(() => fireEvent.ionChange(email, 'test@test.com'));
       await waitFor(() => expect(button.disabled).toBeTruthy());
     });
 
@@ -334,7 +334,7 @@ describe('<LoginPage />', () => {
       render(<LoginPage />);
       const button = screen.getByTestId(/submit-button/) as HTMLIonButtonElement;
       const password = screen.getByTestId(/password-input/) as HTMLIonInputElement;
-      fireEvent.ionChange(password, 'P@ssword123');
+      await act(() => fireEvent.ionChange(password, 'P@ssword123'));
       await waitFor(() => expect(button.disabled).toBeTruthy());
     });
 
@@ -343,8 +343,10 @@ describe('<LoginPage />', () => {
       const button = screen.getByTestId(/submit-button/) as HTMLIonButtonElement;
       const email = screen.getByTestId(/email-input/) as HTMLIonInputElement;
       const password = screen.getByTestId(/password-input/) as HTMLIonInputElement;
-      fireEvent.ionChange(email, 'test@test.com');
-      fireEvent.ionChange(password, 'P@ssword123');
+      await act(() => {
+        fireEvent.ionChange(email, 'test@test.com');
+        fireEvent.ionChange(password, 'P@ssword123');
+      });
       await waitFor(() => expect(button.disabled).toBeFalsy());
     });
   });
