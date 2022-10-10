@@ -224,8 +224,6 @@ import './TeaPage.css';
 
 #### Create a List of Cards
 
-Now that we have a list of teas, we need to figure out how to display this information. One component that seems natural is
-
 Now that we have a list of teas, we need to figure out the best component to visually showcase the data. Each item contains a title, an image, and a description -- those data-points work well with <a href="https://ionicframework.com/docs/api/card" target="_blank">cards</a>.
 
 Let's see how that looks. Replace the line containing `<ExploreContainer />` with the following code:
