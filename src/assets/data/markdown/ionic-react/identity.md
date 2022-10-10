@@ -215,7 +215,7 @@ export const SessionProvider: React.FC = ({ children }) => {
 
 We will go back and implement the `useEffect` shortly. Let's go ahead and use the `<SessionProvider />` component in our application:
 
-1. Export all from `./SessionContext` in `src/core/session/index.ts`
+1. Export all from `./SessionProvider` in `src/core/session/index.ts`
 2. Modify `src/App.tsx` to match the changes below
 
 **`src/App.tsx`**
