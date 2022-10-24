@@ -1,3 +1,9 @@
+# [5.4.0](https://github.com/ionic-team/ionic-training-decks/compare/v5.3.1...v5.4.0) (2022-10-24)
+
+### Features
+
+- **vue:** update to use script setup syntax ([d68a2d2](https://github.com/ionic-team/ionic-training-decks/commit/d68a2d2fb2b83e713cc7b2deab93ad9187783ebe))
+
 ## [5.3.1](https://github.com/ionic-team/ionic-training-decks/compare/v5.3.0...v5.3.1) (2022-10-10)
 
 # [5.3.0](https://github.com/ionic-team/ionic-training-decks/compare/v5.1.3...v5.3.0) (2022-10-10)
