@@ -1,3 +1,9 @@
+## [5.4.1](https://github.com/ionic-team/ionic-training-decks/compare/v5.4.0...v5.4.1) (2022-10-26)
+
+### Bug Fixes
+
+- **vue:** remove ref from a value that is actually constant ([10dada3](https://github.com/ionic-team/ionic-training-decks/commit/10dada318ea8c35675a961a57f11ae6d56df0380))
+
 # [5.4.0](https://github.com/ionic-team/ionic-training-decks/compare/v5.3.1...v5.4.0) (2022-10-24)
 
 ### Features
