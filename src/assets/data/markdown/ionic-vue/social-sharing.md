@@ -36,11 +36,11 @@ The first thing we will do is add a sharing button to the top of our `AppTasting
 
 <script setup lang="ts">
   ...
-  import { computed, ref } from 'vue';
+  import { computed } from 'vue';
   import { close, shareOutline } from 'ionicons/icons';
   ...
   const allowShare = computed( () => true);
-  const sharingIsAvailable = ref(true);
+  const sharingIsAvailable = true;
   const share = async (): Promise<void> => {
     return;
   }
@@ -101,10 +101,10 @@ At this point we can start creating the tests for the button. Note the special c
   });
 ```
 
-The web context test fails, of course, because our `sharingIsAvailable` property is just returning `true` all of the time. Let's fix that now:
+The web context test fails, of course, because our `sharingIsAvailable` property is just set to `true` all of the time. Let's fix that now:
 
 ```TypeScript
-const sharingIsAvailable = ref(isPlatform('hybrid');
+const sharingIsAvailable = isPlatform('hybrid');
 ```
 
 ### Enable When Enough Information Exists
