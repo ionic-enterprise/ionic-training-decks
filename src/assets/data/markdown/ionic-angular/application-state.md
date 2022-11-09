@@ -10,7 +10,9 @@ The first thing that we need to do is install <a href="https://ngrx.io/">NgRX</a
 npx ng add @ngrx/store@latest
 ```
 
-**Note:** you may need to make sure the `eslint` related dependencies are up to date.
+**Note:** You may need to make sure the `eslint` related dependencies are up to date.
+
+When asked what ESLint configuration to use, select "recommended".
 
 ## Boilerplate Setup
 
