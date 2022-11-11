@@ -1,3 +1,9 @@
+## [5.4.3](https://github.com/ionic-team/ionic-training-decks/compare/v5.4.2...v5.4.3) (2022-11-11)
+
+### Bug Fixes
+
+- **vue:** update a couple of sections for the new view patch ([a714966](https://github.com/ionic-team/ionic-training-decks/commit/a714966ab5c27b98eed88b664be4aab20b28d3b6))
+
 ## [5.4.2](https://github.com/ionic-team/ionic-training-decks/compare/v5.4.1...v5.4.2) (2022-11-09)
 
 ## [5.4.1](https://github.com/ionic-team/ionic-training-decks/compare/v5.4.0...v5.4.1) (2022-10-26)
