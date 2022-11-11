@@ -987,11 +987,18 @@ If we have an ID when the editor is created we need to find the note. At that po
       },
     });
     await flushPromises();
-    expect(modal.vm.brand).toEqual('Rishi');
-    expect(modal.vm.name).toEqual('Puer Cake');
-    expect(modal.vm.teaCategoryId).toEqual(6);
-    expect(modal.vm.rating).toEqual(5);
-    expect(modal.vm.notes).toEqual('Smooth and peaty, the king of puer teas');
+    expect(find).toHaveBeenCalledTimes(1);
+    expect(find).toHaveBeenCalledWith(73);
+    const brand = modal.findComponent('[data-testid="brand-input"]');
+    const name = modal.findComponent('[data-testid="name-input"]');
+    const rating = modal.findComponent('[data-testid="rating-input"]');
+    const notes = modal.findComponent('[data-testid="notes-textbox"]');
+    const teaCategory = modal.findComponent('[data-testid="tea-type-select"]');
+    expect((brand.element as HTMLInputElement).value).toEqual('Rishi');
+    expect((name.element as HTMLInputElement).value).toEqual('Puer Cake');
+    expect((teaCategory.element as HTMLSelectElement).value).toEqual(6);
+    expect((notes.element as HTMLInputElement).value).toEqual('Smooth and peaty, the king of puer teas');
+    expect((rating as VueWrapper).props().modelValue).toEqual(5);
   });
 ```
 

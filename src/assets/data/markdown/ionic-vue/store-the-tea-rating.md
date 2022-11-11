@@ -169,28 +169,24 @@ const transform = async (data: RawData): Promise<Tea> => {
 
 ## Update the Rating from the Page
 
-With all of that in place, the changes to the view are very straight forward and are concentrated solely on the user interaction with the page. Our only two requirements are that the rating is set properly when we navigate to the page and that any changes to the rating are saved.
+With all of that in place, the changes to the view are very straight forward and are concentrated solely on the user interaction with the page. Our only requirements are that the rating is bound properly and that any changes to the rating are saved.
 
 First, we will update the test `tests/unit/views/TeaDetailsPage.spec.ts` to cover our requirements:
 
 ```TypeScript
-  it('sets the rating based on the tea', async () => {
-    const wrapper = await mountView();
-    expect(wrapper.vm.rating).toEqual(2);
-  });
-
   it('saves the rating on click', async () => {
     const wrapper = await mountView();
     const { rate } = useTea();
     const rating = wrapper.find('[data-testid="rating"]');
-    wrapper.vm.rating = 4;
+    const stars = rating.findAllComponents(IonIcon);
+    stars[1].trigger('click');
     rating.trigger('click');
     expect(rate).toHaveBeenCalledTimes(1);
     expect(rate).toHaveBeenCalledWith(3, 4);
   });
 ```
 
-**Note:** depending on how you set up your initial test data, you may need to update the values used above. Basically, the first test should use the specified rating, and the second test should set it to something else.
+**Note:** depending on how you set up your initial test data, you may need to update the values used above. Basically, the test should set the rating to something else.
 
 And then `TeaDetailsPage.vue` code changes that make this happen:
 
