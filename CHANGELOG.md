@@ -1,3 +1,10 @@
+## [5.4.4](https://github.com/ionic-team/ionic-training-decks/compare/v5.4.3...v5.4.4) (2022-11-14)
+
+### Bug Fixes
+
+- **vue:** make the auth step a big more clear ([7427ed5](https://github.com/ionic-team/ionic-training-decks/commit/7427ed50f0f19bde6da62fb63c5a901bb77289ad))
+- **vue:** remove grammatical issues ([e53b917](https://github.com/ionic-team/ionic-training-decks/commit/e53b9175f5b51dee8e567177f7ea5cff01954400))
+
 ## [5.4.3](https://github.com/ionic-team/ionic-training-decks/compare/v5.4.2...v5.4.3) (2022-11-11)
 
 ### Bug Fixes
