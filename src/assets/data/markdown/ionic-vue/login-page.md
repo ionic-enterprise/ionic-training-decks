@@ -161,7 +161,7 @@ Now that we have a good idea of how the validations are working, remove the `<pr
 <div class="error-message ion-padding" data-testid="message-area"></div>
 ```
 
-Vee-validate does all of its work asynchronously, so we need to wait for all of the promises to complete before we check any message values. We will use the `flushPromises()` function from the testing utilities to help us out here, but first we will need to add it to the import from `@vue/test-utils`.
+Vee-validate does all of its work asynchronously, so in our tests we need to wait for all of the promises to complete before we check any message values. We will use the `flushPromises()` function from the testing utilities to help us out here, but first we will need to add it to the import from `@vue/test-utils` (this is in our unit test, not the Vue component).
 
 ```typescript
 import { flushPromises, mount, VueWrapper } from '@vue/test-utils';

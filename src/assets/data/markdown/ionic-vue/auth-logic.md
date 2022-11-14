@@ -77,15 +77,21 @@ const key = 'session';
 let session: Session | undefined;
 
 const clearSession = async (): Promise<void> => {
-  null;
+  // TODO:
+  // clear the `session` value
+  // call Preferences.remove()
 };
 
 const getSession = async (): Promise<Session | undefined> => {
+  // TODO:
+  // check if we have a `session`, if not, get it and set it
   return session;
 };
 
-const setSession = async (): Promise<void> => {
-  null;
+const setSession = async (s: Session): Promise<void> => {
+  // TODO:
+  // set the `session` value to the passed `s`
+  // call Preferences.set() (be sure to import above)
 };
 
 export default () => {
@@ -140,22 +146,26 @@ When we set the session, we have two requirements:
 Let's express those requirements as tests. Note that the value stored <a href="https://capacitorjs.com/docs/apis/preferences#setoptions" target="_blank">must be a string</a>. As such we need to stringify the session object. Make sure that you `import { Preferences } from '@capacitor/preferences';` at the top of the file.
 
 ```typescript
-describe('setSession', () => {
-  it('sets the session', async () => {
-    const { getSession, setSession } = useSession();
-    await setSession(testSession);
-    expect(await getSession()).toEqual(testSession);
-  });
+describe('useSession', () => {
+...
+  describe('setSession', () => {
+    it('sets the session', async () => {
+      const { getSession, setSession } = useSession();
+      await setSession(testSession);
+      expect(await getSession()).toEqual(testSession);
+    });
 
-  it('stores the session', async () => {
-    const { setSession } = useSession();
-    await setSession(testSession);
-    expect(Preferences.set).toHaveBeenCalledTimes(1);
-    expect(Preferences.set).toHaveBeenCalledWith({
-      key: 'session',
-      value: JSON.stringify(testSession),
+    it('stores the session', async () => {
+      const { setSession } = useSession();
+      await setSession(testSession);
+      expect(Preferences.set).toHaveBeenCalledTimes(1);
+      expect(Preferences.set).toHaveBeenCalledWith({
+        key: 'session',
+        value: JSON.stringify(testSession),
+      });
     });
   });
+...
 });
 ```
 
@@ -173,24 +183,28 @@ The requirements for clearing the session are just the opposite:
 - The session should be removed from `@capacitor/preferences`.
 
 ```typescript
-describe('clearSession', () => {
-  beforeEach(async () => {
-    const { setSession } = useSession();
-    await setSession(testSession);
-  });
+describe('useSession', () => {
+...
+  describe('clearSession', () => {
+    beforeEach(async () => {
+      const { setSession } = useSession();
+      await setSession(testSession);
+    });
 
-  it('clears the session', async () => {
-    const { getSession, clearSession } = useSession();
-    await clearSession();
-    expect(await getSession()).toBeUndefined();
-  });
+    it('clears the session', async () => {
+      const { getSession, clearSession } = useSession();
+      await clearSession();
+      expect(await getSession()).toBeUndefined();
+    });
 
-  it('removes the session fromm preferences', async () => {
-    const { clearSession } = useSession();
-    await clearSession();
-    expect(Preferences.remove).toHaveBeenCalledTimes(1);
-    expect(Preferences.remove).toHaveBeenCalledWith({ key: 'session' });
+    it('removes the session fromm preferences', async () => {
+      const { clearSession } = useSession();
+      await clearSession();
+      expect(Preferences.remove).toHaveBeenCalledTimes(1);
+      expect(Preferences.remove).toHaveBeenCalledWith({ key: 'session' });
+    });
   });
+...
 });
 ```
 
@@ -205,38 +219,42 @@ We already have tests showing that `getSession()` behaves properly with and with
 - We used the cached version if it has been cached via a prior "set".
 
 ```typescript
-describe('getSession', () => {
-  beforeEach(async () => {
-    const { clearSession } = useSession();
-    await clearSession();
-  });
-
-  it('gets the session from preferences', async () => {
-    const { getSession } = useSession();
-    (Preferences.get as jest.Mock).mockResolvedValue({
-      value: JSON.stringify(testSession),
+describe('useSession', () => {
+...
+  describe('getSession', () => {
+    beforeEach(async () => {
+      const { clearSession } = useSession();
+      await clearSession();
     });
-    expect(await getSession()).toEqual(testSession);
-    expect(Preferences.get).toHaveBeenCalledTimes(1);
-    expect(Preferences.get).toHaveBeenCalledWith({ key: 'session' });
-  });
 
-  it('caches the retrieved session', async () => {
-    const { getSession } = useSession();
-    (Preferences.get as jest.Mock).mockResolvedValue({
-      value: JSON.stringify(testSession),
+    it('gets the session from preferences', async () => {
+      const { getSession } = useSession();
+      (Preferences.get as jest.Mock).mockResolvedValue({
+        value: JSON.stringify(testSession),
+      });
+      expect(await getSession()).toEqual(testSession);
+      expect(Preferences.get).toHaveBeenCalledTimes(1);
+      expect(Preferences.get).toHaveBeenCalledWith({ key: 'session' });
     });
-    await getSession();
-    await getSession();
-    expect(Preferences.get).toHaveBeenCalledTimes(1);
-  });
 
-  it('caches the session set via setSession', async () => {
-    const { getSession, setSession } = useSession();
-    await setSession(testSession);
-    expect(await getSession()).toEqual(testSession);
-    expect(Preferences.get).not.toHaveBeenCalled();
+    it('caches the retrieved session', async () => {
+      const { getSession } = useSession();
+      (Preferences.get as jest.Mock).mockResolvedValue({
+        value: JSON.stringify(testSession),
+      });
+      await getSession();
+      await getSession();
+      expect(Preferences.get).toHaveBeenCalledTimes(1);
+    });
+
+    it('caches the session set via setSession', async () => {
+      const { getSession, setSession } = useSession();
+      await setSession(testSession);
+      expect(await getSession()).toEqual(testSession);
+      expect(Preferences.get).not.toHaveBeenCalled();
+    });
   });
+...
 });
 ```
 
