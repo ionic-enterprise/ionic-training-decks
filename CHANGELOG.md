@@ -1,3 +1,9 @@
+## [5.4.5](https://github.com/ionic-team/ionic-training-decks/compare/v5.4.4...v5.4.5) (2022-11-14)
+
+### Bug Fixes
+
+- **vue:** have the link to the completed code at the top and bottom ([3d731e3](https://github.com/ionic-team/ionic-training-decks/commit/3d731e3667cd1632c79632fee06d23b0a32dfeee))
+
 ## [5.4.4](https://github.com/ionic-team/ionic-training-decks/compare/v5.4.3...v5.4.4) (2022-11-14)
 
 ### Bug Fixes
