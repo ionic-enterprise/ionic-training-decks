@@ -126,7 +126,7 @@ At this point, our tests and the continuous build for our development server sho
 
 ### Update the View
 
-There is not much to update in `src/views/TeaListPage.vue`. We _could_ just need to update the name of the component to avoid future confusion. In the long run, however, it will be to our advantage to switch to using <a href="https://vuejs.org/api/sfc-script-setup.html" target="_blank">script setup</a>.
+There is not much to update in `src/views/TeaListPage.vue`. We _could_ just update the name of the component to avoid future confusion. In the long run, however, it will be to our advantage to switch to using <a href="https://vuejs.org/api/sfc-script-setup.html" target="_blank">script setup</a>.
 
 ```html
 <script setup lang="ts">
@@ -364,7 +364,7 @@ import { Tea } from '@/models';
     ...
     it('displays the name in the title', () => {
       const wrapper = mount(TeaListPage);
-      const teas = wrapper.vm.teaData as Array<Tea>;
+      const teas = (wrapper.getCurrentComponent() as any).setupState.teaData;
       const cols = wrapper.findAll('ion-col');
       cols.forEach((c, idx) => {
         const title = c.find('ion-card ion-card-header ion-card-title');
@@ -374,7 +374,7 @@ import { Tea } from '@/models';
 
     it('displays the description in the content', () => {
       const wrapper = mount(TeaListPage);
-      const teas = wrapper.vm.teaData as Array<Tea>;
+      const teas = (wrapper.getCurrentComponent() as any).setupState.teaData;
       const cols = wrapper.findAll('ion-col');
       cols.forEach((c, idx) => {
         const title = c.find('ion-card ion-card-content');
