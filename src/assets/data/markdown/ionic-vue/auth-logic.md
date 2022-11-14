@@ -6,6 +6,8 @@ Before we get too far in to authentication, we need to do some data modeling and
 - Perform basic HTTP operations
 - Use Capacitor API plugins
 
+If you got stuck on any of the coding challenges in this lab, you can have a look at the <a href="https://github.com/ionic-team/tea-taster-vue" target="_blank">completed code</a>, but try not to peek.
+
 ## The User and AuthUser Models
 
 The first thing we will need to do is model the User data for our system. Create a `src/models/User.ts` file with the following contents:
@@ -496,4 +498,4 @@ We are going to be calling the `login()` and `logout()` methods from our views. 
 
 We have created composable functions to manage our session state and handle the authentication logic. In the next section we will begin to assemble the pieces created here to develop our authentication flow.
 
-If you got stuck on any of the coding challenges, you can have a look at the <a href="https://github.com/ionic-team/tea-taster-vue" target="_blank">completed code</a>, but try not to peek.
+Remember, if you got stuck on any of the coding challenges, you can have a look at the <a href="https://github.com/ionic-team/tea-taster-vue" target="_blank">completed code</a>, but try not to peek.
