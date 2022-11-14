@@ -68,70 +68,74 @@ When the user clicks on the "Sign On" button in the LoginPage view, we need to s
 Now we are ready to define the requirements via a set of tests:
 
 ```typescript
-describe('clicking on the signin button', () => {
-  let wrapper: VueWrapper<any>;
-  beforeEach(async () => {
-    wrapper = await mountView();
-    const email = wrapper.findComponent('[data-testid="email-input"]');
-    const password = wrapper.findComponent('[data-testid="password-input"]');
-    await email.setValue('test@test.com');
-    await password.setValue('test');
-  });
+describe('LoginPage.vue', () => {
+...
+  describe('clicking on the signin button', () => {
+    let wrapper: VueWrapper<any>;
+    beforeEach(async () => {
+      wrapper = await mountView();
+      const email = wrapper.findComponent('[data-testid="email-input"]');
+      const password = wrapper.findComponent('[data-testid="password-input"]');
+      await email.setValue('test@test.com');
+      await password.setValue('test');
+    });
 
-  it('performs the login', async () => {
-    const { login } = useAuth();
-    const button = wrapper.find('[data-testid="signin-button"]');
-    button.trigger('click');
-    expect(login).toHaveBeenCalledTimes(1);
-    expect(login).toHaveBeenCalledWith('test@test.com', 'test');
-  });
-
-  describe('if the login succeeds', () => {
-    beforeEach(() => {
+    it('performs the login', async () => {
       const { login } = useAuth();
-      (login as jest.Mock).mockResolvedValue(true);
+      const button = wrapper.find('[data-testid="signin-button"]');
+      button.trigger('click');
+      expect(login).toHaveBeenCalledTimes(1);
+      expect(login).toHaveBeenCalledWith('test@test.com', 'test');
     });
 
-    it('does not show an error', async () => {
-      const button = wrapper.find('[data-testid="signin-button"]');
-      const msg = wrapper.find('[data-testid="message-area"]');
-      button.trigger('click');
-      await flushPromises();
-      expect(msg.text()).toBe('');
+    describe('if the login succeeds', () => {
+      beforeEach(() => {
+        const { login } = useAuth();
+        (login as jest.Mock).mockResolvedValue(true);
+      });
+
+      it('does not show an error', async () => {
+        const button = wrapper.find('[data-testid="signin-button"]');
+        const msg = wrapper.find('[data-testid="message-area"]');
+        button.trigger('click');
+        await flushPromises();
+        expect(msg.text()).toBe('');
+      });
+
+      it('navigates to the root page', async () => {
+        const button = wrapper.find('[data-testid="signin-button"]');
+        router.replace = jest.fn();
+        button.trigger('click');
+        await flushPromises();
+        expect(router.replace).toHaveBeenCalledTimes(1);
+        expect(router.replace).toHaveBeenCalledWith('/');
+      });
     });
 
-    it('navigates to the root page', async () => {
-      const button = wrapper.find('[data-testid="signin-button"]');
-      router.replace = jest.fn();
-      button.trigger('click');
-      await flushPromises();
-      expect(router.replace).toHaveBeenCalledTimes(1);
-      expect(router.replace).toHaveBeenCalledWith('/');
+    describe('if the login fails', () => {
+      beforeEach(() => {
+        const { login } = useAuth();
+        (login as jest.Mock).mockResolvedValue(false);
+      });
+
+      it('shows an error', async () => {
+        const button = wrapper.find('[data-testid="signin-button"]');
+        const msg = wrapper.find('[data-testid="message-area"]');
+        button.trigger('click');
+        await flushPromises();
+        expect(msg.text()).toBe('Invalid email and/or password');
+      });
+
+      it('does not navigate', async () => {
+        const button = wrapper.find('[data-testid="signin-button"]');
+        router.replace = jest.fn();
+        button.trigger('click');
+        await flushPromises();
+        expect(router.replace).not.toHaveBeenCalled();
+      });
     });
   });
-
-  describe('if the login fails', () => {
-    beforeEach(() => {
-      const { login } = useAuth();
-      (login as jest.Mock).mockResolvedValue(false);
-    });
-
-    it('shows an error', async () => {
-      const button = wrapper.find('[data-testid="signin-button"]');
-      const msg = wrapper.find('[data-testid="message-area"]');
-      button.trigger('click');
-      await flushPromises();
-      expect(msg.text()).toBe('Invalid email and/or password');
-    });
-
-    it('does not navigate', async () => {
-      const button = wrapper.find('[data-testid="signin-button"]');
-      router.replace = jest.fn();
-      button.trigger('click');
-      await flushPromises();
-      expect(router.replace).not.toHaveBeenCalled();
-    });
-  });
+...
 });
 ```
 
@@ -160,7 +164,7 @@ const signinClicked = async () => {
 **Hints:**
 
 1. `email`, `password`, and `errorMessage` are all reactive references, so you will need to access the `value` property to read and write them in the code (example: `fooBar.value = 0`).
-1. Due to the way `yup` works, you will need to cast the `email` and `password` values to strings (`email.value as string`).
+1. Due to the way `yup` works, you may need to cast the `email` and `password` values to strings (`email.value as string`).
 
 Try running the app. You should see an error message when invalid credentials are used, and navigation to the tea list page when valid credentials are used. Here are some valid credentials:
 
