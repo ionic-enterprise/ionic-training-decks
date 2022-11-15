@@ -1,3 +1,9 @@
+## [5.4.7](https://github.com/ionic-team/ionic-training-decks/compare/v5.4.6...v5.4.7) (2022-11-15)
+
+### Bug Fixes
+
+- **vue:** update some typos in the load teas section ([cdadc44](https://github.com/ionic-team/ionic-training-decks/commit/cdadc4489e1c39e05a7405e7fafff8069c9fc985))
+
 ## [5.4.6](https://github.com/ionic-team/ionic-training-decks/compare/v5.4.5...v5.4.6) (2022-11-15)
 
 ### Bug Fixes
