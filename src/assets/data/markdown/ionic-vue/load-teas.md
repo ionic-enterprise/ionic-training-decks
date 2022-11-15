@@ -234,14 +234,14 @@ describe('TeaListPage.vue', () => {
 });
 ```
 
-There are also a couple of tests that grab the list of teas from the view's view model for comparison purposes. You can identify them by having a line like this in them: `const teas = wrapper.vm.teaData as Array<Tea>;`
+There are also a couple of tests that grab the list of teas from the view's view model for comparison purposes. You can identify them by having a line like this in them: `const teas = (wrapper.getCurrentComponent() as any).setupState.teaData;`
 
 Remove that line, and update the comparison to use `teas.value`. Here is a `diff` for one such test to give you an idea of the change required:
 
 ```diff
      it('displays the name in the title', async () => {
        const wrapper = await mountView();
--      const teas = wrapper.vm.teaData as Array<Tea>;
+-      const teas = (wrapper.getCurrentComponent() as any).setupState.teaData;
        const cols = wrapper.find('ion-col');
        cols.forEach((c, idx) => {
          const title = c.find('ion-card ion-card-header ion-card-title');
