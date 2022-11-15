@@ -174,6 +174,8 @@ With all of that in place, the changes to the view are very straight forward and
 First, we will update the test `tests/unit/views/TeaDetailsPage.spec.ts` to cover our requirements:
 
 ```TypeScript
+describe('TeaDetailsPage.vue', () => {
+  ...
   it('saves the rating on click', async () => {
     const wrapper = await mountView();
     const { rate } = useTea();
@@ -184,6 +186,8 @@ First, we will update the test `tests/unit/views/TeaDetailsPage.spec.ts` to cove
     expect(rate).toHaveBeenCalledTimes(1);
     expect(rate).toHaveBeenCalledWith(3, 4);
   });
+  ...
+});
 ```
 
 **Note:** depending on how you set up your initial test data, you may need to update the values used above. Basically, the test should set the rating to something else.
