@@ -144,9 +144,13 @@ const merge = async (note: TastingNote): Promise<TastingNote> => {
   return note;
 };
 
-const refresh = async (): Promise<void> => {};
+const refresh = async (): Promise<void> => {
+  null;
+};
 
-const remove = async (note: TastingNote): Promise<void> => {};
+const remove = async (note: TastingNote): Promise<void> => {
+  null;
+};
 
 export default () => ({
   notes,
@@ -244,7 +248,7 @@ Updating a note is very similar:
    1. The `beforeEach` sets up the mock to resolve to `{ data: note }`
    1. The POST test posts to the `/user-tasting-notes/1` endpoint
    1. The "resolves" test makes sure the `merge(note)` resolves to the `note`
-   1. The "adds a note" test becomes an "updates the note" test, so no note is added (the length of `notes.value`is still 3), but the proper note has been modified
+   1. The "adds a note" test becomes an "updates the note" test, so no note is added (the length of `notes.value` is still 3), but the proper note has been modified
 1. Update the `merge()` code accordingly.
 
 ### `remove`
@@ -311,9 +315,9 @@ describe('AppTastingNoteEditor.vue', () => {
 
 ### Hookup the Modal
 
-The first thing we need to do is get a modal overlay hooked up for the "add a new note" case. This will allow us to test out the component for the modal as we develop it. This will also get the infrastructure for the rest of our modifications in place. We will launch the modal for the "add a new note" scenario from a <a href="https://ionicframework.com/docs/api/fab" target="_blank">floating action button</a> on the `TastingNotes` page.
+The first thing we need to do is get a modal overlay hooked up for the "add a new note" case. This will allow us to test out the component for the modal as we develop it. This will also get the infrastructure for the rest of our modifications in place. We will launch the modal for the "add a new note" scenario from a <a href="https://ionicframework.com/docs/api/fab" target="_blank">floating action button</a> on the `TastingNotesPage`.
 
-First we need to set up the test for the `TastingNotes` page view (`tests/unit/views/TastingNotes.spec.ts`).
+First we need to set up the test for the `TastingNotesPage` view (`tests/unit/views/TastingNotesPage.spec.ts`).
 
 ```typescript
 describe('adding a new note', () => {
@@ -819,7 +823,7 @@ The `script setup` already contains stubs for the `submit()` and `cancel()` func
 
 We can now theoretically add tasting notes, but we don't really know since we cannot see them. So now would be a good time to update the TastingNotes page view to display the notes that we have in the store.
 
-First, let update the test (`tests/unit/views/TastingNotes.spec.ts`) to include some notes. There is a lot going on here, so let's take it a bit at a time.
+First, let update the test (`tests/unit/views/TastingNotesPage.spec.ts`) to include some notes. There is a lot going on here, so let's take it a bit at a time.
 
 First, define some tasting notes data:
 
