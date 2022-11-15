@@ -37,9 +37,9 @@ In the `tests/unit/composables/tea.spec.ts` file there are also a few preliminar
 - a couple of "find" tests expect a specific tea, add the `rating` there as well
 - update the creation of `httpResultTeas` to remove the `result` just like we do the `image`
 - add a `describe('rate')` block for the saving of the rating, but leave it empty for now
-- `import { Preferences } from @capacitor/preferences;`
+- `import { Preferences } from "@capacitor/preferences";`
 
-In `src/composables/tea.ts`, add the rating setting it to zero in `unpackData()`. Also, create the shell of the `rate()` method as such (be sure to return it from the `default` function as well as to the `src/composables/__mocks__/tea.ts` file):
+In `src/composables/tea.ts`, add the rating setting it to zero in `unpack()`. Also, create the shell of the `rate()` method as such (be sure to return it from the `default` function as well as to the `src/composables/__mocks__/tea.ts` file):
 
 ```typescript
 const rate = async (id: number, rating: number): Promise<void> => {
@@ -143,17 +143,17 @@ beforeEach(() => {
 });
 ```
 
-_Note:_ you need to import `GetOptions` from `@capacitor/preferences`.
+_Note:_ you need to import `GetOptions` from `'capacitor/preferences'`.
 
 Now for the transform itself. Here is where things get a little complicated. Here is what we are doing in a nut-shell:
 
 - Create a `transform()` method that transforms the tea, this needs to be done asynchronously now.
-- Since we are doing things asynchronously, the `unpackData()` needs to return a promise of the tea array.
+- Since we are doing things asynchronously, the `unpack()` needs to return a promise of the tea array.
 - Map the data using the new `transform()`.
 - Now we have an array of promises, but we want a promise of an array, so use `Promise.all()` to do this data conversion.
 
 ```TypeScript
-const unpackData = (data: Array<RawData>): Promise<Array<Tea>> => {
+const unpack = (data: Array<RawData>): Promise<Array<Tea>> => {
   return Promise.all(data.map(t => transform(t)));
 };
 
@@ -182,9 +182,8 @@ describe('TeaDetailsPage.vue', () => {
     const rating = wrapper.find('[data-testid="rating"]');
     const stars = rating.findAllComponents(IonIcon);
     stars[1].trigger('click');
-    rating.trigger('click');
     expect(rate).toHaveBeenCalledTimes(1);
-    expect(rate).toHaveBeenCalledWith(3, 4);
+    expect(rate).toHaveBeenCalledWith(3, 2);
   });
   ...
 });

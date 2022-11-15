@@ -79,7 +79,7 @@ In the `src/views/TeaDetailsPage.vue` file, add a `ratings` data item and bind t
 ```html
 <template>
   ...
-  <AppRating data-testid="rating" v-model="rating"></AppRating>
+  <app-rating data-testid="rating" v-model="rating"></app-rating>
   ...
 </template>
 
