@@ -74,7 +74,7 @@ In order to satisfy that test, we can just perform the basic "get" pattern of se
 
 ```TypeScript
 const refresh = async (): Promise<void> => {
-  teas.value = await client.get('./tea-categories').then(res => res.data);
+  teas.value = await client.get('/tea-categories').then(res => res.data);
 };
 ```
 
@@ -169,7 +169,7 @@ const unpack = (data: Array<RawData>): Array<Tea> => {
 }
 ```
 
-We can then also update the promise handling in our `getAll()` to ensure the transform is called if we have data:
+We can then also update the promise handling in our `refresh()` to ensure the transform is called if we have data:
 
 ```TypeScript
       .then(res => unpack(res.data || []));
@@ -219,6 +219,7 @@ import useTea from '@/composables/tea';
 ...
 jest.mock('@/composables/tea');
   ...
+describe('TeaListPage.vue', () => {
   const { teas } = useTea();
   ...
 
@@ -230,6 +231,7 @@ jest.mock('@/composables/tea');
     jest.clearAllMocks();
   });
   ...
+});
 ```
 
 There are also a couple of tests that grab the list of teas from the view's view model for comparison purposes. You can identify them by having a line like this in them: `const teas = wrapper.vm.teaData as Array<Tea>;`
@@ -261,7 +263,7 @@ it('refreshes the tea data', async () => {
 
 ### Modify the View
 
-Let's attach the view code in a methodic, orderly fashion.
+Let's attack the view code in a methodic, orderly fashion.
 
 1. Add `const { refresh, teas } = useTea();` (you will also need to add an import)
 1. Call `refresh()`
@@ -274,7 +276,7 @@ At this point, the old styled `computed:` and `data()` sections should be gone, 
 
 Our TeaList page is now getting live data from our backend. The data itself is managed by our `useTea` composition function.
 
-In case you had any issues transforming the view, here is the full code for the `setup()` function that you can use as a reference. Try to code this on your own, however, without peeking.
+In case you had any issues transforming the view, here is the completed relevant code for the `script setup` section that you can use as a reference. Try to code this on your own, however, without peeking.
 
 ```typescript
 refresh();
