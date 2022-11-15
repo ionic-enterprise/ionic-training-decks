@@ -1,3 +1,10 @@
+## [5.4.8](https://github.com/ionic-team/ionic-training-decks/compare/v5.4.7...v5.4.8) (2022-11-15)
+
+### Bug Fixes
+
+- **vue:** clarify some items with the component ([5b0e397](https://github.com/ionic-team/ionic-training-decks/commit/5b0e397bddb0ebd4e34f50bdb78e8780203cac70))
+- **vue:** no more wrapper.vm ([c9844c1](https://github.com/ionic-team/ionic-training-decks/commit/c9844c180aa2c7674fab7e6bc4801c161aba7fde))
+
 ## [5.4.7](https://github.com/ionic-team/ionic-training-decks/compare/v5.4.6...v5.4.7) (2022-11-15)
 
 ### Bug Fixes
