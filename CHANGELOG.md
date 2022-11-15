@@ -1,3 +1,10 @@
+## [5.4.6](https://github.com/ionic-team/ionic-training-decks/compare/v5.4.5...v5.4.6) (2022-11-15)
+
+### Bug Fixes
+
+- **vue:** clarify a couple of items with the auth workflow ([9f60ef1](https://github.com/ionic-team/ionic-training-decks/commit/9f60ef177a7228c3a97cb49599fe2b4a368a47f6))
+- **vue:** clarify where a store rating test goes ([0b949c1](https://github.com/ionic-team/ionic-training-decks/commit/0b949c130f95c76f78266b97eb479130542f3141))
+
 ## [5.4.5](https://github.com/ionic-team/ionic-training-decks/compare/v5.4.4...v5.4.5) (2022-11-14)
 
 ### Bug Fixes
