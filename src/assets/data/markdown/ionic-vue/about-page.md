@@ -66,12 +66,12 @@ We can then update the template or the view.
 
 Currently, the logout logic is on the first page. Once the user has logged in, it is doubtful they will need to logout, so it would make more sense to put that functionality on a page like the "My Account" page, or "My Profile". We don't have one of those, but the about page will do for now.
 
-We start by moving the logout related tests from the `TeaList` view's test to the `About` view's test. You will need to add a couple of imports, etc, but I leave that up to you at this point. The tests you need to move have descriptions like:
+We start by moving the logout related tests from the `TeaListPage` view's test to the `AboutPage` view's test. You will need to add a couple of imports, etc, but I leave that up to you at this point. The tests you need to move have descriptions like:
 
 - 'performs a logout when the logout button is clicked'
 - 'navigates to the login after the logout action is complete'
 
-I also leave it up to you to move the proper code from `src/views/TeaList.vue` to `src/views/About.vue` and then clean up the `TeaList` code.
+I also leave it up to you to move the proper code from `src/views/TeaListPage.vue` to `src/views/AboutPage.vue` and then clean up the `TeaListPage` code.
 
 Be sure that:
 
