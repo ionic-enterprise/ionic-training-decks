@@ -1,3 +1,11 @@
+## [5.4.9](https://github.com/ionic-team/ionic-training-decks/compare/v5.4.8...v5.4.9) (2022-11-16)
+
+### Bug Fixes
+
+- **vue:** apply some final updates ([59be974](https://github.com/ionic-team/ionic-training-decks/commit/59be9740f54adf410bbcc7e4dba7a63b4c0a2d77))
+- **vue:** minor updates to the notes module section ([a80daa1](https://github.com/ionic-team/ionic-training-decks/commit/a80daa1b1f62425c302dbebb598524568b7a1a2a))
+- **vue:** more of the great page migration ([c57857c](https://github.com/ionic-team/ionic-training-decks/commit/c57857c09b59ff3a81b2d1b74923a07d41cdce07))
+
 ## [5.4.8](https://github.com/ionic-team/ionic-training-decks/compare/v5.4.7...v5.4.8) (2022-11-15)
 
 ### Bug Fixes
