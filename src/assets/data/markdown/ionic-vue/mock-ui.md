@@ -149,7 +149,7 @@ Let's mock up how the Ionic components will be used in the Tea view. This allows
 
 One way of handling data in a Vue component is to use the <a href="https://vuejs.org/api/reactivity-core.html#ref">ref()</a> to declare a reactive value. The advantage of this approach is that the component will automatically re-render when the data changes.
 
-Add a `ref()` to the `script setup` tag as follows:
+Add a `ref()` to the `script setup` tag in `src/view/TeaListPage.vue` as follows:
 
 ```typescript
 const teaData = ref<Array<Tea>>([
@@ -271,13 +271,17 @@ In our case we want to show at most four columns of cards per row for high resol
 
 We no longer need the test that expects the content of our "#container" so remove that test case.
 
-We will lay out this test for our current mock data (which has seven teas), and our highest resolution, which will have four teas per row. In this case, our page is expected to render two rows, the first with four columns and the second with three columns. We will need tests like this:
+We will lay out this test for our current mock data (which has seven teas), and our highest resolution, which will have four teas per row. In this case, our page is expected to render two rows, the first with four columns and the second with three columns. We will need tests like this in `tests/unit/views/TeaListPage.spec.ts`:
 
 ```typescript
-describe('with seven teas', () => {
-  it('displays two rows', () => {});
-  it('displays four columns in the first row', () => {});
-  it('displays three columns in the second row', () => {});
+describe('TeaListPage.vue', () => {
+...
+  describe('with seven teas', () => {
+    it('displays two rows', () => {});
+    it('displays four columns in the first row', () => {});
+    it('displays three columns in the second row', () => {});
+  });
+...
 });
 ```
 
