@@ -19,30 +19,28 @@ describe('PagePage', () => {
   let fixture: ComponentFixture<PagePage>;
   let popover: HTMLIonPopoverElement;
 
-  beforeEach(
-    waitForAsync(() => {
-      popover = createOverlayElementMock('Popover');
-      TestBed.configureTestingModule({
-        declarations: [PagePage],
-        imports: [IonicModule, MarkdownViewModule, RouterModule.forRoot([], { relativeLinkResolution: 'legacy' })],
-        providers: [
-          { provide: ActivatedRoute, useFactory: createActivatedRouteMock },
-          { provide: MenuItemsService, useFactory: createMenuItemsServiceMock },
-          {
-            provide: PopoverController,
-            useFactory: () => createOverlayControllerMock('PopoverController', popover),
-          },
-          { provide: NavController, useFactory: createNavControllerMock },
-        ],
-      }).compileComponents();
+  beforeEach(waitForAsync(() => {
+    popover = createOverlayElementMock('Popover');
+    TestBed.configureTestingModule({
+      declarations: [PagePage],
+      imports: [IonicModule, MarkdownViewModule, RouterModule.forRoot([], {})],
+      providers: [
+        { provide: ActivatedRoute, useFactory: createActivatedRouteMock },
+        { provide: MenuItemsService, useFactory: createMenuItemsServiceMock },
+        {
+          provide: PopoverController,
+          useFactory: () => createOverlayControllerMock('PopoverController', popover),
+        },
+        { provide: NavController, useFactory: createNavControllerMock },
+      ],
+    }).compileComponents();
 
-      const activatedRoute = TestBed.inject(ActivatedRoute);
-      (activatedRoute.snapshot.paramMap.get as any).and.returnValue('1');
+    const activatedRoute = TestBed.inject(ActivatedRoute);
+    (activatedRoute.snapshot.paramMap.get as any).and.returnValue('1');
 
-      fixture = TestBed.createComponent(PagePage);
-      component = fixture.componentInstance;
-    })
-  );
+    fixture = TestBed.createComponent(PagePage);
+    component = fixture.componentInstance;
+  }));
 
   const setupCourseWithoutPages = () => {
     const activatedRoute = TestBed.inject(ActivatedRoute);
