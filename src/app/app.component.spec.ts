@@ -8,31 +8,38 @@ import { AppComponent } from './app.component';
 import { createNavControllerMock, createPlatformMock } from '@test/mocks';
 import { MenuItemsService, ApplicationService } from '@app/core';
 import { createMenuItemsServiceMock, createAppliationServiceMock } from '@app/core/testing';
+import { SplashScreen } from '@capacitor/splash-screen';
 
 describe('AppComponent', () => {
-  beforeEach(
-    waitForAsync(() => {
-      TestBed.configureTestingModule({
-        declarations: [AppComponent],
-        schemas: [CUSTOM_ELEMENTS_SCHEMA],
-        providers: [
-          {
-            provide: ApplicationService,
-            useFactory: createAppliationServiceMock,
-          },
-          { provide: MenuItemsService, useFactory: createMenuItemsServiceMock },
-          { provide: NavController, useFactory: createNavControllerMock },
-          { provide: Platform, useFactory: createPlatformMock },
-        ],
-        imports: [RouterTestingModule.withRoutes([])],
-      }).compileComponents();
-    })
-  );
+  beforeEach(waitForAsync(() => {
+    TestBed.configureTestingModule({
+      declarations: [AppComponent],
+      schemas: [CUSTOM_ELEMENTS_SCHEMA],
+      providers: [
+        {
+          provide: ApplicationService,
+          useFactory: createAppliationServiceMock,
+        },
+        { provide: MenuItemsService, useFactory: createMenuItemsServiceMock },
+        { provide: NavController, useFactory: createNavControllerMock },
+        { provide: Platform, useFactory: createPlatformMock },
+      ],
+      imports: [RouterTestingModule.withRoutes([])],
+    }).compileComponents();
+  }));
 
   it('should create the app', async () => {
     const fixture = TestBed.createComponent(AppComponent);
     const app = fixture.debugElement.componentInstance;
     expect(app).toBeTruthy();
+  });
+
+  it('hides the splash screen', () => {
+    spyOn(SplashScreen, 'hide');
+    const fixture = TestBed.createComponent(AppComponent);
+    TestBed.createComponent(AppComponent);
+    fixture.detectChanges();
+    expect(SplashScreen.hide).toHaveBeenCalledTimes(1);
   });
 
   describe('initialization', () => {

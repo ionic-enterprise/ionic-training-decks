@@ -1,8 +1,0 @@
-{
-  "appId": "io.ionic.trainingdecks",
-  "appName": "Ionic Training Labs",
-  "bundledWebRuntime": false,
-  "npmClient": "npm",
-  "webDir": "www",
-  "cordova": {}
-}

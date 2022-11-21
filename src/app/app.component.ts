@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { ApplicationService, MenuItemsService } from '@app/core';
 import { NavController, Platform } from '@ionic/angular';
 import { FirebaseAnalytics } from '@capacitor-community/firebase-analytics';
+import { SplashScreen } from '@capacitor/splash-screen';
 
 @Component({
   selector: 'app-root',
@@ -42,6 +43,7 @@ export class AppComponent implements OnInit {
     this.loadMenuItems();
     const course = this.getCourseFromPath();
     this.setSelectedMenuItem(course);
+    SplashScreen.hide();
   }
 
   private loadMenuItems() {
