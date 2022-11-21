@@ -97,6 +97,17 @@ To generate the required resources and copy them to the native projects, use the
 npx capacitor-assets generate --iconBackgroundColor '#f1ebe1' --splashBackgroundColor '#f1ebe1' --iconBackgroundColorDark '#110b00' --splashBackgroundColorDark '#110b00'
 ```
 
+**Pro Tip:** the `@capacitor/assets` package is updated from time to time. As a result, you may want to regenerate the icons and splash screen from time to time. To make this easier, add the command to your `package.json` `scripts`:
+
+```JSON
+  "scripts": {
+    "assets": "capacitor-assets generate --iconBackgroundColor '#f1ebe1' --splashBackgroundColor '#f1ebe1' --iconBackgroundColorDark '#110b00' --splashBackgroundColorDark '#110b00'",
+    ...
+  },
+```
+
+When you want to regenerate the assets, you just need to remember `npm run assets`, and not the whole `capacitor-assets` command.
+
 ## Live Reload (Optional)
 
 Now that the projects are set up and building properly, you can use Ionic's "live reload" feature if you would like to. This feature allows you to run the application on your device and then rebuild and reload the application on your device as you develop. This is similar to `ionic serve` but is running the application on your device(s) instead of the browser.
