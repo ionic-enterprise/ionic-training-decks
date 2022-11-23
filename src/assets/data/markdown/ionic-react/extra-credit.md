@@ -29,23 +29,6 @@ The current login page does not offer a very good look and feel. Let's refactor 
 }
 ```
 
-## A Better Splash Screen Flow
-
-The default behavior for the splash screen is not ideal. On Android, there is a white screen between the splash dismissing and the application starting up. On iOS it appears that the splash screen is not displaying at all. Let's fix that by <a href="https://capacitorjs.com/docs/apis/splash-screen#hiding-the-splash-screen" target="_blank">manually hiding the splash screen</a>.
-
-- Install the `@capacitor/splash-screen` plugin.
-- Create a mock for it using `__mocks__/@capacitor/preferences.ts` as a model.
-- Hide the splash screen from `src/App.vue`, including a proper test.
-- Update the `capacitor.config.ts` such that `launchAutoHide` is set to `false` (see snippet below, have a look at the <a href="https://capacitorjs.com/docs/config" target="_blank">configuration docs</a> if needed).
-
-```typescript
-  plugins: {
-    SplashScreen: {
-      launchAutoHide: false,
-    },
-  },
-```
-
 ## Tasting Notes Removal Improvements
 
 The Tasting Notes feature that we added was fairly complete, but some shortcuts were made in order to fit in in "on schedule." Let's remove some of that technical debt was accrued.
@@ -62,4 +45,4 @@ Right now, if the user clicks to remove a tasting note, it is simply removed. Th
 
 ## Conclusion
 
-That is it! Check your solutions against what we did by having a look at what we did <a href="https://github.com/ionic-enterprise/tea-taster-vue" target="_blank">in our code</a>.
+That is it! Check your solutions against what we did by having a look at what we did <a href="https://github.com/ionic-enterprise/tea-taster-react" target="_blank">in our code</a>.

@@ -62,4 +62,4 @@ Right now, if the user clicks to remove a tasting note, it is simply removed. Th
 
 ## Conclusion
 
-That is it! Check your solutions against what we did by having a look at what we did <a href="https://github.com/ionic-enterprise/tea-taster-vue" target="_blank">in our code</a>.
+That is it! Check your solutions against what we did by having a look at what we did <a href="https://github.com/ionic-enterprise/tea-taster-angular" target="_blank">in our code</a>.
