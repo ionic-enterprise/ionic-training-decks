@@ -1,3 +1,14 @@
+# [5.5.0](https://github.com/ionic-team/ionic-training-decks/compare/v5.4.9...v5.5.0) (2022-11-23)
+
+### Bug Fixes
+
+- **splash-screen:** properly handle the splash screen ([03a54c2](https://github.com/ionic-team/ionic-training-decks/commit/03a54c2563885240152ed9e8d3a41d56bb0bbb11))
+
+### Features
+
+- **capacitor:** add the assets script ([8342c00](https://github.com/ionic-team/ionic-training-decks/commit/8342c00b8a20084a58644db3a3d328b2d15b99af))
+- **ionic:** add extra credit sections ([b8fdf27](https://github.com/ionic-team/ionic-training-decks/commit/b8fdf270d1dc2c69480c80b2660cd3a6e039a5b6))
+
 ## [5.4.9](https://github.com/ionic-team/ionic-training-decks/compare/v5.4.8...v5.4.9) (2022-11-16)
 
 ### Bug Fixes
