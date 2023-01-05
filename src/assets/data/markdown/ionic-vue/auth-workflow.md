@@ -185,7 +185,7 @@ Let's add the actual button first. In `src/views/TeaList.vue` add the following 
         </ion-buttons>
 ```
 
-Now we will need to go to the `script setup` tag and make some adjustments. Where we are doing the imports, add the following:
+Now we will need to go to the `script` tag and make some adjustments. Where we are doing the imports, add the following:
 
 - add `IonButton`, `IonButtons`, and `IonIcon` to the list of components being imported
 - add `import { logOutOutline } from 'ionicons/icons';`
@@ -219,7 +219,7 @@ With those modifications in place, we can add the tests that express our current
     });
 ```
 
-Back in the view's code, fill out the logic for the `logoutClicked()` function that was created within the `script setup` section. **Hint:** you will need to import `useAuth` and use the `logout` function from it. You will also need to use `useRouter`. See the `LoginPage` page for examples.
+Back in the view's code, fill out the logic for the `logoutClicked()` function that was created within the `script` section. **Hint:** you will need to import `useAuth` and use the `logout` function from it. You will also need to use `useRouter`. See the `LoginPage` page for examples.
 
 Test that out in the browser. The full flow should now work.
 

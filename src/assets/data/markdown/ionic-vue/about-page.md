@@ -15,7 +15,7 @@ Modify the application's `tsconfig.json` file to allow the code to resolve JSON 
 ...
 ```
 
-This will allow us to read the `package.json` file and get some important information from it within our `script setup` section. Note that there is no reason for this data to be reactive.
+This will allow us to read the `package.json` file and get some important information from it within our `script` section. Note that there is no reason for this data to be reactive.
 
 **Note:** You may need to add the `author` node to the `package.json` file. You can just your your name like this: `"author": "Jackie Smith",`.
 

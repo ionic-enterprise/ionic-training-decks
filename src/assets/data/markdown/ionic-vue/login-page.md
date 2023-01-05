@@ -110,7 +110,7 @@ npm i vee-validate@next yup
 
 ### Set up the Models
 
-Switching back to the view file, we have two bits of information to get from the user: their email address and their password. We will use the `useField` composition API from vee-validate to create the models for those inputs. The string passed to the `useField()` function is the value for the associated input's `name`. The following code belongs in the `script setup` section.
+Switching back to the view file, we have two bits of information to get from the user: their email address and their password. We will use the `useField` composition API from vee-validate to create the models for those inputs. The string passed to the `useField()` function is the value for the associated input's `name`. The following code belongs in the `script` section.
 
 ```TypeScript
 import { useForm, useField } from 'vee-validate';
@@ -264,7 +264,7 @@ it('has a disabled signin button until valid data is entered', async () => {
 });
 ```
 
-The `useForm()` function returns an object called `meta` that contains data about the form's validation state. Let's grab that in our `script setup` section so it is available in our view's template:
+The `useForm()` function returns an object called `meta` that contains data about the form's validation state. Let's grab that in our `script` section so it is available in our view's template:
 
 ```typescript
 const { errors, meta } = useForm({ validationSchema });

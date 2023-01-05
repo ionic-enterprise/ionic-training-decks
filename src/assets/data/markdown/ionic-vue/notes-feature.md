@@ -409,7 +409,7 @@ Here is the markup for the footer:
 </ion-footer>
 ```
 
-The contents of the `script setup` section is left up to you. You should have several code samples to use at this point to determine how to update the imports and create the stubs.
+The contents of the `script` section is left up to you. You should have several code samples to use at this point to determine how to update the imports and create the stubs.
 
 Let's start filling out the form. We already have one simple form, the `LoginPage`. On that page we used a list of inputs. We will need something like that within this editor, so let's use that as a model for the first couple of input fields. All of the following items will go inside the `ion-content` element. Be sure to update the components list as usual. Now is a good time to start filling out the validations as well.
 
@@ -552,7 +552,7 @@ Then we can switch back to `src/components/AppTastingNoteEditor.vue` and add the
 </script>
 ```
 
-**Note:** if you reload the app from the Tasting Notes tab and don't go to the Teas tab before opening the modal you won't see any teas. This isn't really an issue for "normal" operation of the app on a device, but it _is_ an issue. Let's add an `initialize()` function and call it within our `script setup`. Performing the tests for this is an "extra credit" assignment left to the user.
+**Note:** if you reload the app from the Tasting Notes tab and don't go to the Teas tab before opening the modal you won't see any teas. This isn't really an issue for "normal" operation of the app on a device, but it _is_ an issue. Let's add an `initialize()` function and call it within our `script` section. Performing the tests for this is an "extra credit" assignment left to the user.
 
 The code looks something like this:
 
@@ -806,7 +806,7 @@ The cancel button tests will be similar, but with no data setup. We also will ex
 
 #### Modifications to the Code
 
-The `script setup` already contains stubs for the `submit()` and `cancel()` functions. Here is a bit of the `submit()`. Filling out the rest is left as an exercise for you:
+The `script` section already contains stubs for the `submit()` and `cancel()` functions. Here is a bit of the `submit()`. Filling out the rest is left as an exercise for you:
 
 ```TypeScript
     const submit = async () => {
@@ -911,7 +911,7 @@ The key parts for all of this to work together is the following markup:
       </ion-list>
 ```
 
-At this point, all we should have to add to our `script setup` is to add `notes` to the destructuring of our `useTastingNotes()` return value:
+At this point, all we should have to do to our `script` section is to add `notes` to the destructuring of our `useTastingNotes()` return value:
 
 ```typescript
 const { notes, refresh } = useTastingNotes();
@@ -925,7 +925,7 @@ We can add notes, but it would also be good if we could update them.
 
 ### Modify the Editor
 
-The editor component currently only handles creating new tasting note. We will also need to handle the case where we need to edit a tasting note. We could handle this by passing the whole tasting note, but let's just pass the note's ID. Since `id` is not a great name for a prop, let's use `noteId`. Add the following prop to the `script setup` section of our `AppTastingNoteEditor`:
+The editor component currently only handles creating new tasting note. We will also need to handle the case where we need to edit a tasting note. We could handle this by passing the whole tasting note, but let's just pass the note's ID. Since `id` is not a great name for a prop, let's use `noteId`. Add the following prop to the `script` section of our `AppTastingNoteEditor`:
 
 ```TypeScript
 const props = defineProps({
@@ -1006,7 +1006,7 @@ If we have an ID when the editor is created we need to find the note. At that po
   });
 ```
 
-We can then add code to the `initialize()` within our `script setup` section:
+We can then add code to the `initialize()` within our `script` section:
 
 ```TypeScript
 ...

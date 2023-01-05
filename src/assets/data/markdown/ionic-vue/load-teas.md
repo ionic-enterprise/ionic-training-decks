@@ -276,7 +276,7 @@ At this point, the old styled `computed:` and `data()` sections should be gone, 
 
 Our TeaList page is now getting live data from our backend. The data itself is managed by our `useTea` composition function.
 
-In case you had any issues transforming the view, here is the completed relevant code for the `script setup` section that you can use as a reference. Try to code this on your own, however, without peeking.
+In case you had any issues transforming the view, here is the completed relevant code for the `script` section that you can use as a reference. Try to code this on your own, however, without peeking.
 
 ```typescript
 refresh();

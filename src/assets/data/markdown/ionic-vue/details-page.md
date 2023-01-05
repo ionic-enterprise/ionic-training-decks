@@ -296,7 +296,7 @@ Within `src/views/TeaDetailsPage.vue` we need to do the following:
 - `import { Tea } from '@/models';`
 - `import useTea from '@/composables/tea';`
 
-Within the `script setup`, we know we need to use the `params` object to grab the `id`. We then need to use the `id` to `find()` the tea and return the tea so we can use it in the template.
+Within the `script` section, we know we need to use the `params` object to grab the `id`. We then need to use the `id` to `find()` the tea and return the tea so we can use it in the template.
 
 Here is some of that in place, with a TODO for you to finish it up.
 

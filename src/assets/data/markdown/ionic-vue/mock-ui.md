@@ -124,16 +124,6 @@ However, our test still refers to our Tea view as "Home", and that will be confu
 
 At this point, our tests and the continuous build for our development server should both be working.
 
-### Update the View
-
-There is not much to update in `src/views/TeaListPage.vue`. We _could_ just update the name of the component to avoid future confusion. In the long run, however, it will be to our advantage to switch to using <a href="https://vuejs.org/api/sfc-script-setup.html" target="_blank">script setup</a>.
-
-```html
-<script setup lang="ts">
-  import { IonContent, IonHeader, IonPage, IonTitle, IonToolbar } from '@ionic/vue';
-</script>
-```
-
 ## Coding Challenge
 
 Now that we have renamed the Home view and fixed up the routes, I have a coding challenge for you. What I would like you to do is change the Tea view to have a title of "Teas" rather than "Blank". This will be a two step process:
@@ -149,7 +139,7 @@ Let's mock up how the Ionic components will be used in the Tea view. This allows
 
 One way of handling data in a Vue component is to use the <a href="https://vuejs.org/api/reactivity-core.html#ref">ref()</a> to declare a reactive value. The advantage of this approach is that the component will automatically re-render when the data changes.
 
-Add a `ref()` to the `script setup` tag in `src/view/TeaListPage.vue` as follows:
+Add a `ref()` to the `script` tag in `src/view/TeaListPage.vue` as follows:
 
 ```typescript
 const teaData = ref<Array<Tea>>([
@@ -297,7 +287,7 @@ it('displays two rows', () => {
 
 In order to satisfy this requirement, it will be easiest if we convert our list of teas to a matrix. Let's create a computed data item that does just that. The great thing about a computed data item is that Vue will cache the value for us as well as track the dependencies for it. This means that it will only recalculate if this teas list changes.
 
-Add the following code to the Tea view's `script setup` section:
+Add the following code to the Tea view's `script` section:
 
 ```typescript
 const teaRows = computed((): Array<Array<Tea>> => {
