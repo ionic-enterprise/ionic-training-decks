@@ -1,3 +1,10 @@
+# [5.6.0](https://github.com/ionic-team/ionic-training-decks/compare/v5.5.0...v5.6.0) (2023-01-05)
+
+### Features
+
+- **vue:** name the composable API functions ([560e623](https://github.com/ionic-team/ionic-training-decks/commit/560e6234f201e39ff503b71e38a5aed6dd45ebbd))
+- **vue:** update for the fact that we now generate 'script setup' sections in the starters ([1536ad1](https://github.com/ionic-team/ionic-training-decks/commit/1536ad1f3162fdb953922d4651e6361161b9497b))
+
 # [5.5.0](https://github.com/ionic-team/ionic-training-decks/compare/v5.4.9...v5.5.0) (2022-11-23)
 
 ### Bug Fixes
