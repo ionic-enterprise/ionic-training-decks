@@ -37,8 +37,8 @@ This is a review of skills we have already learned. As such, the next steps prov
 `tests/unit/composables/tasting-notes.spec.ts`
 
 ```typescript
-import useBackendAPI from '@/composables/backend-api';
-import useTastingNotes from '@/composables/tasting-notes';
+import { useBackendAPI } from '@/composables/backend-api';
+import { useTastingNotes } from '@/composables/tasting-notes';
 import { TastingNote } from '@/models';
 
 jest.mock('@/composables/backend-api');
@@ -130,7 +130,7 @@ describe('useTastingNotes', () => {
 ```typescript
 import { TastingNote } from '@/models';
 import { ref } from 'vue';
-import useBackendAPI from './backend-api';
+import { useBackendAPI } from './backend-api';
 
 const { client } = useBackendAPI();
 
@@ -152,7 +152,7 @@ const remove = async (note: TastingNote): Promise<void> => {
   null;
 };
 
-export default () => ({
+export const useTastingNotes = () => ({
   notes,
   find,
   merge,
@@ -167,7 +167,7 @@ export default () => ({
 import { ref } from 'vue';
 import { TastingNote } from '@/models';
 
-export default jest.fn().mockReturnValue({
+export const useTastingNotes = jest.fn().mockReturnValue({
   notes: ref<Array<TastingNote>>([]),
   find: jest.fn().mockResolvedValue(undefined),
   merge: jest.fn().mockResolvedValue(undefined),
@@ -466,7 +466,7 @@ First we should create a test to make sure we do the binding correctly. Update `
 
 ```TypeScript
 ...
-import useTea from '@/composables/tea';
+import { useTea } from '@/composables/tea';
 
 jest.mock('@/composables/tea');
 
@@ -533,7 +533,7 @@ Then we can switch back to `src/components/AppTastingNoteEditor.vue` and add the
     string as yupString,
     number as yupNumber,
   } from 'yup';
-  import useTea from '@/composables/tea';
+  import { useTea } from '@/composables/tea';
   ...
 
   const { teas } = useTea();
@@ -728,7 +728,7 @@ The `submit-button` needs to merge the tasting note. Both buttons need to close 
 Add the following to the top of the `tests/unit/components/AppTastingNoteEditor.spec.ts` file:
 
 ```typescript
-import useTastingNotes from '@/composables/tasting-notes';
+import { useTastingNotes } from '@/composables/tasting-notes';
 import { modalController } from '@ionic/vue';
 
 jest.mock('@/composables/tasting-notes');
@@ -829,7 +829,7 @@ First, define some tasting notes data:
 
 ```TypeScript
 ...
-import useTastingNotes from '@/composables/tasting-notes';
+import { useTastingNotes } from '@/composables/tasting-notes';
 
 jest.mock('@/composables/tasting-notes');
 ...

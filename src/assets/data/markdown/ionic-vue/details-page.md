@@ -16,7 +16,7 @@ Let's start with some fairly boilerplate starting code for a page.
 First the test in `tests/unit/views/TeaDetailsPage.spec.ts`
 
 ```TypeScript
-import useAuth from '@/composables/auth';
+import { useAuth } from '@/composables/auth';
 import TeaDetailsPage from '@/views/TeaDetailsPage.vue';
 import { createRouter, createWebHistory } from '@ionic/vue-router';
 import { mount, VueWrapper } from '@vue/test-utils';
@@ -226,7 +226,7 @@ router.push('/teas/tea/3');
 
 Next, we need to configure the tea data so the `find()` call we need to make in the code will be testable. This involves the following steps:
 
-- Import the `useTea()` function: `import useTea from '@/composables/tea';`
+- Import the `useTea()` function: `import { useTea } from '@/composables/tea';`
 - Mock the `useTea()` implementation: `jest.mock('@/composables/tea');`
 - Add a `beforeEach()` that sets up the data and the mocks.
 
@@ -294,7 +294,7 @@ Within `src/views/TeaDetailsPage.vue` we need to do the following:
 - `import { ref } from 'vue';`
 - `import { useRoute } from 'vue-router';`
 - `import { Tea } from '@/models';`
-- `import useTea from '@/composables/tea';`
+- `import { useTea } from '@/composables/tea';`
 
 Within the `script` section, we know we need to use the `params` object to grab the `id`. We then need to use the `id` to `find()` the tea and return the tea so we can use it in the template.
 

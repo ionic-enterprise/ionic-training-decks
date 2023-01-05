@@ -25,7 +25,7 @@ import LoginPage from '@/views/LoginPage.vue';
 import { flushPromises, mount, VueWrapper } from '@vue/test-utils';
 import waitForExpect from 'wait-for-expect';
 import { createRouter, createWebHistory, Router } from 'vue-router';
-import useAuth from '@/composables/auth';
+import { useAuth } from '@/composables/auth';
 
 jest.mock('@/composables/auth');
 
@@ -146,7 +146,7 @@ First the one-liners:
 - Add an `errorMessage` ref object. You will need to add `ref` to the import from `vue`.
 - Update the template to display the error message if there is one. Here is the markup: `<div v-if="errorMessage">{{ errorMessage }}</div>`. We already have an area where error messages should be displayed. This markup belong inside that area.
 - `import { useRouter } from 'vue-router';`
-- `import useAuth from '@/composables/auth';`
+- `import { useAuth } from '@/composables/auth';`
 - Add a click event binding to the button: `@click="signinClicked"`.
 
 Now we can define our click handler.
@@ -247,7 +247,7 @@ const checkAuthStatus = async (
 
 You will need to add a couple of imports for this to compile:
 
-- Add: `import useSession from '@/composables/session';`
+- Add: `import { useSession } from '@/composables/session';`
 - Add `RouteLocationNormalized` and `NavigationGuardNext` to the existing import from `vue-router`
 
 The guts of the `checkAuthStatus()` function are:
@@ -291,7 +291,7 @@ You will need to update the imports.
 import axios, { AxiosRequestConfig } from 'axios';
 
 import router from '@/router';
-import useSession from '@/composables/session';
+import { useSession } from '@/composables/session';
 
 const { clearSession, getSession } = useSession();
 ```

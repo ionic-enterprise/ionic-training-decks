@@ -45,7 +45,7 @@ First create two files that will serve as the shells for our test and composable
 `tests/unit/composables/session.spec.ts`
 
 ```typescript
-import useSession from '@/composables/session';
+import { useSession } from '@/composables/session';
 import { Session } from '@/models';
 
 describe('useSession', () => {
@@ -96,7 +96,7 @@ const setSession = async (s: Session): Promise<void> => {
   // call Preferences.set() (be sure to import above)
 };
 
-export default () => {
+export const useSession = () => {
   return {
     clearSession,
     getSession,
@@ -108,7 +108,7 @@ export default () => {
 `src/composables/__mocks__/session.ts`
 
 ```typescript
-export default jest.fn().mockReturnValue({
+export const useSession = jest.fn().mockReturnValue({
   clearSession: jest.fn().mockResolvedValue(undefined),
   setSession: jest.fn().mockResolvedValue(undefined),
   getSession: jest.fn().mockResolvedValue(undefined),
@@ -294,7 +294,7 @@ const client = axios.create({
   },
 });
 
-export default () => {
+export const useBackendAPI = () => {
   return {
     client,
   };
@@ -304,7 +304,7 @@ export default () => {
 Similar to what we did with the 'useSession' composition function, we will create a mock in `src/composables/__mocks__/backend-api.ts` with the following contents to make our other tests more clean:
 
 ```typescript
-export default jest.fn().mockReturnValue({
+export const useBackendAPI = jest.fn().mockReturnValue({
   client: {
     post: jest.fn().mockResolvedValue({ data: null }),
     get: jest.fn().mockResolvedValue({ data: null }),
@@ -334,9 +334,9 @@ First create two files that will serve as the shells for our test and compsable 
 
 ```typescript
 import { User } from '@/models';
-import useBackendAPI from '@/composables/backend-api';
-import useAuth from '@/composables/auth';
-import useSession from '@/composables/session';
+import { useBackendAPI } from '@/composables/backend-api';
+import { useAuth } from '@/composables/auth';
+import { useSession } from '@/composables/session';
 
 jest.mock('@/composables/backend-api');
 jest.mock('@/composables/session');
@@ -351,8 +351,8 @@ describe('useAuth', () => {
 `src/composables/auth.ts`
 
 ```typescript
-import useBackendAPI from './backend-api';
-import useSession from './session';
+import { useBackendAPI } from './backend-api';
+import { useSession } from './session';
 
 const { client } = useBackendAPI();
 const { clearSession, setSession } = useSession();
@@ -363,7 +363,7 @@ const login = async (email: string, password: string): Promise<boolean> => {
 
 const logout = async (): Promise<void> => {};
 
-export default () => {
+export const useAuth = () => {
   return {
     login,
     logout,

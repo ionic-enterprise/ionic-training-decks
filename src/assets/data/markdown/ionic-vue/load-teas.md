@@ -9,8 +9,8 @@ The first thing we need to to is create some templates for our unit test and com
 **`tests/unit/composables/tea.spec.ts`**
 
 ```TypeScript
-import useBackendAPI from '@/composables/backend-api';
-import useTea from '@/composables/tea';
+import { useBackendAPI } from '@/composables/backend-api';
+import { useTea } from '@/composables/tea';
 import { Tea } from '@/models';
 
 jest.mock('@/composables/backend-api');
@@ -41,14 +41,14 @@ describe('useTea', () => {
 ```TypeScript
 import { ref } from 'vue';
 import { Tea } from '@/models';
-import useBackendAPI from './backend-api';
+import { useBackendAPI } from './backend-api';
 
 const { client } = useBackendAPI();
 const teas = ref<Array<Tea>>([]);
 
 const refresh = async (): Promise<void> => {};
 
-export default () => ({
+export const useTea = () => ({
   refresh,
   teas,
 });
@@ -215,7 +215,7 @@ Modify the test first. Since we are not changing anything about how the page wor
 - Set the `value` of the `teas` array.
 
 ```TypeScript
-import useTea from '@/composables/tea';
+import { useTea } from '@/composables/tea';
 ...
 jest.mock('@/composables/tea');
   ...

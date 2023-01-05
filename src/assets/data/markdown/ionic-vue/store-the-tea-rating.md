@@ -255,7 +255,7 @@ import { ref } from 'vue';
 import { IonBackButton, IonButtons, IonContent, IonHeader, IonImg, IonPage, IonTitle, IonToolbar } from '@ionic/vue';
 import { useRoute } from 'vue-router';
 import { Tea } from '@/models';
-import useTea from '@/composables/tea';
+import { useTea } from '@/composables/tea';
 import AppRating from '@/components/AppRating.vue';
 
 const { params } = useRoute();
