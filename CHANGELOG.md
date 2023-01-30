@@ -1,3 +1,9 @@
+## [5.6.2](https://github.com/ionic-team/ionic-training-decks/compare/v5.6.0...v5.6.2) (2023-01-30)
+
+### Features
+
+- **ng:** discuss lack of splash screen ([2a8cd35](https://github.com/ionic-team/ionic-training-decks/commit/2a8cd35270b3fd342ae5e84d1dd5c5edcc16c5ec))
+
 ## [5.6.1](https://github.com/ionic-team/ionic-training-decks/compare/v5.2.1...v5.6.1) (2023-01-30)
 
 ### Bug Fixes
