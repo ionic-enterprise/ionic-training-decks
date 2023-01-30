@@ -1,3 +1,32 @@
+## [5.6.1](https://github.com/ionic-team/ionic-training-decks/compare/v5.2.1...v5.6.1) (2023-01-30)
+
+### Bug Fixes
+
+- **splash-screen:** properly handle the splash screen ([03a54c2](https://github.com/ionic-team/ionic-training-decks/commit/03a54c2563885240152ed9e8d3a41d56bb0bbb11))
+- **vue:** apply some final updates ([59be974](https://github.com/ionic-team/ionic-training-decks/commit/59be9740f54adf410bbcc7e4dba7a63b4c0a2d77))
+- **vue:** clarify a couple of items with the auth workflow ([9f60ef1](https://github.com/ionic-team/ionic-training-decks/commit/9f60ef177a7228c3a97cb49599fe2b4a368a47f6))
+- **vue:** clarify some items with the component ([5b0e397](https://github.com/ionic-team/ionic-training-decks/commit/5b0e397bddb0ebd4e34f50bdb78e8780203cac70))
+- **vue:** clarify where a store rating test goes ([0b949c1](https://github.com/ionic-team/ionic-training-decks/commit/0b949c130f95c76f78266b97eb479130542f3141))
+- **vue:** have the link to the completed code at the top and bottom ([3d731e3](https://github.com/ionic-team/ionic-training-decks/commit/3d731e3667cd1632c79632fee06d23b0a32dfeee))
+- **vue:** make the auth step a big more clear ([7427ed5](https://github.com/ionic-team/ionic-training-decks/commit/7427ed50f0f19bde6da62fb63c5a901bb77289ad))
+- **vue:** minor updates to the notes module section ([a80daa1](https://github.com/ionic-team/ionic-training-decks/commit/a80daa1b1f62425c302dbebb598524568b7a1a2a))
+- **vue:** more of the great page migration ([c57857c](https://github.com/ionic-team/ionic-training-decks/commit/c57857c09b59ff3a81b2d1b74923a07d41cdce07))
+- **vue:** no more wrapper.vm ([c9844c1](https://github.com/ionic-team/ionic-training-decks/commit/c9844c180aa2c7674fab7e6bc4801c161aba7fde))
+- **vue:** remove grammatical issues ([e53b917](https://github.com/ionic-team/ionic-training-decks/commit/e53b9175f5b51dee8e567177f7ea5cff01954400))
+- **vue:** remove ref from a value that is actually constant ([10dada3](https://github.com/ionic-team/ionic-training-decks/commit/10dada318ea8c35675a961a57f11ae6d56df0380))
+- **vue:** update a couple of sections for the new view patch ([a714966](https://github.com/ionic-team/ionic-training-decks/commit/a714966ab5c27b98eed88b664be4aab20b28d3b6))
+- **vue:** update some typos in the load teas section ([cdadc44](https://github.com/ionic-team/ionic-training-decks/commit/cdadc4489e1c39e05a7405e7fafff8069c9fc985))
+
+### Features
+
+- **capacitor:** add the assets script ([8342c00](https://github.com/ionic-team/ionic-training-decks/commit/8342c00b8a20084a58644db3a3d328b2d15b99af))
+- **ionic:** add extra credit sections ([b8fdf27](https://github.com/ionic-team/ionic-training-decks/commit/b8fdf270d1dc2c69480c80b2660cd3a6e039a5b6))
+- **logos:** switch all trainings to use @capacitor/assets ([#79](https://github.com/ionic-team/ionic-training-decks/issues/79)) ([8ef632d](https://github.com/ionic-team/ionic-training-decks/commit/8ef632d75c63e3919660e98ac9ca079a1daa97b3))
+- **ng:** discuss lack of splash screen ([2a8cd35](https://github.com/ionic-team/ionic-training-decks/commit/2a8cd35270b3fd342ae5e84d1dd5c5edcc16c5ec))
+- **vue:** name the composable API functions ([560e623](https://github.com/ionic-team/ionic-training-decks/commit/560e6234f201e39ff503b71e38a5aed6dd45ebbd))
+- **vue:** update for the fact that we now generate 'script setup' sections in the starters ([1536ad1](https://github.com/ionic-team/ionic-training-decks/commit/1536ad1f3162fdb953922d4651e6361161b9497b))
+- **vue:** update to use script setup syntax ([d68a2d2](https://github.com/ionic-team/ionic-training-decks/commit/d68a2d2fb2b83e713cc7b2deab93ad9187783ebe))
+
 # [5.6.0](https://github.com/ionic-team/ionic-training-decks/compare/v5.5.0...v5.6.0) (2023-01-05)
 
 ### Features
