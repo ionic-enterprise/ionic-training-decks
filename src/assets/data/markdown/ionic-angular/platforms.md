@@ -110,6 +110,8 @@ npx capacitor-assets generate --iconBackgroundColor '#f1ebe1' --splashBackground
 
 When you want to regenerate the assets, you just need to remember `npm run assets`, and not the whole `capacitor-assets` command.
 
+**Note:** Don't see the splash screen? Find out why in the "Extra Credit" section.
+
 ## Update NPM Scripts
 
 I like to have my build do a copy for me. For this reason, I do a `cap copy` with every build. This ensures my native projects are always up to date. I have also added the `--prod` flag so that I always get a production build.
