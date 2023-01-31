@@ -287,18 +287,19 @@ describe('TeaPage', () => {
   let fixture: ComponentFixture<TeaPage>;
   let teas: Array<Tea>;
 
-  beforeEach(
-    waitForAsync(() => {
-      initializeTestData();
-      ...
-  });
-  ...
   const initializeTestData = () => {
     teas = [
       // Remember those tea records we hard coded into the page?
       // Copy those records here and assign them to the "teas" array.
     ];
   }
+
+  beforeEach(
+    waitForAsync(() => {
+      initializeTestData();
+      ...
+  });
+  ...
 });
 ```
 
@@ -369,7 +370,7 @@ Turning our attention away from the test and back to the code, we can modify the
 
   private toMatrix(tea: Array<Tea>): Array<Array<Tea>> {
     const matrix: Array<Array<Tea>> = [];
-    let row = [];
+    let row: Tea[] = [];
     tea.forEach(t => {
       row.push(t);
       if (row.length === 4) {

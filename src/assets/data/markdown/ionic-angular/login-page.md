@@ -162,8 +162,8 @@ import { Component } from '@angular/core';
   styleUrls: ['./login.page.scss']
 })
 export class LoginPage {
-  email: string;
-  password: string;
+  email: string = "";
+  password: string = "";
 
   constructor() {}
 
@@ -396,12 +396,12 @@ Now let's update the form. Add the following to the lower portion of the form, a
 
 ```html
 <div class="error-message">
-  <div *ngIf="emailInput.invalid && (emailInput.dirty || emailInput.touched)">
+  <div *ngIf="emailInput.invalid && emailInput.errors && (emailInput.dirty || emailInput.touched)">
     <div *ngIf="emailInput.errors.email">E-Mail Address must have a valid format</div>
     <div *ngIf="emailInput.errors.required">E-Mail Address is required</div>
   </div>
 
-  <div *ngIf="passwordInput.invalid && (passwordInput.dirty || passwordInput.touched)">
+  <div *ngIf="passwordInput.invalid && passwordInput.errors && (passwordInput.dirty || passwordInput.touched)">
     <div *ngIf="passwordInput.errors.required">Password is required</div>
   </div>
 </div>
