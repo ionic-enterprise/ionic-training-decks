@@ -287,18 +287,19 @@ describe('TeaPage', () => {
   let fixture: ComponentFixture<TeaPage>;
   let teas: Array<Tea>;
 
-  beforeEach(
-    waitForAsync(() => {
-      initializeTestData();
-      ...
-  });
-  ...
   const initializeTestData = () => {
     teas = [
       // Remember those tea records we hard coded into the page?
       // Copy those records here and assign them to the "teas" array.
     ];
   }
+
+  beforeEach(
+    waitForAsync(() => {
+      initializeTestData();
+      ...
+  });
+  ...
 });
 ```
 
