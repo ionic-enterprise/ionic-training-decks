@@ -101,8 +101,8 @@ Let's think about the actions our application will take with regard to authentic
 - Login Failed - Taken by the Authentication API (does not exist yet) when the login fails
 
 - Perform Logout - Taken by the tea page (for now) upon user pressing a logout button (does not exist yet)
-- Login Succeeded - Taken by the Authentication API (does not exist yet) when the login succeeds
-- Login Failed - Taken by the Authentication API (does not exist yet) when the login fails
+- Logout Succeeded - Taken by the Authentication API (does not exist yet) when the logout succeeds
+- Logout Failed - Taken by the Authentication API (does not exist yet) when the logout fails
 
 Most of the actors do not exist yet, but we know what actions they will take once they do exist, so let's code that up in our store. This just defines the actions that other parts of our app can "dispatch". The actions do not, in themselves, actually _do_ anything.
 
