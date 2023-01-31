@@ -1,3 +1,9 @@
+## [5.6.3](https://github.com/ionic-team/ionic-training-decks/compare/v5.6.2...v5.6.3) (2023-01-31)
+
+### Bug Fixes
+
+- **errata:** mock-ui, login-page, application-state fixes ([435b1ae](https://github.com/ionic-team/ionic-training-decks/commit/435b1ae05b671c7d610f3d8016972fae3628d791))
+
 ## [5.6.2](https://github.com/ionic-team/ionic-training-decks/compare/v5.6.0...v5.6.2) (2023-01-30)
 
 ### Features
