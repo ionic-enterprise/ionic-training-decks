@@ -6,10 +6,15 @@ In this lab, we will begin to learn how to use NgRX to manage our application's 
 
 The first thing that we need to do is install <a href="https://ngrx.io/">NgRX</a>.
 
-**Note:** You may need to make sure the `eslint` related dependencies are up to date.
-
 ```bash
 npx ng add @ngrx/store@latest
+```
+
+**Note:** You may get an error relating to peer dependencies. If so, update your `eslint` related dependencies:
+
+```bash
+npm install eslint@latest eslint-plugin-import@latest eslint-plugin-jsdoc@latest
+eslint-plugin-prefer-arrow@latest
 ```
 
 When asked what ESLint configuration to use, select "recommended".
