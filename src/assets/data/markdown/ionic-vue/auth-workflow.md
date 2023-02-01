@@ -288,7 +288,7 @@ We need to intercept outgoing requests and add the token if we have one. We also
 You will need to update the imports.
 
 ```TypeScript
-import axios, { AxiosRequestConfig } from 'axios';
+import axios, { InternalAxiosRequestConfig } from 'axios';
 
 import router from '@/router';
 import { useSession } from '@/composables/session';
@@ -299,7 +299,7 @@ const { clearSession, getSession } = useSession();
 After the client is created, but before the module is exported, you will need to add the interceptors.
 
 ```TypeScript
-client.interceptors.request.use(async (config: AxiosRequestConfig) => {
+client.interceptors.request.use(async (config: InternalAxiosRequestConfig) => {
   const session = await getSession();
   if (session && session.token && config.headers) {
     config.headers.Authorization = `Bearer ${session.token}`;

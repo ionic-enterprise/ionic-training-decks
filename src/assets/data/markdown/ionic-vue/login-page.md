@@ -39,13 +39,23 @@ For the contents of `src/views/LoginPage.vue`, let's just start with a skeleton 
     <ion-content>
       <ion-list>
         <ion-item>
-          <ion-label position="floating">Email</ion-label>
-          <ion-input type="email" name="email" data-testid="email-input"></ion-input>
+          <ion-input
+            type="email"
+            name="email"
+            label="Email"
+            label-placement="floating"
+            data-testid="email-input"
+          ></ion-input>
         </ion-item>
 
         <ion-item>
-          <ion-label position="floating">Password</ion-label>
-          <ion-input type="password" name="password" data-testid="password-input"></ion-input>
+          <ion-input
+            type="password"
+            name="password"
+            label="Password"
+            label-placement="floating"
+            data-testid="password-input"
+          ></ion-input>
         </ion-item>
       </ion-list>
     </ion-content>
@@ -70,7 +80,6 @@ For the contents of `src/views/LoginPage.vue`, let's just start with a skeleton 
     IonIcon,
     IonInput,
     IonItem,
-    IonLabel,
     IonList,
     IonPage,
     IonTitle,

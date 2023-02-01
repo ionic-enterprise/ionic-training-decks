@@ -419,13 +419,18 @@ Let's start filling out the form. We already have one simple form, the `LoginPag
   <ion-content>
     <ion-list>
       <ion-item>
-        <ion-label position="floating">Brand</ion-label>
-        <ion-input name="brand" v-model="brand" data-testid="brand-input"></ion-input>
+        <ion-input name="brand" v-model="brand" label="Brand" label-placement="floating" data-testid="brand-input">
+        </ion-input>
       </ion-item>
 
       <ion-item>
-        <ion-label position="floating">Name</ion-label>
-        <ion-input name="name" v-model="name" data-testid="name-input"></ion-input>
+        <ion-input
+          name="name"
+          v-model="name"
+          label="Name"
+          label-placement="floating"
+          data-testid="name-input"
+        ></ion-input>
       </ion-item>
     </ion-list>
 
@@ -518,8 +523,7 @@ Then we can switch back to `src/components/AppTastingNoteEditor.vue` and add the
 <template>
   ...
   <ion-item>
-    <ion-label>Type</ion-label>
-    <ion-select name="teaCategoryId" data-testid="tea-type-select" v-model.number="teaCategoryId">
+    <ion-select name="teaCategoryId" v-model.number="teaCategoryId" label="Type" data-testid="tea-type-select">
       <ion-select-option v-for="t of teas" :value="t.id" :key="t.id">{{ t.name }}</ion-select-option>
     </ion-select>
   </ion-item>
@@ -594,8 +598,14 @@ And finally, add a text area for some free-form notes on the tea we just tasted:
 <template>
   ...
   <ion-item>
-    <ion-label position="floating">Notes</ion-label>
-    <ion-textarea name="notes" data-testid="notes-textbox" v-model="notes" rows="4"></ion-textarea>
+    <ion-textarea
+      name="notes"
+      v-model="notes"
+      rows="4"
+      label="Notes"
+      label-placement="floating"
+      data-testid="notes-textbox"
+    ></ion-textarea>
   </ion-item>
   ...
 </template>
@@ -832,6 +842,7 @@ First, define some tasting notes data:
 import { useTastingNotes } from '@/composables/tasting-notes';
 
 jest.mock('@/composables/tasting-notes');
+jest.mock('@/composables/tea');
 ...
 describe('TastingNotesPage.vue', () => {
   ...
