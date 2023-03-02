@@ -81,13 +81,13 @@ describe('TeaService', () => {
 
 ## Getting the Data
 
-**Note:** this is just a reminder that as you go through these steps you will need to adjust your imports, importing in new items that you are using and remove items that are no longer being used. In some cases, multiple modules will contain a thing with any given name. Make sure you are importing the correct one. If you are unsure, please be sure to ask.
+**Note:** this is just a reminder that as you go through these steps you will need to adjust your imports, importing in new items that you are using and remove items that are no longer being used. In some cases, multiple modules will contain an object with any given name. Make sure you are importing the correct one. If you are unsure, please be sure to ask.
 
 ### Initialize the Test Data
 
-**Scenario:** the API team is not sure exactly how they are going to provide image data. That is still being debated. But they are getting us the rest of the data, and the data is consistent with consistent IDs, so we can add our own images for the time being via our service.
+**Scenario:** the API team is not sure exactly how they are going to provide image data. That is still being debated. But they are giving us the rest of the data, and the data has consistent IDs, so we can add our own images for the time being via our service.
 
-We are going to need some test data. For our application, the data we get back from the server looks like the test data that we provided for the page, only it does not have an image associated with it. Let's initialize an array of teas called `expectedTeas` using that data.
+We are going to need some test data. For our application, the data we get back from the server looks like the test data that we provided for the tea page, only it does not have an image associated with it. Let's initialize an array of teas called `expectedTeas` using that data.
 
 First, create `expectedTeas` and `resultTeas` variables within the main `describe()` for the test (in the same area where the other variables are declared):
 
@@ -178,6 +178,13 @@ it('gets the tea categories', () => {
 });
 ```
 
+Let's have a look at that test.
+
+1. The first thing we do is call the `getAll()` and subscribe to the Observable that is returned. The `subscribe()` is very important. Without it, all we do is set up an Observable, but don't actually "activate" it.
+1. Next, we tell the HTTP controller that we expect a call to our back end. This call finds that request that was made and returns it.
+1. We expect that request to be a `GET` request.
+1. Finally, we `verify()` that there were no unmatched requests made. That is, we verify that the only request that was made was the one we expected.
+
 Write the minimal code required to make that test pass. Basically, this:
 
 ```typescript
@@ -194,7 +201,7 @@ As sometimes happens, the backend team has not quite figured out how they want t
 
 ```typescript
 it('adds an image to each', () => {
-  let teas: Array<Tea>;
+  let teas: Array<Tea> = [];
   service.getAll().subscribe((t) => (teas = t));
   const req = httpTestingController.expectOne(`${environment.dataService}/tea-categories`);
   req.flush(resultTeas);
@@ -203,7 +210,15 @@ it('adds an image to each', () => {
 });
 ```
 
-In our code, we can define an array of images.
+The flow of this test is very similar to the previous test with the following exceptions:
+
+1. We already expected a `GET` so we don't need to expect that here.
+1. Rather than just making the HTTP call, we are also flushing it. That is, we are telling the mock back end to return specific data for that request. This will trigger the code in the `subscribe()`.
+1. We expect the data returned in the `subscribe()` to be our converted data.
+
+The test currently fails because we are not converting the data. Let's work on that conversion code now.
+
+In our service code, we can define an array of images.
 
 ```typescript
   private images: Array<string> = [

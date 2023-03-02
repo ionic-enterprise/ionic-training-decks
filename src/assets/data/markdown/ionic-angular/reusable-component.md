@@ -149,7 +149,7 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
   ],
 })
 export class RatingComponent implements ControlValueAccessor {
-  @Input() rating: number;
+  @Input() rating: number = 0;
 
   constructor() {}
 
@@ -354,7 +354,7 @@ We need to modify the `TeaService` to both save and retrieve the rating for each
 Update `src/app/models/tea.ts` and add the following property:
 
 ```typescript
-  rating?: number;
+rating: number;
 ```
 
 ### Update the Service
@@ -379,6 +379,8 @@ In the `expectedTeas` array that is part of the `TeaService` test, add a rating 
         rating: 4
       },
 ```
+
+**Note:** there should be other tests failing to compile at this point, like the `TeaPage` test. Update those to include ratings where needed as well.
 
 The rating is not part of the data coming back from our API, so the API results we use cannot have it. Where the `resultTeas` array is defined, delete the `rating` just like we do for the `image`.
 
@@ -409,7 +411,7 @@ beforeEach(() => {
   httpTestingController = TestBed.inject(HttpTestingController);
   service = TestBed.inject(TeaService);
   spyOn(Preferences, 'get')
-    .and.returnValue(Promise.resolve({ value: '0' }))
+    .and.returnValue(Promise.resolve({ value: null }))
     .withArgs({ key: 'rating1' })
     .and.returnValue(Promise.resolve({ value: '4' }))
     // repeat for all expectedTeas with a non-zero rating
@@ -460,7 +462,9 @@ The first step is to make our private `convert()` method async and then grab the
 
 Make sure you `import { Preferences } from '@capacitor/preferences';`.
 
-But this makes our `getAll()` method unhappy. We are now returning an Observable of an array of promises of tea, but we want an array of teas, not just the promise of eventually getting tea. We can use a `mergeMap()` in conjunction with a `Promise.all()` to fix this:
+But this makes our `getAll()` and `get()` methods unhappy.
+
+For `getAll()` we are now returning an Observable of an array of promises of tea, but we want an array of teas, not just the promise of eventually getting tea. We can use a `mergeMap()` in conjunction with a `Promise.all()` to fix this:
 
 ```typescript
   getAll(): Observable<Array<Tea>> {
@@ -479,6 +483,8 @@ Reading that code from the inside out:
 - `convert()` takes a raw tea and converts it to our model, but needs to do so async, so it returns a promise of that conversion
 - `Promise.all()` takes all of those promises of conversions and groups them into a single promise that resolve to an array of teas once all of the inner promises resolve
 - `mergeMap()` converts that promise to an Observable and returns it instead of the original Observable from the HTTP call
+
+For the `get()`, we just need to change our `map()` to a `mergeMap()`.
 
 #### Save the Rating
 
@@ -515,174 +521,26 @@ The code to add to the `TeaService` in order to accomplish this is straight forw
 
 **Important:** Be sure to update the mock factory for this service to reflect the new method.
 
-### Update the Store
-
-#### Actions
-
-We will need a new action to signify that the user has changed the rating on a tea. Notice that it is tied to this page. Also notice that our `actions.ts` file is getting a little large. We may want to look at reorganizing how that is laid out at some point, but for now let's continue to run with the single file.
-
-```TypeScript
-export const teaDetailsChangeRating = createAction(
-  '[Tea Details Page] change rating',
-  props<{ tea: Tea; rating: number }>(),
-);
-export const teaDetailsChangeRatingSuccess = createAction(
-  '[Data API] change rating success',
-  props<{ tea: Tea }>(),
-);
-export const teaDetailsChangeRatingFailure = createAction(
-  '[Data API] change rating failure',
-  props<{ errorMessage: string }>(),
-);
-```
-
-#### Reducer
-
-For the reducer we need to update the state with the updated tea if the rating change succeeded, and with the error message if it failed.
-
-The `src/app/store/reducers/data.reducer.spec.ts` file defines some test teas. Add a rating to each. Then add the following test cases. Note that we only need to handle the "success" and "failure" actions (remember to adjust the imports at the top of the test file for the new actions):
-
-```TypeScript
-  {
-    description: 'Tea Details Change Rating Success: sets the rating for the tea',
-    action: teaDetailsChangeRatingSuccess({ tea: {...teas[1], rating: 3} }),
-    begin: { teas },
-    end: { teas: [teas[0], { ...teas[1], rating: 3 }, teas[2]] },
-  },
-  {
-    description: 'Tea Details Change Rating Failure: sets the error message',
-    action: teaDetailsChangeRatingFailure({ errorMessage: 'The save blew some chunks' }),
-    begin: { teas },
-    end: { teas, errorMessage: 'The save blew some chunks' },
-  },
-```
-
-Here is one way of doing that:
-
-```TypeScript
-  on(Actions.teaDetailsChangeRatingSuccess, (state, { tea }): DataState => {
-    const teas = [...state.teas];
-    const idx = state.teas.findIndex(t => t.id === tea.id);
-    if (idx > -1) {
-      teas.splice(idx, 1, tea);
-    }
-    return { ...state, teas };
-  }),
-  on(Actions.teaDetailsChangeRatingFailure, (state, { errorMessage }): DataState => ({
-    ...state,
-    errorMessage,
-  })),
-```
-
-#### Effect
-
-The effect that we require is pretty straight forward:
-
-- save the tea
-- dispatch the next action based on whether or not the save succeeded
-
-```TypeScript
-  describe('teaRatingChanged$', () => {
-    it('saves the tea', done => {
-      const teaService = TestBed.inject(TeaService);
-      actions$ = of(teaDetailsChangeRating({ tea: teas[1], rating: 5 }));
-      effects.teaRatingChanged$.subscribe(() => {
-        expect(teaService.save).toHaveBeenCalledTimes(1);
-        expect(teaService.save).toHaveBeenCalledWith({ ...teas[1], rating: 5 });
-        done();
-      });
-    });
-
-    describe('on success', () => {
-      it('dispatches tea rating change success', done => {
-        actions$ = of(teaDetailsChangeRating({ tea: teas[1], rating: 5 }));
-        effects.teaRatingChanged$.subscribe(newAction => {
-          expect(newAction).toEqual({
-            type: '[Data API] change rating success',
-            tea: { ...teas[1], rating: 5 },
-          });
-          done();
-        });
-      });
-    });
-
-    describe('on an exception', () => {
-      beforeEach(() => {
-        const teaService = TestBed.inject(TeaService);
-        (teaService.save as any).and.returnValue(
-          Promise.reject(new Error('private storage is blowing chunks?')),
-        );
-      });
-
-      it('dispatches tea rating change failure', done => {
-        actions$ = of(teaDetailsChangeRating({ tea: teas[1], rating: 5 }));
-        effects.teaRatingChanged$.subscribe(newAction => {
-          expect(newAction).toEqual({
-            type: '[Data API] change rating failure',
-            errorMessage: 'private storage is blowing chunks?',
-          });
-          done();
-        });
-      });
-    });
-  });
-```
-
-Here is the code:
-
-```TypeScript
-  teaRatingChanged$ = createEffect(() =>
-    this.actions$.pipe(
-      ofType(teaDetailsChangeRating),
-      mergeMap(action =>
-        from(
-          this.teaService.save({ ...action.tea, rating: action.rating }),
-        ).pipe(
-          map(() =>
-            teaDetailsChangeRatingSuccess({
-              tea: { ...action.tea, rating: action.rating },
-            }),
-          ),
-          catchError(err =>
-            of(
-              teaDetailsChangeRatingFailure({
-                errorMessage: err.message || 'Unknown error in rating save',
-              }),
-            ),
-          ),
-        ),
-      ),
-    ),
-  );
-```
-
 ## Update the Details Page
 
-Now that everything is fully operational, let's update the `TeaDetailsPage` to use it properly rather than just the mock hookup we have now.
+Now that everything is fully operational, let's update the `TeaDetailsPage` to properly set the rating as well as save changes to it.
 
 ### Grab the Current Rating
 
 The first thing we will need to do is get the current rating when we select the tea. We need to do this because we cannot just bind directly to `tea.rating` in our view. The component modifying that value would directly modify the state, and that is not allowed.
 
-Add a rating to our test teas.
+Add a rating to our test tea.
 
 ```TypeScript
-      store.overrideSelector(selectTeas, [
-        {
+      (tea.get as jasmine.Spy).withArgs(7).and.returnValue(
+        of({
           id: 7,
           name: 'White',
           description: 'Often looks like frosty silver pine needles',
           image: 'imgs/white.png',
           rating: 4,
-        },
-        {
-          id: 42,
-          name: 'Green',
-          description: 'Delecate flavor',
-          image: 'imgs/green.png',
-          rating: 3,
-        },
-      ]);
+        })
+      );
 ```
 
 Then add a test to verify the initialization of the rating value. This is in the "initialization" describe block.
@@ -717,8 +575,7 @@ When the user clicks on the rating component, we need to dispatch the change to 
 
 ```TypeScript
   describe('rating click', () => {
-    let store: MockStore;
-    const tea = {
+    const tea: Tea = {
       id: 7,
       name: 'White',
       description: 'Often looks like frosty silver pine needles',
@@ -726,23 +583,22 @@ When the user clicks on the rating component, we need to dispatch the change to 
       rating: 4,
     };
     beforeEach(() => {
-      store = TestBed.inject(Store) as MockStore;
       fixture.detectChanges();
     });
 
-    it('dispatches a rating change action', () => {
-      spyOn(store, 'dispatch');
+    it('saves a rating change', () => {
+      const teaService = TestBed.inject(TeaService);
       component.rating = 3;
       component.changeRating(tea);
-      expect(store.dispatch).toHaveBeenCalledTimes(1);
-      expect(store.dispatch).toHaveBeenCalledWith(teaDetailsChangeRating({ tea, rating: 3 }));
+      expect(teaService.save).toHaveBeenCalledTimes(1);
+      expect(teaService.save).toHaveBeenCalledWith({ ...tea, rating: 3 });
     });
   });
 ```
 
 ```TypeScript
 changeRating(tea: Tea) {
-  this.store.dispatch(teaDetailsChangeRating({ tea, rating: this.rating }));
+  this.tea.save({ ...tea, rating: this.rating });
 }
 ```
 

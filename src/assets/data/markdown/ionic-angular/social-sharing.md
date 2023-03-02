@@ -1,4 +1,4 @@
-# Lab: Add Social Sharing
+# Lab: Add SocSave Sharing
 
 In this lab you will use Capacitor to access a native API. Specifically, the social sharing APIs on iOS and Android devices.
 
@@ -17,14 +17,14 @@ While we are on the subject of plugins, Capacitor has been designed to also work
 
 ## Add a Button
 
-The first thing we will do is add a sharing button to the top of our `src/app/tasting-notes/tasting-note-editor/tasting-note-editor.component.html` file, to the left of the cancel button. We will also include stubs for the bound properties and the click handler in the associated TypeScript file.
+The first thing we will do is add a sharing button to the top of our `src/app/tasting-notes/tasting-note-editor/tasting-note-editor.component.html` file, to the left of the save button. We will also include stubs for the bound properties and the click handler in the associated TypeScript file.
 
 ```html
-<ion-buttons slot="primary">
-  <ion-button *ngIf="sharingIsAvailable" [disabled]="!allowSharing" id="share-button" (click)="share()">
+<ion-buttons slot="end">
+  <ion-button *ngIf="sharingIsAvailable" [disabled]="!allowSharing" data-testid="share-button" (click)="share()">
     <ion-icon slot="icon-only" name="share-outline"></ion-icon>
   </ion-button>
-  ... // Cancel button is already here...
+  ... // Save button is already here...
 </ion-buttons>
 ```
 
@@ -75,7 +75,7 @@ At this point we can start creating the tests for the properties that control th
       });
 
       it('is not available', () => {
-        expect(fixture.debugElement.query(By.css('#share-button'))).toBeFalsy();
+        expect(fixture.debugElement.query(By.css('[data-testid="share-button"]'))).toBeFalsy();
       });
     });
 
@@ -87,7 +87,7 @@ At this point we can start creating the tests for the properties that control th
       });
 
       it('is available', () => {
-        expect(fixture.debugElement.query(By.css('#share-button'))).toBeTruthy();
+        expect(fixture.debugElement.query(By.css('[data-testid="share-button"]'))).toBeTruthy();
       });
     });
   });
@@ -98,11 +98,17 @@ The web context test fails, of course, because our `sharingIsAvailable` getter i
 ```TypeScript
 import { ModalController, Platform } from '@ionic/angular';
 ...
-  constructor(private modalController: ModalController, private platform: Platform, private store: Store) {}
-...
   get sharingIsAvailable(): boolean {
     return this.platform.is('hybrid');
   }
+...
+  constructor(
+    private fb: FormBuilder,
+    private modalController: ModalController,
+   private platform: Platform,
+    private tastingNotes: TastingNotesService,
+    private tea: TeaService
+  ) {}
 ```
 
 ### Enable When Enough Information Exists
@@ -113,18 +119,18 @@ First we will test for it. This test belongs right after the `is available` test
 
 ```TypeScript
       it('is not allowed until a brand, name, and rating have all been entered', () => {
-        const button = fixture.debugElement.query(By.css('#share-button'));
+        const button = fixture.debugElement.query(By.css('[data-testid="share-button"]'));
         expect(button.nativeElement.disabled).toBeTrue();
 
-        component.brand = 'Lipton';
+        component.editorForm.controls.brand.setValue('Lipton');
         fixture.detectChanges();
         expect(button.nativeElement.disabled).toBeTrue();
 
-        component.name = 'Yellow Label';
+        component.editorForm.controls.name.setValue('Yellow Label');
         fixture.detectChanges();
         expect(button.nativeElement.disabled).toBeTrue();
 
-        component.rating = 2;
+        component.editorForm.controls.rating.setValue(2);
         fixture.detectChanges();
         expect(button.nativeElement.disabled).toBeFalse();
       });
@@ -134,7 +140,11 @@ We can then enter the proper logic in the `allowShare` getter:
 
 ```TypeScript
   get allowSharing(): boolean {
-    return !!(this.brand && this.name && this.rating);
+    return !!(
+      this.editorForm.controls.brand.value &&
+      this.editorForm.controls.name.value &&
+      this.editorForm.controls.rating.value
+    );
   }
 ```
 
@@ -166,11 +176,11 @@ import { Share } from '@capacitor/share';
 ...
       it('calls the share plugin when clicked', async () => {
         spyOn(Share, 'share');
-        const button = fixture.debugElement.query(By.css('#share-button'));
+        const button = fixture.debugElement.query(By.css('[data-testid="share-button"]'));
 
-        component.brand = 'Lipton';
-        component.name = 'Yellow Label';
-        component.rating = 2;
+        component.editorForm.controls.brand.setValue('Lipton');
+▎       component.editorForm.controls.name.setValue('Yellow Label');
+▎       component.editorForm.controls.rating.setValue(2);
 
         const event = new Event('click');
         button.nativeElement.dispatchEvent(event);
@@ -191,8 +201,8 @@ We can then add the code fill out the `share()` accordingly. You will also have 
 ```TypeScript
   async share(): Promise<void> {
     await Share.share({
-      title: `${this.brand}: ${this.name}`,
-      text: `I gave ${this.brand}: ${this.name} ${this.rating} stars on the Tea Taster app`,
+      title: `${this.editorForm.controls.brand.value}: ${this.editorForm.controls.name.value}`,
+      text: `I gave ${this.editorForm.controls.brand.value}: ${this.editorForm.controls.name.value} ${this.editorForm.controls.rating.value} stars on the Tea Taster app`,
       dialogTitle: 'Share your tasting note',
       url: 'https://tea-taster-training.web.app',
     });

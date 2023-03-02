@@ -8,20 +8,25 @@ In this lab, you will learn how to:
 
 ## Set Up Headless Chrome Support
 
-Using Chrome in headless mode allows the tests to run in a real browser (Chrome) without taking up valuable screen real estate with an actual browser window. Since there is no drawing being performed, the tests also tend to run faster. Finally, if tests are going to be run on a CI/CD server of some type, headless support is almost certainly required.
+Using Chrome in headless mode allows the tests to run in a real browser (Chrome) without taking up valuable screen real estate with an actual browser window. Since there is no physical rendering being performed, the tests also tend to run faster. Finally, if tests are going to be run on a CI/CD server of some type, headless support is almost certainly required.
 
-We suggest changing the `test` script configuration in the `package.json` file as such:
+We suggest changing the `browsers` configuration in the `karma.conf.js` file as such:
 
-```JSON
+```javascript
+...
+    browsers: ['ChromeHeadless'],
+...
+```
+
+We also suggest modifying the `test` scripts in the `package.json` file as such:
+
+```json
   "scripts": {
-    "build": "ng build",
-    "e2e": "ng e2e",
-    "lint": "ng lint",
-    "ng": "ng",
-    "start": "ng serve",
-    "test": "ng test --browsers=ChromeHeadless",
-    "test:ci": "ng test --no-watch --browsers=ChromeHeadless",
-    "test:debug": "ng test"
+    ...
+    "test": "ng test",
+    "test:ci": "ng test --no-watch",
+    "test:debug": "ng test --browsers=Chrome",
+    "watch": "ng build --watch --configuration development"
   },
 ```
 
@@ -33,7 +38,7 @@ With our current configuration, there are three convenient ways to run the tests
 - `npm run test:debug` - runs the tests in a visible browser and waits for changes. This configuration is most useful for debugging tests and the code being tested.
 - `npm run test:ci` - runs the tests in a headless environment and exits. This is intended for use on your CI/CD server but is also useful for cases where you want to run the tests once.
 
-Type `npm test` and verify that the tests run. We will keep that running as we develop the application such that we are always running our tests and verifying that each step is correct. Continually running unit tests while your application is under development is an important best practice that should always be followed.
+Type `npm test` and verify that the tests run. We will keep that running as we develop the application such that we are always running our tests and verifying that each step is correct. Continually running unit tests while your application is under development is an important _best practice_ that should always be followed.
 
 ## Update the `HomePage` Test
 
@@ -62,7 +67,7 @@ That new test case should go directly under the existing "should create" test ca
 
 ## Install Mock Factories
 
-It is a best-practice to use centralized factory functions to create mocks whenever it makes sense. This allows us to use a consistently defined mock throughout the tests in our application and reduces maintenance costs. For this application, we provide a set of centralized mock factories. <a download href="/assets/packages/ionic-angular/test.zip">Download the zip file</a> and unpack it in the root of the project creating a `test` folder.
+It is a _best practice_ to use centralized factory functions to create mocks whenever it makes sense. This allows us to use a consistently defined mock throughout the tests in our application and reduces maintenance costs. For this application, we provide a set of centralized mock factories. <a download href="/assets/packages/ionic-angular/test.zip">Download the zip file</a> and unpack it in the root of the project creating a `test` folder.
 
 Once that is in place it is often used within the `TestBed` configuration in order to provide the mock object instead of the real object for various dependencies. For example:
 

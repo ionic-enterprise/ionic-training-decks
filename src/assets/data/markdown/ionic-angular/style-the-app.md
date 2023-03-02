@@ -32,16 +32,7 @@ ion-icon:last-child {
 
 Since these are defined in an Angular component, and since we are building using Angular's default scoping rules, these styles will be scoped to the component itself. Without this kind of mechanism in place, these styles would actually apply to all `ion-icon`s in the application unless a more specific selector were used.
 
-Now have a look in `src/global.scss`. Currently, it contains several imports as well as the following styling:
-
-```css
-.error-message {
-  padding: 2em;
-  color: var(--ion-color-danger, ##ff0000);
-}
-```
-
-But _should_ we actually put our global styling directly here? It is convenient when we just have a few styles. A real-world application, however, is likely to have a fair amount of styling. In such cases, we should create a set of SCSS files and import them here.
+Now have a look in `src/global.scss`. Currently, it contains several imports. _Should_ we actually put our global styling directly here? It is convenient when we just have a few styles. A real-world application, however, is likely to have a fair amount of styling. In such cases, we should create a set of SCSS files and import them here.
 
 For our app, though, we will just put the global styles directly into this file. We will not have enough styling yet to justify separate files.
 
@@ -230,7 +221,15 @@ The first requirement from our design team is that the pages should have a gradi
 }
 ```
 
-Then add the `main-content` class to the `ion-content` elements in each of our pages. So far so good, but the lists in a couple of our pages show the default background color, which looks a little out of place, so let's make the background for the various list elements transparent.
+Then add the `main-content` class to the `ion-content` elements in each of our pages (the ones that have an `ion-content`, that is), like this:
+
+```html
+<ion-content class="main-content">
+  <!-- Actual content here... -->
+</ion-content>
+```
+
+So far so good, but the lists in a couple of our pages show the default background color, which looks a little out of place, so let's make the background for the various list elements transparent.
 
 ```css
 .list-ios {

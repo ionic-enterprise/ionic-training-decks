@@ -10,7 +10,7 @@ In this lab, you will:
 
 The Ionic command line is the main tool used to develop Ionic applications. This tool allows you to generate new applications, add features to the application, build the application, interact with Appflow and many other tasks. The command line also wraps and extends several other command lines such as the Apache Cordova or Capacitor command lines, the Angular command line, etc.
 
-If you type `ionic --help` at the command line you get a list of the available top level commands that can be run via the CLI. These commands are separated into two sections: Global Commands and Project Commands. Global Commands can be run from anywhere where as Project Commands can only be run from an Ionic project directory. Commonly used commands include `start`, `info`, `generate`, and `serve`. We wil learn more about these commands as we use them.
+If you type `ionic --help` at the command line you get a list of the available top level commands that can be run via the CLI. These commands are separated into two sections: Global Commands and Project Commands. Global Commands can be run from anywhere where as Project Commands can only be run from an Ionic project directory. Commonly used commands include `start`, `info`, `generate`, and `serve`. We will learn more about these commands as we use them.
 
 ## Create the Application
 
@@ -26,7 +26,7 @@ Lets start our application via whichever technique you want.
 
 ```bash
 cd ~/Projects/Training
-ionic start tea-taster blank --type=angular
+ionic start tea-taster blank --type=angular --no-git
 ```
 
 Let's look at some of those options more closely.
@@ -34,6 +34,7 @@ Let's look at some of those options more closely.
 - The third option is the name of the application.
 - The forth option, `blank` tells Ionic to use the `blank` starter. We have three basic starters: `blank`, `tabs`, and `sidemenu`. The main difference is the style of navigation.
 - The `--type` option specifies the type of application to create. Options include `angular`, `react`, `ionic-angular`, and `ionic1`. The `ionic-angular` type is an Ionic v3 application.
+- The `--no-git` option tells the CLI not to create a git repo. We will create that ourselves.
 - The application will use Capacitor for the native layer by default.
 
 Once the application has been generated, let's start the development server:
@@ -80,13 +81,32 @@ Modify your `package.json` file. I suggest moving the `description` up to the to
 
 **Note:** Throughout the training portions of code examples will be snipped and replaced with `...` (ellipsis). This is done for brevity and to better focus on actionable areas.
 
-Initialize Husky:
+Initialize git and Husky:
 
 ```bash
-npm run prepare
+git init
+npm install
 ```
 
-**Note:** we also could have run `npx husky install` but using the `prepare` script ensures that we have it set up properly.
+The output should look something like this:
+
+```bash
+$ npm install
+
+> tea-taster@0.0.1 prepare
+> husky install
+
+husky - Git hooks installed
+
+up to date, audited 1157 packages in 2s
+
+163 packages are looking for funding
+  run `npm fund` for details
+
+found 0 vulnerabilities
+```
+
+**Note:** we also could have run `npx husky install` but using `npm install` ensures that we have the `prepare` set up properly.
 
 By default, the git hooks handled by `husky` are stored in the `.husky` directory. Let's add a couple now:
 
@@ -97,13 +117,81 @@ npx husky add .husky/pre-push "npm run lint"
 
 This will ensure our code is properly formatted before each commit. It will also ensure that our code does not have any linting errors before we push it out to the `origin` repo. It would also be good to run the unit tests in the `pre-push` hook, but we have not gotten that far yet.
 
-Finally, make sure all of our source is formatted properly.
+Finally, let's add all of our source to git and commit it.
 
 ```bash
-npx prettier --write src
+git add .
+git commit -m "Initial commit"
 ```
 
-At this point all of the source should be formatting properly and will remain so automatically with each commit.
+The output should look something like this:
+
+```
+$ git commit -m "Initial commit"
+🔍  Finding changed files since git revision null.
+🎯  Found 32 changed files.
+✍️  Fixing up .eslintrc.json.
+✍️  Fixing up .vscode/extensions.json.
+✍️  Fixing up angular.json.
+...
+✍️  Fixing up tsconfig.spec.json.
+✅  Everything is awesome!
+[main (root-commit) 879998c] Initial commit
+ 39 files changed, 15637 insertions(+)
+ create mode 100644 .browserslistrc
+ create mode 100644 .editorconfig
+ create mode 100644 .eslintrc.json
+ create mode 100644 .gitignore
+ ...
+```
+
+Notice the "Fixing up" lines. That is the `pre-commit` hook we just set up making sure everything is formatted properly. At this point all of the source should be formatting properly and will remain so automatically with each commit.
+
+## Update Dependencies
+
+It is important to keep our dependencies up to date on a regular basis. At least once a quarter (though preferably more often than that), we should evaluate our dependencies, and update them to the latest supportable version. Before we do that, though, it is important to know a couple of important concepts: <a href="https://semver.org/" target="_blank">Semantic Versioning</a> (a.k.a. semver), and the `npm` <a href="https://semver.npmjs.com/" target="_blank">Version Range Syntax</a>.
+
+### Semantic Versioning
+
+<a href="https://semver.org/" target="_blank">Semantic Versioning</a> is, at a basic level, a three point versioning scheme as such: `major.minor.patch`. A modification of the version at any level signifies the types of changes made in the version:
+
+- **Major**: breaking changes are contained in this release.
+- **Minor**: new features have been added in this release, but in a backwards compatible manner.
+- **Patch**: bug fixes and other optimization are in this release, all done in a backwards compatible manner.
+
+Most libraries and tools that you will use follow semver (or at least try to).
+
+### Version Range Syntax
+
+NPM uses a <a href="https://semver.npmjs.com/" target="_blank">Version Range Syntax</a> to specify the acceptable versions for a package. This is a rather rich syntax and you can read about it in their documentation if you wish. Here we will examine the three most common forms used: pinned, patch-level, or minor.
+
+- **pinned**: this syntax will _only_ take the specified version. Example: `1.2.3`.
+- **patch-level**: this syntax uses the `~`. It will take patch level upgrades via `npm update`. Example: `~1.2.3`.
+- **minor**: this syntax uses the `^`. It will take minor or patch level upgrades via `npm update`. Example: `^1.2.3`.
+
+### The Update Process
+
+To determine which packages are outdated and update them:
+
+1. Create a new branch in case you need to back out your changes.
+1. `npm outdated`: this will create a list of items that are out of date, along with the "Wanted" and "Latest" versions.
+   1. **Wanted:** the latest version that matches the version range specification for the dependency.
+   1. **Latest:** the latest version of the dependency, depending on its `@latest` tag.
+1. Examine the changes for the out of date dependencies.
+1. Use `npm update` to update dependencies to their "Wanted" version.
+1. Use `npm install <dependency>@latest` to update dependencies to their "Latest" version.
+
+Usually it is safe to `npm update` all dependencies that qualify.
+
+Updating dependencies to the `@latest` version should generally be done with more care.
+
+Perform a build and run all automated tests between individual updates.
+
+Commit each individual update (you can always squash the commits before merging into `main`). This will allow you to fall back to a working state if any individual update causes problem.
+
+Let's practice by updating our project now (**note**: you do not need to do all of the `git` related parts for the training, but you definitely should if you are working with a production project).
+
+**Note**: Ionic Framework version 7 is currently in pre-release. Let's do the training using that version since it will be released soon. Follow the <a href="https://ionicframework.com/docs/v7/updating/7-0">upgrade instruction</a>. For our project, we just need to deal with `npm install @ionic/angular@next` and the `.browserslistrc` updates. We are not far enough along to have to worry about any of the other migration steps.
 
 ## Side Note: `ionic serve` vs. `npm start`
 

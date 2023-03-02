@@ -185,8 +185,8 @@ Now we need to adjust the routes for the navigation in the `TeaPage`. In the `Te
 ```typescript
 it('passes the details page and the ID', () => {
   const navController = TestBed.inject(NavController);
-  component.showDetailsPage(42);
-  expect(navController.navigateForward).toHaveBeenCalledWith(['tabs', 'tea', 'tea-details', 42]);
+  click(card);
+  expect(navController.navigateForward).toHaveBeenCalledWith(['tabs', 'tea', 'tea-details', teas[2].id]);
 });
 ```
 
@@ -210,6 +210,8 @@ If you load the application from root, it will go to the `tabs` route, but we re
 ```
 
 One other minor detail is in the markup for the `TeaDetailsPage`. The `defaultHref` for the `ion-back-button` needs to point to the `tabs/tea` route now, and not just the `tea` route.
+
+Finally, we've been coding a lot, and unless you have been pushing your commits somewhere you likely have not been linting your code at all. Run an `npm run lint` here and clean up any errors you may have.
 
 ## Conclusion
 

@@ -42,23 +42,19 @@
               "file": "login-page"
             },
             {
-              "title": "Application State",
-              "file": "application-state"
-            },
-            {
-              "title": "Persist the Session",
-              "file": "persist"
-            },
-            {
-              "title": "Code Challenge",
-              "file": "code-challenge"
+              "title": "Session Storage",
+              "file": "session-storage"
             },
             {
               "title": "Authentication",
               "file": "auth"
             },
             {
-              "title": "Guards",
+              "title": "Authentication Flow",
+              "file": "auth-flow"
+            },
+            {
+              "title": "Guards and Interceptors",
               "file": "auth-guard"
             },
             {

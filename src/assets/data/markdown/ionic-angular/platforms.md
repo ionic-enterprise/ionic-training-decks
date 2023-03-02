@@ -38,7 +38,7 @@ import { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
   appId: 'com.kensodemann.teataster',
-  appName: 'tea-taster',
+  appName: 'Tea Taster',
   webDir: 'www',
   bundledWebRuntime: false
 };
@@ -114,17 +114,19 @@ When you want to regenerate the assets, you just need to remember `npm run asset
 
 ## Update NPM Scripts
 
-I like to have my build do a copy for me. For this reason, I do a `cap copy` with every build. This ensures my native projects are always up to date. I have also added the `--prod` flag so that I always get a production build.
+I like to have my build do a copy for me. For this reason, I do a `cap copy` with every build. This ensures my native projects are always up to date. I have also added the `--configuration production` flag so that I always get a production build.
 
 ```JSON
   "scripts": {
+    "assets": "capacitor-assets generate --iconBackgroundColor '#f1ebe1' --splashBackgroundColor '#f1ebe1' --iconBackgroundColorDark '#110b00' --splashBackgroundColorDark '#110b00'",
     "build": "ng build --configuration production && cap copy",
     "e2e": "ng e2e",
     "lint": "ng lint",
     "ng": "ng",
     "prepare": "husky install",
     "start": "ng serve",
-    "test": "ng test"
+    "test": "ng test",
+    "watch": "ng build --watch --configuration development"
   },
 ```
 

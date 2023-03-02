@@ -106,25 +106,11 @@ ionic generate page tea
 
 ##### Fix the Routing
 
-We no longer need the "home" route, so remove it, leaving only the "tea" route. The root path redirect will also need to change. When you are done, the `src/app/app-routing.module.ts` file should look something like this:
+Open the `src/app/app-routing.module.ts` file and perform the following tasks:
 
-```typescript
-import { NgModule } from '@angular/core';
-import { PreloadAllModules, RouterModule, Routes } from '@angular/router';
-
-const routes: Routes = [
-  {
-    path: '',
-    redirectTo: 'tea',
-    pathMatch: 'full'
-  },
-  {
-    path: 'tea',
-    loadChildren: () => import('./tea/tea.module').then( m => m.TeaPageModule)
-  },
-];
-...
-```
+1. The previous command should have created a `tea` route. If it did not, create one using the `home` route as a model, only pointing to the new page.
+1. We no longer need the "home" route, so remove it, leaving only the "tea" route.
+1. The root path redirect will also need to change to redirect to the `tea` route.
 
 #### Mock the Data
 
@@ -250,7 +236,7 @@ Copy all of that over to the tea page, and change the titles as needed. When you
 
 Now the "Large Title" scrolling effect for iOS should have returned. Give it a try. Note that if you switch to an Android device and reload so you are using Material Design styling that you no longer have the effect. That is because this is not part of the Material Design specification. This is an example of the adaptive styling that you can have for each platform with the Ionic UI Framework. The app adapts and looks correct on each platform.
 
-Let's also copy over a slightly modified version of the test for the title:
+Recall that we previously added the following test to `src/app/home/home.page.spec.ts`:
 
 ```TypeScript
 ...
@@ -259,10 +245,12 @@ import { By } from '@angular/platform-browser';
   it('has the proper title', () => {
     const titles = fixture.debugElement.queryAll(By.css('ion-title'));
     expect(titles.length).toBe(2);
-    expect(titles[0].nativeElement.textContent.trim()).toBe('Teas');
-    expect(titles[1].nativeElement.textContent.trim()).toBe('Teas');
+    expect(titles[0].nativeElement.textContent.trim()).toBe('Blank');
+    expect(titles[1].nativeElement.textContent.trim()).toBe('Blank');
   });
 ```
+
+Copy that to `src/app/tea/tea.page.spec.ts` and modify the expected values to properly test the titles on the teas page.
 
 ## Make a Responsive Grid
 
@@ -387,19 +375,15 @@ Turning our attention away from the test and back to the code, we can modify the
   }
 ```
 
-Now that we have our matrix, let's create the grid in our page's HTML template file. **Set up Chrome to emulate an iPad Pro in landscape**. We know we want four columns on a wide screen like this, and that the grid by default supports 12 columns. That means that for a wide screen such as this, each column should take up three place. So let's lay that out in the markup. Replace the list in `src/app/tea/tea.page.html` with this:
+Now that we have our matrix, let's create the grid in our page's HTML template file. **Set up Chrome to emulate an iPad Pro in landscape**. We know we want four columns on a wide screen like this, and that the grid by default supports 12 columns. That means that for a wide screen such as this, each column should take up three places. So let's lay that out in the markup.
+
+Replace the list in `src/app/tea/tea.page.html` with this:
 
 ```html
 <ion-grid>
   <ion-row *ngFor="let teaRow of teaMatrix" class="ion-align-items-stretch">
     <ion-col *ngFor="let tea of teaRow" size="3">
-      <ion-card>
-        <ion-img [src]="tea.image"></ion-img>
-        <ion-card-header>
-          <ion-card-title>{{tea.name}}</ion-card-title>
-        </ion-card-header>
-        <ion-card-content> {{tea.description}} </ion-card-content>
-      </ion-card>
+      <!-- the ion-card structure stays the same, the list of items changes to a grid -->
     </ion-col>
   </ion-row>
 </ion-grid>
@@ -425,13 +409,13 @@ But there is one last thing. This will always display four columns, which will l
 - large devices: column size 6 -> each column takes up half of the "row" (2 columns per "row")
 - extra large devices: column size 3 -> each column takes up a quarter of the "row" (4 columns per "row")
 
-Change the `ion-col` properties as such:
+Change the `ion-col` attributes as such:
 
-```html
-<ion-col *ngFor="let tea of teaRow" size="12" size-md="6" size-xl="3"> ... </ion-col>
-```
+- Change the `size` from "3" to "12".
+- Add a `size-md` attribute with a value of "6".
+- Add a `size-xl` attribute with a value of "3".
 
-Now as you change the type of device that is being emulated, the layout adapts accordingly.
+Now as you change the type of device that is being emulated, the layout adapts accordingly. Try several different devices and orientations now.
 
 ## Final Cleanup - Remove the Home Page
 

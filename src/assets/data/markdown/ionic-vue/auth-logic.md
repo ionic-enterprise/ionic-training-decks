@@ -8,7 +8,7 @@ Before we get too far in to authentication, we need to do some data modeling and
 
 If you got stuck on any of the coding challenges in this lab, you can have a look at the <a href="https://github.com/ionic-team/tea-taster-vue" target="_blank">completed code</a>, but try not to peek.
 
-## The User and AuthUser Models
+## The User and Session Models
 
 The first thing we will need to do is model the User data for our system. Create a `src/models/User.ts` file with the following contents:
 

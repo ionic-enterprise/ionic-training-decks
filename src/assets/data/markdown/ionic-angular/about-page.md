@@ -17,8 +17,7 @@ Modify the application's `tsconfig.json` file to the code to resolve JSON files.
 This will allow us to read the `package.json` file and get some important information from it:
 
 ```typescript
-import { Component, OnInit } from '@angular/core';
-
+import { Component } from '@angular/core';
 import packageInfo from '../../../package.json';
 
 @Component({
@@ -26,15 +25,13 @@ import packageInfo from '../../../package.json';
   templateUrl: './about.page.html',
   styleUrls: ['./about.page.scss'],
 })
-export class AboutPage implements OnInit {
+export class AboutPage {
   author: string;
   name: string;
   description: string;
   version: string;
 
-  constructor() {}
-
-  ngOnInit() {
+  constructor() {
     this.author = packageInfo.author;
     this.name = packageInfo.name;
     this.description = packageInfo.description;
@@ -80,53 +77,69 @@ Currently, the logout logic is on the first page. Once the user has logged in, i
 Here is the full test:
 
 ```typescript
-import { waitForAsync, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, fakeAsync, TestBed, tick, waitForAsync } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
-import { provideMockStore } from '@ngrx/store/testing';
-import { IonicModule } from '@ionic/angular';
+import { AuthenticationService, SessionVaultService } from '@app/core';
+import { createAuthenticationServiceMock, createSessionVaultServiceMock } from '@app/core/testing';
+import { IonicModule, NavController } from '@ionic/angular';
+import { createNavControllerMock } from '@test/mocks';
+import { of } from 'rxjs';
 
 import { AboutPage } from './about.page';
-import { AuthenticationService } from '@app/core';
-import { createAuthenticationServiceMock } from '@app/core/testing';
-import { Store } from '@ngrx/store';
-import { logout } from '@app/store/actions';
 
 describe('AboutPage', () => {
   let component: AboutPage;
   let fixture: ComponentFixture<AboutPage>;
 
-  beforeEach(
-    waitForAsync(() => {
-      TestBed.configureTestingModule({
-        declarations: [AboutPage],
-        imports: [IonicModule],
-        providers: [
-          provideMockStore(),
-          {
-            provide: AuthenticationService,
-            useFactory: createAuthenticationServiceMock,
-          },
-        ],
-      }).compileComponents();
+  beforeEach(waitForAsync(() => {
+    TestBed.configureTestingModule({
+      declarations: [AboutPage],
+      imports: [IonicModule],
+      providers: [
+        { provide: AuthenticationService, useFactory: createAuthenticationServiceMock },
+        { provide: NavController, useFactory: createNavControllerMock },
+        { provide: SessionVaultService, useFactory: createSessionVaultServiceMock },
+      ],
+    }).compileComponents();
 
-      fixture = TestBed.createComponent(AboutPage);
-      component = fixture.componentInstance;
-      fixture.detectChanges();
-    })
-  );
+    fixture = TestBed.createComponent(AboutPage);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
+  }));
 
   it('should create', () => {
     expect(component).toBeTruthy();
   });
 
   describe('logout button', () => {
-    it('dispatches the logout button', () => {
-      const button = fixture.debugElement.query(By.css('[data-testid="logout-button"]'));
-      const store = TestBed.inject(Store);
-      spyOn(store, 'dispatch');
-      click(button.nativeElement);
-      expect(store.dispatch).toHaveBeenCalledTimes(1);
-      expect(store.dispatch).toHaveBeenCalledWith(logout());
+    describe('on click', () => {
+      beforeEach(() => {
+        const auth = TestBed.inject(AuthenticationService);
+        (auth.logout as jasmine.Spy).and.returnValue(of(undefined));
+      });
+
+      it('calls the logout', () => {
+        const auth = TestBed.inject(AuthenticationService);
+        const button = fixture.debugElement.query(By.css('[data-testid="logout-button"]')).nativeElement;
+        click(button);
+        expect(auth.logout).toHaveBeenCalledTimes(1);
+      });
+
+      it('clears the session', () => {
+        const button = fixture.debugElement.query(By.css('[data-testid="logout-button"]')).nativeElement;
+        const sessionVault = TestBed.inject(SessionVaultService);
+        click(button);
+        expect(sessionVault.clear).toHaveBeenCalledTimes(1);
+      });
+
+      it('navigates to the login page', fakeAsync(() => {
+        const button = fixture.debugElement.query(By.css('[data-testid="logout-button"]')).nativeElement;
+        const nav = TestBed.inject(NavController);
+        click(button);
+        tick();
+        expect(nav.navigateRoot).toHaveBeenCalledTimes(1);
+        expect(nav.navigateRoot).toHaveBeenCalledWith(['/', 'login']);
+      }));
     });
   });
 

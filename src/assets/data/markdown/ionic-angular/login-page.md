@@ -9,7 +9,7 @@ In this lab, you will learn how to:
 
 ## Generate the Page
 
-The `ionic generate` command allows you to generate serveral different types of objects: components, pages, pipes, services, etc. It ties into the Angular `ng generate` command and builds on top of it with some of its own schematics. One of those schematics is for the `page` object. Let's create a page now:
+The `ionic generate` command allows you to generate several different types of objects: components, pages, pipes, services, etc. It ties into the Angular `ng generate` command and builds on top of it with some of its own schematics. One of those schematics is for the `page` object. Let's create a page now:
 
 ```bash
 $ ionic generate page login
@@ -50,27 +50,31 @@ index af456b5..e6c9e39 100644
  @NgModule({
 ```
 
-We see that a `login` route was automatically added for us. Let's see if that works by changing the route in our browser to 'http://localhost:8100/login'. We should be able to navigate to that location just fine. The page is blank, but we can tell that the route is actually working.
+We see that a `login` route was automatically added for us. Let's see if that works by changing the route in our browser to 'http://localhost:8100/login' (your port number may be different). We should be able to navigate to that location just fine. The page is blank, but we can tell that the route is actually working.
+
+## Use Reactive Forms
+
+This is a very simple form, and we could get away with using a template driven form. However, the Reactive forms are far more flexible and ultimately more extensible. As such, we will use them instead. Open `src/app/login/login.module.ts` and import the `ReactiveFormsModule` instead of the `FormsModule`.
 
 ## Mock the UI
 
 First we will add our "title test", but in this case we will only have the single title. There is no reason for the collapsible title on this page.
 
-We also added the `FormsModule` to the `TestBed` configuration. We don't need that now, but we will shortly.
+We also added the `ReactiveFormsModule` to the `TestBed` configuration. We don't need that now, but we will shortly.
 
 ```TypeScript
 ...
-import { FormsModule } from '@angular/forms';
+import { ReactiveFormsModule } from '@angular/forms';
 import { By } from '@angular/platform-browser';
 ...
       TestBed.configureTestingModule({
         declarations: [LoginPage],
-        imports: [FormsModule, IonicModule],
+        imports: [IonicModule, ReactiveFormsModule],
       }).compileComponents();
 ...
   it('displays the title properly', () => {
-    const title = fixture.debugElement.query(By.css('ion-title'));
-    expect(title.nativeElement.textContent.trim()).toBe('Login');
+    // see the tea page test
+    // the big differences: there is only ONE title here and it should be "Login"
   });
 ```
 
@@ -78,7 +82,15 @@ Notice that the test fails, but we are about to fix that.
 
 **Note:** Angular's test server often does not pick up new `*.spec.ts` files so you may need to kill the existing `npm test` run and restart it to see the failed test.
 
-Let's mock up what we would like this page to look like. We know we are going to need a form in which to enter our e-mail and our password, along with a button to press when the user is ready to log in, so let's start by updating the `src/app/login/login.page.html` file.
+For this page, we will follow the very common <a ref="https://ionicframework.com/docs/layout/structure#header-and-footer" target="_blank">Header and Footer</a> UI pattern. This pattern contains a header with the page title and perhaps some controls (sch as a back button) as applicable, a content section with the main content, and a footer section that typically contains action buttons. Let's mock up the UI for that now.
+
+Our `ion-header` already contains what we need.
+
+We know we are going to need a form in which to enter our e-mail and our password. We will place this form inside of our `ion-content` area.
+
+We also know that we need an action button for the user to press once they have entered their credentials. We will place that inside the `ion-footer` section.
+
+When we are done, our page markup looks like this:
 
 ```html
 <ion-header>
@@ -88,15 +100,13 @@ Let's mock up what we would like this page to look like. We know we are going to
 </ion-header>
 
 <ion-content>
-  <form #loginForm="ngForm">
+  <form>
     <ion-list>
       <ion-item>
-        <ion-label>E-Mail Address</ion-label>
-        <ion-input></ion-input>
+        <ion-input label="E-Mail Address"></ion-input>
       </ion-item>
       <ion-item>
-        <ion-label>Password</ion-label>
-        <ion-input></ion-input>
+        <ion-input label="Password"></ion-input>
       </ion-item>
     </ion-list>
   </form>
@@ -109,26 +119,22 @@ Let's mock up what we would like this page to look like. We know we are going to
 </ion-footer>
 ```
 
-Well, that's a start, but let's pretty it up a bit. First, let's use the "floating" style labels like this: `<ion-label position="floating">Some Label</ion-label>`. Nice!
-
-We should also give the inputs an `id`, a `name`, and a `type` like this:
+That's a start, but let's pretty it up a bit. First, let's use the "floating" style labels by adding `label-placement="floating"` to each input. Here is an example:
 
 ```html
-<ion-list>
-  <ion-item>
-    <ion-label position="floating">E-Mail Address</ion-label>
-    <ion-input id="email-input" name="email" type="email"></ion-input>
-  </ion-item>
-  <ion-item>
-    <ion-label position="floating">Password</ion-label>
-    <ion-input id="password-input" name="password" type="password"></ion-input>
-  </ion-item>
-</ion-list>
+<ion-input label="Foo Bar" label-placement="floating"></ion-input>
 ```
+
+We should also give the inputs `id`, `name`, and `type` attributes:
+
+- `id="email-input" name="email" type="email"`
+- `id="password-input" name="password" type="password"`
 
 Now the password shows us markers instead of the text we are typing. This also gets us ready for work we will need to do later.
 
-Finally, the button. It really should:
+The form itself looks a little crowded. You can try adding the `ion-padding` class to the `ion-content` to see what that does.
+
+Finally, the button should:
 
 - have an `id`
 - take up the whole screen width
@@ -155,6 +161,7 @@ For now the `LoginPage` class does not have to do much. It just needs to have a 
 
 ```TypeScript
 import { Component } from '@angular/core';
+import { FormBuilder } from '@angular/forms';
 
 @Component({
   selector: 'app-login',
@@ -162,20 +169,22 @@ import { Component } from '@angular/core';
   styleUrls: ['./login.page.scss']
 })
 export class LoginPage {
-  email: string = "";
-  password: string = "";
+  loginForm = this.fb.group({
+    email: [''],
+    password: [''],
+  });
 
-  constructor() {}
+  constructor(private fb: FormBuilder) {}
 
   signIn() {
-    console.log(this.email, this.password);
+    console.log(this.loginForm.controls.email.value, this.loginForm.controls.password.value);
   }
 }
 ```
 
 ### Binding the Data
 
-Switch back to the test file. The bindings should be tested to make sure they are done correctly. Here are the tests for the Email Address input. Add these and then create similar tests for the password input. You will have to import `fakeAsync` and `tick` from `@angular/core/testing`.
+Switch back to the test file. The bindings should be tested to make sure they are done correctly. Here are the tests for the Email Address input. Add these and then create similar tests for the password input.
 
 Notice how we are using the `nativeElement` along with standard JavaScript DOM APIs in these tests. We could have also used the `debugElement` and used its `.query(By.css(...))` syntax like before, and then gone down to the native element for the rest of the test. You can use whichever method you are most comfortable with. You should also take into consideration which methodology is going to work best within your test. In these tests we need the HTML element, so I just went that route right away.
 
@@ -183,42 +192,37 @@ Notice how we are using the `nativeElement` along with standard JavaScript DOM A
   describe('email input binding', () => {
     it('updates the component model when the input changes', () => {
       const input = fixture.nativeElement.querySelector('#email-input');
-      const event = new InputEvent('ionChange');
+      const event = new InputEvent('ionInput');
 
       input.value = 'test@test.com';
       input.dispatchEvent(event);
       fixture.detectChanges();
 
-      expect(component.email).toEqual('test@test.com');
+      expect(component.loginForm.controls.email.value).toEqual('test@test.com');
     });
 
-    it('updates the input when the component model changes', fakeAsync(()=>{
-      component.email = 'testy@mctesterson.com';
-      fixture.detectChanges();
-      tick();
+    it('updates the input when the component model changes', ()=>{
+      component.loginForm.controls.email.setValue('testy@mctesterson.com');
       const input = fixture.nativeElement.querySelector('#email-input');
       expect(input.value).toEqual('testy@mctesterson.com');
-    }));
+    });
   });
 ```
 
-Hook up the inputs in the templates. The following should be added to both of the inputs:
+Hook up the inputs in the templates. First, the form needs to be associated with our `loginForm`:
 
-- The `ngModel` binding (example: `[(ngModel)]="email"`)
-- A template variable for the input (example: `#emailInput="ngModel"`)
-- Any required validation directives (example: `email required`)
+```html
+<form [formGroup]="loginForm"></form>
+```
+
+Next the `formControlName` needs to be set for each of the inputs
 
 Here is the E-Mail Address input:
 
 ```html
 <ion-input
-  id="email-input"
-  name="email"
-  type="email"
-  [(ngModel)]="email"
-  #emailInput="ngModel"
-  email
-  required
+  ... (already existing attributes like 'id', 'label', etc)
+  formControlName="email"
 ></ion-input>
 ```
 
@@ -228,35 +232,128 @@ The password input test and markup is similar:
   describe('password input binding', () => {
     it('updates the component model when the input changes', () => {
       const input = fixture.nativeElement.querySelector('#password-input');
-      const event = new InputEvent('ionChange');
+      const event = new InputEvent('ionInput');
 
       input.value = 'MyPas$Word';
       input.dispatchEvent(event);
       fixture.detectChanges();
 
-      expect(component.password).toEqual('MyPas$Word');
+      expect(component.loginForm.controls.password.value).toEqual('MyPas$Word');
     });
 
-    it('updates the input when the component model changes', fakeAsync(() => {
-      component.password = 'SomePassword';
-      fixture.detectChanges();
-      tick();
+    it('updates the input when the component model changes', () => {
+      component.loginForm.controls.password.setValue('SomePassword');
       const input = fixture.nativeElement.querySelector('#password-input');
       expect(input.value).toEqual('SomePassword');
-    }));
+    });
   });
 ```
 
 ```html
 <ion-input
-  id="password-input"
-  name="password"
-  type="password"
-  [(ngModel)]="password"
-  #passwordInput="ngModel"
-  required
+  ... (already existing attributes like 'id', 'label', etc)
+  formControlName="password"
 ></ion-input>
 ```
+
+### Test Refactor
+
+Those tests are getting very verbose, especially when it comes to setting a value in one of the form inputs. Let's clean that up a bit.
+
+Add a `setInputValue()` function within the main `describe()`.
+
+```TypeScript
+const setInputValue = (input: HTMLIonInputElement, value: string) => {
+  const event = new InputEvent('ionInput');
+  input.value = value;
+  input.dispatchEvent(event);
+  fixture.detectChanges();
+};
+```
+
+With that in place, clean up the tests. Your tests should now look more like this:
+
+```typescript
+it('updates the component model when the input changes', () => {
+  const input = fixture.nativeElement.querySelector('#password-input');
+  setInputValue(input, 'MyPas$Word');
+  expect(component.password).toEqual('MyPas$Word');
+});
+```
+
+### Display Error Messages
+
+We will use the `errorText` property of `ion-input` to show error messages. First, create a couple of getters within the `LoginPage` class in `src/app/login/login.page.ts`:
+
+```typescript
+get emailError(): string | undefined {
+  return undefined;
+}
+
+get passwordError(): string | undefined {
+  return undefined;
+}
+```
+
+Next, bind the values in the template. Here is the e-mail input:
+
+```html
+<ion-input
+  ... (already existing attributes like 'id', 'label', etc)
+  [errorText]="emailError"
+></ion-input>
+```
+
+Make a similar change for the password.
+
+With this hooked up, let's think about the types of messages we want with each input. Both fields are required. In addition, the e-mail field needs to be a properly formatted e-mail address. Here is the test for the e-mail input:
+
+```typescript
+it('displays appropriate error messages', () => {
+  const input = fixture.nativeElement.querySelector('#email-input');
+  expect(component.emailError).toBe(undefined);
+  setInputValue(input, 'test');
+  expect(component.emailError).toBe('Invalid format');
+  setInputValue(input, 'test@test.com');
+  expect(component.emailError).toBe(undefined);
+  setInputValue(input, '');
+  expect(component.emailError).toBe('Required');
+  setInputValue(input, 'test@test.com');
+  expect(component.emailError).toBe(undefined);
+});
+```
+
+Place that inside the appropriate `describe` block and then add a similar test for the password input (it will not have the "Invalid format" message).
+
+Turning our attention to the code, we need to do two things:
+
+- Add the validations to the form controls.
+- Generate the messages in our getters.
+
+First the validations. Add `Validators` to the import from `@angular/forms`, then update the code where we build `loginForm`:
+
+```typescript
+loginForm = this.fb.group({
+  email: ['', [Validators.email, Validators.required]],
+  password: ['', Validators.required],
+});
+```
+
+With the validations hooked up, we need to make sure we output the proper error. Here is the code for `emailError`:
+
+```typescript
+get emailError(): string | undefined {
+  const email = this.loginForm.controls.email;
+  if (email.invalid && (email.dirty || email.touched)) {
+  ▏ return email.errors?.['required'] ? 'Required' : email.errors?.['email'] ? 'Invalid format' : 'Unknown error';
+  }
+  return undefined;
+}
+```
+
+Make similar changes to `passwordError`.
+
+Now when we enter and delete data in the page, we should see error messages as appropriate under the inputs.
 
 ### Disable button
 
@@ -269,25 +366,19 @@ Let's use our tests to define when the button should be enabled and disabled.
     let button: HTMLIonButtonElement;
     let email: HTMLIonInputElement;
     let password: HTMLIonInputElement;
-    let event: InputEvent;
-    beforeEach(fakeAsync(() => {
+
+    beforeEach(() => {
       button = fixture.nativeElement.querySelector('ion-button');
       email = fixture.nativeElement.querySelector('#email-input');
       password = fixture.nativeElement.querySelector('#password-input');
-      event = new InputEvent('ionChange');
-      fixture.detectChanges();
-      tick();
-    }));
+    });
 
     it('starts disabled', () => {
       expect(button.disabled).toEqual(true);
     });
 
     it('is disabled with just an email address', () => {
-      email.value = 'test@test.com';
-      email.dispatchEvent(event);
-      fixture.detectChanges();
-
+      setInputValue(email, 'test@test.com');
       expect(button.disabled).toEqual(true);
     });
 
@@ -312,7 +403,7 @@ Now that we have the tests, let's update the HTML with the proper bindings.
 ```html
 <ion-footer>
   <ion-toolbar>
-    <ion-button id="signin-button" expand="full" [disabled]="!loginForm.form.valid" (click)="signIn()"
+    <ion-button id="signin-button" expand="full" [disabled]="!loginForm.valid" (click)="signIn()"
       >Sign In
       <ion-icon slot="end" name="log-in-outline"></ion-icon>
     </ion-button>
@@ -320,102 +411,6 @@ Now that we have the tests, let's update the HTML with the proper bindings.
 </ion-footer>
 ```
 
-### Test Refactor
-
-Those tests are getting very verbose, especially when it comes to setting a value in one of the form inputs. Let's clean that up a bit.
-
-Add a `setInputValue()` function within the main `describe()`.
-
-```TypeScript
-const setInputValue = (input: HTMLIonInputElement, value: string) => {
-  const event = new InputEvent('ionChange');
-  input.value = value;
-  input.dispatchEvent(event);
-  fixture.detectChanges();
-};
-```
-
-With that in place, clean up the tests. Your tests should now look more like this:
-
-```typescript
-it('updates the component model when the input changes', () => {
-  const input = fixture.nativeElement.querySelector('#password-input');
-  setInputValue(input, 'MyPas$Word');
-  expect(component.password).toEqual('MyPas$Word');
-});
-```
-
-### Display Error Messages
-
-If the data in one of the inputs is invalid, the Sign In button will be disabled, which is good, but the user will not know why, which is bad. So let's add a section where we display some helpful messages for the user. We will modify the form to display the following error messages when appropriate:
-
-- E-Mail Address must have a valid format
-- E-Mail Address is required
-- Password is required
-
-First let's use our tests to define when the error messages should be displayed:
-
-```typescript
-describe('error messages', () => {
-  let errorDiv: HTMLDivElement;
-  let email: HTMLIonInputElement;
-  let password: HTMLIonInputElement;
-  beforeEach(fakeAsync(() => {
-    errorDiv = fixture.nativeElement.querySelector('.error-message');
-    email = fixture.nativeElement.querySelector('#email-input');
-    password = fixture.nativeElement.querySelector('#password-input');
-    fixture.detectChanges();
-    tick();
-  }));
-
-  it('starts with no error message', () => {
-    expect(errorDiv.textContent).toEqual('');
-  });
-
-  it('displays an error message if the e-mail address is dirty and empty', () => {
-    setInputValue(email, 'test@test.com');
-    setInputValue(email, '');
-    expect(errorDiv.textContent.trim()).toEqual('E-Mail Address is required');
-  });
-
-  it('displays an error message if the e-mail address has an invalid format', () => {
-    // TODO: Fill this in
-  });
-
-  it('clears the error message when the e-mail address has a valid format', () => {
-    // TODO: Fill this in
-  });
-
-  it('displays an error message if the password is dirty and empty', () => {
-    // TODO: Fill this in
-  });
-});
-```
-
-Now let's update the form. Add the following to the lower portion of the form, after the `ion-list` but before the closing tag for the `form`:
-
-```html
-<div class="error-message">
-  <div *ngIf="emailInput.invalid && emailInput.errors && (emailInput.dirty || emailInput.touched)">
-    <div *ngIf="emailInput.errors.email">E-Mail Address must have a valid format</div>
-    <div *ngIf="emailInput.errors.required">E-Mail Address is required</div>
-  </div>
-
-  <div *ngIf="passwordInput.invalid && passwordInput.errors && (passwordInput.dirty || passwordInput.touched)">
-    <div *ngIf="passwordInput.errors.required">Password is required</div>
-  </div>
-</div>
-```
-
-That is helpful, but a little styling will make it look better. Since this is not the only page where we _could_ potentially want to display the error messages, let's add this to the `src/global.scss` file:
-
-```scss
-.error-message {
-  padding: 2em;
-  color: var(--ion-color-danger, #ff0000);
-}
-```
-
 ## Conclusion
 
-We now have a (mostly) funcitonal login page. The only problems are that we have to manually navigate to it, and it doesn't actually perform the login. Before we fix that far we are going to need to need to create a couple of services. We will do that next.
+We now have a (mostly) functional login page. The only problems are that we have to manually navigate to it, and it doesn't actually perform the login. Before we fix that far we are going to need to need to create a couple of services. We will do that next.

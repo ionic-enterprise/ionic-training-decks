@@ -6,6 +6,34 @@ In this lab you will learn how to:
 - Use the Capacitor Preferences API
 - Add more actions to the store
 
+## The User and Session Models
+
+The first thing we will need to do is model the Session data for our system. The session will consist of some user data along with the authentication token for that user's session.
+
+First let's define the user data. Create a `src/app/models/user.ts` file with the following contents:
+
+```TypeScript
+export interface User {
+  id: number;
+  firstName: string;
+  lastName: string;
+  email: string;
+}
+```
+
+Next we will model the current session. Create a `src/app/models/session.ts` file with the following contents:
+
+```TypeScript
+import { User } from './user';
+
+export interface Session {
+  user: User;
+  token: string;
+}
+```
+
+Be sure to update `src/app/models/index.ts`
+
 ## Create the Session Vault Service
 
 It is now time to get down to the main subject here and create an Angular service that will store information about the currently authenticated user.
@@ -45,19 +73,19 @@ export class SessionVaultService {
 
   constructor() {}
 
-  async login(session: Session): Promise<void> {}
+  async set(session: Session): Promise<void> {}
 
-  async restoreSession(): Promise<Session> {
+  async get(): Promise<Session | null> {
     return null;
   }
 
-  async logout(): Promise<void> {}
+  async clear(): Promise<void> {}
 }
 ```
 
 ### Test Setup
 
-Now that we have the interface for the service worked out, we can fill out a skeleton of the test. First, we need to set create some "global mocks" for the our `@capacitor` plugins. This will make it easier to mock the plugins. However, the concept of global mocks doesn't actually exist in Jasmine so we will have to perform a simple TypeScript configuration trick to fake it.
+Now that we have the interface for the service worked out, we can fill out a skeleton of the test. First, we need to set create some "global mocks" for the our `@capacitor` plugins. <a href="https://capacitorjs.com/docs/guides/mocking-plugins" target="_blank">This will make it easier to mock the plugins</a>. However, the concept of global mocks doesn't actually exist in Jasmine so we will have to perform a simple TypeScript configuration trick to fake it.
 
 Edit the `tsconfig.spec.json` file and add a `paths` parameter to the `compilerOptions` as such:
 
@@ -108,24 +136,26 @@ describe('SessionVaultService', () => {
     expect(service).toBeTruthy();
   });
 
-  describe('login', () => {});
+  // describe('set', () => {});
 
-  describe('restoreSession', () => {});
+  // describe('get', () => {});
 
-  describe('logout', () => {});
+  // describe('clear', () => {});
 });
 ```
 
+**Note:** the `describe()` calls start commented out because you cannot have empty `describe()` calls. Be sure to uncomment them as you create tests within them.
+
 ### Craft the Service
 
-As we start crafting the service, we will do so in a TDD fashion. First write a test that verifies a requirement, then create the code to make the test pass. Be sure to add each test within the appropriate `describe()` block.
+As we start crafting the service, we will do so in a TDD fashion. First write a test that verifies a requirement, then create the code to make the test pass. Be sure to add each test within the appropriate `describe()` block. As we do this, we will be working primarily in `src/app/core/session-vault/session-vault.service.spec.ts` and `src/app/core/session-vault/session-vault.service.ts`, so be sure to have those open in your editor.
 
-#### Login
+#### Set
 
-The `login()` method is called at login and stores the session via the Capacitor Preferences plugin.
+The `set()` method is called at login and stores the session via the Capacitor Preferences plugin.
 
 ```typescript
-describe('login', () => {
+describe('set', () => {
   it('saves the session in preferences', async () => {
     spyOn(Preferences, 'set');
     const session: Session = {
@@ -137,7 +167,7 @@ describe('login', () => {
       },
       token: '19940059fkkf039',
     };
-    await service.login(session);
+    await service.set(session);
     expect(Preferences.set).toHaveBeenCalledTimes(1);
     expect(Preferences.set).toHaveBeenCalledWith({
       key: 'auth-session',
@@ -150,22 +180,22 @@ describe('login', () => {
 The code for this in the service class then looks like the following:
 
 ```TypeScript
-  async login(session: Session): Promise<void> {
+  async set(session: Session): Promise<void> {
     await Preferences.set({ key: this.key, value: JSON.stringify(session) });
   }
 ```
 
 Be sure to import `Preferences` from `@capacitor/preferences` at the top of your file.
 
-#### Restore Session
+#### Get Session
 
-The `restoreSession()` method is used to get the session via the Capacitor Preferences plugin.
+The `get()` method is used to get the session via the Capacitor Preferences plugin.
 
 ```typescript
-describe('restore session', () => {
+describe('get session', () => {
   it('gets the session from preferences', async () => {
     spyOn(Preferences, 'get').and.returnValue(Promise.resolve({ value: null }));
-    await service.restoreSession();
+    await service.get();
     expect(Preferences.get).toHaveBeenCalledTimes(1);
     expect(Preferences.get).toHaveBeenCalledWith({
       key: 'auth-session',
@@ -187,7 +217,7 @@ describe('restore session', () => {
     });
 
     it('resolves the session', async () => {
-      expect(await service.restoreSession()).toEqual(session);
+      expect(await service.get()).toEqual(session);
     });
   });
 
@@ -197,7 +227,7 @@ describe('restore session', () => {
     });
 
     it('resolves null', async () => {
-      expect(await service.restoreSession()).toEqual(null);
+      expect(await service.get()).toEqual(null);
     });
   });
 });
@@ -205,15 +235,15 @@ describe('restore session', () => {
 
 **Challenge:** write the code for this method based on the requirements that are defined by this set of tests. Check with the <a href="https://capacitorjs.com/docs/apis/preferences" target="_blank">Preferences Plugin</a> docs if you get stuck.
 
-#### Logout
+#### Clear
 
-The Logout() method is called at logout and removes the session from preferences.
+The `clear()` method is called at logout and removes the session from preferences.
 
 ```typescript
-describe('logout', () => {
+describe('clear', () => {
   it('clears the preferences', async () => {
     spyOn(Preferences, 'remove');
-    await service.logout();
+    await service.clear();
     expect(Preferences.remove).toHaveBeenCalledTimes(1);
     expect(Preferences.remove).toHaveBeenCalledWith({
       key: 'auth-session',
@@ -233,9 +263,9 @@ Add a `src/app/core/session-vault/session-vault.service.mock.ts` file and inside
 ```typescript
 export const createSessionVaultServiceMock = () =>
   jasmine.createSpyObj('SessionVaultService', {
-    login: Promise.resolve(),
-    restoreSession: Promise.resolve(),
-    logout: Promise.resolve(),
+    set: Promise.resolve(),
+    get: Promise.resolve(),
+    clear: Promise.resolve(),
   });
 ```
 
@@ -245,225 +275,13 @@ Also create a `testing` barrel file called `src/app/core/testing.ts` that will e
 export * from './session-vault/session-vault.service.mock';
 ```
 
-## Integrate with the Store
-
-There are two tasks we currently need to perform within the store:
-
-- upon login, save the session
-- when the session is restored, dispatch an action to update the state
-
-### Handle Login
-
-Let's start with the easy one. We need to save the session when the login succeeds and do nothing when it fails. The first thing to do is create tests in `src/app/store/effects/auth.effects.spec.ts` that express these requirements.
-
-A couple of notes on the following code:
-
-- **Do not** add the `beforeEach`. It already exists. You are adding the `SessionVaultService` provider to it.
-- The `describe()` blocks already exist, they are there to guide you as to where the tests go.
-- Reminder: the `...` is just a placeholder for other code that may be in the file.
-
-```TypeScript
-...
-import { Session } from '@app/models';
-import { SessionVaultService } from '@app/core';
-import { createSessionVaultServiceMock } from '@app/core/testing';
-...
-  beforeEach(() => {
-    TestBed.configureTestingModule({
-      providers: [
-        AuthEffects,
-        provideMockActions(() => actions$),
-        { provide: NavController, useFactory: createNavControllerMock },
-        {
-          provide: SessionVaultService,
-          useFactory: createSessionVaultServiceMock,
-        },
-      ],
-    });
-    effects = TestBed.inject(AuthEffects);
-  });
-...
-  describe('login$', () => {
-    describe('on login success', () => {
-...
-      it('saves the session', done => {
-        const sessionVaultService = TestBed.inject(SessionVaultService);
-        actions$ = of(login({ email: 'test@test.com', password: 'test' }));
-        effects.login$.subscribe(() => {
-          expect(sessionVaultService.login).toHaveBeenCalledTimes(1);
-          expect(sessionVaultService.login).toHaveBeenCalledWith({
-            user: {
-              id: 73,
-              firstName: 'Ken',
-              lastName: 'Sodemann',
-              email: 'test@test.com',
-            },
-            token: '314159',
-          });
-          done();
-        });
-      });
-...
-    describe('on login failure', () => {
-...
-      it('does not save the session', done => {
-        const sessionVaultService = TestBed.inject(SessionVaultService);
-        actions$ = of(login({ email: 'test@test.com', password: 'badpass' }));
-        effects.login$.subscribe(() => {
-          expect(sessionVaultService.login).not.toHaveBeenCalled();
-          done();
-        });
-      });
-...
-```
-
-In the code, we can add a `tap()` to our observable pipeline that will fulfill these requirements. Note that a lot of this code already exists, you are just adding to it, so please don't copy-paste:
-
-```TypeScript
-...
-import { SessionVaultService } from '@app/core';
-...
-        from(this.fakeLogin(action.email, action.password)).pipe(
-          tap(session => this.sessionVault.login(session)),
-          map(session => loginSuccess({ session })),
-          catchError(error =>
-            of(loginFailure({ errorMessage: error.message })),
-          ),
-        ),
-...
-  constructor(
-    private actions$: Actions,
-    private navController: NavController,
-    private sessionVault: SessionVaultService,
-  ) {}
-...
-```
-
-### Handle Session Restore
-
-When the session is restored, we need to dispatch an action to the store in order to update the state with the session. First add the action in `src/app/store/actions.js`:
-
-```TypeScript
-export const sessionRestored = createAction(
-  '[Vault API] session restored',
-  props<{ session: Session }>(),
-);
-```
-
-The reducer (`src/app/store/reducers/auth.reducer.*`) should handle this action by setting the session in the state.
-
-**Test:**
-
-```TypeScript
-describe('Session Restored', () => {
-  it('sets the session', () => {
-    const session: Session = {
-      user: {
-        id: 42,
-        firstName: 'Douglas',
-        lastName: 'Adams',
-        email: 'solong@thanksforthefish.com',
-      },
-      token: 'Imalittletoken',
-    };
-    const action = sessionRestored({ session });
-    expect(reducer({ loading: false, errorMessage: '' }, action)).toEqual({
-      session,
-      loading: false,
-      errorMessage: '',
-    });
-  });
-});
-```
-
-**Code:**
-
-```TypeScript
-  on(
-    Actions.sessionRestored,
-    (state, { session }): AuthState => ({
-      ...state,
-      session,
-    })
-  )
-```
-
-Finally, modify the `SessionVaultService` to dispatch this action whenever a session is restored.
-
-```TypeScript
-...
-import { Store } from '@ngrx/store';
-import { provideMockStore } from '@ngrx/store/testing';
-...
-import { sessionRestored } from '@app/store/actions';
-
-...
-    TestBed.configureTestingModule({
-      providers: [provideMockStore()],
-    });
-...
-
-  describe('restore session', () => {
-    ...
-
-    describe('with a session', () => {
-      ...
-      it('dispatches session restored', async () => {
-        const store = TestBed.inject(Store);
-        spyOn(store, 'dispatch');
-        await service.restoreSession();
-        expect(store.dispatch).toHaveBeenCalledTimes(1);
-        expect(store.dispatch).toHaveBeenCalledWith(
-          sessionRestored({ session }),
-        );
-      });
-
-...
-
-    describe('without a session', () => {
-      ...
-      it('does not dispatch session restored', async () => {
-        const store = TestBed.inject(Store);
-        spyOn(store, 'dispatch');
-        await service.restoreSession();
-        expect(store.dispatch).not.toHaveBeenCalled();
-      });
-...
-```
-
-The code to accomplish this while still satisfying the other tests looks like this:
-
-```TypeScript
-...
-import { Store } from '@ngrx/store';
-import { sessionRestored } from '@app/store/actions';
-...
-
-  constructor(private store: Store) {}
-
-...
-
-  async restoreSession(): Promise<Session> {
-    const { value } = await Preferences.get({ key: this.key });
-    const session = JSON.parse(value);
-
-    if (session) {
-      this.store.dispatch(sessionRestored({ session }));
-    }
-
-    return session;
-  }
-
-...
-```
-
 ## A Note on Security
 
 We should be careful about what we are storing in local storage and then trusting. The token isn't too bad. If someone tampers with it, it is extremely likely that it will be invalid. The bigger issue would be if we were, for example, storing authorization information with the session and then trusting that to be correct. A user could easily update local storage in that case to, for example, give themselves admin access.
 
 Basically:
 
-- do not rely on locally stored information, always get it from the backend
+- do not rely on locally stored key information, always get it from the backend
 - the backend should _always_ assume the front end is compromised and not to be trusted
 
 Here we are just storing the user's name, etc. and are not using anything other than the token for security purposes. As has already been noted, tampering with the key invalidates it, so it cannot be used to gain elevated access.
@@ -472,4 +290,4 @@ Our implementation still has an issue where someone _could_ gain access to the d
 
 ## Conclusion
 
-You have created a service that will store the information about the currently logged in user, but we have not provided a way for the user to actually authenticate with the API. That is what we will talk about after a quick coding challenge.
+You have created a service that will store the information about the currently logged in user, but we have not provided a way for the user to actually authenticate with the API. That is what we will talk about next.

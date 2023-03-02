@@ -66,28 +66,7 @@ The first thing we will do is to integrate the page within the routing flow of t
 
 #### Navigating to the Page
 
-We will use the NavController to navigate to the child page. Provide a mock for that class in `src/app/tea/tea.page.spec.ts`:
-
-```typescript
-beforeEach(async(() => {
-  TestBed.configureTestingModule({
-    declarations: [TeaPage],
-    imports: [IonicModule],
-    providers: [
-      provideMockStore<{ auth: AuthState; data: DataState }>({
-        initialState: { auth: initialAuthState, data: initialDataState },
-      }),
-      {
-        provide: NavController,
-        useFactory: createNavControllerMock,
-      },
-    ],
-  }).compileComponents();
-  ...
-}));
-```
-
-In the same file, create the following set of tests:
+We will use the NavController to navigate from the `TeaPage` to the child page when a tea card is clicked. In the `src/app/tea/tea.page.spec.ts` file, create the following set of tests:
 
 ```typescript
 describe('show details page', () => {
@@ -126,10 +105,7 @@ Here is the markup for the template. A `(click)` event binding has been added th
 </ion-card>
 ```
 
-**Code Challenge:** write the `showDetailsPage()` method. To accomplish this, you will need to:
-
-- inject the `NavController` in the `TeaPage` class
-- call the appropriate method on that service passing the proper parameters (see the test)
+**Code Challenge:** write the `showDetailsPage()` method.
 
 #### Display Something
 
@@ -141,6 +117,27 @@ Before we get too far into the page, let's do an initial layout of what the data
 ion-img {
   max-width: 75%;
   max-height: 512px;
+}
+```
+
+##### `src/app/tea-details/tea-details.page.ts`
+
+```typescript
+import { Component, OnInit } from '@angular/core';
+import { Tea } from '@app/models';
+import { EMPTY, Observable } from 'rxjs';
+
+@Component({
+  selector: 'app-tea-details',
+  templateUrl: './tea-details.page.html',
+  styleUrls: ['./tea-details.page.scss'],
+})
+export class TeaDetailsPage implements OnInit {
+  tea$: Observable<Tea> = EMPTY;
+
+  constructor() {}
+
+  ngOnInit() {}
 }
 ```
 
@@ -164,45 +161,71 @@ ion-img {
 </ion-content>
 ```
 
-#### Selecting a Single Tea
+This will not display anything right now. First we need to get the data. We will work on that next.
 
-NgRX selectors allow us to <a href="https://ngrx.io/guide/store/selectors#using-selectors-with-props" target="_blank">pass properties</a> to them. We can use this in order to craft a selector that will observe a specific tea within the state.
+#### Getting a Single Tea
 
-Open `src/app/store/selectors/data.selectors.ts` and add the following selector factory:
+We need to modify the `TeaService` to include a `get()` method that returns a single tea. Add the following signature to `src/app/core/tea/tea.service.ts`:
 
-```TypeScript
-export const selectTea = (id: number) =>
-  createSelector(selectTeas, (teas: Array<Tea>) => teas.find((t) => t.id === id));
+```typescript
+  get(id: number): Observable<Tea> {
+    // This is the part you will fill in once the tests are in place
+  }
 ```
 
-Notice how we are building upon the other selectors. Also notice that `selectTea` is not itself a selector, but a factory that creates a selector.
+The tests look a lot like the tests for `getAll()` with the following exceptions:
 
-#### Reading the ID Parameter
+- An `id` is passed to `get()`.
+- The `id` is included in the URL.
+- A single tea is returned and not an array of teas.
 
-Now that we are navigating to the tea-details page with an ID parameter, we need to modify `src/app/tea-details/tea-details.page.ts` to read the parameter and get the tea information for that ID. To accomplish this we will need to use the Angular Components Router's `ActivedRoute` service and our store. We will also eventually make use of the `NavController`.
+Add the following tests to `src/app/core/tea/tea.service.spec.ts`:
+
+```typescript
+describe('get', () => {
+  it('gets the tea category', () => {
+    service.get(3).subscribe();
+    const req = httpTestingController.expectOne(`${environment.dataService}/tea-categories/3`);
+    expect(req.request.method).toEqual('GET');
+    httpTestingController.verify();
+  });
+
+  it('adds an image', () => {
+    let tea: Tea = expectedTeas[0];
+    service.get(3).subscribe((t) => (tea = t));
+    const req = httpTestingController.expectOne(`${environment.dataService}/tea-categories/3`);
+    req.flush(resultTeas[2]);
+    httpTestingController.verify();
+    expect(tea).toEqual(expectedTeas[2]);
+  });
+});
+```
+
+**Code Challenge #1:** With the tests in place, you are ready to write the code for the `get()` method. Use the `getAll()` as a model, making the necessary changes to handle just a single tea rather than an array.
+
+**Code Challenge #2:** Add the `get()` method to `src/app/core/tea/tea.service.mock.ts`
+
+#### Getting the Tea in the Page
+
+Now that we are navigating to the tea-details page with an ID parameter, we need to modify `src/app/tea-details/tea-details.page.ts` to read the parameter and get the tea information for that ID. To accomplish this we will need to use the Angular Components Router's `ActivedRoute` service and the `get()` we just added to our `TeaService`. We will also eventually make use of the `NavController`.
 
 In the `src/app/tea-details/tea-details.page.spec.ts` file, set up the `TestBed` to inject mocks for these services.
 
 ```typescript
-beforeEach(
-  waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [TeaDetailsPage],
-      imports: [IonicModule],
-      providers: [
-        provideMockStore<{ data: DataState }>({
-          initialState: { data: initialState },
-        }),
-        { provide: ActivatedRoute, useFactory: createActivatedRouteMock },
-        { provide: NavController, useFactory: createNavControllerMock },
-      ],
-    }).compileComponents();
+beforeEach(waitForAsync(() => {
+  TestBed.configureTestingModule({
+    declarations: [TeaDetailsPage],
+    imports: [IonicModule],
+    providers: [
+      { provide: ActivatedRoute, useFactory: createActivatedRouteMock },
+      { provide: NavController, useFactory: createNavControllerMock },
+    ],
+  }).compileComponents();
 
-    fixture = TestBed.createComponent(TeaDetailsPage);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
-  })
-);
+  fixture = TestBed.createComponent(TeaDetailsPage);
+  component = fixture.componentInstance;
+  fixture.detectChanges();
+}));
 ```
 
 You will need to adjust your import statements accordingly.
@@ -211,29 +234,20 @@ You will need to adjust your import statements accordingly.
 
 Create an `initialization` section in the test. Also, since we will need to do some setup within the initialization tests, remove the `fixture.detectChanges();` line from the main `beforeEach()`. That call will run the initialization, and we want to delay its execution until after our test setup code has run.
 
-In the `beforeEach()`, we need to set up the current route so it has an ID on it. We also need to set up the data returned via our selectors. Since `selectTea` is not itself a selector, but is a factory, we will override the selector that it relies on. We can then write our first test.
+In the `beforeEach()`, we need to set up the current route so it has an ID on it. We also need to set up the value returned by the `TeaService` when `get()` is called.
 
 ```TypeScript
   describe('initialization', () => {
-    let store: MockStore;
     beforeEach(() => {
       const route = TestBed.inject(ActivatedRoute);
       (route.snapshot.paramMap.get as any).withArgs('id').and.returnValue('7');
-      store = TestBed.inject(Store) as MockStore;
-      store.overrideSelector(selectTeas, [
-        {
-          id: 7,
-          name: 'White',
-          description: 'Often looks like frosty silver pine needles',
-          image: 'imgs/white.png',
-        },
-        {
-          id: 42,
-          name: 'Green',
-          description: 'Delecate flavor',
-          image: 'imgs/green.png',
-        },
-      ]);
+      const tea = TestBed.inject(TeaService);
+      (tea.get as jasmine.Spy).and.returnValue(of({
+        id: 7,
+        name: 'White',
+        description: 'Often looks like frosty silver pine needles',
+        image: 'imgs/white.png',
+      }));
     });
 
     it('binds the name', () => {
@@ -251,7 +265,7 @@ The code that satisfies that test looks like this:
 ```TypeScript
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { Observable } from 'rxjs';
+import { EMPTY, Observable } from 'rxjs';
 
 import { Tea } from '@app/models';
 import { selectTea, State } from '@app/store';
@@ -262,13 +276,13 @@ import { selectTea, State } from '@app/store';
   styleUrls: ['./tea-details.page.scss'],
 })
 export class TeaDetailsPage implements OnInit {
-  tea$: Observable<Tea>;
+  tea$: Observable<Tea> = EMPTY;
 
-  constructor(private route: ActivatedRoute, private store: Store) {}
+  constructor(private route: ActivatedRoute, private tea: TeaService) {}
 
   ngOnInit() {
-    const id = parseInt(this.route.snapshot.paramMap.get('id'), 10);
-    this.tea$ = this.store.select(selectTea(id));
+    const id = parseInt(this.route.snapshot.paramMap.get('id') as string, 10);
+    this.tea$ = this.tea.get(id);
   }
 }
 ```
@@ -281,6 +295,8 @@ We should now be able to get to the details page, but now the user is stuck ther
 
 1. go to the <a href="https://ionicframework.com/docs/api/back-button" target="_blank">`ion-back-button` documentation</a>
 1. under the Angular Usage examples, the first one is marked "Default back button", try adding the appropriate mark-up from there in `src/app/tea-details/tea-details.page.html`
+
+**Note:** in the example, you will need to scroll over to the `src/app/page-two.component.ts` tab in order to find the markup you are looking for.
 
 If you were already on the `tea-details` page when you did this, then you did not see a back-button. This is because when the page refreshed, the navigation stack was destroyed. If your app needs to still display the back button even if there is no navigation stack (for example, if you are going to deploy to the web where someone could go directly to the tea details page via a link), use the `defaultHref` property.
 
