@@ -2,6 +2,12 @@
 
 Now that you are through with the course, here are some extra credit exercises you can use to apply what you have learned or to start digging into something new. If there is time at the end of the training days, this can be done "in class." You can also do this on your own if you wish.
 
+For extra credit, we will:
+
+- Build a better login page.
+- Create a better splash screen flow.
+- Improve the testing and UX surrounding the removal of tasting notes.
+
 ## A Better Login Page
 
 The current login page does not offer a very good look and feel. Let's refactor this page for a better user experience. Have a look at the <a href="https://ionicframework.com/docs/api/card" target="_blank">card component</a>. We have used these elsewhere. Let's also use one here.

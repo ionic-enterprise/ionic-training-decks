@@ -82,7 +82,7 @@ We have a function that performs input operations. We need a similar one that cl
       let auth: AuthenticationService;
 
       beforeEach(() => {
-        (auth.login as jasmine.Spy).and.returnValue(of(session));
+        auth = TestBed.inject(AuthenticationService);
       });
 
       it('calls the login', () => {
@@ -323,6 +323,12 @@ In the class, we need to define the property, initialize it to `false`, and set 
 ```
 
 ## Hook up the Logout
+
+For now, we will add a logout button to the `TeaPage`. The button will log out the user and navigate to the login page so they can log in again. We will need to make changes to the following files:
+
+- `src/app/tea/tea.page.spec.ts`
+- `src/app/tea/tea.page.ts`
+- `src/app/tea/tea.page.html`
 
 ### Inject the Services
 

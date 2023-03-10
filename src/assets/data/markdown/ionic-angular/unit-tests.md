@@ -69,7 +69,7 @@ That new test case should go directly under the existing "should create" test ca
 
 It is a _best practice_ to use centralized factory functions to create mocks whenever it makes sense. This allows us to use a consistently defined mock throughout the tests in our application and reduces maintenance costs. For this application, we provide a set of centralized mock factories. <a download href="/assets/packages/ionic-angular/test.zip">Download the zip file</a> and unpack it in the root of the project creating a `test` folder.
 
-Once that is in place it is often used within the `TestBed` configuration in order to provide the mock object instead of the real object for various dependencies. For example:
+The items in that folder are often used within the `TestBed` configuration in order to provide the mock object instead of the real object for various dependencies. For example:
 
 ```TypeScript
 ...

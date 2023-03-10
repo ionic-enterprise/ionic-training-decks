@@ -1,4 +1,4 @@
-# Lab: Complete the Authentication Flow
+# Lab: Route Guards and HTTP Interceptors
 
 In this lab you will learn how to:
 
@@ -24,125 +24,47 @@ The first problem will be solved by adding a guard service. The other two proble
 An authentication guard is just a service that matches a <a href="https://angular.io/api/router/CanActivate" target="_blank">specific interface</a>. Start by creating the service.
 
 ```bash
-$ ionic g s core/auth-guard/auth-guard
+$ npx ng g guard core/guards/auth --skip-tests
 ```
 
-Remember to update the `src/app/core/index.ts` file to export the new service.
+Remember to update the `src/app/core/index.ts` file to export the guard.
 
-## Create the Interface
+## Switch to a Functional Guard
 
-The AuthGuard needs to implement the <a href="https://angular.io/api/router/CanActivate" target="_blank">CanActivate</a> interface. Let's set that up in the class.
+The Angular CLI (which the Ionic CLI is wrapping) currently generates a class-based guard, but these are deprecated. Let's quick change that to a functional guard.
+
+**Note:** skip this step if the CLI starts to generate a `CanActivateFn` rather than a class-based guard.
 
 ```typescript
-import { Injectable } from '@angular/core';
-import { CanActivate } from '@angular/router';
+import { ActivatedRouteSnapshot, CanActivateFn, RouterStateSnapshot } from '@angular/router';
 
-@Injectable({
-  providedIn: 'root',
-})
-export class AuthGuardService implements CanActivate {
-  constructor() {}
-
-  async canActivate(): Promise<boolean> {
-    return true;
-  }
-}
+export const authGuard: CanActivateFn = async (
+  route: ActivatedRouteSnapshot,
+  state: RouterStateSnapshot
+): Promise<boolean> => {
+  return true;
+};
 ```
 
-## Test and Code
+## Code
 
-### Configure the Testing Module
-
-We know that we are going to be checking to see if we have an identity and that we may have to navigate to the login page. So let's set up the module such that the `SessionVaultService` and `NavController` are both provided as mocks by adding a `providers` array to the `TestBed.configureTestingModule()` call.
+We've provided the basic skeleton here. Fill in the logic.
 
 ```typescript
-...
-import { NavController } from '@ionic/angular';
-import { SessionVaultService } from '../session-vault/session-vault.service';
-import { createNavControllerMock } from '@test/mocks';
-import { createSessionVaultServiceMock } from '../session-vault/session-vault.service.mock';
-...
-      providers: [
-        { provide: NavController, useFactory: createNavControllerMock },
-        {
-          provide: SessionVaultService,
-          useFactory: createSessionVaultServiceMock,
-        },
-      ],
-```
+// all imports up here...
 
-As you go through the next steps, remember that you will need to expand your imports a bit from time to time.
+export const authGuard: CanActivateFn = async (
+  route: ActivatedRouteSnapshot,
+  state: RouterStateSnapshot
+): Promise<boolean> => {
+  const sessionVault = inject(SessionVaultService);
+  const navController = inject(NavController);
 
-### Step 1 - when a session exists in the vault
+  // get the session
+  // if a session exists, return true
 
-If a session is stored in the vault, then there is no need to redirect to the login page, and we can continue with the current navigation.
-
-```typescript
-describe('with a stored session', () => {
-  beforeEach(() => {
-    const sessionVault = TestBed.inject(SessionVaultService);
-    (sessionVault.get as any).and.returnValue(
-      Promise.resolve({
-        user: {
-          id: 42,
-          firstName: 'Joe',
-          lastName: 'Tester',
-          email: 'test@test.org',
-        },
-        token: '19940059fkkf039',
-      })
-    );
-  });
-
-  it('does not navigate', async () => {
-    const navController = TestBed.inject(NavController);
-    await service.canActivate();
-    expect(navController.navigateRoot).not.toHaveBeenCalled();
-  });
-
-  it('emits true', async () => {
-    expect(await service.canActivate()).toBeTrue();
-  });
-});
-```
-
-These tests should work with the code we currently have.
-
-### Step 2 - when a session does not exist in the vault
-
-If a session does not exist in vault state, then we need to disallow the current navigation and redirect to the login page instead.
-
-```typescript
-describe('without a stored session', () => {
-  it('navigates to the login page', async () => {
-    const navController = TestBed.inject(NavController);
-    await service.canActivate();
-    expect(navController.navigateRoot).toHaveBeenCalledTimes(1);
-    expect(navController.navigateRoot).toHaveBeenCalledWith(['/', 'login']);
-  });
-
-  it('emits false', async () => {
-    expect(await service.canActivate()).toBeFalse();
-  });
-});
-```
-
-Add those tests and then write the code that satisfies them. In the end, your code will look _something_ like this:
-
-```typescript
-export class AuthGuardService implements CanActivate {
-  constructor() {} // inject the nav controller and session vault here as private
-
-  async canActivate(): Promise<boolean> {
-    const session = await this.sessionVault.get();
-    if (session) {
-      return true;
-    }
-
-    this.navController.navigateRoot(['/', 'login']);
-    return false;
-  }
-}
+  // Otherwise, navigate to the login page and return false
+};
 ```
 
 Be sure to replace the comments with the actual logic. I had to leave _something_ as an exercise for you... 🤓
@@ -156,7 +78,7 @@ Any route that requires the user to be logged in should have the guard. At this 
 ```typescript
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import { AuthGuardService } from '@app/core/auth-guard/auth-guard.service';
+import { authGuard } from '@app/core';
 
 import { TeaPage } from './tea.page';
 
@@ -164,7 +86,7 @@ const routes: Routes = [
   {
     path: '',
     component: TeaPage,
-    canActivate: [AuthGuardService],
+    canActivate: [authGuard],
   },
 ];
 
@@ -180,8 +102,8 @@ export class TeaPageRoutingModule {}
 Outgoing requests needs to have the token added to the headers, and incoming responses needed to be checked for 401 errors. It is best to handle these sorts of things in a centralized location. This is a perfect job for HTTP Interceptors.
 
 ```bash
-ionic g s core/http-interceptors/auth-interceptor --skipTests
-ionic g s core/http-interceptors/unauth-interceptor --skipTests
+npx ng g interceptor core/interceptors/auth --skip-tests
+npx ng g interceptor core/interceptors/unauth --skip-tests
 ```
 
 Be sure to update the `src/core/index.ts` file.
@@ -189,17 +111,19 @@ Be sure to update the `src/core/index.ts` file.
 ### The Auth Interceptor - Append the Bearer Token
 
 ```typescript
+import { HttpEvent, HttpHandler, HttpInterceptor, HttpRequest } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
-import { HttpEvent, HttpInterceptor, HttpHandler, HttpRequest } from '@angular/common/http';
+import { from, mergeMap, Observable, tap } from 'rxjs';
+import { SessionVaultService } from '../session-vault/session-vault.service';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root',
+})
 export class AuthInterceptor implements HttpInterceptor {
-  constructor(private store: Store) {}
+  constructor(private sessionVault: SessionVaultService) {}
 
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-    return this.store.select(selectAuthToken).pipe(
-      take(1),
+    return from(this.sessionVault.get()).pipe(
       tap((session) => {
         if (session && this.requestRequiresToken(req)) {
           req = req.clone({

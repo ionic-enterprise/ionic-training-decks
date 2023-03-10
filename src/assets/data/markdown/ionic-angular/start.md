@@ -54,7 +54,7 @@ Prettier itself is an opinionated code formatter, and Ionic has its own opinions
 npm install -D @ionic/prettier-config husky prettier pretty-quick
 ```
 
-Modify your `package.json` file. I suggest moving the `description` up to the top and giving it a reasonable value, and then adding the Prettier config portion to the bottom. For example:
+Modify your `package.json` file. Move the `description` up to the top and giving it a reasonable value, add a `prepare` script that runs `husky install` to make sure the hooks are available, and then add the Prettier config portion to the bottom. For example:
 
 ```json
 {
@@ -88,7 +88,7 @@ git init
 npm install
 ```
 
-The output should look something like this:
+The output of the `npm install` should look something like this:
 
 ```bash
 $ npm install

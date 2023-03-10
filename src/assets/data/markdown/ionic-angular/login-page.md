@@ -56,6 +56,21 @@ We see that a `login` route was automatically added for us. Let's see if that wo
 
 This is a very simple form, and we could get away with using a template driven form. However, the Reactive forms are far more flexible and ultimately more extensible. As such, we will use them instead. Open `src/app/login/login.module.ts` and import the `ReactiveFormsModule` instead of the `FormsModule`.
 
+```typescript
+import { CommonModule } from '@angular/common';
+import { NgModule } from '@angular/core';
+import { ReactiveFormsModule } from '@angular/forms';
+import { IonicModule } from '@ionic/angular';
+import { LoginPageRoutingModule } from './login-routing.module';
+import { LoginPage } from './login.page';
+
+@NgModule({
+  imports: [CommonModule, IonicModule, LoginPageRoutingModule, ReactiveFormsModule],
+  declarations: [LoginPage],
+})
+export class LoginPageModule {}
+```
+
 ## Mock the UI
 
 First we will add our "title test", but in this case we will only have the single title. There is no reason for the collapsible title on this page.
@@ -101,14 +116,8 @@ When we are done, our page markup looks like this:
 
 <ion-content>
   <form>
-    <ion-list>
-      <ion-item>
-        <ion-input label="E-Mail Address"></ion-input>
-      </ion-item>
-      <ion-item>
-        <ion-input label="Password"></ion-input>
-      </ion-item>
-    </ion-list>
+    <ion-input label="E-Mail Address"></ion-input>
+    <ion-input label="Password"></ion-input>
   </form>
 </ion-content>
 
@@ -125,10 +134,22 @@ That's a start, but let's pretty it up a bit. First, let's use the "floating" st
 <ion-input label="Foo Bar" label-placement="floating"></ion-input>
 ```
 
-We should also give the inputs `id`, `name`, and `type` attributes:
+We should also give the inputs `id`, `name`, and `type` attributes as well as setting the `errorText` property:
 
-- `id="email-input" name="email" type="email"`
-- `id="password-input" name="password" type="password"`
+- `id="email-input" name="email" type="email" [errorText]="emailError"`
+- `id="password-input" name="password" type="password" [errorText]="passwordError"`
+
+The `emailError` and `passwordError` will need to be defined in the page's class:
+
+```typescript
+  get emailError(): string {
+    return 'Unknown error';
+  }
+
+  get passwordError(): string {
+    return 'Unknown error';
+  }
+```
 
 Now the password shows us markers instead of the text we are typing. This also gets us ready for work we will need to do later.
 
@@ -283,47 +304,38 @@ it('updates the component model when the input changes', () => {
 
 ### Display Error Messages
 
-We will use the `errorText` property of `ion-input` to show error messages. First, create a couple of getters within the `LoginPage` class in `src/app/login/login.page.ts`:
+The `errorText` property of `ion-input` will show error messages when the input is dirty and in an invalid state. We currently are just binding a generic error message:
 
 ```typescript
-get emailError(): string | undefined {
-  return undefined;
+get emailError(): string {
+  return 'Unknown error';
 }
 
-get passwordError(): string | undefined {
-  return undefined;
+get passwordError(): string {
+  return 'Unknown error';
 }
 ```
 
-Next, bind the values in the template. Here is the e-mail input:
-
-```html
-<ion-input
-  ... (already existing attributes like 'id', 'label', etc)
-  [errorText]="emailError"
-></ion-input>
-```
-
-Make a similar change for the password.
-
-With this hooked up, let's think about the types of messages we want with each input. Both fields are required. In addition, the e-mail field needs to be a properly formatted e-mail address. Here is the test for the e-mail input:
+Let's think about the types of messages we want with each input. Both fields are required. In addition, the e-mail field needs to be a properly formatted e-mail address. Here is the test for the e-mail input:
 
 ```typescript
-it('displays appropriate error messages', () => {
+it('generates appropriate error messages', () => {
   const input = fixture.nativeElement.querySelector('#email-input');
-  expect(component.emailError).toBe(undefined);
+  expect(component.emailError).toBe('Required');
   setInputValue(input, 'test');
   expect(component.emailError).toBe('Invalid format');
   setInputValue(input, 'test@test.com');
-  expect(component.emailError).toBe(undefined);
+  expect(component.emailError).toBe('Unknown error');
   setInputValue(input, '');
   expect(component.emailError).toBe('Required');
   setInputValue(input, 'test@test.com');
-  expect(component.emailError).toBe(undefined);
+  expect(component.emailError).toBe('Unknown error');
 });
 ```
 
 Place that inside the appropriate `describe` block and then add a similar test for the password input (it will not have the "Invalid format" message).
+
+The form system will determine whether or not the error message should be displayed, we just need to make sure we have one. The "Unknown error" means we either don't have an error (in which case the form will not show the message) or we do not know exactly what the error is.
 
 Turning our attention to the code, we need to do two things:
 
@@ -344,10 +356,7 @@ With the validations hooked up, we need to make sure we output the proper error.
 ```typescript
 get emailError(): string | undefined {
   const email = this.loginForm.controls.email;
-  if (email.invalid && (email.dirty || email.touched)) {
-  ▏ return email.errors?.['required'] ? 'Required' : email.errors?.['email'] ? 'Invalid format' : 'Unknown error';
-  }
-  return undefined;
+  return email.errors?.['required'] ? 'Required' : email.errors?.['email'] ? 'Invalid format' : 'Unknown error';
 }
 ```
 
@@ -413,4 +422,4 @@ Now that we have the tests, let's update the HTML with the proper bindings.
 
 ## Conclusion
 
-We now have a (mostly) functional login page. The only problems are that we have to manually navigate to it, and it doesn't actually perform the login. Before we fix that far we are going to need to need to create a couple of services. We will do that next.
+We now have a (mostly) functional login page. The only problems are that we have to manually navigate to it, and it doesn't actually perform the login. Before we fix that we are going to need to need to create a couple of services. We will do that next.
