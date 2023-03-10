@@ -26,7 +26,7 @@ While we are in there, let's also create a stub for the method we are going to n
 - `save(obj)` - save and existing item or create add a new one, depending on whether an ID exists on the object or not, return the saved object
 - `delete(obj)` - delete the object
 
-Not every service has all of these methods, but when they need the method these are the names that I use. The details here are not quite as important as making sure you come up with names and semantics that work for your application and your team, and then being consistent with them.
+Not every service has all of these methods, but when a data service needs a specific method these are the names that I use. The details here are not quite as important as making sure you develop a standard and then enforce it across your data services.
 
 ```TypeScript
 import { Injectable } from '@angular/core';
@@ -49,7 +49,7 @@ export class TeaService {
 
 Angular's <a href="https://angular.io/api/common/http/HttpClient" target="_blank">HttpClient</a> service is very flexible and has several options for working with RESTful data. We will not go into full details, as that could be a full course on its own. You have already seen a couple of cases where we use the POST method to log in and out of the application. In this service we will only be using GET method to retrieve data.
 
-You should see one test failing. That is the test for this service, and it is failing because the testing module does not know how to inject the `HttpClient` service. The `@angular/common/http/testing` library will be used to mock the `HttpClient` for our tests. Here is the configuration needed to rectify that:
+You should see one test failing (note that since we added a test file you will likely need to restart the Angular testing service). That is the test for this service, and it is failing because the testing module does not know how to inject the `HttpClient` service. The `@angular/common/http/testing` library will be used to mock the `HttpClient` for our tests. Here is the configuration needed to rectify that:
 
 ```TypeScript
 import { TestBed } from '@angular/core/testing';
@@ -94,11 +94,9 @@ First, create `expectedTeas` and `resultTeas` variables within the main `describ
 ```typescript
 ...
   let expectedTeas: Array<Tea>;
-  let resultTeas: Array<any>;
+  let resultTeas: Array<Omit<Tea, 'image'>>;
 ...
 ```
-
-**Note:** to be absolutely correct, we should have created a type for the shape of the `Tea` coming back from the API. That would be a good tech-debt-reduction task for the future. For now, we will roll with this.
 
 We can then use `expectedTeas` to manufacture a set of `resultTeas` by deleting the `image`. The `resultTeas` will be the result of our API call. Create the following function at the bottom of the main `describe()` function callback.
 
@@ -167,6 +165,12 @@ Call this function from the main `beforeEach()`.
 
 Create a `describe` for the "get all" functionality. All of our tests for the `getAll()` requirements will go there.
 
+```typescript
+describe('get all', () => {
+  // Test cases will go here...
+});
+```
+
 #### Test #1 - Getting Data from the Correct Endpoint
 
 ```typescript
@@ -189,7 +193,7 @@ Write the minimal code required to make that test pass. Basically, this:
 
 ```typescript
   getAll(): Observable<Array<Tea>> {
-    return this.http.get(`${environment.dataService}/tea-categories`) as any;
+    return this.http.get<Array<Omit<Tea, 'image'>>>(`${environment.dataService}/tea-categories`) as any;
   }
 ```
 
@@ -237,8 +241,8 @@ We can then use the Array `map` operator to convert the individual teas, and the
 
 ```typescript
   getAll(): Observable<Array<Tea>> {
-    return this.http.get(`${environment.dataService}/tea-categories`).pipe(
-      map((teas: Array<any>) =>
+    return this.http.get<Array<Omit<Tea, 'image'>>>(`${environment.dataService}/tea-categories`).pipe(
+      map((teas) =>
         teas.map(t => ({
           ...t,
           image: `assets/img/${this.images[t.id - 1]}.jpg`,
@@ -254,8 +258,8 @@ The code that you have for this method looks like this:
 
 ```typescript
   getAll(): Observable<Array<Tea>> {
-    return this.http.get(`${environment.dataService}/tea-categories`).pipe(
-      map((teas: Array<any>) =>
+    return this.http.get<Array<Omit<Tea, 'image'>>>(`${environment.dataService}/tea-categories`).pipe(
+      map((teas) =>
         teas.map(t => ({
           ...t,
           image: `assets/img/${this.images[t.id - 1]}.jpg`,
@@ -265,19 +269,21 @@ The code that you have for this method looks like this:
   }
 ```
 
-The problem here is that there is a lot for future you to parse when you come back to maintain this. The method is responsible for more tha one thing: getting the data, and doing the conversion. Let's fix that by abstracting the code that does the conversion on a tea object into a local `convert()` method.
+The problem here is that there is a lot for future you to parse when you come back to maintain this. The method is responsible for more than one thing: getting the data, and doing the conversion. Let's fix that by abstracting the code that does the conversion on a tea object into a local `convert()` method.
 
 When you are done, the code should look more like this:
 
 ```typescript
   getAll(): Observable<Array<Tea>> {
     return this.http
-      .get(`${environment.dataService}/tea-categories`)
-      .pipe(map((teas: Array<any>) => teas.map(t => this.convert(t))));
+      .get<Array<Omit<Tea, 'image'>>>(`${environment.dataService}/tea-categories`)
+      .pipe(map((teas) => teas.map(t => this.convert(t))));
   }
 ```
 
-Make sure your tests are still passing. That makes it clear that we are grabbing the teas from the API and returning them after a mapping process. The details of that convertion then are left to the `convert()` method, and everything is tidy and is only responsible for one thing.
+Make sure your tests are still passing. That makes it clear that we are grabbing the teas from the API and returning them after a mapping process. The details of that conversion then are left to the `convert()` method, and everything is tidy and is only responsible for one thing.
+
+Also note that you likely now have a couple of definitions of `Array<Omit<Tea, 'image'>>` in your code. It is best to refactor that into a locally declared type and use it instead. There is no need to export it. The fact that we also use that same type in the test is not a big deal.
 
 **Best Practice:** The point of what we just did is that it is OK for things to get a little messy while you are working out exactly how it should work. However, before you call the code "done" you should clean it up to make it easier to maintain. Having properly written unit tests will help you ensure you are doing that clean-up correctly.
 

@@ -4,11 +4,13 @@ In this lab you will use the service you just created.
 
 ## Update the Test
 
-We are going to start getting the data from the service we just created. For the most part, I will describe the changes you should make to the test, but I leave it to you to figure out how to make the changes. Here is a synopsis of those changes:
+We are going to start getting the data from the service we just created within our `TeaPage`. For the most part, I will describe the changes you should make to the test, but I leave it to you to figure out how to make the changes. Here is a synopsis of those changes:
 
 - Inject a mock of the service.
 - Change the tea data from what is hard coded in the page. Adjust the tests accordingly.
 - Set up the service to return the modified tea data.
+
+For all of the code mentioned here, we are working in one of the files in `src/app/tea`.
 
 ### Inject a Mock of the Service
 
@@ -58,8 +60,9 @@ We will switch the code over from having hard coded data to having an `Observabl
 1. Remove the `teaData` array and the `teaMatrix` getter.
 1. Define a new public property for our `Observable`: `teaMatrix$: Observable<Array<Array<Tea>>> = of([]);`.
 1. Inject the `TeaService` in the constructor (`private tea: TeaService`).
-1. Modify the class definition such that we specify the class implements `OnInit` (`export class TeaPage implements OnInit`)
-1. Create a `ngOnInit()` method that sets up the `teaMatrix$` observable.
+1. if it is not already there, modify the class definition such that we specify the class implements `OnInit` (`export class TeaPage implements OnInit`), then add an `ngOnInit()` method.
+
+The `ngOnInit()` method should set up the observable that we created.
 
 ```typescript
   ngOnInit() {
