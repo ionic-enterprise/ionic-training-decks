@@ -35,15 +35,14 @@ But, we want details for a specific tea, so our route will need to have the tea 
 ```typescript
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
-
 import { TeaDetailsPage } from './tea-details.page';
-import { AuthGuardService } from '@app/core';
+import { authGuard } from '@app/core';
 
 const routes: Routes = [
   {
     path: ':id',
     component: TeaDetailsPage,
-    canActivate: [AuthGuardService],
+    canActivate: [authGuard],
   },
 ];
 
@@ -219,6 +218,7 @@ beforeEach(waitForAsync(() => {
     providers: [
       { provide: ActivatedRoute, useFactory: createActivatedRouteMock },
       { provide: NavController, useFactory: createNavControllerMock },
+      { provide: TeaService, useFactory: createTeaServiceMock },
     ],
   }).compileComponents();
 
@@ -294,7 +294,7 @@ export class TeaDetailsPage implements OnInit {
 We should now be able to get to the details page, but now the user is stuck there, at least on devices that don't have a back button. Let's fix that now.
 
 1. go to the <a href="https://ionicframework.com/docs/api/back-button" target="_blank">`ion-back-button` documentation</a>
-1. under the Angular Usage examples, the first one is marked "Default back button", try adding the appropriate mark-up from there in `src/app/tea-details/tea-details.page.html`
+1. under the Angular Usage examples, the first one is marked "Basic Usage", try adding the appropriate mark-up from there in `src/app/tea-details/tea-details.page.html`
 
 **Note:** in the example, you will need to scroll over to the `src/app/page-two.component.ts` tab in order to find the markup you are looking for.
 
