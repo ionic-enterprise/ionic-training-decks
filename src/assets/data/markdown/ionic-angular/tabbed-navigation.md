@@ -194,16 +194,11 @@ Now go change the `TeaPage` source accordingly so the test will pass. Try it in 
 
 #### Step 4: Redirects and Other Details
 
-If you load the application from root, it will go to the `tabs` route, but we really need it to display one of the pages. The `tabs/tea` route makes the most sense. Modify the current redirect within `app-routing.module.ts` to go to `tabs/tea`, and add a redirect from `tabs` to `tabs/tea`.
+If you load the application from root, it will go to the `tabs` route, but we really need it to display one of the pages. The `tabs/tea` route makes the most sense. Modify the current redirect within `app-routing.module.ts` to go to `tabs/tea`.
 
 ```typescript
   {
     path: '',
-    redirectTo: 'tabs/tea',
-    pathMatch: 'full',
-  },
-  {
-    path: 'tabs',
     redirectTo: 'tabs/tea',
     pathMatch: 'full',
   },

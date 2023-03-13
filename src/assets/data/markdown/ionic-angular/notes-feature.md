@@ -142,7 +142,8 @@ export class TastingNotesService {
   constructor(private http: HttpClient) {}
 
   getAll(): Observable<Array<TastingNote>> {
-    // TODO: Replace with actual code
+    // TODO: Replace with actual code, see the tea service if you need a hint.
+    //       This one is a lot easier, though, as there are no data transforms.
     return EMPTY;
   }
 
@@ -452,7 +453,6 @@ describe('TastingNoteEditorComponent', () => {
         label="Brand"
         label-placement="floating"
         formControlName="brand"
-        [errorText]="brandError"
         data-testid="brand-input"
       ></ion-input>
     </ion-item>
@@ -463,12 +463,10 @@ describe('TastingNoteEditorComponent', () => {
         label="Name"
         label-placement="floating"
         formControlName="name"
-        [errorText]="nameError"
         data-testid="name-input"
       ></ion-input>
     </ion-item>
     <ion-item>
-      <ion-label>Type</ion-label>
       <ion-select name="tea-type-select" label="Type" formControlName="teaCategoryId" data-testid="tea-type-select">
         <ion-select-option *ngFor="let t of teaCategories$ | async" [value]="t.id">{{ t.name }}</ion-select-option>
       </ion-select>
@@ -484,7 +482,6 @@ describe('TastingNoteEditorComponent', () => {
         label="Notes"
         label-placement="floating"
         formControlName="notes"
-        [errorText]="notesError"
         rows="5"
         data-testid="notes-input"
       ></ion-textarea>
@@ -525,18 +522,6 @@ export class TastingNoteEditorComponent implements OnInit {
   title: string = '';
   teaCategories$: Observable<Array<Tea>> = of([]);
 
-  get brandError(): string | undefined {
-    return this.errorString(this.editorForm.controls.brand);
-  }
-
-  get nameError(): string | undefined {
-    return this.errorString(this.editorForm.controls.name);
-  }
-
-  get notesError(): string | undefined {
-    return this.errorString(this.editorForm.controls.notes);
-  }
-
   constructor(
     private fb: FormBuilder,
     private modalController: ModalController,
@@ -549,7 +534,11 @@ export class TastingNoteEditorComponent implements OnInit {
   }
 
   async save() {
-    const note: TastingNote = // TODO: Figure out how to set this based on the test we just wrote
+    const note: TastingNote = {
+      // TODO: Figure out how to set this based on the test we just wrote. As an example, here is
+      //       how to set the brand:
+      brand: this.editorForm.controls.brand.value as string,
+    };
 
     this.tastingNotes
       .save(note)
@@ -559,14 +548,15 @@ export class TastingNoteEditorComponent implements OnInit {
 
   ngOnInit() {
     this.teaCategories$ = this.tea.getAll();
-    // TODO: Figure out what needs to be done here if a `note` is passed via property
-  }
-
-  private errorString(control: FormControl): string | undefined {
-    if (control.invalid && (control.dirty || control.touched)) {
-      return control.errors?.['required'] ? 'Required' : 'Unknown error';
+    if (this.note) {
+      // TODO: Figure out what needs to be done here if a `note` is passed via property
+      // HINT: this.editorForm.controls.brand.setValue(this.note.brand);
+      //       ...
+      //       this.buttonLabel = 'Update'
+      //       ...
+    } else {
+      // TODO: Only the buttonLabel and title need to get set here.
     }
-    return undefined;
   }
 }
 ```
@@ -887,7 +877,9 @@ But that is a lot of repeated code with just a one line difference. Let's refact
   }
 
   private async displayEditor(note?: TastingNote): Promise<void> {
-    // Filling in this code is left as an exercise for you
+    // Filling in this code is left as an exercise for you.
+    // You may want to start with setting up the options based on whether you have a note or not:
+    // const opt: ModalOptions = { ... }
   }
 ```
 
@@ -928,7 +920,7 @@ And the code for the delete is pretty straight forward:
 
 ## Refreshing
 
-This is mostly working. Mostly. One problem we have, though, is that as we add, update, or remove tasting notes, the list does not update. We can fix that, though, by using a `BehaviorSubject` to refresh the data. All of the following changes are in the `src/app/tasting-notes/tasting-notes.page.ts` file.
+This is mostly working. Mostly. One problem we have, though, is that as we add, update, or remove tasting notes, the list does not update. We can fix that by using a `BehaviorSubject` to refresh the data. All of the following changes are in the `src/app/tasting-notes/tasting-notes.page.ts` file.
 
 First, create the `BehaviorSubject`:
 

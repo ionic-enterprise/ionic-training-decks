@@ -255,32 +255,7 @@ To successfully log in, use the following credentials:
 
 ### Login Failures
 
-The user can enter the wrong email or password. If they do so, we will not store a session and we will not navigate. Try that out from the login page just to be sure. The fact that we stay on the login page is good, but there are two problems:
-
-1. We do not have a set of automated unit tests for this.
-1. When the user fails, there is no indication provided to the user.
-
-We will fix that now.
-
-#### Code Challenge: Add Tests
-
-Writing the tests is left as a code challenge for you. You will need to add a test group within the "on click" group. The tests will be similar to the ones where we verify something _is_ done. In this case, though, our expected results look more like `expect(someService.foo).not.toHaveBeenCalled()`.
-
-```typescript
-describe('on fail', () => {
-  beforeEach(() => {
-    (auth.login as jasmine.Spy).and.returnValue(of(undefined));
-  });
-
-  it('does not store the session', () => {
-    // TODO: you fill in this part
-  });
-
-  // TODO: add a similar test that the app does not navigate
-});
-```
-
-#### Add a Toast Message
+The user can enter the wrong email or password. If they do so, we will not store a session and we will not navigate. Try that out from the login page just to be sure. The fact that we stay on the login page is good, but there is no indication provided to the user.
 
 We will use <a href="https://ionicframework.com/docs/api/toast" target="_blank">toast</a> to inform the user when they enter invalid credentials. First add the following markup somewhere within the page. It does not really matter where. I placed it after the footer.
 
