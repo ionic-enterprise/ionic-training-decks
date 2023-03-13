@@ -342,7 +342,7 @@ Our component is now ready for use.
 
 We need to modify the `TeaService` to both save and retrieve the rating for each tea. Our backend API does not currently support the rating on a tea, so we will store this data locally using the Capacitor Preferences API. Our tasks for this will include:
 
-- Add an optional `rating` property to the `Tea` model
+- Add `rating` property to the `Tea` model
 - Modify the tea service
   - get the rating in the `getAll()`
   - add a `save()` routine to save the rating
@@ -357,9 +357,21 @@ Update `src/app/models/tea.ts` and add the following property:
 rating: number;
 ```
 
+Adding this requires us to also update a couple of derived types that we have in our `TeaService` (and its test). The derived types look like this:
+
+```typescript
+type TeaResponse = Omit<Tea, 'image'>;
+```
+
+They need to be changed to include the `rating` as well
+
+```typescript
+type TeaResponse = Omit<Tea, 'image' | 'rating'>;
+```
+
 ### Update the Service
 
-We need to do two things in the service:
+We need to do a few things in the service (and test):
 
 - update the `getAll()` to include the rating
 - add a `save()` routine
@@ -397,7 +409,7 @@ We should have a failing test at this point.
 
 We will use the Capacitor Preferences plugin, so we will mock that. There are multiple ways that we could store the ratings. We will just go with the very simple strategy of using a key of `ratingX` where `X` is the `ID` of the tea.
 
-In the main `beforeEach()`, spy on `Preferences.get()` returning a default of `{ value: '0' }` and add non-zero values for various ratings depending on the changes you made to the test data above.
+In the main `beforeEach()`, spy on `Preferences.get()` returning a default of `{ value: null }` and add non-zero values for various ratings depending on the changes you made to the test data above.
 
 ```typescript
 ...
@@ -450,11 +462,11 @@ At this point, you should still have a failing test. Update the code in `src/app
 The first step is to make our private `convert()` method async and then grab the rating from preferences:
 
 ```typescript
-  private async convert(res: any): Promise<Tea> {
-    const { value } = await Preferences.get({ key: `rating${res.id}` });
+  private async convert(tea: TeaResponse): Promise<Tea> {
+    const { value } = await Preferences.get({ key: `rating${tea.id}` });
     return {
-      ...res,
-      image: `assets/img/${this.images[res.id - 1]}.jpg`,
+      ...tea,
+      image: `assets/img/${this.images[tea.id - 1]}.jpg`,
       rating: parseInt(value || '0', 10),
     };
   }
@@ -471,7 +483,7 @@ For `getAll()` we are now returning an Observable of an array of promises of tea
     return this.http
       .get(`${environment.dataService}/tea-categories`)
       .pipe(
-        mergeMap((teas: Array<any>) =>
+        mergeMap((teas: Array<TeaResponse>) =>
           Promise.all(teas.map(t => this.convert(t))),
         ),
       );
@@ -558,7 +570,7 @@ In the code we can tap into the Observable pipeline and grab the rating:
 ...
   rating: number;
 ...
-    this.tea$ = this.store.select(selectTea(id)).pipe(tap((tea) => (this.rating = tea.rating)));
+    this.tea$ = this.tea.get(id).pipe(tap((t: Tea) => (this.rating = t.rating)));
 ```
 
 We can then bind the rating in the template:
