@@ -298,7 +298,7 @@ There are two ways that we could go with the test for this:
 1. Figure out what the class needs to do to the data to produce a matrix of teas for the grid and test that.
 1. Test that the component renders the grid properly.
 
-The first set of tests would be testing an implementation detail, and therefor is not ideal. The second test more accurately reflects the requirement for the page from the user's perspective, and that is what is important. As such, we will write the test from that perspective. This also has the advantage of being a more robust test since the implementation details may change but the requirements for what we display to the user will likely stay the same.
+The first set of tests would be testing an implementation detail, and therefore is not ideal. The second test more accurately reflects the requirement for the page from the user's perspective, and that is what is important. As such, we will write the test from that perspective. This also has the advantage of being a more robust test since the implementation details may change but the requirements for what we display to the user will likely stay the same.
 
 ```TypeScript
 ...

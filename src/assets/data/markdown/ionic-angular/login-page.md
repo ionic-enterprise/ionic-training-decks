@@ -195,6 +195,8 @@ export class LoginPage {
     password: [''],
   });
 
+  ...
+
   constructor(private fb: FormBuilder) {}
 
   signIn() {

@@ -19,7 +19,7 @@ The first thing we will use the Ionic CLI for is to start a new application. Typ
 Lets start our application via whichever technique you want.
 
 1. At the command line, change directories in to a starting directory. I use `~/Projects/Training`
-1. Enter the following command: `ionic start tea-taster blank --type=angular`
+1. Enter the following command: `ionic start tea-taster blank --type=angular --no-git`
 1. Alternatively, you could just enter `ionic start` and let the command line ask you for what it needs
 
 **Example:**
@@ -33,7 +33,7 @@ Let's look at some of those options more closely.
 
 - The third option is the name of the application.
 - The forth option, `blank` tells Ionic to use the `blank` starter. We have three basic starters: `blank`, `tabs`, and `sidemenu`. The main difference is the style of navigation.
-- The `--type` option specifies the type of application to create. Options include `angular`, `react`, `ionic-angular`, and `ionic1`. The `ionic-angular` type is an Ionic v3 application.
+- The `--type` option specifies the type of application to create. Options include `angular`, `react`, `vue`, `ionic-angular`, and `ionic1`. The `ionic-angular` type is an Ionic v3 application.
 - The `--no-git` option tells the CLI not to create a git repo. We will create that ourselves.
 - The application will use Capacitor for the native layer by default.
 
@@ -46,7 +46,7 @@ ionic serve
 
 ## Enforce Consistent Styling
 
-<a href="https://prettier.io/" target="_blank">Prettier</a> is an excellent tool that you can use to keep the formatting of your code consistent and clean. We highly suggest you use a tool such as this. Whether your are a lone developer or part of a team, using a tool such as Prettier means that you do not have to think about the formatting of your code. Better yet, you do not run into "formatting wars" between developers.
+<a href="https://prettier.io/" target="_blank">Prettier</a> is an excellent tool that you can use to keep the formatting of your code consistent and clean. We highly suggest you use a tool such as this. Whether you are a lone developer or part of a team, using a tool such as Prettier means that you do not have to think about the formatting of your code. Better yet, you do not run into "formatting wars" between developers.
 
 Prettier itself is an opinionated code formatter, and Ionic has its own opinions on how it is best configured, so let's install both Prettier and Ionic's Prettier configuration. We will also install <a href="https://www.npmjs.com/package/husky" target="_blank">husky</a> and <a href="https://www.npmjs.com/package/pretty-quick" target="_blank">pretty-quick</a>. This will allow us to set up a commit hook to make sure Prettier is run with each commit. After that we don't have to waste brain cycles thinking about code formatting ever again.
 
@@ -187,11 +187,11 @@ Updating dependencies to the `@latest` version should generally be done with mor
 
 Perform a build and run all automated tests between individual updates.
 
-Commit each individual update (you can always squash the commits before merging into `main`). This will allow you to fall back to a working state if any individual update causes problem.
+Commit each individual update (you can always squash the commits before merging into `main`). This will allow you to fall back to a working state if any individual update causes problems.
 
 Let's practice by updating our project now (**note**: you do not need to do all of the `git` related parts for the training, but you definitely should if you are working with a production project).
 
-**Note**: Ionic Framework version 7 is currently in pre-release. Let's do the training using that version since it will be released soon. Follow the <a href="https://ionicframework.com/docs/v7/updating/7-0">upgrade instruction</a>. For our project, we just need to deal with `npm install @ionic/angular@next` and the `.browserslistrc` updates. We are not far enough along to have to worry about any of the other migration steps.
+**Note**: Ionic Framework version 7 is currently in pre-release. Let's do the training using that version since it will be released soon. Follow the <a href="https://ionicframework.com/docs/v7/updating/7-0" target="_blank">upgrade instructions</a>. For our project, we just need to deal with `npm install @ionic/angular@next` and the `.browserslistrc` updates. We are not far enough along to have to worry about any of the other migration steps.
 
 ## Side Note: `ionic serve` vs. `npm start`
 

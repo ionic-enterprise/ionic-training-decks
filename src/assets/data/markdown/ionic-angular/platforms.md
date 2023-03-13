@@ -120,7 +120,6 @@ I like to have my build do a copy for me. For this reason, I do a `cap sync` wit
   "scripts": {
     "assets": "capacitor-assets generate --iconBackgroundColor '#f1ebe1' --splashBackgroundColor '#f1ebe1' --iconBackgroundColorDark '#110b00' --splashBackgroundColorDark '#110b00'",
     "build": "ng build --configuration production && cap sync",
-    "e2e": "ng e2e",
     "lint": "ng lint",
     "ng": "ng",
     "prepare": "husky install",
@@ -130,7 +129,7 @@ I like to have my build do a copy for me. For this reason, I do a `cap sync` wit
   },
 ```
 
-At this point, perform an `npm run build` and then open either the Android or iOS native project and run the application on a device or emulator. The app should have the updated icon as well as the new splash screen, and it should run normally. Let's stage all of our files and commit them to the git repo at this point (I suggest doing that at the end of every lab).
+At this point, perform an `npm run build` and then open either the Android or iOS native project and run the application on a device or emulator. The app should have the updated icon, and it should run normally. Let's stage all of our files and commit them to the git repo at this point (I suggest doing that at the end of every lab).
 
 ## Live Reload (Optional)
 

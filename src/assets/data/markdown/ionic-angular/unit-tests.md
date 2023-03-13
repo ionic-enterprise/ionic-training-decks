@@ -91,4 +91,4 @@ describe('SomeComponent', () => {
 
 ## Conclusion
 
-In this lab we configured our basic testing infrastructure and added a simple test. We will expand on our testing as we develop our application. As such, we will learn more unit testing techniques hand as we develop the code.
+In this lab we configured our basic testing infrastructure and added a simple test. We will expand on our testing as we develop our application. As such, we will learn more unit testing techniques as we develop the code.
