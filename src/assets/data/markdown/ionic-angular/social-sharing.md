@@ -1,4 +1,4 @@
-# Lab: Add SocSave Sharing
+# Lab: Add Social Sharing
 
 In this lab you will use Capacitor to access a native API. Specifically, the social sharing APIs on iOS and Android devices.
 
@@ -179,8 +179,8 @@ import { Share } from '@capacitor/share';
         const button = fixture.debugElement.query(By.css('[data-testid="share-button"]'));
 
         component.editorForm.controls.brand.setValue('Lipton');
-▎       component.editorForm.controls.name.setValue('Yellow Label');
-▎       component.editorForm.controls.rating.setValue(2);
+        component.editorForm.controls.name.setValue('Yellow Label');
+        component.editorForm.controls.rating.setValue(2);
 
         const event = new Event('click');
         button.nativeElement.dispatchEvent(event);
