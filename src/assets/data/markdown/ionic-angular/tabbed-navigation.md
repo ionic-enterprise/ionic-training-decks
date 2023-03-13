@@ -21,7 +21,7 @@ Once those pages have been generated, be sure to open each of their routing modu
   {
     path: '',
     component: AboutPage,
-    canActivate: [AuthGuardService],
+    canActivate: [authGuard],
   },
 ```
 
