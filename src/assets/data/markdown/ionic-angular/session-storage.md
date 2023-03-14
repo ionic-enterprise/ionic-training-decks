@@ -8,7 +8,7 @@ In this lab you will learn how to:
 
 ## The User and Session Models
 
-The first thing we will need to do is model the Session data for our system. The session will consist of some user data along with the authentication token for that user's session.
+The first thing we will need to do is model the session data for our system. The session will consist of some user data along with the authentication token for that user's session.
 
 First let's define the user data. Create a `src/app/models/user.ts` file with the following contents:
 
@@ -32,7 +32,7 @@ export interface Session {
 }
 ```
 
-Be sure to update `src/app/models/index.ts`
+Be sure to update `src/app/models/index.ts`.
 
 ## Create the Session Vault Service
 
@@ -180,9 +180,9 @@ describe('set', () => {
 The code for this in the service class then looks like the following:
 
 ```TypeScript
-  async set(session: Session): Promise<void> {
-    await Preferences.set({ key: this.key, value: JSON.stringify(session) });
-  }
+async set(session: Session): Promise<void> {
+  await Preferences.set({ key: this.key, value: JSON.stringify(session) });
+}
 ```
 
 Be sure to import `Preferences` from `@capacitor/preferences` at the top of your file.

@@ -7,13 +7,13 @@ In this lab you will add learn how to:
 
 ## Set up the Environment
 
-Update both of the files under `src/environments` to include the following property in the JSON:
+Update both of the files under `src/environments` to include the following property:
 
 ```TypeScript
 dataService: 'https://cs-demo-api.herokuapp.com'
 ```
 
-These files define the `dev` and `prod` environments. Typically they would have different values for something like the data service, but for our app we only have a single API server. Also, you can create more environments (QA, Testing, etc), but doing so is beyond the scope of this class.
+These files define the `dev` and `prod` environments. Typically they would have different values for something like the data service, but for our app we only have a single API server. Also, you can create more environments (QA, Testing, etc), but doing so is beyond the scope of this training.
 
 ## Authentication Service
 
@@ -176,7 +176,7 @@ The following `3.1` step should then be nested within the `describe()` that was 
 
 ```typescript
 it('emits the session', fakeAsync(() => {
-  let session: Session;
+  let session: Session | undefined;
   service.login('thank.you@forthefish.com', 'solongDude').subscribe((r) => (session = r));
   const req = httpTestingController.expectOne(`${environment.dataService}/login`);
   req.flush(response);

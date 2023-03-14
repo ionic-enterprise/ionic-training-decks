@@ -238,7 +238,7 @@ Hook up the inputs in the templates. First, the form needs to be associated with
 <form [formGroup]="loginForm"></form>
 ```
 
-Next the `formControlName` needs to be set for each of the inputs
+Next the `formControlName` needs to be set for each of the inputs.
 
 Here is the E-Mail Address input:
 
@@ -300,7 +300,7 @@ With that in place, clean up the tests. Your tests should now look more like thi
 it('updates the component model when the input changes', () => {
   const input = fixture.nativeElement.querySelector('#password-input');
   setInputValue(input, 'MyPas$Word');
-  expect(component.password).toEqual('MyPas$Word');
+  expect(component.loginForm.password.value).toEqual('MyPas$Word');
 });
 ```
 
@@ -356,7 +356,7 @@ loginForm = this.fb.group({
 With the validations hooked up, we need to make sure we output the proper error. Here is the code for `emailError`:
 
 ```typescript
-get emailError(): string | undefined {
+get emailError(): string {
   const email = this.loginForm.controls.email;
   return email.errors?.['required'] ? 'Required' : email.errors?.['email'] ? 'Invalid format' : 'Unknown error';
 }

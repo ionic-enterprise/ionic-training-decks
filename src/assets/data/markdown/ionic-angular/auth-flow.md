@@ -3,7 +3,7 @@
 In this lab you will learn how to:
 
 - Setup a pipeline on an observable.
-- Setup the authentication flow
+- Setup the authentication flow.
 
 ## Hook up the Login
 
@@ -24,7 +24,7 @@ Three services are required in order to complete our login workflow:
 
 - `AuthenticationService`
 - `SessionVaultService`
-- `NavControler` (from `@ionic/angular`)
+- `NavController` (from `@ionic/angular`)
 
 #### Test
 
@@ -78,6 +78,8 @@ We have a function that performs input operations. We need a similar one that cl
     fixture.detectChanges();
   };
 ...
+  describe('signin button', () => {
+    ...
     describe('on click', () => {
       let auth: AuthenticationService;
 
@@ -93,6 +95,7 @@ We have a function that performs input operations. We need a similar one that cl
         expect(auth.login).toHaveBeenCalledWith('test@test.com', 'ThisIsMyPa$$W0rd');
       });
     });
+  });
 ```
 
 #### Code
@@ -100,11 +103,11 @@ We have a function that performs input operations. We need a similar one that cl
 For now, we can just call the method passing in the entered values.
 
 ```typescript
-  signIn() {
-    const controls = this.loginForm.controls;
-    this.auth
-      .login(controls.email.value as string, controls.password.value as string);
-  }
+signIn() {
+  const controls = this.loginForm.controls;
+  this.auth
+    .login(controls.email.value as string, controls.password.value as string);
+}
 ```
 
 ### Save the Session
@@ -212,7 +215,9 @@ Test this out in the application by manually loading `http://localhost:8100/logi
 Open the devtools and have a look at the console. You should see an error something like this:
 
 ```
-NullInjectorError: R3InjectorError(AppModule)[EffectsRootModule -> InjectionToken @ngrx/effects Root Effects -> AuthEffects -> AuthenticationService -> HttpClient -> HttpClient -> HttpClient]:
+Uncaught (in promise): NullInjectorError: R3InjectorError(LoginPageModule)[AuthenticationService -> AuthenticationService -> HttpClient -> HttpClient -> HttpClient]:
+  NullInjectorError: No provider for HttpClient!
+NullInjectorError: R3InjectorError(LoginPageModule)[AuthenticationService -> AuthenticationService -> HttpClient -> HttpClient -> HttpClient]:
   NullInjectorError: No provider for HttpClient!
     at NullInjector.get (:8100/vendor.js:76705:27)
     at R3Injector.get (:8100/vendor.js:76872:33)
@@ -257,7 +262,7 @@ To successfully log in, use the following credentials:
 
 The user can enter the wrong email or password. If they do so, we will not store a session and we will not navigate. Try that out from the login page just to be sure. The fact that we stay on the login page is good, but there is no indication provided to the user.
 
-We will use <a href="https://ionicframework.com/docs/api/toast" target="_blank">toast</a> to inform the user when they enter invalid credentials. First add the following markup somewhere within the page. It does not really matter where. I placed it after the footer.
+We will use a <a href="https://ionicframework.com/docs/api/toast" target="_blank">toast</a> to inform the user when they enter invalid credentials. First add the following markup somewhere within the page. It does not really matter where. I placed it after the footer.
 
 ```html
 <ion-toast
@@ -432,18 +437,18 @@ it('navigates to the login page', fakeAsync(() => {
 Your final code should look something like this:
 
 ```typescript
-  logout() {
-    return this.auth
-      .logout()
-      .pipe(
-        take(1),
-        tap(async () => {
-          await this.sessionVault.clear();
-          this.nav.navigateRoot(['/', 'login']);
-        })
-      )
-      .subscribe();
-  }
+logout() {
+  return this.auth
+    .logout()
+    .pipe(
+      take(1),
+      tap(async () => {
+        await this.sessionVault.clear();
+        this.nav.navigateRoot(['/', 'login']);
+      })
+    )
+    .subscribe();
+}
 ```
 
 ## Conclusion
