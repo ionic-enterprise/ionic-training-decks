@@ -104,6 +104,8 @@ The Ionic CLI can be used to generate the new page for us. It will create all of
 ionic generate page tea
 ```
 
+**Note:** Angular's test server often does not pick up new `*.spec.ts` files so you likely need to kill the existing `npm test` and restart it to pick up the newly generated test.
+
 ##### Fix the Routing
 
 Open the `src/app/app-routing.module.ts` file and perform the following tasks:

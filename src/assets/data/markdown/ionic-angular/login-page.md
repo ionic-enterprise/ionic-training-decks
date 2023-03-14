@@ -95,7 +95,7 @@ import { By } from '@angular/platform-browser';
 
 Notice that the test fails, but we are about to fix that.
 
-**Note:** Angular's test server often does not pick up new `*.spec.ts` files so you may need to kill the existing `npm test` run and restart it to see the failed test.
+**Reminder:** Angular's test server often does not pick up new `*.spec.ts` files so you may need to kill the existing `npm test` run and restart it to see the failed test.
 
 For this page, we will follow the very common <a ref="https://ionicframework.com/docs/layout/structure#header-and-footer" target="_blank">Header and Footer</a> UI pattern. This pattern contains a header with the page title and perhaps some controls (sch as a back button) as applicable, a content section with the main content, and a footer section that typically contains action buttons. Let's mock up the UI for that now.
 
