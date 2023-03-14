@@ -153,7 +153,7 @@ The `emailError` and `passwordError` will need to be defined in the page's class
 
 Now the password shows us markers instead of the text we are typing.
 
-Notice that the getters for the error text bindings return 'Valid' but no error text is shown. The in order to have a consistent UI experience `errorText` must have a value. However, the displayed value will only be shown when the control is in an invalid state. We will see later how to better tailor our messages for when the control is in such a state.
+Notice that the getters for the error text bindings return 'Valid' but no error text is shown. In order to have a consistent UI experience `errorText` must have a value. However, the displayed value will only be shown when the control is in an invalid state. We will see later how to tailor our messages for when the control is in an invalid state.
 
 The form itself looks a little crowded. You can try adding the `ion-padding` class to the `ion-content` to see what that does.
 
