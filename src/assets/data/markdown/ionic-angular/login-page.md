@@ -143,15 +143,17 @@ The `emailError` and `passwordError` will need to be defined in the page's class
 
 ```typescript
   get emailError(): string {
-    return 'Unknown error';
+    return 'Valid';
   }
 
   get passwordError(): string {
-    return 'Unknown error';
+    return 'Valid';
   }
 ```
 
-Now the password shows us markers instead of the text we are typing. This also gets us ready for work we will need to do later.
+Now the password shows us markers instead of the text we are typing.
+
+Notice that the getters for the error text bindings return 'Valid' but no error text is shown. The in order to have a consistent UI experience `errorText` must have a value. However, the displayed value will only be shown when the control is in an invalid state. We will see later how to better tailor our messages for when the control is in such a state.
 
 The form itself looks a little crowded. You can try adding the `ion-padding` class to the `ion-content` to see what that does.
 
@@ -310,11 +312,11 @@ The `errorText` property of `ion-input` will show error messages when the input 
 
 ```typescript
 get emailError(): string {
-  return 'Unknown error';
+  return 'Valid';
 }
 
 get passwordError(): string {
-  return 'Unknown error';
+  return 'Valid';
 }
 ```
 
@@ -327,17 +329,17 @@ it('generates appropriate error messages', () => {
   setInputValue(input, 'test');
   expect(component.emailError).toBe('Invalid format');
   setInputValue(input, 'test@test.com');
-  expect(component.emailError).toBe('Unknown error');
+  expect(component.emailError).toBe('Valid');
   setInputValue(input, '');
   expect(component.emailError).toBe('Required');
   setInputValue(input, 'test@test.com');
-  expect(component.emailError).toBe('Unknown error');
+  expect(component.emailError).toBe('Valid');
 });
 ```
 
 Place that inside the appropriate `describe` block and then add a similar test for the password input (it will not have the "Invalid format" message).
 
-The form system will determine whether or not the error message should be displayed, we just need to make sure we have one. The "Unknown error" means we either don't have an error (in which case the form will not show the message) or we do not know exactly what the error is.
+The form system will determine whether or not the error message should be displayed, we just need to make sure we have one. The "Valid" means we don't have an error, in which case the form will not show the message.
 
 Turning our attention to the code, we need to do two things:
 
@@ -358,7 +360,7 @@ With the validations hooked up, we need to make sure we output the proper error.
 ```typescript
 get emailError(): string {
   const email = this.loginForm.controls.email;
-  return email.errors?.['required'] ? 'Required' : email.errors?.['email'] ? 'Invalid format' : 'Unknown error';
+  return email.errors?.['required'] ? 'Required' : email.errors?.['email'] ? 'Invalid format' : 'Valid';
 }
 ```
 
