@@ -114,7 +114,7 @@ When you want to regenerate the assets, you just need to remember `npm run asset
 
 ## Update NPM Scripts
 
-I like to have my build do a copy for me. For this reason, I do a `cap sync` with every build. This ensures my native projects are always up to date. I have also added the `--configuration production` flag so that I always get a production build.
+I like to have my build ensure that that web-app and plugins are up to date in my native applications. For this reason, I do a `cap sync` with every build. This ensures my native projects are always up to date. I have also added the `--configuration production` flag so that I always get a production build.
 
 ```JSON
   "scripts": {
