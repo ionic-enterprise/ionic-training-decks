@@ -185,7 +185,7 @@ import { IonicModule } from '@ionic/angular';
 import { RatingComponent } from './rating.component';
 
 @Component({
-  template: ` <app-rating [(ngModel)]="rating" [disabled]="disabled" (ngModelChange)="onChange()"> </app-rating>`,
+  template: `<app-rating [(ngModel)]="rating" [disabled]="disabled" (ngModelChange)="onChange()"> </app-rating>`,
 })
 class TestHostComponent {
   disabled = false;
@@ -265,7 +265,7 @@ Then let's create the code. For now, `ratingClicked()` just needs to call throug
 
 #### Allow the Component to be Disabled
 
-It would be good if we could allow this component to be disabled. When we do this, we should reduce the opacity to make it look "grayed out", and we should disabled clicks. Add a test to the "when enabled" section of the test.
+It would be good if we could allow this component to be disabled. When we do this, we should reduce the opacity to make it look "grayed out", and we should disable clicks. Add a test to the "when enabled" section of the test.
 
 ```typescript
 it('sets the opacity to 1', () => {
@@ -306,14 +306,14 @@ In order to get these tests to pass, add the following code to the `rating.compo
 First add this:
 
 ```typescript
-  @Input() disabled = false;
+@Input() disabled = false;
 
-  constructor() {}
+constructor() {}
 
-  @HostBinding('style.opacity')
-  get opacity(): number {
-    return this.disabled ? 0.25 : 1;
-  }
+@HostBinding('style.opacity')
+get opacity(): number {
+  return this.disabled ? 0.25 : 1;
+}
 ```
 
 **Note:** In order to keep lint happy, the `opacity()` getter needs to be after the constructor. Your class already has a constructor, so make sure you don't have two constructors after this.
@@ -331,9 +331,9 @@ Next, modify `ratingClicked()` to only do anything if the component is not disab
 The tests should now be passing, but we will add one more little piece of boiler-plate code that will make the component behave properly when Angular needs to set the component disabled via functional means:
 
 ```typescript
-  setDisabledState(isDisabled: boolean): void {
-    this.disabled = isDisabled;
-  }
+setDisabledState(isDisabled: boolean): void {
+  this.disabled = isDisabled;
+}
 ```
 
 Our component is now ready for use.
@@ -342,12 +342,10 @@ Our component is now ready for use.
 
 We need to modify the `TeaService` to both save and retrieve the rating for each tea. Our backend API does not currently support the rating on a tea, so we will store this data locally using the Capacitor Preferences API. Our tasks for this will include:
 
-- Add `rating` property to the `Tea` model
+- Add a `rating` property to the `Tea` model
 - Modify the tea service
-  - get the rating in the `getAll()`
+  - get the rating in the `getAll()` method
   - add a `save()` routine to save the rating
-- Update the store to handle the data flow
-- Modify the tea details page to dispatch an action to the store when the rating is changed
 
 ### Update the Model
 
@@ -383,13 +381,13 @@ We need to do a few things in the service (and test):
 In the `expectedTeas` array that is part of the `TeaService` test, add a rating to each tea as shown. For some of them, use zero. This will be the default value for teas that do not yet have a rating.
 
 ```typescript
-      {
-        id: 1,
-        name: 'Green',
-        image: 'assets/img/green.jpg',
-        description: 'Green tea description.',
-        rating: 4
-      },
+{
+  id: 1,
+  name: 'Green',
+  image: 'assets/img/green.jpg',
+  description: 'Green tea description.',
+  rating: 4
+},
 ```
 
 **Note:** there should be other tests failing to compile at this point, like the `TeaPage` test. Update those to include ratings where needed as well.
@@ -462,14 +460,14 @@ At this point, you should still have a failing test. Update the code in `src/app
 The first step is to make our private `convert()` method async and then grab the rating from preferences:
 
 ```typescript
-  private async convert(tea: TeaResponse): Promise<Tea> {
-    const { value } = await Preferences.get({ key: `rating${tea.id}` });
-    return {
-      ...tea,
-      image: `assets/img/${this.images[tea.id - 1]}.jpg`,
-      rating: parseInt(value || '0', 10),
-    };
-  }
+private async convert(tea: TeaResponse): Promise<Tea> {
+  const { value } = await Preferences.get({ key: `rating${tea.id}` });
+  return {
+    ...tea,
+    image: `assets/img/${this.images[tea.id - 1]}.jpg`,
+    rating: parseInt(value || '0', 10),
+  };
+}
 ```
 
 Make sure you `import { Preferences } from '@capacitor/preferences';`.
@@ -479,15 +477,15 @@ But this makes our `getAll()` and `get()` methods unhappy.
 For `getAll()` we are now returning an Observable of an array of promises of tea, but we want an array of teas, not just the promise of eventually getting tea. We can use a `mergeMap()` in conjunction with a `Promise.all()` to fix this:
 
 ```typescript
-  getAll(): Observable<Array<Tea>> {
-    return this.http
-      .get(`${environment.dataService}/tea-categories`)
-      .pipe(
-        mergeMap((teas: Array<TeaResponse>) =>
-          Promise.all(teas.map(t => this.convert(t))),
-        ),
-      );
-  }
+getAll(): Observable<Array<Tea>> {
+  return this.http
+    .get(`${environment.dataService}/tea-categories`)
+    .pipe(
+      mergeMap((teas: Array<TeaResponse>) =>
+        Promise.all(teas.map(t => this.convert(t))),
+      ),
+    );
+}
 ```
 
 Reading that code from the inside out:
@@ -523,12 +521,12 @@ describe('save', () => {
 The code to add to the `TeaService` in order to accomplish this is straight forward:
 
 ```typescript
-  save(tea: Tea): Promise<void> {
-    return Preferences.set({
-      key: `rating${tea.id}`,
-      value: tea.rating.toString(),
-    });
-  }
+save(tea: Tea): Promise<void> {
+  return Preferences.set({
+    key: `rating${tea.id}`,
+    value: tea.rating.toString(),
+  });
+}
 ```
 
 **Important:** Be sure to update the mock factory for this service to reflect the new method.
@@ -544,31 +542,31 @@ The first thing we will need to do is get the current rating when we select the 
 Add a rating to our test tea.
 
 ```TypeScript
-      (tea.get as jasmine.Spy).withArgs(7).and.returnValue(
-        of({
-          id: 7,
-          name: 'White',
-          description: 'Often looks like frosty silver pine needles',
-          image: 'imgs/white.png',
-          rating: 4,
-        })
-      );
+(tea.get as jasmine.Spy).withArgs(7).and.returnValue(
+  of({
+    id: 7,
+    name: 'White',
+    description: 'Often looks like frosty silver pine needles',
+    image: 'imgs/white.png',
+    rating: 4,
+  })
+);
 ```
 
 Then add a test to verify the initialization of the rating value. This is in the "initialization" describe block.
 
 ```TypeScript
-    it('initializes the rating', () => {
-      fixture.detectChanges();
-      expect(component.rating).toBe(4);
-    });
+  it('initializes the rating', () => {
+    fixture.detectChanges();
+    expect(component.rating).toBe(4);
+  });
 ```
 
 In the code we can tap into the Observable pipeline and grab the rating:
 
 ```TypeScript
 ...
-  rating: number;
+  rating: number = 0;
 ...
     this.tea$ = this.tea.get(id).pipe(tap((t: Tea) => (this.rating = t.rating)));
 ```
@@ -583,29 +581,29 @@ We can then bind the rating in the template:
 
 ### Save the New Rating
 
-When the user clicks on the rating component, we need to dispatch the change to the store. Here is the test, code, and template markup change.
+When the user clicks on the rating component, we need to save the rating to storage. Here is the test, code, and template markup change.
 
 ```TypeScript
-  describe('rating click', () => {
-    const tea: Tea = {
-      id: 7,
-      name: 'White',
-      description: 'Often looks like frosty silver pine needles',
-      image: 'imgs/white.png',
-      rating: 4,
-    };
-    beforeEach(() => {
-      fixture.detectChanges();
-    });
-
-    it('saves a rating change', () => {
-      const teaService = TestBed.inject(TeaService);
-      component.rating = 3;
-      component.changeRating(tea);
-      expect(teaService.save).toHaveBeenCalledTimes(1);
-      expect(teaService.save).toHaveBeenCalledWith({ ...tea, rating: 3 });
-    });
+describe('rating click', () => {
+  const tea: Tea = {
+    id: 7,
+    name: 'White',
+    description: 'Often looks like frosty silver pine needles',
+    image: 'imgs/white.png',
+    rating: 4,
+  };
+  beforeEach(() => {
+    fixture.detectChanges();
   });
+
+  it('saves a rating change', () => {
+    const teaService = TestBed.inject(TeaService);
+    component.rating = 3;
+    component.changeRating(tea);
+    expect(teaService.save).toHaveBeenCalledTimes(1);
+    expect(teaService.save).toHaveBeenCalledWith({ ...tea, rating: 3 });
+  });
+});
 ```
 
 ```TypeScript

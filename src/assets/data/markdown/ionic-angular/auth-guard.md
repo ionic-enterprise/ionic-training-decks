@@ -2,7 +2,7 @@
 
 In this lab you will learn how to:
 
-- protect your routes with an Authentication Guard
+- Protect your routes with an Authentication Guard
 - Use HTTP Interceptors to modify requests
 - Use HTTP Interceptors to handle errors with responses
 - Perform up-front application initialization
@@ -27,11 +27,13 @@ An authentication guard is just a service that matches a <a href="https://angula
 $ npx ng g guard core/guards/auth --skip-tests
 ```
 
+Select `CanActivate` as the type of guard to create when prompted.
+
 Remember to update the `src/app/core/index.ts` file to export the guard.
 
 ## Switch to a Functional Guard
 
-The Angular CLI (which the Ionic CLI is wrapping) currently generates a class-based guard, but these are deprecated. Let's quick change that to a functional guard.
+The Angular CLI (which the Ionic CLI is wrapping) currently generates a class-based guard, but these are deprecated. Let's quickly change that to a functional guard.
 
 **Note:** skip this step if the CLI starts to generate a `CanActivateFn` rather than a class-based guard.
 
@@ -69,6 +71,8 @@ export const authGuard: CanActivateFn = async (
 
 Be sure to replace the comments with the actual logic. I had to leave _something_ as an exercise for you... 🤓
 
+**Note:** `route` and `state` are part of the `CanActivateFn` signature, but you will not need to use them.
+
 ## Hookup the Guard
 
 Any route that requires the user to be logged in should have the guard. At this time, that is only the `tea` page, so let's hook up the guard in that page's routing module (`src/app/tea/tea-routing.module.ts`).
@@ -99,7 +103,7 @@ export class TeaPageRoutingModule {}
 
 ## HTTP Interceptors
 
-Outgoing requests needs to have the token added to the headers, and incoming responses needed to be checked for 401 errors. It is best to handle these sorts of things in a centralized location. This is a perfect job for HTTP Interceptors.
+Outgoing requests need to have the token added to the headers, and incoming responses need to be checked for 401 errors. It is best to handle these sorts of things in a centralized location. This is a perfect job for HTTP Interceptors.
 
 ```bash
 npx ng g interceptor core/interceptors/auth --skip-tests
@@ -116,9 +120,7 @@ import { Injectable } from '@angular/core';
 import { from, mergeMap, Observable, tap } from 'rxjs';
 import { SessionVaultService } from '../session-vault/session-vault.service';
 
-@Injectable({
-  providedIn: 'root',
-})
+@Injectable()
 export class AuthInterceptor implements HttpInterceptor {
   constructor(private sessionVault: SessionVaultService) {}
 
@@ -164,7 +166,7 @@ export class UnauthInterceptor implements HttpInterceptor {
     return next.handle(req).pipe(
       tap(
         (event: HttpEvent<any>) => {},
-        (err: any) => {
+        async (err: any) => {
           if (err instanceof HttpErrorResponse && err.status === 401) {
             // What should we do here?
           }
@@ -187,8 +189,8 @@ Doing this has been left as an exercise for the reader.
 Now that we have the interceptors, we need to hook them up. We will do this in the `AppModule` (`src/app/app.module.ts`). To do this, add the interceptors to the `providers` array of the `AppModule`. This ensures that they are used by the whole application. The `HTTP_INTERCEPTORS` array needs to be imported from `@angluar/common/http`.
 
 ```typescript
-    { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
-    { provide: HTTP_INTERCEPTORS, useClass: UnauthInterceptor, multi: true },
+{ provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
+{ provide: HTTP_INTERCEPTORS, useClass: UnauthInterceptor, multi: true },
 ```
 
 ## Conclusion

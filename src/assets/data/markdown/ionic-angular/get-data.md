@@ -17,7 +17,7 @@ In this lab, you will learn how to:
 
 The generated service is just a shell for an injectable class. We need to provide the details. The primary purpose of this service will be to get JSON data from the API via HTTP, so we will need to inject Angular's HTTP client service. Dependency injection in Angular is handled via the constructor. Inject the HTTP client, creating a `private` reference to it.
 
-While we are in there, let's also create a stub for the method we are going to need.
+While we are in there, let's also create stub for the method we are going to need.
 
 **A note on method naming:** I generally use the same method names across all of my data services as such:
 
@@ -225,16 +225,16 @@ The test currently fails because we are not converting the data. Let's work on t
 In our service code, we can define an array of images.
 
 ```typescript
-  private images: Array<string> = [
-    'green',
-    'black',
-    'herbal',
-    'oolong',
-    'dark',
-    'puer',
-    'white',
-    'yellow',
-  ];
+private images: Array<string> = [
+  'green',
+  'black',
+  'herbal',
+  'oolong',
+  'dark',
+  'puer',
+  'white',
+  'yellow',
+];
 ```
 
 We can then use the Array `map` operator to convert the individual teas, and the RxJS `map` operator to convert the output of the Observable.
@@ -257,16 +257,16 @@ We can then use the Array `map` operator to convert the individual teas, and the
 The code that you have for this method looks like this:
 
 ```typescript
-  getAll(): Observable<Array<Tea>> {
-    return this.http.get<Array<Omit<Tea, 'image'>>>(`${environment.dataService}/tea-categories`).pipe(
-      map((teas) =>
-        teas.map(t => ({
-          ...t,
-          image: `assets/img/${this.images[t.id - 1]}.jpg`,
-        })),
-      ),
-    );
-  }
+getAll(): Observable<Array<Tea>> {
+  return this.http.get<Array<Omit<Tea, 'image'>>>(`${environment.dataService}/tea-categories`).pipe(
+    map((teas) =>
+      teas.map(t => ({
+        ...t,
+        image: `assets/img/${this.images[t.id - 1]}.jpg`,
+      })),
+    ),
+  );
+}
 ```
 
 The problem here is that there is a lot for future you to parse when you come back to maintain this. The method is responsible for more than one thing: getting the data, and doing the conversion. Let's fix that by abstracting the code that does the conversion on a tea object into a local `convert()` method.
@@ -274,11 +274,11 @@ The problem here is that there is a lot for future you to parse when you come ba
 When you are done, the code should look more like this:
 
 ```typescript
-  getAll(): Observable<Array<Tea>> {
-    return this.http
-      .get<Array<Omit<Tea, 'image'>>>(`${environment.dataService}/tea-categories`)
-      .pipe(map((teas) => teas.map(t => this.convert(t))));
-  }
+getAll(): Observable<Array<Tea>> {
+  return this.http
+    .get<Array<Omit<Tea, 'image'>>>(`${environment.dataService}/tea-categories`)
+    .pipe(map((teas) => teas.map(t => this.convert(t))));
+}
 ```
 
 Make sure your tests are still passing. That makes it clear that we are grabbing the teas from the API and returning them after a mapping process. The details of that conversion then are left to the `convert()` method, and everything is tidy and is only responsible for one thing.

@@ -2,8 +2,8 @@
 
 In this lab, you will:
 
-- add a child page to the application
-- set up the navigation to and from the child page
+- Add a child page to the application
+- Set up the navigation to and from the child page
 
 ## Stacked Navigation
 
@@ -206,7 +206,7 @@ describe('get', () => {
 
 #### Getting the Tea in the Page
 
-Now that we are navigating to the tea-details page with an ID parameter, we need to modify `src/app/tea-details/tea-details.page.ts` to read the parameter and get the tea information for that ID. To accomplish this we will need to use the Angular Components Router's `ActivedRoute` service and the `get()` we just added to our `TeaService`. We will also eventually make use of the `NavController`.
+Now that we are navigating to the `tea-details` page with an ID parameter, we need to modify `src/app/tea-details/tea-details.page.ts` to read the parameter and get the tea information for that ID. To accomplish this we will need to use the Angular Components Router's `ActivedRoute` service and the `get()` method we just added to our `TeaService`.
 
 In the `src/app/tea-details/tea-details.page.spec.ts` file, set up the `TestBed` to inject mocks for these services.
 
@@ -217,7 +217,6 @@ beforeEach(waitForAsync(() => {
     imports: [IonicModule],
     providers: [
       { provide: ActivatedRoute, useFactory: createActivatedRouteMock },
-      { provide: NavController, useFactory: createNavControllerMock },
       { provide: TeaService, useFactory: createTeaServiceMock },
     ],
   }).compileComponents();
@@ -229,8 +228,6 @@ beforeEach(waitForAsync(() => {
 ```
 
 You will need to adjust your import statements accordingly.
-
-**Note:** We are not going to directly use the `NavController` but it will get used indirectly when we add the `ion-back-button` so we need the mock for it.
 
 Create an `initialization` section in the test. Also, since we will need to do some setup within the initialization tests, remove the `fixture.detectChanges();` line from the main `beforeEach()`. That call will run the initialization, and we want to delay its execution until after our test setup code has run.
 
