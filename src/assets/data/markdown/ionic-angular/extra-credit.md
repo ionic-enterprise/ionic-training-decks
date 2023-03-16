@@ -54,7 +54,7 @@ The default behavior for the splash screen is not ideal. On Android, there is a 
 
 ## Tasting Notes Removal Improvements
 
-The Tasting Notes feature that we added was fairly complete, but some shortcuts were made in order to fit in in "on schedule." Let's remove some of that technical debt was accrued.
+The Tasting Notes feature that we added was fairly complete, but some shortcuts were made in order to fit it in "on schedule." Let's remove some of that technical debt was accrued.
 
 ### Unit Testing
 

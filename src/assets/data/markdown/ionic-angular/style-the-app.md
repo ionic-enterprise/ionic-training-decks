@@ -10,7 +10,7 @@ The Ionic Framework automatically adapts between styling that matches the iOS Hu
 
 ## Styling
 
-Our design team has come back to use with some requirements about how the application should look. Luckily these are fairly light weight suggestions for now, but we are going to want to start thinking about how we want to accomplish what the design team requires.
+Our design team has come back to use with some requirements about how the application should look. Luckily these are fairly lightweight suggestions for now, but we are going to want to start thinking about how we want to accomplish what the design team requires.
 
 ### Scoped CSS vs. Global CSS
 
@@ -34,17 +34,17 @@ Since these are defined in an Angular component, and since we are building using
 
 Now have a look in `src/global.scss`. Currently, it contains several imports. _Should_ we actually put our global styling directly here? It is convenient when we just have a few styles. A real-world application, however, is likely to have a fair amount of styling. In such cases, we should create a set of SCSS files and import them here.
 
-For our app, though, we will just put the global styles directly into this file. We will not have enough styling yet to justify separate files.
+For our app though, we will just put the global styles directly into this file. We will not have enough styling yet to justify separate files.
 
 ### Shadow DOM
 
-Most of the components in the Ionic Framework use <a href="https://developer.mozilla.org/en-US/docs/Web/Web_Components/Using_shadow_DOM" target="_blank">Shadow DOM</a>. This works very similar to the `scoped` discussion above, allowing the framework developers to apply styling to the individual components without having that styling bleed out into other components. This also allows you as a developer to use the component without having to worry about the details of the component's construction when styling your own application.
+Most of the components in the Ionic Framework use <a href="https://developer.mozilla.org/en-US/docs/Web/Web_Components/Using_shadow_DOM" target="_blank">Shadow DOM</a>. This works very similar to the `scoped` discussion above, allowing the framework developers to apply styling to individual components without having that styling bleed out into other components. This also allows you as a developer to use the component without having to worry about the details of the component's construction when styling your own application.
 
 However, it also means that different techniques must be employed when styling these components. The authors of the components must provide you with a styling API that defines the ways in which they intend for you to be able to style these components. The two mechanisms that make this possible are `CSS Custom Properties` (also called `CSS Variables`) and `Shadow Parts`.
 
 ### Light DOM
 
-There really is no official term called "Light DOM" but it is a term that is common referred to items outside of a shadow root that you can style via traditional means. Even for many components that use shadow DOM you are still able to apply "light DOM" styling to them. For example:
+There really is no official term called "Light DOM", but it is a term that is commonly used to refer to items outside of a shadow root that you can style via traditional means. Even for many components that use Shadow DOM you are still able to apply "Light DOM" styling to them. For example:
 
 ```css
 ion-card {
@@ -52,11 +52,11 @@ ion-card {
 }
 ```
 
-The `ion-card` uses shadow DOM, but that is for the internal structure. The border radius applies to the card itself, which is visible in the normal DOM tree, and thus can be styled via traditional means.
+The `ion-card` uses Shadow DOM, but that is for the internal structure. The border radius applies to the card itself, which is visible in the normal DOM tree, and thus can be styled via traditional means.
 
 ### CSS Custom Properties
 
-The Ionic Framework makes heavy use of CSS Custom Properties. They are used to define the color scheme, default padding, etc. They are also used heavily in order to style individual components. Have a look at the <a href="https://ionicframework.com/docs/api/button#css-custom-properties">CSS Custom Properties for a button</a> as an example. This defines an API for the ways in which the framework authors intend for you to be able to style a button. You can do so as such:
+The Ionic Framework makes heavy use of CSS Custom Properties. They are used to define the color scheme, default padding, etc. They are also used heavily in order to style individual components. Have a look at the <a href="https://ionicframework.com/docs/api/button#css-custom-properties" target="_blank">CSS Custom Properties for a button</a> as an example. This defines an API for the ways in which the framework authors intend for you to be able to style a button. You can do so as such:
 
 ```css
 ion-button {
@@ -64,17 +64,17 @@ ion-button {
 }
 ```
 
-This will apply a 75% opacity to all buttons in the application. You probably want to be a bit more restrictive with your selector, but that is the basic idea with the custom properties.
+This will apply a 75% opacity to all buttons in the application. You probably want to be a bit more restrictive with your selector, but that is the basic idea of custom properties.
 
 ### Shadow Parts
 
-A newer specification is <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/::part">Shadow Parts</a>. This allows the component author to tag specific parts of the component as something you can apply styles to as if it were in the light DOM. This allows component developers to still restrict how a component can be styled without having to redefine all of the ways an underlying element can be styled via a CSS Custom Property.
+A newer specification is <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/::part" target="_blank">Shadow Parts</a>. This allows the component author to tag specific parts of the component as something you can apply styles to as if it were in the Light DOM. This allows component developers to still restrict how a component can be styled without having to redefine all of the ways an underlying element can be styled via a CSS Custom Property.
 
-As a result, users of the component can still style the component in ways that they are used do styling things, while still being protected from the implementation details of how the component itself is rendered internally.
+As a result, users of the component can still style the component in ways that they are used to styling things, while still being protected from the implementation details of how the component itself is rendered internally.
 
-Have a look at the <a href="https://ionicframework.com/docs/api/select#css-shadow-parts">Shadow Parts of a Select</a>. Notice that the various parts of a select are abstracted into parts that you can access and style, but you do not have to worry about the details of exactly how the component itself was constructed.
+Have a look at the <a href="https://ionicframework.com/docs/api/select#css-shadow-parts" target="_blank">Shadow Parts of a Select</a>. Notice that the various parts of a select are abstracted into parts that you can access and style, but you do not have to worry about the details of exactly how the component itself was constructed.
 
-This allows you to style the icon, for example, as such:
+This allows you to style the icon, for example, like so:
 
 ```css
 ion-select::part(icon) {
@@ -266,13 +266,14 @@ We have a couple of other components where we need to set a specific color. Name
 ```html
 <ion-tabs>
   <ion-tab-bar color="tertiary" slot="bottom">
-    <ion-tab-button tab="teas" href="/tabs/teas"></ion-tab-button></ion-tab-bar
-></ion-tabs>
+    <ion-tab-button tab="teas" href="/tabs/teas"></ion-tab-button>
+  </ion-tab-bar>
+</ion-tabs>
 ```
 
 ### Other Styles
 
-First, our design team wants a slightly more obvious radius on our cards. Since this is in the light DOM we can use traditional styling techniques to accomplish this.
+First, our design team wants a slightly more obvious radius on our cards. Since this is in the Light DOM we can use traditional styling techniques to accomplish this.
 
 ```css
 ion-card {
@@ -280,7 +281,7 @@ ion-card {
 }
 ```
 
-They would also like the select component to have a nice box around the down-arrow shape. This is in the shadow DOM so we need to use a different technique. In this case, we can use Shadow Parts to modify the select.
+They would also like the select component to have a nice box around the down-arrow shape. This is in the Shadow DOM so we need to use a different technique. In this case, we can use Shadow Parts to modify the select.
 
 ```css
 ion-select::part(icon) {

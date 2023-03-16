@@ -31,7 +31,7 @@ Also, open the test for each page and remove the `forRoot()` from the `IonicModu
 
 Tabs are one of two very common navigation styles within native applications. The other is side-menu navigation. A tabs navigation page will have a row of tabs either at the top or the bottom of the page. Each tab will contain a set of stacked pages. We have this stacked paradigm right now with the `TeaDetailsPage` rendering stacked on top of the `TeaPage`. This same idea carries over to tabbed navigation only each tab will have its own stack.
 
-This application will have a small number of distinct sections, so tabs make the most sense.
+This application will have a small number of distinct sections, so a tabbed layout make the most sense.
 
 ### Lay Out the Tabs Page
 

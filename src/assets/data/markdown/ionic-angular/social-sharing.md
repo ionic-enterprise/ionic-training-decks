@@ -8,6 +8,8 @@ We can use various <a href="https://capacitorjs.com/docs/plugins" target="_blank
 
 Some plugins, though, provide native functionality that the user interacts with directly. The <a href="https://capacitorjs.com/docs/apis/share" target="_blank">Social Sharing</a> plugin is one of those. In this lab we will update the code to use that plugin to allow us to share tea tasting notes with our friends.
 
+Add the plugin by running the following commands:
+
 ```bash
 npm i @capacitor/share
 npx cap sync
@@ -29,15 +31,15 @@ The first thing we will do is add a sharing button to the top of our `src/app/ta
 ```
 
 ```TypeScript
-  get sharingIsAvailable(): boolean {
-    return true;
-  }
+get sharingIsAvailable(): boolean {
+  return true;
+}
 
-  get allowSharing(): boolean {
-    return true;
-  }
-  ...
-  share() {}
+get allowSharing(): boolean {
+  return true;
+}
+...
+share() { }
 ```
 
 At this point, the button should display and be clickable, but it is not functional yet.
@@ -57,40 +59,37 @@ describe('TastingNoteEditorComponent', () => {
   ...
         providers: [
           ...
-          {
-            provide: Platform,
-            useFactory: createPlatformMock,
-          },
+          { provide: Platform, useFactory: createPlatformMock },
 ```
 
 At this point we can start creating the tests for the properties that control the button:
 
 ```TypeScript
-  describe('share', () => {
-    describe('in a web context', () => {
-      beforeEach(() => {
-        const platform = TestBed.inject(Platform);
-        (platform.is as any).withArgs('hybrid').and.returnValue(false);
-        fixture.detectChanges();
-      });
-
-      it('is not available', () => {
-        expect(fixture.debugElement.query(By.css('[data-testid="share-button"]'))).toBeFalsy();
-      });
+describe('share', () => {
+  describe('in a web context', () => {
+    beforeEach(() => {
+      const platform = TestBed.inject(Platform);
+      (platform.is as any).withArgs('hybrid').and.returnValue(false);
+      fixture.detectChanges();
     });
 
-    describe('in a mobile context', () => {
-      beforeEach(() => {
-        const platform = TestBed.inject(Platform);
-        (platform.is as any).withArgs('hybrid').and.returnValue(true);
-        fixture.detectChanges();
-      });
-
-      it('is available', () => {
-        expect(fixture.debugElement.query(By.css('[data-testid="share-button"]'))).toBeTruthy();
-      });
+    it('is not available', () => {
+      expect(fixture.debugElement.query(By.css('[data-testid="share-button"]'))).toBeFalsy();
     });
   });
+
+  describe('in a mobile context', () => {
+    beforeEach(() => {
+      const platform = TestBed.inject(Platform);
+      (platform.is as any).withArgs('hybrid').and.returnValue(true);
+      fixture.detectChanges();
+    });
+
+    it('is available', () => {
+      expect(fixture.debugElement.query(By.css('[data-testid="share-button"]'))).toBeTruthy();
+    });
+  });
+});
 ```
 
 The web context test fails, of course, because our `sharingIsAvailable` getter is just returning `true` all of the time. Let's fix that now:
@@ -118,34 +117,34 @@ In order to share a rating, we need to have at least the brand, name, and rating
 First we will test for it. This test belongs right after the `is available` test within the `in a mobile context` describe that we just created above.
 
 ```TypeScript
-      it('is not allowed until a brand, name, and rating have all been entered', () => {
-        const button = fixture.debugElement.query(By.css('[data-testid="share-button"]'));
-        expect(button.nativeElement.disabled).toBeTrue();
+it('is not allowed until a brand, name, and rating have all been entered', () => {
+  const button = fixture.debugElement.query(By.css('[data-testid="share-button"]'));
+  expect(button.nativeElement.disabled).toBeTrue();
 
-        component.editorForm.controls.brand.setValue('Lipton');
-        fixture.detectChanges();
-        expect(button.nativeElement.disabled).toBeTrue();
+  component.editorForm.controls.brand.setValue('Lipton');
+  fixture.detectChanges();
+  expect(button.nativeElement.disabled).toBeTrue();
 
-        component.editorForm.controls.name.setValue('Yellow Label');
-        fixture.detectChanges();
-        expect(button.nativeElement.disabled).toBeTrue();
+  component.editorForm.controls.name.setValue('Yellow Label');
+  fixture.detectChanges();
+  expect(button.nativeElement.disabled).toBeTrue();
 
-        component.editorForm.controls.rating.setValue(2);
-        fixture.detectChanges();
-        expect(button.nativeElement.disabled).toBeFalse();
-      });
+  component.editorForm.controls.rating.setValue(2);
+  fixture.detectChanges();
+  expect(button.nativeElement.disabled).toBeFalse();
+});
 ```
 
 We can then enter the proper logic in the `allowShare` getter:
 
 ```TypeScript
-  get allowSharing(): boolean {
-    return !!(
-      this.editorForm.controls.brand.value &&
-      this.editorForm.controls.name.value &&
-      this.editorForm.controls.rating.value
-    );
-  }
+get allowSharing(): boolean {
+  return !!(
+    this.editorForm.controls.brand.value &&
+    this.editorForm.controls.name.value &&
+    this.editorForm.controls.rating.value
+  );
+}
 ```
 
 ## Share the Note
@@ -199,14 +198,14 @@ import { Share } from '@capacitor/share';
 We can then add the code fill out the `share()` accordingly. You will also have to add a line importing the `Share` object from `@capacitor/share`:
 
 ```TypeScript
-  async share(): Promise<void> {
-    await Share.share({
-      title: `${this.editorForm.controls.brand.value}: ${this.editorForm.controls.name.value}`,
-      text: `I gave ${this.editorForm.controls.brand.value}: ${this.editorForm.controls.name.value} ${this.editorForm.controls.rating.value} stars on the Tea Taster app`,
-      dialogTitle: 'Share your tasting note',
-      url: 'https://tea-taster-training.web.app',
-    });
-  }
+async share(): Promise<void> {
+  await Share.share({
+    title: `${this.editorForm.controls.brand.value}: ${this.editorForm.controls.name.value}`,
+    text: `I gave ${this.editorForm.controls.brand.value}: ${this.editorForm.controls.name.value} ${this.editorForm.controls.rating.value} stars on the Tea Taster app`,
+    dialogTitle: 'Share your tasting note',
+    url: 'https://tea-taster-training.web.app',
+  });
+}
 ```
 
 ## Conclusion

@@ -766,34 +766,34 @@ Adding a new node will be handled via a <a href="https://ionicframework.com/docs
 In our test, we will verify that the modal is properly opened:
 
 ```TypeScript
-  describe('add new note', () => {
-    beforeEach(() => {
-      fixture.detectChanges();
-    });
-
-    it('creates the editor modal', () => {
-      const modalController = TestBed.inject(ModalController);
-      const button = fixture.debugElement.query(
-        By.css('[data-testid="add-new-button"]'),
-      ).nativeElement;
-      click(button);
-      expect(modalController.create).toHaveBeenCalledTimes(1);
-      expect(modalController.create).toHaveBeenCalledWith({
-        component: TastingNoteEditorComponent,
-        backdropDismiss: false,
-        presentingElement: mockRouterOutlet.nativeEl as any,
-      });
-    });
-
-    it('displays the editor modal', fakeAsync(() => {
-      const button = fixture.debugElement.query(
-        By.css('[data-testid="add-new-button"]'),
-      ).nativeElement;
-      click(button);
-      tick();
-      expect(modal.present).toHaveBeenCalledTimes(1);
-    }));
+describe('add new note', () => {
+  beforeEach(() => {
+    fixture.detectChanges();
   });
+
+  it('creates the editor modal', () => {
+    const modalController = TestBed.inject(ModalController);
+    const button = fixture.debugElement.query(
+      By.css('[data-testid="add-new-button"]'),
+    ).nativeElement;
+    click(button);
+    expect(modalController.create).toHaveBeenCalledTimes(1);
+    expect(modalController.create).toHaveBeenCalledWith({
+      component: TastingNoteEditorComponent,
+      backdropDismiss: false,
+      presentingElement: mockRouterOutlet.nativeEl as any,
+    });
+  });
+
+  it('displays the editor modal', fakeAsync(() => {
+    const button = fixture.debugElement.query(
+      By.css('[data-testid="add-new-button"]'),
+    ).nativeElement;
+    click(button);
+    tick();
+    expect(modal.present).toHaveBeenCalledTimes(1);
+  }));
+});
 ```
 
 The code required to perform this action is:
@@ -824,63 +824,63 @@ Find the `ion-item` that displays each note in the list and add the following ev
 Now we can add a set of tests:
 
 ```TypeScript
-  describe('update an existing note', () => {
-    beforeEach(() => {
-      fixture.detectChanges();
-    });
-
-    it('creates the editor modal', () => {
-      const modalController = TestBed.inject(ModalController);
-      const item = fixture.debugElement.query(By.css('ion-item')).nativeElement;
-      click(item);
-      expect(modalController.create).toHaveBeenCalledTimes(1);
-      expect(modalController.create).toHaveBeenCalledWith({
-        component: TastingNoteEditorComponent,
-        backdropDismiss: false,
-        presentingElement: mockRouterOutlet.nativeEl as any,
-        componentProps: { note: testData[0] },
-      });
-    });
-
-    it('displays the editor modal', fakeAsync(() => {
-      const item = fixture.debugElement.query(By.css('ion-item')).nativeElement;
-      click(item);
-      tick();
-      expect(modal.present).toHaveBeenCalledTimes(1);
-    }));
+describe('update an existing note', () => {
+  beforeEach(() => {
+    fixture.detectChanges();
   });
+
+  it('creates the editor modal', () => {
+    const modalController = TestBed.inject(ModalController);
+    const item = fixture.debugElement.query(By.css('ion-item')).nativeElement;
+    click(item);
+    expect(modalController.create).toHaveBeenCalledTimes(1);
+    expect(modalController.create).toHaveBeenCalledWith({
+      component: TastingNoteEditorComponent,
+      backdropDismiss: false,
+      presentingElement: mockRouterOutlet.nativeEl as any,
+      componentProps: { note: testData[0] },
+    });
+  });
+
+  it('displays the editor modal', fakeAsync(() => {
+    const item = fixture.debugElement.query(By.css('ion-item')).nativeElement;
+    click(item);
+    tick();
+    expect(modal.present).toHaveBeenCalledTimes(1);
+  }));
+});
 ```
 
 The quick and dirty way to get this test to pass is to copy the `newNote()` method and add the note property binding to it as such:
 
 ```TypeScript
-  async updateNote(note: TastingNote): Promise<void> {
-    const modal = await this.modalController.create({
-      component: TastingNoteEditorComponent,
-      backdropDismiss: false,
-      presentingElement: this.routerOutlet.nativeEl,
-      componentProps: { note },
-    });
-    modal.present();
-  }
+async updateNote(note: TastingNote): Promise<void> {
+  const modal = await this.modalController.create({
+    component: TastingNoteEditorComponent,
+    backdropDismiss: false,
+    presentingElement: this.routerOutlet.nativeEl,
+    componentProps: { note },
+  });
+  modal.present();
+}
 ```
 
 But that is a lot of repeated code with just a one line difference. Let's refactor that a bit:
 
 ```TypeScript
-  newNote(): Promise<void> {
-    return this.displayEditor();
-  }
+newNote(): Promise<void> {
+  return this.displayEditor();
+}
 
-  updateNote(note: TastingNote): Promise<void> {
-    return this.displayEditor(note);
-  }
+updateNote(note: TastingNote): Promise<void> {
+  return this.displayEditor(note);
+}
 
-  private async displayEditor(note?: TastingNote): Promise<void> {
-    // Filling in this code is left as an exercise for you.
-    // You may want to start with setting up the options based on whether you have a note or not:
-    // const opt: ModalOptions = { ... }
-  }
+private async displayEditor(note?: TastingNote): Promise<void> {
+  // Filling in this code is left as an exercise for you.
+  // You may want to start with setting up the options based on whether you have a note or not:
+  // const opt: ModalOptions = { ... }
+}
 ```
 
 Try clicking on an existing note to make sure that you can properly update it.
@@ -889,33 +889,33 @@ Try clicking on an existing note to make sure that you can properly update it.
 
 The final feature we will add is the ability to delete a note. We will keep this one simple and make it somewhat hidden so that it isn't too easy for a user to delete a note.
 
-We will use a construct called a <a ref="https://ionicframework.com/docs/api/item-sliding" target="_blank">item sliding</a> to essentially "hide" the delete button behind the item. That way the user has to slide the item over in order to expose the button and do a delete.
+We will use a construct called <a ref="https://ionicframework.com/docs/api/item-sliding" target="_blank">item sliding</a> to essentially "hide" the delete button behind the item. That way the user has to slide the item over in order to expose the button and do a delete.
 
 Doing this results in a little bit of rework in how the item is rendered and bound on the `TastingNotesPage`:
 
 ```HTML
-    <ion-item-sliding *ngFor="let note of notes$ | async">
-      <ion-item (click)="updateNote(note)">
-        <ion-label>
-          <div>{{ note.brand }}</div>
-          <div>{{ note.name }}</div>
-        </ion-label>
-      </ion-item>
+<ion-item-sliding *ngFor="let note of notes$ | async">
+  <ion-item (click)="updateNote(note)">
+    <ion-label>
+      <div>{{ note.brand }}</div>
+      <div>{{ note.name }}</div>
+    </ion-label>
+  </ion-item>
 
-      <ion-item-options>
-        <ion-item-option color="danger" (click)="deleteNote(note)">
-          Delete
-        </ion-item-option>
-      </ion-item-options>
-    </ion-item-sliding>
+  <ion-item-options>
+    <ion-item-option color="danger" (click)="deleteNote(note)">
+      Delete
+    </ion-item-option>
+  </ion-item-options>
+</ion-item-sliding>
 ```
 
 And the code for the delete is pretty straight forward:
 
 ```typescript
-  deleteNote(note: TastingNote): void {
-    this.tastingNotes.delete(note.id as number).subscribe();
-  }
+deleteNote(note: TastingNote): void {
+  this.tastingNotes.delete(note.id as number).subscribe();
+}
 ```
 
 ## Refreshing
