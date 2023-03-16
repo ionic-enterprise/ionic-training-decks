@@ -85,7 +85,7 @@ describe('AuthenticationService', () => {
 });
 ```
 
-**Note:** This is just a template to get you started. As you go through this, you will need to do some things on your own, such as importing various objects and operators from the appropriate libraries (often `@angular/core/testing` or `rxjs/operators`). You can use your editor's automatic import feature or you can manually add the import. You will not be told by the labs when you need them, but your editor will let you know.
+**Note:** This is just a template to get you started. As you go through this, you will need to do some things on your own, such as importing various objects and functions from the appropriate libraries (often `@angular/core/testing` or `rxjs`). You can use your editor's automatic import feature or you can manually add the import. You will not be told by the labs when you need them, but your editor will let you know.
 
 ### login
 
@@ -204,7 +204,7 @@ interface LoginResponse extends Session {
 }
 ```
 
-Then the body of the `login()` method is changed to map the response as such:
+This is the _actual_ shape of the data returned from the API, so change the type on the `post()` and `map()` the return data to remove the `success` flag.
 
 ```typescript
 return this.http
@@ -254,10 +254,7 @@ That just takes one minor tweak in the `map()`:
 ```TypeScript
       map((res: LoginResponse) => {
         const { success, ...session } = res;
-        if (success) {
-          return session;
-        }
-        return undefined;
+        return success ? session : undefined;
       })
 ```
 
@@ -292,10 +289,7 @@ export class AuthenticationService {
       .pipe(
         map((res: LoginResponse) => {
           const { success, ...session } = res;
-          if (success) {
-            return session;
-          }
-          return undefined;
+          return success ? session : undefined;
         })
       );
   }
