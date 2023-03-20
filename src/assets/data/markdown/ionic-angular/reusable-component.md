@@ -390,7 +390,7 @@ In the `expectedTeas` array that is part of the `TeaService` test, add a rating 
 },
 ```
 
-**Note:** there should be other tests failing to compile at this point, like the `TeaPage` test. Update those to include ratings where needed as well.
+**Note:** other tests like the `TeaPage` test also set up `Tea` data. Update those to include ratings where needed as well.
 
 The rating is not part of the data coming back from our API, so the API results we use cannot have it. Where the `resultTeas` array is defined, delete the `rating` just like we do for the `image`.
 
@@ -401,13 +401,13 @@ resultTeas = expectedTeas.map((t: Tea) => {
 });
 ```
 
-We should have a failing test at this point.
+Finally, the `TeaService` itself is not compiling. Add some code to the `convert()` that adds a `rating` with a value of zero just to get it to compile. We should have a failing test at this point.
 
 ##### Set up the Preferences Mock
 
 We will use the Capacitor Preferences plugin, so we will mock that. There are multiple ways that we could store the ratings. We will just go with the very simple strategy of using a key of `ratingX` where `X` is the `ID` of the tea.
 
-In the main `beforeEach()`, spy on `Preferences.get()` returning a default of `{ value: null }` and add non-zero values for various ratings depending on the changes you made to the test data above.
+In the main `beforeEach()` of the `TeaService` test, spy on `Preferences.get()` returning a default of `{ value: null }` and add non-zero values for various ratings depending on the changes you made to the test data above.
 
 ```typescript
 ...
@@ -537,9 +537,9 @@ Now that everything is fully operational, let's update the `TeaDetailsPage` to p
 
 ### Grab the Current Rating
 
-The first thing we will need to do is get the current rating when we select the tea. We need to do this because we cannot just bind directly to `tea.rating` in our view. The component modifying that value would directly modify the state, and that is not allowed.
+The first thing we will need to do is get the current rating when we select the tea. We _could_ just bind directly to `tea.rating` in our view. However, if the service were changed to cache the data, we would be directly mutating the state of our application, and that would be bad form.
 
-Add a rating to our test tea.
+Add a rating to the test tea in our `TeaDetailsPage` test.
 
 ```TypeScript
 (tea.get as jasmine.Spy).withArgs(7).and.returnValue(
