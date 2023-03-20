@@ -30,6 +30,8 @@ TestBed.configureTestingModule({
 
 Using this as a template, add code to provide a mock for the `TeaService`.
 
+**Note:** you will need to add some import statements for missing items.
+
 ### Change the Test Data
 
 The easiest way to modify the test data from what we have hard coded in the page is to simply remove one of the teas. It doesn't matter which one, just remove one. Once you do, you will also need to:
@@ -50,8 +52,6 @@ Add the following code in the main `beforeEach()` for all of our tests. This cod
 const tea = TestBed.inject(TeaService);
 (tea.getAll as jasmine.Spy).and.returnValue(of(teas));
 ```
-
-**Note:** you will need to add some import statements for missing items.
 
 ## Update the Code
 
