@@ -50,7 +50,7 @@ export const authGuard: CanActivateFn = async (
 
 ## Code
 
-We've provided the basic skeleton here. Fill in the logic.
+We do not want our guard to just return `true`, however, so we will need to fill in some logic. Below we have provided the basic skeleton here. Your job is to fill in the logic. Be sure to replace the comments with the actual logic. I had to leave _something_ as an exercise for you... 🤓
 
 ```typescript
 // all imports up here...
@@ -68,8 +68,6 @@ export const authGuard: CanActivateFn = async (
   // Otherwise, navigate to the login page and return false
 };
 ```
-
-Be sure to replace the comments with the actual logic. I had to leave _something_ as an exercise for you... 🤓
 
 **Note:** `route` and `state` are part of the `CanActivateFn` signature, but you will not need to use them.
 
@@ -124,11 +122,11 @@ import { SessionVaultService } from '../session-vault/session-vault.service';
 export class AuthInterceptor implements HttpInterceptor {
   constructor(private sessionVault: SessionVaultService) {}
 
-  intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
+  intercept(request: HttpRequest<unknown>, next: HttpHandler): Observable<HttpEvent<unknown>> {
     return from(this.sessionVault.get()).pipe(
       tap((session) => {
-        if (session && this.requestRequiresToken(req)) {
-          req = req.clone({
+        if (session && this.requestRequiresToken(request)) {
+          request = request.clone({
             setHeaders: {
               // eslint-disable-next-line @typescript-eslint/naming-convention
               Authorization: 'Bearer ' + session.token,
@@ -136,7 +134,7 @@ export class AuthInterceptor implements HttpInterceptor {
           });
         }
       }),
-      mergeMap(() => next.handle(req))
+      mergeMap(() => next.handle(request))
     );
   }
 
@@ -162,11 +160,11 @@ import { SessionVaultService } from '../session-vault/session-vault.service';
 export class UnauthInterceptor implements HttpInterceptor {
   constructor(private navController: NavController, private sessionVault: SessionVaultService) {}
 
-  intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-    return next.handle(req).pipe(
+  intercept(request: HttpRequest<unknown>, next: HttpHandler): Observable<HttpEvent<unknown>> {
+    return next.handle(request).pipe(
       tap(
-        (event: HttpEvent<any>) => {},
-        async (err: any) => {
+        (event: HttpEvent<unknown>) => {},
+        async (err: unknown) => {
           if (err instanceof HttpErrorResponse && err.status === 401) {
             // What should we do here?
           }

@@ -281,9 +281,11 @@ getAll(): Observable<Array<Tea>> {
 }
 ```
 
+The `convert` function should have the following signature: `private convert(tea: Omit<Tea, 'image'>): Tea`
+
 Make sure your tests are still passing. That makes it clear that we are grabbing the teas from the API and returning them after a mapping process. The details of that conversion then are left to the `convert()` method, and everything is tidy and is only responsible for one thing.
 
-Also note that you likely now have a couple of definitions of `Array<Omit<Tea, 'image'>>` in your code. It is best to refactor that into a locally declared type and use it instead. There is no need to export it. The fact that we also use that same type in the test is not a big deal.
+Also note that you likely now have a couple of definitions of `Omit<Tea, 'image'>` in your code. It is best to refactor that into a locally declared type and use it instead. There is no need to export it. The fact that we also use that same type in the test is not a big deal.
 
 **Best Practice:** The point of what we just did is that it is OK for things to get a little messy while you are working out exactly how it should work. However, before you call the code "done" you should clean it up to make it easier to maintain. Having properly written unit tests will help you ensure you are doing that clean-up correctly.
 
