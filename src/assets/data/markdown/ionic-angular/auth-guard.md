@@ -75,7 +75,7 @@ export const authGuard: CanActivateFn = async (
 
 Any route that requires the user to be logged in should have the guard. At this time, that is only the `tea` page, so let's hook up the guard in that page's routing module (`src/app/tea/tea-routing.module.ts`).
 
-**Note:** most of this code should exist already. Just add the `AuthGuardService` related bits.
+**Note:** most of this code should exist already. Just add the `authGuard` related bits.
 
 ```typescript
 import { NgModule } from '@angular/core';

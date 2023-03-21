@@ -159,13 +159,13 @@ import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 
 import { TeaPage } from './tea.page';
-import { AuthGuardService } from '@app/core';
+import { authGuard } from '@app/core';
 
 const routes: Routes = [
   {
     path: '',
     component: TeaPage,
-    canActivate: [AuthGuardService],
+    canActivate: [authGuard],
   },
   {
     path: 'tea-details',
