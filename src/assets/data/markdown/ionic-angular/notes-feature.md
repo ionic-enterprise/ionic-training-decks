@@ -537,8 +537,18 @@ export class TastingNoteEditorComponent implements OnInit {
     const note: TastingNote = {
       // TODO: Figure out how to set this based on the test we just wrote. As an example, here is
       //       how to set the brand:
-      brand: this.editorForm.controls.brand.value as string,
+      // brand: this.editorForm.controls.brand.value as string,
+      //
+      // Fill this in below
+      brand: '',
+      name: '',
+      notes: '',
+      rating: 0,
+      teaCategoryId: 0,
     };
+    if (this.note?.id) {
+      note.id = this.note?.id;
+    }
 
     this.tastingNotes
       .save(note)
@@ -550,6 +560,7 @@ export class TastingNoteEditorComponent implements OnInit {
     this.teaCategories$ = this.tea.getAll();
     if (this.note) {
       // TODO: Figure out what needs to be done here if a `note` is passed via property
+      //
       // HINT: this.editorForm.controls.brand.setValue(this.note.brand);
       //       ...
       //       this.buttonLabel = 'Update'
@@ -718,7 +729,7 @@ In `src/app/tasting-notes/tasting-notes.page.spec.ts`, update the `TestBed` conf
       providers: [
         { provide: ModalController, useFactory: () => createOverlayControllerMock('ModalController', modal) },
         { provide: IonRouterOutlet, useValue: mockRouterOutlet },
-      ▏ { provide: TastingNotesService, useFactory: createTastingNotesServiceMock },
+        { provide: TastingNotesService, useFactory: createTastingNotesServiceMock },
       ],
     }).compileComponents();
 
@@ -809,7 +820,7 @@ The code required to perform this action is:
   }
 ```
 
-When you click on the FAB button, you should be able to add a tasting note. Check that out to determine if it works.
+When you click on the FAB button, you should be able to add a tasting note. Check that out to determine if it works. Note that for now you will need to refresh your page to see the newly added note.
 
 ### Edit an Existing Note
 
@@ -932,7 +943,7 @@ Then update the main observable pipeline that is feeding the data to our page:
 
 ```typescript
 ngOnInit() {
-▏ this.notes$ = this.refresh.pipe(mergeMap(() => this.tastingNotes.getAll()));
+  this.notes$ = this.refresh.pipe(mergeMap(() => this.tastingNotes.getAll()));
 }
 ```
 
@@ -977,4 +988,4 @@ This will ensure that the data is refreshed after each change.
 
 ## Conclusion
 
-Congratulations. You have used what we have learned to this point to add a whole new feature to your app. Along the way, you also exercised a few Framework components you had not used before. We are almost done with this app. One more page to go and we will be done.
+Congratulations. You have used what we have learned to this point to add a whole new feature to your app. Along the way, you also exercised a few Framework components you had not used before. We are almost done with this app.
