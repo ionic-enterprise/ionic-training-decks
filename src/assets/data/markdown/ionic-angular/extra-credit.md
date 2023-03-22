@@ -41,7 +41,7 @@ The default behavior for the splash screen is not ideal. On Android, there is a 
 
 - Install the `@capacitor/splash-screen` plugin.
 - Create a mock for it using `__mocks__/@capacitor/preferences.ts` as a model.
-- Hide the splash screen from `src/app/app.module.ts`, including a proper test.
+- Hide the splash screen from `src/app/app.component.ts`, including a proper test.
 - Update the `capacitor.config.ts` such that `launchAutoHide` is set to `false` (see snippet below, have a look at the <a href="https://capacitorjs.com/docs/config" target="_blank">configuration docs</a> if needed).
 
 ```typescript
