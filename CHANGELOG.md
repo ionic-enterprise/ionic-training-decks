@@ -1,3 +1,32 @@
+## [5.7.1](https://github.com/ionic-team/ionic-training-decks/compare/v5.6.3...v5.7.1) (2023-03-24)
+
+### Bug Fixes
+
+- **anguar:** update a couple of typos on sharing ([f8de689](https://github.com/ionic-team/ionic-training-decks/commit/f8de689c5ea20ab0b8d5145c8433e1c2d416a77b))
+- **angular:** add more notes about restarting the tests ([c8dd3e5](https://github.com/ionic-team/ionic-training-decks/commit/c8dd3e596c2c2162ba588c7ace1944c872891060))
+- **angular:** audit and update the first half of the training ([cd864f3](https://github.com/ionic-team/ionic-training-decks/commit/cd864f3a0b137122766b8230b56902d93f13a2b2))
+- **angular:** clarify the errorText a bit ([8fd53e4](https://github.com/ionic-team/ionic-training-decks/commit/8fd53e4bfc1bbd7c75daf8d1d4a44df759b3f07b))
+- **angular:** clarify the reason for the cap sync ([f600edc](https://github.com/ionic-team/ionic-training-decks/commit/f600edc6eddde3a3909d6863ecfbc8d527a3a661))
+- **angular:** clean up the notes feature ([ffbf7df](https://github.com/ionic-team/ionic-training-decks/commit/ffbf7df128baf29c7110d6281972ca888bf969a0))
+- **angular:** further restrict various types ([a54fd18](https://github.com/ionic-team/ionic-training-decks/commit/a54fd18e4992b00f8f06fbe05e46d572bf5fceb9))
+- **angular:** make minor auth service tweaks ([7551a64](https://github.com/ionic-team/ionic-training-decks/commit/7551a6452070bfde4e8f1c2ccb0493e23497fc5a))
+- **angular:** move the note about imports ([fd60936](https://github.com/ionic-team/ionic-training-decks/commit/fd60936bb8761a297b518d97b94445170347a1e8))
+- **angular:** polish the tea details page ([b9d2d45](https://github.com/ionic-team/ionic-training-decks/commit/b9d2d450dcebd5bf6dbad4e5eb56549e3e703754))
+- **angular:** remove reference to the store ([9d2c6e8](https://github.com/ionic-team/ionic-training-decks/commit/9d2c6e8e8e4d2ef344300b7db856fd5c6a1517c7))
+- **angular:** remove references to state management ([adb047c](https://github.com/ionic-team/ionic-training-decks/commit/adb047c59e1a9c24f1ae67acf84ca3257193896c))
+- **angular:** tweak the tea data sections ([b6e1954](https://github.com/ionic-team/ionic-training-decks/commit/b6e1954cb7aaa9a0a4f7d1ef96853b87f0c2750a))
+- **angular:** update references to the AuthGuardSerice ([94d45b4](https://github.com/ionic-team/ionic-training-decks/commit/94d45b460159aba67bffc6a5b474ec8d39fd925a))
+- **angular:** update the component not the module ([70f3a5b](https://github.com/ionic-team/ionic-training-decks/commit/70f3a5b67281c5010ff45a211969ef8043b0df47))
+- **angular:** update the notes feature ([0ac59bd](https://github.com/ionic-team/ionic-training-decks/commit/0ac59bdc40d7a5fc4ba92746b08d174968f1b896))
+- **angular:** update the ratings component ([c31f5f2](https://github.com/ionic-team/ionic-training-decks/commit/c31f5f2c6d26cc897809a57ed45d3912e8598ea6))
+- **angular:** upgrade the tabs route guard ([40c5d28](https://github.com/ionic-team/ionic-training-decks/commit/40c5d28bc9b89cd7ec59421c50225bb81155e905))
+- **vue:** update for v7 changes ([84711e2](https://github.com/ionic-team/ionic-training-decks/commit/84711e25b9f0f0a8bae4703004354d127ccae478))
+
+### Features
+
+- **angular:** remove NgRX from the Angular training ([d244d69](https://github.com/ionic-team/ionic-training-decks/commit/d244d69c71d505c1e87010e7686a17f0ad18a067))
+- **angular:** use proper English rather than random words ([ac6b587](https://github.com/ionic-team/ionic-training-decks/commit/ac6b5874f08ba4c79db3b54fe62a2e7d5e83f791))
+
 # [5.7.0](https://github.com/ionic-team/ionic-training-decks/compare/v4.1.1...v5.7.0) (2023-03-23)
 
 ### Bug Fixes
