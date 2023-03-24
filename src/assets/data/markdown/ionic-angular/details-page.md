@@ -262,10 +262,9 @@ The code that satisfies that test looks like this:
 ```TypeScript
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { EMPTY, Observable } from 'rxjs';
-
+import { TeaService } from '@app/core';
 import { Tea } from '@app/models';
-import { selectTea, State } from '@app/store';
+import { EMPTY, Observable } from 'rxjs';
 
 @Component({
   selector: 'app-tea-details',
