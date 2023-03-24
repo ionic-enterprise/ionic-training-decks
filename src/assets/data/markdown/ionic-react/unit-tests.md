@@ -1,122 +1,133 @@
 # Lab: Unit Tests
 
-In this lab, you will learn how to:
+The starter application was built with minimal testing scaffolding for a generic starter application; it does not apply to the application that we have. In this lab, you will learn how to:
 
-- Support continuous integration, code coverage, and snapshot testing
-- Run the existing suite of unit tests in the application
-- Structure, group, and place unit tests for the application
-- Write unit tests for the Home page component
+- How to run the unit tests
+- How to organize the unit tests
+- Some basic unit testing techniques
 
-## Overview
+## Running Unit Tests
 
-Ionic Framework React applications use [Jest](https://jestjs.io) as it's testing framework and runner. <a href="https://testing-library.com/docs/react-testing-library/intro" target="_blank"> React Testing Library</a> is included to write unit tests that test React components.
+Ionic React applications use <a href="https://vitest.dev" target="_blank">Vitest</a> as a testing framework and runner and <a href="https://testing-library.com/docs/react-testing-library/intro" target="_blank"> React Testing Library</a> to write unit tests for React components.
 
-The `npm test` script will run all of our tests and then watch for changes to the code.
+<a href="https://www.cypress.io/" target="_blank">Cypress</a> is bundled with Ionic React starters as well for end-to-end testing. However, the topic of using Cypress to conduct end-to-end testing is beyond the scope of this training and will not be used.
 
-## Setup CI, Coverage, and Snapshot Support
+To run the existing unit test, run the following command:
 
-If you would like to run tests once without the watch, you can do something like this: `(export CI=true; npm test)`. There are additional options to capture code coverage and to update component snapshots during the test run.
-
-I suggest adding additional test script configurations in the `package.json` file like so:
-
-- `test` - Use the default configuration, re-run the tests as changes are made
-- `test:ci` - Use the default configuration, run the tests once and exit
-- `test:cov` - Collect and report code coverage information, run the tests once and exit
-- `test:upd` - Regenerate snapshots, run the tests once and exit
-
-```json
-"scripts": {
-  "start": "react-scripts start",
-  "build": "react-scripts build",
-  "eject": "react-scripts eject",
-  "prepare": "husky install",
-  "test": "react-scripts test --transformIgnorePatterns 'node_modules/(?!(@ionic/react|@ionic/react-router|@ionic/core|@stencil/core|ionicons)/)'",
-  "test:ci": "export CI=true; npm run test",
-  "test:cov": "export CI=true; npm run test -- --coverage",
-  "test:upd": "exportCI=true; npm run test -- --updateSnapshot"
-},
+```bash
+npm run test.unit
 ```
 
-## Run the Tests
+Leave the test runner running. Next we will start adding tests for our components.
 
-With our updated configuration, there are four convenient ways to run the tests:
+## Scaffold Tests for Our Application
 
-- `npm test` - Runs the tests and waits for changes. This is the default and should be used for most development.
-- `npm run test:ci` - Runs the tests and exits. This is intended for use on your CI/CD server but is also useful for cases where you want to run the tests once.
-- `npm run test:cov` - Runs the tests and collects coverage information. This is intended for use on your CI/CD server but is also useful for cases where you want to identify non-tested areas.
-- `npm run test:upd` - Runs the tests and regenerates failed snapshots. This is intended for use when component markup is modified and you have tests that assert against the composition of components.
+We currently have a single test in `src/App.test.tsx`. It is a nice example, but it is not going to scale well. Since unit tests are intended to test the various parts of our system in isolation, it makes sense that the file structure for our tests will resemble the file structure of our application.
 
-Enter `npm test` and verify that the tests run.
+Our application currently has the following components:
 
-### Jest VSCode Extension
+- `App.tsx`
+- `components/ExploreContainer.tsx`
+- `pages/Home.tsx`
 
-If you are using Visual Studio Code as your editor, a [Jest extension](https://github.com/jest-community/vscode-jest) exists that will (among other things) automatically run the tests for you and report on the status.
+These components currently do not do much, so now is a really good time to scaffold tests for them so we can build the tests up as we go.
 
-## Structuring Unit Tests
+### App.tsx
 
-Jest test structure calls for a single file containing setup/teardown code and individual test cases to be created per project file. Jest supports grouping test cases together in nested blocks which allows you to group tests together by functionality.
+Take a look at `src/App.tsx`. There's not much here that is testable. We can make sure that it renders, which is what the default test in `src/App.test.tsx` does.
 
-### Setup and Teardown
+Let's better organize this test file by creating a `describe()` grouping for the component. Replace the contents of `src/App.test.tsx` with the following code:
 
-Often when writing tests some initialization logic needs to occur before each test is run, and some cleanup needs to occur after each test has been run. Jest provides the following methods to do this:
-
-- `beforeAll` - Run once before any test in the file or group
-- `beforeEach` - Run before each test in the file or group
-- `afterAll` - Run once at the completion of all tests in the file or group
-- `afterEach` - Run after the completion of each test in the file or group
-
-### Grouping Tests
-
-Sometimes tests logically belong grouped together; for example, tests that exercise a particular method. Often these are tests that need to share specific setup and/or teardown code. Tests are grouped together using the `describe()` method in Jest.
-
-Some important aspects of a `describe()` group are:
-
-- They can be nested inside of another group
-- They can have their own setup and teardown routines which are run in addition to the setup/teardown of the file or enclosing groups
-
-## Test the Home Page
-
-Start by creating a new file `Home.test.tsx` in the `src/pages` folder. Here we will add required imports and insert a `describe()` block where we can group tests for this component:
-
-**`src/pages/Home.test.tsx`**
-
-```tsx
+```typescript
 import { render } from '@testing-library/react';
-import Home from './Home';
+import App from './App';
 
-describe('<Home />', () => {});
-```
-
-### Test the Header
-
-The home page has it's header text set to "Blank". Let's write a test that verifies that the header text renders with the correct text:
-
-```tsx
-describe('<Home />', () => {
-  it('displays the header', () => {
-    const { container } = render(<Home />);
-    expect(container).toHaveTextContent(/Blank/);
+describe('<App />', () => {
+  it('renders without crashing', () => {
+    const { baseElement } = render(<App />);
+    expect(baseElement).toBeDefined();
   });
 });
 ```
 
-### Add Snapshot Test
+If the React Testing Library is new to you, it's important to know the guiding principle behind it:
 
-We can also create snapshots of the component under specific conditions and compare them as we modify the application. Add the following test inside the `describe()` block, under the test previously created:
+> The more your tests resemble the way your software is used, the more confidence they can give you.
 
-```tsx
+This means that we will design tests that make assertions based around what end users would see. The test above asserts that the rendered output of `<App />` should not be an empty DOM tree.
+
+#### Snapshot Testing
+
+Vitest has a neat feature where we can compare the output of our test against a reference snapshot file stored alongside the test. Snapshot tests will fail if the two snapshots do not match: either when a change is unexpected, or the reference snapshot needs to be updated.
+
+Add a snapshot test to the describe block:
+
+```typescript
 it('renders consistently', () => {
-  const { asFragment } = render(<Home />);
+  const { asFragment } = render(<App />);
   expect(asFragment()).toMatchSnapshot();
 });
 ```
 
-If a change had been made that changes the way the component renders, the snapshot test will fail. If the change is intentional there are a couple of ways the snapshot can be updated:
+A snapshot reference file is created the first time this test runs (since there is nothing to compare against).
 
-- If you are using the VSCode Jest plugin, it will display a toast asking you if you would like to update snapshots
-- If you are running the tests interactively, pressing `u` will update the snapshots
-- You can manually update the snapshots via a command like `(export CI=true; npm test -- --updateSnapshot)`
-- You can create a command in your `package.json` file like we did at the start of this section and run that
+### Home.tsx
+
+Take a look at `src/pages/Home.tsx`. What should we test here? We don't want to write too many tests since we will be changing this file some time soon. Let's just test that the header has a proper title and contains the text we expect.
+
+Create a file `src/pages/Home.test.tsx` containing the following code:
+
+```Typescript
+import { render, screen } from '@testing-library/react';
+import Home from './Home';
+
+describe('<Home />', () => {
+  it('displays the title', () => {
+    render(<Home />);
+    const titleElements = screen.getAllByText('Blank');
+    expect(titleElements.length).toEqual(2);
+  });
+
+  it('displays the default text', () => {
+    const { baseElement } = render(<Home />);
+    expect(baseElement).toHaveTextContent(/Ready to create an app?/);
+  });
+});
+```
+
+These tests are markedly different than the one created for `App.tsx`. I've added comments to the code block below to break down what is going on:
+
+```Typescript
+it('displays the title', () => {
+  // First, we want to render the <Home /> component.
+  render(<Home />);
+  // "screen" is a special version of "baseElement" that includes
+  // utility methods to query the DOM.
+  //
+  // In this test, we are looking for all elements that contain
+  // our header text: "Blank"
+  const titleElements = screen.getAllByText('Blank');
+  // To accommodate iOS's "collapsible title" design guideline,
+  // two title elements are defined in the template. We will
+  // elaborate on this more further on.
+  expect(titleElements.length).toEqual(2);
+});
+
+it('displays the default text', () => {
+  // This test only cares that the default text is rendered within the
+  // component, but doesn't care where. That makes it a good candidate
+  // to use "baseElement" instead of "screen".
+  const { baseElement } = render(<Home />);
+  // Text matchers, such as "toHaveTextContent" exist, that allow us
+  // to create UI-based logical expressions for our tests.
+  expect(baseElement).toHaveTextContent(/Ready to create an app?/);
+  // "/Ready to create an app?/" is a substring matcher. We don't care
+  // if additional text exists, only that _our_ text does. Full-string
+  // matching uses double-quotes ("").
+});
+```
+
+Testing is a critical part of software development. As such, I strongly urge you to get acquainted with the <a href="https://testing-library.com/docs/react-testing-library/intro" target="_blank">React Testing Library</a>.
 
 ## Conclusion
 
