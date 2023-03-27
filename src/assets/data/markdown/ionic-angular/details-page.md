@@ -18,39 +18,24 @@ Use the `ionic generate page tea-details` command to generate the new page.
 ```bash
 $ ionic generate page tea-details
 > ng generate page tea-details --project=app
-CREATE src/app/tea-details/tea-details-routing.module.ts (364 bytes)
-CREATE src/app/tea-details/tea-details.module.ts (502 bytes)
 CREATE src/app/tea-details/tea-details.page.scss (0 bytes)
 CREATE src/app/tea-details/tea-details.page.html (130 bytes)
 CREATE src/app/tea-details/tea-details.page.spec.ts (676 bytes)
 CREATE src/app/tea-details/tea-details.page.ts (275 bytes)
-UPDATE src/app/app-routing.module.ts (746 bytes)
+UPDATE src/app/app.routes.ts (746 bytes)
 [OK] Generated page!
 ```
 
 Note the output of the command. This generated several files for us and also updated our main routing module. We now have a new route called `tea-details`. If we do a little URL hacking in our browser, we can even display the page. Neat!
 
-But, we want details for a specific tea, so our route will need to have the tea ID as part of it. Let's start by modifying the route to take a parameter. Edit the `src/app/tea-details/tea-details-routing.module.ts` module file to add an `:id` parameter to the path. While we are here, also add the guard to the route.
+But, we want details for a specific tea, so our route will need to have the tea ID as part of it. Let's start by modifying the route to take a parameter. Edit the `src/app/app.routes.ts` file to add an `:id` parameter to the path. While we are here, also add the guard to the route.
 
 ```typescript
-import { NgModule } from '@angular/core';
-import { Routes, RouterModule } from '@angular/router';
-import { TeaDetailsPage } from './tea-details.page';
-import { authGuard } from '@app/core';
-
-const routes: Routes = [
   {
-    path: ':id',
-    component: TeaDetailsPage,
-    canActivate: [authGuard],
+    path: 'tea-details/:id',
+    loadComponent: () => import('./tea-details/tea-details.page').then((c) => c.TeaDetailsPage),
+    canActivate: [authGuard]
   },
-];
-
-@NgModule({
-  imports: [RouterModule.forChild(routes)],
-  exports: [RouterModule],
-})
-export class TeaDetailsPageRoutingModule {}
 ```
 
 With a little URL hacking, you should still be able to get to this page, but now you will need to supply an ID like this: `tea-details/1`.
@@ -122,14 +107,19 @@ ion-img {
 ##### `src/app/tea-details/tea-details.page.ts`
 
 ```typescript
+import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { Tea } from '@app/models';
+import { IonicModule } from '@ionic/angular';
 import { EMPTY, Observable } from 'rxjs';
 
 @Component({
   selector: 'app-tea-details',
   templateUrl: './tea-details.page.html',
   styleUrls: ['./tea-details.page.scss'],
+  standalone: true,
+  imports: [CommonModule, FormsModule, IonicModule],
 })
 export class TeaDetailsPage implements OnInit {
   tea$: Observable<Tea> = EMPTY;
@@ -213,13 +203,11 @@ In the `src/app/tea-details/tea-details.page.spec.ts` file, set up the `TestBed`
 ```typescript
 beforeEach(waitForAsync(() => {
   TestBed.configureTestingModule({
-    declarations: [TeaDetailsPage],
-    imports: [IonicModule],
-    providers: [
-      { provide: ActivatedRoute, useFactory: createActivatedRouteMock },
-      { provide: TeaService, useFactory: createTeaServiceMock },
-    ],
-  }).compileComponents();
+    imports: [TeaDetailsPage],
+  })
+    .overrideProvider(ActivatedRoute, { useFactory: createActivatedRouteMock })
+    .overrideProvider(TeaService, { useFactory: createTeaServiceMock })
+    .compileComponents();
 
   fixture = TestBed.createComponent(TeaDetailsPage);
   component = fixture.componentInstance;
@@ -260,7 +248,9 @@ In the `beforeEach()`, we need to set up the current route so it has an ID on it
 The code that satisfies that test looks like this:
 
 ```TypeScript
+import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { TeaService } from '@app/core';
 import { Tea } from '@app/models';
@@ -270,6 +260,8 @@ import { EMPTY, Observable } from 'rxjs';
   selector: 'app-tea-details',
   templateUrl: './tea-details.page.html',
   styleUrls: ['./tea-details.page.scss'],
+  standalone: true,
+  imports: [CommonModule, FormsModule, IonicModule]
 })
 export class TeaDetailsPage implements OnInit {
   tea$: Observable<Tea> = EMPTY;

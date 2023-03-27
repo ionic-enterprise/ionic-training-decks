@@ -108,7 +108,7 @@ ionic generate page tea
 
 ##### Fix the Routing
 
-Open the `src/app/app-routing.module.ts` file and perform the following tasks:
+Open the `src/app/app.routes.ts` file and perform the following tasks:
 
 1. The previous command should have created a `tea` route. If it did not, create one using the `home` route as a model, only pointing to the new page.
 1. We no longer need the "home" route, so remove it, leaving only the "tea" route.

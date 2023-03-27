@@ -18,12 +18,15 @@ This will allow us to read the `package.json` file and get some important inform
 
 ```typescript
 import { Component } from '@angular/core';
+import { IonicModule } from '@ionic/angular';
 import packageInfo from '../../../package.json';
 
 @Component({
   selector: 'app-about',
   templateUrl: './about.page.html',
   styleUrls: ['./about.page.scss'],
+  standalone: true,
+  imports: [IonicModule],
 })
 export class AboutPage {
   author: string;
@@ -81,7 +84,7 @@ import { ComponentFixture, fakeAsync, TestBed, tick, waitForAsync } from '@angul
 import { By } from '@angular/platform-browser';
 import { AuthenticationService, SessionVaultService } from '@app/core';
 import { createAuthenticationServiceMock, createSessionVaultServiceMock } from '@app/core/testing';
-import { IonicModule, NavController } from '@ionic/angular';
+import { NavController } from '@ionic/angular';
 import { createNavControllerMock } from '@test/mocks';
 import { of } from 'rxjs';
 
@@ -93,14 +96,12 @@ describe('AboutPage', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [AboutPage],
-      imports: [IonicModule],
-      providers: [
-        { provide: AuthenticationService, useFactory: createAuthenticationServiceMock },
-        { provide: NavController, useFactory: createNavControllerMock },
-        { provide: SessionVaultService, useFactory: createSessionVaultServiceMock },
-      ],
-    }).compileComponents();
+      imports: [AboutPage],
+    })
+      .overrideProvider(AuthenticationService, { useFactory: createAuthenticationServiceMock })
+      .overrideProvider(NavController, { useFactory: createNavControllerMock })
+      .overrideProvider(SessionVaultService, { useFactory: createSessionVaultServiceMock })
+      .compileComponents();
 
     fixture = TestBed.createComponent(AboutPage);
     component = fixture.componentInstance;

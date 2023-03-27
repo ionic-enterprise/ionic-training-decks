@@ -24,7 +24,6 @@ First let's generate some entities that we are going to need. We will fill these
 
 ```bash
 ionic g service core/tasting-notes/tasting-notes
-ionic g module tasting-notes/tasting-note-editor
 ionic g component tasting-notes/tasting-note-editor
 ```
 
@@ -177,33 +176,13 @@ export const createTastingNotesServiceMock = () =>
 
 ### The Editor Component
 
-#### `src/app/tasting-notes/tasting-note-editor/tasting-note-editor.module.ts`
-
-```TypeScript
-import { CommonModule } from '@angular/common';
-import { NgModule } from '@angular/core';
-import { ReactiveFormsModule } from '@angular/forms';
-import { SharedModule } from '@app/shared';
-import { IonicModule } from '@ionic/angular';
-import { TastingNoteEditorComponent } from './tasting-note-editor.component';
-
-@NgModule({
-  declarations: [TastingNoteEditorComponent],
-  exports: [TastingNoteEditorComponent],
-  imports: [CommonModule, IonicModule, ReactiveFormsModule, SharedModule],
-})
-export class TastingNoteEditorModule {}
-```
-
 #### `src/app/tasting-notes/tasting-note-editor/tasting-note-editor.component.spec.ts`
 
 ```TypeScript
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { ReactiveFormsModule } from '@angular/forms';
 import { By } from '@angular/platform-browser';
 import { TastingNotesService, TeaService } from '@app/core';
 import { createTastingNotesServiceMock, createTeaServiceMock } from '@app/core/testing';
-import { SharedModule } from '@app/shared';
 import { IonicModule, ModalController } from '@ionic/angular';
 import { createOverlayControllerMock } from '@test/mocks';
 import { of } from 'rxjs';
@@ -213,6 +192,7 @@ import { TastingNoteEditorComponent } from './tasting-note-editor.component';
 describe('TastingNoteEditorComponent', () => {
   let component: TastingNoteEditorComponent;
   let fixture: ComponentFixture<TastingNoteEditorComponent>;
+  let modalController: ModalController;
 
   const click = (button: HTMLElement) => {
     const event = new Event('click');
@@ -221,15 +201,14 @@ describe('TastingNoteEditorComponent', () => {
   };
 
   beforeEach(waitForAsync(() => {
+    modalController = createOverlayControllerMock('ModalController');
     TestBed.configureTestingModule({
-      declarations: [TastingNoteEditorComponent],
-      imports: [IonicModule, ReactiveFormsModule, SharedModule],
-      providers: [
-        { provide: ModalController, useFactory: () => createOverlayControllerMock('ModalController') },
-        { provide: TastingNotesService, useFactory: createTastingNotesServiceMock },
-        { provide: TeaService, useFactory: createTeaServiceMock },
-      ],
-    }).compileComponents();
+      imports: [TastingNoteEditorComponent],
+    })
+      .overrideProvider(TastingNotesService, { useFactory: createTastingNotesServiceMock })
+      .overrideProvider(TeaService, { useFactory: createTeaServiceMock })
+      .overrideProvider(ModalController, { useValue: modalController })
+      .compileComponents();
 
     fixture = TestBed.createComponent(TastingNoteEditorComponent);
     component = fixture.componentInstance;
@@ -364,7 +343,6 @@ describe('TastingNoteEditorComponent', () => {
 
       it('dismisses the modal', () => {
         const btn = fixture.debugElement.query(By.css('[data-testid="save-button"]'));
-        const modalController = TestBed.inject(ModalController);
         click(btn.nativeElement);
         expect(modalController.dismiss).toHaveBeenCalledTimes(1);
       });
@@ -405,7 +383,6 @@ describe('TastingNoteEditorComponent', () => {
 
       it('dismisses the modal', () => {
         const btn = fixture.debugElement.query(By.css('[data-testid="save-button"]'));
-        const modalController = TestBed.inject(ModalController);
         click(btn.nativeElement);
         expect(modalController.dismiss).toHaveBeenCalledTimes(1);
       });
@@ -419,7 +396,6 @@ describe('TastingNoteEditorComponent', () => {
 
     it('dismisses the modal', () => {
       const btn = fixture.debugElement.query(By.css('[data-testid="cancel-button"]'));
-      const modalController = TestBed.inject(ModalController);
       click(btn.nativeElement);
       expect(modalController.dismiss).toHaveBeenCalledTimes(1);
     });
@@ -495,17 +471,21 @@ describe('TastingNoteEditorComponent', () => {
 There are two TODOs in the following code. Copy the rest of the code in to your TypeScript file, then fill in the TODOs.
 
 ```TypeScript
+import { CommonModule } from '@angular/common';
 import { Component, Input, OnInit } from '@angular/core';
-import { FormBuilder, FormControl, Validators } from '@angular/forms';
+import { FormBuilder, FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { TastingNotesService, TeaService } from '@app/core';
 import { TastingNote, Tea } from '@app/models';
-import { ModalController } from '@ionic/angular';
+import { RatingComponent } from '@app/shared';
+import { IonicModule, ModalController } from '@ionic/angular';
 import { Observable, of, tap } from 'rxjs';
 
 @Component({
   selector: 'app-tasting-note-editor',
   templateUrl: './tasting-note-editor.component.html',
   styleUrls: ['./tasting-note-editor.component.scss'],
+  standalone: true,
+  imports: [CommonModule, IonicModule, RatingComponent, ReactiveFormsModule],
 })
 export class TastingNoteEditorComponent implements OnInit {
   @Input()
@@ -626,10 +606,10 @@ describe('TastingNotesPage', () => {
   beforeEach(waitForAsync(() => {
     initializeTestData();
     TestBed.configureTestingModule({
-      declarations: [TastingNotesPage],
-      imports: [IonicModule],
-      providers: [{ provide: TastingNotesService, useFactory: createTastingNotesServiceMock }],
-    }).compileComponents();
+      imports: [TastingNotesPage],
+    })
+      .overrideProvider(TastingNotesService, { useFactory: createTastingNotesServiceMock })
+      .compileComponents();
 
     const tastingNotes = TestBed.inject(TastingNotesService);
     (tastingNotes.getAll as jasmine.Spy).and.returnValue(of(testData));
@@ -681,15 +661,20 @@ describe('TastingNotesPage', () => {
 #### `src/app/tasting-notes/tasting-notes.page.ts`
 
 ```TypeScript
+import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { TastingNotesService } from '@app/core';
 import { TastingNote } from '@app/models';
+import { IonicModule } from '@ionic/angular';
 import { EMPTY, Observable } from 'rxjs';
 
 @Component({
   selector: 'app-tasting-notes',
   templateUrl: './tasting-notes.page.html',
   styleUrls: ['./tasting-notes.page.scss'],
+  standalone: true,
+  imports: [CommonModule, FormsModule, IonicModule],
 })
 export class TastingNotesPage implements OnInit {
   notes$: Observable<Array<TastingNote>> = EMPTY;
@@ -716,22 +701,28 @@ With that in mind, let's update the test and the view model so we can inject the
 In `src/app/tasting-notes/tasting-notes.page.spec.ts`, update the `TestBed` configuration to provide the `ModalController` and the `IonRouterOutlet`. The full `beforeEach` should look something like the following. **Do not** copy past this in. Instead just add the parts you don't have, using the auto-complete and auto-import features of your editor to get the proper `import` statements added for you. Here is a synopsis of the changes:
 
 - create a mock for the modal element
-- import the `TastingNoteEditorModule`
 - provide mocks for the `IonRouterOutlet` and `ModalController`
 
 ```TypeScript
+  let modal: HTMLIonModalElement;
+  let modalController: ModalController;
+  let testData: Array<TastingNote>;
+
+  const mockRouterOutlet = {
+    nativeEl: {},
+  };
+
   beforeEach(waitForAsync(() => {
     initializeTestData();
     modal = createOverlayElementMock('Modal');
+    modalController = createOverlayControllerMock('ModalController', modal);
     TestBed.configureTestingModule({
-      declarations: [TastingNotesPage],
-      imports: [IonicModule, TastingNoteEditorModule],
-      providers: [
-        { provide: ModalController, useFactory: () => createOverlayControllerMock('ModalController', modal) },
-        { provide: IonRouterOutlet, useValue: mockRouterOutlet },
-        { provide: TastingNotesService, useFactory: createTastingNotesServiceMock },
-      ],
-    }).compileComponents();
+      imports: [TastingNotesPage],
+    })
+      .overrideProvider(ModalController, { useValue: modalController })
+      .overrideProvider(IonRouterOutlet, { useValue: mockRouterOutlet })
+      .overrideProvider(TastingNotesService, { useFactory: createTastingNotesServiceMock })
+      .compileComponents();
 
     const tastingNotes = TestBed.inject(TastingNotesService);
     (tastingNotes.getAll as jasmine.Spy).and.returnValue(of(testData));
@@ -740,26 +731,22 @@ In `src/app/tasting-notes/tasting-notes.page.spec.ts`, update the `TestBed` conf
   }));
 ```
 
-In `src/app/tasting-notes/tasting-notes.page.ts` inject the same items that we just set up providers for:
+In `src/app/tasting-notes/tasting-notes.page.ts`, add the `TastingNoteEditorComponent` to the `imports` list and inject the same items that we just set up providers for:
 
 ```TypeScript
+@Component({
+  selector: 'app-tasting-notes',
+  templateUrl: './tasting-notes.page.html',
+  styleUrls: ['./tasting-notes.page.scss'],
+  standalone: true,
+  imports: [CommonModule, FormsModule, IonicModule, TastingNoteEditorComponent],
+})
+...
   constructor(
     private modalController: ModalController,
     private routerOutlet: IonRouterOutlet,
     private tastingNotes: TastingNotesService,
   ) {}
-```
-
-Finally, in `src/app/tasting-notes/tasting-notes.module.ts`, add `TastingNoteEditorModule` to the imports list:
-
-```TypeScript
-  imports: [
-    CommonModule,
-    FormsModule,
-    IonicModule,
-    TastingNoteEditorModule,
-    TastingNotesPageRoutingModule,
-  ],
 ```
 
 ### Add a New Note
@@ -783,7 +770,6 @@ describe('add new note', () => {
   });
 
   it('creates the editor modal', () => {
-    const modalController = TestBed.inject(ModalController);
     const button = fixture.debugElement.query(
       By.css('[data-testid="add-new-button"]'),
     ).nativeElement;
@@ -841,7 +827,6 @@ describe('update an existing note', () => {
   });
 
   it('creates the editor modal', () => {
-    const modalController = TestBed.inject(ModalController);
     const item = fixture.debugElement.query(By.css('ion-item')).nativeElement;
     click(item);
     expect(modalController.create).toHaveBeenCalledTimes(1);

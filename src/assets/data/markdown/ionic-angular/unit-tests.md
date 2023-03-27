@@ -81,10 +81,9 @@ describe('SomeComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [SomeComponent],
-      providers: [
-        { provide: Platform, useFactory: createPlatformMock }
-      ]
-    }).compileComponents();
+    })
+      .overrideProvider(Platform, { useFactory: createPlatformMock })
+      .compileComponents();
   }));
 ...
 ```

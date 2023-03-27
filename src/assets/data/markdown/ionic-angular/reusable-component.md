@@ -2,64 +2,33 @@
 
 In this lab you will:
 
-- Create a `shared` module
-- Add a reusable component to the `shared` library
+- Add a reusable component
 - Use the component in the details page
 
-## Create the `SharedModule`
+## Create the `RatingComponent`
 
-A common convention in Angular application is to use a <a href="https://angular.io/guide/ngmodule-faq#sharedmodule" target="_blank">`SharedModule`</a> containing components, directives, and pipes that are used throughout the application.
-
-Create a shared module, and then create the rating component in the same folder
+A common convention is to create reusable components that are not specific to a particular feature in a folder called `common` or `shared`. We will use the `shared` folder convention.
 
 ```bash
-ionic g module shared
 ionic g component shared/rating
 ```
 
-The `RatingComponent` will need to be declared and exported in the `SharedModule` so we will then be able to use it elsewhere in the system. We are going to use at least one Ionic Framework component in this module, so be sure to import the `FormsModule` and `IonicModule` as well.
-
-```typescript
-import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { IonicModule } from '@ionic/angular';
-
-import { RatingComponent } from './rating/rating.component';
-
-@NgModule({
-  declarations: [RatingComponent],
-  exports: [RatingComponent],
-  imports: [CommonModule, FormsModule, IonicModule],
-})
-export class SharedModule {}
-```
-
-Create a barrel file (`src/app/shared/index.ts`) to export the module and all components that we add to the shared module.
+Create a barrel file (`src/app/shared/index.ts`) to export all of the items that we add to the shared module.
 
 ## Use the `RatingComponent`
 
 Our component isn't very useful or interesting yet, but it will be hard to build it out if we cannot see it somewhere. Let's just show it on the `TeaDetailsPage`. We can refine how it is used later.
 
-The first thing we will need to do is import our `SharedModule` in the `TeaDetailsPageModule`.
+The first thing we will need to do is import our `RatingComponent` in the `TeaDetailsPage`.
 
 ```typescript
-import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-
-import { IonicModule } from '@ionic/angular';
-
-import { TeaDetailsPageRoutingModule } from './tea-details-routing.module';
-
-import { TeaDetailsPage } from './tea-details.page';
-import { SharedModule } from '@app/shared';
-
-@NgModule({
-  imports: [CommonModule, FormsModule, IonicModule, SharedModule, TeaDetailsPageRoutingModule],
-  declarations: [TeaDetailsPage],
+@Component({
+  selector: 'app-tea-details',
+  templateUrl: './tea-details.page.html',
+  styleUrls: ['./tea-details.page.scss'],
+  standalone: true,
+  imports: [CommonModule, FormsModule, IonicModule, RatingComponent],
 })
-export class TeaDetailsPageModule {}
 ```
 
 We will also need to do the same when setting up the testing module within `src/app/tea-details/tea-details.page.spec.ts`.
@@ -140,6 +109,8 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
   selector: 'app-rating',
   templateUrl: './rating.component.html',
   styleUrls: ['./rating.component.scss'],
+  standalone: true,
+  imports: [CommonModule, FormsModule, IonicModule],
   providers: [
     {
       provide: NG_VALUE_ACCESSOR,
@@ -180,8 +151,6 @@ Let's also scaffold the test. This one will be a little more complex because we 
 import { waitForAsync, ComponentFixture, TestBed } from '@angular/core/testing';
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { IonicModule } from '@ionic/angular';
-
 import { RatingComponent } from './rating.component';
 
 @Component({
@@ -203,8 +172,8 @@ describe('RatingComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [RatingComponent, TestHostComponent],
-      imports: [FormsModule, IonicModule],
+      declarations: [TestHostComponent],
+      imports: [FormsModule, RatingComponent],
     }).compileComponents();
 
     fixture = TestBed.createComponent(TestHostComponent);

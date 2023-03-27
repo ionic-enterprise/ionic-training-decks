@@ -57,9 +57,16 @@ import { createOverlayControllerMock, createPlatformMock } from '@test/mocks';
 
 describe('TastingNoteEditorComponent', () => {
   ...
-        providers: [
-          ...
-          { provide: Platform, useFactory: createPlatformMock },
+    platform = createPlatformMock();
+    TestBed.configureTestingModule({
+      imports: [TastingNoteEditorComponent],
+    })
+      .overrideProvider(TastingNotesService, { useFactory: createTastingNotesServiceMock })
+      .overrideProvider(TeaService, { useFactory: createTeaServiceMock })
+      .overrideProvider(ModalController, { useValue: modalController })
+      .overrideProvider(Platform, { useValue: platform })
+      .compileComponents();
+  ...
 ```
 
 At this point we can start creating the tests for the properties that control the button:
@@ -68,7 +75,6 @@ At this point we can start creating the tests for the properties that control th
 describe('share', () => {
   describe('in a web context', () => {
     beforeEach(() => {
-      const platform = TestBed.inject(Platform);
       (platform.is as any).withArgs('hybrid').and.returnValue(false);
       fixture.detectChanges();
     });
@@ -80,7 +86,6 @@ describe('share', () => {
 
   describe('in a mobile context', () => {
     beforeEach(() => {
-      const platform = TestBed.inject(Platform);
       (platform.is as any).withArgs('hybrid').and.returnValue(true);
       fixture.detectChanges();
     });

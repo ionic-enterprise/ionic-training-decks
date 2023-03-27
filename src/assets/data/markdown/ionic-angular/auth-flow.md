@@ -28,7 +28,7 @@ Three services are required in order to complete our login workflow:
 
 #### Test
 
-We need to set up the test to inject mock services (remember that unit tests execute the unit under test in isolation).
+We need to set up the test to inject mock services (remember that unit tests should execute the unit under test in isolation).
 
 ```typescript
 import { AuthenticationService, SessionVaultService } from '@app/core';
@@ -37,14 +37,12 @@ import { IonicModule, NavController } from '@ionic/angular';
 import { createNavControllerMock } from '@test/mocks';
 ...
     TestBed.configureTestingModule({
-      declarations: [LoginPage],
-      imports: [IonicModule, ReactiveFormsModule],
-      providers: [
-        { provide: AuthenticationService, useFactory: createAuthenticationServiceMock },
-        { provide: SessionVaultService, useFactory: createSessionVaultServiceMock },
-        { provide: NavController, useFactory: createNavControllerMock },
-      ],
-    }).compileComponents();
+      imports: [LoginPage],
+    })
+      .overrideProvider(AuthenticationService, { useFactory: createAuthenticationServiceMock })
+      .overrideProvider(SessionVaultService, { useFactory: createSessionVaultServiceMock })
+      .overrideProvider(NavController, { useFactory: createNavControllerMock })
+      .compileComponents();
 ```
 
 #### Code
@@ -231,24 +229,29 @@ NullInjectorError: R3InjectorError(LoginPageModule)[AuthenticationService -> Aut
     at injectInjectorOnly (:8100/vendor.js:70360:33)
 ```
 
-This is because we are using the Angular HTTP Client, but we never registered it with Angular's injector. Open `src/app/app.module.ts` and add an import for `HttpClientModule` to the `imports[...]` array that is part of the base `@NgModule`. Here is what mine looks like after the change:
+This is because we are using the Angular HTTP Client, but we never registered it with Angular's injector. Open `src/main.ts` and add an import for `HttpClientModule` to the `importProvidersFrom()` call that is part of the application bootstrapping.
 
 ```typescript
 import { HttpClientModule } from '@angular/common/http';
-import { NgModule } from '@angular/core';
-import { BrowserModule } from '@angular/platform-browser';
-import { RouteReuseStrategy } from '@angular/router';
+import { enableProdMode, importProvidersFrom } from '@angular/core';
+import { bootstrapApplication } from '@angular/platform-browser';
+import { provideRouter, RouteReuseStrategy } from '@angular/router';
+import { AppComponent } from '@app/app.component';
+import { routes } from '@app/app.routes';
 import { IonicModule, IonicRouteStrategy } from '@ionic/angular';
-import { AppRoutingModule } from './app-routing.module';
-import { AppComponent } from './app.component';
+import { environment } from './environments/environment';
 
-@NgModule({
-  declarations: [AppComponent],
-  imports: [BrowserModule, HttpClientModule, IonicModule.forRoot(), AppRoutingModule],
-  providers: [{ provide: RouteReuseStrategy, useClass: IonicRouteStrategy }],
-  bootstrap: [AppComponent],
-})
-export class AppModule {}
+if (environment.production) {
+  enableProdMode();
+}
+
+bootstrapApplication(AppComponent, {
+  providers: [
+    { provide: RouteReuseStrategy, useClass: IonicRouteStrategy },
+    importProvidersFrom(HttpClientModule, IonicModule.forRoot({})),
+    provideRouter(routes),
+  ],
+});
 ```
 
 Test this out in the application again. Note from the "network" tab in the devtools that you are now using actual calls to the backend for the login and the logout.
@@ -321,14 +324,12 @@ import { IonicModule, NavController } from '@ionic/angular';
 import { createNavControllerMock } from '@test/mocks';
 ...
     TestBed.configureTestingModule({
-      declarations: [TeaPage],
-      imports: [IonicModule],
-      providers: [
-        { provide: AuthenticationService, useFactory: createAuthenticationServiceMock },
-        { provide: SessionVaultService, useFactory: createSessionVaultServiceMock },
-        { provide: NavController, useFactory: createNavControllerMock },
-      ],
-    }).compileComponents();
+      imports: [TeaPage],
+    })
+      .overrideProvider(AuthenticationService, { useFactory: createAuthenticationServiceMock })
+      .overrideProvider(NavController, { useFactory: createNavControllerMock })
+      .overrideProvider(SessionVaultService, { useFactory: createSessionVaultServiceMock })
+      .compileComponents();
 ```
 
 #### Code

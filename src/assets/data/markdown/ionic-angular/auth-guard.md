@@ -73,30 +73,30 @@ export const authGuard: CanActivateFn = async (
 
 ## Hookup the Guard
 
-Any route that requires the user to be logged in should have the guard. At this time, that is only the `tea` page, so let's hook up the guard in that page's routing module (`src/app/tea/tea-routing.module.ts`).
+Any route that requires the user to be logged in should have the guard. At this time, that is only the `tea` page, so let's hook up the guard on that page's route in `src/app/app.route.ts`.
 
 **Note:** most of this code should exist already. Just add the `authGuard` related bits.
 
 ```typescript
-import { NgModule } from '@angular/core';
-import { RouterModule, Routes } from '@angular/router';
+import { Routes } from '@angular/router';
 import { authGuard } from '@app/core';
 
-import { TeaPage } from './tea.page';
-
-const routes: Routes = [
+export const routes: Routes = [
   {
     path: '',
-    component: TeaPage,
+    redirectTo: 'tabs/tea',
+    pathMatch: 'full',
+  },
+  {
+    path: 'login',
+    loadComponent: () => import('./login/login.page').then((c) => c.LoginPage),
+  },
+  {
+    path: 'tea',
+    loadComponent: () => import('./tea/tea.page').then((c) => c.TeaPage),
     canActivate: [authGuard],
   },
 ];
-
-@NgModule({
-  imports: [RouterModule.forChild(routes)],
-  exports: [RouterModule],
-})
-export class TeaPageRoutingModule {}
 ```
 
 ## HTTP Interceptors
@@ -184,7 +184,7 @@ Doing this has been left as an exercise for the reader.
 
 ### Hookup the Interceptors
 
-Now that we have the interceptors, we need to hook them up. We will do this in the `AppModule` (`src/app/app.module.ts`). To do this, add the interceptors to the `providers` array of the `AppModule`. This ensures that they are used by the whole application. The `HTTP_INTERCEPTORS` array needs to be imported from `@angluar/common/http`.
+Now that we have the interceptors, we need to hook them up. We will modify the bootstrap configuration in `src/main.ts` by adding the interceptors to the `providers` array. This ensures that they are used by the whole application. The `HTTP_INTERCEPTORS` array needs to be imported from `@angluar/common/http`.
 
 ```typescript
 { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },

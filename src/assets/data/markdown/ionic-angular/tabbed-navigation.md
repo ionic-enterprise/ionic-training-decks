@@ -15,17 +15,18 @@ ionic generate page about
 ionic generate page tasting-notes
 ```
 
-Once those pages have been generated, be sure to open each of their routing modules and add our Auth Guard to their base routes. For example:
+If not automatically performed by the tooling, be sure to add routes to the `src/app/app.routes.ts` file:
 
 ```typescript
-  {
-    path: '',
-    component: AboutPage,
-    canActivate: [authGuard],
-  },
+      {
+        path: 'tasting-notes',
+        loadComponent: () => import('./tasting-notes/tasting-notes.page').then((c) => c.TastingNotesPage),
+      },
+      {
+        path: 'about',
+        loadComponent: () => import('./about/about.page').then((c) => c.AboutPage),
+      },
 ```
-
-Also, open the test for each page and remove the `forRoot()` from the `IonicModule` import in the `TestBed` configuration object.
 
 ## Tabs
 
@@ -62,13 +63,13 @@ At this point, we can go to the tabs page by manually setting the route via the 
 </ion-tabs>
 ```
 
-This will cause the test to start failing. The easiest way to fix that is to remove the `IonicModule` import and just use Angular's `CUSTOM_ELEMENT_SCHEMA`. This is OK because we aren't really going to be testing the tabs any further than the basic test. Our other option would be to mock out several dependencies, and that is a lot of work for no gain in this case.
+This will cause the test to start failing. The easiest way to fix that is to provide the router, though we don't need any actual routes.
 
 Modify `src/app/tabs/tabs.page.spec.ts` as such:
 
 ```typescript
-import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
-import { waitForAsync, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
 
 import { TabsPage } from './tabs.page';
 
@@ -78,8 +79,8 @@ describe('TabsPage', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [TabsPage],
-      schemas: [CUSTOM_ELEMENTS_SCHEMA],
+      imports: [TabsPage],
+      providers: [provideRouter([])],
     }).compileComponents();
 ...
 ```
@@ -88,9 +89,25 @@ describe('TabsPage', () => {
 
 The `TabsPage` renders in the `AppComponent`'s router outlet, which is where we want it. However, we want most of our individual pages to render within the `TabsPage`'s router outlet.
 
-This will involve two main files: `src/app/app-routing.module.ts` and `src/app/tabs/tabs-routing.module.ts`. Let's refactor our routes one step at a time, testing in the browser with each change.
+This will involve two main files: `src/app/app.routes.ts` and `src/app/tabs/tabs.routes.ts`. Let's refactor our routes one step at a time, testing in the browser with each change.
 
-#### Step 1: Make Tabs the Default Route
+#### Step 1: Update the Tabs Route
+
+Create a file named `src/app/tabs/tabs.routes.ts` with the following contents:
+
+```typescript
+import { Routes } from '@angular/router';
+import { authGuard } from '@app/core';
+import { TabsPage } from './tabs.page';
+
+export const routes: Routes = [
+  {
+    path: '',
+    component: TabsPage,
+    canActivate: [authGuard],
+  },
+];
+```
 
 In the `app-routing.module.ts` file there is a redirect for the "empty" route (`path: ''`). It currently redirects to the tea page. Change it to redirect to the tabs page:
 
@@ -102,82 +119,96 @@ In the `app-routing.module.ts` file there is a redirect for the "empty" route (`
   },
 ```
 
+Then either add a route for the tabs page or change the existing route to call `loadChildren()` rather than calling `loadComponent()`:
+
+```typescript
+  {
+    path: 'tabs',
+    loadChildren: () => import('./tabs/tabs.routes').then((m) => m.routes),
+  },
+```
+
+One important concept to keep in mind here is that we _can_ define all of our routes in one location, or we can define routes in a nested fashion when that makes sense. Use the strategy that makes sense for your application. This application is smaller and the only nesting level exists at the `TabsPage` level.
+
 At this point, if you reload from root (ex: `http://localhost:4200`), you should be automatically redirected to the tabs page.
 
 #### Step 2: Move the Child Pages
 
 The following pages should be child pages of the `TabsPage` so they will render in the `TabsPage` route: `AboutPage`, `TastingNotesPage`, and `TeaPage`.
 
-Move those routes from `app-routing.module.ts` to `tabs-routing.module.ts`. When you do this, you will need to place them in a `children` array under the main route, and you will need to adjust the relative paths to the lazy loaded modules.
+Move those routes from `src/app/app.routes.ts` to `src/app/tabs/tabs.routes.ts`. When you do this, you will need to place them in a `children` array under the main route, and you will need to adjust the relative paths to the lazy loaded modules.
 
 Here is what your tabs routing module should look like at this point:
 
 ```typescript
 import { NgModule } from '@angular/core';
+import { authGuard } from '@app/core';
 import { Routes, RouterModule } from '@angular/router';
 
 import { TabsPage } from './tabs.page';
 
-const routes: Routes = [
+export const routes: Routes = [
   {
     path: '',
     component: TabsPage,
+    canActivate: [authGuard],
     children: [
       {
         path: 'about',
-        loadChildren: () => import('../about/about.module').then((m) => m.AboutPageModule),
+        loadComponent: () => import('../about/about.page').then((c) => c.AboutPage),
       },
       {
         path: 'tasting-notes',
-        loadChildren: () => import('../tasting-notes/tasting-notes.module').then((m) => m.TastingNotesPageModule),
+        loadComponent: () => import('../tasting-notes/tasting-notes.page').then((c) => c.TastingNotesPage),
       },
       {
         path: 'tea',
-        loadChildren: () => import('../tea/tea.module').then((m) => m.TeaPageModule),
+        loadComponent: () => import('../tea/tea.page').then((c) => c.TeaPage),
+      },
+      {
+        path: '',
+        redirectTo: '/tabs/tea',
+        pathMatch: 'full',
       },
     ],
   },
 ];
-
-@NgModule({
-  imports: [RouterModule.forChild(routes)],
-  exports: [RouterModule],
-})
-export class TabsPageRoutingModule {}
 ```
+
+Since the `authGuard` is defined for the `tabs` route, we don't need to have it on the `children` so we can remove it as we move the other routes.
 
 If you click on the tabs at the bottom of the page, you should load each individual page. Magic!! 🌈🦄🤓
 
 #### Step 3: Move the Details Page
 
-Click on the the "Tea" tab and then click on a tea panel. The `TeaDetailsPage` is displayed but it is not rendered in the tabs page. Rather it is rendered in the root router outlet. Not so magical... 🌧
+Click on the "Tea" tab and then click on a tea panel. The `TeaDetailsPage` is displayed but it is not rendered in the tabs page. Rather it is rendered in the root router outlet. Not so magical... 🌧
 
-This page should really be a route under the `TeaPage`, so let's move it to the `tea-routing.module.ts` file and add it as a sibling of the main route that is defined there. That routing file should now look like this:
+This page should really be a route under the `TeaPage`, so let's move it to the `src/app/tabs/tabs.routes.ts` file and add it as a sibling of the main route that is defined there. That routing file should now look like this:
 
 ```typescript
-import { NgModule } from '@angular/core';
-import { RouterModule, Routes } from '@angular/router';
-
-import { TeaPage } from './tea.page';
-import { authGuard } from '@app/core';
-
-const routes: Routes = [
-  {
-    path: '',
-    component: TeaPage,
-    canActivate: [authGuard],
-  },
-  {
-    path: 'tea-details',
-    loadChildren: () => import('../tea-details/tea-details.module').then((m) => m.TeaDetailsPageModule),
-  },
-];
-
-@NgModule({
-  imports: [RouterModule.forChild(routes)],
-  exports: [RouterModule],
-})
-export class TeaPageRoutingModule {}
+    children: [
+      {
+        path: 'about',
+        loadComponent: () => import('../about/about.page').then((c) => c.AboutPage),
+      },
+      {
+        path: 'tasting-notes',
+        loadComponent: () => import('../tasting-notes/tasting-notes.page').then((c) => c.TastingNotesPage),
+      },
+      {
+        path: 'tea',
+        loadComponent: () => import('../tea/tea.page').then((c) => c.TeaPage),
+      },
+      {
+        path: 'tea/tea-details/:id',
+        loadComponent: () => import('../tea-details/tea-details.page').then((c) => c.TeaDetailsPage),
+      },
+      {
+        path: '',
+        redirectTo: '/tabs/tea',
+        pathMatch: 'full',
+      },
+    ],
 ```
 
 Now we need to adjust the routes for the navigation in the `TeaPage`. In the `TeaPage` test, find the "passes the details page and the ID" test. Add the new items to the route as noted below.
@@ -194,7 +225,7 @@ Now go change the `TeaPage` source accordingly so the test will pass. Try it in 
 
 #### Step 4: Redirects and Other Details
 
-If you load the application from root, it will go to the `tabs` route, but we really need it to display one of the pages. The `tabs/tea` route makes the most sense. Modify the current redirect within `app-routing.module.ts` to go to `tabs/tea`.
+If you load the application from root, it will go to the `tabs` route, but we really need it to display one of the pages. The `tabs/tea` route makes the most sense. Modify the current redirect within `src/app/app.routes.ts` to go to `tabs/tea`.
 
 ```typescript
   {

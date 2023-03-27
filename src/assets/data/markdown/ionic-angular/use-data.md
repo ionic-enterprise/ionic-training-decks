@@ -18,14 +18,12 @@ We currently are injecting the following mocks:
 
 ```typescript
 TestBed.configureTestingModule({
-  declarations: [TeaPage],
-  imports: [IonicModule],
-  providers: [
-    { provide: AuthenticationService, useFactory: createAuthenticationServiceMock },
-    { provide: NavController, useFactory: createNavControllerMock },
-    { provide: SessionVaultService, useFactory: createSessionVaultServiceMock },
-  ],
-}).compileComponents();
+  imports: [TeaPage],
+})
+  .overrideProvider(AuthenticationService, { useFactory: createAuthenticationServiceMock })
+  .overrideProvider(NavController, { useFactory: createNavControllerMock })
+  .overrideProvider(SessionVaultService, { useFactory: createSessionVaultServiceMock })
+  .compileComponents();
 ```
 
 Using this as a template, add code to provide a mock for the `TeaService`.
