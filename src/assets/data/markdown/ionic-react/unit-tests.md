@@ -82,6 +82,11 @@ import { render, screen } from '@testing-library/react';
 import Home from './Home';
 
 describe('<Home />', () => {
+  it('renders consistently', () => {
+    const { asFragment } = render(<Home />);
+    expect(asFragment()).toMatchSnapshot();
+  });
+
   it('displays the title', () => {
     render(<Home />);
     const titleElements = screen.getAllByText('Blank');
