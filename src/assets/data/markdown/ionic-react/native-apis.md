@@ -115,7 +115,7 @@ touch src/splash/SplashContainer.test.tsx
 
 Scaffold out the component like so:
 
-```typescript
+```
 import { ReactNode } from 'react';
 
 type Props = { children?: ReactNode };
@@ -128,7 +128,7 @@ export default SplashContainer;
 
 Import it into `src/App.tsx` and adjust the component template so `<SplashContainer />` wraps `<IonReactRouter />`:
 
-```jsx
+```
 ...
 import SplashContainer from './splash/SplashContainer';
 

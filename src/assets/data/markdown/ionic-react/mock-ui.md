@@ -9,16 +9,15 @@ In this lab, you will learn how to:
 
 ## Overview
 
-It is often desirable to lay out the user interface without worrying about how to get the data to be displayed. This allows us to concentrate solely on how the application will look and feel in order to get that worked out early in the process.
+It is often desirable to lay out the user interface before worrying how to get data to be displayed. Doing so allows us to concentrate solely on how the application will look and feel in order to get that worked out early in the development process.
 
 ## Install the Images
 
 We'll want to display images for the tea data we will be mocking up, but these assets do not exist yet. <a href="/assets/packages/ionic-react/img.zip">Download the images</a> and unpack the zip file. Follow these steps to place them in the correct locations:
 
-1. Create a folder `src/assets`
-2. Within `src/assets` create two sub folders, `images` and `icon`
-3. Move all files with the `.jpg` extension into `src/assets/images`
-4. Move `favicon.png` into `src/assets/icon`
+1. Create a folder `public/assets/images`
+2. Move all files with the `.jpg` extension into `public/assets/images`
+3. Move `favicon.png` into `public`
 
 ## Feature Folders
 
@@ -105,37 +104,35 @@ Then, update `App.tsx` to replace references to the old home page and update the
 
 **`src/App.tsx`**
 
+<<<<<<< HEAD
 ```tsx
+=======
+```
+>>>>>>> 3110f1d (wip(react): update steps 5 + workaround broken JSX rendering)
 ...
 import TeaPage from './tea/TeaPage';
 ...
-const App: React.FC = () => {
-  useEffect(() => {
-    ...
-  });
-
-  return (
-    <IonApp>
-      <IonReactRouter>
-        <IonRouterOutlet>
-          <Route exact path="/tea">
-            <TeaPage />
-          </Route>
-          <Route exact path="/">
-            <Redirect to="/tea" />
-          </Route>
-        </IonRouterOutlet>
-      </IonReactRouter>
-    </IonApp>
-  );
-};
+const App: React.FC = () => (
+  <IonApp>
+    <IonReactRouter>
+      <IonRouterOutlet>
+        <Route exact path="/tea">
+          <TeaPage />
+        </Route>
+        <Route exact path="/">
+          <Redirect to="/tea" />
+        </Route>
+      </IonRouterOutlet>
+    </IonReactRouter>
+  </IonApp>
+);
 
 export default App;
 ```
 
 **Challenge:** Replace the header text "Blank" with "Tea" and fix any failing tests.
 
-During this training, your snapshot tests will periodically fail as we update components. That's OK and makes sense - we are modifying our components so they shouldn't be matching existing snapshots. Remember to update your snapshots whenever the snapshot tests fail by pressing `u` in the terminal hosting `npm test`.
+During this training, your snapshot tests will periodically fail as we update components. That's OK and makes sense - we are modifying our components so they shouldn't be matching existing snapshots. Remember to update your snapshots whenever the snapshot tests fail by pressing `u` in the terminal hosting `npm run test.unit`.
 
 #### Mock the Data
 
@@ -148,7 +145,7 @@ export const teaData: Array<Tea> = [
   {
     id: 1,
     name: 'Green',
-    image: require('../assets/images/green.jpg'),
+    image: '/assets/images/green.jpg',
     description:
       'Green teas have the oxidation process stopped very early on, leaving them with a very subtle flavor and ' +
       'complex undertones. These teas should be steeped at lower temperatures for shorter periods of time.',
@@ -156,7 +153,7 @@ export const teaData: Array<Tea> = [
   {
     id: 2,
     name: 'Black',
-    image: require('../assets/images/black.jpg'),
+    image: '/assets/images/black.jpg',
     description:
       'A fully oxidized tea, black teas have a dark color and a full robust and pronounced flavor. Black teas tend ' +
       'to have a higher caffeine content than other teas.',
@@ -164,7 +161,7 @@ export const teaData: Array<Tea> = [
   {
     id: 3,
     name: 'Herbal',
-    image: require('../assets/images/herbal.jpg'),
+    image: '/assets/images/herbal.jpg',
     description:
       'Herbal infusions are not actually "tea" but are more accurately characterized as infused beverages ' +
       'consisting of various dried herbs, spices, and fruits.',
@@ -172,7 +169,7 @@ export const teaData: Array<Tea> = [
   {
     id: 4,
     name: 'Oolong',
-    image: require('../assets/images/oolong.jpg'),
+    image: '/assets/images/oolong.jpg',
     description:
       'Oolong teas are partially oxidized, giving them a flavor that is not as robust as black teas but also ' +
       'not as subtle as green teas. Oolong teas often have a flowery fragrance.',
@@ -180,7 +177,7 @@ export const teaData: Array<Tea> = [
   {
     id: 5,
     name: 'Dark',
-    image: require('../assets/images/dark.jpg'),
+    image: '/assets/images/dark.jpg',
     description:
       'From the Hunan and Sichuan provinces of China, dark teas are flavorful aged probiotic teas that steeps ' +
       'up very smooth with slightly sweet notes.',
@@ -188,14 +185,14 @@ export const teaData: Array<Tea> = [
   {
     id: 6,
     name: 'Puer',
-    image: require('../assets/images/puer.jpg'),
+    image: '/assets/images/puer.jpg',
     description:
       'An aged black tea from china. Puer teas have a strong rich flavor that could be described as "woody" or "peaty."',
   },
   {
     id: 7,
     name: 'White',
-    image: require('../assets/images/white.jpg'),
+    image: '/assets/images/white.jpg',
     description:
       'White tea is produced using very young shoots with no oxidation process. White tea has an extremely ' +
       'delicate flavor that is sweet and fragrant. White tea should be steeped at lower temperatures for ' +
@@ -204,7 +201,7 @@ export const teaData: Array<Tea> = [
   {
     id: 8,
     name: 'Yellow',
-    image: require('../assets/images/yellow.jpg'),
+    image: '/assets/images/yellow.jpg',
     description:
       'A rare tea from China, yellow tea goes through a similar shortened oxidation process like green teas. ' +
       'Yellow teas, however, do not have the grassy flavor that green teas tend to have. The leaves often ' +
@@ -215,11 +212,13 @@ export const teaData: Array<Tea> = [
 
 We haven't imported the `Tea` model into our file yet so your IDE may be showing some kind of visual cue. Let's go ahead and import it using the barrel file we created:
 
+<<<<<<< HEAD
 ```typescript
 import ExploreContainer from '../components/ExploreContainer';
+=======
+```TypeScript
+>>>>>>> 3110f1d (wip(react): update steps 5 + workaround broken JSX rendering)
 import { Tea } from '../shared/models';
-import './TeaPage.css';
-...
 ```
 
 #### Create a List of Cards
@@ -230,7 +229,11 @@ Let's see how that looks. Replace the line containing `<ExploreContainer />` wit
 
 **`src/tea/TeaPage.tsx`**
 
+<<<<<<< HEAD
 ```tsx
+=======
+```
+>>>>>>> 3110f1d (wip(react): update steps 5 + workaround broken JSX rendering)
 <IonList>
   {teaData.map((tea) => (
     <IonItem key={tea.id} lines="none">
@@ -262,8 +265,9 @@ Enter the <a href="https://ionicframework.com/docs/layout/grid" target="_blank">
 
 We have a list of X number of teas (currently 8, but once we start fetching data from a back end service it could be any number); let's break that up into a matrix with 4 teas in each row.
 
-Create a test for this in `TeaPage.test.tsx`:
+In `TeaPage.test.tsx`, replace the `displays the default text` test with the describe block below.
 
+<<<<<<< HEAD
 ```tsx
 ...
 import TeaPage, { teaData } from './TeaPage.tsx';
@@ -278,23 +282,37 @@ describe('<TeaPage />', () => {
       ];
       expect(undefined).toEqual(teaMatrix);
     });
+=======
+```TypeScript
+describe('initialization', () => {
+  it('makes a matrix of teas', () => {
+    const teaMatrix = [
+      [teaData[0], teaData[1], teaData[2], teaData[3]],
+      [teaData[4], teaData[5], teaData[6], teaData[7]],
+    ];
+    expect(undefined).toEqual(teaMatrix);
+>>>>>>> 3110f1d (wip(react): update steps 5 + workaround broken JSX rendering)
   });
 });
 ```
 
 This test shows the single array being expanded into an array of two child arrays, each of which are four teas long. Let's create the code to do that.
 
-Export a function called `listToMatrix()` in `TeaPage.tsx`:
+Like `teaData`, place this code _outside_ of the component and export it in `TeaPage.tsx`:
 
+<<<<<<< HEAD
 **`src/tea/TeaPage.tsx`**:
 
 ```typescript
 ...
+=======
+```typescript
+>>>>>>> 3110f1d (wip(react): update steps 5 + workaround broken JSX rendering)
 export const listToMatrix = (): Tea[][] => {
   let teaMatrix: Tea[][] = [];
   let row: Tea[] = [];
 
-  teaData.forEach(tea => {
+  teaData.forEach((tea) => {
     row.push(tea);
     if (row.length === 4) {
       teaMatrix.push(row);
@@ -305,7 +323,6 @@ export const listToMatrix = (): Tea[][] => {
   if (row.length) teaMatrix.push(row);
   return teaMatrix;
 };
-...
 ```
 
 **Challenge:** Go ahead and update the unit test so it passes.
@@ -318,11 +335,19 @@ Replace the existing `<IonList />` with the following code:
 
 **`src/tea/TeaPage.tsx`**
 
+<<<<<<< HEAD
 ```tsx
 <IonGrid className="tea-grid">
   {listToMatrix().map((row, idx) => (
     <IonRow key={idx} className="ion-justify-content-center ion-align-items-stretch">
       {row.map((tea) => (
+=======
+```
+<IonGrid className="tea-grid">
+  {listToMatrix().map((row, idx) => (
+    <IonRow key={idx} className="ion-justify-content-center ion-align-items-stretch">
+      { row.map((tea) => (
+>>>>>>> 3110f1d (wip(react): update steps 5 + workaround broken JSX rendering)
         <IonCol size="3" key={tea.id}>
           <IonCard>
             <IonImg src={tea.image} />
@@ -340,9 +365,13 @@ Replace the existing `<IonList />` with the following code:
 
 This code loops through the rows of the matrix and displays a column for each tea in that row. That looks great on an iPad Pro, although the cards are all different sizes and the rows are a bit crowded. Let's fix that with some simple CSS in `TeaPage.css`:
 
+<<<<<<< HEAD
 **`src/tea/TeaPage.css`**
 
 ```css
+=======
+```CSS
+>>>>>>> 3110f1d (wip(react): update steps 5 + workaround broken JSX rendering)
 .tea-grid ion-card {
   height: 100%;
 }
@@ -362,12 +391,15 @@ There is one last thing: our layout will always display four columns which will 
 
 Change the `IonCol` properties like so:
 
+<<<<<<< HEAD
 **`src/tea/TeaPage.tsx`**
 
 ```tsx
 ...
+=======
+```TypeScript
+>>>>>>> 3110f1d (wip(react): update steps 5 + workaround broken JSX rendering)
 <IonCol size="12" sizeMd="6" sizeXl="3" key={tea.id}>
-...
 ```
 
 Now as you change the type of device that is being emulated on Chrome the layout adapts accordingly.
