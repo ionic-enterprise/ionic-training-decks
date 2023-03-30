@@ -12,7 +12,7 @@ In this lab, you will learn how to:
 The `ionic generate` command allows you to generate several different types of objects: components, pages, pipes, services, etc. It ties into the Angular `ng generate` command and builds on top of it with some of its own schematics. One of those schematics is for the `page` object. Let's create a page now:
 
 ```bash
-$ ionic generate page login
+ionic generate page login
 ```
 
 Here are the results of that command:
@@ -20,13 +20,14 @@ Here are the results of that command:
 ```bash
 > ng generate page login --project=app
 CREATE src/app/login/login.page.scss (0 bytes)
-CREATE src/app/login/login.page.html (124 bytes)
-CREATE src/app/login/login.page.spec.ts (640 bytes)
-CREATE src/app/login/login.page.ts (252 bytes)
+CREATE src/app/login/login.page.html (300 bytes)
+CREATE src/app/login/login.page.spec.ts (446 bytes)
+CREATE src/app/login/login.page.ts (464 bytes)
+UPDATE src/app/app.routes.ts (353 bytes)
 [OK] Generated page!
 ```
 
-Add the login page to the application's routes (`src/app/app.routes.ts`):
+Verify the login page had been added to the application's routes (`src/app/app.routes.ts`):
 
 ```typescript
   {

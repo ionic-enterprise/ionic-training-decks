@@ -15,7 +15,7 @@ ionic generate page about
 ionic generate page tasting-notes
 ```
 
-If not automatically performed by the tooling, be sure to add routes to the `src/app/app.routes.ts` file:
+This will add routes to the `src/app/app.routes.ts` file:
 
 ```typescript
       {
@@ -68,7 +68,7 @@ This will cause the test to start failing. The easiest way to fix that is to pro
 Modify `src/app/tabs/tabs.page.spec.ts` as such:
 
 ```typescript
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 
 import { TabsPage } from './tabs.page';
@@ -77,8 +77,8 @@ describe('TabsPage', () => {
   let component: TabsPage;
   let fixture: ComponentFixture<TabsPage>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       imports: [TabsPage],
       providers: [provideRouter([])],
     }).compileComponents();
@@ -119,7 +119,7 @@ In the `app-routing.module.ts` file there is a redirect for the "empty" route (`
   },
 ```
 
-Then either add a route for the tabs page or change the existing route to call `loadChildren()` rather than calling `loadComponent()`:
+Change the existing route for the tabs page to call `loadChildren()` rather than calling `loadComponent()` and to load the newly created `tabs.routes.ts` file rather than the tabs page:
 
 ```typescript
   {

@@ -110,9 +110,8 @@ ionic generate page tea
 
 Open the `src/app/app.routes.ts` file and perform the following tasks:
 
-1. The previous command should have created a `tea` route. If it did not, create one using the `home` route as a model, only pointing to the new page.
 1. We no longer need the "home" route, so remove it, leaving only the "tea" route.
-1. The root path redirect will also need to change to redirect to the `tea` route.
+1. Change the root page to redirect to the newly created `tea` route.
 
 #### Mock the Data
 
@@ -211,13 +210,11 @@ In `src/app/tea/tea.page.html` place the following inside of the `ion-content`:
 
 This creates a list of cards. Angular's `ngFor` structural directive is used to render the sample template for each item in the `teaData` collection. That looks pretty good, at least when viewed at a phone resolution, but what about other form factors? Those do not look quite as nice. We will fix that shortly, but first go back to an iPhone form factor.
 
-If you look closely, though, we lost the "Large Title" scrolling effect we had on the "Home" page. Have a look at the HTML for the "Home" page. There are a few key items we need to bring over:
+Notice the "Large Title" collapsing to a translucent header as you scroll. This is an iOS specific effect (you will not see it when using Material Design on Android). Have a look at the HTML for the page. There are a few key elements that provide this:
 
 - the `[translucent]="true"` property binding in the `ion-header`
 - the `[fullscreen]="true"` property binding in the `ion-content`
 - the second `ion-header` embedded in the `ion-content`
-
-Copy all of that over to the tea page, and change the titles as needed. When you are done, your markup should look something like this:
 
 ```html
 <ion-header [translucent]="true">
@@ -236,7 +233,7 @@ Copy all of that over to the tea page, and change the titles as needed. When you
 </ion-content>
 ```
 
-Now the "Large Title" scrolling effect for iOS should have returned. Give it a try. Note that if you switch to an Android device and reload so you are using Material Design styling that you no longer have the effect. That is because this is not part of the Material Design specification. This is an example of the adaptive styling that you can have for each platform with the Ionic UI Framework. The app adapts and looks correct on each platform.
+Give it a try again. Switch to an Android device and reload so you are using Material Design styling that you no longer have the effect. That is because this is not part of the Material Design specification. This is an example of the adaptive styling that you can have for each platform with the Ionic UI Framework. The app adapts and looks correct on each platform.
 
 Recall that we previously added the following test to `src/app/home/home.page.spec.ts`:
 

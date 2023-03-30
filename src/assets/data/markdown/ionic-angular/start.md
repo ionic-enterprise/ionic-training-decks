@@ -191,8 +191,6 @@ Commit each individual update (you can always squash the commits before merging 
 
 Let's practice by updating our project now (**note**: you do not need to do all of the `git` related parts for the training, but you definitely should if you are working with a production project).
 
-**Note**: Ionic Framework version 7 is currently in pre-release. Let's do the training using that version since it will be released soon. Follow the <a href="https://ionicframework.com/docs/v7/updating/7-0" target="_blank">upgrade instructions</a>. For our project, we just need to deal with `npm install @ionic/angular@next` and the `.browserslistrc` updates. We are not far enough along to have to worry about any of the other migration steps.
-
 ## Side Note: `ionic serve` vs. `npm start`
 
 You may be used to using `npm start` to start an application. That works, but it is different. The application is for all intents and purposes an Angular application and was generated using the standard Angular schematics with some extra Ionic spices, so all of the base Angular CLI application scripts are there.
