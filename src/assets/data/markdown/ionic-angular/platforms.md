@@ -18,14 +18,14 @@ Here is an example of those changes:
 
 **Before:**
 
-```TypeScript
+```typescript
 import { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
   appId: 'io.ionic.starter',
   appName: 'tea-taster',
   webDir: 'www',
-  bundledWebRuntime: false
+  bundledWebRuntime: false,
 };
 
 export default config;
@@ -33,14 +33,14 @@ export default config;
 
 **After:**
 
-```TypeScript
+```typescript
 import { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
   appId: 'com.kensodemann.teataster',
   appName: 'Tea Taster',
   webDir: 'www',
-  bundledWebRuntime: false
+  bundledWebRuntime: false,
 };
 
 export default config;
@@ -101,7 +101,7 @@ npx capacitor-assets generate --iconBackgroundColor '#f1ebe1' --splashBackground
 
 **Pro Tip:** the `@capacitor/assets` package is updated from time to time. As a result, you may want to regenerate the icons and splash screen from time to time. To make this easier, add the command to your `package.json` `scripts`:
 
-```JSON
+```json
   "scripts": {
     "assets": "capacitor-assets generate --iconBackgroundColor '#f1ebe1' --splashBackgroundColor '#f1ebe1' --iconBackgroundColorDark '#110b00' --splashBackgroundColorDark '#110b00'",
     ...
@@ -116,7 +116,7 @@ When you want to regenerate the assets, you just need to remember `npm run asset
 
 I like to have my build ensure that that web-app and plugins are up to date in my native applications. For this reason, I do a `cap sync` with every build. This ensures my native projects are always up to date. I have also added the `--configuration production` flag so that I always get a production build.
 
-```JSON
+```json
   "scripts": {
     "assets": "capacitor-assets generate --iconBackgroundColor '#f1ebe1' --splashBackgroundColor '#f1ebe1' --iconBackgroundColorDark '#110b00' --splashBackgroundColorDark '#110b00'",
     "build": "ng build --configuration production && cap sync",

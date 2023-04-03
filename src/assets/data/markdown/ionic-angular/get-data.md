@@ -28,7 +28,7 @@ While we are in there, let's also create stub for the method we are going to nee
 
 Not every service has all of these methods, but when a data service needs a specific method these are the names that I use. The details here are not quite as important as making sure you develop a standard and then enforce it across your data services.
 
-```TypeScript
+```typescript
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { EMPTY, Observable } from 'rxjs';
@@ -51,12 +51,9 @@ Angular's <a href="https://angular.io/api/common/http/HttpClient" target="_blank
 
 You should see one test failing (note that since we added a test file you will likely need to restart the Angular testing service). That is the test for this service, and it is failing because the testing module does not know how to inject the `HttpClient` service. The `@angular/common/http/testing` library will be used to mock the `HttpClient` for our tests. Here is the configuration needed to rectify that:
 
-```TypeScript
+```typescript
 import { TestBed } from '@angular/core/testing';
-import {
-  HttpClientTestingModule,
-  HttpTestingController
-} from '@angular/common/http/testing';
+import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 
 import { environment } from '@env/environment';
 import { TeaService } from './tea.service';
@@ -67,7 +64,7 @@ describe('TeaService', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      imports: [HttpClientTestingModule]
+      imports: [HttpClientTestingModule],
     });
     httpTestingController = TestBed.inject(HttpTestingController);
     service = TestBed.inject(TeaService);

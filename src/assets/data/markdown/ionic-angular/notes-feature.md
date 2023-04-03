@@ -178,7 +178,7 @@ export const createTastingNotesServiceMock = () =>
 
 #### `src/app/tasting-notes/tasting-note-editor/tasting-note-editor.component.spec.ts`
 
-```TypeScript
+```typescript
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { TastingNotesService, TeaService } from '@app/core';
@@ -470,7 +470,7 @@ describe('TastingNoteEditorComponent', () => {
 
 There are two TODOs in the following code. Copy the rest of the code in to your TypeScript file, then fill in the TODOs.
 
-```TypeScript
+```typescript
 import { CommonModule } from '@angular/common';
 import { Component, Input, OnInit } from '@angular/core';
 import { FormBuilder, FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -583,7 +583,7 @@ export class TastingNoteEditorComponent implements OnInit {
 
 #### `src/app/tasting-notes/tasting-notes.page.spec.ts`
 
-```TypeScript
+```typescript
 import { fakeAsync, tick, waitForAsync, ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { TastingNotesService } from '@app/core';
@@ -660,7 +660,7 @@ describe('TastingNotesPage', () => {
 
 #### `src/app/tasting-notes/tasting-notes.page.ts`
 
-```TypeScript
+```typescript
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -703,37 +703,37 @@ In `src/app/tasting-notes/tasting-notes.page.spec.ts`, update the `TestBed` conf
 - create a mock for the modal element
 - provide mocks for the `IonRouterOutlet` and `ModalController`
 
-```TypeScript
-  let modal: HTMLIonModalElement;
-  let modalController: ModalController;
-  let testData: Array<TastingNote>;
+```typescript
+let modal: HTMLIonModalElement;
+let modalController: ModalController;
+let testData: Array<TastingNote>;
 
-  const mockRouterOutlet = {
-    nativeEl: {},
-  };
+const mockRouterOutlet = {
+  nativeEl: {},
+};
 
-  beforeEach(waitForAsync(() => {
-    initializeTestData();
-    modal = createOverlayElementMock('Modal');
-    modalController = createOverlayControllerMock('ModalController', modal);
-    TestBed.configureTestingModule({
-      imports: [TastingNotesPage],
-    })
-      .overrideProvider(ModalController, { useValue: modalController })
-      .overrideProvider(IonRouterOutlet, { useValue: mockRouterOutlet })
-      .overrideProvider(TastingNotesService, { useFactory: createTastingNotesServiceMock })
-      .compileComponents();
+beforeEach(waitForAsync(() => {
+  initializeTestData();
+  modal = createOverlayElementMock('Modal');
+  modalController = createOverlayControllerMock('ModalController', modal);
+  TestBed.configureTestingModule({
+    imports: [TastingNotesPage],
+  })
+    .overrideProvider(ModalController, { useValue: modalController })
+    .overrideProvider(IonRouterOutlet, { useValue: mockRouterOutlet })
+    .overrideProvider(TastingNotesService, { useFactory: createTastingNotesServiceMock })
+    .compileComponents();
 
-    const tastingNotes = TestBed.inject(TastingNotesService);
-    (tastingNotes.getAll as jasmine.Spy).and.returnValue(of(testData));
-    fixture = TestBed.createComponent(TastingNotesPage);
-    component = fixture.componentInstance;
-  }));
+  const tastingNotes = TestBed.inject(TastingNotesService);
+  (tastingNotes.getAll as jasmine.Spy).and.returnValue(of(testData));
+  fixture = TestBed.createComponent(TastingNotesPage);
+  component = fixture.componentInstance;
+}));
 ```
 
 In `src/app/tasting-notes/tasting-notes.page.ts`, add the `TastingNoteEditorComponent` to the `imports` list and inject the same items that we just set up providers for:
 
-```TypeScript
+```typescript
 @Component({
   selector: 'app-tasting-notes',
   templateUrl: './tasting-notes.page.html',
@@ -763,16 +763,14 @@ Adding a new node will be handled via a <a href="https://ionicframework.com/docs
 
 In our test, we will verify that the modal is properly opened:
 
-```TypeScript
+```typescript
 describe('add new note', () => {
   beforeEach(() => {
     fixture.detectChanges();
   });
 
   it('creates the editor modal', () => {
-    const button = fixture.debugElement.query(
-      By.css('[data-testid="add-new-button"]'),
-    ).nativeElement;
+    const button = fixture.debugElement.query(By.css('[data-testid="add-new-button"]')).nativeElement;
     click(button);
     expect(modalController.create).toHaveBeenCalledTimes(1);
     expect(modalController.create).toHaveBeenCalledWith({
@@ -783,9 +781,7 @@ describe('add new note', () => {
   });
 
   it('displays the editor modal', fakeAsync(() => {
-    const button = fixture.debugElement.query(
-      By.css('[data-testid="add-new-button"]'),
-    ).nativeElement;
+    const button = fixture.debugElement.query(By.css('[data-testid="add-new-button"]')).nativeElement;
     click(button);
     tick();
     expect(modal.present).toHaveBeenCalledTimes(1);
@@ -795,7 +791,7 @@ describe('add new note', () => {
 
 The code required to perform this action is:
 
-```TypeScript
+```typescript
   async newNote(): Promise<void> {
     const modal = await this.modalController.create({
       component: TastingNoteEditorComponent,
@@ -820,7 +816,7 @@ Find the `ion-item` that displays each note in the list and add the following ev
 
 Now we can add a set of tests:
 
-```TypeScript
+```typescript
 describe('update an existing note', () => {
   beforeEach(() => {
     fixture.detectChanges();
@@ -849,7 +845,7 @@ describe('update an existing note', () => {
 
 The quick and dirty way to get this test to pass is to copy the `newNote()` method and add the note property binding to it as such:
 
-```TypeScript
+```typescript
 async updateNote(note: TastingNote): Promise<void> {
   const modal = await this.modalController.create({
     component: TastingNoteEditorComponent,
@@ -863,7 +859,7 @@ async updateNote(note: TastingNote): Promise<void> {
 
 But that is a lot of repeated code with just a one line difference. Let's refactor that a bit:
 
-```TypeScript
+```typescript
 newNote(): Promise<void> {
   return this.displayEditor();
 }
@@ -889,7 +885,7 @@ We will use a construct called <a ref="https://ionicframework.com/docs/api/item-
 
 Doing this results in a little bit of rework in how the item is rendered and bound on the `TastingNotesPage`:
 
-```HTML
+```html
 <ion-item-sliding *ngFor="let note of notes$ | async">
   <ion-item (click)="updateNote(note)">
     <ion-label>
@@ -899,9 +895,7 @@ Doing this results in a little bit of rework in how the item is rendered and bou
   </ion-item>
 
   <ion-item-options>
-    <ion-item-option color="danger" (click)="deleteNote(note)">
-      Delete
-    </ion-item-option>
+    <ion-item-option color="danger" (click)="deleteNote(note)"> Delete </ion-item-option>
   </ion-item-options>
 </ion-item-sliding>
 ```

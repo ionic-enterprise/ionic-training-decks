@@ -12,7 +12,7 @@ The first thing we will need to do is model the session data for our system. The
 
 First let's define the user data. Create a `src/app/models/user.ts` file with the following contents:
 
-```TypeScript
+```typescript
 export interface User {
   id: number;
   firstName: string;
@@ -23,7 +23,7 @@ export interface User {
 
 Next we will model the current session. Create a `src/app/models/session.ts` file with the following contents:
 
-```TypeScript
+```typescript
 import { User } from './user';
 
 export interface Session {
@@ -89,7 +89,7 @@ Now that we have the interface for the service worked out, we can fill out a ske
 
 Edit the `tsconfig.spec.json` file and add a `paths` parameter to the `compilerOptions` as such:
 
-```JSON
+```json
     "paths": {
       "@app/*": ["src/app/*"],
       "@env/*": ["src/environments/*"],
@@ -102,7 +102,7 @@ Note that this is exactly like the `paths` we added to the base `tsconfig.json` 
 
 Next, create a `__mocks__/@capacitor` folder in the project's root and add a `preferences.ts` file with the following contents:
 
-```TypeScript
+```typescript
 class MockPreferences {
   async remove(opt: { key: string }): Promise<void> {}
   async set(opt: { key: string; value: string | undefined }): Promise<void> {}
@@ -118,7 +118,7 @@ export { Preferences };
 
 Now we can begin creating the test for our new `SessionVaultService` in `src/app/core/session-vault/session-vault.service.spec.ts`. Start by importing `Preferences` and `Session` as shown and by adding `describe` blocks for each of our public methods:
 
-```TypeScript
+```typescript
 import { TestBed } from '@angular/core/testing';
 import { Preferences } from '@capacitor/preferences';
 import { Session } from '@app/models';
@@ -179,7 +179,7 @@ describe('set', () => {
 
 The code for this in the service class then looks like the following:
 
-```TypeScript
+```typescript
 async set(session: Session): Promise<void> {
   await Preferences.set({ key: this.key, value: JSON.stringify(session) });
 }

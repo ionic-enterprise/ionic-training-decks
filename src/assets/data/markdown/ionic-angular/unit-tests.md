@@ -51,7 +51,7 @@ This is a very simple test involving the page's DOM, but it will give you an ide
 
 Add the following to the `src/app/home/home.page.spec.ts` file:
 
-```TypeScript
+```typescript
 ...
 import { By } from '@angular/platform-browser';
 ...
@@ -71,7 +71,7 @@ It is a _best practice_ to use centralized factory functions to create mocks whe
 
 The items in that folder are often used within the `TestBed` configuration in order to provide the mock object instead of the real object for various dependencies. For example:
 
-```TypeScript
+```typescript
 ...
 import { SomeComponent } from './some.component';
 import { createPlatformMock } from '../../test/mocks';

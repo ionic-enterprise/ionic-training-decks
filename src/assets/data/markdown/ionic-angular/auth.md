@@ -9,8 +9,8 @@ In this lab you will add learn how to:
 
 Update both of the files under `src/environments` to include the following property:
 
-```TypeScript
-dataService: 'https://cs-demo-api.herokuapp.com'
+```typescript
+dataService: 'https://cs-demo-api.herokuapp.com';
 ```
 
 These files define the `dev` and `prod` environments. Typically they would have different values for something like the data service, but for our app we only have a single API server. Also, you can create more environments (QA, Testing, etc), but doing so is beyond the scope of this training.
@@ -251,11 +251,11 @@ it('emits undefined', fakeAsync(() => {
 
 That just takes one minor tweak in the `map()`:
 
-```TypeScript
-      map((res: LoginResponse) => {
-        const { success, ...session } = res;
-        return success ? session : undefined;
-      })
+```typescript
+map((res: LoginResponse) => {
+  const { success, ...session } = res;
+  return success ? session : undefined;
+});
 ```
 
 In case you got lost at any step, here is the complete code so far:
