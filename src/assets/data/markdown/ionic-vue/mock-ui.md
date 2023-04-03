@@ -28,7 +28,7 @@ Before we mock up the UI for the main page, let's define the data model for our 
 - Create a `src/models` folder
 - Add a `src/models/Tea.ts` file
 
-```TypeScript
+```typescript
 export interface Tea {
   id: number;
   name: string;
@@ -386,15 +386,15 @@ With the test in place, we can make the following modifications to the view:
 
 The component now loops through the rows. For each row it displays a column for each tea in that row. That looks great on a large device such as an iPad Pro or standard web browser. However, the cards are all different sizes and look a little crowded. We can fix that with a little styling in the view. You can replace the styling that is currently there with the following:
 
-```scss
+```html
 <style scoped>
-ion-card {
-  height: 100%;
-}
+  ion-card {
+    height: 100%;
+  }
 
-ion-col {
-  margin-bottom: 1em;
-}
+  ion-col {
+    margin-bottom: 1em;
+  }
 </style>
 ```
 

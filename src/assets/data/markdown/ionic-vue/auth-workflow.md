@@ -177,12 +177,12 @@ We can log in, but what about logging out? For now, we will add that to the Tea 
 
 Let's add the actual button first. In `src/views/TeaList.vue` add the following markup within the `ion-toolbar` that is in the header:
 
-```HTML
-        <ion-buttons slot="end">
-          <ion-button data-testid="logout-button" @click="logoutClicked">
-            <ion-icon slot="icon-only" :icon="logOutOutline"></ion-icon>
-          </ion-button>
-        </ion-buttons>
+```html
+<ion-buttons slot="end">
+  <ion-button data-testid="logout-button" @click="logoutClicked">
+    <ion-icon slot="icon-only" :icon="logOutOutline"></ion-icon>
+  </ion-button>
+</ion-buttons>
 ```
 
 Now we will need to go to the `script` tag and make some adjustments. Where we are doing the imports, add the following:
@@ -191,32 +191,32 @@ Now we will need to go to the `script` tag and make some adjustments. Where we a
 - add `import { logOutOutline } from 'ionicons/icons';`
 - add a shell `loginClicked()` function
 
-```TypeScript
-const logoutClicked = async (): Promise<void> => { };
+```typescript
+const logoutClicked = async (): Promise<void> => {};
 ```
 
 Now let's make that button actually do something. Specifically, let's make it log us out. First we will update the `TeaListPage` test to use a `mountView` function similar to the one we created in the `LoginPage` test. Be sure to also import and mock `@/composables/auth`.
 
 With those modifications in place, we can add the tests that express our current requirements:
 
-```TypeScript
-    it('performs a logout when the logout button is clicked', async () => {
-      const { logout } = useAuth();
-      const wrapper = await mountView();
-      const button = wrapper.find('[data-testid="logout-button"]');
-      router.replace = jest.fn();
-      await button.trigger('click');
-      expect(logout).toHaveBeenCalledTimes(1);
-    });
+```typescript
+it('performs a logout when the logout button is clicked', async () => {
+  const { logout } = useAuth();
+  const wrapper = await mountView();
+  const button = wrapper.find('[data-testid="logout-button"]');
+  router.replace = jest.fn();
+  await button.trigger('click');
+  expect(logout).toHaveBeenCalledTimes(1);
+});
 
-    it('navigates to the login after the logout action is complete', async () => {
-      const wrapper = await mountView();
-      const button = wrapper.find('[data-testid="logout-button"]');
-      router.replace = jest.fn();
-      await button.trigger('click');
-      expect(router.replace).toHaveBeenCalledTimes(1);
-      expect(router.replace).toHaveBeenCalledWith('/login');
-    });
+it('navigates to the login after the logout action is complete', async () => {
+  const wrapper = await mountView();
+  const button = wrapper.find('[data-testid="logout-button"]');
+  router.replace = jest.fn();
+  await button.trigger('click');
+  expect(router.replace).toHaveBeenCalledTimes(1);
+  expect(router.replace).toHaveBeenCalledWith('/login');
+});
 ```
 
 Back in the view's code, fill out the logic for the `logoutClicked()` function that was created within the `script` section. **Hint:** you will need to import `useAuth` and use the `logout` function from it. You will also need to use `useRouter`. See the `LoginPage` page for examples.
@@ -229,16 +229,16 @@ There are some routes within our app where we do not want to allow users to go u
 
 First, let's write the guard itself. Add a `checkAuthStatus()` function to the top of the file, after the imports.
 
-```TypeScript
+```typescript
 const { getSession } = useSession();
 
 const checkAuthStatus = async (
   to: RouteLocationNormalized,
   from: RouteLocationNormalized,
-  next: NavigationGuardNext,
+  next: NavigationGuardNext
 ) => {
   const session = await getSession();
-  if (!session && to.matched.some(r => r.meta.requiresAuth)) {
+  if (!session && to.matched.some((r) => r.meta.requiresAuth)) {
     return next('/login');
   }
   next();
@@ -257,7 +257,7 @@ The guts of the `checkAuthStatus()` function are:
 
 Next, after we create the router, call the guard for each route change (code given in context, only add the appropriate line in your own code).
 
-```TypeScript
+```typescript
 const router = createRouter({
   history: createWebHistory(process.env.BASE_URL),
   routes,
@@ -270,7 +270,7 @@ export default router;
 
 Finally, mark the teas route as requiring authentication:
 
-```TypeScript
+```typescript
   {
     path: '/teas',
     name: 'Teas',
@@ -287,7 +287,7 @@ We need to intercept outgoing requests and add the token if we have one. We also
 
 You will need to update the imports.
 
-```TypeScript
+```typescript
 import axios, { InternalAxiosRequestConfig } from 'axios';
 
 import router from '@/router';
@@ -298,7 +298,7 @@ const { clearSession, getSession } = useSession();
 
 After the client is created, but before the module is exported, you will need to add the interceptors.
 
-```TypeScript
+```typescript
 client.interceptors.request.use(async (config: InternalAxiosRequestConfig) => {
   const session = await getSession();
   if (session && session.token && config.headers) {
@@ -308,13 +308,13 @@ client.interceptors.request.use(async (config: InternalAxiosRequestConfig) => {
 });
 
 client.interceptors.response.use(
-  response  => response,
-  error => {
+  (response) => response,
+  (error) => {
     if (error.response.status === 401) {
       clearSession().then(() => router.replace('/login'));
     }
     return Promise.reject(error);
-  },
+  }
 );
 ```
 

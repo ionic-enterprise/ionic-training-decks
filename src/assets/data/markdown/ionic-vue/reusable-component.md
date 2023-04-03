@@ -57,7 +57,7 @@ We don't want a component that just tells us that it works. What we want is a se
 
 Let's modify our `script` tag code to get some of that in place. What we need to do is grab the icons we need and make them available on our component. We then need to add a `modelValue` prop since that is the property that `v-model` will be setting. The `defineEmits` is not strictly needed, but combined with defining `modelValue` it makes it obvious that we intend for this to work with `v-model`.
 
-```TypeScript
+```typescript
 <script setup lang="ts">
 import { star, starOutline } from 'ionicons/icons';
 
@@ -119,13 +119,13 @@ If we look at a tea details page in the browser we should see five outlined star
 
 Next, let's make the component respect the modelValue property. First the test:
 
-```TypeScript
-  it('fills in the first 3 stars', async () => {
-    const icons = wrapper.findAllComponents({ name: 'ion-icon' });
-    await wrapper.setProps({modelValue: 3});
-    expect(icons.length).toBe(5);
-    icons.forEach((icon, idx) => expect(icon.vm.icon).toEqual(idx < 3 ? star : starOutline));
-  });
+```typescript
+it('fills in the first 3 stars', async () => {
+  const icons = wrapper.findAllComponents({ name: 'ion-icon' });
+  await wrapper.setProps({ modelValue: 3 });
+  expect(icons.length).toBe(5);
+  icons.forEach((icon, idx) => expect(icon.vm.icon).toEqual(idx < 3 ? star : starOutline));
+});
 ```
 
 To get this test to pass, the icon binding in the template changes a bit. It currently looks like this:
@@ -147,14 +147,14 @@ The final bit is to get the component to respond to click events. In order to fu
 
 The easiest way to test this is to trigger a click and look for the proper event to have been emitted:
 
-```TypeScript
-  it('emits the model value update event on clicks', () => {
-    const icons = wrapper.findAll('ion-icon');
-    icons[2].trigger('click');
-    const updateModelValueCalls = wrapper.emitted('update:modelValue');
-    expect(updateModelValueCalls?.length).toBe(1);
-    expect(updateModelValueCalls && updateModelValueCalls[0]).toEqual([3]);
-  });
+```typescript
+it('emits the model value update event on clicks', () => {
+  const icons = wrapper.findAll('ion-icon');
+  icons[2].trigger('click');
+  const updateModelValueCalls = wrapper.emitted('update:modelValue');
+  expect(updateModelValueCalls?.length).toBe(1);
+  expect(updateModelValueCalls && updateModelValueCalls[0]).toEqual([3]);
+});
 ```
 
 Add the following event handler to the icon in order to handle the click events:
@@ -169,7 +169,7 @@ Try this out in the `TeaDetails` page in the browser. You should now be able to 
 
 So far this works well, but the stars are a little small and close together, especially for people with larger hands. Let's apply a little style to make that better.
 
-```CSS
+```css
 <style scoped>
 ion-icon {
   font-size: 24px;

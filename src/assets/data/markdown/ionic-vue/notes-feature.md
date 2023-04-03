@@ -295,7 +295,7 @@ Let's create a composite component that we can use to create new tasting notes o
 
 Also create a `tests/unit/components/AppTastingNoteEditor.spec.ts` file with the following contents:
 
-```TypeScript
+```typescript
 import { mount, VueWrapper } from '@vue/test-utils';
 import AppTastingNoteEditor from '@/components/AppTastingNoteEditor.vue';
 
@@ -469,7 +469,7 @@ We need a way to select the type of tea that we have. Add a select for this. In 
 
 First we should create a test to make sure we do the binding correctly. Update `tests/unit/components/AppTastingNoteEditor.spec.ts`
 
-```TypeScript
+```typescript
 ...
 import { useTea } from '@/composables/tea';
 
@@ -625,7 +625,7 @@ That looks pretty good so far.
 
 We have built up the validations as we went. Let's just add a simple test to verify some of the messages:
 
-```TypeScript
+```typescript
 import { flushPromises, mount, VueWrapper } from '@vue/test-utils';
 import waitForExpect from 'wait-for-expect';
   ...
@@ -684,46 +684,46 @@ The submit button at the bottom of the modal should be disabled until valid data
 
 Test:
 
-```TypeScript
-  describe('submit button', () => {
-    it('is disabled until valid data is entered', async () => {
-      const brand = wrapper.findComponent('[data-testid="brand-input"]');
-      const name = wrapper.findComponent('[data-testid="name-input"]');
-      const teaType = wrapper.findComponent('[data-testid="tea-type-select"]');
-      const rating = wrapper.findComponent('[data-testid="rating-input"]');
-      const notes = wrapper.findComponent('[data-testid="notes-textbox"]');
+```typescript
+describe('submit button', () => {
+  it('is disabled until valid data is entered', async () => {
+    const brand = wrapper.findComponent('[data-testid="brand-input"]');
+    const name = wrapper.findComponent('[data-testid="name-input"]');
+    const teaType = wrapper.findComponent('[data-testid="tea-type-select"]');
+    const rating = wrapper.findComponent('[data-testid="rating-input"]');
+    const notes = wrapper.findComponent('[data-testid="notes-textbox"]');
 
-      const button = wrapper.find('[data-testid="submit-button"]');
+    const button = wrapper.find('[data-testid="submit-button"]');
 
-      await flushPromises();
-      await waitForExpect(() => expect((button.element as HTMLIonButtonElement).disabled).toBe(true));
+    await flushPromises();
+    await waitForExpect(() => expect((button.element as HTMLIonButtonElement).disabled).toBe(true));
 
-      await brand.setValue('foobar');
-      await flushPromises();
-      await waitForExpect(() => expect((button.element as HTMLIonButtonElement).disabled).toBe(true));
+    await brand.setValue('foobar');
+    await flushPromises();
+    await waitForExpect(() => expect((button.element as HTMLIonButtonElement).disabled).toBe(true));
 
-      await name.setValue('mytea');
-      await flushPromises();
-      await waitForExpect(() => expect((button.element as HTMLIonButtonElement).disabled).toBe(true));
+    await name.setValue('mytea');
+    await flushPromises();
+    await waitForExpect(() => expect((button.element as HTMLIonButtonElement).disabled).toBe(true));
 
-      await teaType.setValue(3);
-      await flushPromises();
-      await waitForExpect(() => expect((button.element as HTMLIonButtonElement).disabled).toBe(true));
+    await teaType.setValue(3);
+    await flushPromises();
+    await waitForExpect(() => expect((button.element as HTMLIonButtonElement).disabled).toBe(true));
 
-      await rating.setValue(2);
-      await flushPromises();
-      await waitForExpect(() => expect((button.element as HTMLIonButtonElement).disabled).toBe(true));
+    await rating.setValue(2);
+    await flushPromises();
+    await waitForExpect(() => expect((button.element as HTMLIonButtonElement).disabled).toBe(true));
 
-      await notes.setValue('Meh. It is ok.');
-      await flushPromises();
-      await waitForExpect(() => expect((button.element as HTMLIonButtonElement).disabled).toBe(false));
-    });
+    await notes.setValue('Meh. It is ok.');
+    await flushPromises();
+    await waitForExpect(() => expect((button.element as HTMLIonButtonElement).disabled).toBe(false));
   });
+});
 ```
 
 The markup to enable this is super simple. We had already snuck in the `formIsValid` computed value earlier, so it is just a matter of binding the `formIsValid` to the submit button's `disabled` property, just like we did in the Login view before.
 
-```HTML
+```html
 :disabled="!formIsValid"
 ```
 
@@ -746,87 +746,87 @@ jest.mock('@/composables/tasting-notes');
 
 Within the "submit button" describe block we will add another group of test for when the button click is triggered:
 
-```TypeScript
-    describe('on click', () => {
-      beforeEach(async () => {
-        const brand = wrapper.findComponent('[data-testid="brand-input"]');
-        const name = wrapper.findComponent('[data-testid="name-input"]');
-        const teaType = wrapper.findComponent('[data-testid="tea-type-select"]');
-        const rating = wrapper.findComponent('[data-testid="rating-input"]');
-        const notes = wrapper.findComponent('[data-testid="notes-textbox"]');
+```typescript
+describe('on click', () => {
+  beforeEach(async () => {
+    const brand = wrapper.findComponent('[data-testid="brand-input"]');
+    const name = wrapper.findComponent('[data-testid="name-input"]');
+    const teaType = wrapper.findComponent('[data-testid="tea-type-select"]');
+    const rating = wrapper.findComponent('[data-testid="rating-input"]');
+    const notes = wrapper.findComponent('[data-testid="notes-textbox"]');
 
-        await brand.setValue('foobar');
-        await name.setValue('mytea');
-        await teaType.setValue(3);
-        await rating.setValue(2);
-        await notes.setValue('Meh. It is ok.');
+    await brand.setValue('foobar');
+    await name.setValue('mytea');
+    await teaType.setValue(3);
+    await rating.setValue(2);
+    await notes.setValue('Meh. It is ok.');
 
-        modalController.dismiss = jest.fn();
-      });
+    modalController.dismiss = jest.fn();
+  });
 
-      it('merges the tasting note', async () => {
-        const { merge } = useTastingNotes();
-        const button = wrapper.find('[data-testid="submit-button"]');
-        await button.trigger('click');
+  it('merges the tasting note', async () => {
+    const { merge } = useTastingNotes();
+    const button = wrapper.find('[data-testid="submit-button"]');
+    await button.trigger('click');
 
-        expect(merge).toHaveBeenCalledTimes(1);
-        expect(merge).toHaveBeenCalledWith({
-          brand: 'foobar',
-          name: 'mytea',
-          rating: 2,
-          teaCategoryId: 3,
-          notes: 'Meh. It is ok.',
-        });
-      });
-
-      it('closes the modal', async () => {
-        const button = wrapper.find('[data-testid="submit-button"]');
-
-        expect(modalController.dismiss).not.toHaveBeenCalled();
-        await button.trigger('click');
-        expect(modalController.dismiss).toHaveBeenCalledTimes(1);
-      });
+    expect(merge).toHaveBeenCalledTimes(1);
+    expect(merge).toHaveBeenCalledWith({
+      brand: 'foobar',
+      name: 'mytea',
+      rating: 2,
+      teaCategoryId: 3,
+      notes: 'Meh. It is ok.',
     });
+  });
+
+  it('closes the modal', async () => {
+    const button = wrapper.find('[data-testid="submit-button"]');
+
+    expect(modalController.dismiss).not.toHaveBeenCalled();
+    await button.trigger('click');
+    expect(modalController.dismiss).toHaveBeenCalledTimes(1);
+  });
+});
 ```
 
 The cancel button tests will be similar, but with no data setup. We also will expect that the merge does not take place.
 
-```TypeScript
-  describe('cancel button', () => {
-    beforeEach(() => {
-      modalController.dismiss = jest.fn();
-    });
-
-    it('does not merge', async () => {
-      const { merge } = useTastingNotes();
-      const button = wrapper.find('[data-testid="cancel-button"]');
-      await button.trigger('click');
-      expect(merge).not.toHaveBeenCalled();
-    });
-
-    it('closes the modal', async () => {
-      const button = wrapper.find('[data-testid="cancel-button"]');
-
-      expect(modalController.dismiss).not.toHaveBeenCalled();
-      await button.trigger('click');
-      expect(modalController.dismiss).toHaveBeenCalledTimes(1);
-    });
+```typescript
+describe('cancel button', () => {
+  beforeEach(() => {
+    modalController.dismiss = jest.fn();
   });
+
+  it('does not merge', async () => {
+    const { merge } = useTastingNotes();
+    const button = wrapper.find('[data-testid="cancel-button"]');
+    await button.trigger('click');
+    expect(merge).not.toHaveBeenCalled();
+  });
+
+  it('closes the modal', async () => {
+    const button = wrapper.find('[data-testid="cancel-button"]');
+
+    expect(modalController.dismiss).not.toHaveBeenCalled();
+    await button.trigger('click');
+    expect(modalController.dismiss).toHaveBeenCalledTimes(1);
+  });
+});
 ```
 
 #### Modifications to the Code
 
 The `script` section already contains stubs for the `submit()` and `cancel()` functions. Here is a bit of the `submit()`. Filling out the rest is left as an exercise for you:
 
-```TypeScript
-    const submit = async () => {
-      const { merge } = useTastingNotes();
-      await merge({
-        brand: brand.value,
-        // TODO: fill in the rest
-      });
-      await modalController.dismiss();
-    };
+```typescript
+const submit = async () => {
+  const { merge } = useTastingNotes();
+  await merge({
+    brand: brand.value,
+    // TODO: fill in the rest
+  });
+  await modalController.dismiss();
+};
 ```
 
 ## Listing the Tasting Notes
@@ -837,7 +837,7 @@ First, let update the test (`tests/unit/views/TastingNotesPage.spec.ts`) to incl
 
 First, define some tasting notes data:
 
-```TypeScript
+```typescript
 ...
 import { useTastingNotes } from '@/composables/tasting-notes';
 
@@ -882,44 +882,44 @@ describe('TastingNotesPage.vue', () => {
 
 We will need to load that data upon entering the page. That means that the page will need to call the `refresh()` from `useTastingNotes()`. Let's create a test for that:
 
-```TypeScript
-  it('refreshes the tasting notes data', async () => {
-    const { refresh } = useTastingNotes();
-    await mountView();
-    expect(refresh).toHaveBeenCalledTimes(1);
-  });
+```typescript
+it('refreshes the tasting notes data', async () => {
+  const { refresh } = useTastingNotes();
+  await mountView();
+  expect(refresh).toHaveBeenCalledTimes(1);
+});
 ```
 
 Add the code to the view component in order to accomplish this. See the `TeaListPage.vue` file if you need a model.
 
 Our requirements are that if a note exists for this user, we display it in the list, and that we display the `name` and the `brand` fields in the list. Let's test that now.
 
-```TypeScript
-  it('displays the notes', async () => {
-    const wrapper = await mountView();
-    const list = wrapper.find('[data-testid="notes-list"]');
-    const items = list.findAll('ion-item');
-    expect(items.length).toBe(3);
-    expect(items[0].text()).toContain('Lipton');
-    expect(items[0].text()).toContain('Green Tea');
-    expect(items[1].text()).toContain('Lipton');
-    expect(items[1].text()).toContain('Yellow Label');
-    expect(items[2].text()).toContain('Rishi');
-    expect(items[2].text()).toContain('Puer Cake');
-  });
+```typescript
+it('displays the notes', async () => {
+  const wrapper = await mountView();
+  const list = wrapper.find('[data-testid="notes-list"]');
+  const items = list.findAll('ion-item');
+  expect(items.length).toBe(3);
+  expect(items[0].text()).toContain('Lipton');
+  expect(items[0].text()).toContain('Green Tea');
+  expect(items[1].text()).toContain('Lipton');
+  expect(items[1].text()).toContain('Yellow Label');
+  expect(items[2].text()).toContain('Rishi');
+  expect(items[2].text()).toContain('Puer Cake');
+});
 ```
 
 The key parts for all of this to work together is the following markup:
 
-```HTML
-      <ion-list data-testid="notes-list">
-        <ion-item v-for="note of notes" :key="note.id">
-          <ion-label>
-            <div>{{ note.brand }}</div>
-            <div>{{ note.name }}</div>
-          </ion-label>
-        </ion-item>
-      </ion-list>
+```html
+<ion-list data-testid="notes-list">
+  <ion-item v-for="note of notes" :key="note.id">
+    <ion-label>
+      <div>{{ note.brand }}</div>
+      <div>{{ note.name }}</div>
+    </ion-label>
+  </ion-item>
+</ion-list>
 ```
 
 At this point, all we should have to do to our `script` section is to add `notes` to the destructuring of our `useTastingNotes()` return value:
@@ -938,7 +938,7 @@ We can add notes, but it would also be good if we could update them.
 
 The editor component currently only handles creating new tasting note. We will also need to handle the case where we need to edit a tasting note. We could handle this by passing the whole tasting note, but let's just pass the note's ID. Since `id` is not a great name for a prop, let's use `noteId`. Add the following prop to the `script` section of our `AppTastingNoteEditor`:
 
-```TypeScript
+```typescript
 const props = defineProps({
   noteId: Number,
 });
@@ -950,13 +950,13 @@ With that in place we can now start building out the changes to the editor and w
 
 First, we should modify the title based on whether we are doing an add or an update.
 
-```TypeScript
-  it('displays an appropriate title', async () => {
-    const title = wrapper.find('ion-title');
-    expect(title.text()).toBe('Add New Tasting Note');
-    await wrapper.setProps({ noteId: 42 });
-    expect(title.text()).toBe('Tasting Note');
-  });
+```typescript
+it('displays an appropriate title', async () => {
+  const title = wrapper.find('ion-title');
+  expect(title.text()).toBe('Add New Tasting Note');
+  await wrapper.setProps({ noteId: 42 });
+  expect(title.text()).toBe('Tasting Note');
+});
 ```
 
 So the add case has "Add New Tasting Note" where the update case just says "Tasting Note". Let's implement that in the code.
@@ -985,41 +985,41 @@ So the add case has "Add New Tasting Note" where the update case just says "Tast
 
 If we have an ID when the editor is created we need to find the note. At that point, we can add a test. We will need to mount the component within our test so we can pass the property:
 
-```TypeScript
-  it('populates the data when editing a note', async () => {
-    const { find } = useTastingNotes();
-    (find as jest.Mock).mockResolvedValue({
-      id: 73,
-      brand: 'Rishi',
-      name: 'Puer Cake',
-      teaCategoryId: 6,
-      rating: 5,
-      notes: 'Smooth and peaty, the king of puer teas',
-    });
-    const modal = mount(AppTastingNoteEditor, {
-      props: {
-        noteId: 73,
-      },
-    });
-    await flushPromises();
-    expect(find).toHaveBeenCalledTimes(1);
-    expect(find).toHaveBeenCalledWith(73);
-    const brand = modal.findComponent('[data-testid="brand-input"]');
-    const name = modal.findComponent('[data-testid="name-input"]');
-    const rating = modal.findComponent('[data-testid="rating-input"]');
-    const notes = modal.findComponent('[data-testid="notes-textbox"]');
-    const teaCategory = modal.findComponent('[data-testid="tea-type-select"]');
-    expect((brand.element as HTMLInputElement).value).toEqual('Rishi');
-    expect((name.element as HTMLInputElement).value).toEqual('Puer Cake');
-    expect((teaCategory.element as HTMLSelectElement).value).toEqual(6);
-    expect((notes.element as HTMLInputElement).value).toEqual('Smooth and peaty, the king of puer teas');
-    expect((rating as VueWrapper).props().modelValue).toEqual(5);
+```typescript
+it('populates the data when editing a note', async () => {
+  const { find } = useTastingNotes();
+  (find as jest.Mock).mockResolvedValue({
+    id: 73,
+    brand: 'Rishi',
+    name: 'Puer Cake',
+    teaCategoryId: 6,
+    rating: 5,
+    notes: 'Smooth and peaty, the king of puer teas',
   });
+  const modal = mount(AppTastingNoteEditor, {
+    props: {
+      noteId: 73,
+    },
+  });
+  await flushPromises();
+  expect(find).toHaveBeenCalledTimes(1);
+  expect(find).toHaveBeenCalledWith(73);
+  const brand = modal.findComponent('[data-testid="brand-input"]');
+  const name = modal.findComponent('[data-testid="name-input"]');
+  const rating = modal.findComponent('[data-testid="rating-input"]');
+  const notes = modal.findComponent('[data-testid="notes-textbox"]');
+  const teaCategory = modal.findComponent('[data-testid="tea-type-select"]');
+  expect((brand.element as HTMLInputElement).value).toEqual('Rishi');
+  expect((name.element as HTMLInputElement).value).toEqual('Puer Cake');
+  expect((teaCategory.element as HTMLSelectElement).value).toEqual(6);
+  expect((notes.element as HTMLInputElement).value).toEqual('Smooth and peaty, the king of puer teas');
+  expect((rating as VueWrapper).props().modelValue).toEqual(5);
+});
 ```
 
 We can then add code to the `initialize()` within our `script` section:
 
-```TypeScript
+```typescript
 ...
 const initialize = async () => {
   if (props.noteId) {
@@ -1046,22 +1046,22 @@ initialize();
 
 When saving the note, the value passed to the `merge()` should include the ID. Here is the test. Place this right after the existing "merges the tasting note" test.
 
-```TypeScript
-      it('includes the ID if it set', async () => {
-        const { merge } = useTastingNotes();
-        const button = wrapper.find('[data-testid="submit-button"]');
-        await wrapper.setProps({noteId: 4273});
-        await button.trigger('click');
+```typescript
+it('includes the ID if it set', async () => {
+  const { merge } = useTastingNotes();
+  const button = wrapper.find('[data-testid="submit-button"]');
+  await wrapper.setProps({ noteId: 4273 });
+  await button.trigger('click');
 
-        expect(merge).toHaveBeenCalledWith({
-          id: 4273,
-          brand: 'foobar',
-          name: 'mytea',
-          rating: 2,
-          teaCategoryId: 3,
-          notes: 'Meh. It is ok.',
-        });
-      });
+  expect(merge).toHaveBeenCalledWith({
+    id: 4273,
+    brand: 'foobar',
+    name: 'mytea',
+    rating: 2,
+    teaCategoryId: 3,
+    notes: 'Meh. It is ok.',
+  });
+});
 ```
 
 **Challenge:** Update the submit method so this test passes.
@@ -1076,7 +1076,7 @@ We can then modify the `TastingNotesPage` to pass along the `noteId` when a user
 
 This involves a minor change to the `presentNoteEditor()` method.
 
-```TypeScript
+```typescript
 const presentNoteEditor = async (evt: Event, noteId?: number): Promise<void> => {
   const modal = await modalController.create({
     component: AppTastingNoteEditor,
@@ -1085,7 +1085,7 @@ const presentNoteEditor = async (evt: Event, noteId?: number): Promise<void> => 
     },
   });
   return modal.present();
-},
+};
 ```
 
 Now go add and edit some tasting notes to make sure everything still works when using the app.
@@ -1098,21 +1098,19 @@ For this feature, we need to switch our attention back to the `TastingNotes` pag
 
 Using this results in a little bit of rework in how the item is rendered and bound on the `TastingNotes` page:
 
-```HTML
-        <ion-item-sliding v-for="note of notes" :key="note.id">
-          <ion-item button @click="presentNoteEditor($event, note.id)">
-            <ion-label>
-              <div>{{ note.brand }}</div>
-              <div>{{ note.name }}</div>
-            </ion-label>
-          </ion-item>
+```html
+<ion-item-sliding v-for="note of notes" :key="note.id">
+  <ion-item button @click="presentNoteEditor($event, note.id)">
+    <ion-label>
+      <div>{{ note.brand }}</div>
+      <div>{{ note.name }}</div>
+    </ion-label>
+  </ion-item>
 
-          <ion-item-options>
-            <ion-item-option color="danger" @click="remove(note)">
-              Delete
-            </ion-item-option>
-          </ion-item-options>
-        </ion-item-sliding>
+  <ion-item-options>
+    <ion-item-option color="danger" @click="remove(note)"> Delete </ion-item-option>
+  </ion-item-options>
+</ion-item-sliding>
 ```
 
 **Note:** Remember to update the component imports and references for the newly added elements.

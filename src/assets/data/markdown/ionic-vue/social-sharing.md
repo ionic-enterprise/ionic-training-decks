@@ -55,7 +55,7 @@ The designers have let us know that they only want this functionality available 
 
 We will start with the test. First, import the `isPlatform` function from `@ionic/vue` and mock it. This get's a little tricky as you need to mock all of `@ionic/vue` using the actual implementation for most of it.
 
-```TypeScript
+```typescript
 import { isPlatform, modalController } from '@ionic/vue';
 ...
 jest.mock('@ionic/vue', () => {
@@ -66,44 +66,40 @@ jest.mock('@ionic/vue', () => {
 
 In the main `beforeEach()`, create a mock implementation that defaults to us running in a mobile context. We will do this in the code by passing the "hybrid" flag, so just compare the value sent to "hybrid". Do this before mounting the component (towards the end of the `beforeEach()`).
 
-```TypeScript
-    (isPlatform as jest.Mock).mockImplementation((key: string) => key === 'hybrid');
+```typescript
+(isPlatform as jest.Mock).mockImplementation((key: string) => key === 'hybrid');
 ```
 
 At this point we can start creating the tests for the button. Note the special case test for the web context. Also note that we are remounting the modal there. That is because the `isPlatform` is only going to be evaluated at that time. We aren't doing anything here that would otherwise trigger a re-evaluation.
 
-```TypeScript
-  describe('share button', () => {
-    describe('in a web context', () => {
-      beforeEach(() => {
-        (isPlatform as jest.Mock).mockImplementation(
-          (key: string) => key !== 'hybrid',
-        );
-      });
-
-      afterEach(() => {
-        (isPlatform as jest.Mock).mockImplementation(
-          (key: string) => key === 'hybrid',
-        );
-      });
-
-      it('does not exist', () => {
-        const modal = mount(AppTastingNoteEditor);
-        const button = modal.findComponent('[data-testid="share-button"]');
-        expect(button.exists()).toBe(false);
-      });
+```typescript
+describe('share button', () => {
+  describe('in a web context', () => {
+    beforeEach(() => {
+      (isPlatform as jest.Mock).mockImplementation((key: string) => key !== 'hybrid');
     });
 
-    it('exists', () => {
-      const button = wrapper.findComponent('[data-testid="share-button"]');
-      expect(button.exists()).toBe(true);
+    afterEach(() => {
+      (isPlatform as jest.Mock).mockImplementation((key: string) => key === 'hybrid');
+    });
+
+    it('does not exist', () => {
+      const modal = mount(AppTastingNoteEditor);
+      const button = modal.findComponent('[data-testid="share-button"]');
+      expect(button.exists()).toBe(false);
     });
   });
+
+  it('exists', () => {
+    const button = wrapper.findComponent('[data-testid="share-button"]');
+    expect(button.exists()).toBe(true);
+  });
+});
 ```
 
 The web context test fails, of course, because our `sharingIsAvailable` property is just set to `true` all of the time. Let's fix that now:
 
-```TypeScript
+```typescript
 const sharingIsAvailable = isPlatform('hybrid');
 ```
 
@@ -113,33 +109,33 @@ In order to share a rating, we need to have at least the brand, name, and rating
 
 First we will test for it. This test belongs right after the `exists` test within the `share button` describe that we just created above.
 
-```TypeScript
-    it('is disabled until enough information is entered', async () => {
-      const button = wrapper.findComponent('[data-testid="share-button"]');
-      const brand = wrapper.findComponent('[data-testid="brand-input"]');
-      const name = wrapper.findComponent('[data-testid="name-input"]');
-      const rating = wrapper.findComponent('[data-testid="rating-input"]');
+```typescript
+it('is disabled until enough information is entered', async () => {
+  const button = wrapper.findComponent('[data-testid="share-button"]');
+  const brand = wrapper.findComponent('[data-testid="brand-input"]');
+  const name = wrapper.findComponent('[data-testid="name-input"]');
+  const rating = wrapper.findComponent('[data-testid="rating-input"]');
 
-      await flushPromises();
-      await waitForExpect(() => expect((button.element as HTMLIonButtonElement).disabled).toBe(true));
+  await flushPromises();
+  await waitForExpect(() => expect((button.element as HTMLIonButtonElement).disabled).toBe(true));
 
-      await brand.setValue('foobar');
-      await flushPromises();
-      await waitForExpect(() => expect((button.element as HTMLIonButtonElement).disabled).toBe(true));
+  await brand.setValue('foobar');
+  await flushPromises();
+  await waitForExpect(() => expect((button.element as HTMLIonButtonElement).disabled).toBe(true));
 
-      await name.setValue('mytea');
-      await flushPromises();
-      await waitForExpect(() => expect((button.element as HTMLIonButtonElement).disabled).toBe(true));
+  await name.setValue('mytea');
+  await flushPromises();
+  await waitForExpect(() => expect((button.element as HTMLIonButtonElement).disabled).toBe(true));
 
-      await rating.setValue(2);
-      await flushPromises();
-      await waitForExpect(() => expect((button.element as HTMLIonButtonElement).disabled).toBe(false));
-    });
+  await rating.setValue(2);
+  await flushPromises();
+  await waitForExpect(() => expect((button.element as HTMLIonButtonElement).disabled).toBe(false));
+});
 ```
 
 We can then enter the proper logic in the `allowShare` computed property:
 
-```TypeScript
+```typescript
 const allowShare = computed(() => !!(brand.value && name.value && rating.value));
 ```
 
@@ -163,7 +159,7 @@ $ npm i @capacitor/share
 
 Import and mock the plugin in the `tests/unit/components/AppTastingNotes.spec.ts` test file:
 
-```TypeScript
+```typescript
 import { Share } from '@capacitor/share';
 ...
 jest.mock('@capacitor/share');
@@ -171,40 +167,40 @@ jest.mock('@capacitor/share');
 
 Then we will add a test within the `share button` describe block.
 
-```TypeScript
-    it('calls the share plugin when pressed', async () => {
-      const button = wrapper.find('[data-testid="share-button"]');
-      const brand = wrapper.findComponent('[data-testid="brand-input"]');
-      const name = wrapper.findComponent('[data-testid="name-input"]');
-      const rating = wrapper.findComponent('[data-testid="rating-input"]');
+```typescript
+it('calls the share plugin when pressed', async () => {
+  const button = wrapper.find('[data-testid="share-button"]');
+  const brand = wrapper.findComponent('[data-testid="brand-input"]');
+  const name = wrapper.findComponent('[data-testid="name-input"]');
+  const rating = wrapper.findComponent('[data-testid="rating-input"]');
 
-      await brand.setValue('foobar');
-      await name.setValue('mytea');
-      await rating.setValue(2);
+  await brand.setValue('foobar');
+  await name.setValue('mytea');
+  await rating.setValue(2);
 
-      await button.trigger('click');
+  await button.trigger('click');
 
-      expect(Share.share).toHaveBeenCalledTimes(1);
-      expect(Share.share).toHaveBeenCalledWith({
-        title: 'foobar: mytea',
-        text: 'I gave foobar: mytea 2 stars on the Tea Taster app',
-        dialogTitle: 'Share your tasting note',
-        url: 'https://tea-taster-training.web.app',
-      });
-    });
+  expect(Share.share).toHaveBeenCalledTimes(1);
+  expect(Share.share).toHaveBeenCalledWith({
+    title: 'foobar: mytea',
+    text: 'I gave foobar: mytea 2 stars on the Tea Taster app',
+    dialogTitle: 'Share your tasting note',
+    url: 'https://tea-taster-training.web.app',
+  });
+});
 ```
 
 We can then add the code fill out the `share()` accordingly:
 
-```TypeScript
-    async function share(): Promise<void> {
-      await Share.share({
-        title: `${brand.value}: ${name.value}`,
-        text: `I gave ${brand.value}: ${name.value} ${rating.value} stars on the Tea Taster app`,
-        dialogTitle: 'Share your tasting note',
-        url: 'https://tea-taster-training.web.app',
-      });
-    }
+```typescript
+async function share(): Promise<void> {
+  await Share.share({
+    title: `${brand.value}: ${name.value}`,
+    text: `I gave ${brand.value}: ${name.value} ${rating.value} stars on the Tea Taster app`,
+    dialogTitle: 'Share your tasting note',
+    url: 'https://tea-taster-training.web.app',
+  });
+}
 ```
 
 You will also have to add a line importing the `Share` object from `@capacitor/share`.
