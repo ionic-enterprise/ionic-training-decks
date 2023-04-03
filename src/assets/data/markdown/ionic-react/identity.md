@@ -60,7 +60,7 @@ We need to define the shape of the data we want to store as state. Create a fold
 
 **`src/core/models/User.ts`**
 
-```TypeScript
+```typescript
 export interface User {
   id: number;
   firstName: string;
@@ -71,7 +71,7 @@ export interface User {
 
 **`src/core/models/Session.ts`**
 
-```TypeScript
+```typescript
 import { User } from './User';
 
 export interface Session {
@@ -94,7 +94,7 @@ Define an interface for `SessionState` within `SessionProvider.tsx`:
 
 **`src/core/session/SessionProvider.tsx`**
 
-```TypeScript
+```typescript
 import { Session } from '../models';
 
 interface SessionState {
@@ -106,7 +106,7 @@ interface SessionState {
 
 There needs to be an initial value for this state. Define it under the `SessionState` interface:
 
-```TypeScript
+```typescript
 const initialState: SessionState = {
   session: undefined,
   loading: false,
@@ -120,7 +120,7 @@ What actions can happen to the application that would cause the state to change?
 
 Under `initialState`, add the `SessionAction` type:
 
-```TypeScript
+```typescript
 export type SessionAction =
   | { type: 'CLEAR_SESSION' }
   | { type: 'RESTORE_SESSION'; session: Session }
@@ -138,7 +138,7 @@ With our state and actions defined we can now write a reducer function that upda
 
 Under the `SessionAction` type, add the following function:
 
-```TypeScript
+```typescript
 const reducer = (state: SessionState = initialState, action: SessionAction): SessionState => {
   switch (action.type) {
     case 'CLEAR_SESSION':
@@ -178,7 +178,7 @@ First we should define the Context we want to be accessible by child components.
 
 **`src/core/session/SessionProvider.tsx`**
 
-```TypeScript
+```typescript
 export const SessionContext = createContext<{
   state: typeof initialState;
   dispatch: (action: SessionAction) => void;
@@ -196,7 +196,7 @@ The Context's Provider returns a React component that allows any child component
 
 Add the following code after `SessionContext`, importing any modules along the way:
 
-```TypeScript
+```tsx
 export const SessionProvider: React.FC<PropsWithChildren> = ({ children }) => {
   const [initializing, setInitializing] = useState<boolean>(true);
   const [state, dispatch] = useReducer(reducer, initialState);
@@ -220,7 +220,7 @@ We will go back and implement the `useEffect` shortly. Let's go ahead and use th
 
 **`src/App.tsx`**
 
-```TypeScript
+```tsx
 ...
 import { SessionProvider } from './core/session';
 ...
@@ -254,13 +254,13 @@ Inserting the `<SessionProvider />` into our component tree impacts the tests we
 
 Create a new file `src/core/session/__mocks__/SessionProvider.tsx` and populate it with the following code:
 
-```TypeScript
+```tsx
 export const SessionProvider: React.FC = () => <div></div>;
 ```
 
 Then add the following line of code to `App.test.tsx`, after the mock for `@ionic/react`:
 
-```TypeScript
+```typescript
 jest.mock('./core/session/SessionProvider');
 ```
 
@@ -285,7 +285,7 @@ Start by testing `<SessionProvider />` to verify that the loader is displayed wh
 
 **`src/core/session/SessionProvider.test.tsx`**
 
-```TypeScript
+```tsx
 import { useContext } from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { SessionContext, SessionProvider } from './SessionProvider';
@@ -314,7 +314,7 @@ Make the test pass by adding a timeout that sets initializing to false inside th
 
 **`src/core/session/SessionProvider.tsx`**
 
-```TypeScript
+```tsx
 useEffect(() => {
   setTimeout(() => setInitializing(false), 500);
 }, []);
@@ -334,7 +334,7 @@ Before we start writing unit tests for this scenario, let's create a fixture we 
 
 **`src/core/session/__fixtures__/mockSession.ts`**
 
-```TypeScript
+```typescript
 import { Session } from '../../models';
 
 export const mockSession: Session = {
@@ -346,14 +346,13 @@ export const mockSession: Session = {
     email: 'test@test.org',
   },
 };
-
 ```
 
 Now, write unit tests for this scenario:
 
 **`src/core/session/SessionProvider.test.tsx`**
 
-```TypeScript
+```tsx
 ...
 import { Preferences } from '@capacitor/preferences';
 import Axios from 'axios';
@@ -405,7 +404,7 @@ describe('<SessionProvider />', () => {
 
 If a token is not available or is unable to be restored we should simply dispatch the `CLEAR_SESSION` action. The `describe()` block for this can be found below. Add it to `SessionProvider.test.tsx`.
 
-```TypeScript
+```tsx
 describe('when a token is not stored', () => {
   it('does not set the session', async () => {
     render(ComponentTree);
@@ -421,7 +420,7 @@ The tests are all in place, let's finish implementing the `useEffect` in `Sessio
 
 **`src/core/session/SessionProvider.tsx`**
 
-```TypeScript
+```tsx
 ...
 useEffect(() => {
     attemptSessionRestore().finally(() => setInitializing(false));
@@ -447,7 +446,7 @@ const attemptSessionRestore = async () => {
 
 Your tests should now pass. However, now the Splash Screen tests in `App.test.tsx` fail! We can fix this by appending `await waitFor()` to the first `expect` statement, like so:
 
-```TypeScript
+```typescript
 await waitFor(() => expect(container).toBeDefined());
 ```
 

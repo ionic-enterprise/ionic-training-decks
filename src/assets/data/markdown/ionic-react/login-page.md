@@ -35,7 +35,7 @@ Finally, open `src/setupTests.ts` and add the following lines of code:
 
 **`src/setupTests.ts`**
 
-```TypeScript
+```typescript
 import { mockIonicReact } from '@ionic/react-test-utils';
 import { setupIonicReact } from '@ionic/react';
 
@@ -53,14 +53,8 @@ Add a new feature folder `src/login`. Inside that folder add two files for the c
 
 Next, copy the code snippet below and paste it into `LoginPage.tsx`:
 
-```TypeScript
-import {
-  IonContent,
-  IonHeader,
-  IonPage,
-  IonTitle,
-  IonToolbar,
-} from '@ionic/react';
+```tsx
+import { IonContent, IonHeader, IonPage, IonTitle, IonToolbar } from '@ionic/react';
 
 type LoginInputs = {
   email: string;
@@ -98,7 +92,7 @@ export default LoginPage;
 
 To make our login page accessible, we need to add an entry to the `IonReactRouter` residing in `App.tsx`:
 
-```JSX
+```tsx
 ...
 <IonApp>
   <IonReactRouter>
@@ -128,7 +122,7 @@ Let's mock up what we would like the login page to look like. We know we are goi
 
 Replace the contents within `<IonContent>` with the following:
 
-```JSX
+```tsx
 <form>
   <IonList>
     <IonItem>
@@ -145,7 +139,7 @@ Replace the contents within `<IonContent>` with the following:
 
 Under `</IonContent>`, add the following code to create a footer:
 
-```JSX
+```tsx
 <IonFooter>
   <IonToolbar>
     <IonButton>Sign In</IonButton>
@@ -157,7 +151,7 @@ Well, that's a start, but let's pretty it up a bit. First, let's use the "floati
 
 We should also give the inputs a `data-testid`, a `name`, and a `type`:
 
-```JSX
+```tsx
 <IonList>
   <IonItem>
     <IonLabel position="floating">E-Mail Address</IonLabel>
@@ -181,13 +175,13 @@ Finally, let's add the "Sign In" button. Ideally it should:
 
 Take a few minutes to check out the site. The icon we're going to use is `log-in-outline`:
 
-```TypeScript
+```typescript
 import { logInOutline } from 'ionicons/icons';
 ```
 
 Update the `<IonFooter>` portion of the page like so:
 
-```JSX
+```tsx
 <IonFooter>
   <IonToolbar>
     <IonButton expand="full" data-testid="submit-button">
@@ -208,7 +202,7 @@ First, let's import the `useForm` hook and `Controller` component made available
 
 **`src/login/LoginPage.tsx`**
 
-```TypeScript
+```typescript
 ...
 import { useForm, Controller } from 'react-hook-form';
 import { logInOutline } from 'ionicons/icons';
@@ -226,7 +220,7 @@ Within our `LoginPage` component, let's establish a context for the form and pul
 
 We'll also specify that we want our form to be validated when any inputs are changed:
 
-```TypeScript
+```tsx
 ...
 const LoginPage: React.FC = () => {
   const {
@@ -244,7 +238,7 @@ export default LoginPage;
 
 Next we will make use of the `Controller` component. Modify the `<form>` of the page component like so:
 
-```JSX
+```tsx
 ...
 <form>
   <IonList>
@@ -308,7 +302,7 @@ Application users should not be able to click the "Sign In" button if the form i
 
 Let's write unit tests that define when the button should be enabled or disabled:
 
-```TypeScript
+```tsx
 import { render, waitFor, screen, act } from '@testing-library/react';
 import { ionFireEvent as fireEvent, waitForIonicReact } from '@ionic/react-test-utils';
 import LoginPage from './LoginPage';
@@ -357,7 +351,7 @@ With failing tests, add the logic to determine whether or not the "Sign In" butt
 
 **`src/login/LoginPage.tsx`**
 
-```JSX
+```tsx
 ...
   <IonButton
     expand="full"
@@ -385,9 +379,9 @@ Define tests to account for when error messages should be displayed. Add the fol
 
 **`src/login/LoginPage.test.tsx`**
 
-```TypeScript
+```tsx
 describe('error messages', () => {
- it('starts with no error messages', () => {
+  it('starts with no error messages', () => {
     render(<LoginPage />);
     const errors = screen.getByTestId(/errors/);
     expect(errors).toHaveTextContent('');
@@ -424,7 +418,7 @@ Now let's update the form. Add the following block of code after the closing `Io
 
 **`src/login/LoginPage.tsx`**
 
-```JSX
+```tsx
 ...
   </IonList>
 
@@ -452,7 +446,7 @@ Create a new file in `src/theme` called `global.css` and add the following CSS c
 
 **`src/theme/global.css`**
 
-```CSS
+```css
 .error-message {
   padding: 2em;
   color: var(--ion-color-danger);

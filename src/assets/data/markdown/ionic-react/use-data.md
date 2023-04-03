@@ -28,7 +28,7 @@ Make the following change to the `useTea` hook:
 
 **`src/tea/TeaProvider.tsx`**
 
-```TypeScript
+```tsx
 export const useTea = () => {
   const { teas, getTeas, getTeaById } = useContext(TeaContext);
 
@@ -48,7 +48,7 @@ Note that we are no longer exposing `getTeas` to components. They'll have no rea
 
 We should also add some functionality to reset the list of teas if the user session is no longer valid:
 
-```TypeScript
+```tsx
 ...
 const { session } = useSession();
 
@@ -62,7 +62,7 @@ These modifications will break the unit tests we have in place to test the `useT
 
 **`src/tea/TeaProvider.test.tsx`**
 
-```TypeScript
+```typescript
 ...
   it('GETs the teas from the backend', async () => {
     const { waitForNextUpdate } = renderHook(() => useTea(), { wrapper });
@@ -86,7 +86,7 @@ Add the following mock to `TeaPage.test.tsx`:
 
 **`src/tea/TeaPage.test.tsx`**
 
-```TypeScript
+```typescript
 const mockTeas = expectedTeas;
 jest.mock('./TeaProvider', () => ({
   useTea: () => ({ teas: mockTeas }),

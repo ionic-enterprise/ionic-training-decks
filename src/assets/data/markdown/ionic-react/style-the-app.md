@@ -256,7 +256,7 @@ We have a couple of other components where we need to set a specific color. Name
 
 **`src/login/LoginPage.tsx`**
 
-```JSX
+```tsx
     <IonFooter>
       <IonToolbar color="secondary">
         <IonButton
@@ -264,7 +264,7 @@ We have a couple of other components where we need to set a specific color. Name
 
 **`src/tasting-notes/editor/TastingNoteEditor.tsx`**
 
-```JSX
+```tsx
     <IonFooter>
       <IonToolbar color="secondary">
         <IonButton
@@ -272,7 +272,7 @@ We have a couple of other components where we need to set a specific color. Name
 
 **`src/Tabs.tsx`**
 
-```JSX
+```tsx
     </IonRouterOutlet>
     <IonTabBar color="tertiary" slot="bottom">
       <IonTabButton tab="tea" href={`${url}/tea`}>

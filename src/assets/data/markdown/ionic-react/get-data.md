@@ -14,7 +14,7 @@ Our application now requires authentication in order to access the tea page. We 
 
 Remember the amount of code we had to write in order to make the network request for the current application user? If not, here's a reminder:
 
-```TypeScript
+```typescript
 const headers = { Authorization: 'Bearer ' + token };
 const url = `${process.env.REACT_APP_DATA_SERVICE}/users/current`;
 const { data } = await axios.get(url, { headers });
@@ -34,7 +34,7 @@ First, let's add a method named `invalidate` to the `useSession()` hook. This me
 
 Here are the unit tests for this method, add them to `src/core/session/useSession.test.tsx`:
 
-```TypeScript
+```typescript
 describe('invalidate', () => {
   beforeEach(() => {
     Preferences.remove = jest.fn(async () => void 0);
@@ -68,7 +68,7 @@ Create a new file `src/core/session/AuthInterceptorProvider.tsx` and populate it
 
 **`src/core/session/AuthInterceptorProvider.tsx`**
 
-```TypeScript
+```typescript
 import axios, { AxiosRequestConfig, AxiosResponse, AxiosInstance } from 'axios';
 import { createContext, useContext } from 'react';
 import { useSession } from './useSession';
@@ -130,7 +130,7 @@ Insert the `<AuthInterceptorProvider />` component between `<SessionProvider>` a
 
 **`src/App.tsx`**
 
-```JSX
+```tsx
 ...
 <IonApp>
   <SessionProvider>
@@ -152,7 +152,7 @@ Let's start by scaffolding `TeaProvider.tsx`:
 
 **`src/tea/TeaProvider.tsx`**
 
-```TypeScript
+```tsx
 import { createContext, useContext, useState } from 'react';
 import { useAuthInterceptor } from '../core/session';
 import { Tea } from '../shared/models';
@@ -162,7 +162,7 @@ export const TeaContext = createContext<{
   getTeas: () => Promise<void>;
 }>({
   teas: [],
-   getTeas: () => {
+  getTeas: () => {
     throw new Error('Method not implemented');
   },
 });
@@ -191,7 +191,7 @@ Do the same for `TeaProvider.test.tsx`:
 
 **`src/tea/TeaProvider.test.tsx`**
 
-```TypeScript
+```tsx
 import axios from 'axios';
 import { renderHook } from '@testing-library/react-hooks';
 import { TeaProvider, useTea } from './TeaProvider';
@@ -220,7 +220,7 @@ Like we did for `src/core/session`, let's create a folder under `src/tea` named 
 
 **`src/tea/__fixtures__/mockTeas.ts`**
 
-```TypeScript
+```typescript
 import { Tea } from '../../shared/models';
 
 export const expectedTeas = [
@@ -290,7 +290,7 @@ Let's place some setup logic for our "get all teas" tests in `TeaProvider.test.t
 
 **`src/tea/TeaProvider.test.tsx`**
 
-```TypeScript
+```typescript
 ...
 describe('useTea()', () => {
   describe('get all teas', () => {
@@ -309,7 +309,7 @@ describe('useTea()', () => {
 
 Let's make this test pass:
 
-```TypeScript
+```typescript
 const getTeas = async () => {
   const { data } = await api.get('/tea-categories');
   setTeas(data);
@@ -320,7 +320,7 @@ Now let's write a test to ensure that `getTeas()` will add images to each tea it
 
 **`src/tea/TeaProvider.test.tsx`**
 
-```TypeScript
+```typescript
 ...
 describe('get all teas', () => {
   ...
@@ -337,7 +337,7 @@ Let's add images to each tea item. First, we need to add an array of image file 
 
 **`src/tea/TeaProvider.tsx`**
 
-```TypeScript
+```typescript
 import { ... } from 'react';
 ...
 
@@ -349,8 +349,8 @@ export const TeaContext = createContext<{...}>({...});
 
 Then, update `getTeas` like so:
 
-```TypeScript
- const getTeas = async () => {
+```typescript
+const getTeas = async () => {
   const { data } = await api.get('/tea-categories');
   const teas = data.map((tea: Tea) => ({ ...tea, image: require(`../assets/images/${images[tea.id - 1]}.jpg`) }));
   setTeas(teas);
@@ -367,7 +367,7 @@ Insert the `<AuthInterceptorProvider />` component between `<SessionProvider>` a
 
 **`src/App.tsx`**
 
-```JSX
+```tsx
 ...
 <IonApp>
   <SessionProvider>

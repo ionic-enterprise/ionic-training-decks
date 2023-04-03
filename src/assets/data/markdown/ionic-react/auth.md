@@ -20,9 +20,9 @@ Populate `useSession.tsx` with the following "interface":
 
 **`src/core/session/useSession.tsx`**
 
-```TypeScript
-import { useContext } from "react";
-import { SessionContext } from "./SessionProvider";
+```tsx
+import { useContext } from 'react';
+import { SessionContext } from './SessionProvider';
 
 export const useSession = () => {
   const { state, dispatch } = useContext(SessionContext);
@@ -31,15 +31,15 @@ export const useSession = () => {
     throw new Error('useSession must be used within a SessionProvider');
   }
 
-  const login = async (): Promise<void> => { };
-  const logout = async (): Promise<void> => { };
+  const login = async (): Promise<void> => {};
+  const logout = async (): Promise<void> => {};
 
   return {
     session: state.session,
     loading: state.loading,
     error: state.error,
     login,
-    logout
+    logout,
   };
 };
 ```
@@ -48,7 +48,7 @@ Do the same for `useSession.test.tsx`:
 
 **`src/core/session/useSession.test.tsx`**
 
-```TypeScript
+```tsx
 import axios from 'axios';
 import { Preferences } from '@capacitor/preferences';
 import { renderHook, waitFor, act } from '@testing-library/react';
@@ -70,9 +70,9 @@ describe('useSession()', () => {
     mockedAxios.post.mockResolvedValue({ data: { success: true, token, user } });
   });
 
-  describe('login', () => { });
+  describe('login', () => {});
 
-  describe('logout', () => { })
+  describe('logout', () => {});
 
   afterEach(() => jest.restoreAllMocks());
 });
@@ -89,7 +89,7 @@ When a user attempts to sign into our application the following needs to happen:
 
 The unit tests for these scenarios are found below. Add them inside the login `describe()` block in `useSession.test.tsx` in addition to adding any required imports.
 
-```TypeScript
+```typescript
 it('POSTs the login request', async () => {
   const url = `${process.env.REACT_APP_DATA_SERVICE}/login`;
   const { result } = renderHook(() => useSession(), { wrapper });
@@ -135,7 +135,7 @@ Consult the <a href="https://capacitorjs.com/docs/apis/preferences" target="_bla
 
 **`src/core/session/useSession.tsx`**
 
-```TypeScript
+```typescript
 ...
 const login = async (username: string, password: string): Promise<void> => {
   // 1. Dispatch the LOGIN action
@@ -168,7 +168,7 @@ The process followed for `login()` will be used for the `logout()` method. You w
 
 Replace the existing logout `describe()` block in `useSession.test.tsx` with the following:
 
-```TypeScript
+```typescript
 describe('logout', () => {
   beforeEach(() => {
     Preferences.remove = jest.fn(async () => void 0);
@@ -219,20 +219,20 @@ describe('logout', () => {
 
 The partial `logout()` implementation for `useSession.tsx` is below. Consult the <a href="https://capacitorjs.com/docs/apis/preferences" target="_blank">Capacitor Preferences API</a> documentation if you get stuck. If you need assistance, please let your instructor know.
 
-```TypeScript
+```typescript
 const logout = async (): Promise<void> => {
-    // 1. Dispatch the LOGOUT action
-    try {
-      const url = `${process.env.REACT_APP_DATA_SERVICE}/logout`;
-      const headers = { Authorization: 'Bearer ' + state.session!.token };
+  // 1. Dispatch the LOGOUT action
+  try {
+    const url = `${process.env.REACT_APP_DATA_SERVICE}/logout`;
+    const headers = { Authorization: 'Bearer ' + state.session!.token };
 
-      await axios.post(url, null, { headers });
-      // 2. Remove 'auth-token' from Capacitor Storage
-      // 3. Dispatch the LOGOUT_SUCCESS action
-    } catch (error) {
-      // 4. Dispatch the LOGOUT_FAILURE action. 'error.message' should be sent as the error parameter
-    }
-  };
+    await axios.post(url, null, { headers });
+    // 2. Remove 'auth-token' from Capacitor Storage
+    // 3. Dispatch the LOGOUT_SUCCESS action
+  } catch (error) {
+    // 4. Dispatch the LOGOUT_FAILURE action. 'error.message' should be sent as the error parameter
+  }
+};
 ```
 
 ## Updating the UI
@@ -245,7 +245,7 @@ Open `src/login/LoginPage.tsx` and take a look at the button that handles submis
 
 Let's import our `useSession()` hook so that we can call our login function:
 
-```TypeScript
+```tsx
 ...
 const LoginPage: React.FC = () => {
   const { login, session } = useSession();
@@ -278,7 +278,7 @@ If the sign in failed, we should print the `error` from `useSession()`. In order
 
 Make the following changes:
 
-```TypeScript
+```tsx
 ...
 const LoginPage: React.FC = () => {
   const { login, session, error } = useSession();
@@ -312,7 +312,7 @@ Let's go ahead and write the logic to handle signing out:
 
 **`src/tea/TeaPage.tsx`**
 
-```TypeScript
+```tsx
 ...
 import { useHistory } from 'react-router';
 import { useSession } from '../core/session';
@@ -348,7 +348,7 @@ Start by creating a new file in `src/core/session` named `PrivateRoute.tsx`:
 
 **`src/core/session/PrivateRoute.tsx`**
 
-```TypeScript
+```tsx
 import { Redirect } from 'react-router';
 import { useSession } from './useSession';
 
@@ -371,7 +371,7 @@ Using our `PrivateRoute` component is trivial, it's a drop-in replacement for `R
 
 Open `src/App.tsx` and add wrap `<TeaPage />` with our `<PrivateRoute />` component:
 
-```JSX
+```tsx
 <Route exact path="/tea">
   <PrivateRoute>
     <TeaPage />

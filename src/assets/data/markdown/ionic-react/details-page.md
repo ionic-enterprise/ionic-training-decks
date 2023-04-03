@@ -17,7 +17,7 @@ Let's fill the files in with some shell code:
 
 **`src/tea/details/TeaDetailsPage.test.tsx`**
 
-```TypeScript
+```tsx
 import { render } from '@testing-library/react';
 import TeaDetailsPage from './TeaDetailsPage';
 
@@ -36,7 +36,7 @@ describe('<TeaDetailsPage />', () => {
 
 **`src/tea/details/TeaDetailsPage.tsx`**
 
-```TypeScript
+```tsx
 import { IonContent, IonHeader, IonPage, IonTitle, IonToolbar } from '@ionic/react';
 
 const TeaDetailsPage: React.FC = () => {
@@ -66,7 +66,7 @@ Head over to `App.tsx`. We need to add an additional route inside our `<IonRoute
 
 **`src/App.tsx`**
 
-```JSX
+```tsx
 ...
 <IonRouterOutlet>
  ...
@@ -90,7 +90,7 @@ Modify the `<IonCard>` component in `TeaPage.tsx` by adding the following props:
 
 **`src/tea/TeaPage.tsx`**
 
-```JSX
+```tsx
 <IonCard button onClick={() => navToDetailsPage(tea.id)}>
 ```
 
@@ -98,7 +98,7 @@ The `button` prop which adds some styling to the card, making it behave in a "cl
 
 Next let's define `navToDetailsPage()`. Add the following function:
 
-```TypeScript
+```typescript
 const navToDetailsPage = (id: number) => {
   history.push(`/tea/details/${id}`);
 };
@@ -118,7 +118,7 @@ Open `TeaDetailsPage.tsx` and make the following adjustments:
 
 **`src/tea/details/TeaDetailsPage.tsx`**
 
-```TypeScript
+```tsx
 import { ... } from '@ionic/react';
 import { useParams } from 'react-router';
 
@@ -136,7 +136,7 @@ Now that we know how the `useParams()` hook works, let's go ahead and mock it in
 
 **`src/tea/details/TeaDetailsPage.test.tsx`**
 
-```TypeScript
+```typescript
 ...
 jest.mock('react-router', () => ({
   useParams: () => ({
@@ -165,7 +165,7 @@ We know that we want to fetch the details of the tea with the ID specified in ou
 
 **`src/tea/details/TeaDetailsPage.tsx`**:
 
-```TypeScript
+```tsx
 import { ... } from '@ionic/react';
 ...
 
@@ -189,7 +189,7 @@ We'll also need to mock the `useTea()` hook within our tests:
 
 **`src/tea/details/TeaDetailsPage.test.tsx`**
 
-```TypeScript
+```typescript
 ...
 const mockTeas = expectedTeas;
 jest.mock('react-router', () => ({
@@ -203,7 +203,7 @@ jest.mock('../TeaProvider', () => ({
 
 Once complete, let's write some additional unit tests to ensure that the content we want to display properly renders in our tea details page:
 
-```TypeScript
+```typescript
 describe('<TeaDetailsPage />', () => {
   ...
   it('renders the tea name', () => {
@@ -220,7 +220,7 @@ describe('<TeaDetailsPage />', () => {
 
 Add the following markup right before the closing `</IonContent>` tag:
 
-```JSX
+```tsx
 <div className="ion-padding">
   <div className="ion-justify-content-center">
     <IonImg src={tea?.image} />

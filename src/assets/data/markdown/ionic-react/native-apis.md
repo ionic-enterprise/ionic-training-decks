@@ -38,7 +38,7 @@ Update the application's `CapacitorConfig` object so it does not dismiss the spl
 
 **`capacitor.config.ts`**
 
-```TypeScript
+```typescript
 import { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
@@ -62,17 +62,17 @@ Start by refactoring `App.test.tsx` to follow the pattern we established for the
 
 **`App.test.tsx`**
 
-```TypeScript
+```tsx
 import { render } from '@testing-library/react';
 import { SplashScreen } from '@capacitor/splash-screen';
 import App from './App';
 
-describe('<App />', () => { });
+describe('<App />', () => {});
 ```
 
 The functionality of the splash screen plugin needs to be mocked in order to test pieces of logic that call it. Introduce setup and teardown code to mock the plugin's API, and add a test to assert that `SplashScreen.hide()` has been called:
 
-```TypeScript
+```tsx
 import { render } from '@testing-library/react';
 import { SplashScreen } from '@capacitor/splash-screen';
 import App from './App';
@@ -98,7 +98,7 @@ The test fails as we have not implemented any logic. Let's go ahead and implemen
 
 **`App.tsx`**
 
-```TypeScript
+```tsx
 import { useEffect } from 'react';
 import { SplashScreen } from '@capacitor/splash-screen';
 ...
@@ -130,7 +130,7 @@ Like the Splash Screen Capacitor API plugin, we need a mock for the `isPlatform`
 
 **`App.test.tsx`**
 
-```TypeScript
+```tsx
 import { render } from '@testing-library/react';
 import { SplashScreen } from '@capacitor/splash-screen';
 import { isPlatform } from '@ionic/react';
@@ -147,7 +147,7 @@ jest.mock('@ionic/react', () => {
 
 Remove the 'should hide the splash screen' test from the 'initialization' describe block, and replace it with the following series of tests:
 
-```TypeScript
+```tsx
 describe('in an Android context', () => {
   beforeEach(() => (isPlatform as jest.Mock).mockImplementation(() => true));
   it('should hide the splash screen', () => {
@@ -184,8 +184,10 @@ Looking through the <a href="https://ionicframework.com/docs/react/platform#plat
 
 Let's take this knowledge to update the `useEffect` in `App.tsx` to check if the application is being run in the `capacitor` platform:
 
-```TypeScript
-useEffect(() => { if (isPlatform('capacitor')) SplashScreen.hide(); }, []);
+```tsx
+useEffect(() => {
+  if (isPlatform('capacitor')) SplashScreen.hide();
+}, []);
 ```
 
 **Note:** `import` statements may be omitted from code samples for brevity. Most IDEs will prompt you when your code is using functionality from a module that needs to be imported. Should you get stuck with any imports, please let your instructor know.

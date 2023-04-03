@@ -22,7 +22,7 @@ Within `src/about` add two new files: `AboutPage.tsx` and `AboutPage.test.tsx`.
 
 **`src/about/AboutPage.tsx`**
 
-```TypeScript
+```tsx
 import { IonPage, IonHeader, IonTitle, IonToolbar, IonContent } from '@ionic/react';
 
 const AboutPage: React.FC = () => {
@@ -48,7 +48,7 @@ export default AboutPage;
 
 **`src/about/AboutPage.test.tsx`**
 
-```TypeScript
+```tsx
 import { render } from '@testing-library/react';
 import AboutPage from './AboutPage';
 
@@ -66,14 +66,10 @@ Now create two new files within `src/tasting-notes`: `TastingNotesPage.tsx` and 
 
 We can leverage the `<IonTabs />` component in such a way that will define the routes that belongs to it's tabs and create the look-and-feel of the tab bar:
 
-```JSX
+```tsx
 <IonTabs>
-  <IonRouterOutlet>
-    {/* Routes defined here */}
-  </IonRouterOutlet>
-  <IonTabBar>
-    {/* Tabs UI defined here */}
-  </IonTabBar>
+  <IonRouterOutlet>{/* Routes defined here */}</IonRouterOutlet>
+  <IonTabBar>{/* Tabs UI defined here */}</IonTabBar>
 </IonTabs>
 ```
 
@@ -83,7 +79,7 @@ Create a new file `src/Tabs.tsx` and fill it in with the following code:
 
 **`src/Tabs.tsx`**
 
-```TypeScript
+```tsx
 import React from 'react';
 import { Redirect, Route, useRouteMatch } from 'react-router';
 import { IonRouterOutlet, IonTabBar, IonTabs } from '@ionic/react';
@@ -99,14 +95,13 @@ const Tabs: React.FC = () => {
   );
 };
 export default Tabs;
-
 ```
 
 ### Routes
 
 Open `App.tsx` and replace the routes inside `<IonRouterOutlet>` with the following:
 
-```JSX
+```tsx
 <Route exact path="/login">
   <LoginPage />
 </Route>
@@ -136,7 +131,7 @@ However, `/login` will remain `/login` (since the login page will not be accessi
 
 Now open `Tabs.tsx` back up so we can add our tab-based routes. Place the following code inside `<IonRouterOutlet />`:
 
-```JSX
+```tsx
 <Route exact path={url}>
   <Redirect to={`${url}/tea`} />
 </Route>
@@ -168,7 +163,7 @@ Now it's time to fill out the `<IonTabBar />` component:
 
 **`src/Tabs.tsx`**
 
-```JSX
+```tsx
 <IonTabBar slot="bottom">
   <IonTabButton tab="tea" href={`${url}/tea`}>
     <IonIcon icon={leaf} />
