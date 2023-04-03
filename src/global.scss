@@ -27,13 +27,20 @@
 
 @import 'highlight.js/scss/night-owl';
 
+@import '~prismjs/themes/prism-dark.css';
+
 pre {
   padding: 16px;
   border-radius: 8px;
   background: #363636;
   color: #ffffff;
+  text-shadow: none;
 }
 
 .error-message {
   color: var(--ion-color-danger);
+}
+
+code {
+  text-shadow: none !important;
 }

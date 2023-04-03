@@ -80,18 +80,18 @@ Start by creating a new file `Home.test.tsx` in the `src/pages` folder. Here we 
 
 **`src/pages/Home.test.tsx`**
 
-```Typescript
+```tsx
 import { render } from '@testing-library/react';
 import Home from './Home';
 
-describe('<Home />', () => { });
+describe('<Home />', () => {});
 ```
 
 ### Test the Header
 
 The home page has it's header text set to "Blank". Let's write a test that verifies that the header text renders with the correct text:
 
-```Typescript
+```tsx
 describe('<Home />', () => {
   it('displays the header', () => {
     const { container } = render(<Home />);
@@ -104,7 +104,7 @@ describe('<Home />', () => {
 
 We can also create snapshots of the component under specific conditions and compare them as we modify the application. Add the following test inside the `describe()` block, under the test previously created:
 
-```TypeScript
+```tsx
 it('renders consistently', () => {
   const { asFragment } = render(<Home />);
   expect(asFragment()).toMatchSnapshot();
