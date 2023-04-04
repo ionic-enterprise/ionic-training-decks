@@ -30,7 +30,7 @@ TypeScript gives us the ability to model the shape of our data and enforce consi
 - Create a `src/app/models` folder
 - Add a `src/app/models/tea.ts` file
 
-```TypeScript
+```typescript
 export interface Tea {
   id: number;
   name: string;
@@ -43,7 +43,7 @@ export interface Tea {
 
 Before we get into the next section, let's make TypeScript module resolution a bit easier to deal with. If we don't do this, we could end up with a lot of code that looks like this:
 
-```TypeScript
+```typescript
 import { BarService } from '../../core/bar/bar.service';
 import { FooService } from '../../core/foo/foo.service';
 import { Tea } from '../../models/tea';
@@ -52,7 +52,7 @@ import { environment } from '../../../environments/environment';
 
 The relative paths are obnoxious. They are also a maintenance headache as the application grows since you may need to adjust them as services and components are reorganized into different subdirectories over time. It would be better if our code could look like this:
 
-```TypeScript
+```typescript
 import { BarService, FooService } from '@app/core';
 import { Tea } from '@app/models';
 import { environment } from '@env/environment';
@@ -66,7 +66,7 @@ We will group all of our models in a single `index.ts` file within the `models` 
 
 **`src/app/models/index.ts`**
 
-```TypeScript
+```typescript
 export * from './tea';
 ```
 
@@ -117,65 +117,65 @@ Open the `src/app/app.routes.ts` file and perform the following tasks:
 
 We do not have a connection to a back end service to get any data for our application. So for now we will just add some data directly to our page so we have something to work with. Just copy-paste the following into your `TeaPage` class.
 
-```TypeScript
-  teaData: Array<Tea> = [
-    {
-      id: 1,
-      name: 'Green',
-      image: 'assets/img/green.jpg',
-      description:
-        'Green teas have the oxidation process stopped very early on, leaving them with a very subtle flavor and ' +
-        'complex undertones. These teas should be steeped at lower temperatures for shorter periods of time.'
-    },
-    {
-      id: 2,
-      name: 'Black',
-      image: 'assets/img/black.jpg',
-      description:
-        'A fully oxidized tea, black teas have a dark color and a full robust and pronounced flavor. Black teas tend ' +
-        'to have a higher caffeine content than other teas.'
-    },
-    {
-      id: 3,
-      name: 'Herbal',
-      image: 'assets/img/herbal.jpg',
-      description:
-        'Herbal infusions are not actually "tea" but are more accurately characterized as infused beverages ' +
-        'consisting of various dried herbs, spices, and fruits.'
-    },
-    {
-      id: 4,
-      name: 'Oolong',
-      image: 'assets/img/oolong.jpg',
-      description:
-        'Oolong teas are partially oxidized, giving them a flavor that is not as robust as black teas but also ' +
-        'not as subtle as green teas. Oolong teas often have a flowery fragrance.'
-    },
-    {
-      id: 5,
-      name: 'Dark',
-      image: 'assets/img/dark.jpg',
-      description:
-        'From the Hunan and Sichuan provinces of China, dark teas are flavorful aged pro-biotic teas that steeps ' +
-        'up very smooth with slightly sweet notes.'
-    },
-    {
-      id: 6,
-      name: 'Puer',
-      image: 'assets/img/puer.jpg',
-      description:
-        'An aged black tea from china. Puer teas have a strong rich flavor that could be described as "woody" or "peaty."'
-    },
-    {
-      id: 7,
-      name: 'White',
-      image: 'assets/img/white.jpg',
-      description:
-        'White tea is produced using very young shoots with no oxidation process. White tea has an extremely ' +
-        'delicate flavor that is sweet and fragrent. White tea should be steeped at lower temperatures for ' +
-        'short periods of time.'
-    },
-  ];
+```typescript
+teaData: Array<Tea> = [
+  {
+    id: 1,
+    name: 'Green',
+    image: 'assets/img/green.jpg',
+    description:
+      'Green teas have the oxidation process stopped very early on, leaving them with a very subtle flavor and ' +
+      'complex undertones. These teas should be steeped at lower temperatures for shorter periods of time.',
+  },
+  {
+    id: 2,
+    name: 'Black',
+    image: 'assets/img/black.jpg',
+    description:
+      'A fully oxidized tea, black teas have a dark color and a full robust and pronounced flavor. Black teas tend ' +
+      'to have a higher caffeine content than other teas.',
+  },
+  {
+    id: 3,
+    name: 'Herbal',
+    image: 'assets/img/herbal.jpg',
+    description:
+      'Herbal infusions are not actually "tea" but are more accurately characterized as infused beverages ' +
+      'consisting of various dried herbs, spices, and fruits.',
+  },
+  {
+    id: 4,
+    name: 'Oolong',
+    image: 'assets/img/oolong.jpg',
+    description:
+      'Oolong teas are partially oxidized, giving them a flavor that is not as robust as black teas but also ' +
+      'not as subtle as green teas. Oolong teas often have a flowery fragrance.',
+  },
+  {
+    id: 5,
+    name: 'Dark',
+    image: 'assets/img/dark.jpg',
+    description:
+      'From the Hunan and Sichuan provinces of China, dark teas are flavorful aged pro-biotic teas that steeps ' +
+      'up very smooth with slightly sweet notes.',
+  },
+  {
+    id: 6,
+    name: 'Puer',
+    image: 'assets/img/puer.jpg',
+    description:
+      'An aged black tea from china. Puer teas have a strong rich flavor that could be described as "woody" or "peaty."',
+  },
+  {
+    id: 7,
+    name: 'White',
+    image: 'assets/img/white.jpg',
+    description:
+      'White tea is produced using very young shoots with no oxidation process. White tea has an extremely ' +
+      'delicate flavor that is sweet and fragrent. White tea should be steeped at lower temperatures for ' +
+      'short periods of time.',
+  },
+];
 ```
 
 You will also need to import the `Tea` model that we created:
@@ -237,7 +237,7 @@ Give it a try again. Switch to an Android device and reload so you are using Mat
 
 Recall that we previously added the following test to `src/app/home/home.page.spec.ts`:
 
-```TypeScript
+```typescript
 ...
 import { By } from '@angular/platform-browser';
 ...
@@ -265,7 +265,7 @@ We currently have a list of X number of teas (currently 7, but once we start get
 
 First let's set up the test data in `src/app/tea/tea.page.spec.ts`:
 
-```TypeScript
+```typescript
 ...
 import { Tea } from '@app/models';
 
@@ -299,7 +299,7 @@ There are two ways that we could go with the test for this:
 
 The first set of tests would be testing an implementation detail, and therefore is not ideal. The second test more accurately reflects the requirement for the page from the user's perspective, and that is what is important. As such, we will write the test from that perspective. This also has the advantage of being a more robust test since the implementation details may change but the requirements for what we display to the user will likely stay the same.
 
-```TypeScript
+```typescript
 ...
 import { DebugElement } from '@angular/core';
 ...
@@ -348,7 +348,7 @@ import { DebugElement } from '@angular/core';
 
 Turning our attention away from the test and back to the code, we can modify the page class by adding a "getter" that transforms our tea list into a matrix:
 
-```TypeScript
+```typescript
   get teaMatrix(): Array<Array<Tea>> {
     return this.toMatrix(this.teaData);
   }

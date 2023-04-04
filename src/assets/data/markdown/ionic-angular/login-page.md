@@ -64,11 +64,11 @@ export class LoginPage {
 
 First we will add our "title test", but in this case we will only have the single title. There is no reason for the collapsible title on this page.
 
-```TypeScript
-  it('displays the title properly', () => {
-    // see the tea page test
-    // the big differences: there is only ONE title here and it should be "Login"
-  });
+```typescript
+it('displays the title properly', () => {
+  // see the tea page test
+  // the big differences: there is only ONE title here and it should be "Login"
+});
 ```
 
 Notice that the test fails, but we are about to fix that.
@@ -160,7 +160,7 @@ Pay particular attention to the `slot` on the `ion-icon` (`slot="end"`). A slot 
 
 For now the `LoginPage` class does not have to do much. It just needs to have a couple of properties to bind to the input fields. It also needs a handler for the button. At this time, the handler will just output a message to the console.
 
-```TypeScript
+```typescript
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
@@ -195,25 +195,25 @@ Switch back to the test file. The bindings should be tested to make sure they ar
 
 Notice how we are using the `nativeElement` along with standard JavaScript DOM APIs in these tests. We could have also used the `debugElement` and used its `.query(By.css(...))` syntax like before, and then gone down to the native element for the rest of the test. You can use whichever method you are most comfortable with. You should also take into consideration which methodology is going to work best within your test. In these tests we need the HTML element, so I just went that route right away.
 
-```TypeScript
-  describe('email input binding', () => {
-    it('updates the component model when the input changes', () => {
-      const input = fixture.nativeElement.querySelector('#email-input');
-      const event = new InputEvent('ionInput');
+```typescript
+describe('email input binding', () => {
+  it('updates the component model when the input changes', () => {
+    const input = fixture.nativeElement.querySelector('#email-input');
+    const event = new InputEvent('ionInput');
 
-      input.value = 'test@test.com';
-      input.dispatchEvent(event);
-      fixture.detectChanges();
+    input.value = 'test@test.com';
+    input.dispatchEvent(event);
+    fixture.detectChanges();
 
-      expect(component.loginForm.controls.email.value).toEqual('test@test.com');
-    });
-
-    it('updates the input when the component model changes', ()=>{
-      component.loginForm.controls.email.setValue('testy@mctesterson.com');
-      const input = fixture.nativeElement.querySelector('#email-input');
-      expect(input.value).toEqual('testy@mctesterson.com');
-    });
+    expect(component.loginForm.controls.email.value).toEqual('test@test.com');
   });
+
+  it('updates the input when the component model changes', () => {
+    component.loginForm.controls.email.setValue('testy@mctesterson.com');
+    const input = fixture.nativeElement.querySelector('#email-input');
+    expect(input.value).toEqual('testy@mctesterson.com');
+  });
+});
 ```
 
 Hook up the inputs in the templates. First, the form needs to be associated with our `loginForm`:
@@ -235,25 +235,25 @@ Here is the E-Mail Address input:
 
 The password input test and markup is similar:
 
-```TypeScript
-  describe('password input binding', () => {
-    it('updates the component model when the input changes', () => {
-      const input = fixture.nativeElement.querySelector('#password-input');
-      const event = new InputEvent('ionInput');
+```typescript
+describe('password input binding', () => {
+  it('updates the component model when the input changes', () => {
+    const input = fixture.nativeElement.querySelector('#password-input');
+    const event = new InputEvent('ionInput');
 
-      input.value = 'MyPas$Word';
-      input.dispatchEvent(event);
-      fixture.detectChanges();
+    input.value = 'MyPas$Word';
+    input.dispatchEvent(event);
+    fixture.detectChanges();
 
-      expect(component.loginForm.controls.password.value).toEqual('MyPas$Word');
-    });
-
-    it('updates the input when the component model changes', () => {
-      component.loginForm.controls.password.setValue('SomePassword');
-      const input = fixture.nativeElement.querySelector('#password-input');
-      expect(input.value).toEqual('SomePassword');
-    });
+    expect(component.loginForm.controls.password.value).toEqual('MyPas$Word');
   });
+
+  it('updates the input when the component model changes', () => {
+    component.loginForm.controls.password.setValue('SomePassword');
+    const input = fixture.nativeElement.querySelector('#password-input');
+    expect(input.value).toEqual('SomePassword');
+  });
+});
 ```
 
 ```html
@@ -269,7 +269,7 @@ Those tests are getting very verbose, especially when it comes to setting a valu
 
 Add a `setInputValue()` function within the main `describe()`.
 
-```TypeScript
+```typescript
 const setInputValue = (input: HTMLIonInputElement, value: string) => {
   const event = new InputEvent('ionInput');
   input.value = value;
@@ -356,39 +356,39 @@ The user should not be able to click the "Sign In" button if the form itself is 
 
 Let's use our tests to define when the button should be enabled and disabled.
 
-```TypeScript
-  describe('signin button', () => {
-    let button: HTMLIonButtonElement;
-    let email: HTMLIonInputElement;
-    let password: HTMLIonInputElement;
+```typescript
+describe('signin button', () => {
+  let button: HTMLIonButtonElement;
+  let email: HTMLIonInputElement;
+  let password: HTMLIonInputElement;
 
-    beforeEach(() => {
-      button = fixture.nativeElement.querySelector('ion-button');
-      email = fixture.nativeElement.querySelector('#email-input');
-      password = fixture.nativeElement.querySelector('#password-input');
-    });
-
-    it('starts disabled', () => {
-      expect(button.disabled).toEqual(true);
-    });
-
-    it('is disabled with just an email address', () => {
-      setInputValue(email, 'test@test.com');
-      expect(button.disabled).toEqual(true);
-    });
-
-    it('is disabled with just a password', () => {
-      // TODO: Fill this in
-    });
-
-    it('is enabled with both an email address and a password', () => {
-      // TODO: Fill this in
-    });
-
-    it('is disabled when the email address is not a valid format', () => {
-      // TODO: Fill this in
-    });
+  beforeEach(() => {
+    button = fixture.nativeElement.querySelector('ion-button');
+    email = fixture.nativeElement.querySelector('#email-input');
+    password = fixture.nativeElement.querySelector('#password-input');
   });
+
+  it('starts disabled', () => {
+    expect(button.disabled).toEqual(true);
+  });
+
+  it('is disabled with just an email address', () => {
+    setInputValue(email, 'test@test.com');
+    expect(button.disabled).toEqual(true);
+  });
+
+  it('is disabled with just a password', () => {
+    // TODO: Fill this in
+  });
+
+  it('is enabled with both an email address and a password', () => {
+    // TODO: Fill this in
+  });
+
+  it('is disabled when the email address is not a valid format', () => {
+    // TODO: Fill this in
+  });
+});
 ```
 
 Be sure to fill in the logic for the missing tests.

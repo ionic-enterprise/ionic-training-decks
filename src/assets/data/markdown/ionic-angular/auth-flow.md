@@ -212,7 +212,7 @@ Test this out in the application by manually loading `http://localhost:8100/logi
 
 Open the devtools and have a look at the console. You should see an error something like this:
 
-```
+```bash
 Uncaught (in promise): NullInjectorError: R3InjectorError(LoginPageModule)[AuthenticationService -> AuthenticationService -> HttpClient -> HttpClient -> HttpClient]:
   NullInjectorError: No provider for HttpClient!
 NullInjectorError: R3InjectorError(LoginPageModule)[AuthenticationService -> AuthenticationService -> HttpClient -> HttpClient -> HttpClient]:

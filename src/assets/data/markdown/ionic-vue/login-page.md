@@ -121,7 +121,7 @@ npm i vee-validate@next yup
 
 Switching back to the view file, we have two bits of information to get from the user: their email address and their password. We will use the `useField` composition API from vee-validate to create the models for those inputs. The string passed to the `useField()` function is the value for the associated input's `name`. The following code belongs in the `script` section.
 
-```TypeScript
+```typescript
 import { useForm, useField } from 'vee-validate';
 ...
 const { value: email } = useField<string>('email');
@@ -136,7 +136,7 @@ Let's also hook up the `v-model` on the inputs at this point. For example:
 
 With Vee-Validate, we will create a validation schema that defines how to validate the fields in our form. To do this, we will also use a library called `yup` to help us with our validations.
 
-```TypeScript
+```typescript
 ...
 import { object as yupObject, string as yupString } from 'yup';
 ...
@@ -153,7 +153,7 @@ const { value: password } = useField("password");
 
 This configuration exposed an object for us called `errors` and we can have a look at it now by adding `<pre>{{ errors }}</pre>` at the end of the `ion-content` area of our Login page, right after the `ion-list`. Do that now and have a look at it in the browser. You should see an object like this:
 
-```JSON
+```json
 {
   "email": "Email Address must be a valid email",
   "password": "Password is a required field"
@@ -190,40 +190,40 @@ import waitForExpect from 'wait-for-expect';
 
 We can now create a test that shows that our validations are set up properly by verifying that the user receives proper messages as they enter their data.
 
-```TypeScript
-  it('displays messages as the user enters invalid data', async () => {
-    const wrapper = mount(LoginPage);
-    const email = wrapper.findComponent('[data-testid="email-input"]');
-    const password = wrapper.findComponent('[data-testid="password-input"]');
-    const msg = wrapper.find('[data-testid="message-area"]');
+```typescript
+it('displays messages as the user enters invalid data', async () => {
+  const wrapper = mount(LoginPage);
+  const email = wrapper.findComponent('[data-testid="email-input"]');
+  const password = wrapper.findComponent('[data-testid="password-input"]');
+  const msg = wrapper.find('[data-testid="message-area"]');
 
-    await flushPromises();
-    await waitForExpect(() => expect(msg.text()).toBe(''));
+  await flushPromises();
+  await waitForExpect(() => expect(msg.text()).toBe(''));
 
-    await email.setValue('foobar');
-    await flushPromises();
-    await waitForExpect(() => expect(msg.text()).toBe('Email Address must be a valid email'));
+  await email.setValue('foobar');
+  await flushPromises();
+  await waitForExpect(() => expect(msg.text()).toBe('Email Address must be a valid email'));
 
-    await email.setValue('');
-    await flushPromises();
-    await waitForExpect(() => expect(msg.text()).toBe('Email Address is a required field'));
+  await email.setValue('');
+  await flushPromises();
+  await waitForExpect(() => expect(msg.text()).toBe('Email Address is a required field'));
 
-    await email.setValue('foobar@baz.com');
-    await flushPromises();
-    await waitForExpect(() => expect(msg.text()).toBe(''));
+  await email.setValue('foobar@baz.com');
+  await flushPromises();
+  await waitForExpect(() => expect(msg.text()).toBe(''));
 
-    await password.setValue('mypassword');
-    await flushPromises();
-    await waitForExpect(() => expect(msg.text()).toBe(''));
+  await password.setValue('mypassword');
+  await flushPromises();
+  await waitForExpect(() => expect(msg.text()).toBe(''));
 
-    await password.setValue('');
-    await flushPromises();
-    await waitForExpect(() => expect(msg.text()).toBe('Password is a required field'));
+  await password.setValue('');
+  await flushPromises();
+  await waitForExpect(() => expect(msg.text()).toBe('Password is a required field'));
 
-    await password.setValue('mypassword');
-    await flushPromises();
-    await waitForExpect(() => expect(msg.text()).toBe(''));
-  });
+  await password.setValue('mypassword');
+  await flushPromises();
+  await waitForExpect(() => expect(msg.text()).toBe(''));
+});
 ```
 
 We can then fill in the `message-area` with some markup that processes our error messages.

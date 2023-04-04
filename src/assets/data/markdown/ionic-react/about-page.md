@@ -15,10 +15,18 @@ The about page will use properties from `package.json` to display in an `IonList
 
 **`src/about/AboutPage.tsx`**
 
-```TypeScript
+```tsx
 import {
-  IonContent, IonHeader, IonItem, IonLabel, IonList,
-  IonNote, IonPage, IonTitle, IonToolbar} from '@ionic/react';
+  IonContent,
+  IonHeader,
+  IonItem,
+  IonLabel,
+  IonList,
+  IonNote,
+  IonPage,
+  IonTitle,
+  IonToolbar,
+} from '@ionic/react';
 
 const AboutPage: React.FC = () => {
   const { author, name, version, description } = require('../../package.json');

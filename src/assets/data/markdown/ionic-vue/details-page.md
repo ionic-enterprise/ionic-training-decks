@@ -15,7 +15,7 @@ Let's start with some fairly boilerplate starting code for a page.
 
 First the test in `tests/unit/views/TeaDetailsPage.spec.ts`
 
-```TypeScript
+```typescript
 import { useAuth } from '@/composables/auth';
 import TeaDetailsPage from '@/views/TeaDetailsPage.vue';
 import { createRouter, createWebHistory } from '@ionic/vue-router';
@@ -51,7 +51,7 @@ describe('TeaDetailsPage.vue', () => {
 
 Then the page itself in `src/views/TeaDetailsPage.vue`
 
-```HTML
+```html
 <template>
   <ion-page>
     <ion-header>
@@ -65,13 +65,7 @@ Then the page itself in `src/views/TeaDetailsPage.vue`
 </template>
 
 <script setup lang="ts">
-import {
-  IonContent,
-  IonHeader,
-  IonPage,
-  IonTitle,
-  IonToolbar,
-} from '@ionic/vue';
+  import { IonContent, IonHeader, IonPage, IonTitle, IonToolbar } from '@ionic/vue';
 </script>
 
 <style scoped></style>
@@ -87,15 +81,15 @@ Now that we have a details page, let's set up the navigation to the page and the
 
 We want to navigate from the `TeaListPage` page to the `TeaDetailsPage` page. A logical choice for the trigger is to use a click on the tea's card to start the navigation. Let's write a test for that in `tests/unit/views.TeaListPage.spec.ts`.
 
-```TypeScript
-  it('navigates to the tea details page when a tea card is clicked', async () => {
-    const wrapper = await mountView();
-    const cards = wrapper.findAll('ion-card');
-    router.push = jest.fn();
-    cards[3].trigger('click');
-    expect(router.push).toHaveBeenCalledTimes(1);
-    expect(router.push).toHaveBeenCalledWith('/teas/tea/4');
-  });
+```typescript
+it('navigates to the tea details page when a tea card is clicked', async () => {
+  const wrapper = await mountView();
+  const cards = wrapper.findAll('ion-card');
+  router.push = jest.fn();
+  cards[3].trigger('click');
+  expect(router.push).toHaveBeenCalledTimes(1);
+  expect(router.push).toHaveBeenCalledWith('/teas/tea/4');
+});
 ```
 
 Based on how we have the test set up, we know we should have seven `ion-card` elements, and we know what order they will be displayed in since we are controlling the state. Our test triggers a click on the 4th card and expects the proper `router.push()` call to occur.
@@ -104,8 +98,8 @@ Based on how we have the test set up, we know we should have seven `ion-card` el
 
 Now that we have a failing test, let's make that click occur in the `TeaListPage.vue` file.
 
-```HTML
-<ion-card button @click="$router.push(`/teas/tea/${tea.id}`)">
+```html
+<ion-card button @click="$router.push(`/teas/tea/${tea.id}`)"></ion-card>
 ```
 
 If we click on that, we get to the details page, but we have no way to get back. Let's fix that now. Add the following markup to the `TeaDetailsPage.vue` file. Add it within the `ion-toolbar`.

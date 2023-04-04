@@ -510,7 +510,7 @@ The first thing we will need to do is get the current rating when we select the 
 
 Add a rating to the test tea in our `TeaDetailsPage` test.
 
-```TypeScript
+```typescript
 (tea.get as jasmine.Spy).withArgs(7).and.returnValue(
   of({
     id: 7,
@@ -524,16 +524,16 @@ Add a rating to the test tea in our `TeaDetailsPage` test.
 
 Then add a test to verify the initialization of the rating value. This is in the "initialization" describe block.
 
-```TypeScript
-  it('initializes the rating', () => {
-    fixture.detectChanges();
-    expect(component.rating).toBe(4);
-  });
+```typescript
+it('initializes the rating', () => {
+  fixture.detectChanges();
+  expect(component.rating).toBe(4);
+});
 ```
 
 In the code we can tap into the Observable pipeline and grab the rating:
 
-```TypeScript
+```typescript
 ...
   rating: number = 0;
 ...
@@ -552,7 +552,7 @@ We can then bind the rating in the template:
 
 When the user clicks on the rating component, we need to save the rating to storage. Here is the test, code, and template markup change.
 
-```TypeScript
+```typescript
 describe('rating click', () => {
   const tea: Tea = {
     id: 7,
@@ -575,13 +575,13 @@ describe('rating click', () => {
 });
 ```
 
-```TypeScript
+```typescript
 changeRating(tea: Tea) {
   this.tea.save({ ...tea, rating: this.rating });
 }
 ```
 
-```HTML
+```html
 <app-rating [(ngModel)]="rating" (click)="changeRating(tea)"></app-rating>
 ```
 

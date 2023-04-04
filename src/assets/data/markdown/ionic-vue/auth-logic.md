@@ -12,7 +12,7 @@ If you got stuck on any of the coding challenges in this lab, you can have a loo
 
 The first thing we will need to do is model the User data for our system. Create a `src/models/User.ts` file with the following contents:
 
-```TypeScript
+```typescript
 export interface User {
   id: number;
   firstName: string;
@@ -23,7 +23,7 @@ export interface User {
 
 Next we will model the current session. The session will consist of a User and the authentication token for that user's session. Create a `src/models/Session.ts` file with the following contents:
 
-```TypeScript
+```typescript
 import { User } from './User';
 
 export interface Session {

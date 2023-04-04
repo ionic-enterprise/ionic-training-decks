@@ -42,7 +42,7 @@ Create a data model to define the data for a given tea.
 
 **`src/shared/models/Tea.ts`**
 
-```TypeScript
+```typescript
 export interface Tea {
   id: number;
   name: string;
@@ -55,7 +55,7 @@ export interface Tea {
 
 Before moving onto the next section let's make TypeScript module importing a bit easier to deal with. Have you ever worked on a project where files have a bunch of imports that look like this?
 
-```TypeScript
+```typescript
 import { Bar } from '../core/bar/Bar';
 import { Foo } from '../core/foo/Foo';
 import { Baz } from '../models/Baz';
@@ -63,7 +63,7 @@ import { Baz } from '../models/Baz';
 
 The amount of import statements are obnoxious. They are also a maintenance headache as the application grows. Wouldn't it be nice if we could import multiple modules on a single line like this?
 
-```TypeScript
+```typescript
 import { Bar, Foo } from '../core';
 import { Baz } from '../shared/models';
 ```
@@ -72,7 +72,7 @@ This can be achieved by grouping like items into "barrel" files. Let's group all
 
 **`src/shared/models/index.ts`**
 
-```TypeScript
+```typescript
 export * from './Tea';
 ```
 
@@ -105,7 +105,7 @@ Then, update `App.tsx` to replace references to the old home page and update the
 
 **`src/App.tsx`**
 
-```TypeScript
+```tsx
 ...
 import TeaPage from './tea/TeaPage';
 ...
@@ -143,7 +143,7 @@ We don't have a connection to a back end service to get any data for our applica
 
 Just copy-paste the following into your `TeaPage` file, above the component declaration:
 
-```TypeScript
+```typescript
 export const teaData: Array<Tea> = [
   {
     id: 1,
@@ -215,7 +215,7 @@ export const teaData: Array<Tea> = [
 
 We haven't imported the `Tea` model into our file yet so your IDE may be showing some kind of visual cue. Let's go ahead and import it using the barrel file we created:
 
-```TypeScript
+```typescript
 import ExploreContainer from '../components/ExploreContainer';
 import { Tea } from '../shared/models';
 import './TeaPage.css';
@@ -230,9 +230,9 @@ Let's see how that looks. Replace the line containing `<ExploreContainer />` wit
 
 **`src/tea/TeaPage.tsx`**
 
-```JSX
+```tsx
 <IonList>
-  {teaData.map(tea => (
+  {teaData.map((tea) => (
     <IonItem key={tea.id} lines="none">
       <IonCard>
         <IonImg src={tea.image} />
@@ -264,7 +264,7 @@ We have a list of X number of teas (currently 8, but once we start fetching data
 
 Create a test for this in `TeaPage.test.tsx`:
 
-```TypeScript
+```tsx
 ...
 import TeaPage, { teaData } from './TeaPage.tsx';
 
@@ -288,7 +288,7 @@ Export a function called `listToMatrix()` in `TeaPage.tsx`:
 
 **`src/tea/TeaPage.tsx`**:
 
-```TypeScript
+```typescript
 ...
 export const listToMatrix = (): Tea[][] => {
   let teaMatrix: Tea[][] = [];
@@ -318,13 +318,11 @@ Replace the existing `<IonList />` with the following code:
 
 **`src/tea/TeaPage.tsx`**
 
-```JSX
+```tsx
 <IonGrid className="tea-grid">
   {listToMatrix().map((row, idx) => (
-    <IonRow
-      key={idx}
-      className="ion-justify-content-center ion-align-items-stretch">
-      {row.map(tea => (
+    <IonRow key={idx} className="ion-justify-content-center ion-align-items-stretch">
+      {row.map((tea) => (
         <IonCol size="3" key={tea.id}>
           <IonCard>
             <IonImg src={tea.image} />
@@ -344,7 +342,7 @@ This code loops through the rows of the matrix and displays a column for each te
 
 **`src/tea/TeaPage.css`**
 
-```CSS
+```css
 .tea-grid ion-card {
   height: 100%;
 }
@@ -352,7 +350,6 @@ This code loops through the rows of the matrix and displays a column for each te
 .tea-grid ion-col {
   margin-bottom: 1em;
 }
-
 ```
 
 Now each card takes up the same cell height and we have some margin between the rows. Nice!
@@ -367,7 +364,7 @@ Change the `IonCol` properties like so:
 
 **`src/tea/TeaPage.tsx`**
 
-```TypeScript
+```tsx
 ...
 <IonCol size="12" sizeMd="6" sizeXl="3" key={tea.id}>
 ...

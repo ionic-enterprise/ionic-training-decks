@@ -30,7 +30,7 @@ The first thing we will do is add a sharing button to the top of our `src/app/ta
 </ion-buttons>
 ```
 
-```TypeScript
+```typescript
 get sharingIsAvailable(): boolean {
   return true;
 }
@@ -50,7 +50,7 @@ The designers have let us know that they only want this functionality available 
 
 We will start with the test. First, import the `Platform` service from `@ionic/angular` and provide a mock for it where we set up the testing module.
 
-```TypeScript
+```typescript
 import { IonicModule, ModalController, Platform } from '@ionic/angular';
 ...
 import { createOverlayControllerMock, createPlatformMock } from '@test/mocks';
@@ -71,7 +71,7 @@ describe('TastingNoteEditorComponent', () => {
 
 At this point we can start creating the tests for the properties that control the button:
 
-```TypeScript
+```typescript
 describe('share', () => {
   describe('in a web context', () => {
     beforeEach(() => {
@@ -99,7 +99,7 @@ describe('share', () => {
 
 The web context test fails, of course, because our `sharingIsAvailable` getter is just returning `true` all of the time. Let's fix that now:
 
-```TypeScript
+```typescript
 import { ModalController, Platform } from '@ionic/angular';
 ...
   get sharingIsAvailable(): boolean {
@@ -121,7 +121,7 @@ In order to share a rating, we need to have at least the brand, name, and rating
 
 First we will test for it. This test belongs right after the `is available` test within the `in a mobile context` describe that we just created above.
 
-```TypeScript
+```typescript
 it('is not allowed until a brand, name, and rating have all been entered', () => {
   const button = fixture.debugElement.query(By.css('[data-testid="share-button"]'));
   expect(button.nativeElement.disabled).toBeTrue();
@@ -142,7 +142,7 @@ it('is not allowed until a brand, name, and rating have all been entered', () =>
 
 We can then enter the proper logic in the `allowShare` getter:
 
-```TypeScript
+```typescript
 get allowSharing(): boolean {
   return !!(
     this.editorForm.controls.brand.value &&
@@ -156,7 +156,7 @@ get allowSharing(): boolean {
 
 The final step is to call the share API when the button is clicked. Let's update the test. First we will need to create a global mock for the plugin (just like we previously did for the Preferences plugin). Create a `__mocks__/@capacitor/share.ts` file with the following contents:
 
-```TypeScript
+```typescript
 class MockShare {
   async share(opt: {
     title: string;
@@ -175,7 +175,7 @@ export { Share };
 
 Then we will add a test within the `share in a mobile context` describe block of the notes editor test.
 
-```TypeScript
+```typescript
 import { Share } from '@capacitor/share';
 ...
       it('calls the share plugin when clicked', async () => {
@@ -202,7 +202,7 @@ import { Share } from '@capacitor/share';
 
 We can then add the code fill out the `share()` accordingly. You will also have to add a line importing the `Share` object from `@capacitor/share`:
 
-```TypeScript
+```typescript
 async share(): Promise<void> {
   await Share.share({
     title: `${this.editorForm.controls.brand.value}: ${this.editorForm.controls.name.value}`,

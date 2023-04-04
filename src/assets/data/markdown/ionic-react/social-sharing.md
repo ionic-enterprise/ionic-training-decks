@@ -16,7 +16,7 @@ Let's update the sliding items from the last lab so that it displays a trashcan 
 
 **`src/tasting-notes/TastingNotesPage.tsx`**
 
-```JSX
+```tsx
 <IonItemOption color="danger" onClick={() => handleDeleteNote(note.id!)} slot="icon-only">
   <IonIcon icon={trashBin} />
 </IonItemOption>
@@ -39,7 +39,7 @@ Start by stubbing out a method to handle when the option is tapped.
 
 **`src/tasting-notes/TastingNotesPage.tsx`**
 
-```TypeScript
+```typescript
 ...
 const handleShareNote = async (note: TastingNote) => {
   console.log(note);
@@ -49,13 +49,8 @@ const handleShareNote = async (note: TastingNote) => {
 
 Then add the option to the `<IonItemOptions />` component. Add it _before_ the delete option:
 
-```JSX
-<IonItemOption
-  data-testid={`share${idx}`}
-  color="secondary"
-  onClick={() => handleShareNote(note)}
-  slot="icon-only"
->
+```tsx
+<IonItemOption data-testid={`share${idx}`} color="secondary" onClick={() => handleShareNote(note)} slot="icon-only">
   <IonIcon icon={share} />
 </IonItemOption>
 ```
@@ -68,7 +63,7 @@ First, the Capacitor Social Sharing API needs to be mocked in our unit test.
 
 Add a `describe()` block for 'sharing a note' as a sibling to the 'initialization' describe block, with the following tests:
 
-```TypeScript
+```tsx
 describe('sharing a note', () => {
   beforeEach(() => (Share.share = jest.fn()));
 
@@ -106,7 +101,7 @@ Finally, implement `handleSharedNote` in `TastingNotesPage.tsx`.
 
 **`src/tasting-notes/TastingNotesPage.tsx`**
 
-```TypeScript
+```typescript
 const handleShareNote = async (note: TastingNote) => {
   const { brand, name, rating, notes } = note;
   await Share.share({

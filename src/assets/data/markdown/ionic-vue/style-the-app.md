@@ -18,7 +18,7 @@ Generally, we want as much of our styling to be as global as possible in order t
 
 Have a look at the bottom of the `src/components/AppRating.vue` file. There you will find the `style` section:
 
-```html
+```css
 <style scoped>
   ion-icon {
     font-size: 24px;
@@ -36,7 +36,7 @@ Notice that it is marked as `scoped`. This tells Vue to automatically scope the 
 
 Now look at `src/App.vue`. It has a style tag without the `scoped`, which will result in this applying to anything within the application that has the class `error-message`.
 
-```html
+```css
 <style>
   .error-message {
     color: var(--ion-color-danger, ##ff0000);

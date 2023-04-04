@@ -53,24 +53,24 @@ At this point we are ready to start implementing the changes.
 
 When the rating is saved using `@capacitor/preferences`, we will use a key of `ratingID` where ID is the value of the tea's ID. The test for this looks like the following (this should go in the "rate" `describe` block.
 
-```TypeScript
-  describe('rate', () => {
-    const { rate } = useTea();
+```typescript
+describe('rate', () => {
+  const { rate } = useTea();
 
-    it('saves the value', async () => {
-      await rate(5, 4);
-      expect(Preferences.set).toHaveBeenCalledTimes(1);
-      expect(Preferences.set).toHaveBeenCalledWith({
-        key: 'rating5',
-        value: '4',
-      });
+  it('saves the value', async () => {
+    await rate(5, 4);
+    expect(Preferences.set).toHaveBeenCalledTimes(1);
+    expect(Preferences.set).toHaveBeenCalledWith({
+      key: 'rating5',
+      value: '4',
     });
   });
+});
 ```
 
 Add the code to accomplish this in `src/composables/tea.ts`:
 
-```TypeScript
+```typescript
 const rate = async (id: number, rating: number): Promise<void> => {
   // TODO: your code goes here...
 };
@@ -152,9 +152,9 @@ Now for the transform itself. Here is where things get a little complicated. Her
 - Map the data using the new `transform()`.
 - Now we have an array of promises, but we want a promise of an array, so use `Promise.all()` to do this data conversion.
 
-```TypeScript
+```typescript
 const unpack = (data: Array<RawData>): Promise<Array<Tea>> => {
-  return Promise.all(data.map(t => transform(t)));
+  return Promise.all(data.map((t) => transform(t)));
 };
 
 const transform = async (data: RawData): Promise<Tea> => {
@@ -173,7 +173,7 @@ With all of that in place, the changes to the view are very straight forward and
 
 First, we will update the test `tests/unit/views/TeaDetailsPage.spec.ts` to cover our requirements:
 
-```TypeScript
+```typescript
 describe('TeaDetailsPage.vue', () => {
   ...
   it('saves the rating on click', async () => {

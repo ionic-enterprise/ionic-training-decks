@@ -23,7 +23,7 @@ Fill `Rating.tsx` with the following boilerplate code:
 
 **`src/shared/components/rating/Rating.tsx`**
 
-```TypeScript
+```typescript
 import './Rating.css';
 
 export const Rating: React.FC = () => {
@@ -35,7 +35,7 @@ Now let's shell out the test file:
 
 **`src/shared/components/rating/Rating.test.tsx`**
 
-```TypeScript
+```tsx
 import { render } from '@testing-library/react';
 import { Rating } from './Rating';
 
@@ -45,7 +45,7 @@ describe('<Rating />', () => {
     expect(asFragment()).toMatchSnapshot();
   });
 
-  afterEach(() =>  jest.restoreAllMocks());
+  afterEach(() => jest.restoreAllMocks());
 });
 ```
 
@@ -53,7 +53,7 @@ We'll leave `Rating.css` alone for now, finally add your export statement to the
 
 **`src/shared/components/index.ts`**
 
-```TypeScript
+```typescript
 export * from './rating/Rating';
 ```
 
@@ -61,7 +61,7 @@ Before we do anything else, let's add our component to the tea details page:
 
 **`src/tea/details/TeaDetailsPage.tsx`**
 
-```TypeScript
+```tsx
 ...
 import { Rating } from '../../shared/components';
 ...
@@ -91,7 +91,7 @@ Update the rating component to display a row of five stars:
 
 **`src/shared/components/rating/Rating.tsx`**
 
-```TypeScript
+```tsx
 import { IonIcon } from '@ionic/react';
 import { star } from 'ionicons/icons';
 
@@ -112,7 +112,7 @@ export const Rating: React.FC = () => {
 
 Change the component's markup so that the number of filled in starts matches the initial rating and the rest are outlined stars:
 
-```JSX
+```tsx
  <div className="rating" data-testid="rating">>
   {[1, 2, 3, 4, 5].map((num, idx) => (
     <IonIcon data-testid={`Rate ${num} stars`} key={idx} icon={num <= rating ? star : starOutline} />
@@ -122,7 +122,7 @@ Change the component's markup so that the number of filled in starts matches the
 
 Add an `onClick` handler that will change the rating when the user clicks on a star:
 
-```JSX
+```tsx
  <div className="rating" data-testid="rating">>
   {[1, 2, 3, 4, 5].map((num, idx) => (
     <IonIcon
@@ -143,7 +143,7 @@ The rating component works well but the stars are a _little_ small and close tog
 
 **`src/shared/components/rating/Rating.css`**:
 
-```CSS
+```css
 .rating ion-icon {
   font-size: 1.5em;
   padding-right: 0.5em;
@@ -169,7 +169,7 @@ This can be achieved by creating a set of props specific to the rating component
 
 **`src/shared/components/rating/Rating.tsx`**
 
-```TypeScript
+```typescript
 ...
 import './Rating.css';
 
@@ -185,7 +185,7 @@ The only prop that the consumer _needs_ to provide is `onRatingChange`. Default 
 
 Update the component to use `RatingProps`:
 
-```TypeScript
+```tsx
 import { useEffect, useState } from 'react';
 ...
 
@@ -218,7 +218,7 @@ The tests for the rating component are failing. Let's replace the existing tests
 
 **`src/shared/components/rating/Rating.test.tsx`**
 
-```TypeScript
+```typescript
 import { ionFireEvent as fireEvent } from '@ionic/react-test-utils';
 ...
 
@@ -235,7 +235,7 @@ describe('<Rating />', () => {
 
 Fill out the `when enabled` describe block with the following:
 
-```TypeScript
+```tsx
 ...
   describe('when enabled', () => {
     let props: any;
@@ -266,7 +266,7 @@ Fill out the `when enabled` describe block with the following:
 
 Then the "when disabled" block:
 
-```TypeScript
+```tsx
 ...
   describe('when disabled', () => {
     let props: any;
@@ -296,7 +296,7 @@ First, update the `Tea` model to optionally contain a `rating`.
 
 **`src/shared/models/Tea.ts`**
 
-```TypeScript
+```typescript
 export interface Tea {
   id: number;
   name: string;
@@ -312,7 +312,7 @@ Add ratings to each of the `expectedTeas` items in `src/tea/__fixtures__/mockTea
 
 **Example:**
 
-```TypeScript
+```typescript
 {
   id: 1,
   name: 'Green',
@@ -326,7 +326,7 @@ For some of the items, make the rating zero. This will be the default value for 
 
 The rating is not part of the data coming back from the back end, so the result set that we expect back from the API should not include it. Update `resultTeas` so it deletes the `rating` property like we do for `image`:
 
-```TypeScript
+```typescript
 const resultTeas = () => {
   return expectedTeas.map((t: Tea) => {
     const tea = { ...t };
@@ -342,7 +342,7 @@ Then update the setup code in order to mock the `Preferences` Capacitor API. Whe
 
 **`src/tea/TeaProvider.test.tsx`**
 
-```TypeScript
+```typescript
 ...
 jest.mock('@capacitor/preferences');
 ...
@@ -369,7 +369,7 @@ First update `fromJsonToTea()`:
 
 **`src/tea/TeaProvider.tsx`**
 
-```TypeScript
+```typescript
 const fromJsonToTea = async (obj: any): Promise<Tea> => {
   const rating = await Preferences.get({ key: `rating${obj.id}` });
   return {
@@ -382,7 +382,7 @@ const fromJsonToTea = async (obj: any): Promise<Tea> => {
 
 Then update `getTeas()`:
 
-```TypeScript
+```typescript
 const getTeas = useCallback(async () => {
   const { data } = await api.get('/tea-categories');
   const teas = await Promise.all(data.map(async (item: any) => await fromJsonToTea(item)));
@@ -400,7 +400,7 @@ Start by adding the describe block for "save tea":
 
 **`src/tea/TeaProvider.test.tsx`**
 
-```TypeScript
+```typescript
 ...
 describe('useTea', () => {
   ...
@@ -432,7 +432,7 @@ To make this test pass, first we need to update `TeaContext`:
 
 **`src/tea/TeaProvider.tsx`**
 
-```TypeScript
+```typescript
 export const TeaContext = createContext<{
   teas: Tea[];
   getTeas: () => Promise<void>;
@@ -450,7 +450,7 @@ export const TeaContext = createContext<{
 
 Then, we need to add and export the `saveTea()` function within `<TeaProvider />`:
 
-```TypeScript
+```typescript
 const saveTea = async (tea: Tea): Promise<void> => {
   const rating = tea.rating?.toString() || '0';
   Preferences.set({ key: `rating${tea.id}`, value: rating });
@@ -476,7 +476,7 @@ Go ahead and make the following changes to the tea details page.
 
 **`src/tea/details/TeaDetailsPage.tsx`**
 
-```TypeScript
+```tsx
 ...
 const TeaDetailsPage: React.FC = () => {
   ...

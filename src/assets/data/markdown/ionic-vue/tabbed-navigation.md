@@ -10,7 +10,7 @@ In this lab you will:
 
 If we are going to have multiple tabs, we are going to need a place to navigate to. For now, we will just navigate to some blank starter pages. Let's create those now. Add two files: `src/views/AboutPage.vue` and `src/views/TastingNotesPage.vue`. The contents of these files should look like this:
 
-```HTML
+```html
 <template>
   <ion-page>
     <ion-header>
@@ -24,13 +24,7 @@ If we are going to have multiple tabs, we are going to need a place to navigate 
 </template>
 
 <script setup lang="ts">
-import {
-  IonContent,
-  IonHeader,
-  IonPage,
-  IonTitle,
-  IonToolbar,
-} from '@ionic/vue';
+  import { IonContent, IonHeader, IonPage, IonTitle, IonToolbar } from '@ionic/vue';
 </script>
 
 <style scoped></style>
@@ -40,7 +34,7 @@ Adjust the name and the `ion-title` based on the page. Do not worry about adding
 
 Add a couple of simple tests for the views that were just created. Create them under `tests/unit/views` using the same naming convention that we have been using already. Use the following as a template:
 
-```TypeScript
+```typescript
 import TastingNotesPage from '@/views/TastingNotesPage.vue';
 import { createRouter, createWebHistory } from '@ionic/vue-router';
 import { mount, VueWrapper } from '@vue/test-utils';
@@ -82,7 +76,7 @@ This application will have a small number of distinct sections, so tabs make the
 
 Create a `src/views/TabsPage.vue` file with the following contents:
 
-```TypeScript
+```html
 <template>
   <ion-page>
     <ion-tabs>
@@ -106,16 +100,8 @@ Create a `src/views/TabsPage.vue` file with the following contents:
 </template>
 
 <script setup lang="ts">
-import {
-  IonIcon,
-  IonLabel,
-  IonPage,
-  IonRouterOutlet,
-  IonTabBar,
-  IonTabButton,
-  IonTabs,
-} from '@ionic/vue';
-import { leaf, documentText, informationCircle } from 'ionicons/icons';
+  import { IonIcon, IonLabel, IonPage, IonRouterOutlet, IonTabBar, IonTabButton, IonTabs } from '@ionic/vue';
+  import { leaf, documentText, informationCircle } from 'ionicons/icons';
 </script>
 
 <style scoped></style>
@@ -127,7 +113,7 @@ This page will be rendered with a row of tabs on the bottom of the page. The top
 
 Have a look at the documentation on <a href="https://ionicframework.com/docs/vue/navigation#shared-urls-versus-nested-routes" target="_blank">Shared URLs vs. Nested Routes</a>. Here is what we currently have for our routes. Note that we currently have an example of using shared URLs in our routes. When we add the tabs, we will also have some nested routes. The currently defined routes should look something like this:
 
-```TypeScript
+```typescript
 const routes: Array<RouteRecordRaw> = [
   {
     path: '/',
@@ -162,7 +148,7 @@ What we will do here is:
 
 Let's do this one step at a time. First, create the `tabs` route as such:
 
-```TypeScript
+```typescript
 import Tabs from '../views/TabsPage.vue';
 ...
 const routes: Array<RouteRecordRaw> = [
@@ -224,7 +210,7 @@ Congratulations, you have just expanded your application to use tabs based routi
 
 In case you need it, here are the full set of routes:
 
-```TypeScript
+```typescript
 const routes: Array<RouteRecordRaw> = [
   {
     path: '/',

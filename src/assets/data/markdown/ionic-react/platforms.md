@@ -83,7 +83,7 @@ npx capacitor-assets generate --iconBackgroundColor '#f1ebe1' --splashBackground
 
 **Pro Tip:** the `@capacitor/assets` package is updated from time to time. As a result, you may want to regenerate the icons and splash screen from time to time. To make this easier, add the command to your `package.json` `scripts`:
 
-```JSON
+```json
   "scripts": {
     "assets": "capacitor-assets generate --iconBackgroundColor '#f1ebe1' --splashBackgroundColor '#f1ebe1' --iconBackgroundColorDark '#110b00' --splashBackgroundColorDark '#110b00'",
     ...
@@ -96,7 +96,7 @@ When you want to regenerate the assets, you just need to remember `npm run asset
 
 I like to have my build do a copy for me. For this reason, I do a `cap copy` with every build. This ensures my native projects are always up to date with the latest changes made.
 
-```JSON
+```json
   "scripts": {
     "build": "react-scripts build && cap copy",
     ...

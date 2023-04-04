@@ -221,33 +221,35 @@ Create an `initialization` section in the test. Also, since we will need to do s
 
 In the `beforeEach()`, we need to set up the current route so it has an ID on it. We also need to set up the value returned by the `TeaService` when `get()` is called.
 
-```TypeScript
-  describe('initialization', () => {
-    beforeEach(() => {
-      const route = TestBed.inject(ActivatedRoute);
-      (route.snapshot.paramMap.get as any).withArgs('id').and.returnValue('7');
-      const tea = TestBed.inject(TeaService);
-      (tea.get as jasmine.Spy).and.returnValue(of({
+```typescript
+describe('initialization', () => {
+  beforeEach(() => {
+    const route = TestBed.inject(ActivatedRoute);
+    (route.snapshot.paramMap.get as any).withArgs('id').and.returnValue('7');
+    const tea = TestBed.inject(TeaService);
+    (tea.get as jasmine.Spy).and.returnValue(
+      of({
         id: 7,
         name: 'White',
         description: 'Often looks like frosty silver pine needles',
         image: 'imgs/white.png',
-      }));
-    });
-
-    it('binds the name', () => {
-      fixture.detectChanges();
-      const el = fixture.debugElement.query(By.css('[data-testid="name"]'));
-      expect(el.nativeElement.textContent.trim()).toBe('White');
-    });
+      })
+    );
   });
+
+  it('binds the name', () => {
+    fixture.detectChanges();
+    const el = fixture.debugElement.query(By.css('[data-testid="name"]'));
+    expect(el.nativeElement.textContent.trim()).toBe('White');
+  });
+});
 ```
 
 **Note:** remember to remove the `fixture.detectChanges()` call from the top-level `beforeEach()`.
 
 The code that satisfies that test looks like this:
 
-```TypeScript
+```typescript
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -261,7 +263,7 @@ import { EMPTY, Observable } from 'rxjs';
   templateUrl: './tea-details.page.html',
   styleUrls: ['./tea-details.page.scss'],
   standalone: true,
-  imports: [CommonModule, FormsModule, IonicModule]
+  imports: [CommonModule, FormsModule, IonicModule],
 })
 export class TeaDetailsPage implements OnInit {
   tea$: Observable<Tea> = EMPTY;
