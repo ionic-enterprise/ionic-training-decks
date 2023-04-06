@@ -50,11 +50,9 @@ describe('<App />', () => {
 });
 ```
 
-If the React Testing Library is new to you, it's important to know the guiding principle behind it:
+This test asserts that the rendered output of `<App />` is not an empty DOM tree.
 
-> The more your tests resemble the way your software is used, the more confidence they can give you.
-
-This means that we will design tests that make assertions based around what end users would see. The test above asserts that the rendered output of `<App />` should not be an empty DOM tree.
+If you are new to using the React Testing Library, it may initially seem odd to use the DOM as a way to simulate user interaction with your components. However, by doing so, you can create tests that more closely resemble how your users will interact with your application, leading to greater confidence in the functionality of your code.
 
 #### Snapshot Testing
 
@@ -77,7 +75,7 @@ Take a look at `src/pages/Home.tsx`. What should we test here? We don't want to 
 
 Create a file `src/pages/Home.test.tsx` containing the following code:
 
-```Typescript
+```tsx
 import { render, screen } from '@testing-library/react';
 import Home from './Home';
 
@@ -102,7 +100,7 @@ describe('<Home />', () => {
 
 These tests are markedly different than the one created for `App.tsx`. I've added comments to the code block below to break down what is going on:
 
-```Typescript
+```tsx
 it('displays the title', () => {
   // First, we want to render the <Home /> component.
   render(<Home />);

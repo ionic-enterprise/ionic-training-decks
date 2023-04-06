@@ -19,27 +19,14 @@ We'll want to display images for the tea data we will be mocking up, but these a
 2. Move all files with the `.jpg` extension into `public/assets/images`
 3. Move `favicon.png` into `public`
 
-## Feature Folders
+If you are running the application in the browser, you should notice that the icon in the browser tab has no changed. However, the tab still says _Ionic App_. To change that, edit `index.html` and change the `title`.
 
-One way to organize project files is to create folders by feature, opposed to file "type". A feature folder structure is easier to maintain over the lifetime of an application as new requirements and features are scheduled to be added. This training will utilize a feature folder approach.
+## Model the Data
 
-In addition to folders by feature, it's typical to have folders for `core` and `shared` functionality: bits of code that are used across features. Create the following folders:
+Before we mock up te UI for the main page, let's define the data model for our teas:
 
-- `src/core`
-- `src/shared`
-
-## Mock Up the Tea Display
-
-Let's mock how components will be used in our page. This allows us to test our exactly what our data should look like and also allows us to concentrate on the styling without worrying about other moving parts. This is a common technique used when laying out the interface for an application.
-
-### Tea Model
-
-Create a data model to define the data for a given tea.
-
-- Create a `src/shared/models` folder
-- Add a `src/shared/models/Tea.ts` file
-
-**`src/shared/models/Tea.ts`**
+- Create a `src/models` folder
+- Add a `src/models/Tea.ts` file
 
 ```typescript
 export interface Tea {
@@ -50,98 +37,94 @@ export interface Tea {
 }
 ```
 
-### Barrel Files
-
-Before moving onto the next section let's make TypeScript module importing a bit easier to deal with. Have you ever worked on a project where files have a bunch of imports that look like this?
-
-```typescript
-import { Bar } from '../core/bar/Bar';
-import { Foo } from '../core/foo/Foo';
-import { Baz } from '../models/Baz';
-```
-
-The amount of import statements are obnoxious. They are also a maintenance headache as the application grows. Wouldn't it be nice if we could import multiple modules on a single line like this?
-
-```typescript
-import { Bar, Foo } from '../core';
-import { Baz } from '../shared/models';
-```
-
-This can be achieved by grouping like items into "barrel" files. Let's group all our of models into a single `index.ts` file within the `models` folder:
-
-**`src/shared/models/index.ts`**
+We will also create a barrel file for our models. This seems a little redundant right now, but it will make our lives easier later. Create `src/models/index.ts` and export the `Tea` model there.
 
 ```typescript
 export * from './Tea';
 ```
 
-### The Tea Page
+## Rename the Home Page
 
-#### Rename the Home Page
+We've done some work already with the Home page. Rather than start over, let's just rename that to be our tea listing page.
 
-Our app currently has a page called `Home`, but we want to display several types of teas on it. Let's rename that page so we can find it more easily as our application grows. This is a two part operation:
+This is a multi-part process:
 
-1. Move the files
-2. Rename the objects
+1. Rename `src/pages` to `src/tea`
+2. Replace `Home` with `TeaListPage` for all filenames within `src/tea`
+   - For example, `src/tea/Home.test.tsx` becomes `src/tea/TeaListPage.test.tsx`
+3. Fix the routing
+4. Fix the tests
+5. Make minor updates to the code
 
-##### Move the Files
+### Fix the Routing
 
-```bash
-$ git mv src/pages src/tea
-$ git mv src/tea/Home.tsx src/tea/TeaPage.tsx
-$ git mv src/tea/Home.css src/tea/TeaPage.css
-$ git mv src/tea/Home.test.tsx src/tea/TeaPage.test.tsx
-$ git mv src/tea/__snapshots__/Home.test.tsx.snap src/tea/__snapshots__/TeaPage.test.tsx.snap
-```
+Application routing is defined in `src/App.tsx`, so we need to replace the reference to `<Home />` here. While we're at it, let's give the route a more descriptive path:
 
-Using `git mv` to move the file ensures they are tracked properly in `git`. You could also do the renaming via your IDE; do whatever works best for you.
-
-##### Rename the Objects
-
-All of the TypeScript files in `src/tea` contain path references to the old `home` files. They also contain object names such as `Home`. Fix the file path references and change the object names to be `TeaPage`.
-
-Then, update `App.tsx` to replace references to the old home page and update the routing to have a `tea` route instead of a `home` route:
-
-**`src/App.tsx`**
-
-<<<<<<< HEAD
 ```tsx
-=======
-```
->>>>>>> 3110f1d (wip(react): update steps 5 + workaround broken JSX rendering)
-...
-import TeaPage from './tea/TeaPage';
 ...
 const App: React.FC = () => (
   <IonApp>
-    <IonReactRouter>
-      <IonRouterOutlet>
-        <Route exact path="/tea">
-          <TeaPage />
-        </Route>
-        <Route exact path="/">
-          <Redirect to="/tea" />
-        </Route>
-      </IonRouterOutlet>
-    </IonReactRouter>
+    <SplashContainer>
+      <IonReactRouter>
+        <IonRouterOutlet>
+          <Route exact path="/tea">
+            <TeaListPage />
+          </Route>
+          <Route exact path="/">
+            <Redirect to="/tea" />
+          </Route>
+        </IonRouterOutlet>
+      </IonReactRouter>
+    </SplashContainer>
   </IonApp>
 );
-
-export default App;
+...
 ```
 
-**Challenge:** Replace the header text "Blank" with "Tea" and fix any failing tests.
+### Fix the Tests
+
+We need to replace the reference to `<Home />` within `src/tea/TeaListPage.test.tsx` as well.
+
+```tsx
+describe('<TeaListPage />', () => {
+  it('renders consistently', () => {
+    const { asFragment } = render(<TeaListPage />);
+    expect(asFragment()).toMatchSnapshot();
+  });
+
+  it('displays the title', () => {
+    render(<TeaListPage />);
+    const titleElements = screen.getAllByText('Blank');
+    expect(titleElements).toHaveLength(2);
+  });
+}
+```
+
+At this point, our tests and the continuous build for our development server should both be working. Please reach out to your instructor if you get stuck.
+
+### Coding Challenge
+
+Now that we've renamed the Home page and fixed up the routes, I have a coding challenge for you. Change the tea listing page to have a title of "Teas" instead of "Blank".
+
+This will be a two step process:
+
+1. Update the test to grab elements with the text "Teas" rather than "Blank". This should break your test.
+2. Update and fix the code accordingly.
 
 During this training, your snapshot tests will periodically fail as we update components. That's OK and makes sense - we are modifying our components so they shouldn't be matching existing snapshots. Remember to update your snapshots whenever the snapshot tests fail by pressing `u` in the terminal hosting `npm run test.unit`.
 
-#### Mock the Data
+## Mock Up the Tea Display
+
+Let's mock up how Ionic components will be used in the tea listing page. This allows us to test out exactly what our data should look like and also allows us to concentrate on the styling without worrying about other moving parts.
+
+### Mock the Data
 
 We don't have a connection to a back end service to get any data for our application. For now we will just add some data directly to our page so we have something to work with.
 
-Just copy-paste the following into your `TeaPage` file, above the component declaration:
+Just copy-paste the following into your `TeaListPage` component, above the return block:
 
 ```typescript
-export const teaData: Array<Tea> = [
+export const teaData: Tea[] = [
   {
     id: 1,
     name: 'Green',
@@ -198,42 +181,22 @@ export const teaData: Array<Tea> = [
       'delicate flavor that is sweet and fragrant. White tea should be steeped at lower temperatures for ' +
       'short periods of time.',
   },
-  {
-    id: 8,
-    name: 'Yellow',
-    image: '/assets/images/yellow.jpg',
-    description:
-      'A rare tea from China, yellow tea goes through a similar shortened oxidation process like green teas. ' +
-      'Yellow teas, however, do not have the grassy flavor that green teas tend to have. The leaves often ' +
-      'resemble the shoots of white teas, but are slightly oxidized.',
-  },
 ];
 ```
 
 We haven't imported the `Tea` model into our file yet so your IDE may be showing some kind of visual cue. Let's go ahead and import it using the barrel file we created:
 
-<<<<<<< HEAD
 ```typescript
-import ExploreContainer from '../components/ExploreContainer';
-=======
-```TypeScript
->>>>>>> 3110f1d (wip(react): update steps 5 + workaround broken JSX rendering)
-import { Tea } from '../shared/models';
+import { Tea } from '../models';
 ```
 
-#### Create a List of Cards
+### Experiment with a List
 
-Now that we have a list of teas, we need to figure out the best component to visually showcase the data. Each item contains a title, an image, and a description -- those data-points work well with <a href="https://ionicframework.com/docs/api/card" target="_blank">cards</a>.
+Now that we have a list of teas, we need to figure out how to display this information. One design that seems natural to use is a <a href="https://ionicframework.com/docs/api/card" target="_blank">card</a> per tea in the list. Let's see how that looks. Before doing this, use your browser's DevTools to emulate an iPhone.
 
-Let's see how that looks. Replace the line containing `<ExploreContainer />` with the following code:
+Replace the line containing `<ExploreContainer />` with the following code:
 
-**`src/tea/TeaPage.tsx`**
-
-<<<<<<< HEAD
 ```tsx
-=======
-```
->>>>>>> 3110f1d (wip(react): update steps 5 + workaround broken JSX rendering)
 <IonList>
   {teaData.map((tea) => (
     <IonItem key={tea.id} lines="none">
@@ -249,66 +212,56 @@ Let's see how that looks. Replace the line containing `<ExploreContainer />` wit
 </IonList>
 ```
 
-That looks pretty good, at least when viewed at a phone resolution but what about other form factors?
+This looks nice on an iPhone form factor, but try some others. Try an iPad Pro, for example. Toggle device emulation off in the DevTools and look at it as a web page with desktop resolution. In both of these cases, the cards just look "big". Clearly a more responsive design is called for.
 
-## Make a Responsive Grid
+Leave device emulation off in the DevTools. Let's just worry about the desktop sized layout for now.
 
-Our application looks good when viewed on a phone resolution but if we modify our browser to emulate some other form factor such as an iPad or iPad Pro the cards are huge; each item gets way too much real estate. It would look much nicer if we could:
+### Use a Responsive Grid
+
+We _could_ just limit the size of the cards so they would not get so big, but that would just be a waste of screen space on larger devices. Clearly we are not going to go with a list, so let's remove the markup we just added.
+
+What we really need is a way to do the following:
 
 1. Show a single list on a phone
-2. Show two columns of cards side-by-side on an iPad
-3. Show four columns on even wider screen, such as an iPad in landscape mode or a desktop
+2. Show two columns of tea cards side by side on an iPad
+3. Expand the columns to four on even wider screens, such as an iPad in landscape mode or a desktop
 
-Enter the <a href="https://ionicframework.com/docs/layout/grid" target="_blank">responsive grid</a>! By default, the responsive grid shows rows of 12 columns each. However, we only want to show at most rows of 4 columns. Luckily there are some simple mechanisms in place that will allow us to do that, but first we should massage our data a bit.
+Enter the <a href="https://ionicframework.com/docs/layout/grid" target="_blank">responsive grid</a>. By default, the responsive grid shows rows containing 12 columns. Elements within the rows can be contained either within a single column or spread across multiple columns allowing for a very flexible layout within each row.
 
-### Setup a Data Matrix
+In our case, we want to show at most four columns of cards per row for high resolution devices. As the form factor changes, we want the number of columns to change. On lower resolution devices we would like to display only two columns per row, and on phone resolutions we would like just a single column of cards. Luckily, there are some simple mechanisms in place that will allow us to do that. First, let's think about how we want the grid to work at the highest resolutions and then express that in some tests.
 
-We have a list of X number of teas (currently 8, but once we start fetching data from a back end service it could be any number); let's break that up into a matrix with 4 teas in each row.
+We no longer need the test that expects the default text, so remove that test case.
 
-In `TeaPage.test.tsx`, replace the `displays the default text` test with the describe block below.
+Let's lay out our tests for our current mock data (which has seven teas), and our highest resolution, which will have four teas per row. In this case, our page is expected to render two rows; the first with four columns and the second with three.
 
-<<<<<<< HEAD
+We need tests like this in `src/tea/TeaListPage.test.tsx`:
+
 ```tsx
+describe('<TeaListPage />', () => {
 ...
-import TeaPage, { teaData } from './TeaPage.tsx';
-
-describe('<TeaPage />', () => {
-  ...
-  describe('initialization', () => {
-    it('makes a tea matrix', () => {
-      const teaMatrix = [
-        [teaData[0], teaData[1], teaData[2], teaData[3]],
-        [teaData[4], teaData[5], teaData[6], teaData[7]],
-      ];
-      expect(undefined).toEqual(teaMatrix);
-    });
-=======
-```TypeScript
-describe('initialization', () => {
-  it('makes a matrix of teas', () => {
-    const teaMatrix = [
-      [teaData[0], teaData[1], teaData[2], teaData[3]],
-      [teaData[4], teaData[5], teaData[6], teaData[7]],
-    ];
-    expect(undefined).toEqual(teaMatrix);
->>>>>>> 3110f1d (wip(react): update steps 5 + workaround broken JSX rendering)
+  describe('with seven teas', () => {
+    it('displays two rows', () => {});
+    it('displays four columns in the first row', () => {});
+    it('displays three columns in the second row', () => {});
   });
+...
 });
 ```
 
-This test shows the single array being expanded into an array of two child arrays, each of which are four teas long. Let's create the code to do that.
+Let's fill out the first test:
 
-Like `teaData`, place this code _outside_ of the component and export it in `TeaPage.tsx`:
+```tsx
+it('displays two rows', () => {
+  const { baseElement } = render(<TeaListPage />);
+  const rows = baseElement.querySelectorAll('ion-grid ion-row');
+  expect(rows).toHaveLength(2);
+});
+```
 
-<<<<<<< HEAD
-**`src/tea/TeaPage.tsx`**:
+In order to satisfy this requirement, it will be easiest if we convert our list of teas to a matrix. Let's write a method that does just that. Add the following function to `src/tea/TeaListPage.tsx`, above the component definition, like we did for the mock tea data:
 
 ```typescript
-...
-=======
-```typescript
->>>>>>> 3110f1d (wip(react): update steps 5 + workaround broken JSX rendering)
-export const listToMatrix = (): Tea[][] => {
+const listToMatrix = (): Tea[][] => {
   let teaMatrix: Tea[][] = [];
   let row: Tea[] = [];
 
@@ -325,53 +278,89 @@ export const listToMatrix = (): Tea[][] => {
 };
 ```
 
-**Challenge:** Go ahead and update the unit test so it passes.
+We can now update the template accordingly. Add the following template code either directly above or below the `IonList` we previously added:
 
-### Style the Grid
-
-Now that we have our matrix, let's create the grid. **Set up Chrome to emulate an iPad Pro in landscape mode.** We know we want 4 columns on a wide screen like this, and we know that the grid by default supports 12 columns. That means for a wide screen like this each column should take up 3 columns.
-
-Replace the existing `<IonList />` with the following code:
-
-**`src/tea/TeaPage.tsx`**
-
-<<<<<<< HEAD
 ```tsx
 <IonGrid className="tea-grid">
   {listToMatrix().map((row, idx) => (
-    <IonRow key={idx} className="ion-justify-content-center ion-align-items-stretch">
-      {row.map((tea) => (
-=======
+    <IonRow key={idx} className="ion-align-items-stretch"></IonRow>
+  ))}
+</IonGrid>
 ```
+
+**Hint:** remember to import new components as you use them.
+
+Also, if you are wondering about the `ion-align-items-stretch` class, you can read more about it <a href="https://ionicframework.com/docs/layout/css-utilities#flex-container-properties" target="_blank">in our documentation</a>.
+
+Now let's display the columns properly, first updating the tests:
+
+```tsx
+it('displays four columns in the first row', () => {
+  const { baseElement } = render(<TeaListPage />);
+  const rows = baseElement.querySelectorAll('ion-grid ion-row');
+  const cols = rows[0].querySelectorAll('ion-col');
+  expect(cols).toHaveLength(4);
+});
+
+it('displays three columns in the second row', () => {
+  // Using the above test as a model, write your own test here...
+});
+```
+
+Verify that we have two failing tests. Now we can update the template by mapping each row into columns:
+
+```tsx
 <IonGrid className="tea-grid">
   {listToMatrix().map((row, idx) => (
-    <IonRow key={idx} className="ion-justify-content-center ion-align-items-stretch">
-      { row.map((tea) => (
->>>>>>> 3110f1d (wip(react): update steps 5 + workaround broken JSX rendering)
-        <IonCol size="3" key={tea.id}>
-          <IonCard>
-            <IonImg src={tea.image} />
-            <IonCardHeader>
-              <IonCardTitle>{tea.name}</IonCardTitle>
-            </IonCardHeader>
-            <IonCardContent>{tea.description}</IonCardContent>
-          </IonCard>
-        </IonCol>
+    <IonRow key={idx} className="ion-align-items-stretch">
+      {row.map((tea) => (
+        <IonCol key={tea.id} size="3"></IonCol>
       ))}
     </IonRow>
   ))}
 </IonGrid>
 ```
 
-This code loops through the rows of the matrix and displays a column for each tea in that row. That looks great on an iPad Pro, although the cards are all different sizes and the rows are a bit crowded. Let's fix that with some simple CSS in `TeaPage.css`:
+**Note:** `size="3"` tells the column component to take up three column positions in the row. Remember that each row contains 12 column positions and that `IonCol` components in the row can be spread across multiple column positions. We only want at most four columns per row. Thus, each `IonCol` component we supply should be spread across three of the column positions in the row.
 
-<<<<<<< HEAD
-**`src/tea/TeaPage.css`**
+Now that we have the grid laid out, we can add our card template. We will just use the card template from our `IonList` that we had added above. First let's add the tests to the `describe('with seven teas)` block.
+
+```tsx
+it('displays the name in the title', () => {
+  const { baseElement } = render(<TeaListPage />);
+  const cols = baseElement.querySelectorAll('ion-col');
+  cols.forEach((c, idx) => {
+    const title = c.querySelector('ion-card ion-card-header ion-card-title');
+    expect(title).toHaveTextContent(teaData[idx].name);
+  });
+});
+
+it('displays the description in the content', () => {
+  const { baseElement } = render(<TeaListPage />);
+  const cols = baseElement.querySelectorAll('ion-col');
+  cols.forEach((c, idx) => {
+    const title = c.querySelector('ion-card ion-card-content');
+    expect(title).toHaveTextContent(teaData[idx].description);
+  });
+});
+```
+
+Don't forget to update your import from `./TeaListPage.tsx`:
+
+```typescript
+import TeaListPage, { teaData } from './TeaListPage';
+```
+
+With the test in place, we can make the following modifications to the view:
+
+- Move the `IonCard` layout from the `IonList` to be a child of the `IonCol` in our grid
+- Remove the rest of the `IonList`
+
+The component now loops through the rows. For each row it displays a column for each tea in that row. That looks great on a large device such as an iPad Pro or standard web browser. However, the cards are all different sizes and look a little crowded. We can fix that with a little styling in the view.
+
+Let's fix that with some simple CSS in `TeaListPage.css`:
 
 ```css
-=======
-```CSS
->>>>>>> 3110f1d (wip(react): update steps 5 + workaround broken JSX rendering)
 .tea-grid ion-card {
   height: 100%;
 }
@@ -391,14 +380,7 @@ There is one last thing: our layout will always display four columns which will 
 
 Change the `IonCol` properties like so:
 
-<<<<<<< HEAD
-**`src/tea/TeaPage.tsx`**
-
 ```tsx
-...
-=======
-```TypeScript
->>>>>>> 3110f1d (wip(react): update steps 5 + workaround broken JSX rendering)
 <IonCol size="12" sizeMd="6" sizeXl="3" key={tea.id}>
 ```
 
@@ -406,7 +388,7 @@ Now as you change the type of device that is being emulated on Chrome the layout
 
 ## Cleanup
 
-We have no further use of the `<ExploreContainer />` component that was generated when we generated our project using `ionic start`. Let's remove the statement importing it in `TeaPage.tsx` and delete the `components` folder.
+We have no further use of the `<ExploreContainer />` component that was generated when we generated our project using `ionic start`. Let's remove the statement importing it in `TeaListPage.tsx` and delete the `components` folder.
 
 Additionally, don't forget to update your component's snapshot!
 
