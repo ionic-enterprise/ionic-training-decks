@@ -134,8 +134,12 @@
               "file": "login-page"
             },
             {
-              "title": "Identity",
-              "file": "identity"
+              "title": "Authentication Logic",
+              "file": "auth-logic"
+            },
+            {
+              "title": "Authentication Workflow",
+              "file": "auth-workflow"
             },
             {
               "title": "Authentication",
