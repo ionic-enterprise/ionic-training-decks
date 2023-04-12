@@ -25,21 +25,24 @@ Add a `rating` property in `src/models/Tea.ts`. Make it a number
 
 Three tests are using the `Tea` model when creating test data.
 
-- `tests/unit/views/TeaDetailsPage.spec.ts`
-- `tests/unit/views/TeaListPage.spec.ts`
-- `tests/unit/composables/tea.spec.ts`
+- `src/views/__tests__/TeaDetailsPage.spec.ts`
+- `src/views/__tests__/TeaListPage.spec.ts`
+- `src/composables/__tests__/tea.spec.ts`
 
 Update the `TeaDetailsPage` and `TeaListPage` tests to include a `rating` in any defined `Tea` model. Use any number between 0 and 5 for each tea.
 
-In the `tests/unit/composables/tea.spec.ts` file there are also a few preliminary items to handle:
+In the `src/composables/__tests__/tea.spec.ts` file there are also a few preliminary items to handle:
 
 - when adding a rating to each Tea model, use a value of zero for now
 - a couple of "find" tests expect a specific tea, add the `rating` there as well
-- update the creation of `httpResultTeas` to remove the `result` just like we do the `image`
+- update the creation of `httpResultTeas` to remove the `result` just like we do the `image` (also update the type declaration for `httpResultTeas` to omit the 'rating' as well as the 'image')
 - add a `describe('rate')` block for the saving of the rating, but leave it empty for now
-- `import { Preferences } from "@capacitor/preferences";`
+- `import { Preferences } from '@capacitor/preferences';`
+- `vi.mock('@capacitor/preferences');`
 
-In `src/composables/tea.ts`, add the rating setting it to zero in `unpack()`. Also, create the shell of the `rate()` method as such (be sure to return it from the `default` function as well as to the `src/composables/__mocks__/tea.ts` file):
+Some tests should be failing at this point. In `src/composables/tea.ts`, add the rating setting it to zero in `unpack()`. This should fix the failing tests.
+
+Also, create the shell of the `rate()` method as such (be sure to return it from the `useTea` function as well as to the `src/composables/__mocks__/tea.ts` file):
 
 ```typescript
 const rate = async (id: number, rating: number): Promise<void> => {
@@ -72,7 +75,7 @@ Add the code to accomplish this in `src/composables/tea.ts`:
 
 ```typescript
 const rate = async (id: number, rating: number): Promise<void> => {
-  // TODO: your code goes here...
+  // TODO: your code goes here based on the failing test
 };
 ```
 
@@ -92,7 +95,7 @@ You should add a `beforeEach()` section within the `describe('rate')` like this:
 ```typescript
 beforeEach(() => {
   const { client } = useBackendAPI();
-  (client.get as jest.Mock).mockResolvedValue({ data: httpResultTeas });
+  (client.get as Mock).mockResolvedValue({ data: httpResultTeas });
 });
 ```
 
@@ -115,7 +118,8 @@ We will be using the Preferences API's `get()` method to get the proper data. In
 ```typescript
 beforeEach(() => {
   initializeTestData();
-  jest.clearAllMocks();
+  vi.resetAllMocks();
+  (client.get as Mock).mockResolvedValue({});
 });
 ```
 
@@ -124,8 +128,9 @@ beforeEach(() => {
 ```typescript
 beforeEach(() => {
   initializeTestData();
-  jest.clearAllMocks();
-  (Preferences.get as jest.Mock).mockImplementation(async (opt: GetOptions) => {
+  vi.clearAllMocks();
+  (client.get as Mock).mockResolvedValue({});
+  (Preferences.get as Mock).mockImplementation(async (opt: GetOptions) => {
     let value = null;
     switch (opt.key) {
       case 'rating3':
@@ -153,6 +158,9 @@ Now for the transform itself. Here is where things get a little complicated. Her
 - Now we have an array of promises, but we want a promise of an array, so use `Promise.all()` to do this data conversion.
 
 ```typescript
+type RawData = Omit<Tea, 'image' | 'rating'>;
+...
+
 const unpack = (data: Array<RawData>): Promise<Array<Tea>> => {
   return Promise.all(data.map((t) => transform(t)));
 };
@@ -162,24 +170,27 @@ const transform = async (data: RawData): Promise<Tea> => {
   return {
     ...data,
     rating: parseInt(value || '0', 10),
-    image: `assets/img/${images[data.id - 1]}.jpg`,
+    image: `img/${images[data.id - 1]}.jpg`,
   };
 };
 ```
 
 ## Update the Rating from the Page
 
-With all of that in place, the changes to the view are very straight forward and are concentrated solely on the user interaction with the page. Our only requirements are that the rating is bound properly and that any changes to the rating are saved.
+With all of that in place, the changes to the view are very straight forward and are concentrated solely on the user interaction with the page. Our only requirements are that the rating is initialized properly and that any changes to the rating are saved.
 
-First, we will update the test `tests/unit/views/TeaDetailsPage.spec.ts` to cover our requirements:
+First, update the `find()` call to set the rating: `find(id).then((t) => { tea.value = t; rating.value = t?.rating || 0; });`
+
+Second, we will update the test `src/views/__tests__/TeaDetailsPage.spec.ts` to cover the change handling requirement:
 
 ```typescript
 describe('TeaDetailsPage.vue', () => {
   ...
   it('saves the rating on click', async () => {
     const wrapper = await mountView();
+    await flushPromises();
     const { rate } = useTea();
-    const rating = wrapper.find('[data-testid="rating"]');
+    const rating = wrapper.findComponent('[data-testid="rating"]');
     const stars = rating.findAllComponents(IonIcon);
     stars[1].trigger('click');
     expect(rate).toHaveBeenCalledTimes(1);
@@ -191,7 +202,7 @@ describe('TeaDetailsPage.vue', () => {
 
 **Note:** depending on how you set up your initial test data, you may need to update the values used above. Basically, the test should set the rating to something else.
 
-And then `TeaDetailsPage.vue` code changes that make this happen:
+Finally, modify `TeaDetailsPage.vue` to make this happen:
 
 - Write function called `ratingClicked` that will handle saving the rating when the tea is clicked.
 - Bind `ratingClicked` to the `click` event on the `app-rating` element.
@@ -218,7 +229,7 @@ describe('rate', () => {
     // main beforeEach() and clean up the rest of the tests accordingly. Doing so
     // is left as an exercise for the reader.
     const { client } = useBackendAPI();
-    (client.get as jest.Mock).mockResolvedValue({ data: httpResultTeas });
+    (client.get as Mock).mockResolvedValue({ data: httpResultTeas });
   });
 
   it('saves the value', async () => {
@@ -233,7 +244,8 @@ describe('rate', () => {
   it('updates the teas array', async () => {
     await refresh();
     await rate(5, 4);
-    expect(teas.value[4].rating).toEqual(4);
+    const tea = teas.value.find((x) => x.id === 5);
+    expect(tea?.rating).toBe(4);
   });
 });
 ```
@@ -266,7 +278,7 @@ const rating = ref(0);
 const { find, rate } = useTea();
 find(id).then((t) => {
   tea.value = t;
-  rating.value = t.rating;
+  rating.value = t?.rating || 0;
 });
 
 const ratingClicked = () => {

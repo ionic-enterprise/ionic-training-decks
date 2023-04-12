@@ -23,10 +23,11 @@ Create a `src/components/AppRating.vue` file with the following contents:
 <style scoped></style>
 ```
 
-Also create a test for it (`tests/unit/components/AppRating.spec.ts`) with the following contents:
+Also create a test for it (`src/components/__tests__/AppRating.spec.ts`) with the following contents:
 
 ```typescript
 import { mount, VueWrapper } from '@vue/test-utils';
+import { beforeEach, describe, expect, it } from 'vitest';
 import AppRating from '@/components/AppRating.vue';
 
 describe('AppRating.vue', () => {
@@ -88,17 +89,18 @@ In the `src/views/TeaDetailsPage.vue` file, add a `ratings` data item and bind t
 </script>
 ```
 
-For our first unit test in `tests/unit/components/AppRating.spec.ts` we will just ensure that we get 5 outlined star icons by default.
+For our first unit test in `src/components/__tests__/AppRating.spec.ts` we will just ensure that we get 5 outlined star icons by default.
 
 ```typescript
 ...
+import { IonIcon } from '@ionic/vue';
 import { star, starOutline } from 'ionicons/icons';
 
 describe('AppRating.vue', () => {
 ...
 
   it('renders five empty stars', () => {
-    const icons = wrapper.findAllComponents({ name: 'ion-icon' });
+    const icons = wrapper.findAllComponents(IonIcon);
     expect(icons.length).toBe(5);
     icons.forEach(icon => expect(icon.vm.icon).toEqual(starOutline));
   });
@@ -121,7 +123,7 @@ Next, let's make the component respect the modelValue property. First the test:
 
 ```typescript
 it('fills in the first 3 stars', async () => {
-  const icons = wrapper.findAllComponents({ name: 'ion-icon' });
+  const icons = wrapper.findAllComponents(IonIcon);
   await wrapper.setProps({ modelValue: 3 });
   expect(icons.length).toBe(5);
   icons.forEach((icon, idx) => expect(icon.vm.icon).toEqual(idx < 3 ? star : starOutline));
@@ -149,7 +151,7 @@ The easiest way to test this is to trigger a click and look for the proper event
 
 ```typescript
 it('emits the model value update event on clicks', () => {
-  const icons = wrapper.findAll('ion-icon');
+  const icons = wrapper.findAllComponents(IonIcon);
   icons[2].trigger('click');
   const updateModelValueCalls = wrapper.emitted('update:modelValue');
   expect(updateModelValueCalls?.length).toBe(1);

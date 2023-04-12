@@ -13,13 +13,15 @@ Ionic supports the common mobile paradigm of stacked navigation, where one page 
 
 Let's start with some fairly boilerplate starting code for a page.
 
-First the test in `tests/unit/views/TeaDetailsPage.spec.ts`
+First the test in `src/views/__tests__/TeaDetailsPage.spec.ts`
 
 ```typescript
 import { useAuth } from '@/composables/auth';
 import TeaDetailsPage from '@/views/TeaDetailsPage.vue';
+import { IonContent, IonHeader } from '@ionic/vue';
 import { createRouter, createWebHistory } from '@ionic/vue-router';
 import { mount, VueWrapper } from '@vue/test-utils';
+import { beforeEach, describe, expect, it, Mock, vi } from 'vitest';
 import { Router } from 'vue-router';
 
 describe('TeaDetailsPage.vue', () => {
@@ -41,8 +43,8 @@ describe('TeaDetailsPage.vue', () => {
 
   it('renders', async () => {
     const wrapper = await mountView();
-    const header = wrapper.find('ion-header');
-    const content = wrapper.find('ion-content');
+    const header = wrapper.findComponent(IonHeader);
+    const content = wrapper.findComponent(IonContent);
     expect(header.exists()).toBe(true);
     expect(content.exists()).toBe(true);
   });
@@ -79,13 +81,13 @@ Now that we have a details page, let's set up the navigation to the page and the
 - We want to lazy load the page. The `TeaListPage` is loaded eagerly. To lazy load the page, use this syntax for the `component` property: `() => import('@/views/TeaDetailsPage.vue')`.
 - The name should be different, give it reasonable name.
 
-We want to navigate from the `TeaListPage` page to the `TeaDetailsPage` page. A logical choice for the trigger is to use a click on the tea's card to start the navigation. Let's write a test for that in `tests/unit/views.TeaListPage.spec.ts`.
+We want to navigate from the `TeaListPage` page to the `TeaDetailsPage` page. A logical choice for the trigger is to use a click on the tea's card to start the navigation. Let's write a test for that in `src/views/__tests__/TeaListPage.spec.ts`.
 
 ```typescript
 it('navigates to the tea details page when a tea card is clicked', async () => {
   const wrapper = await mountView();
-  const cards = wrapper.findAll('ion-card');
-  router.push = jest.fn();
+  const cards = wrapper.findAllComponents(IonCard);
+  router.push = vi.fn();
   cards[3].trigger('click');
   expect(router.push).toHaveBeenCalledTimes(1);
   expect(router.push).toHaveBeenCalledWith('/teas/tea/4');
@@ -156,8 +158,9 @@ describe('find', () => {
   const { find, refresh, teas } = useTea();
 
   beforeEach(() => {
+    vi.clearAllMocks();
     teas.value = [];
-    (client.get as jest.Mock).mockResolvedValue({ data: httpResultTeas });
+    (client.get as Mock).mockResolvedValue({ data: httpResultTeas });
   });
 
   it('refreshes the tea data if it has not been loaded yet', async () => {
@@ -166,7 +169,7 @@ describe('find', () => {
     expect(t).toEqual({
       id: 6,
       name: 'Puer',
-      image: 'assets/img/puer.jpg',
+      image: 'img/puer.jpg',
       description: 'Puer tea description.',
     });
     expect(client.get).toHaveBeenCalledTimes(1);
@@ -175,12 +178,12 @@ describe('find', () => {
 
   it('finds the tea from the existing teas', async () => {
     await refresh();
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     const t = await find(4);
     expect(t).toEqual({
       id: 4,
       name: 'Oolong',
-      image: 'assets/img/oolong.jpg',
+      image: 'img/oolong.jpg',
       description: 'Oolong tea description.',
     });
     expect(client.get).not.toHaveBeenCalled();
@@ -192,8 +195,8 @@ describe('find', () => {
 });
 ```
 
-1. Add those tests to `tests/unit/composables/tea.spec.ts`.
-1. Add the `find` from above to `src/composables/tea.ts` and fill in the logic.
+1. Add those tests to `src/composables/__tests__/tea.spec.ts`.
+1. Add the `find` from above to `src/composables/tea.ts` and fill in the logic based on the content of the tests.
 1. Be sure to return the `find` in the default function exported by `src/composables/tea.ts`.
 1. Include a `find` mock in `src/composables/__mocks__/tea.ts`.
 
@@ -201,7 +204,7 @@ describe('find', () => {
 
 #### Create the Tests
 
-First we need to figure out what our test setup in `tests/unit/view/TeaDetails.spec.ts` should look like. We know that we will need to do the following in the code:
+First we need to figure out what our test setup in `src/views/__tests__/TeaDetailsPage.spec.ts` should look like. We know that we will need to do the following in the code:
 
 - Get the `id` parameter from our route.
 - Call the `find` from `useTeas()` to find the proper tea.
@@ -221,7 +224,7 @@ router.push('/teas/tea/3');
 Next, we need to configure the tea data so the `find()` call we need to make in the code will be testable. This involves the following steps:
 
 - Import the `useTea()` function: `import { useTea } from '@/composables/tea';`
-- Mock the `useTea()` implementation: `jest.mock('@/composables/tea');`
+- Mock the `useTea()` implementation: `vi.mock('@/composables/tea');`
 - Add a `beforeEach()` that sets up the data and the mocks.
 
 ```typescript
@@ -231,30 +234,30 @@ beforeEach(() => {
     {
       id: 1,
       name: 'Green',
-      image: 'assets/img/green.jpg',
+      image: 'img/green.jpg',
       description: 'Green tea description.',
     },
     {
       id: 2,
       name: 'Black',
-      image: 'assets/img/black.jpg',
+      image: 'img/black.jpg',
       description: 'Black tea description.',
     },
     {
       id: 3,
       name: 'Herbal',
-      image: 'assets/img/herbal.jpg',
+      image: 'img/herbal.jpg',
       description: 'Herbal Infusion description.',
     },
     {
       id: 4,
       name: 'Oolong',
-      image: 'assets/img/oolong.jpg',
+      image: 'img/oolong.jpg',
       description: 'Oolong tea description.',
     },
   ];
-  (find as jest.Mock).mockResolvedValue(teas.value[2]);
-  jest.clearAllMocks();
+  vi.resetAllMocks();
+  (find as Mock).mockResolvedValue(teas.value[2]);
 });
 ```
 
@@ -270,12 +273,14 @@ it('finds the tea specified in the route', async () => {
 
 it('renders the tea name', async () => {
   const wrapper = await mountView();
+  await flushPromises();
   const name = wrapper.find('[data-testid="name"]');
   expect(name.text()).toBe('Herbal');
 });
 
 it('renders the tea description', async () => {
   const wrapper = await mountView();
+  await flushPromises();
   const description = wrapper.find('[data-testid="description"]');
   expect(description.text()).toBe('Herbal Infusion description.');
 });
@@ -283,14 +288,14 @@ it('renders the tea description', async () => {
 
 #### Update the View
 
-Within `src/views/TeaDetailsPage.vue` we need to do the following:
+Within the `script` section of `src/views/TeaDetailsPage.vue` we need to do the following:
 
 - `import { ref } from 'vue';`
 - `import { useRoute } from 'vue-router';`
 - `import { Tea } from '@/models';`
 - `import { useTea } from '@/composables/tea';`
 
-Within the `script` section, we know we need to use the `params` object to grab the `id`. We then need to use the `id` to `find()` the tea and return the tea so we can use it in the template.
+We need to use the `params` object from the route to grab the `id`. We then need to use the `id` to `find()` the tea and return the tea so we can use it in the template.
 
 Here is some of that in place, with a TODO for you to finish it up.
 

@@ -14,12 +14,12 @@ While we are on the subject of plugins, Capacitor has been designed to also work
 
 ## Add a Button
 
-The first thing we will do is add a sharing button to the top of our `AppTastingNotes` modal component, to the left of the cancel button. We will also include stubs for the computed properties and methods that we need.
+The first thing we will do is add a sharing button to the top of our `AppTastingNotes` modal component, to the left of the submit button. We will also include stubs for the computed properties and methods that we need.
 
 ```html
 <template>
   ...
-  <ion-buttons slot="primary">
+  <ion-buttons slot="end">
     <ion-button
       id="share-button"
       data-testid="share-button"
@@ -29,15 +29,14 @@ The first thing we will do is add a sharing button to the top of our `AppTasting
     >
       <ion-icon slot="icon-only" :icon="shareOutline"></ion-icon>
     </ion-button>
-    ... // Cancel button is already here...
+    ... // Submit button is already here...
   </ion-buttons>
   ...
 </template>
 
 <script setup lang="ts">
   ...
-  import { computed } from 'vue';
-  import { close, shareOutline } from 'ionicons/icons';
+  import { shareOutline } from 'ionicons/icons';
   ...
   const allowShare = computed( () => true);
   const sharingIsAvailable = true;
@@ -56,18 +55,18 @@ The designers have let us know that they only want this functionality available 
 We will start with the test. First, import the `isPlatform` function from `@ionic/vue` and mock it. This get's a little tricky as you need to mock all of `@ionic/vue` using the actual implementation for most of it.
 
 ```typescript
-import { isPlatform, modalController } from '@ionic/vue';
+import { IonTitle, isPlatform, modalController } from '@ionic/vue';
 ...
-jest.mock('@ionic/vue', () => {
-  const actual = jest.requireActual('@ionic/vue');
-  return { ...actual, isPlatform: jest.fn() };
+vi.mock('@ionic/vue', async () => {
+  const actual = (await vi.importActual('@ionic/vue')) as any;
+  return { ...actual, isPlatform: vi.fn() };
 });
 ```
 
-In the main `beforeEach()`, create a mock implementation that defaults to us running in a mobile context. We will do this in the code by passing the "hybrid" flag, so just compare the value sent to "hybrid". Do this before mounting the component (towards the end of the `beforeEach()`).
+In the main `beforeEach()`, create a mock implementation that defaults to us running in a mobile context. We will do this in the code by passing the "hybrid" flag, so just compare the value sent to "hybrid". Do this before mounting the component but after the call to `vi.resetAllMocks()` towards the end of the `beforeEach()`.
 
 ```typescript
-(isPlatform as jest.Mock).mockImplementation((key: string) => key === 'hybrid');
+(isPlatform as Mock).mockImplementation((key: string) => key === 'hybrid');
 ```
 
 At this point we can start creating the tests for the button. Note the special case test for the web context. Also note that we are remounting the modal there. That is because the `isPlatform` is only going to be evaluated at that time. We aren't doing anything here that would otherwise trigger a re-evaluation.
@@ -76,11 +75,11 @@ At this point we can start creating the tests for the button. Note the special c
 describe('share button', () => {
   describe('in a web context', () => {
     beforeEach(() => {
-      (isPlatform as jest.Mock).mockImplementation((key: string) => key !== 'hybrid');
+      (isPlatform as Mock).mockImplementation((key: string) => key !== 'hybrid');
     });
 
     afterEach(() => {
-      (isPlatform as jest.Mock).mockImplementation((key: string) => key === 'hybrid');
+      (isPlatform as Mock).mockImplementation((key: string) => key === 'hybrid');
     });
 
     it('does not exist', () => {
@@ -90,9 +89,11 @@ describe('share button', () => {
     });
   });
 
-  it('exists', () => {
-    const button = wrapper.findComponent('[data-testid="share-button"]');
-    expect(button.exists()).toBe(true);
+  describe('in a mobile context', () => {
+    it('exists', () => {
+      const button = wrapper.findComponent('[data-testid="share-button"]');
+      expect(button.exists()).toBe(true);
+    });
   });
 });
 ```
@@ -107,7 +108,7 @@ const sharingIsAvailable = isPlatform('hybrid');
 
 In order to share a rating, we need to have at least the brand, name, and rating entered. The button should be disabled until these are entered.
 
-First we will test for it. This test belongs right after the `exists` test within the `share button` describe that we just created above.
+First we will test for it. This test belongs right after the `exists` test within the `in a mobile context` describe that we just created above.
 
 ```typescript
 it('is disabled until enough information is entered', async () => {
@@ -146,26 +147,28 @@ The final step is to call the share API when the button is clicked. Let's update
 **`__mocks__/@capacitor/share.ts`**
 
 ```typescript
+import { vi } from 'vitest';
+
 export const Share = {
-  share: jest.fn().mockResolvedValue(undefined),
+  share: vi.fn().mockResolvedValue(undefined),
 };
 ```
 
 Install the plugin so it is available to us:
 
 ```bash
-$ npm i @capacitor/share
+npm i @capacitor/share
 ```
 
-Import and mock the plugin in the `tests/unit/components/AppTastingNotes.spec.ts` test file:
+Import and mock the plugin in the `src/components/__tests__/AppTastingNotes.spec.ts` test file:
 
 ```typescript
 import { Share } from '@capacitor/share';
 ...
-jest.mock('@capacitor/share');
+vi.mock('@capacitor/share');
 ```
 
-Then we will add a test within the `share button` describe block.
+Then we will add a test within the `in a mobile context` describe block.
 
 ```typescript
 it('calls the share plugin when pressed', async () => {
@@ -193,14 +196,14 @@ it('calls the share plugin when pressed', async () => {
 We can then add the code fill out the `share()` accordingly:
 
 ```typescript
-async function share(): Promise<void> {
+const share = async (): Promise<void> => {
   await Share.share({
     title: `${brand.value}: ${name.value}`,
     text: `I gave ${brand.value}: ${name.value} ${rating.value} stars on the Tea Taster app`,
     dialogTitle: 'Share your tasting note',
     url: 'https://tea-taster-training.web.app',
   });
-}
+};
 ```
 
 You will also have to add a line importing the `Share` object from `@capacitor/share`.

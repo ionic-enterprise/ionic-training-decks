@@ -139,7 +139,7 @@ The color scheme for the application is defined in `src/theme/variables.css` via
 --ion-color-primary-tint: #b4a78f;
 ```
 
-Given the base color (`#ac9d83` in this case), you can use our <a href="https://ionicframework.com/docs/theming/color-generator" target="_blank">Color Generator</a> tool to generate a set of values for each color. Do this for the Light Mode theme colors and update `src/theme/variables.css`.
+Given a base color (`#ac9d83` in this case), you can use the <a href="https://ionicframework.com/docs/theming/color-generator" target="_blank">Ionic Color Generator</a> tool to generate a set of values for any color. Do this for the Light Mode theme base colors defined above and update `src/theme/variables.css`.
 
 #### Handling Dark Mode
 
@@ -227,7 +227,11 @@ There is also a set of other colors for both iOS and Material Design. For these,
 
 #### Applying the Colors
 
-The first requirement from our design team is that the pages should have a gradient background, going from from white to the secondary color for the light theme, or from the background color to the secondary color for the dark theme. We will do this via a class. Add the following to the `src/theme/styles.css` file.
+The first requirement from our design team is that the pages should have a gradient background, going from from white to the secondary color for the light theme, or from the background color to the secondary color for the dark theme. We will do this via a class defined in a global CSS file.
+
+- Create a `src/theme/styles.css` file.
+- Import the file in `src/main.ts` right after the import of the `variables.css` file.
+- Add the following CSS to the `src/theme/styles.css` file.
 
 ```css
 .main-content {

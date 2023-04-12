@@ -10,16 +10,16 @@ In this lab, you will learn how to:
 
 ## Install the Images
 
-There are several images we would like to display for our teas, but these assets to do not exist yet. <a download href="/assets/packages/ionic-angular/img.zip">Download the images</a> and unpack the zip file under `public/assets`, creating an `img` folder with the images in them.
+There are several images we would like to display for our teas, but these assets to do not exist yet. <a download href="/assets/packages/ionic-angular/img.zip">Download the images</a> and unpack the zip file under `public`, creating an `img` folder with the images in them.
 
 **Note:** the specifics on doing this depends on the type of machine you are using. On a Mac:
 
-1. Drag and drop the `img.zip` from `Downloads` into `public/assets`
-1. Double click the `img.zip` file in `public/assets`, which creates an `img` folder
+1. Drag and drop the `img.zip` from `Downloads` into `public`
+1. Double click the `img.zip` file in `public`, which creates an `img` folder
 1. Remove the `img.zip` file
-1. Find the favicon.png file and move it into `public/assets/icon`
+1. Find the favicon.png file and move it into `public`
 
-If you are running the application in the browser, you should notice that the icon in the browser tab has now changed. However, the tab still says "Ionic App." To change that, you can edit the `public/index.html` file and change the `title`.
+If you are running the application in the browser, you should notice that the icon in the browser tab has now changed. However, the tab still says "Ionic App." To change that, you can edit the `index.html` file and change the `title`.
 
 ## Model the Data
 
@@ -48,7 +48,7 @@ export * from './Tea';
 We have done some work already with the Home page. Rather than start over, let's just rename that to be our TeaList page. This is a multi-part process as follows:
 
 - Move the view file: `git mv src/views/HomePage.vue src/views/TeaListPage.vue`
-- Move the test file: `git mv tests/unit/views/HomePage.spec.ts tests/unit/views/TeaListPage.spec.ts`
+- Move the test file: `git mv src/views/__tests__/HomePage.spec.ts src/views/__tests__/TeaListPage.spec.ts`
 - Fix the routing.
 - Fix the tests.
 - Make minor updates to the code.
@@ -91,7 +91,7 @@ In the long run, though, that would be confusing. While we are in there we shoul
 
 ### Fix the Tests
 
-Similar to the routes, all we _really_ need to do with the test is fix the import in `tests/unit/views/TeaListPage.spec.ts`:
+Similar to the routes, all we _really_ need to do with the test is fix the import in `src/views/__tests__/TeaListPage.spec.ts`:
 
 ```diff
 -import HomePage from '@/views/HomePage.vue';
@@ -101,16 +101,17 @@ Similar to the routes, all we _really_ need to do with the test is fix the impor
 However, our test still refers to our Tea view as "Home", and that will be confusing long term, so let's fix the test properly:
 
 ```diff
- import { mount } from '@vue/test-utils';
 -import HomePage from '@/views/HomePage.vue';
 +import TeaListPage from '@/views/TeaListPage.vue';
+ import { mount } from '@vue/test-utils';
+ import { describe, expect, it } from 'vitest';
 
 -describe('HomePage.vue', () => {
 +describe('TeaListPage.vue', () => {
    it('displays the title', () => {
 -    const wrapper = mount(HomePage);
 +    const wrapper = mount(TeaListPage);
-     const titles = wrapper.findAll('ion-title');
+     const titles = wrapper.findAllComponents(IonTitle);
      expect(titles).toHaveLength(2);
      expect(titles[0].text()).toBe('Blank');
    });
@@ -146,7 +147,7 @@ const teaData = ref<Array<Tea>>([
   {
     id: 1,
     name: 'Green',
-    image: 'assets/img/green.jpg',
+    image: 'img/green.jpg',
     description:
       'Green teas have the oxidation process stopped very early on, leaving them with a very subtle flavor and ' +
       'complex undertones. These teas should be steeped at lower temperatures for shorter periods of time.',
@@ -154,7 +155,7 @@ const teaData = ref<Array<Tea>>([
   {
     id: 2,
     name: 'Black',
-    image: 'assets/img/black.jpg',
+    image: 'img/black.jpg',
     description:
       'A fully oxidized tea, black teas have a dark color and a full robust and pronounced flavor. Black teas tend ' +
       'to have a higher caffeine content than other teas.',
@@ -162,7 +163,7 @@ const teaData = ref<Array<Tea>>([
   {
     id: 3,
     name: 'Herbal',
-    image: 'assets/img/herbal.jpg',
+    image: 'img/herbal.jpg',
     description:
       'Herbal infusions are not actually "tea" but are more accurately characterized as infused beverages ' +
       'consisting of various dried herbs, spices, and fruits.',
@@ -170,7 +171,7 @@ const teaData = ref<Array<Tea>>([
   {
     id: 4,
     name: 'Oolong',
-    image: 'assets/img/oolong.jpg',
+    image: 'img/oolong.jpg',
     description:
       'Oolong teas are partially oxidized, giving them a flavor that is not as robust as black teas but also ' +
       'not as subtle as green teas. Oolong teas often have a flowery fragrance.',
@@ -178,7 +179,7 @@ const teaData = ref<Array<Tea>>([
   {
     id: 5,
     name: 'Dark',
-    image: 'assets/img/dark.jpg',
+    image: 'img/dark.jpg',
     description:
       'From the Hunan and Sichuan provinces of China, dark teas are flavorful aged probiotic teas that steeps ' +
       'up very smooth with slightly sweet notes.',
@@ -186,14 +187,14 @@ const teaData = ref<Array<Tea>>([
   {
     id: 6,
     name: 'Puer',
-    image: 'assets/img/puer.jpg',
+    image: 'img/puer.jpg',
     description:
       'An aged black tea from china. Puer teas have a strong rich flavor that could be described as "woody" or "peaty."',
   },
   {
     id: 7,
     name: 'White',
-    image: 'assets/img/white.jpg',
+    image: 'img/white.jpg',
     description:
       'White tea is produced using very young shoots with no oxidation process. White tea has an extremely ' +
       'delicate flavor that is sweet and fragrant. White tea should be steeped at lower temperatures for ' +
@@ -261,7 +262,7 @@ In our case we want to show at most four columns of cards per row for high resol
 
 We no longer need the test that expects the content of our "#container" so remove that test case.
 
-We will lay out this test for our current mock data (which has seven teas), and our highest resolution, which will have four teas per row. In this case, our page is expected to render two rows, the first with four columns and the second with three columns. We will need tests like this in `tests/unit/views/TeaListPage.spec.ts`:
+We will lay out this test for our current mock data (which has seven teas), and our highest resolution, which will have four teas per row. In this case, our page is expected to render two rows, the first with four columns and the second with three columns. We will need tests like this in `src/views/__tests__/TeaListPage.spec.ts`:
 
 ```typescript
 describe('TeaListPage.vue', () => {

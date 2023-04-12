@@ -14,42 +14,49 @@ To run the existing unit test, run the following command:
 npm run test:unit
 ```
 
-There are two things we should note right away:
+This command runs the unit tests in watch mode, which is great for development, but is not the only option we want. It would be nice to also have an option that runs all of the tests once and then exists and another option that runs all of the tests and generates a coverage report. We will create the following test commands:
 
-1. The current test file has a poor name.
-1. The command runs the tests once and then exits.
+- `test`: run all of the tests once and exit
+- `test:dev`: run the tests in "development mode" (that is, just like `test:unit` currently does)
+- `test:cov`: run the tests once and generate a coverage report
 
-The first item we will fix as we go.
-
-For the second item, it would be nice if we could run the tests continuously during our development process and have them re-run each time we make a change. We _could_ do that with the following command:
+In order to facilitate the coverage report generation, we need to install the `@vitest/coverage-c8` package as a development dependency:
 
 ```bash
-npm run test:unit -- --watch
+npm i -D @vitest/coverage-c8
 ```
 
-However, that is a lot of extra typing for something a developer will be doing every day, so let's add a script to our `package.json` file to make our developer's lives easier.
+We can then update the `package.json` file to:
+
+- Rename `test:unit` to `test:dev`.
+- Create the `test` script.
+- Create the `test:cov` script.
 
 ```json
   "scripts": {
-    "serve": "vue-cli-service serve",
-    "build": "vue-cli-service build",
-    "lint": "vue-cli-service lint",
+    "build": "vue-tsc && vite build",
+    "dev": "vite",
     "prepare": "husky install",
-    "test:dev": "vue-cli-service test:unit --watch",
-    "test:unit": "vue-cli-service test:unit",
-    "test:e2e": "vue-cli-service test:e2e"
+    "preview": "vite preview",
+    "lint": "eslint",
+    "test": "vitest run",
+    "test:cov": "vitest run --coverage",
+    "test:dev": "vitest",
+    "test:e2e": "cypress run"
   },
 ```
 
-Run the following command:
+Now when we want to start development, we can queue up our test server by running the following command:
 
 ```bash
 npm run test:dev
 ```
 
-Jest should run our tests and then wait for changes. We have not changed anything, so it doesn't _actually_ run any tests. Let's make some changes to the `tests/unit/example.spec.ts` file. Add some junk to the `toMatch()` string and save the file. The test should fail. Remove the junk text that was just added. The tests should pass again.
+Try `npm test` and `npm run test:cov` as well to see how their execution differs.
 
 We have our general workflow in place. Leave the test runner running. Next we will start to add tests for our components.
+
+**Note:** if you are using VS Code and have the proper Vite extensions installed you can also run Vite and Vitest directly from the IDE. Whether you use these scripts or the VS Code extension is strictly a matter of taste.
 
 ## Scaffold the Tests for Our Application
 
@@ -64,10 +71,11 @@ These components do not currently do much, so now is a really good time to scaff
 
 ### App.vue
 
-Have a look at `src/App.vue`. It does not do much that is testable, but we can make sure that it renders, so let's create a test that does just that. Create a file called `tests/unit/App.spec.ts`. Note that this follows the path and general naming convention of our `src`, but the `spec.ts` extension lets jest know that this is a TypeScript unit test file.
+Have a look at `src/App.vue`. It does not do much that is testable, but we can make sure that it renders, so let's create a test that does just that. Create a file called `src/__tests__/App.spec.ts`. Note that this follows the path and general naming convention of `src/App.vue`, but the `spec.ts` extension lets vitest know that this is a TypeScript unit test file.
 
 ```typescript
 import { shallowMount } from '@vue/test-utils';
+import { describe, expect, it } from 'vitest';
 import App from '@/App.vue';
 
 describe('App.vue', () => {
@@ -84,25 +92,37 @@ Next we make sure the wrapper is not empty by calling `exists()` on it. Had our 
 
 There is not much else we can effectively test here, so let's move on to the Home page.
 
+**Note:** some editors will provide an error such as `Cannot find module '@/App.vue' or its corresponding type declarations.` This does not cause any issues with the test itself, but to remove the issue in the editor modify the `src/vite-env.d.ts` as such:
+
+```typescript
+/// <reference types="vite/client" />
+
+declare module '*.vue';
+```
+
 ### HomePage.vue
 
 The `tests/unit/example.spec.ts` test is testing `HomePage.vue`, so let's just start with a little housekeeping to make this more obvious:
 
-- `mkdir tests/unit/views`
-- `git mv tests/unit/example.spec.ts tests/unit/views/HomePage.spec.ts`
+- `mkdir src/views/__tests__`
+- `git mv tests/unit/example.spec.ts src/views/__tests__/HomePage.spec.ts`
+
+**Note:** the starter puts all unit tests in `tests/unit` but I prefer to have them near the sources. Vitest is flexible here. Do what works best for you. This training will use the `__tests__` folders under `src`.
 
 Have a look at `src/views/HomePage.vue`. What should we test here? We do not want to write too many tests, since we will be changing this all some time soon. Let's just test that the header has a proper title and that the container div has the text we expect.
 
-Let's just make a slight modification to `tests/unit/views/HomePage.spec.ts`:
+Let's just make a slight modification to `src/views/__tests__/HomePage.spec.ts`:
 
 ```typescript
-import { mount } from '@vue/test-utils';
 import HomePage from '@/views/HomePage.vue';
+import { IonTitle } from '@ionic/vue';
+import { mount } from '@vue/test-utils';
+import { describe, expect, it } from 'vitest';
 
 describe('HomePage.vue', () => {
   it('displays the title', () => {
     const wrapper = mount(HomePage);
-    const titles = wrapper.findAll('ion-title');
+    const titles = wrapper.findAllComponents(IonTitle);
     expect(titles).toHaveLength(2);
     expect(titles[0].text()).toBe('Blank');
     expect(titles[1].text()).toBe('Blank');
@@ -118,6 +138,7 @@ describe('HomePage.vue', () => {
 
 There are few key items to note with this test.
 
+- The test was using `test()` and we changed to using `it()`. This is a matter of personal taste, and you can use either one.
 - The test was already using `mount()` instead of `shallowMount()`. This is because we want to query some actual DOM content.
 - The "find" methods take CSS selectors and find the matching item(s) returning either a `DOMWrapper` or array of `DOMWrapper`.
   - `find` - find the DOM first element matching the selector

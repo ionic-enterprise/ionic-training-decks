@@ -408,12 +408,12 @@ describe('TastingNoteEditorComponent', () => {
 ```html
 <ion-header>
   <ion-toolbar>
-    <ion-title>{{ title }}</ion-title>
+    <ion-title class="ion-text-center">{{ title }}</ion-title>
     <ion-buttons slot="start">
       <ion-button id="cancel-button" (click)="close()" data-testid="cancel-button"> Cancel </ion-button>
     </ion-buttons>
     <ion-buttons slot="end">
-      <ion-button expand="full" [disabled]="!editorForm.valid" (click)="save()" data-testid="save-button"
+      <ion-button [strong]="true" [disabled]="!editorForm.valid" (click)="save()" data-testid="save-button"
         >{{ buttonLabel }}</ion-button
       >
     </ion-buttons>

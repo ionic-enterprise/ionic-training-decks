@@ -10,7 +10,7 @@ In this lab you will add the following capabilities:
 
 ## Modify the View Tests
 
-We will begin using the router from within the views. As a result, we will need to refactor how the view is mounted within our tests. In `tests/unit/views/LoginPage.spec.ts` and `tests/unit/views/TeaList.spec.ts`, make the following modifications:
+We will begin using the router from within the views. As a result, we will need to refactor how the view is mounted within our tests. In `src/views/__tests__/LoginPage.spec.ts` and `src/views/__tests__/TeaListPage.spec.ts`, make the following modifications:
 
 - Import `createRouter`, `createWebHistory`, and `Router` from `vue-router`.
 - Create a method called `mountView` that is responsible for setting up the router and mounting the view.
@@ -18,16 +18,18 @@ We will begin using the router from within the views. As a result, we will need 
 - Import `useAuth` from `@/composables/auth`.
 - Mock the `useAuth` composition function that we imported.
 
-Here is an example from the `LoginPage` test. Make similar modifications to the `TeaList` test as well.
+Here is an example from the `LoginPage` test. Make similar modifications to the `TeaListPage` test as well.
 
 ```typescript
 import LoginPage from '@/views/LoginPage.vue';
+import { IonTitle } from '@ionic/vue';
 import { flushPromises, mount, VueWrapper } from '@vue/test-utils';
+import { describe, expect, it, vi } from 'vitest';
 import waitForExpect from 'wait-for-expect';
 import { createRouter, createWebHistory, Router } from 'vue-router';
 import { useAuth } from '@/composables/auth';
 
-jest.mock('@/composables/auth');
+vi.mock('@/composables/auth');
 
 describe('LoginPage.vue', () => {
   let router: Router;
@@ -48,7 +50,7 @@ describe('LoginPage.vue', () => {
 
   it('displays the title', async () => {
     const wrapper = await mountView();
-    const titles = wrapper.findAll('ion-title');
+    const titles = wrapper.findAllComponents(IonTitle);
     expect(titles).toHaveLength(1);
     expect(titles[0].text()).toBe('LoginPage');
   });
@@ -65,77 +67,71 @@ When the user clicks on the "Sign On" button in the LoginPage view, we need to s
 - If the login fails, we need to display an error message.
 - If the login succeeds, we need to navigate to the root page of the application.
 
-Now we are ready to define the requirements via a set of tests:
+### Login and Navigation
+
+We are ready to define the login and navigation requirements via a set of tests (only add the stuff that doesn't already exist, some items are included below just to provide context):
 
 ```typescript
+// Imports are here, you will need to add missing things...
+
+vi.mock('@/composables/auth');
+
 describe('LoginPage.vue', () => {
-...
-  describe('clicking on the signin button', () => {
-    let wrapper: VueWrapper<any>;
-    beforeEach(async () => {
-      wrapper = await mountView();
-      const email = wrapper.findComponent('[data-testid="email-input"]');
-      const password = wrapper.findComponent('[data-testid="password-input"]');
-      await email.setValue('test@test.com');
-      await password.setValue('test');
-    });
+  // Other describes are here...
 
-    it('performs the login', async () => {
-      const { login } = useAuth();
-      const button = wrapper.find('[data-testid="signin-button"]');
-      button.trigger('click');
-      expect(login).toHaveBeenCalledTimes(1);
-      expect(login).toHaveBeenCalledWith('test@test.com', 'test');
-    });
+  describe('sign in button', () => {
+    // Existing button disabled test is here...
 
-    describe('if the login succeeds', () => {
-      beforeEach(() => {
+    describe('clicking', () => {
+      let wrapper: VueWrapper<any>;
+      beforeEach(async () => {
+        wrapper = await mountView();
+        const email = wrapper.findComponent('[data-testid="email-input"]');
+        const password = wrapper.findComponent('[data-testid="password-input"]');
+        await email.setValue('test@test.com');
+        await password.setValue('test');
+      });
+
+      it('performs the login', async () => {
         const { login } = useAuth();
-        (login as jest.Mock).mockResolvedValue(true);
-      });
-
-      it('does not show an error', async () => {
         const button = wrapper.find('[data-testid="signin-button"]');
-        const msg = wrapper.find('[data-testid="message-area"]');
         button.trigger('click');
-        await flushPromises();
-        expect(msg.text()).toBe('');
+        expect(login).toHaveBeenCalledTimes(1);
+        expect(login).toHaveBeenCalledWith('test@test.com', 'test');
       });
 
-      it('navigates to the root page', async () => {
-        const button = wrapper.find('[data-testid="signin-button"]');
-        router.replace = jest.fn();
-        button.trigger('click');
-        await flushPromises();
-        expect(router.replace).toHaveBeenCalledTimes(1);
-        expect(router.replace).toHaveBeenCalledWith('/');
-      });
-    });
+      describe('if the login succeeds', () => {
+        beforeEach(() => {
+          const { login } = useAuth();
+          (login as Mock).mockResolvedValue(true);
+        });
 
-    describe('if the login fails', () => {
-      beforeEach(() => {
-        const { login } = useAuth();
-        (login as jest.Mock).mockResolvedValue(false);
-      });
-
-      it('shows an error', async () => {
-        const button = wrapper.find('[data-testid="signin-button"]');
-        const msg = wrapper.find('[data-testid="message-area"]');
-        button.trigger('click');
-        await flushPromises();
-        expect(msg.text()).toBe('Invalid email and/or password');
+        it('navigates to the root page', async () => {
+          const button = wrapper.find('[data-testid="signin-button"]');
+          router.replace = vi.fn();
+          button.trigger('click');
+          await flushPromises();
+          expect(router.replace).toHaveBeenCalledTimes(1);
+          expect(router.replace).toHaveBeenCalledWith('/');
+        });
       });
 
-      it('does not navigate', async () => {
-        const button = wrapper.find('[data-testid="signin-button"]');
-        router.replace = jest.fn();
-        button.trigger('click');
-        await flushPromises();
-        expect(router.replace).not.toHaveBeenCalled();
+      describe('if the login fails', () => {
+        beforeEach(() => {
+          const { login } = useAuth();
+          (login as Mock).mockResolvedValue(false);
+        });
+
+        it('does not navigate', async () => {
+          const button = wrapper.find('[data-testid="signin-button"]');
+          router.replace = vi.fn();
+          button.trigger('click');
+          await flushPromises();
+          expect(router.replace).not.toHaveBeenCalled();
+        });
       });
     });
   });
-...
 });
 ```
 
@@ -143,8 +139,6 @@ For the code, here are the pieces. It is up to you to find the correct spot in `
 
 First the one-liners:
 
-- Add an `errorMessage` ref object. You will need to add `ref` to the import from `vue`.
-- Update the template to display the error message if there is one. Here is the markup: `<div v-if="errorMessage">{{ errorMessage }}</div>`. We already have an area where error messages should be displayed. This markup belong inside that area.
 - `import { useRouter } from 'vue-router';`
 - `import { useAuth } from '@/composables/auth';`
 - Add a click event binding to the button: `@click="signinClicked"`.
@@ -163,7 +157,7 @@ const signinClicked = async () => {
 
 **Hints:**
 
-1. `email`, `password`, and `errorMessage` are all reactive references, so you will need to access the `value` property to read and write them in the code (example: `fooBar.value = 0`).
+1. `email`, and `password` are both reactive references, so you will need to access the `value` property to read and write them in the code (example: `fooBar.value = 0`).
 1. Due to the way `yup` works, you may need to cast the `email` and `password` values to strings (`email.value as string`).
 
 Try running the app. You should see an error message when invalid credentials are used, and navigation to the tea list page when valid credentials are used. Here are some valid credentials:
@@ -171,11 +165,47 @@ Try running the app. You should see an error message when invalid credentials ar
 - **email:** test@ionic.io
 - **password:** Ion54321
 
+### Login Failures
+
+The user can enter the wrong email or password. If they do so, we will not store a session and we will not navigate. Try that out from the login page just to be sure. The fact that we stay on the login page is good, but there is no indication provided to the user.
+
+We will use a <a href="https://ionicframework.com/docs/api/toast" target="_blank">toast</a> to inform the user when they enter invalid credentials. First add the following markup somewhere within the `template`. It does not really matter where. I placed it after the footer. Remember to `import` the `IonToast` component in the `script` section.
+
+```html
+<ion-toast
+  :isOpen="loginFailed"
+  message="Invalid Email or Password!"
+  color="danger"
+  :duration="3000"
+  @didDismiss="loginFailed = false"
+></ion-toast>
+```
+
+Note that we are using `loginFailed` to open the toast. The toast will open when `loginFailed` is set to `true`. The toast stays up for three seconds and then closes. When it closes, `didDismiss` is fired and we set `loginFailed` to `false`.
+
+Play around with some of the options on the `ion-toast`. Perhaps you would rather position the toast in the middle? Try that. Note that you may need to reload the page as sometimes HMR and caching causes odd re-rendering.
+
+In the `script` section, we need to define the property, initialize it to `false`, and set it to `true` if the login fails.
+
+```typescript
+  const loginFailed = ref(false);
+
+  // other code is here...
+
+  const signinClicked = async () => {
+    // Your code may look a bit different, and that is OK
+  if (await login(email.value, password.value)) {
+    router.replace('/')
+  } else {
+    loginFailed.value = true;
+  }
+```
+
 ## Handle the Logout
 
 We can log in, but what about logging out? For now, we will add that to the Tea page.
 
-Let's add the actual button first. In `src/views/TeaList.vue` add the following markup within the `ion-toolbar` that is in the header:
+Let's add the actual button first. In `src/views/TeaListPage.vue` add the following markup within the `ion-toolbar` that is in the header:
 
 ```html
 <ion-buttons slot="end">
@@ -195,27 +225,27 @@ Now we will need to go to the `script` tag and make some adjustments. Where we a
 const logoutClicked = async (): Promise<void> => {};
 ```
 
-Now let's make that button actually do something. Specifically, let's make it log us out. First we will update the `TeaListPage` test to use a `mountView` function similar to the one we created in the `LoginPage` test. Be sure to also import and mock `@/composables/auth`.
-
-With those modifications in place, we can add the tests that express our current requirements:
+Now let's make that button actually do something. Specifically, let's make it log us out. First we need to import and mock `@/composables/auth`. With that modification in place, we can add the tests that express our current requirements:
 
 ```typescript
-it('performs a logout when the logout button is clicked', async () => {
-  const { logout } = useAuth();
-  const wrapper = await mountView();
-  const button = wrapper.find('[data-testid="logout-button"]');
-  router.replace = jest.fn();
-  await button.trigger('click');
-  expect(logout).toHaveBeenCalledTimes(1);
-});
+describe('logout button', () => {
+  it('performs a logout when the logout button is clicked', async () => {
+    const { logout } = useAuth();
+    const wrapper = await mountView();
+    const button = wrapper.find('[data-testid="logout-button"]');
+    router.replace = vi.fn();
+    await button.trigger('click');
+    expect(logout).toHaveBeenCalledTimes(1);
+  });
 
-it('navigates to the login after the logout action is complete', async () => {
-  const wrapper = await mountView();
-  const button = wrapper.find('[data-testid="logout-button"]');
-  router.replace = jest.fn();
-  await button.trigger('click');
-  expect(router.replace).toHaveBeenCalledTimes(1);
-  expect(router.replace).toHaveBeenCalledWith('/login');
+  it('navigates to the login after the logout action is complete', async () => {
+    const wrapper = await mountView();
+    const button = wrapper.find('[data-testid="logout-button"]');
+    router.replace = vi.fn();
+    await button.trigger('click');
+    expect(router.replace).toHaveBeenCalledTimes(1);
+    expect(router.replace).toHaveBeenCalledWith('/login');
+  });
 });
 ```
 

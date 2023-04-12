@@ -125,13 +125,16 @@ I like to have my build do a copy for me. For this reason, I do a `cap sync` wit
 
 ```json
   "scripts": {
-    "build": "vue-cli-service build && cap sync",
-    "lint": "vue-cli-service lint",
+    "assets": "capacitor-assets generate --iconBackgroundColor '#f1ebe1' --splashBackgroundColor '#f1ebe1' --iconBackgroundColorDark '#110b00' --splashBackgroundColorDark '#110b00'",
+    "build": "vue-tsc && vite build && cap sync",
+    "dev": "vite",
+    "lint": "eslint",
     "prepare": "husky install",
-    "serve": "vue-cli-service serve",
-    "test:dev": "vue-cli-service test:unit --watch",
-    "test:unit": "vue-cli-service test:unit",
-    "test:e2e": "vue-cli-service test:e2e"
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:cov": "vitest run --coverage",
+    "test:dev": "vitest",
+    "test:e2e": "cypress run"
   },
 ```
 

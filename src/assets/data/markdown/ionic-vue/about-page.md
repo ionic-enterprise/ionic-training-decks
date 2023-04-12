@@ -6,7 +6,7 @@ Every good app gives credit where credit is due. We will use a traditional "Abou
 
 ## Get the Data
 
-Modify the application's `tsconfig.json` file to allow the code to resolve JSON files:
+Open the application's `tsconfig.json` file and make sure `resolveJsonModule` to `true` in order to allow the code to resolve JSON files:
 
 ```json
   "compilerOptions": {
@@ -15,9 +15,17 @@ Modify the application's `tsconfig.json` file to allow the code to resolve JSON 
 ...
 ```
 
-This will allow us to read the `package.json` file and get some important information from it within our `script` section. Note that there is no reason for this data to be reactive.
+**Note:** You may need to add the `author` node to the `package.json` file. Here is an example:
 
-**Note:** You may need to add the `author` node to the `package.json` file. You can just your your name like this: `"author": "Jackie Smith",`.
+```json
+  "author": {
+    "name": "Ionic Customer Success Team",
+    "email": "support@ionic.io",
+    "url": "https://ionic.io"
+  },
+```
+
+This will allow us to read the `package.json` file and get some important information from it within our `script` section. Note that there is no reason for this data to be reactive.
 
 ```typescript
 import packageInfo from '../../package.json';
@@ -52,7 +60,7 @@ We can then update the template or the view.
         </ion-item>
         <ion-item>
           <ion-label>Author</ion-label>
-          <ion-note slot="end">{{ author }}</ion-note>
+          <ion-note slot="end">{{ author.name }}</ion-note>
         </ion-item>
       </ion-list>
     </ion-content>

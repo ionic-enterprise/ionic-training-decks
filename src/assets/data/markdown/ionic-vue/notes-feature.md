@@ -34,14 +34,15 @@ This is a review of skills we have already learned. As such, the next steps prov
 
 #### Test
 
-`tests/unit/composables/tasting-notes.spec.ts`
+`src/composables/__tests__/tasting-notes.spec.ts`
 
 ```typescript
 import { useBackendAPI } from '@/composables/backend-api';
 import { useTastingNotes } from '@/composables/tasting-notes';
 import { TastingNote } from '@/models';
+import { beforeEach, describe, expect, it, Mock, vi } from 'vitest';
 
-jest.mock('@/composables/backend-api');
+vi.mock('@/composables/backend-api');
 
 describe('useTastingNotes', () => {
   const { client } = useBackendAPI();
@@ -78,16 +79,16 @@ describe('useTastingNotes', () => {
 
   beforeEach(() => {
     initializeTestData();
-    jest.clearAllMocks();
-    (client.get as jest.Mock).mockResolvedValue({ data: tastingNotes });
+    vi.resetAllMocks();
+    (client.get as Mock).mockResolvedValue({ data: tastingNotes });
   });
 
   describe('refresh', () => {
-    // TODO: create similar tests to those in tests/unit/composables/tea.spec.ts
+    // TODO: create similar tests to those in src/composables/__tests__/tea.spec.ts
   });
 
   describe('find', () => {
-    // TODO: create similar tests to those in tests/unit/composables/tea.spec.ts
+    // TODO: create similar tests to those in src/composables/__tests__/tea.spec.ts
   });
 
   describe('merge', () => {
@@ -164,15 +165,22 @@ export const useTastingNotes = () => ({
 #### Mock
 
 ```typescript
+import { vi } from 'vitest';
 import { ref } from 'vue';
 import { TastingNote } from '@/models';
 
-export const useTastingNotes = jest.fn().mockReturnValue({
-  notes: ref<Array<TastingNote>>([]),
-  find: jest.fn().mockResolvedValue(undefined),
-  merge: jest.fn().mockResolvedValue(undefined),
-  refresh: jest.fn().mockResolvedValue(undefined),
-  remove: jest.fn().mockResolvedValue(undefined),
+const notes = ref<Array<TastingNote>>([]);
+const find = vi.fn().mockResolvedValue(undefined);
+const merge = vi.fn().mockResolvedValue(undefined);
+const refresh = vi.fn().mockResolvedValue(undefined);
+const remove = vi.fn().mockResolvedValue(undefined);
+
+export const useTastingNotes = () => ({
+  notes,
+  find,
+  merge,
+  refresh,
+  remove,
 });
 ```
 
@@ -180,7 +188,7 @@ export const useTastingNotes = jest.fn().mockReturnValue({
 
 We have done a `refresh` and a `find` before. Specifically for `useTeas()`. Look at the tests and code for those and create similar tests and code here.
 
-For the tests, you can copy from the `refresh` and `find` tests from `tests/unit/composables/tea.spec.ts` and update them as appropriate.
+For the tests, you can copy from the `refresh` and `find` tests from `src/composables/__teas__/tea.spec.ts` and update them as appropriate.
 
 For the `refresh()`, the proper endpoint is `/user-tasting-notes` and there is no need to transform the data, only to make sure the `notes.value` gets assigned properly when the data comes back.
 
@@ -209,7 +217,7 @@ Add the following tests within the `describe('a new note')` section:
 
 ```typescript
 beforeEach(() => {
-  (client.post as jest.Mock).mockResolvedValue({ data: { id: 73, ...note } });
+  (client.post as Mock).mockResolvedValue({ data: { id: 73, ...note } });
 });
 
 it('posts the new note', async () => {
@@ -277,7 +285,7 @@ Let's create a composite component that we can use to create new tasting notes o
 <template>
   <ion-header>
     <ion-toolbar>
-      <ion-title>Tasting Notes Editor</ion-title>
+      <ion-title>Tasting Note Editor</ion-title>
     </ion-toolbar>
   </ion-header>
 
@@ -293,17 +301,18 @@ Let's create a composite component that we can use to create new tasting notes o
 <style scoped></style>
 ```
 
-Also create a `tests/unit/components/AppTastingNoteEditor.spec.ts` file with the following contents:
+Also create a `src/components/__tests__/AppTastingNoteEditor.spec.ts` file with the following contents:
 
 ```typescript
 import { mount, VueWrapper } from '@vue/test-utils';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import AppTastingNoteEditor from '@/components/AppTastingNoteEditor.vue';
 
 describe('AppTastingNoteEditor.vue', () => {
   let wrapper: VueWrapper<any>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.resetAllMocks();
     wrapper = mount(AppTastingNoteEditor);
   });
 
@@ -317,16 +326,16 @@ describe('AppTastingNoteEditor.vue', () => {
 
 The first thing we need to do is get a modal overlay hooked up for the "add a new note" case. This will allow us to test out the component for the modal as we develop it. This will also get the infrastructure for the rest of our modifications in place. We will launch the modal for the "add a new note" scenario from a <a href="https://ionicframework.com/docs/api/fab" target="_blank">floating action button</a> on the `TastingNotesPage`.
 
-First we need to set up the test for the `TastingNotesPage` view (`tests/unit/views/TastingNotesPage.spec.ts`).
+First we need to set up the test for the `TastingNotesPage` view (`src/views/__tests__/TastingNotesPage.spec.ts`).
 
 ```typescript
 describe('adding a new note', () => {
   let modal: { present: () => Promise<void> };
   beforeEach(() => {
     modal = {
-      present: jest.fn().mockResolvedValue(undefined),
+      present: vi.fn().mockResolvedValue(undefined),
     };
-    modalController.create = jest.fn().mockResolvedValue(modal);
+    modalController.create = vi.fn().mockResolvedValue(modal);
   });
 
   it('displays the modal', async () => {
@@ -380,36 +389,26 @@ From here, the code and the markup in `src/views/TastingNotesPage.vue` are prett
 
 Now that we can click on the FAB button and see the modal, let's return our attention to the `src/components/AppTastingNoteEditor.vue` file and start laying out the basics of our form. We already have title and a content section. We know we will need a button in the header that will allow the dialog to be cancelled. We will also need a button on the bottom that will be used for saving and dismissing.
 
-- Add the `ion-buttons` section within the `ion-header>ion-toolbar`.
-- Add the `ion-footer` section under the `ion-contents`.
-- Import the `close` icon from `ionicons/icons`.
+- Add the `ion-buttons` sections within the `ion-header>ion-toolbar`.
+- Add the `ion-text-center` class to the `ion-title` element.
 - Update the component imports.
 - Define a stub function called `cancel`.
 - Define a stub function called `submit`.
 
-**Note:** I generally just "console.log" from the stub functions to avoid linting errors and to prove my bindings are working.
-
 Here is the `ion-buttons` markup for within the `ion-header>ion-toolbar`:
 
 ```html
-<ion-buttons slot="primary">
-  <ion-button id="cancel-button" data-testid="cancel-button" @click="cancel">
-    <ion-icon slot="icon-only" :icon="close"></ion-icon>
-  </ion-button>
+<ion-buttons slot="start">
+  <ion-button data-testid="cancel-button" @click="cancel"> Cancel </ion-button>
+</ion-buttons>
+<ion-buttons slot="end">
+  <ion-button :strong="true" data-testid="submit-button" @click="submit">Add</ion-button>
 </ion-buttons>
 ```
 
-Here is the markup for the footer:
-
-```html
-<ion-footer>
-  <ion-toolbar>
-    <ion-button expand="full" data-testid="submit-button" @click="submit">Add</ion-button>
-  </ion-toolbar>
-</ion-footer>
-```
-
 The contents of the `script` section is left up to you. You should have several code samples to use at this point to determine how to update the imports and create the stubs.
+
+**Note:** I generally just "console.log" from the stub functions to avoid linting errors and to prove my bindings are working.
 
 Let's start filling out the form. We already have one simple form, the `LoginPage`. On that page we used a list of inputs. We will need something like that within this editor, so let's use that as a model for the first couple of input fields. All of the following items will go inside the `ion-content` element. Be sure to update the components list as usual. Now is a good time to start filling out the validations as well.
 
@@ -434,8 +433,10 @@ Let's start filling out the form. We already have one simple form, the `LoginPag
       </ion-item>
     </ion-list>
 
-    <div class="error-message ion-padding" data-testid="message-area">
-      <div v-for="(error, idx) of errors" :key="idx">{{ error }}</div>
+    <div class="ion-padding" data-testid="message-area">
+      <div v-for="(error, idx) of errors" :key="idx">
+        <ion-text color="danger"> {{ error }} </ion-text>
+      </div>
     </div>
   </ion-content>
   ...
@@ -451,15 +452,15 @@ Let's start filling out the form. We already have one simple form, the `LoginPag
   import { object as yupObject, string as yupString } from 'yup';
 
   const validationSchema = yupObject({
-    brand: yupString().required().label('Brand'),
-    name: yupString().required().label('Name'),
+    brand: yupString().required().label<string>('Brand'),
+    name: yupString().required().label<string>('Name'),
   });
 
   const { errors, meta } = useForm({ validationSchema });
   const { value: brand } = useField('brand');
   const { value: name } = useField('name');
 
-  const formIsValid = computed(() => meta.value.valid);
+  const formIsInvalid = computed(() => !meta.value.valid);
 
   ... // Other functions and stubs have already been defined here.
 </script>
@@ -467,13 +468,13 @@ Let's start filling out the form. We already have one simple form, the `LoginPag
 
 We need a way to select the type of tea that we have. Add a select for this. In addition to the usual updating of the component references (not shown), you will also need to map the teas from the state so we can use them to populate the select.
 
-First we should create a test to make sure we do the binding correctly. Update `tests/unit/components/AppTastingNoteEditor.spec.ts`
+First we should create a test to make sure we do the binding correctly. Update `src/components/__tests__/AppTastingNoteEditor.spec.ts`
 
 ```typescript
 ...
 import { useTea } from '@/composables/tea';
 
-jest.mock('@/composables/tea');
+vi.mock('@/composables/tea');
 
 describe('AppTastingNoteEditor.vue', () => {
   let wrapper: VueWrapper<any>;
@@ -484,21 +485,21 @@ describe('AppTastingNoteEditor.vue', () => {
       {
         id: 1,
         name: 'Green',
-        image: 'assets/img/green.jpg',
+        image: 'img/green.jpg',
         description: 'Green tea description.',
         rating: 3,
       },
       {
         id: 2,
         name: 'Black',
-        image: 'assets/img/black.jpg',
+        image: 'img/black.jpg',
         description: 'Black tea description.',
         rating: 0,
       },
       {
         id: 3,
         name: 'Herbal',
-        image: 'assets/img/herbal.jpg',
+        image: 'img/herbal.jpg',
         description: 'Herbal Infusion description.',
         rating: 0,
       },
@@ -551,7 +552,7 @@ Then we can switch back to `src/components/AppTastingNoteEditor.vue` and add the
   });
   ...
   // NOTE: you are adding this to the same general area where other useField calls exist
-  const { value: teaCategoryId } = useField('teaCategoryId');
+  const { value: teaCategoryId } = useField<number>('teaCategoryId');
   ...
 </script>
 ```
@@ -612,9 +613,9 @@ And finally, add a text area for some free-form notes on the tea we just tasted:
 
 <script setup lang="ts">
   ...
-  TODO: do the usual component additions
+  // TODO: do the usual component additions
   ...
-  TODO: add a notes text validation, it is required just like brand and name
+  // TODO: add a notes text validation, it is required just like brand and name
   ...
 </script>
 ```
@@ -721,10 +722,10 @@ describe('submit button', () => {
 });
 ```
 
-The markup to enable this is super simple. We had already snuck in the `formIsValid` computed value earlier, so it is just a matter of binding the `formIsValid` to the submit button's `disabled` property, just like we did in the Login view before.
+The markup to enable this is super simple. We had already snuck in the `formIsInvalid` computed value earlier, so it is just a matter of binding the `formIsInvalid` to the submit button's `disabled` property, just like we did in the Login view before.
 
 ```html
-:disabled="!formIsValid"
+:disabled="formIsInvalid"
 ```
 
 ### Save and Close
@@ -735,13 +736,13 @@ The `submit-button` needs to merge the tasting note. Both buttons need to close 
 
 #### Modifications to the Test
 
-Add the following to the top of the `tests/unit/components/AppTastingNoteEditor.spec.ts` file:
+Add the following to the top of the `src/components/__tests__/AppTastingNoteEditor.spec.ts` file:
 
 ```typescript
 import { useTastingNotes } from '@/composables/tasting-notes';
 import { modalController } from '@ionic/vue';
 
-jest.mock('@/composables/tasting-notes');
+vi.mock('@/composables/tasting-notes');
 ```
 
 Within the "submit button" describe block we will add another group of test for when the button click is triggered:
@@ -761,7 +762,7 @@ describe('on click', () => {
     await rating.setValue(2);
     await notes.setValue('Meh. It is ok.');
 
-    modalController.dismiss = jest.fn();
+    modalController.dismiss = vi.fn();
   });
 
   it('merges the tasting note', async () => {
@@ -794,7 +795,7 @@ The cancel button tests will be similar, but with no data setup. We also will ex
 ```typescript
 describe('cancel button', () => {
   beforeEach(() => {
-    modalController.dismiss = jest.fn();
+    modalController.dismiss = vi.fn();
   });
 
   it('does not merge', async () => {
@@ -833,7 +834,7 @@ const submit = async () => {
 
 We can now theoretically add tasting notes, but we don't really know since we cannot see them. So now would be a good time to update the TastingNotes page view to display the notes that we have in the store.
 
-First, let update the test (`tests/unit/views/TastingNotesPage.spec.ts`) to include some notes. There is a lot going on here, so let's take it a bit at a time.
+First, let update the test (`src/views/__tests__/TastingNotesPage.spec.ts`) to include some notes. There is a lot going on here, so let's take it a bit at a time.
 
 First, define some tasting notes data:
 
@@ -841,8 +842,7 @@ First, define some tasting notes data:
 ...
 import { useTastingNotes } from '@/composables/tasting-notes';
 
-jest.mock('@/composables/tasting-notes');
-jest.mock('@/composables/tea');
+vi.mock('@/composables/tasting-notes');
 ...
 describe('TastingNotesPage.vue', () => {
   ...
@@ -875,7 +875,7 @@ describe('TastingNotesPage.vue', () => {
         notes: 'Smooth and peaty, the king of puer teas',
       },
     ];
-    jest.clearAllMocks();
+    vi.resetAllMocks();
   });
 ...
 ```
@@ -952,10 +952,10 @@ First, we should modify the title based on whether we are doing an add or an upd
 
 ```typescript
 it('displays an appropriate title', async () => {
-  const title = wrapper.find('ion-title');
-  expect(title.text()).toBe('Add New Tasting Note');
+  const title = wrapper.findComponent(IonTitle);
+  expect(title.text()).toBe('Add Note');
   await wrapper.setProps({ noteId: 42 });
-  expect(title.text()).toBe('Tasting Note');
+  expect(title.text()).toBe('Update Note');
 });
 ```
 
@@ -964,14 +964,14 @@ So the add case has "Add New Tasting Note" where the update case just says "Tast
 ```html
 <template>
   ...
-  <ion-title>{{ title }}</ion-title>
+  <ion-title class="ion-text-center">{{ title }}</ion-title>
   ...
 </template>
 
 <script setup lang="ts">
   ...
   const title = computed(
-    () => `${props.noteId ? '' : 'Add New '}Tasting Note`,
+    () => `${props.noteId ? 'Update' : 'Add'} Note`
   );
   ...
 </script>
@@ -988,7 +988,7 @@ If we have an ID when the editor is created we need to find the note. At that po
 ```typescript
 it('populates the data when editing a note', async () => {
   const { find } = useTastingNotes();
-  (find as jest.Mock).mockResolvedValue({
+  (find as Mock).mockResolvedValue({
     id: 73,
     brand: 'Rishi',
     name: 'Puer Cake',
@@ -1017,7 +1017,7 @@ it('populates the data when editing a note', async () => {
 });
 ```
 
-We can then add code to the `initialize()` within our `script` section:
+We can then add code to the `initialize()` within our `script` section (this function should already exist, we are just adding code to it):
 
 ```typescript
 ...
@@ -1038,8 +1038,6 @@ const initialize = async () => {
    refresh();
  }
 };
-...
-initialize();
 ```
 
 #### Save the Note
@@ -1127,11 +1125,11 @@ Play around with this in the browser and make sure everything is working.
 
 Let's put the browser in iPhone emulation mode and reload the app to make sure we are getting the iOS styling. Notice on the Teas page we have what is called a <a href="https://ionicframework.com/docs/api/title#collapsible-large-titles">Collapsible Large Title</a>. On the Tasting Notes page, we do not have this, but we probably should because we essentially have a scrollable list. So let's add that.
 
-First we will update the "displays the title" test in `tests/unit/views/TastingNotes.spec.ts`. This isn't a huge change, but it is enough to ensure both titles are set correctly. Here is a diff of the test changes:
+First we will update the "displays the title" test in `src/views/__tests__/TastingNotesPage.spec.ts`. This isn't a huge change, but it is enough to ensure both titles are set correctly. Here is a diff of the test changes:
 
 ```diff
    it('displays the title', () => {
-     const titles = wrapper.findAll('ion-title');
+     const titles = wrapper.findAllComponents(IonTitle);
 -    expect(titles).toHaveLength(1);
 +    expect(titles).toHaveLength(2);
      expect(titles[0].text()).toBe('Tasting Notes');
@@ -1150,14 +1148,21 @@ We then need to update the `template` in `src/views/TastingNotesPage.vue`. Here 
 
 Have a look at `src/views/TeaListPage.vue` if you need a model for your changes.
 
-The last thing we should do is add a couple of options to the modal dialog to prevent the user from accidentally dismissing it by touching the background, and to allow swiping the dialog to close on iOS.
+The last thing we should do is add a couple of options to the modal dialog to prevent the user from accidentally dismissing it by touching the background, and to present the dialog as a "<a href="https://ionicframework.com/docs/api/modal#card-modal" target="_blank">card modal</a>" on iOS.
 
 ```diff
+-  <ion-page>
++  <ion-page ref="page">
+...
++import { ref } from 'vue';
++
++const page = ref(null);
+...
      async presentNoteEditor(evt: Event, noteId?: number): Promise<void> {
        const modal = await modalController.create({
          component: AppTastingNoteEditor,
++        presentingElement: (page.value as any).$el,
 +        backdropDismiss: false,
-+        canDismiss: true,
          componentProps: {
            noteId,
          },
@@ -1190,7 +1195,7 @@ describe('an existing note', () => {
   };
 
   beforeEach(() => {
-    (client.post as jest.Mock).mockResolvedValue({ data: note });
+    (client.post as Mock).mockResolvedValue({ data: note });
   });
 
   it('posts the existing note', async () => {

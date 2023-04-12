@@ -42,41 +42,13 @@ When the user logs in, they establish a session. The session contains informatio
 
 First create two files that will serve as the shells for our test and composable function. You will also need to create the proper directories for them as they do not exist yet.
 
-`tests/unit/composables/session.spec.ts`
-
-```typescript
-import { useSession } from '@/composables/session';
-import { Session } from '@/models';
-
-describe('useSession', () => {
-  const testSession: Session = {
-    user: {
-      id: 314159,
-      firstName: 'Testy',
-      lastName: 'McTest',
-      email: 'test@test.com',
-    },
-    token: '123456789',
-  };
-
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
-  it('starts with an undefined session', async () => {
-    const { getSession } = useSession();
-    expect(await getSession()).toBeUndefined();
-  });
-});
-```
-
 `src/composables/session.ts`
 
 ```typescript
 import { Session } from '@/models';
 
 const key = 'session';
-let session: Session | undefined;
+let session: Session | null = null;
 
 const clearSession = async (): Promise<void> => {
   // TODO:
@@ -84,7 +56,7 @@ const clearSession = async (): Promise<void> => {
   // call Preferences.remove()
 };
 
-const getSession = async (): Promise<Session | undefined> => {
+const getSession = async (): Promise<Session | null> => {
   // TODO:
   // check if we have a `session`, if not, get it and set it
   return session;
@@ -105,13 +77,48 @@ export const useSession = () => {
 };
 ```
 
+`src/composables/__tests__/session.spec.ts`
+
+```typescript
+import { useSession } from '@/composables/session';
+import { Session } from '@/models';
+import { beforeEach, describe, expect, it, Mock, vi } from 'vitest';
+
+describe('useSession', () => {
+  const testSession: Session = {
+    user: {
+      id: 314159,
+      firstName: 'Testy',
+      lastName: 'McTest',
+      email: 'test@test.com',
+    },
+    token: '123456789',
+  };
+
+  beforeEach(() => {
+    vi.resetAllMocks();
+  });
+
+  it('starts with an null session', async () => {
+    const { getSession } = useSession();
+    expect(await getSession()).toBeNull();
+  });
+});
+```
+
 `src/composables/__mocks__/session.ts`
 
 ```typescript
-export const useSession = jest.fn().mockReturnValue({
-  clearSession: jest.fn().mockResolvedValue(undefined),
-  setSession: jest.fn().mockResolvedValue(undefined),
-  getSession: jest.fn().mockResolvedValue(undefined),
+import { vi } from 'vitest';
+
+const clearSession = vi.fn().mockResolvedValue(undefined);
+const setSession = vi.fn().mockResolvedValue(undefined);
+const getSession = vi.fn().mockResolvedValue(undefined);
+
+export const useSession = () => ({
+  clearSession,
+  setSession,
+  getSession,
 });
 ```
 
@@ -125,18 +132,18 @@ We will use <a href="https://capacitorjs.com/docs/apis/preferences" target="_bla
 npm i @capacitor/preferences
 ```
 
-Also create a <a href="https://jestjs.io/docs/manual-mocks" target="_blank">manual mock</a> for it. This will make the testing easier:
+Also create a root level mock for it in `__mocks__/@capacitor/preferences.ts`.
 
 ```typescript
+import { vi } from 'vitest';
+
 export const Preferences = {
-  get: jest.fn().mockResolvedValue({ value: undefined }),
-  set: jest.fn().mockResolvedValue(undefined),
-  remove: jest.fn().mockResolvedValue(undefined),
-  clear: jest.fn().mockResolvedValue(undefined),
+  get: vi.fn().mockResolvedValue({ value: null }),
+  set: vi.fn().mockResolvedValue(undefined),
+  remove: vi.fn().mockResolvedValue(undefined),
+  clear: vi.fn().mockResolvedValue(undefined),
 };
 ```
-
-The manual mock should be created as `__mocks__/@capacitor/preferences.ts` under the application's root directory.
 
 ### Setting the Session
 
@@ -148,7 +155,17 @@ When we set the session, we have two requirements:
 Let's express those requirements as tests. Note that the value stored <a href="https://capacitorjs.com/docs/apis/preferences#setoptions" target="_blank">must be a string</a>. As such we need to stringify the session object. Make sure that you `import { Preferences } from '@capacitor/preferences';` at the top of the file.
 
 ```typescript
+import { Preferences } from '@capacitor/preferences';
+...
+
+vi.mock('@capacitor/preferences');
+
 describe('useSession', () => {
+...
+  beforeEach(() => {
+    vi.resetAllMocks();
+    (Preferences.get as Mock).mockResolvedValue({ value: null });
+  });
 ...
   describe('setSession', () => {
     it('sets the session', async () => {
@@ -173,7 +190,6 @@ describe('useSession', () => {
 
 The code required to satisfy these tests is left as an exercise for the reader. Here is a synopsis if what you need to do:
 
-- The signature of `setSession` needs to be updated to take a parameter of type `Session`.
 - The file global `session` needs to be set to the passed value.
 - The `setSession` function needs to return the result of calling `Preferences.set()` (be sure to import `Preferences`). The signature for `Preferences.set()` is `set({ key: string, value: string }), so the passed session will need to be converted from an object to a string via `JSON.stringify()`.
 
@@ -196,7 +212,7 @@ describe('useSession', () => {
     it('clears the session', async () => {
       const { getSession, clearSession } = useSession();
       await clearSession();
-      expect(await getSession()).toBeUndefined();
+      expect(await getSession()).toBeNull();
     });
 
     it('removes the session fromm preferences', async () => {
@@ -231,7 +247,7 @@ describe('useSession', () => {
 
     it('gets the session from preferences', async () => {
       const { getSession } = useSession();
-      (Preferences.get as jest.Mock).mockResolvedValue({
+      (Preferences.get as Mock).mockResolvedValue({
         value: JSON.stringify(testSession),
       });
       expect(await getSession()).toEqual(testSession);
@@ -241,7 +257,7 @@ describe('useSession', () => {
 
     it('caches the retrieved session', async () => {
       const { getSession } = useSession();
-      (Preferences.get as jest.Mock).mockResolvedValue({
+      (Preferences.get as Mock).mockResolvedValue({
         value: JSON.stringify(testSession),
       });
       await getSession();
@@ -270,15 +286,6 @@ We will be using <a href="https://www.npmjs.com/package/axios" target="_blank">A
 npm i axios
 ```
 
-After installing this, the `transformIgnorePatterns` in `jest.config.js` need to be updated for Axios:
-
-```javascript
-module.exports = {
-  preset: '@vue/cli-plugin-unit-jest/presets/typescript-and-babel',
-  transformIgnorePatterns: ['/node_modules/(?!@ionic/vue|@ionic/vue-router|@ionic/core|@stencil/core|ionicons|axios)'],
-};
-```
-
 We will also create a single Axios instance for our backend API. Create a `src/composables/backend-api.ts` file with the following contents:
 
 ```typescript
@@ -304,10 +311,15 @@ export const useBackendAPI = () => {
 Similar to what we did with the 'useSession' composition function, we will create a mock in `src/composables/__mocks__/backend-api.ts` with the following contents to make our other tests more clean:
 
 ```typescript
-export const useBackendAPI = jest.fn().mockReturnValue({
+import { vi } from 'vitest';
+
+const post = vi.fn().mockResolvedValue({ data: null });
+const get = vi.fn().mockResolvedValue({ data: null });
+
+export const useBackendAPI = () => ({
   client: {
-    post: jest.fn().mockResolvedValue({ data: null }),
-    get: jest.fn().mockResolvedValue({ data: null }),
+    post,
+    get,
   },
 });
 ```
@@ -329,24 +341,6 @@ We have logic in place to store the session. It is now time to create the logic 
 ### Test and Function Shells
 
 First create two files that will serve as the shells for our test and compsable function.
-
-`tests/unit/composables/auth.spec.ts`
-
-```typescript
-import { User } from '@/models';
-import { useBackendAPI } from '@/composables/backend-api';
-import { useAuth } from '@/composables/auth';
-import { useSession } from '@/composables/session';
-
-jest.mock('@/composables/backend-api');
-jest.mock('@/composables/session');
-
-describe('useAuth', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-});
-```
 
 `src/composables/auth.ts`
 
@@ -371,6 +365,25 @@ export const useAuth = () => {
 };
 ```
 
+`src/composables/__tests__/auth.spec.ts`
+
+```typescript
+import { User } from '@/models';
+import { useBackendAPI } from '@/composables/backend-api';
+import { useAuth } from '@/composables/auth';
+import { useSession } from '@/composables/session';
+import { beforeEach, describe, expect, it, Mock, vi } from 'vitest';
+
+vi.mock('@/composables/backend-api');
+vi.mock('@/composables/session');
+
+describe('useAuth', () => {
+  beforeEach(() => {
+    vi.resetAllMocks();
+  });
+});
+```
+
 ### Perform the Login
 
 For the login, we need to:
@@ -388,7 +401,7 @@ describe('login', () => {
   const { login } = useAuth();
   const { client } = useBackendAPI();
   beforeEach(() => {
-    (client.post as jest.Mock).mockResolvedValue({
+    (client.post as Mock).mockResolvedValue({
       data: { success: false },
     });
   });
@@ -417,7 +430,7 @@ describe('login', () => {
         lastName: 'McTest',
         email: 'test@test.com',
       };
-      (client.post as jest.Mock).mockResolvedValue({
+      (client.post as Mock).mockResolvedValue({
         data: {
           success: true,
           user,

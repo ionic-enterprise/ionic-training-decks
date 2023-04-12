@@ -32,10 +32,11 @@ If we are going to have multiple tabs, we are going to need a place to navigate 
 
 Adjust the name and the `ion-title` based on the page. Do not worry about adding routes for these pages yet. We will address that in a bit.
 
-Add a couple of simple tests for the views that were just created. Create them under `tests/unit/views` using the same naming convention that we have been using already. Use the following as a template:
+Add a couple of simple tests for the views that were just created. Create them under `src/views/__tests__/` using the same naming convention that we have been using already. Use the following as a template:
 
 ```typescript
 import TastingNotesPage from '@/views/TastingNotesPage.vue';
+import { IonTitle } from '@ionic/vue';
 import { createRouter, createWebHistory } from '@ionic/vue-router';
 import { mount, VueWrapper } from '@vue/test-utils';
 import { Router } from 'vue-router';
@@ -59,7 +60,7 @@ describe('TastingNotesPage.vue', () => {
 
   it('displays the title', async () => {
     const wrapper = await mountView();
-    const titles = wrapper.findAll('ion-title');
+    const titles = wrapper.findAllComponents(IonTitle);
     expect(titles).toHaveLength(1);
     expect(titles[0].text()).toBe('Tasting Notes');
   });
@@ -149,7 +150,7 @@ What we will do here is:
 Let's do this one step at a time. First, create the `tabs` route as such:
 
 ```typescript
-import Tabs from '../views/TabsPage.vue';
+import Tabs from '@/views/TabsPage.vue';
 ...
 const routes: Array<RouteRecordRaw> = [
   {
@@ -181,7 +182,7 @@ With that in place, do the following (try to do this without looking at the fini
 
 1. Move the "Tea List" and "Tea Details" routes to be within the `children` array of the "Tabs" route.
 1. Remove the starting '/' from the "Tea List" and "Tea Details" routes (example: `path: 'teas',`).
-1. Make the "Tea List" route lazy loaded (use "Tea Details" as a model), at which point you can remove the import of the `TeaListPage` component.
+1. If you have not done so prior, make the "Tea List" route lazy loaded (use "Tea Details" as a model), at which point you can remove the import of the `TeaListPage` component.
 1. Using "Tea List" as a model, create routes for the "About" and "Tasting Notes" pages. They shall also be lazy loaded.
 1. Change the '/' redirect to be '/tabs/teas' instead of '/teas'.
 
@@ -194,7 +195,7 @@ A few things to note about this:
 
 You will also have to modify a couple of the pages to compensate for the change:
 
-- in `tests/unit/views/TeaListPage.spec.ts` find the 'navigates to the tea details page when a tea card is clicked' test and change the expected route from `/teas/tea/4` to `/tabs/teas/tea/4` (the actual ID number may be different in your test)
+- in `src/views/__tests__/TeaListPage.spec.ts` find the 'navigates to the tea details page when a tea card is clicked' test and change the expected route from `/teas/tea/4` to `/tabs/teas/tea/4` (the actual ID number may be different in your test)
 - modify the code in `src/views/TeaListPage.vue` accordingly
 - modify the `defaultHref` for the back button in the `TeaDetailsPage` view to be `/tabs/teas`
 

@@ -6,33 +6,34 @@ In this lab, you will learn how to create a composition function that will be us
 
 The first thing we need to to is create some templates for our unit test and composition function.
 
-**`tests/unit/composables/tea.spec.ts`**
+**`src/composables/__tests__/tea.spec.ts`**
 
 ```typescript
 import { useBackendAPI } from '@/composables/backend-api';
 import { useTea } from '@/composables/tea';
 import { Tea } from '@/models';
+import { beforeEach, describe, expect, it, Mock, vi } from 'vitest';
 
-jest.mock('@/composables/backend-api');
+vi.mock('@/composables/backend-api');
 
 describe('useTea', () => {
+  const { client } = useBackendAPI();
   let expectedTeas: Array<Tea>;
-  let httpResultTeas: Array<{ id: number; name: string; description: string }>;
-
-  const initializeTestData = () => {};
+  let httpResultTeas: Array<Omit<Tea, 'image'>>;
 
   beforeEach(() => {
     initializeTestData();
-    jest.clearAllMocks();
+    vi.resetAllMocks();
+    (client.get as Mock).mockResolvedValue({});
   });
 
   describe('refresh', () => {
-    const { client } = useBackendAPI();
-
     it('gets the tea categories', async () => {});
 
     it('transforms the tea data', async () => {});
   });
+
+  const initializeTestData = () => {};
 });
 ```
 
@@ -88,49 +89,49 @@ const initializeTestData = () => {
     {
       id: 1,
       name: 'Green',
-      image: 'assets/img/green.jpg',
+      image: 'img/green.jpg',
       description: 'Green tea description.',
     },
     {
       id: 2,
       name: 'Black',
-      image: 'assets/img/black.jpg',
+      image: 'img/black.jpg',
       description: 'Black tea description.',
     },
     {
       id: 3,
       name: 'Herbal',
-      image: 'assets/img/herbal.jpg',
+      image: 'img/herbal.jpg',
       description: 'Herbal Infusion description.',
     },
     {
       id: 4,
       name: 'Oolong',
-      image: 'assets/img/oolong.jpg',
+      image: 'img/oolong.jpg',
       description: 'Oolong tea description.',
     },
     {
       id: 5,
       name: 'Dark',
-      image: 'assets/img/dark.jpg',
+      image: 'img/dark.jpg',
       description: 'Dark tea description.',
     },
     {
       id: 6,
       name: 'Puer',
-      image: 'assets/img/puer.jpg',
+      image: 'img/puer.jpg',
       description: 'Puer tea description.',
     },
     {
       id: 7,
       name: 'White',
-      image: 'assets/img/white.jpg',
+      image: 'img/white.jpg',
       description: 'White tea description.',
     },
     {
       id: 8,
       name: 'Yellow',
-      image: 'assets/img/yellow.jpg',
+      image: 'img/yellow.jpg',
       description: 'Yellow tea description.',
     },
   ];
@@ -147,7 +148,7 @@ What we have here is the `expectedTeas` with the data in the shape we want withi
 ```typescript
 it('transforms the tea data', async () => {
   const { refresh, teas } = useTea();
-  (client.get as jest.Mock).mockResolvedValue({ data: httpResultTeas });
+  (client.get as Mock).mockResolvedValue({ data: httpResultTeas });
   await refresh();
   expect(teas.value).toEqual(expectedTeas);
 });
@@ -158,13 +159,7 @@ The HTTP `GET` returns the teas in one shape, we expect the results in the other
 So, let's get down to coding this in `src/composables/tea.ts`. The first thing we will do is define a type for the data coming back from the HTTP API and the shell of a transforming function.
 
 ```typescript
-interface RawData {
-  id: number;
-  name: string;
-  description: string;
-}
-
-const unpack = (data: Array<RawData>): Array<Tea> => {
+const unpack = (data: Array<Omit<Tea, 'image'>>): Array<Tea> => {
   return [];
 };
 ```
@@ -184,7 +179,7 @@ const images: Array<string> = ['green', 'black', 'herbal', 'oolong', 'dark', 'pu
 Then in `unpack()` map the data, adding in the image property in the format required:
 
 ```typescript
-return data.map((t) => ({ ...t, image: `assets/img/${images[t.id - 1]}.jpg` }));
+return data.map((t) => ({ ...t, image: `img/${images[t.id - 1]}.jpg` }));
 ```
 
 Obviously, this is a fairly contrived example and it does not compensate for changes such as someone adding a tea category or changing the IDs in some way, etc. However, let's say that in the future the backend team decides to add a "Type Code" to the tea category that does a better job of mapping this tea to an image within your system, you only have to go to this service to make that change.
@@ -195,20 +190,20 @@ At this point, we should create a `src/composables/__mocks__/tea.ts` as well. Yo
 
 ## Update the Tea List Page
 
-Now that we have this put together, we can update the `TeaList` page to show the actual teas from our API rather than the hard coded teas that are being displayed right now. Open the `src/views/TeaListPage.vue` and `tests/unit/views/TeaListPage.spec.ts` files in your editor.
+Now that we have this put together, we can update the `TeaList` page to show the actual teas from our API rather than the hard coded teas that are being displayed right now. Open the `src/views/TeaListPage.vue` and `src/views/__tests__/TeaListPage.spec.ts` files in your editor.
 
 ### Modify the Test
 
 Modify the test first. Since we are not changing anything about how the page works, but are only changing the source of our data, we need to modify the test to make sure the new data source has data in it. We will:
 
-- Import the mock of the composition function we just created. Note that jest hoists the `jest.mock('@/composables/tea')`, which is why that can be _after_ the actual import.
+- Import the mock of the composition function we just created. Note that vitest hoists the `vi.mock('@/composables/tea')`, which is why that can be _after_ the actual import.
 - Get the `teas` array from it.
 - Set the `value` of the `teas` array.
 
 ```typescript
 import { useTea } from '@/composables/tea';
 ...
-jest.mock('@/composables/tea');
+vi.mock('@/composables/tea');
   ...
 describe('TeaListPage.vue', () => {
   const { teas } = useTea();
@@ -219,7 +214,7 @@ describe('TeaListPage.vue', () => {
       // Copy the tea data for seven of the teas from the `TeaListPage.vue` file to here.
       // Only seven because we have our "with a list of seven teas" test group.
     ];
-    jest.clearAllMocks();
+    vi.resetAllMocks();
   });
   ...
 });
@@ -261,7 +256,7 @@ Let's attack the view code in a methodic, orderly fashion.
 1. Modify the `teaRows` computed value to use `teas` rather than `teaData`
 1. Remove the hard coded `teaData`
 
-At this point, the old styled `computed:` and `data()` sections should be gone, and all of the logic to fetch our teas and transform the array into a matrix should be contained within our `setup()` routine. All of our tests should be passing, and when we run the code in the browser we should see eight teas displayed.
+All of our tests should be passing, and when we run the code in the browser we should see eight teas displayed.
 
 ## Conclusion
 
