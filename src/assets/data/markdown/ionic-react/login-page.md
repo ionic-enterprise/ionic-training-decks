@@ -16,10 +16,13 @@ Start by writing unit tests for a new page. We'll want to create tests that veri
 Create a file `src/login/LoginPage.test.tsx` and add the following tests:
 
 ```tsx
-import { render, screen } from '@testing-library/react';
+import { vi } from 'vitest';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import LoginPage from './LoginPage';
 
 describe('<LoginPage />', () => {
+  beforeEach(() => vi.clearAllMocks());
+
   it('renders consistently', () => {
     const { asFragment } = render(<LoginPage />);
     expect(asFragment()).toMatchSnapshot();
@@ -237,20 +240,29 @@ const {
 } = useForm<LoginInputs>({ mode: 'onTouched', resolver: yupResolver(validationSchema) });
 ```
 
-<!-- EH 4/7/23 - Uncomment when unit tests are figured out. Issue: button doesn't set disabled = true.
-
 Let's write unit tests that define when the button should be enabled or disabled. Add the following `describe()` block under the existing unit tests.
 
 ```tsx
 describe('sign in button', () => {
-  it('starts disabled', () => {});
-  it('is disabled with just an email address', () => {});
-  it('is disabled with just a password', () => {});
-  it('is enabled with both an email address and password', () => {});
+  it('starts disabled', async () => {
+    render(<LoginPage />);
+    const button = await waitFor(() => screen.getByText('Sign In') as HTMLIonButtonElement);
+    expect(button.disabled).toBeTruthy();
+  });
+
+  it('is enabled once valid data is entered', async () => {
+    render(<LoginPage />);
+    const button = await waitFor(() => screen.getByText('Sign In') as HTMLIonButtonElement);
+    const password = await waitFor(() => screen.getByLabelText('Password'));
+    const email = await waitFor(() => screen.getByLabelText('Email Address'));
+    expect(button.disabled).toBeTruthy();
+    await waitFor(() => fireEvent.input(email, { target: { value: 'test@test.com' } }));
+    expect(button.disabled).toBeTruthy();
+    await waitFor(() => fireEvent.input(password, { target: { value: 'password' } }));
+    expect(button.disabled).toBeFalsy();
+  });
 });
 ```
-
--->
 
 Finally, add logic to determine whether or not the "sign in" button should be disabled.
 
@@ -262,19 +274,36 @@ Finally, add logic to determine whether or not the "sign in" button should be di
 
 Logic is in place to keep users from pressing the "sign in" button if they don't provide a valid email address or password, but we don't yet have a way to present that information to the user.
 
-<!-- Unit tests
-
 First add unit tests that test the error messages we want to display to users. Add the following `describe()` block within the component's describe block.
 
 ```tsx
 describe('error messages', () => {
-  it('displays an error if the e-mail address is dirty and empty', async () => {});
-  it('displays an error if the email address has an invalid format', async () => {});
-  it('displays an error message if the password is dirty and empty', async () => {});
+  it('displays an error if the e-mail address is dirty and empty', async () => {
+    render(<LoginPage />);
+    const email = await waitFor(() => screen.getByLabelText('Email Address'));
+    await waitFor(() => fireEvent.input(email, { target: { value: 'test@test.com' } }));
+    await waitFor(() => fireEvent.blur(email));
+    await waitFor(() => fireEvent.input(email, { target: { value: '' } }));
+    await waitFor(() => expect(screen.getByText(/Email address is a required field/)).toBeInTheDocument());
+  });
+
+  it('displays an error if the email address has an invalid format', async () => {
+    render(<LoginPage />);
+    const email = await waitFor(() => screen.getByLabelText('Email Address'));
+    await waitFor(() => fireEvent.input(email, { target: { value: 'test' } }));
+    await waitFor(() => fireEvent.blur(email));
+    await waitFor(() => expect(screen.getByText(/Email address must be a valid email/)).toBeInTheDocument());
+  });
+
+  it('displays an error message if the password is dirty and empty', async () => {
+    render(<LoginPage />);
+    const password = await waitFor(() => screen.getByLabelText('Password'));
+    await waitFor(() => fireEvent.input(password, { target: { value: '' } }));
+    await waitFor(() => fireEvent.blur(password));
+    await waitFor(() => expect(screen.getByText(/Password is a required field/)).toBeInTheDocument());
+  });
 });
 ```
-
--->
 
 `IonInput` allows us to supply helper and error text inside of an input! Let's update our component template:
 
