@@ -212,8 +212,6 @@ Before we proceed, we'll need a mock for our `useAuth()` hook. Create a file `sr
 ```typescript
 import { vi } from 'vitest';
 
-import { vi } from 'vitest';
-
 const login = vi.fn().mockResolvedValue(undefined);
 const logout = vi.fn().mockResolvedValue(undefined);
 
@@ -337,130 +335,110 @@ I leave it to you to pretty up the invalid error message styling. You can have a
 
 ## Handle the Logout
 
-We can log in, but what about logging out? For now, we will add that to the Tea page.
+We can log in, but what about logging out? For now, we will add that to the tea listing page.
 
-Let's add the actual button first. In `src/views/TeaList.vue` add the following markup within the `ion-toolbar` that is in the header:
+Let's add the actual button first. In `src/tea/TeaListingPage.tsx` add the following markup within the `IonToolbar` that is in the header:
 
-```html
-<ion-buttons slot="end">
-  <ion-button data-testid="logout-button" @click="logoutClicked">
-    <ion-icon slot="icon-only" :icon="logOutOutline"></ion-icon>
-  </ion-button>
-</ion-buttons>
+```tsx
+<IonButtons slot="end">
+  <IonButton data-testid="logout-button" onClick={() => handleLogout()}>
+    <IonIcon slot="icon-only" icon={logOutOutline} />
+  </IonButton>
+</IonButtons>
 ```
 
-Now we will need to go to the `script` tag and make some adjustments. Where we are doing the imports, add the following:
-
-- add `IonButton`, `IonButtons`, and `IonIcon` to the list of components being imported
-- add `import { logOutOutline } from 'ionicons/icons';`
-- add a shell `loginClicked()` function
+We need a shell `handleLogout()` function within the component definition:
 
 ```typescript
-const logoutClicked = async (): Promise<void> => {};
+const handleLogout = async (): Promise<void> => {};
 ```
 
-Now let's make that button actually do something. Specifically, let's make it log us out. First we will update the `TeaListPage` test to use a `mountView` function similar to the one we created in the `LoginPage` test. Be sure to also import and mock `@/composables/auth`.
+The sign out button should do the "inverse" of the sign in button:
 
-With those modifications in place, we can add the tests that express our current requirements:
+- It should call `logout` from the `useAuth` hook
+- It should navigate the user to the login page
+
+Like the test suite for the sign in button, we will need to state that we want to mock `AuthProvider` and `react-router` in `TeaListPage.test.tsx`:
 
 ```typescript
-it('performs a logout when the logout button is clicked', async () => {
-  const { logout } = useAuth();
-  const wrapper = await mountView();
-  const button = wrapper.find('[data-testid="logout-button"]');
-  router.replace = jest.fn();
-  await button.trigger('click');
-  expect(logout).toHaveBeenCalledTimes(1);
-});
+vi.mock('../auth/AuthProvider.tsx');
+vi.mock('react-router');
+```
 
-it('navigates to the login after the logout action is complete', async () => {
-  const wrapper = await mountView();
-  const button = wrapper.find('[data-testid="logout-button"]');
-  router.replace = jest.fn();
-  await button.trigger('click');
-  expect(router.replace).toHaveBeenCalledTimes(1);
-  expect(router.replace).toHaveBeenCalledWith('/login');
+Add the following describe block within the main `describe('<TeaListPage /')` block:
+
+```tsx
+describe('sign out button', () => {
+  it('performs a logout when clicked', async () => {
+    const { logout } = useAuth();
+    render(<TeaListPage />);
+    const button = screen.getByTestId('logout-button');
+    fireEvent.click(button);
+    await waitFor(() => expect(logout).toHaveBeenCalledTimes(1));
+  });
+
+  it('navigates to the login page', async () => {
+    const history = useHistory();
+    render(<TeaListPage />);
+    const button = screen.getByTestId('logout-button');
+    fireEvent.click(button);
+    await waitFor(() => expect(history.replace).toHaveBeenCalledTimes(1));
+    expect(history.replace).toHaveBeenCalledWith('/login');
+  });
 });
 ```
 
-Back in the view's code, fill out the logic for the `logoutClicked()` function that was created within the `script` section. **Hint:** you will need to import `useAuth` and use the `logout` function from it. You will also need to use `useRouter`. See the `LoginPage` page for examples.
+Fill out the logic for the `handleLogout()` function in `src/tea/TeaListPage.tsx`. If you get stuck, refer back to the "Handle the Login" section for examples.
 
 Test that out in the browser. The full flow should now work.
 
 ## Guard the Routes
 
-There are some routes within our app where we do not want to allow users to go unless they are logged in. Let's create a guard for that. All of this work will be done within `src/router/index.js`
+There are some routes within our app where we do not want to allow users to go unless they are logged in.
 
-First, let's write the guard itself. Add a `checkAuthStatus()` function to the top of the file, after the imports.
+Let's create a guard for that. Create a file `src/auth/PrivateRoute.tsx` and populate it with the code below.
 
-```typescript
-const { getSession } = useSession();
+```tsx
+import { ReactNode } from 'react';
+import { Redirect } from 'react-router';
+import { useAuth } from './AuthProvider';
 
-const checkAuthStatus = async (
-  to: RouteLocationNormalized,
-  from: RouteLocationNormalized,
-  next: NavigationGuardNext
-) => {
-  const session = await getSession();
-  if (!session && to.matched.some((r) => r.meta.requiresAuth)) {
-    return next('/login');
+type Props = { children?: ReactNode };
+
+export const PrivateRoute = ({ children }: Props) => {
+  const { isAuthenticated } = useAuth();
+
+  if (!isAuthenticated) {
+    return <Redirect to="/login" />;
   }
-  next();
+  return <>{children}</>;
 };
 ```
 
-You will need to add a couple of imports for this to compile:
+To apply the guard, we need to modify the way we declare the tea listing route in `App.tsx`:
 
-- Add: `import { useSession } from '@/composables/session';`
-- Add `RouteLocationNormalized` and `NavigationGuardNext` to the existing import from `vue-router`
-
-The guts of the `checkAuthStatus()` function are:
-
-- If we do not have a session, use `to.matched` to check each segment of the target route. If at least one segment in the route requires authentication redirect to the LoginPage page.
-- Otherwise (either we have a session, or no segments required authentication), continue to the next hook in the pipeline.
-
-Next, after we create the router, call the guard for each route change (code given in context, only add the appropriate line in your own code).
-
-```typescript
-const router = createRouter({
-  history: createWebHistory(process.env.BASE_URL),
-  routes,
-});
-
-router.beforeEach(checkAuthStatus);
-
-export default router;
+```diff
+<Route exact path="/tea">
++ <PrivateRoute>
+    <TeaListPage />
++ </PrivateRoute>
+</Route>
 ```
 
-Finally, mark the teas route as requiring authentication:
-
-```typescript
-  {
-    path: '/teas',
-    name: 'Teas',
-    component: TeaList,
-    meta: { requiresAuth: true },
-  },
-```
-
-At this point, if you logout and the try to manually go to either `http://localhost:8100/` or `http://localhost:8100/teas`, you should be redirected to the login page.
+At this point, if you logout and the try to manually go to either `http://localhost:8100/` or `http://localhost:8100/tea`, you should be redirected to the login page.
 
 ## Add Interceptors
 
-We need to intercept outgoing requests and add the token if we have one. We also need to take a look at responses coming back from the server, and if we get a 401 we need to clear our store state as it is invalid. Make the appropriate modifications to `src/composables/backend-api.ts`.
+Before we wrap up our authentication workflow, we'll need a way to intercept outgoing requests and add the session's token (if we have one). Make the appropriate modification to `src/api/backend-api.ts`:
 
 You will need to update the imports.
 
 ```typescript
 import axios, { InternalAxiosRequestConfig } from 'axios';
-
-import router from '@/router';
-import { useSession } from '@/composables/session';
-
-const { clearSession, getSession } = useSession();
+import { getSession } from './session-api';
 ```
 
-After the client is created, but before the module is exported, you will need to add the interceptors.
+After the client is created, but before the module is exported, you will need to add the interceptor:
 
 ```typescript
 client.interceptors.request.use(async (config: InternalAxiosRequestConfig) => {
@@ -470,21 +448,13 @@ client.interceptors.request.use(async (config: InternalAxiosRequestConfig) => {
   }
   return config;
 });
-
-client.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (error.response.status === 401) {
-      clearSession().then(() => router.replace('/login'));
-    }
-    return Promise.reject(error);
-  }
-);
 ```
+
+<!-- TODO: Clear session and redirect to login on 401 errors -->
 
 ## Linting
 
-We have been developing for a bit now, but have not run `lint` at all (though to be fair, Vue's build process does this for us). I suggest running lint early and often. At the very least, before any commit to `main` (or `master`) we should run `lint` and clean up any issues in our code. Let's do that now:
+We have been developing for a bit now, but have not run `lint` at all (though to be fair, Vite's build process does this for us). I suggest running lint early and often. At the very least, before any commit to `main` (or `master`) we should run `lint` and clean up any issues in our code. Let's do that now:
 
 ```bash
 npm run lint
