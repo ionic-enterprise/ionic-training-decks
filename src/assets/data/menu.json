@@ -142,24 +142,20 @@
               "file": "auth-workflow"
             },
             {
-              "title": "Authentication",
-              "file": "auth"
+              "title": "Load the Teas",
+              "file": "load-teas"
             },
             {
-              "title": "Get Data",
-              "file": "get-data"
-            },
-            {
-              "title": "Use the Data",
-              "file": "use-data"
-            },
-            {
-              "title": "Details Page",
+              "title": "Tea Details Page",
               "file": "details-page"
             },
             {
               "title": "Reusable Component",
               "file": "reusable-component"
+            },
+            {
+              "title": "Store the Tea Rating",
+              "file": "store-the-tea-rating"
             },
             {
               "title": "Tabbed Navigation",
