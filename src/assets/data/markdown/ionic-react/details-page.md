@@ -1,40 +1,42 @@
 # Lab: Tea Details Page
 
-In this lab, you will learn how to:
+In this lab, you will:
 
-- Use path parameters to create dynamic routes
-- Leverage path parameters within components
+- Add a child page to the application
+- Set up navigation to and from the child page.
 
 ## Overview
 
-The Ionic Framework supports the common mobile paradigm of stacked navigation, where one page is logically displayed over the top of another page. In this lab we will see that paradigm in action by creating a simple "details" page for each of our teas. This page will start simple, but we will add more information to it later.
+Ionic supports the common mobile paradigm of stacked navigation, where one page is logically displayed over the top of another page. In this lab we will see that paradigm in action by creating a simple "details" page for each of our teas. This page will start simple, but we will add more information to it later.
 
-## Create the Files
+## Starting Code
 
-Create a new folder in `src/tea` named `details`. Within `src/tea/details` create two files: `TeaDetailsPage.tsx` and `TeaDetailsPage.test.tsx`.
+Let's start with some fairly boilerplate starting code for a page.
 
-Let's fill the files in with some shell code:
-
-**`src/tea/details/TeaDetailsPage.test.tsx`**
+First the test in `src/tea/TeaDetailsPage.test.tsx`:
 
 ```tsx
-import { render } from '@testing-library/react';
+import { vi } from 'vitest';
+import { render, screen } from '@testing-library/react';
 import TeaDetailsPage from './TeaDetailsPage';
 
 describe('<TeaDetailsPage />', () => {
-  it('displays the header', () => {
-    const { container } = render(<TeaDetailsPage />);
-    expect(container).toHaveTextContent(/Details/);
-  });
+  beforeEach(() => vi.clearAllMocks());
 
   it('renders consistently', () => {
     const { asFragment } = render(<TeaDetailsPage />);
     expect(asFragment()).toMatchSnapshot();
   });
+
+  it('displays the title', () => {
+    const { baseElement } = render(<TeaDetailsPage />);
+    const titleELements = baseElement.querySelectorAll('ion-title');
+    expect(titleELements).toHaveLength(1);
+  });
 });
 ```
 
-**`src/tea/details/TeaDetailsPage.tsx`**
+Then the page itself in `src/tea/TeaDetailsPage.tsx`:
 
 ```tsx
 import { IonContent, IonHeader, IonPage, IonTitle, IonToolbar } from '@ionic/react';
@@ -44,191 +46,224 @@ const TeaDetailsPage: React.FC = () => {
     <IonPage>
       <IonHeader>
         <IonToolbar>
-          <IonTitle>Details</IonTitle>
+          <IonTitle>Tea Details</IonTitle>
         </IonToolbar>
       </IonHeader>
-      <IonContent>
-        <IonHeader collapse="condense">
-          <IonToolbar>
-            <IonTitle size="large">Details</IonTitle>
-          </IonToolbar>
-        </IonHeader>
-      </IonContent>
+      <IonContent></IonContent>
     </IonPage>
   );
 };
 export default TeaDetailsPage;
 ```
 
-## Adding the Details Route
+## Navigating
 
-Head over to `App.tsx`. We need to add an additional route inside our `<IonRouterOutlet>`, after the tea route and before the `/` route:
+Now that we have a details page, let's set up the navigation to the page and then back again. The first thing we should do is set up the route to the page. From a URL perspective, it makes sense that the page should be a child to the `/tea` route. Also, since we will be displaying a particular tea it makes sense that the tea's ID should be part of the route. Add a route in `App.tsx`. It will be similar to the existing `/tea` route with the following differences:
 
-**`src/App.tsx`**
+- The path will be `/tea/:id`.
+- `<TeaDetailsPage />` will be the component rendered within `TeaProvider`.
 
-```tsx
-...
-<IonRouterOutlet>
- ...
-  <Route path="/tea/details/:id">
-    <PrivateRoute>
-      <TeaDetailsPage />
-    </PrivateRoute>
-  </Route>
-...
-</IonRouterOutlet>
-...
-```
+**Note:** we do now have two different tea contexts, which defeats the purpose of why we created `TeaProvider` in the first place. This will be fixed in a couple of labs from now.
 
-With a little URL hacking you should be able to navigate to this page, but you will need to supply an ID like this: `/tea/details/1`. Pretty neat!
-
-## Update the Teas page
-
-The tea category detail route has been defined but our application has no idea how to navigate to it. So let's add the child page to the application's routing flow by navigating the user to the child page upon clicking one of the tea category cards.
-
-Modify the `<IonCard>` component in `TeaPage.tsx` by adding the following props:
-
-**`src/tea/TeaPage.tsx`**
+We want to navigate from the `TeaListPage` page to the `TeaDetailsPage` page. A logical choice for the trigger is to use a click on the tea's card to start the navigation. Let's write a test for that in `src/tea/TeaListPage.test.tsx`.
 
 ```tsx
-<IonCard button onClick={() => navToDetailsPage(tea.id)}>
+it('navigates to the details page when a tea card is clicked', async () => {
+  const history = useHistory();
+  const { baseElement } = render(<TeaListPage />);
+  const cards = baseElement.querySelectorAll('ion-card');
+  fireEvent.click(cards[3]);
+  await waitFor(() => expect(history.push).toHaveBeenCalledTimes(1));
+  expect(history.push).toHaveBeenCalledWith('/tea/4');
+});
 ```
 
-The `button` prop which adds some styling to the card, making it behave in a "clickable" fashion.
+The `react-router` mock (located in `__mocks__/react-router.ts`) needs to be updated to spy on `history.push`:
 
-Next let's define `navToDetailsPage()`. Add the following function:
+```diff
+  import { vi } from 'vitest';
+
+  const replace = vi.fn();
++ const push = vi.fn();
++ const useHistory = vi.fn().mockReturnValue({ replace, push });
+
+  export { useHistory };
+```
+
+Based on how we have the test set up, we know we should have seven `ion-card` elements, and we know what order they will be displayed in since we are controlling the state in the `beforeEach` block. Our test triggers a click on the 4th card and expects the proper `history.push()` call to occur.
+
+**Note:** you may need to adjust the list a bit based on exactly what your data looks like.
+
+Now that we have a failing test, let's make that click occur in the `src/tea/TeaListPage.tsx` file.
+
+```tsx
+<IonCard onClick={() => history.push(`/tea/${tea.id}`)}>
+```
+
+If we click on that, we get to the details page, but we have no way to get back. Let's fix that now. Add the following markup to the `TeaDetailsPage.tsx` file. Add it within the `IonToolbar`.
+
+```tsx
+<IonButtons slot="start">
+  <IonBackButton />
+</IonButtons>
+```
+
+Be sure to update your imports as we continue.
+
+Now when we navigate from the `TeaListPage` page to the `TeaDetailPage` page, the current `IonRouterOutlet` creates a navigation stack and knows that we have a page to go back to. Therefore, it renders a back button in the toolbar for us (remember, iOS has no hardware back button so you need to deal with this in software).
+
+What happens if we refresh while we are on the details page? We no longer have the back button because there is no stack, only this page. However, we know we want to go to the `TeaListPage` page, so we can set a default on the back button:
+
+```tsx
+<IonBackButton defaultHref="/tea" />
+```
+
+Try reloading the details page again. There are two real-world scenarios where you will need to take something like this into account:
+
+- You are deploying to the web
+- You are deploying natively but allowing deep linking to the child page
+
+In other cases this is less important because you should always have a valid navigation stack.
+
+## Displaying the Tea
+
+Now that we have the navigation in place, let's grab the tea and display it.
+
+### Create the Tests
+
+First we need to figure out what our test setup in `src/tea/TeaDetailsPage.test.tsx` should look like. We know that we will need to do the following in the code:
+
+- Get the `id` parameter from our route.
+- Get the list of teas from our `useTea()` hook.
+- Bind the proper tea to the component.
+
+The mock for `react-router` needs to be updated to mock a new hook we'll be using from the package, `useParams`. Update `__mocks__/react-router.ts`:
+
+```diff
+  import { vi } from 'vitest';
+
+  const replace = vi.fn();
+  const push = vi.fn();
+  const useHistory = vi.fn().mockReturnValue({ replace, push });
++ const useParams = vi.fn().mockReturnValue({ id: '3' });
+
++ export { useHistory, useParams };
+```
+
+Next, we need to configure the tea data so the computed value can be testable. This involves the following steps in `src/tea/TeaDetailsPage.test.tsx`:
+
+Importing the `useTea` and `useParam` hooks.
 
 ```typescript
-const navToDetailsPage = (id: number) => {
-  history.push(`/tea/details/${id}`);
-};
-```
-
-Notice that we're calling `history.push()` whereas we've seen `history.replace()`. When signing a user in or signing a user out, we want to replace the entire history stack (so they can't go back to an invalid application state). In this case however, we want to push a new route onto the stack so the application user can go back to our tea page if they desire.
-
-Now when we click on a card we should go to the tea category detail page and the path should include the ID of the specific tea category.
-
-## The Tea Details Page
-
-### Reading the ID Parameter
-
-We need a way to fetch the `:id` path parameter so that our child page can retrieve information for the correct tea category. We can grab this using React Router's `useParams` hook.
-
-Open `TeaDetailsPage.tsx` and make the following adjustments:
-
-**`src/tea/details/TeaDetailsPage.tsx`**
-
-```tsx
-import { ... } from '@ionic/react';
+import { useTea } from './TeaProvider';
 import { useParams } from 'react-router';
-
-const TeaDetailsPage: React.FC = () => {
-  const { id } = useParams<{ id: string }>();
-
-  return (
-   ...
-  );
-};
-export default TeaDetailsPage;
 ```
 
-Now that we know how the `useParams()` hook works, let's go ahead and mock it in our test file:
-
-**`src/tea/details/TeaDetailsPage.test.tsx`**
+Mocking their implementation.
 
 ```typescript
-...
-jest.mock('react-router', () => ({
-  useParams: () => ({
-    id: 1,
-  }),
-}));
+vi.mock('../tea/TeaProvider');
+vi.mock('react-router');
+```
 
-describe('<TeaDetailsPage />', () => {
-  ...
+And modifying the `beforeEach()` block that sets up the data and the mocks.
+
+```typescript
+beforeEach(() => {
+  (useParams as Mock).mockReturnValue({ id: '3' });
+  (useTea as Mock).mockReturnValue({
+    teas: teas: [
+      {
+        id: 1,
+        name: 'Green',
+        image: '/assets/images/green.jpg',
+        description: 'Green tea description.',
+      },
+      {
+        id: 2,
+        name: 'Black',
+        image: '/assets/images/black.jpg',
+        description: 'Black tea description.',
+      },
+      {
+        id: 3,
+        name: 'Herbal',
+        image: '/assets/images/herbal.jpg',
+        description: 'Herbal infusions description.',
+      },
+      {
+        id: 4,
+        name: 'Oolong',
+        image: '/assets/images/oolong.jpg',
+        description: 'Oolong tea description.',
+      },
+    ],
+  });
+  vi.clearAllMocks();
 });
 ```
 
-### Navigating Back
-
-We also need a way for application users to navigate back, otherwise our application users will be stuck (unless they are on a device that has a back button)! Let's fix that:
-
-1. Go to the <a href="https://ionicframework.com/docs/api/back-button" target="_blank">IonBackButton documentation</a>
-2. Take a look at the React Usage example, the first one is marked "Default back button"
-3. **Challenge:** Try adding the appropriate mark-up from there to `<TeaDetailsPage />`.
-
-If you were already on the child page when you did this, then you did not see a back button. This is because when the page refreshed, the navigation stack was destroyed. If your app needs to still display the back button even if there is no navigation stack (for example, if you are going to deploy to the web where someone _could_ directly go to the tea category details page via a link), use the `defaultHref` property.
-
-### Displaying the Data
-
-We know that we want to fetch the details of the tea with the ID specified in our URL path. We also know that we can use `useEffect()` to run logic when state changes; therefore we should write a `useEffect()` that fetches the details of a tea when `id` changes:
-
-**`src/tea/details/TeaDetailsPage.tsx`**:
+Now that we are set up to get data, let's add a couple of tests. These tests show that we get the correct data and that we then display the correct data within the correct element in the DOM.
 
 ```tsx
-import { ... } from '@ionic/react';
-...
+it('renders the tea name', () => {
+  render(<TeaDetailsPage />);
+  expect(screen.getByTestId('name')).toHaveTextContent('Herbal');
+});
 
-const TeaDetailsPage: React.FC = () => {
-   const { id } = useParams<{ id: string }>();
-  const { teas } = useTea();
-  const [tea, setTea] = useState<Tea | undefined>(undefined);
-
-  useEffect(() => {
-    setTea(teas.find((t) => t.id === parseInt(id, 10)));
-  }, [id, teas]);
-
-  return (
-    ...
-  );
-};
-export default TeaDetailsPage;
-```
-
-We'll also need to mock the `useTea()` hook within our tests:
-
-**`src/tea/details/TeaDetailsPage.test.tsx`**
-
-```typescript
-...
-const mockTeas = expectedTeas;
-jest.mock('react-router', () => ({
-  useParams: () => ({ id: 1 }),
-}));
-jest.mock('../TeaProvider', () => ({
-  useTea: () => ({ teas: mockTeas }),
-}));
-...
-```
-
-Once complete, let's write some additional unit tests to ensure that the content we want to display properly renders in our tea details page:
-
-```typescript
-describe('<TeaDetailsPage />', () => {
-  ...
-  it('renders the tea name', () => {
-    const { container } = render(<TeaDetailsPage />);
-    expect(container).toHaveTextContent(mockTeas[0].name);
-  });
-
-  it('renders the tea description', () => {
-    const { container } = render(<TeaDetailsPage />);
-    expect(container).toHaveTextContent(mockTeas[0].description);
-  });
+it('renders the tea description', () => {
+  render(<TeaDetailsPage />);
+  expect(screen.getByTestId('description')).toHaveTextContent('Herbal infusions description.');
 });
 ```
 
-Add the following markup right before the closing `</IonContent>` tag:
+### Update the View
+
+Within `src/tea/TeaDetailsPage.tsx` we need to import the following:
+
+```typescript
+import { useTea } from './TeaProvider';
+import { useParams } from 'react-router';
+import { Tea } from '../models';
+```
+
+We need to get the `id` parameter from the route, which we can do with the `useParams` hook and the list of `teas` from the `useTea` hook. Once we have those, we can create a computed property that grabs the correct tea according to the id in the route.
+
+Add the following code within the `TeaDetailsPage` component definition:
+
+```typescript
+const { id } = useParams<{ id: string }>();
+const { teas } = useTea();
+const tea: Tea | undefined = teas.find((t) => t.id === parseInt(id, 10));
+```
+
+Now we can add some tea-specific markup to the component template. Add this inside `IonContent`. Also, add the `ion-padding` class to `IonContent`.
 
 ```tsx
-<div className="ion-padding">
-  <div className="ion-justify-content-center">
-    <IonImg src={tea?.image} />
-  </div>
-  <h1>{tea?.name}</h1>
-  <p>{tea?.description}</p>
-</div>
+{
+  tea && (
+    <div>
+      <div className="ion-justify-content-center" style={{ display: 'flex' }}>
+        <IonImg src={tea.image} />
+      </div>
+      <h1 data-testid="name">{tea.name}</h1>
+      <p data-testid="description">{tea.description}</p>
+    </div>
+  );
+}
 ```
+
+At this point, your tests should be passing.
+
+We should also style that image just a tad to make sure it is not too big:
+
+```tsx
+<IonImg src={tea.image} style={{ maxWidth: '75%', maxHeight: '512px' }} />
+```
+
+I'm using inline CSS throughout this component, but it would be best practice to extract any inline CSS into CSS classes in a local CSS file (`TeaDetailsPage.css`). I leave that exercise up to you.
+
+That completes our details page. Try it out in the browser and make sure everything works well. Try different mobile footprints via the DevTools as well.
 
 ## Conclusion
 
