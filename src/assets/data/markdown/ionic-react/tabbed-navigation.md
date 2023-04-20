@@ -2,87 +2,67 @@
 
 In this lab you will:
 
-- Scaffold additional application pages
-- Create a tab-based navigation component and add it to your application
+- Create some shell pages
+- Create a tabbed navigation page and add it to your application
 - Rework the routing so the pages draw in the router outlet for the tabs
 
-## Overview
+## Create New Pages
 
-Tabs are one of two very common navigation styles within mobile applications. The other is side-menu navigation. A tabs navigation page will have a row of tabs either at the top or the bottom of the page.
-
-This application will have a small number of distinct pages, so tab-based navigation makes the most sense.
-
-## Pre-Work
-
-### Create Additional Pages
-
-If we are going to have multiple tabs, we are going to need places to navigate to. Add two new folders, `src/about` and `src/tasting-notes`.
-
-Within `src/about` add two new files: `AboutPage.tsx` and `AboutPage.test.tsx`.
-
-**`src/about/AboutPage.tsx`**
+If we are going to have multiple tabs, we are going to need a place to navigate to. For now, we will just navigate to some blank starter pages. Let's create those now. Add two files: `src/about/AboutPage.tsx` and `src/notes/TastingNotesPage.tsx`. The contents of these files should look like this:
 
 ```tsx
-import { IonPage, IonHeader, IonTitle, IonToolbar, IonContent } from '@ionic/react';
+import { IonContent, IonHeader, IonPage, IonTitle, IonToolbar } from '@ionic/react';
 
 const AboutPage: React.FC = () => {
   return (
     <IonPage>
       <IonHeader>
         <IonToolbar>
-          <IonTitle>About</IonTitle>
+          <IonTitle>About Page</IonTitle>
         </IonToolbar>
       </IonHeader>
-      <IonContent>
-        <IonHeader collapse="condense">
-          <IonToolbar>
-            <IonTitle size="large">About</IonTitle>
-          </IonToolbar>
-        </IonHeader>
-      </IonContent>
+      <IonContent></IonContent>
     </IonPage>
   );
 };
 export default AboutPage;
 ```
 
-**`src/about/AboutPage.test.tsx`**
+Adjust the component name and the title based on the page. Do not worry about adding routes for these pages yet; we will address that in a bit.
+
+Add a couple of simple tests for the pages that were just created using the same naming convention we have been using already. Use the following as a template:
 
 ```tsx
 import { render } from '@testing-library/react';
 import AboutPage from './AboutPage';
 
 describe('<AboutPage />', () => {
+  it('renders without crashing', () => {
+    const { baseElement } = render(<AboutPage />);
+    expect(baseElement).toBeDefined();
+  });
+
   it('renders consistently', () => {
     const { asFragment } = render(<AboutPage />);
-    expect(asFragment).toMatchSnapshot();
+    expect(asFragment()).toMatchSnapshot();
   });
 });
 ```
 
-Now create two new files within `src/tasting-notes`: `TastingNotesPage.tsx` and `TastingNotesPage.test.tsx` and shell out these files the way we did for the about page. The page's component name should be `TastingNotesPage`.
+## Tabs
 
-## Tab-Based Navigation
+Tabs are one of two very common navigation paradigms within mobile applications. The other is side-menu navigation. A tabs navigation page will have a row of tabs either at the top or the bottom of the page. Each tab will contain a set of stacked pages. We have the stacked paradigm right now with the tea details page rendering stacked on top of the tea listing page. This same idea carries over to tabbed navigation -- only each tab will have its own stack.
 
-We can leverage the `<IonTabs />` component in such a way that will define the routes that belongs to it's tabs and create the look-and-feel of the tab bar:
+This application will have a small number of distinct sections, so tabs make the most sense.
 
-```tsx
-<IonTabs>
-  <IonRouterOutlet>{/* Routes defined here */}</IonRouterOutlet>
-  <IonTabBar>{/* Tabs UI defined here */}</IonTabBar>
-</IonTabs>
-```
+### Lay Out the Tabs Page
 
-Take a moment to look at the <a href="https://ionicframework.com/docs/api/tabs" target="_blank">Ionic Tabs documentation</a> and familiarize yourself with the components used in the creation of a tab bar.
-
-Create a new file `src/Tabs.tsx` and fill it in with the following code:
-
-**`src/Tabs.tsx`**
+Create a `src/Tabs.tsx` file with the following contents:
 
 ```tsx
-import React from 'react';
-import { Redirect, Route, useRouteMatch } from 'react-router';
-import { IonRouterOutlet, IonTabBar, IonTabs } from '@ionic/react';
+import { IonIcon, IonLabel, IonRouterOutlet, IonTabBar, IonTabButton, IonTabs } from '@ionic/react';
+import { useRouteMatch } from 'react-router';
+import { documentText, informationCircle, leaf } from 'ionicons/icons';
 
 const Tabs: React.FC = () => {
   const { url } = useRouteMatch();
@@ -90,21 +70,44 @@ const Tabs: React.FC = () => {
   return (
     <IonTabs>
       <IonRouterOutlet></IonRouterOutlet>
-      <IonTabBar slot="bottom"></IonTabBar>
+
+      <IonTabBar slot="bottom">
+        <IonTabButton tab="tea" href={`${url}/tea`}>
+          <IonIcon icon={leaf} />
+          <IonLabel>Tea</IonLabel>
+        </IonTabButton>
+        <IonTabButton tab="tasting-notes" href={`${url}/tasting-notes`}>
+          <IonIcon icon={documentText} />
+          <IonLabel>Tasting Notes</IonLabel>
+        </IonTabButton>
+        <IonTabButton tab="about" href={`${url}/about`}>
+          <IonIcon icon={informationCircle} />
+          <IonLabel>About</IonLabel>
+        </IonTabButton>
+      </IonTabBar>
     </IonTabs>
   );
 };
 export default Tabs;
 ```
 
-### Routes
+This page will be rendered with a row of tabs on the bottom of the page. The top portion of the page contains a router outlet that will be used to render the pages displayed by the individual tabs.
 
-Open `App.tsx` and replace the routes inside `<IonRouterOutlet>` with the following:
+### Update the Main Router Outlet
+
+Our application now has two router outlets. The tab router outlet is nested within the outlet defined in `src/App.tsx`. Since we want to dedicate one of our application's tabs to the tea stack we've created, we no longer need them in the "main" router outlet.
+
+Our "main" router outlet will consist of:
+
+- The login page
+- The tabs page
+- A redirect to the tabs page from the root path (`/`)
+
+Any other pages we've built in the app will reside within the tab router outlet.
+
+Remove the existing `<Route />` definitions for the `/tea` and `/tea/:id` paths. In their place, add the following route definition:
 
 ```tsx
-<Route exact path="/login">
-  <LoginPage />
-</Route>
 <Route path="/tabs">
   <PrivateRoute>
     <TeaProvider>
@@ -112,88 +115,71 @@ Open `App.tsx` and replace the routes inside `<IonRouterOutlet>` with the follow
     </TeaProvider>
   </PrivateRoute>
 </Route>
-<Route exact path="/">
-  <Redirect to="/login" />
-</Route>
 ```
 
-Remove `<TeaProvider />` from `App.tsx`. We will move it into `<Tabs />`.
+With this change, all routes residing within the tab router outlet are private and have access to the tea context. Nice!
 
-Sign out of the application if you are signed in. Replace the `/login` portion of the URL so that it is just `/` (our default route). Sign in, then change the URL so that the path is `/tabs`. You should see any empty-ish screen.
+The final change to this router is to update the redirect for the root (`/`) path:
 
-We want to move all routes so that authenticated (protected) paths begin with `/tabs`:
+```diff
+- <Redirect to="/teas" />
++ <Redirect to="/tabs" />
+```
 
-- `/tea` becomes `/tabs/tea`
-- `/tea/details/:id` becomes `/tabs/tea/details/:id`
-- ...and so on
+### Update the Tab Router Outlet
 
-However, `/login` will remain `/login` (since the login page will not be accessible via the tab bar).
-
-Now open `Tabs.tsx` back up so we can add our tab-based routes. Place the following code inside `<IonRouterOutlet />`:
+Now open `src/Tabs.tsx`. The first thing we'll do is add back the routes we removed from the main router outlet:
 
 ```tsx
-<Route exact path={url}>
-  <Redirect to={`${url}/tea`} />
-</Route>
-<Route exact path={`${url}/tea`}>
-  <TeaPage />
-</Route>
-<Route path={`${url}/tea/details/:id`}>
-  <TeaDetailsPage />
-</Route>
-<Route exact path={`${url}/tasting-notes`}>
-  <TastingNotesPage />
-</Route>
-<Route exact path={`${url}/about`}>
-  <AboutPage />
-</Route>
+<IonRouterOutlet>
+  <Route exact path={`${url}/tea`}>
+    <TeaListPage />
+  </Route>
+  <Route exact path={`${url}/tea/:id`}>
+    <TeaDetailsPage />
+  </Route>
+  <Route exact path={url}>
+    <Redirect to={`${url}/tea`} />
+  </Route>
+</IonRouterOutlet>
 ```
 
-An Ionic Framework application can have multiple `<IonRouterOutlet />` components:
+The last route is another redirect, this time to redirect `/tabs` to `/tabs/tea`.
 
-- The `path` property is always absolute. It appears that we have have nested router outlets, but we still need to provide the full path.
-- `match.url` will return the current path. For our purposes, this will always be `/tabs`. However, if you change this value in `App.tsx` you won't need to change each route above.
-- When navigating from `/tabs/tea` to `/tabs/tea/details/:id` there will be an animation as if the navigation is stacked. When navigation from tab-to-tab there is no animation, just as you'd observe with natively built apps.
+Let's add two new route entries for our new pages:
 
-Oh yeah, we also added our new pages - and each route is protected!
-
-### Tab Bar
-
-Now it's time to fill out the `<IonTabBar />` component:
-
-**`src/Tabs.tsx`**
-
-```tsx
-<IonTabBar slot="bottom">
-  <IonTabButton tab="tea" href={`${url}/tea`}>
-    <IonIcon icon={leaf} />
-    <IonLabel>Tea</IonLabel>
-  </IonTabButton>
-  <IonTabButton tab="tasting-notes" href={`${url}/tasting-notes`}>
-    <IonIcon icon={documentText} />
-    <IonLabel>Tasting Notes</IonLabel>
-  </IonTabButton>
-  <IonTabButton tab="about" href={`${url}/about`}>
-    <IonIcon icon={informationCircle} />
-    <IonLabel>About</IonLabel>
-  </IonTabButton>
-</IonTabBar>
+```diff
++ <Route exact path={`${url}/about`}>
++   <AboutPage />
++ </Route>
++ <Route exact path={`${url}/tasting-notes`}>
++   <TastingNotesPage />
++ </Route>
+  <Route exact path={`${url}/tea`}>
+    <TeaListPage />
+  </Route>
+  <Route exact path={`${url}/tea/:id`}>
+    <TeaDetailsPage />
+  </Route>
+  <Route exact path={url}>
+    <Redirect to={`${url}/tea`} />
+  </Route>
 ```
 
-Our application now has tab-based navigation! Go ahead and switch back and forth between tabs.
+### Navigation Cleanup
 
-Click the tea tab and click any of the cards. Oops...
+You will have to modify a couple of the pages to compensate for the change:
 
-## Navigation Cleanup
+- In `src/tea/TeaListPage.test.tsx` find the "navigates to the details page when a tea card is clicked" test and change the expected route from `/tea/4` to `/tabs/tea/4` (the actual ID number may be different in your test).
+- Modify the code in `src/tea/TeaListPage.tsx` accordingly.
+- Modify the `defaultHref` for the back button in the `TeaDetailsPage` to be `/tabs/teas`.
 
-There's three places we need to cleanup navigation, it's not such a heavy lift.
+After making all of these modifications, try the navigation in your app. Examine the DOM with the DevTools and look for the tabs router outlet. Observe how the different pages are rendered within the DOM. Be sure to try this:
 
-1. Open `src/tea/TeaPage.tsx` and edit `/tea/details/${id}` to be `/tabs/tea/details/${id}`.
-2. Open `src/login/LoginPage.tsx` and edit `/tea` to be `/tabs`.
-3. Open `src/tea/details/TeaDetails.tsx` and edit `/tea` to be `/tabs/tea`.
-
-_Now_ we have fully functioning tab-based navigation!
+1. Click on a card in the Teas tab to open the Tea Details page.
+2. Click on the About or Tasting Notes tab.
+3. Click on the Tea tab again. Notice that the Tea Details page is still showing. Each tab has its own navigation stack, and the stack persists as you go from tab to tab.
 
 ## Conclusion
 
-Congratulations, you have just expanded your application to use tab-based routing! Next, we're going to implement the tasting notes feature.
+Congratulations, you have just expanded your application to use tabs based routing.
