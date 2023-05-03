@@ -1,29 +1,23 @@
 # Lab: Add the Notes Feature
 
-In this lab you will:
+In this lab, we will take what we have learned so far and add a whole new feature to our application. Specifically, we will add the "Tasting Notes" feature. In addition to exercising some skills we have already learned, we will also use some framework components we have not seen yet. These will include:
 
-- Take what you have learned so far and add a whole new feature
-- Use some Ionic Framework components we have not seen yet, including:
-- The modal overlay, various form elements, and the sliding IonItem
-
-## Overview
-
-Let's take what we've learned so far to add a whole new feature to our application. Specifically, we will add the "Tasting Notes" feature. In addition to exercising some skills we have already learned such as creating models, hooks, components, and pages, we will also use some Ionic Framework components we have not seen yet.
+- The modal overlay
+- Various form elements
+- The sliding `IonItem`
 
 ## Preliminary Items
 
-Before we move onto new stuff, there are a couple of preliminary items that we need to get out of the way first:
+There are a couple of preliminary items that we need to get out of the way first.
 
 - Create a data model
-- Create a hook that interacts with our back end service
+- Create a hook that performs HTTP requests
 
-These are a couple things we have done multiple times now, so I will just give you the code to move things along. If you are still unsure on these items though, please review the code that is provided here.
+Up to this point we've managed data within our application by tying a React Context and hook together so state and functionality can be shared between components. In the case of the tasting notes feature, we won't need to share state, so we are only going to build a hook.
 
-### The `TastingNote` Model
+### The `TastingNotes` Model
 
-Add the following shared model `TastingNote` and make sure to update the barrel file accordingly:
-
-**`src/shared/models/TastingNote.ts`**
+Add the following model in `src/models/TastingNote.ts` and make sure to update `src/models/index.ts` accordingly:
 
 ```typescript
 export interface TastingNote {
@@ -36,337 +30,331 @@ export interface TastingNote {
 }
 ```
 
-### Add Mock Data
+### The `useTastingNotes` hook
 
-Create a new folder `src/tasting-notes/__fixtures__` with a file `mockNotes.ts` within it.
+This is a review of skills we have already learned. As such, the next steps provide you with enough information to get started, but expect you to do the heavy lifting. Let's get started. Here is the starting point for both the test and the code.
 
-**`src/tasting-notes/__fixtures__/mockNotes.ts`**
+**`src/tasting-notes/useTastingNotes.test.tsx`**
 
 ```typescript
-import { TastingNote } from '../../shared/models';
+import { vi, Mock } from 'vitest';
+import { render, renderHook, waitFor } from '@testing-library/react';
+import { client } from '../api/backend-api';
+import { TastingNote } from '../models';
+import { useTastingNotes } from './useTastingNotes';
 
-export const mockNotes: TastingNote[] = [
-  {
-    id: 4,
-    brand: 'Lipton',
-    name: 'Yellow Label',
-    notes: 'Overly acidic, highly tannic flavor',
-    rating: 4,
-    teaCategoryId: 1,
-  },
-  {
-    id: 73,
-    brand: 'Bently',
-    name: 'Brown Label',
-    notes: 'Essentially OK',
-    rating: 3,
-    teaCategoryId: 2,
-  },
-  {
-    id: 42,
-    brand: 'Lipton',
-    name: 'Yellow Label',
-    notes: 'Overly acidic, highly tannic flavor',
-    rating: 1,
-    teaCategoryId: 3,
-  },
-];
-```
+vi.mock('../api/backend-api');
 
-### `<TastingNotesProvider />` Provider and Hook
+describe('useTastingNotes', () => {
+  let tastingNotes: TastingNote[];
 
-Add two files to `src/tasting-notes` - `TastingNotesProvider.tsx` and `TastingNotesProvider.test.tsx`.
+  const initializeTestData = () => {
+    tastingNotes = [
+      {
+        id: 1,
+        brand: 'Lipton',
+        name: 'Green',
+        notes: 'Bland and dull, but better than their standard tea',
+        rating: 2,
+        teaCategoryId: 1,
+      },
+      {
+        id: 3,
+        brand: 'Rishi',
+        name: 'Puer Tuo Cha',
+        notes: 'Earthy with a bold a full flavor',
+        rating: 5,
+        teaCategoryId: 6,
+      },
+      {
+        id: 42,
+        brand: 'Rishi',
+        name: 'Elderberry Healer',
+        notes: 'Elderberry and ginger. Strong and healthy.',
+        rating: 4,
+        teaCategoryId: 7,
+      },
+    ];
+  };
 
-**`src/tasting-notes/TastingNotesProvider.test.tsx`**
-
-```tsx
-import axios from 'axios';
-import { renderHook, act } from '@testing-library/react-hooks';
-import { TastingNotesProvider, useTastingNotes } from './TastingNotesProvider';
-import { mockNotes } from './__fixtures__/mockNotes';
-
-jest.mock('axios');
-var mockedAxios = axios as jest.Mocked<typeof axios>;
-jest.mock('../core/session/AuthInterceptorProvider', () => ({
-  useAuthInterceptor: () => ({ api: mockedAxios }),
-}));
-
-const wrapper = ({ children }: any) => <TastingNotesProvider>{children}</TastingNotesProvider>;
-
-describe('useTastingNotes()', () => {
-  describe('gets all notes', () => {
-    beforeEach(() => mockedAxios.get.mockResolvedValue({ data: mockNotes }));
-
-    it('GETs tasting notes from the backend', async () => {
-      const { result } = renderHook(() => useTastingNotes(), { wrapper });
-      await act(async () => await result.current.getNotes());
-      expect(mockedAxios.get).toHaveBeenCalledWith('/user-tasting-notes');
-    });
-
-    it('sets notes state', async () => {
-      const { result } = renderHook(() => useTastingNotes(), { wrapper });
-      await act(async () => await result.current.getNotes());
-      expect(result.current.notes).toEqual(mockNotes.reverse());
-    });
+  beforeEach(() => {
+    initializeTestData();
+    vi.resetAllMocks();
+    (client.get as Mock).mockResolvedValue({ data: tastingNotes });
   });
 
-  describe('delete a note', () => {
-    beforeEach(() => mockedAxios.delete.mockResolvedValue({}));
+  describe('refresh', () => {
+    it('gets the user tasting notes', async () => {});
 
-    it('DELETEs a single note', async () => {
-      const { result } = renderHook(() => useTastingNotes(), { wrapper });
-      await act(async () => await result.current.deleteNote(4));
-      expect(mockedAxios.delete).toHaveBeenCalledTimes(1);
-      expect(mockedAxios.delete).toHaveBeenCalledWith('/user-tasting-notes/4');
-    });
+    it('sets the notes data', async () => {});
   });
 
-  describe('save a note', () => {
-    beforeEach(() => mockedAxios.post.mockResolvedValue({}));
+  describe('merge', () => {
+    describe('a new note', () => {
+      let note: TastingNote = {
+        brand: 'Lipton',
+        name: 'Yellow Label',
+        notes: 'Overly acidic, highly tannic flavor',
+        rating: 1,
+        teaCategoryId: 3,
+      };
+    });
 
-    it('POSTs a single note', async () => {
-      const { result } = renderHook(() => useTastingNotes(), { wrapper });
-      await act(async () => await result.current.saveNote(mockNotes[0]));
-      expect(mockedAxios.post).toHaveBeenCalledTimes(1);
-      expect(mockedAxios.post).toHaveBeenCalledWith('/user-tasting-notes/42', mockNotes[0]);
+    describe('an existing note', () => {
+      let note: TastingNote = {
+        id: 1,
+        brand: 'Lipton',
+        name: 'Green Tea',
+        notes: 'Kinda like Lite beer. Dull, but well executed.',
+        rating: 3,
+        teaCategoryId: 1,
+      };
+    });
+
+    describe('remove', () => {
+      it('deletes the new note', async () => {
+        const { result } = renderHook(() => useTastingNotes());
+        await waitFor(() => result.current.refresh());
+      });
+
+      it('removes the note from the notes list', async () => {
+        const { result } = renderHook(() => useTastingNotes());
+        await waitFor(() => result.current.refresh());
+      });
     });
   });
-
-  afterEach(() => jest.restoreAllMocks());
 });
 ```
 
-**`src/tasting-notes/TastingNotesProvider.tsx`**
+**`src/tasting-notes/useTastingNotes.tsx`**
 
-```tsx
-import { createContext, useCallback, useContext, useEffect, useState } from 'react';
-import { useAuthInterceptor, useSession } from '../core/session';
-import { TastingNote } from '../shared/models';
-
-export const TastingNotesContext = createContext<{
-  notes: TastingNote[];
-  getNotes: () => Promise<void>;
-  deleteNote: (id: number) => Promise<void>;
-  saveNote: (note: TastingNote) => Promise<void>;
-}>({
-  notes: [],
-  getNotes: () => {
-    throw new Error('Method not implemented');
-  },
-  deleteNote: () => {
-    throw new Error('Method not implemented');
-  },
-  saveNote: () => {
-    throw new Error('Method not implemented');
-  },
-});
-
-export const TastingNotesProvider: React.FC = ({ children }) => {
-  const { session } = useSession();
-  const { api } = useAuthInterceptor();
-  const [notes, setNotes] = useState<TastingNote[]>([]);
-
-  useEffect(() => {
-    session === undefined && setNotes([]);
-  }, [session]);
-
-  const getNotes = useCallback(async () => {
-    const { data } = await api.get('/user-tasting-notes');
-    setNotes(data.reverse());
-  }, [api]);
-
-  const deleteNote = async (id: number): Promise<void> => {
-    await api.delete(`/user-tasting-note/${id}`);
-  };
-
-  const saveNote = async (note: TastingNote) => {
-    let url = `/user-tasting-notes`;
-    if (note.id) url += `/${note.id}`;
-    await api.post(url, note);
-  };
-
-  return (
-    <TastingNotesContext.Provider value={{ notes, getNotes, deleteNote, saveNote }}>
-      {children}
-    </TastingNotesContext.Provider>
-  );
-};
+```typescript
+import { useState } from 'react';
+import { client } from '../api/backend-api';
+import { TastingNote } from '../models';
 
 export const useTastingNotes = () => {
-  const { notes, getNotes, deleteNote, saveNote } = useContext(TastingNotesContext);
+  const [notes, setNotes] = useState<TastingNote[]>([]);
 
-  if (notes === undefined) {
-    throw new Error('useTastingNotes must be used within a TastingNotesProvider');
-  }
+  const merge = async (note: TastingNote): Promise<TastingNote> => {
+    return note;
+  };
 
-  return { notes, getNotes, deleteNote, saveNote };
+  const refresh = async (): Promise<void> => {};
+
+  const remove = async (note: TastingNote): Promise<void> => {};
+
+  return { notes, merge, refresh, remove };
 };
 ```
 
-Finally, wrap the `<TastingNotesPage />` component with the provider in `Tabs.tsx`:
+**`src/tasting-notes/__mocks__/useTastingNotes.tsx`**
 
-**`src/Tabs.tsx`**
+```typescript
+import { vi } from 'vitest';
 
-```tsx
-<Route exact path={`${url}/tasting-notes`}>
-  <TastingNotesProvider>
-    <TastingNotesPage />
-  </TastingNotesProvider>
-</Route>
+const merge = vi.fn().mockResolvedValue(undefined);
+const refresh = vi.fn().mockResolvedValue(undefined);
+const remove = vi.fn().mockResolvedValue(undefined);
+
+export const useTastingNotes = vi.fn(() => ({ notes: [], merge, refresh, remove }));
 ```
+
+#### `refresh`
+
+We have done something functionally similar to `refresh` in the `TeaProvider`, in the `loadTeas` function. The main difference here is that we will not be using a `useEffect` to automatically load our notes. Look at the tests and code for `loadTeas` and implement the tests and function.
+
+For the `refresh` function, the proper endpoint is `/user-tasting-notes`. THere is no need to transform the data, only to make sure `setNotes` is called to assign the data returned to `notes`.
+
+The code to satisfy the tests should be straight forward, but feel free to use the `src/tea/TeaProvider.tsx` code to help guide you.
+
+#### `merge`
+
+The `merge()` will either add a new note or update an existing note. This is determined by the existence or absence of an ID on the note object.
+
+When adding a new note, we need to:
+
+- Post to the `/user-tasting-notes` endpoint with a payload of the note.
+- That endpoint will return the posted object with the ID added. As such, we need to:
+  - Add that object to the `notes` array using `setNotes`.
+  - Return the new object.
+
+Add the following tests within the `describe('a new note')` section:
+
+```typescript
+beforeEach(() => (client.post as Mock).mockResolvedValue({ data: { id: 73, ...note } }));
+
+it('posts the new note', async () => {
+  const { result } = renderHook(() => useTastingNotes());
+  await waitFor(() => result.current.merge(note));
+  expect(client.post).toHaveBeenCalledTimes(1);
+  expect(client.post).toHaveBeenCalledWith('/user-tasting-notes', note);
+});
+
+it('resolves the saved note', async () => {
+  const { result } = renderHook(() => useTastingNotes());
+  const data = await waitFor(() => result.current.merge(note));
+  expect(data).toEqual({ id: 73, ...note });
+});
+
+it('adds the note to the notes list', async () => {
+  const { result } = renderHook(() => useTastingNotes());
+  await waitFor(() => result.current.refresh());
+  await waitFor(() => result.current.merge(note));
+  expect(result.current.notes).toHaveLength(4);
+  expect(result.current.notes[3]).toEqual({ id: 73, ...note });
+});
+```
+
+Write the code in the `merge()` function to support that.
+
+Updating a note is very similar:
+
+- POST to the `/user-tasting-notes/:id` endpoint with a payload of the note, where `:id` is the `note.id`.
+- That endpoint will return the posted object as save by the backend. As such, we need to:
+  - Update that object within the `notes` array (find the index of it by ID, then replace the object).
+  - Update the `notes` array to the updated array value by calling `setNotes()`.
+  - Return the new object.
+
+**Code Challenge:** your task is to:
+
+1. Using the `describe('a new note')` tests as a model, create a set of tests for the "update" requirements within `describe('an existing note')`.
+   1. The `beforeEach` sets up the mock to resolve to `{ data: note }`
+   1. The POST test posts to the `/user-tasting-notes/1` endpoint
+   1. The "resolves" test makes sure the `merge(note)` resolves to the `note`
+   1. The "adds a note" test becomes an "updates the note" test, so no note is added (the length of `notes.value` is still 3), but the proper note has been modified
+1. Update the `merge()` code accordingly.
+
+#### `remove`
+
+In order to remove a tasting note, we need to:
+
+- send a DELETE to the `/user-tasting-notes/:id` endpoint, where `:id` is the `note.id`. There is no payload for this.
+- Remove the note from the `notes.value` array.
+
+**Code Challenge:** your task is to:
+
+1. Add a `delete()` method to the `client` in the `backend-api.ts` mock file (Axios already supports this, we never had it in our mock because we did not need it yet).
+1. Fill out the tests for the `remove()` function.
+1. Add the code to the `remove()` function to satisfy these requirements
 
 ## Create the Editor Component
 
-Now we are getting into the new stuff. Back to the usual format. 🤓
+Now we are getting into newer territory. Namely creating a form component that will be used inside of an `IonModal`. As such, more details are provided here.
 
-Let's create a composite component that we can use to both create new tasting notes or update existing notes. This component will be created in the tasting notes feature folder since it is going to be specific to that feature of the application.
-
-Create a new folder inside of `src/tasting-notes` named `editor`. Create the following files in `src/tasting-notes/editor`: `TastingNoteEditor.tsx` and `TastingNoteEditor.test.tsx`.
-
-**`src/tasting-notes/editor/TastingNoteEditor.test.tsx`**
+Let's create a composite component that we can use to create new tasting notes or update existing notes. Create a file called `src/tasting-notes/TastingNoteEditor.tsx` with the following contents:
 
 ```tsx
-import { render } from '@testing-library/react';
-import TastingNoteEditor from './TastingNoteEditor';
+import { IonContent, IonHeader, IonTitle, IonToolbar } from '@ionic/react';
 
-describe('<TastingNoteEditor />', () => {
-  it('renders consistently', () => {
-    const { asFragment } = render(<TastingNoteEditor />);
-    expect(asFragment).toMatchSnapshot();
-  });
+type Props = { onDismiss: () => void };
 
-  afterEach(() => jest.restoreAllMocks());
-});
-```
-
-**`src/tasting-notes/editor/TastingNoteEditor.tsx`**
-
-```tsx
-import { IonContent, IonFooter, IonHeader, IonTitle, IonToolbar } from '@ionic/react';
-
-const TastingNoteEditor: React.FC = () => {
+export const TastingNoteEditor: React.FC<Props> = ({ onDismiss }) => {
   return (
     <>
       <IonHeader>
         <IonToolbar>
-          <IonTitle>Add New Tasting Note</IonTitle>
+          <IonTitle>Tasting Note Editor</IonTitle>
         </IonToolbar>
       </IonHeader>
-      <IonContent></IonContent>
-      <IonFooter></IonFooter>
+      <IonContent>
+        <p>Hello!!!</p>
+      </IonContent>
     </>
   );
 };
-export default TastingNoteEditor;
 ```
 
-### Editor Props
+Also create a `src/tasting-notes/TastingNoteEditor.test.tsx` file with the following contents:
 
-The tasting note editor will need to a couple of inputs:
-
-- A callback letting the parent component know that the user is ready to dismiss the editor
-- An optional `TastingNote` to fit the use-case where the user wants to edit an existing note
-
-Go ahead and add these props to our `TastingNoteEditor` component:
-
-**`src/tasting-notes/editor/TastingNoteEditor.tsx`**
-
-```tsx
-...
-import { TastingNote } from '../../shared/models';
-
-export interface TastingNoteEditorProps {
-  onDismiss: () => void;
-  note?: TastingNote;
-}
-
-const TastingNoteEditor: React.FC<TastingNoteEditorProps> = ({ onDismiss, note = undefined }) => {
-  return (
-    <>
-      ...
-    </>
-  );
-};
-export default TastingNoteEditor;
-```
-
-Since we have an optional prop, we should update our test file so that it contains describe blocks for both the "new note" and "edit note" scenarios:
-
-**`src/tasting-note/editor/TastingNoteEditor.test.tsx`**
-
-```tsx
-/* eslint-disable testing-library/no-wait-for-snapshot */
-import { render, screen, waitFor } from '@testing-library/react';
-import TastingNoteEditor from './TastingNoteEditor';
-import { mockNotes } from '../__fixtures__/mockNotes';
+```typescript
+import { vi } from 'vitest';
+import { render } from '@testing-library/react';
+import { TastingNoteEditor } from './TastingNoteEditor';
 
 describe('<TastingNoteEditor />', () => {
-  let component: any;
-  let mockDismiss = jest.fn();
+  beforeEach(() => vi.clearAllMocks());
 
-  describe('save', () => {
-    beforeEach(() => (component = <TastingNoteEditor onDismiss={mockDismiss} />));
-
-    it('renders consistently', async () => {
-      const { asFragment } = render(component);
-      await waitFor(() => expect(asFragment()).toMatchSnapshot());
-    });
+  it('renders without crashing', () => {
+    const { baseElement } = render(<TastingNoteEditor onDismiss={() => vi.fn()} />);
+    expect(baseElement).toBeDefined();
   });
 
-  describe('update', () => {
-    beforeEach(() => (component = <TastingNoteEditor onDismiss={mockDismiss} note={mockNotes[0]} />));
-
-    it('renders consistently', async () => {
-      const { asFragment } = render(component);
-      await waitFor(() => expect(asFragment()).toMatchSnapshot());
-    });
+  it('renders consistently', () => {
+    const { asFragment } = render(<TastingNoteEditor onDismiss={() => vi.fn()} />);
+    expect(asFragment()).toMatchSnapshot();
   });
-
-  afterEach(() => jest.restoreAllMocks());
 });
 ```
 
-Your test output is going to note that you need
+### Hookup the Modal
 
-### Hooking Up the Modal
+The first thing we need to do is get a modal overlay hooked up for the "add a new note" case. This will allow us to test out the component for the modal as we develop it. This will also get the infrastructure for the rest of our modifications in place. We will launch the modal for the "add a new note" scenario from a <a href="https://ionicframework.com/docs/api/fab" target="_blank">floating action button</a> on the `TastingNotesPage`.
 
-Before we get any deeper into building the editor let's get a modal overlay hooked up in `TastingNotesPage` so we can view the component as we develop it.
+First we need to set up the test for the `TastingNotesPage` view (`src/tasting-notes/TastingNotesPage.test.tsx`).
 
-The modal will be launched when a floating action button is pressed:
+Add the following _outside_ of describe block:
 
-**`src/tasting-notes/TastingNotesPage.tsx`**
+```typescript
+const present = vi.fn();
+vi.mock('@ionic/react', async (getOriginal) => {
+  const original: any = await getOriginal();
+  return { ...original, useIonModal: vi.fn(() => [present, vi.fn()]) };
+});
+```
+
+Next, add a `beforeEach` block within the `describe('<TastingNotesPage />')` block:
+
+```typescript
+beforeEach(() => vi.clearAllMocks());
+```
+
+Then add a describe block after the "renders consistently" test to testing when a new note is added:
 
 ```tsx
-import { useState } from 'react';
-...
+describe('adding a new note', () => {
+  it('displays the modal', async () => {
+    render(<TastingNotesPage />);
+    fireEvent.click(screen.getByTestId('add-note-button'));
+    await waitFor(() => expect(present).toHaveBeenCalledTimes(1));
+  });
+});
+```
+
+From here, the code and the markup in `src/tasting-notes/TastingNotesPage.tsx` are pretty easy:
+
+```tsx
+import {
+  IonButton,
+  IonContent,
+  IonFab,
+  IonFabButton,
+  IonHeader,
+  IonIcon,
+  IonPage,
+  IonTitle,
+  IonToolbar,
+  useIonModal,
+} from '@ionic/react';
+import { TastingNoteEditor } from './TastingNoteEditor';
 import { add } from 'ionicons/icons';
-import TastingNoteEditor from './editor/TastingNoteEditor';
 
 const TastingNotesPage: React.FC = () => {
-  const [isOpen, setIsOpen] = useState<boolean>(false);
-
-  const handleOnDismiss = () => {
-    setIsOpen(false);
-  };
+  const [present, dismiss] = useIonModal(TastingNoteEditor, { onDismiss: () => dismiss() });
 
   return (
     <IonPage>
+      <IonHeader>
+        <IonToolbar>
+          <IonTitle>Tasting Notes</IonTitle>
+        </IonToolbar>
+      </IonHeader>
       <IonContent>
-        <IonHeader collapse="condense">
-          ...
-        </IonHeader>
-
-         <IonFab vertical="bottom" horizontal="end" slot="fixed">
-          <IonFabButton onClick={() => setIsOpen(true)}>
+        <IonFab vertical="bottom" horizontal="end" slot="fixed">
+          <IonFabButton onClick={() => present()} data-testid="add-note-button">
             <IonIcon icon={add} />
           </IonFabButton>
         </IonFab>
-
-
-        <IonModal ref={modal} trigger="add-note">
-          <TastingNoteEditor onDismiss={handleOnDismiss} />
-        </IonModal>
-
       </IonContent>
     </IonPage>
   );
@@ -374,165 +362,226 @@ const TastingNotesPage: React.FC = () => {
 export default TastingNotesPage;
 ```
 
-### Mock the Editor Component
+### Basic Layout
 
-#### Basic Layout
+Now that we can click on the FAB button and see the modal, let's return our attention to the `src/tasting-notes/TastingNoteEditor.tsx` file and start laying out the basics of our form. We already have title and a content section. We know we will need a button in the header that will allow the dialog to be cancelled. We will also need a button on the bottom that will be used for saving and dismissing.
 
-Let's lay down some basics of the form's UI.
+- Add the `IonButtons` section within the `IonHeader>IonToolbar`.
+- Add the `ion-text-center` class to the `IonTitle` element.
+- Update the component imports.
+- Define a stub function called `cancel`.
+- Define a stub function called `submit`.
 
-First we're going to tackle the cancel button. Since this action behaves the same whether the user is adding a new note or updating an existing one, we'll place tests for it within it's own describe block:
-
-**`src/tasting-notes/editor/TastingNoteEditor.test.tsx`**
-
-```tsx
-import { ionFireEvent as fireEvent } from '@ionic/react-test-utils';
-...
-  describe('cancel button', () => {
-    it('calls the dismiss function', () => {
-      render(<TastingNoteEditor onDismiss={mockDismiss} />);
-      const button = (await screen.findByTestId(/cancel-button/)) as HTMLIonButtonElement;
-      fireEvent.click(button);
-      expect(mockDismiss).toHaveBeenCalledTimes(1);
-    });
-  });
-
-  describe('save', () => {
-    ...
-  });
-...
-```
-
-The cancel button will be part of the editor's header:
-
-**`src/tasting-note/editor/TastingNoteEditor.tsx`**
+Here is the `IonButtons` markup for within the `IonHeader>IonToolbar`:
 
 ```tsx
-<IonHeader>
-  <IonToolbar>
-    <IonTitle>Add New Tasting Note</IonTitle>
-    <IonButtons slot="primary">
-      <IonButton data-testid="cancel-button" onClick={() => onDismiss()}>
-        <IonIcon slot="icon-only" icon={close} />
-      </IonButton>
-    </IonButtons>
-  </IonToolbar>
-</IonHeader>
+<IonButtons slot="start">
+  <IonButton data-testid="cancel-button" onClick={() => cancel()}>
+    Cancel
+  </IonButton>
+</IonButtons>
+<IonButtons slot="end">
+  <IonButton strong={true} data-testid="submit-button" onClick={handleSubmit(() => submit())}>
+    Add
+  </IonButton>
+</IonButtons>
 ```
 
-Populate the `<IonFooter />` component with an `<IonToolbar />` and "add" button:
+The rest is left up to you. You should have several code samples to use at this point to determine how to update the imports and create the stubs.
 
-```tsx
-<IonFooter>
-  <IonToolbar>
-    <IonButton expand="full">Add</IonButton>
-  </IonToolbar>
-</IonFooter>
+**Note:** I generally just "console.log" from the stub functions to avoid linting errors and to prove my bindings are working.
+
+Let's start filling out the form. We already have one simple form, the `LoginPage`. On that page we used a list of inputs. We will need something like that within this editor, so let's use that as a model for the first couple of input fields. All of the following items will go inside the `IonContent` component. Now is a good time to start filling out the validations as well.
+
+Here is validation function:
+
+```typescript
+const validationSchema = yup.object({
+  brand: yup.string().required().label('Brand'),
+  name: yup.string().required().label('Name'),
+});
 ```
 
-#### Inputs
-
-Start by adding some plumbing for React Hook Form:
-
-**`src/tasting-notes/editor/TastingNoteEditor.tsx`**
+The code for the component:
 
 ```typescript
 const {
   handleSubmit,
   control,
-  formState: { isValid },
-} = useForm<TastingNote>({ mode: 'onChange' });
+  formState: { errors, isValid, touchedFields, dirtyFields },
+} = useForm<TastingNote>({ mode: 'onTouched', resolver: yupResolver(validationSchema) });
+
+const getClassNames = (field: keyof TastingNote) =>
+  [
+    errors[field] ? 'ion-invalid' : 'ion-valid',
+    touchedFields[field] ? 'ion-touched' : 'ion-untouched',
+    dirtyFields[field] ? 'ion-dirty' : 'ion-pristine',
+  ].join(' ');
+
+const cancel = () => onDismiss();
+const submit = () => onDismiss();
 ```
 
-Add an `<IonList />` component within the `<IonContent>` tags:
-
-**`src/tasting-notes/editor/TastingNoteEditor.tsx`**
+And the template code to replace the `p` tag with:
 
 ```tsx
-<IonContent>
-  <IonList></IonList>
-</IonContent>
-```
-
-Let's adjust the footer button so it calls `handleSubmit()`:
-
-```tsx
-<IonFooter>
-<IonToolbar>
-  <IonButton data-testid="submit-button" expand="full" onClick={handleSubmit(() => {})}>
-    Add
-  </IonButton>
-</IonToolbar>
-```
-
-Let's start adding input fields. These fields will be added within the `<IonList>` components.
-
-```tsx
-<IonItem>
-  <IonLabel position="floating">Brand</IonLabel>
-  <Controller
-    render={({ field: { onChange, value } }) => (
-      <IonInput
-        data-testid="brand-input"
-        onIonChange={e => onChange(e.detail.value!)}
-        value={value}
+<form>
+  <IonList lines="none">
+    <IonItem>
+      <Controller
+        name="brand"
+        control={control}
+        render={({ field: { onChange, onBlur, value } }) => (
+          <IonInput
+            label="Brand"
+            labelPlacement="floating"
+            value={value}
+            onIonBlur={onBlur}
+            onIonInput={(e) => onChange(e.detail.value!)}
+            errorText={errors.brand?.message}
+            className={getClassNames('brand')}
+          />
+        )}
       />
-    )}
-    control={control}
-    name="brand"
-    rules={{ required: true, minLength: 1 }}
-    defaultValue={note?.brand || ''}
-  />
-</IonItem>
-<IonItem>
-  <IonLabel position="floating">Name</IonLabel>
-  <Controller
-    render={({ field: { onChange, value } }) => (
-      <IonInput
-        data-testid="name-input"
-        onIonChange={e => onChange(e.detail.value!)}
-        value={value}
+    </IonItem>
+    <IonItem>
+      <Controller
+        name="name"
+        control={control}
+        render={({ field: { onChange, onBlur, value } }) => (
+          <IonInput
+            label="Name"
+            labelPlacement="floating"
+            value={value}
+            onIonBlur={onBlur}
+            onIonInput={(e) => onChange(e.detail.value!)}
+            errorText={errors.name?.message}
+            className={getClassNames('name')}
+          />
+        )}
       />
-    )}
-    control={control}
-    name="name"
-    rules={{ required: true, minLength: 1 }}
-    defaultValue={note?.name || ''}
-  />
-</IonItem>
+    </IonItem>
+  </IonList>
+</form>
 ```
 
-We need a way to select the category of tea that we have. Add the following mock to `TastingNoteEditor.test.tsx`:
+We need a way to select the type of tea that we have.
 
-**`src/tasting-notes/editor/TastingNoteEditor.test.tsx`**
+**Important!** `IonModal` components attach themselves to the `IonApp` component. This becomes troublesome in our case, because that means `TastingNoteEditor` can't access the list of teas:
 
-```typescript
-const mockTeas = expectedTeas;
-jest.mock('../../tea/TeaProvider', () => ({
-  useTea: () => ({ teas: mockTeas }),
-}));
+(Ignore the missing bits, this is only intended for illustrative purposes)
+
+```diff
+  <IonApp>
++   <TastingNoteEditor />
+    <Route path="/tabs">
+      <TeaProvider>
+        <Tabs />
+      </TeaProvider>
+    </Route>
+  </IonApp>
 ```
 
-Next, add the list of teas from the `useTea()` hook:
+To get around this restriction, let's pass the list of teas into `TastingNoteEditor` as a prop.
 
-**`src/tasting-notes/editor/TastingNoteEditor.tsx`**
+**`src/tasting-notes/TastingNotesPage.tsx`**
 
-```typescript
-const TastingNoteEditor: React.FC<TastingNoteEditorProps> = ({ onDismiss, note = undefined }) => {
-  ...
-  const { teas } = useTea();
-  ...
+```diff
++ const { teas } = useTea();
+  const [present, dismiss] = useIonModal(TastingNoteEditor, { onDismiss: () => dismiss(), teas });
+```
+
+**`src/tasting-notes/TastingNotesPage.test.tsx`**
+
+```diff
+  const present = vi.fn();
+  vi.mock('@ionic/react', async (getOriginal) => {
+    const original: any = await getOriginal();
+    return { ...original, useIonModal: vi.fn(() => [present, vi.fn()]) };
+  });
++ vi.mock('../tea/TeaProvider');
+```
+
+**`src/tasting-notes/TastingNoteEditor.tsx`**
+
+```diff
+type Props = {
+  onDismiss: () => void;
++ teas: Tea[]
 };
-export default TastingNoteEditor;
 ```
 
-Then add the following `<IonItem />` after the "name" field:
+Let's add a `props` constant to `src/tasting-notes/TastingNoteEditor.test.tsx` (outside the describe block):
+
+```typescript
+const props = {
+  onDismiss: vi.fn(),
+  teas: [
+    {
+      id: 1,
+      name: 'Green',
+      image: '/assets/images/green.jpg',
+      description:
+        'Green teas have the oxidation process stopped very early on, leaving them with a very subtle flavor and ' +
+        'complex undertones. These teas should be steeped at lower temperatures for shorter periods of time.',
+      rating: 0,
+    },
+    {
+      id: 2,
+      name: 'Black',
+      image: '/assets/images/black.jpg',
+      description:
+        'A fully oxidized tea, black teas have a dark color and a full robust and pronounced flavor. Black teas tend ' +
+        'to have a higher caffeine content than other teas.',
+      rating: 1,
+    },
+    {
+      id: 3,
+      name: 'Herbal',
+      image: '/assets/images/herbal.jpg',
+      description:
+        'Herbal infusions are not actually "tea" but are more accurately characterized as infused beverages ' +
+        'consisting of various dried herbs, spices, and fruits.',
+      rating: 2,
+    },
+  ],
+};
+```
+
+And adjust how we `render` the component in our tests:
+
+```diff
+- render(<TastingNoteEditor onDismiss={() => void 0}>);
++ render(<TastingNoteEditor {...props} >);
+```
+
+With this settled, we can now create a test to make sure that we map the teas to populate an `IonSelect`.
+
+```tsx
+it('binds the teas in the select', () => {
+  render(<TastingNoteEditor {...props} />);
+  const opts = screen.getByTestId('tea-categories');
+  expect(opts).toHaveTextContent('Green');
+  expect(opts).toHaveTextContent('Black');
+  expect(opts).toHaveTextContent('Herbal');
+});
+```
+
+Then we can switch back to `src/tasting-notes/TastingNoteEditor.tsx` and add the select data with the mapped state.
 
 ```tsx
 <IonItem>
-  <IonLabel>Category</IonLabel>
   <Controller
+    name="teaCategoryId"
+    control={control}
     render={({ field: { onChange, value } }) => (
-      <IonSelect onIonChange={(e) => onChange(e.detail.value!)} value={value}>
+      <IonSelect
+        data-testid="tea-categories"
+        label="Type"
+        labelPlacement="floating"
+        onIonChange={(e) => onChange(e.detail.value!)}
+        value={value}
+      >
         {teas.map((tea: Tea) => (
           <IonSelectOption key={tea.id} value={tea.id}>
             {tea.name}
@@ -540,516 +589,533 @@ Then add the following `<IonItem />` after the "name" field:
         ))}
       </IonSelect>
     )}
-    control={control}
-    name="teaCategoryId"
-    defaultValue={note?.teaCategoryId || 1}
   />
 </IonItem>
 ```
 
-Under the category field, let's add a field for rating:
+Update the validation schema to make `teaCategoryId` required:
+
+```typescript
+const validationSchema = yup.object({
+  brand: yup.string().required().label('Brand'),
+  name: yup.string().required().label('Name'),
+  teaCategoryId: yup.number().required().label('Type of Tea'),
+});
+```
+
+Add a rating:
 
 ```tsx
 <IonItem>
   <IonLabel>Rating</IonLabel>
   <Controller
-    render={({ field: { onChange, value } }) => <Rating onRatingChange={onChange} initialRating={value} />}
-    control={control}
     name="rating"
-    rules={{ required: true }}
-    defaultValue={note?.rating || 0}
+    control={control}
+    render={({ field: { onChange, value } }) => <Rating onRatingChange={onChange} rating={value} />}
   />
 </IonItem>
 ```
 
-We're reusing the `Rating` component we built here, pretty neat!
+```diff
+const validationSchema = yup.object({
+  brand: yup.string().required().label('Brand'),
+  name: yup.string().required().label('Name'),
+  teaCategoryId: yup.number().required().label('Type of Tea'),
++ rating: yup.number().required().label('Rating'),
+});
+```
 
-Finally, we'll add a text area for some free-form notes on the tea tasted:
+And finally, add a text area for some free-form notes on the tea we just tasted:
 
 ```tsx
 <IonItem>
-  <IonLabel position="floating">Notes</IonLabel>
   <Controller
-    render={({ field: { onChange, value } }) => (
-      <IonTextarea data-testid="notes-input" onIonChange={(e) => onChange(e.detail.value!)} rows={5} value={value} />
-    )}
-    control={control}
     name="notes"
-    rules={{ required: true, minLength: 1 }}
-    defaultValue={note?.notes || ''}
+    control={control}
+    render={({ field: { onChange, value } }) => (
+      <IonTextarea
+        label="Notes"
+        labelPlacement="floating"
+        rows={4}
+        value={value}
+        onIonInput={(e) => onChange(e.detail.value!)}
+      />
+    )}
   />
 </IonItem>
 ```
 
-### Wiring up the Form
+Add a notes text validation. Make it required like `brand` and `name`.
 
-We will now turn our attention to wiring the form up to submit tasting notes to the backend data service.
+That looks pretty good so far!
 
-#### Perform the Add
+### Validation Tests
 
-To add a new note is relatively simple. Take the form data, call `saveNote()`, and dismiss the modal.
-
-Add the following mock to `src/tasting-notes/editor/TastingNoteEditor.test.tsx`:
+We have built up the validations as we went. Let's just add a simple test to verify some of the messages:
 
 ```typescript
-let mockSaveNote = jest.fn(() => Promise.resolve());
-jest.mock('../TastingNotesProvider', () => ({
-  useTastingNotes: () => ({
-    saveNote: mockSaveNote,
-  }),
-}));
-```
-
-Add the following unit test into the 'save' `describe()` block:
-
-```typescript
-it('saves the note', async () => {
-  const { id, ...expected } = mockNotes[0];
-  render(component);
-  const brand = (await screen.findByTestId(/brand-input/)) as HTMLIonInputElement;
-  const name = (await screen.findByTestId(/name-input/)) as HTMLIonInputElement;
-  const rating = await screen.findByTestId(/Rate 4 stars/);
-  const notes = (await screen.findByTestId(/notes-input/)) as HTMLIonTextareaElement;
-  const submit = (await screen.findByTestId(/submit-button/)) as HTMLIonButtonElement;
-
-  fireEvent.ionChange(brand, mockNotes[0].brand);
-  fireEvent.ionChange(name, mockNotes[0].name);
-  fireEvent.click(rating);
-  fireEvent.ionChange(notes, mockNotes[0].notes);
-  fireEvent.click(submit);
-
-  await waitFor(() => expect(mockSaveNote).toHaveBeenCalledTimes(1));
-  expect(mockSaveNote).toHaveBeenCalledWith(expected);
+it('displays messages as the user enters invalid data', async () => {
+  render(<TastingNoteEditor {...props} />);
+  const name = await waitFor(() => screen.getByLabelText('Name'));
+  const brand = await waitFor(() => screen.getByLabelText('Brand'));
+  const notes = await waitFor(() => screen.getByLabelText('Notes'));
+  await waitFor(() => fireEvent.input(name, { target: { value: '' } }));
+  await waitFor(() => fireEvent.blur(name));
+  await waitFor(() => expect(screen.getByText(/Name is a required field/)).toBeInTheDocument());
+  await waitFor(() => fireEvent.input(brand, { target: { value: '' } }));
+  await waitFor(() => fireEvent.blur(brand));
+  await waitFor(() => expect(screen.getByText(/Brand is a required field/)).toBeInTheDocument());
+  await waitFor(() => fireEvent.input(notes, { target: { value: '' } }));
+  await waitFor(() => fireEvent.blur(notes));
+  await waitFor(() => expect(screen.getByText(/Notes is a required field/)).toBeInTheDocument());
 });
 ```
 
-As we go back to implement the save in the component's code file, let's make these additional changes to the button in the footer:
+That should all pass if we have coded everything correctly.
 
-- Set it's `type` to `submit`
-- Disable the button if the form is invalid or dirty
+### Disable / Enable Button
 
-**`src/tasting-notes/editor/TastingNoteEditor.tsx`**
+The submit button at the top of the modal should be disabled until valid data is entered.
+
+Test:
+
+```typescript
+describe('submit button', () => {
+  it('is disabled until valid data is entered', async () => {
+    const ionChangeEvent = new CustomEvent('ionChange', { detail: { value: '2' } });
+    render(<TastingNoteEditor {...props} />);
+    const button = screen.getByTestId('submit-button') as HTMLIonButtonElement;
+
+    await waitFor(() => fireEvent.input(screen.getByLabelText('Brand'), { target: { value: 'foobar' } }));
+    await waitFor(() => expect(button.disabled).toBeTruthy());
+
+    await waitFor(() => fireEvent.input(screen.getByLabelText('Name'), { target: { value: 'mytea' } }));
+    await waitFor(() => expect(button.disabled).toBeTruthy());
+
+    await waitFor(() => fireEvent(screen.getByTestId('tea-categories'), ionChangeEvent));
+    await waitFor(() => expect(button.disabled).toBeTruthy());
+
+    await waitFor(() => fireEvent.click(screen.getAllByTestId('outline')[2]));
+    await waitFor(() => expect(button.disabled).toBeTruthy());
+
+    await waitFor(() => fireEvent.input(screen.getByLabelText('Notes'), { target: { value: 'Meh. It is ok.' } }));
+    await waitFor(() => expect(button.disabled).toBeFalsy());
+  });
+});
+```
+
+The markup to enable this is super simple. We had already snuck in the `isValid` property earlier, so it is just a matter of binding it to the "Add" button's `disabled` property, just like we did in the login page before.
 
 ```tsx
-const TastingNoteEditor: React.FC<TastingNoteEditorProps> = ({ ... }) => {
-  ...
-  const { saveNote } = useTastingNotes();
-  ...
+disabled={!isValid}
+```
 
-  const save = async (data: TastingNote) => {
-    await saveNote(data);
-    onDismiss();
-  };
+### Save and Close
 
-  return (
-    <>
-      ...
-      <IonFooter>
-        <IonToolbar>
-          <IonButton
-            data-testid="submit-button"
-            type="submit"
-            disabled={!isValid}
-            expand="full"
-            onClick={handleSubmit(data => save(data))}
-          >
-            Add
-          </IonButton>
-        </IonToolbar>
-      </IonFooter>
-    </>
-  );
+There are two buttons on the modal. One is the `submit-button` which is labelled "Add", and is not _really_ a submit button in that it does not submit the form, but we have given it that ID as it best describes the role the button will functionally fill. The other button is the `cancel-button`.
+
+The `submit-button` needs to merge the tasting note. Both buttons need to close the dialog.
+
+#### Modifications to the Test
+
+Add the following to the top of the `src/components/__tests__/AppTastingNoteEditor.spec.ts` file:
+
+```typescript
+import { useTastingNotes } from './useTastingNotes';
+
+vi.mock('./useTastingNotes');
+```
+
+Within the "submit button" describe block we will add another group of tests for when the button click is triggered:
+
+```typescript
+describe('on click', () => {
+  beforeEach(async () => {
+    const ionChangeEvent = new CustomEvent('ionChange', { detail: { value: '2' } });
+    render(<TastingNoteEditor {...props} />);
+    await waitFor(() => fireEvent.input(screen.getByLabelText('Brand'), { target: { value: 'foobar' } }));
+    await waitFor(() => fireEvent.input(screen.getByLabelText('Name'), { target: { value: 'mytea' } }));
+    await waitFor(() => fireEvent(screen.getByTestId('tea-categories'), ionChangeEvent));
+    await waitFor(() => fireEvent.click(screen.getAllByTestId('outline')[2]));
+    await waitFor(() => fireEvent.input(screen.getByLabelText('Notes'), { target: { value: 'Meh. It is ok.' } }));
+  });
+
+  it('merges the tasting note', async () => {
+    const { merge } = useTastingNotes();
+    const button = screen.getByTestId('submit-button') as HTMLIonButtonElement;
+    fireEvent.click(button);
+    await waitFor(() => expect(merge).toHaveBeenCalledTimes(1));
+    expect(merge).toHaveBeenCalledWith({
+      brand: 'foobar',
+      name: 'mytea',
+      rating: 3,
+      teaCategoryId: 2,
+      notes: 'Meh. It is ok.',
+    });
+  });
+
+  it('closes the modal', async () => {
+    const button = screen.getByTestId('submit-button') as HTMLIonButtonElement;
+    fireEvent.click(button);
+    await waitFor(() => expect(props.onDismiss).toHaveBeenCalledTimes(1));
+  });
+});
+```
+
+The cancel button tests will be similar, but with no data setup. We also will expect that the merge does not take place.
+
+```typescript
+describe('cancel button', () => {
+  it('does not merge', async () => {
+    const { merge } = useTastingNotes();
+    render(<TastingNoteEditor {...props} />);
+    const button = screen.getByTestId('cancel-button');
+    fireEvent.click(button);
+    await waitFor(() => expect(merge).not.toHaveBeenCalled());
+  });
+
+  it('closes the modal', async () => {
+    render(<TastingNoteEditor {...props} />);
+    const button = screen.getByTestId('cancel-button');
+    fireEvent.click(button);
+    await waitFor(() => expect(props.onDismiss).toHaveBeenCalledTimes(1));
+  });
+});
+```
+
+#### Modifications to the Code
+
+The component already contains stubs for the `submit()` and `cancel()` functions. Here is the implementation for `submit()`. Filling out the `cancel()` function is left as an exercise to you:
+
+```typescript
+const submit = async (data: TastingNote) => {
+  await merge(data);
+  onDismiss();
 };
-export default TastingNoteEditor;
 ```
 
-Our tests pass, and if you are serving the application you'll see the modal dismisses after a new tasting note is added. Nice!
+## Listing the Tasting Notes
 
-## List the Tasting Notes
+We can now theoretically add tasting notes, but we don't really know since we cannot see them. So now would be a good time to update the tasting notes page view to display the notes that we have in the store.
 
-We can add notes all day long, but we cannot see them. Let's shift back to the tasting notes page and do a little work. When we come into the page, we want to display the existing notes in a simple list.
+First, let's update the test (`src/tasting-notes/TastingNotesPage.test.tsx`) to include some notes.
 
-### Mocks and Test Data
-
-Do some pre-work to provide the appropriate mocks and test data for the tasting notes page's test file.
-
-**`src/tasting-notes/TastingNotesPage.test.tsx`**
+Import and mock the `useTastingNotes` hook:
 
 ```typescript
-...
-import { mockNotes } from './__fixtures__/mockNotes';
-
-let mockGetNotes = jest.fn(() => Promise.resolve());
-jest.mock('./TastingNotesProvider', () => ({
-  useTastingNotes: () => ({
-    getNotes: mockGetNotes,
-    notes: mockNotes,
-  }),
-}));
-```
-
-### Fetching Tasting Notes
-
-Create a `describe()` block for the initialization of the page. It will be a sibling to the 'add a new note' `describe()` block.
-
-```tsx
-describe('initialization', () => {
-  it('gets all of the notes', async () => {
-    render(<TastingNotesPage />);
-    await waitFor(() => expect(mockGetNotes).toHaveBeenCalledTimes(1));
-  });
-
-  it('displays the notes', () => {
-    render(<TastingNotesPage />);
-    expect(screen.getByText(/Bently/)).toBeInTheDocument();
-  });
-});
-```
-
-We have initialized components a few times now. I will outline the changes to make to `TastingNotesPage` below.
-
-**`src/tasting-notes/TastingNotesPage.tsx`**
-
-```tsx
 ...
 import { useTastingNotes } from './useTastingNotes';
-import { TastingNote } from '../shared/models';
-
-const TastingNotesPage: React.FC = () => {
-  const { notes, getNotes } = useTastingNotes();
-  const [isOpen, setIsOpen] = useState<boolean>(false);
-
-  useEffect(() => {
-    getNotes();
-  }, [getNotes]);
-
-   const handleOnDismiss = () => {
-    setIsOpen(false);
-  };
-
-  return (
-    <IonPage>
-      ...
-      <IonContent>
-        {/* Place before the IonFab component */}
-        <IonList>
-          {notes.map((note, idx) => (
-            <IonItem key={idx}>
-              <IonLabel>
-                <div>{note.brand}</div>
-                <div>{note.name}</div>
-              </IonLabel>
-            </IonItem>
-          ))}
-        </IonList>
-        ...
-      </IonContent>
-    </IonPage>
-  );
-};
-export default TastingNotesPage;
-```
-
-## Refreshing Tasting Notes
-
-The existing notes stored in the backend data service show up but when we add a new note it does not. Let's update the page such that when a new tasting note has been added we refresh the list of tasting notes.
-
-Start by updating the `onDismiss` property in `TastingNoteEditor`. When the modal is dismissed, we will notify the consuming component if a refresh is required.
-
-**`src/tasting-notes/editor/TastingNoteEditor.tsx`**
-
-```typescript
-interface TastingNoteEditorProps {
-  onDismiss: (opts: { refresh: boolean }) => void;
-  note?: TastingNote;
-}
-```
-
-Update the `save` method and the close button accordingly.
-
-Start by adding the `reset` property to the list of items destructured from `useForm()`:
-
-```typescript
-const {
-  handleSubmit,
-  control,
-  formState: { isValid },
-  reset,
-} = useForm<TastingNote>({ mode: 'onChange' });
-```
-
-Then update the `save` method:
-
-```typescript
-const save = async (data: TastingNote) => {
-  await saveNote(data);
-  reset();
-  onDismiss({ refresh: true });
-};
-```
-
-Finally update the cancel button's click event:
-
-```tsx
-<IonButton data-testid="cancel-button" onClick={() => onDismiss({ refresh: false})}>
-```
-
-Add a handler to `TastingNotesPage` that:
-
-1. Dismisses the modal
-2. Checks if the list of notes should be refreshed
-3. If so, fetches the list of tasting notes
-
-**`src/tasting-notes/TastingNotesPage.tsx`**
-
-```tsx
 ...
-const TastingNotesPage: React.FC = () => {
-  ...
-  const handleOnDismiss = async (refresh: boolean) => {
-    setIsOpen(false);
-    if (refresh) await getNotes();
-  };
-
-  return (
-    ...
-    <TastingNoteEditor onDismiss={({refresh}) => handleOnDismiss(refresh)} />
-    ...
-  );
-};
-export default TastingNotesPage;
+vi.mock('./useTastingNotes');
 ```
 
-## Edit a Note
+Update the main `beforeEach()` block, defining some tasting notes data:
 
-It would be nice to be able to go back and either view or modify tasting notes that had been previously created.
+```typescript
+beforeEach(() => {
+  (useTastingNotes as Mock).mockReturnValue({
+    notes: [
+      {
+        id: 42,
+        brand: 'Lipton',
+        name: 'Green Tea',
+        teaCategoryId: 3,
+        rating: 3,
+        notes: 'A basic green tea, very passable but nothing special',
+      },
+      {
+        id: 314159,
+        brand: 'Lipton',
+        name: 'Yellow Label',
+        teaCategoryId: 2,
+        rating: 1,
+        notes: 'Very acidic, even as dark teas go, OK for iced tea, horrible for any other application',
+      },
+      {
+        id: 73,
+        brand: 'Rishi',
+        name: 'Puer Cake',
+        teaCategoryId: 6,
+        rating: 5,
+        notes: 'Smooth and peaty, the king of puer teas',
+      },
+    ],
+    refresh: vi.fn(),
+  });
+  vi.clearAllMocks();
+});
+```
 
-### Modify the Editor
-
-A good first step will be to start by modifying the editor such that it should have a different title and different button text based on whether or not a note is passed.
-
-Let's make use of the `update` describe block we created in `TastingNoteEditor.test.tsx`:
-
-**`src/tasting-notes/editor/TastingNoteEditor.test.tsx`**
+We will need to load that data upon entering the page. That means that the page will need to call the `refresh()` function from `useTastingNotes()`. Let's create a test for that:
 
 ```tsx
-describe('update', () => {
-  beforeEach(() => {
-    component = <TastingNoteEditor onDismiss={mockDismiss} note={mockNote} />;
-  });
-
-  it('renders consistently', async () => {
-    const { asFragment } = render(component);
-    await waitFor(() => expect(asFragment()).toMatchSnapshot());
-  });
-
-  it('sets the properties', async () => {
-    render(component);
-    const brand = (await screen.findByTestId(/brand-input/)) as HTMLIonInputElement;
-    const name = (await screen.findByTestId(/name-input/)) as HTMLIonInputElement;
-    const notes = (await screen.findByTestId(/notes-input/)) as HTMLIonTextareaElement;
-    expect(brand.getAttribute('value')).toEqual(mockNotes[0].brand);
-    expect(name.getAttribute('value')).toEqual(mockNotes[0].name);
-    expect(notes.getAttribute('value')).toEqual(mockNotes[0].notes);
-  });
-
-  it('updates the data', async () => {
-    const expected = { ...mockNotes[0] };
-    expected.notes = "It's not good";
-    expected.rating = 1;
-    const { getByTestId } = render(component);
-    const brand = await waitFor(() => getByTestId(/brand-input/));
-    const name = await waitFor(() => getByTestId(/name-input/));
-    const rating = await waitFor(() => getByTestId(/Rate 1 stars/));
-    const notes = await waitFor(() => getByTestId(/notes-input/));
-    const submit = await waitFor(() => getByTestId(/submit-button/));
-
-    await waitFor(() => fireEvent.ionChange(brand, mockNotes[0].brand));
-    await waitFor(() => fireEvent.ionChange(name, mockNotes[0].name));
-    await waitFor(() => fireEvent.click(rating));
-    await waitFor(() => fireEvent.ionChange(notes, expected.notes));
-    await waitFor(() => fireEvent.click(submit));
-
-    expect(mockSaveNote).toHaveBeenCalledWith(expected);
-    expect(mockSaveNote).toHaveBeenCalledTimes(1);
-  });
+it('refreshes the tasting notes data', async () => {
+  const { refresh } = useTastingNotes();
+  render(<TastingNotesPage />);
+  await waitFor(() => expect(refresh).toHaveBeenCalledTimes(1));
 });
 ```
 
-Updating the data is very similar to saving the data - it's a simple copy and paste job with a few extra steps.
+Now add the code to do this in `src/tasting-notes/TastingNotesPage.tsx`:
 
-Refactoring the `save()` method is to handle the new requirement is straight forward. Here is one way of doing it:
+```diff
++ const { notes, refresh } = useTastingNotes();
+  const { teas } = useTea();
+  const [present, dismiss] = useIonModal(TastingNoteEditor, { onDismiss: () => dismiss(), teas });
+
++ useEffect(() => {
++   refresh();
++ }, []);
+```
+
+Our requirements are that if a note exists for this tea, we display it in the list, and that we display the `name` and the `brand` fields in the list. Let's test that now.
 
 ```typescript
-const save = async (data: TastingNote) => {
-  if (note?.id) data.id = note.id;
-  await saveNote(data);
-  reset();
-  onDismiss({ refresh: true });
-};
-```
-
-Now we can load a note for editing and we can modify the data and have it saved. We should change some of the labels on the editor to reflect which action the application user is doing.
-
-Add the following tests to the 'save' `describe()` block. They should all pass.
-
-```typescript
-it('has the add title', async () => {
-  const { container } = render(component);
-  await waitFor(() => expect(container).toHaveTextContent(/Add New Tasting Note/));
-});
-
-it('has the add button label', async () => {
-  render(component);
-  const submit = (await screen.findByTestId(/submit-button/)) as HTMLIonButtonElement;
-  expect(submit.textContent).toEqual('Add');
+it('displays the notes', () => {
+  render(<TastingNotesPage />);
+  expect(screen.getAllByText('Lipton')).toHaveLength(2);
+  expect(screen.getAllByText('Green Tea')).toHaveLength(1);
+  expect(screen.getAllByText('Yellow Label')).toHaveLength(1);
+  expect(screen.getAllByText('Rishi')).toHaveLength(1);
+  expect(screen.getAllByText('Puer Cake')).toHaveLength(1);
 });
 ```
 
-Add the following tests to the 'update' `describe()` block. These tests should fail.
-
-```typescript
-it('has the update title', async () => {
-  const { container } = render(component);
-  await waitFor(() => expect(container).toHaveTextContent(/Update Tasting Note/));
-});
-
-it('has the update button label', async () => {
-  render(component);
-  const submit = (await screen.findByTestId(/submit-button/)) as HTMLIonButtonElement;
-  expect(submit.textContent).toEqual('Update');
-});
-```
-
-**Challenge:** I leave it to you to make the "update" tests pass.
-
-### Update the Tasting Notes Page
-
-Now that the editor has been modified to handle updating existing tasting notes in addition to adding new tasting notes, we need to update the tasting note page so application users can access this functionality.
-
-To make this all work, we need to use state to update the `note` prop on `<TastingNoteEditor />` when:
-
-- A specific note is clicked
-- The floating action button is clicked
-- The modal is dismissed
-
-Let's go ahead and do that:
-
-**`src/tasting-notes/TastingNotesPage.tsx`**
+The key parts for all of this to work together is the following markup:
 
 ```tsx
-...
-const TastingNotesPage: React.FC = () => {
-  ...
-  const [selectedNote, setSelectedNote] = useState<TastingNote | undefined>(undefined);
-  ...
-
-  const handleOnDismiss = async (refresh: boolean) => {
-    setIsOpen(false);
-    setSelectedNote(undefined);
-    if (refresh) await getNotes();
-  };
-
-  const handleUpdateNote = (note: TastingNote) => {
-    setSelectedNote(note);
-    setIsOpen(true);
-  };
-
-  const handleNewNote = () => {
-    setSelectedNote(undefined);
-    setIsOpen(true);
-  };
-
-  return (
-    <IonPage>
-      ...
-      <IonContent>
-        ...
-        <IonList>
-          {notes.map((note, idx) => (
-            <IonItem key={idx} onClick={() => handleUpdateNote(note)}>
-              <IonLabel>
-                <div>{note.brand}</div>
-                <div>{note.name}</div>
-              </IonLabel>
-            </IonItem>
-          ))}
-        </IonList>
-        <IonFab vertical="bottom" horizontal="end" slot="fixed">
-          <IonFabButton onClick={() => handleNewNote()}>
-            <IonIcon icon={add} />
-          </IonFabButton>
-        </IonFab>
-        <IonModal isOpen={isOpen}>
-          <TastingNoteEditor onDismiss={({ refresh }) => handleOnDismiss(refresh)} note={selectedNote} />
-        </IonModal>
-      </IonContent>
-    </IonPage>
-  );
-};
-export default TastingNotesPage;
-```
-
-## Delete a Note
-
-The final feature we will add is the ability to delete a note. We will keep this one simple and make it somewhat hidden so that it isn't too easy for application users to delete notes.
-
-We will use <a href="https://ionicframework.com/docs/api/item-sliding" target="_blank">item-sliding</a> to essentially "hide" the delete button behind the item. That way the application user has to slide the item over in order to expose the button and perform a delete.
-
-This results in a little bit of re-work in the way the item is rendered and bound:
-
-First, add a reference we can use for the `<IonList />`. This will allow us to programmatically close any items that have been slid open:
-
-**`src/tasting-notes/TastingNotesPage.tsx`**
-
-```typescript
-...
-const [selectedNote, setSelectedNote] = useState<TastingNote | undefined>(undefined);
-const list = useRef<HTMLIonListElement>(null);
-...
-```
-
-Then, modify the component template:
-
-**`src/tasting-notes/TastingNotesPage.tsx`**
-
-```tsx
-<IonList ref={list}>
-  {notes.map((note, idx) => (
-    <IonItemSliding key={idx}>
-      <IonItem onClick={() => handleUpdateNote(note)}>
+<IonList>
+  {notes
+    .sort((a, b) => a.id! - b.id!)
+    .map((note) => (
+      <IonItem key={note.id}>
         <IonLabel>
           <div>{note.brand}</div>
           <div>{note.name}</div>
         </IonLabel>
       </IonItem>
-      <IonItemOptions>
-        <IonItemOption
-          color="danger"
-          onClick={() => {
-            handleDeleteNote(note.id!);
-          }}
-        >
-          Delete
-        </IonItemOption>
-      </IonItemOptions>
-    </IonItemSliding>
-  ))}
+    ))}
 </IonList>
 ```
 
-Finally, use the accompanying code for `handleDeleteNote()`:
+One final change is required here, and that is to refresh the list of notes after the modal has been dismissed. Update the usage of `useIonModal()` like so:
 
 ```typescript
-const handleDeleteNote = async (id: number) => {
-  await list.current?.closeSlidingItems();
-  await deleteNote(id);
-  await getNotes();
+const [present, dismiss] = useIonModal(TastingNoteEditor, { onDismiss: () => refresh().then(dismiss), teas });
+```
+
+**Note:** Typically we prefer to use the `async/await` syntax over `then/catch`, but in this case it allows us to keep all of the code above on one line in a neat and readable manner.
+
+As you can see, the heavy lifting is all being done by our hook. Try adding a note, and you will see that the list is automatically updated.
+
+## Update Notes
+
+We can add notes, but it would also be good if we could update them.
+
+### Modify the Editor
+
+The editor component currently only handles creating new tasting notes. We also need to handle the case where we need to edit an existing tasting note. Add the following prop to the `Props` type of our `TastingNoteEditor` component:
+
+```typescript
+type Props = { onDismiss: () => void; teas: Tea[]; note?: TastingNote };
+```
+
+Let's add a mock tasting note outside of the `describe('<TastingNoteEditor />')` block:
+
+```typescript
+const note: TastingNote = {
+  id: 73,
+  brand: 'Rishi',
+  name: 'Puer Cake',
+  teaCategoryId: 6,
+  rating: 5,
+  notes: 'Smooth and peaty, the king of puer teas',
 };
 ```
 
-**Extra Credit:** Add an alert to ask the user if they _really_ want to delete the note!
+With that in place we can now start building out the changes to the editor and we can visually see the results as we go. Let's get started.
+
+#### The Title
+
+First, we should modify the title based on whether we are doing an add or an update.
+
+```typescript
+it('displays an appropriate title', () => {
+  render(<TastingNoteEditor {...props} />);
+  expect(screen.getByText('Add New Tasting Note')).toBeInTheDocument();
+  cleanup();
+  render(<TastingNoteEditor {...props} note={note} />);
+  expect(screen.getByText('Update Tasting Note')).toBeInTheDocument();
+});
+```
+
+So the add case has "Add New Tasting Note" where the update case just says "Update Tasting Note". Let's implement that in the code.
+
+```tsx
+<IonTitle className="ion-text-center">{note ? 'Update' : 'Add New'} Tasting Note</IonTitle>
+```
+
+#### The Button Label
+
+**Challenge:** write a very similar test and computed property for the `submit-button`. It should have a label of "Add" when we are adding a new note and a label of "Update" when we are updating an existing note.
+
+#### Load the Note
+
+If we have a note when the editor is created, we need to use it as default values for the form:
+
+```tsx
+it('populates the data when editing a note', async () => {
+  const { baseElement } = render(<TastingNoteEditor {...props} note={note} />);
+  expect((baseElement.querySelector('[label="Brand"]') as HTMLInputElement).value).toBe('Rishi');
+  expect((baseElement.querySelector('[label="Name"]') as HTMLInputElement).value).toBe('Puer Cake');
+  expect((baseElement.querySelector('[label="Type"]') as HTMLInputElement).value).toBe(6);
+  expect(screen.getAllByTestId('star')).toHaveLength(5);
+  expect((baseElement.querySelector('[label="Notes"') as HTMLInputElement).value).toBe(
+    'Smooth and peaty, the king of puer teas'
+  );
+});
+```
+
+We can then leverage the `reset()` method from React Hook Form to populate the form with the note data.
+
+```diff
+  const {
+    handleSubmit,
+    control,
+    formState: { errors, isValid, touchedFields, dirtyFields },
++   reset,
+  } = useForm<TastingNote>({ mode: 'onTouched', resolver: yupResolver(validationSchema) });
+
++ useEffect(() => {
++   note && reset(note);
++ }, [note]);
+```
+
+#### Save the Note
+
+When saving the note, the value passed to the `merge()` should include the ID. Here is the test. Place this right after the existing "merges the tasting note" test.
+
+```typescript
+it('includes the ID when editing a note', async () => {
+  cleanup();
+  const { merge } = useTastingNotes();
+  render(<TastingNoteEditor {...props} note={note} />);
+  const button = screen.getByTestId('submit-button') as HTMLIonButtonElement;
+  fireEvent.click(button);
+  await waitFor(() => expect(merge).toHaveBeenCalledTimes(1));
+  expect(merge).toHaveBeenCalledWith({
+    id: 73,
+    brand: 'Rishi',
+    name: 'Puer Cake',
+    teaCategoryId: 6,
+    rating: 5,
+    notes: 'Smooth and peaty, the king of puer teas',
+  });
+});
+```
+
+### Hookup the Editor
+
+We can then modify the `TastingNotesPage` to pass along the `note` when a user clicks on the note in the list.
+
+This requires a few minor edits. The first of which is to add a state variable to hold an optional `TastingNote` to pass as a prop to `TastingNoteEditor`:
+
+```diff
+  const { notes, refresh } = useTastingNotes();
++ const [note, setNote] = useState<TastingNote | undefined>(undefined);
+  const { teas } = useTea();
+  const [present, dismiss] = useIonModal(TastingNoteEditor, {
+    onDismiss: () => refresh().then(dismiss),
+    teas,
++   note
+  });
+```
+
+Next, add some helper functions to `setNote` and `present` the modal, depending on the scenario.
+
+```typescript
+const handleAddNote = () => {
+  setNote(undefined);
+  present();
+};
+
+const handleUpdateNote = (note: TastingNote) => {
+  setNote(note);
+  present();
+};
+```
+
+Then, modify the `onClick` handler of the `IonFabButton` like so:
+
+```tsx
+<IonFabButton onClick={() => handleAddNote()} data-testid="add-note-button">
+```
+
+Finally, adjust the `IonItem`:
+
+```tsx
+<IonItem key={note.id} button onClick={() => handleUpdateNote(note)}>
+```
+
+Now go add and edit some tasting notes to make sure everything still works when using the app.
+
+## Delete a Note
+
+The final feature we will add is the ability to delete a note. We will keep this one simple and make it somewhat hidden so that it isn't too easy for a user to delete a note.
+
+We will use a construct called a <a href="https://ionicframework.com/docs/api/item-sliding" target="_blank">item sliding</a> to essentially "hide" the delete button behind the item. That way the user has to slide the item over in order to expose the button and do a delete.
+
+Using this results in a little bit of rework in how the item is rendered and bound on the `TastingNotesPage`:
+
+```tsx
+<IonItemSliding key={note.id}>
+  <IonItem button onClick={() => handleUpdateNote(note)}>
+    <IonLabel>
+      <div>{note.brand}</div>
+      <div>{note.name}</div>
+    </IonLabel>
+  </IonItem>
+  <IonItemOptions>
+    <IonItemOption color="danger" onClick={() => remove(note)}>
+      Delete
+    </IonItemOption>
+  </IonItemOptions>
+</IonItemSliding>
+```
+
+For now, all you need to do in the code is grab the `remove` from `useTastingNotes()`:
+
+```typescript
+const { notes, refresh, remove } = useTastingNotes();
+```
+
+Play around with this in the browser and make sure everything is working.
+
+## Final Cleanup
+
+Let's put the browser in iPhone emulation mode and reload the app to make sure we are getting the iOS styling. Notice on the tea listing page we have what is called a <a href="https://ionicframework.com/docs/api/title#collapsible-large-titles">Collapsible Large Title</a>. On the tasting notes page, we do not have this, but we probably should because we essentially have a scrollable list. So let's add that.
+
+First we'll add a "displays the title" test in `src/tasting-notes/TastingNotesPage.test.ts`.
+
+```tsx
+it('displays the title', () => {
+  render(<TastingNotesPage />);
+  const titleElements = screen.getAllByText('Tasting Notes');
+  expect(titleElements).toHaveLength(2);
+});
+```
+
+We then need to update the component template in `src/tasting-notes/TastingNotesPage.tsx`. Here is a synopsis of the changes:
+
+- Add `translucent={true}` to the `IonHeader`.
+- Add `fullscreen` to the `IonContent`.
+- Add an `IonHeader` at the top of the `IonContent`. Its contents will be similar to the existing `IonHeader` with the following differences:
+  - Instead of `translucent={true}`, set `collapse="condense"`.
+  - On the `IonTitle`, set `size="large"`.
+  - If you had anything else in the toolbar other than the title (which we do not in this case), remove it.
+
+Have a look at `src/tea/TeaListPage.tsx` if you need a model for your changes.
 
 ## Conclusion
 
-Congratulations. You have used what we have learned to this point to add a whole new feature to your app. Along the way, you also exercised a few Framework components you had not used before. Next we will add some styling to the application.
+Congratulations. You have used what we have learned to this point to add a whole new feature to your app. Along the way, you also exercised a few Framework components you had not used before. We are almost done with this app.

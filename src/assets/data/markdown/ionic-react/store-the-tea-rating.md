@@ -110,7 +110,7 @@ We will be using the Preferences API's `get()` method to get the proper data. In
 ```diff
 beforeEach(() => {
   initializeTestData();
-  vi.resetAllMocks();
+  vi.clearAllMocks();
   (client.get as Mock).mockResolvedValue({ data: [] });
 + (Preferences.get as Mock).mockImplementation(async (opt: GetOptions) => {
 +   switch (opt.key) {
