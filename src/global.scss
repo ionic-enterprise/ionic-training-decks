@@ -42,3 +42,8 @@ pre {
 code {
   text-shadow: none !important;
 }
+
+/* Prism Diff Inserted Text Color Override */
+.token.inserted {
+  color: #7ec699;
+}
