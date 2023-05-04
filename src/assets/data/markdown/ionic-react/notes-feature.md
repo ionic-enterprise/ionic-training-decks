@@ -984,11 +984,11 @@ We can then leverage the `reset()` method from React Hook Form to populate the f
     control,
     formState: { errors, isValid, touchedFields, dirtyFields },
 +   reset,
-  } = useForm<TastingNote>({ mode: 'onTouched', resolver: yupResolver(validationSchema) });
-
-+ useEffect(() => {
-+   note && reset(note);
-+ }, [note]);
+  } = useForm<TastingNote>({
+    mode: 'onTouched',
+    resolver: yupResolver(validationSchema),
++   defaultValues: note || undefined,
+  });
 ```
 
 #### Save the Note
