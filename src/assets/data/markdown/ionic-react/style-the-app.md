@@ -2,25 +2,27 @@
 
 In this lab, you will further explore how to style your application.
 
+**Note:** the first half of this lab is just explanation, so do not try to put the CSS samples anywhere. The second half will apply all of this to our app. If you want to skip all of the explanation, look for the section titled **Putting it All Together**.
+
 ## A Note on iOS and Material Design Styling
 
-The Ionic Framework automatically adapts between styling that matches the iOS Human Interface Guidelines and Android's Material Design. We _highly_ suggest that you keep this paradigm in place. It allows your customers to see the application in a manner that makes sense to them on whatever platform they are on. The best practice here is to style your application in a way that injects your own branding without interfering with the native styling that makes the application look "at home" on each platform.
+The Ionic Framework automatically adapts between styling that matches the iOS Human Interface Guidelines and Android's Material Design. We _highly_ suggest that you keep this paradigm in place. It allows your customers to see the application in a manner that makes sense to them on whatever platform they are on. The best practice with regard to this is to style your application in a way that injects your own branding without interfering with the native styling. This makes the application look "at home" on each platform.
 
 ## Styling
 
-Our design team has come back to use with some requirements about how the application should look. Luckily these are fairly light weight suggestions for now, but we are going to want to start thinking about how we want to accomplish what the design team requires.
+Our design team has come back to us with some requirements about how the application should look. Luckily these are fairly light weight suggestions for now, but we are going to want to start thinking about how we will accomplish what the design team requires.
 
 ### Scoped CSS vs. Global CSS
 
 Generally, we want as much of our styling to be as global as possible in order to give our application an overall consistent look and feel. However, it is sometimes desirable to only apply a particular style within a specific view or component.
 
-Have a look at the bottom of the `src/shared/components/rating/Rating.css` file. There you will find the following styles:
+Have a look at the bottom of the `src/shared/Rating.css` file. There you will find the following styles:
 
 ```css
 .rating ion-icon {
-  font-size: 1.5em;
-  padding-right: 0.5em;
-  color: var(--ion-color-primary);
+  font-size: 24px;
+  padding-right: 12px;
+  color: gold;
 }
 
 .rating ion-icon:last-child {
@@ -28,22 +30,14 @@ Have a look at the bottom of the `src/shared/components/rating/Rating.css` file.
 }
 ```
 
-Notice the `.rating` class in the selector. This effectively scopes the styling to the Rating component since it is the only one with the `rating` class. Without such a convention, these styles would end up applying to _every_ `ion-icon` in the application.
+Notice the `.rating` class in the selector. This effectively scopes the styling to the Rating component since it is the only one with the `rating` class. Without this, the CSS that we have here could apply to every single `ion-icon` within our application, and we do not want this. We want these particular styles to _only_ apply to `ion-icon`s that are a part of this component.
 
 For most of our styling, we want a more global scope, but we would not put such styling in a component's CSS file like we did here. The reason is, that while it may actually apply globally it would be very difficult for developers to track and find. Rather, the best practice is to:
 
 - scope local styles like was done for the rating
 - place global styles in a global file (or another file imported by a global styling file)
 
-Have a look at `src/theme/global.css`. It currently contains:
-
-```css
-.error-message {
-  padding: 2em;
-  color: var(--ion-color-danger);
-  text-align: center;
-}
-```
+Let's create a file `src/theme/global.css` and import it in `App.tsx`.
 
 We will expand this shortly to contain more styles. As the styles grow, we will want to look at splitting them out into separate files that are imported here, but for now we can just add our styles to the `global.css` file.
 
@@ -55,7 +49,7 @@ However, it also means that different techniques must be employed when styling t
 
 ### Light DOM
 
-There really is no official term called "Light DOM" but it is a term that is common referred to items outside of a shadow root that you can style via traditional means. Even for many components that use shadow DOM you are still able to apply "light DOM" styling to them. For example:
+There is no official term called "Light DOM" but it is a term that commonly refers to items outside of a shadow root that you can style via traditional means. Even for many components that use shadow DOM you are still able to apply "light DOM" styling to them. For example:
 
 ```css
 ion-card {
@@ -67,7 +61,7 @@ The `ion-card` uses shadow DOM, but that is for the internal structure. The bord
 
 ### CSS Custom Properties
 
-The Ionic Framework makes heavy use of CSS Custom Properties. They are used to define the color scheme, default padding, etc. They are also used heavily in order to style individual components. Have a look at the <a href="https://ionicframework.com/docs/api/button#css-custom-properties">CSS Custom Properties for a button</a> as an example. This defines an API for the ways in which the framework authors intend for you to be able to style a button. You can do so as such:
+The Ionic Framework makes heavy use of <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/--*" target="_blank">CSS Custom Properties</a>. They are used to define the color scheme, default padding, etc. They are also used heavily in order to style individual components. Have a look at the <a href="https://ionicframework.com/docs/api/button#css-custom-properties" target="_blank">CSS Custom Properties for a button</a> as an example. This defines an API for the ways in which the framework authors intend for you to be able to style a button. You can do so as such:
 
 ```css
 ion-button {
@@ -79,11 +73,11 @@ This will apply a 75% opacity to all buttons in the application. You probably wa
 
 ### Shadow Parts
 
-A newer specification is <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/::part">Shadow Parts</a>. This allows the component author to tag specific parts of the component as something you can apply styles to as if it were in the light DOM. This allows component developers to still restrict how a component can be styled without having to redefine all of the ways an underlying element can be styled via a CSS Custom Property.
+A newer specification is <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/::part" target="_blank">Shadow Parts</a>. This allows the component author to tag specific parts of the component as something you can apply styles to as if it were in the light DOM. This allows component developers to still restrict how a component can be styled without having to redefine all of the ways an underlying element can be styled via a CSS Custom Property.
 
-As a result, users of the component can still style the component in ways that they are used do styling things, while still being protected from the implementation details of how the component itself is rendered internally.
+As a result, users of the component can still style the component in ways that they are used to styling things, while still being protected from the implementation details of how the component itself is rendered internally.
 
-Have a look at the <a href="https://ionicframework.com/docs/api/select#css-shadow-parts">Shadow Parts of a Select</a>. Notice that the various parts of a select are abstracted into parts that you can access and style, but you do not have to worry about the details of exactly how the component itself was constructed.
+Have a look at the <a href="https://ionicframework.com/docs/api/select#css-shadow-parts" target="_blank">Shadow Parts of a Select</a>. Notice that the various parts of a select are abstracted into parts that you can access and style, but you do not have to worry about the details of exactly how the component itself was constructed.
 
 This allows you to style the icon, for example, as such:
 
@@ -97,7 +91,11 @@ ion-select::part(icon) {
 
 ## Putting it All Together
 
+**Note:** now we are getting to the part where we will modify our code... 🤓
+
 The design team has started giving us design requirements. Mostly the color schemes to use for both light and dark mode, but they would also like a minor tweak to the border radius on the cards and a slightly different style on the select dropdown.
+
+Make sure you have a `theme/src/global.css` file created and imported in `App.tsx` if you have not done so already.
 
 ### The Color Theme
 
@@ -230,7 +228,9 @@ The first requirement from our design team is that the pages should have a gradi
 }
 ```
 
-Then add the `main-content` class to the `IonContent` elements in each of our pages as such: `<IonContent className="main-content">`. So far so good, but the lists in a couple of our pages show the default background color, which looks a little out of place, so let's make the background for the various list elements transparent.
+Then add the `main-content` class to the `IonContent` elements in each of our pages like so: `<IonContent className="main-content">`.
+
+So far so good, but the lists in a couple of our pages show the default background color, which looks a little out of place, so let's make the background for the various list elements transparent (in `src/theme/global.css`).
 
 ```css
 .list-ios {
@@ -262,14 +262,6 @@ We have a couple of other components where we need to set a specific color. Name
         <IonButton
 ```
 
-**`src/tasting-notes/editor/TastingNoteEditor.tsx`**
-
-```tsx
-    <IonFooter>
-      <IonToolbar color="secondary">
-        <IonButton
-```
-
 **`src/Tabs.tsx`**
 
 ```tsx
@@ -285,24 +277,6 @@ First, our design team wants a slightly more obvious radius on our cards. Since 
 ```css
 ion-card {
   border-radius: 20px;
-}
-```
-
-They would also like the select component to have a nice box around the down-arrow shape. This is in the shadow DOM so we need to use a different technique. In this case, we can use Shadow Parts to modify the select.
-
-```css
-ion-select::part(icon) {
-  width: 20px;
-  border: 1px solid;
-  border-radius: 4px;
-}
-```
-
-This results in the text being a little too close to the button icon, crowding it a bit, so we will use the shadow part for the text to nudge that over.
-
-```css
-ion-select::part(text) {
-  margin-right: 1em;
 }
 ```
 

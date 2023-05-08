@@ -41,7 +41,7 @@ There are no tests for the removal of the tasting notes. Here is your chance to 
 
 Right now, if the user clicks to remove a tasting note, it is simply removed. There is no double check. A lot of our users have complained about this since they will accidentally swipe and click.
 
-**Gaol:** Use an <a href="https://ionicframework.com/docs/api/alert" target="_blank">alert</a> to ask the user if they would like to delete the note, and then respond accordingly. Be sure to fully test this change and follow TDD as you develop the solution.
+**Goal:** Use an <a href="https://ionicframework.com/docs/api/alert" target="_blank">alert</a> to ask the user if they would like to delete the note, and then respond accordingly. Be sure to fully test this change and follow TDD as you develop the solution.
 
 ## Conclusion
 
