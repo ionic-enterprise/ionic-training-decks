@@ -1,4 +1,4 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { PopoverController } from '@ionic/angular';
 
 @Component({
@@ -6,10 +6,8 @@ import { PopoverController } from '@ionic/angular';
   templateUrl: './page-menu.component.html',
   styleUrls: ['./page-menu.component.scss'],
 })
-export class PageMenuComponent implements OnInit {
+export class PageMenuComponent {
   @Input() menuItems: Array<string>;
 
   constructor(public popoverController: PopoverController) {}
-
-  ngOnInit() {}
 }
