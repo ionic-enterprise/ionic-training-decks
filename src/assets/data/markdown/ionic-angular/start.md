@@ -26,14 +26,14 @@ Lets start our application via whichever technique you want.
 
 ```bash
 cd ~/Projects/Training
-ionic start tea-taster blank --type=angular --no-git
+ionic start tea-taster blank --type=angular-standalone --no-git
 ```
 
 Let's look at some of those options more closely.
 
 - The third option is the name of the application.
 - The forth option, `blank` tells Ionic to use the `blank` starter. We have three basic starters: `blank`, `tabs`, and `sidemenu`. The main difference is the style of navigation.
-- The `--type` option specifies the type of application to create. Options include `angular`, `react`, `vue`, `ionic-angular`, and `ionic1`. The `ionic-angular` type is an Ionic v3 application.
+- The `--type` option specifies the type of application to create. Options include `angular`, `angular-standalone`, `react`, `vue`, `ionic-angular`, and `ionic1`. The `ionic-angular` type is an Ionic v3 application.
 - The `--no-git` option tells the CLI not to create a git repo. We will create that ourselves.
 - The application will use Capacitor for the native layer by default.
 
@@ -46,7 +46,11 @@ ionic serve
 
 ## Enforce Consistent Styling
 
-<a href="https://prettier.io/" target="_blank">Prettier</a> is an excellent tool that you can use to keep the formatting of your code consistent and clean. We highly suggest you use a tool such as this. Whether you are a lone developer or part of a team, using a tool such as Prettier means that you do not have to think about the formatting of your code. Better yet, you do not run into "formatting wars" between developers.
+<a href="https://prettier.io/" target="_blank">
+  Prettier
+</a> is an excellent tool that you can use to keep the formatting of your code consistent and clean. We highly suggest you
+use a tool such as this. Whether you are a lone developer or part of a team, using a tool such as Prettier means that you
+do not have to think about the formatting of your code. Better yet, you do not run into "formatting wars" between developers.
 
 Prettier itself is an opinionated code formatter, and Ionic has its own opinions on how it is best configured, so let's install both Prettier and Ionic's Prettier configuration. We will also install <a href="https://www.npmjs.com/package/husky" target="_blank">husky</a> and <a href="https://www.npmjs.com/package/pretty-quick" target="_blank">pretty-quick</a>. This will allow us to set up a commit hook to make sure Prettier is run with each commit. After that we don't have to waste brain cycles thinking about code formatting ever again.
 
@@ -153,7 +157,10 @@ It is important to keep our dependencies up to date on a regular basis. At least
 
 ### Semantic Versioning
 
-<a href="https://semver.org/" target="_blank">Semantic Versioning</a> is, at a basic level, a three point versioning scheme as such: `major.minor.patch`. A modification of the version at any level signifies the types of changes made in the version:
+<a href="https://semver.org/" target="_blank">
+  Semantic Versioning
+</a> is, at a basic level, a three point versioning scheme as such: `major.minor.patch`. A modification of the version at
+any level signifies the types of changes made in the version:
 
 - **Major**: breaking changes are contained in this release.
 - **Minor**: new features have been added in this release, but in a backwards compatible manner.
