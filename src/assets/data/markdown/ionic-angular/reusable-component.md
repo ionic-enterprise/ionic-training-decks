@@ -218,7 +218,7 @@ Open the `src/app/shared/rating/rating.component.html` file and change the `(cli
 <div>
   <ion-icon
     *ngFor="let n of [1, 2, 3, 4, 5]"
-    [name]="n > (rating || 0) ? 'star' : 'star-outline'"
+    [name]="n > (rating || 0) ? 'star-outline' : 'star'"
     (click)="ratingClicked(n)"
   ></ion-icon>
 </div>
