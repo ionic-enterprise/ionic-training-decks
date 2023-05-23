@@ -65,6 +65,8 @@ import { By } from '@angular/platform-browser';
 
 That new test case should go directly under the existing "should create" test case.
 
+Take note of the `trim()`. The text content of an HTML element can have leading or trailing spaces depending upon how the HTML is rendered. It is a best practice to include the `trim()` in your test.
+
 ## Install Mock Factories
 
 It is a _best practice_ to use centralized factory functions to create mocks whenever it makes sense. This allows us to use a consistently defined mock throughout the tests in our application and reduces maintenance costs. For this application, we provide a set of centralized mock factories. <a download href="/assets/packages/ionic-angular/test.zip">Download the zip file</a> and unpack it in the root of the project creating a `test` folder.
