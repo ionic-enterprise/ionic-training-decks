@@ -245,9 +245,9 @@ describe('TastingNoteEditorComponent', () => {
       const opts = sel.queryAll(By.css('ion-select-option'));
       expect(opts.length).toEqual(2);
       expect(opts[0].nativeElement.value).toEqual(7);
-      expect(opts[0].nativeElement.textContent).toEqual('White');
+      expect(opts[0].nativeElement.textContent.trim()).toEqual('White');
       expect(opts[1].nativeElement.value).toEqual(8);
-      expect(opts[1].nativeElement.textContent).toEqual('Yellow');
+      expect(opts[1].nativeElement.textContent.trim()).toEqual('Yellow');
     });
 
     describe('without a note', () => {
@@ -257,12 +257,12 @@ describe('TastingNoteEditorComponent', () => {
 
       it('has the add title', () => {
         const el = fixture.debugElement.query(By.css('ion-title'));
-        expect(el.nativeElement.textContent).toEqual('Add Note');
+        expect(el.nativeElement.textContent.trim()).toEqual('Add Note');
       });
 
       it('has the add button label', () => {
         const btn = fixture.debugElement.query(By.css('[data-testid="save-button"]'));
-        expect(btn.nativeElement.textContent).toEqual('Add');
+        expect(btn.nativeElement.textContent.trim()).toEqual('Add');
       });
     });
 
@@ -301,12 +301,12 @@ describe('TastingNoteEditorComponent', () => {
 
       it('has the update title', () => {
         const el = fixture.debugElement.query(By.css('ion-title'));
-        expect(el.nativeElement.textContent).toEqual('Update Note');
+        expect(el.nativeElement.textContent.trim()).toEqual('Update Note');
       });
 
       it('has the update button label', () => {
         const btn = fixture.debugElement.query(By.css('[data-testid="save-button"]'));
-        expect(btn.nativeElement.textContent).toEqual('Update');
+        expect(btn.nativeElement.textContent.trim()).toEqual('Update');
       });
     });
   });
@@ -625,8 +625,8 @@ describe('TastingNotesPage', () => {
     fixture.detectChanges();
     const items = fixture.debugElement.queryAll(By.css('ion-item'));
     expect(items.length).toEqual(2);
-    expect(items[0].nativeElement.textContent).toContain('Bentley');
-    expect(items[1].nativeElement.textContent).toContain('Lipton');
+    expect(items[0].nativeElement.textContent.trim()).toContain('Bentley');
+    expect(items[1].nativeElement.textContent.trim()).toContain('Lipton');
   });
 
   const click = (button: HTMLElement) => {
