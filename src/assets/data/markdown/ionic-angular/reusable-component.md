@@ -13,7 +13,19 @@ A common convention is to create reusable components that are not specific to a 
 ionic g component shared/rating
 ```
 
-Create a barrel file (`src/app/shared/index.ts`) to export all of the items that we add to the shared module.
+Once the component is created, look at the `@Component` properties in `src/app/shared/rating/rating.component.ts` and ensure that the component is properly configured to be stand alone:
+
+```typescript
+@Component({
+  selector: 'app-rating',
+  templateUrl: './rating.component.html',
+  styleUrls: ['./rating.component.scss'],
+  standalone: true,
+  imports: [CommonModule, FormsModule, IonicModule],
+})
+```
+
+Finally, create a barrel file (`src/app/shared/index.ts`) to export all of the items that we add to the shared folder.
 
 ## Use the `RatingComponent`
 
