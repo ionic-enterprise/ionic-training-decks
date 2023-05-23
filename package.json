@@ -55,7 +55,7 @@
     "@angular/compiler-cli": "^16.0.0",
     "@angular/language-service": "^16.0.0",
     "@capacitor/cli": "^5.0.0",
-    "@chiragrupani/karma-chromium-edge-launcher": "~2.2.1",
+    "@chiragrupani/karma-chromium-edge-launcher": "~2.3.1",
     "@ionic/angular-toolkit": "~9.0.0",
     "@ionic/prettier-config": "~3.0.0",
     "@types/jasmine": "~4.3.0",
