@@ -1,13 +1,17 @@
 import { Component, OnInit } from '@angular/core';
 import { ApplicationService, MenuItemsService } from '@app/core';
-import { NavController, Platform } from '@ionic/angular';
+import { IonicModule, NavController, Platform } from '@ionic/angular';
 import { FirebaseAnalytics } from '@capacitor-community/firebase-analytics';
 import { SplashScreen } from '@capacitor/splash-screen';
+import { CommonModule } from '@angular/common';
+import { RouterLink, RouterLinkActive } from '@angular/router';
 
 @Component({
   selector: 'app-root',
   templateUrl: 'app.component.html',
   styleUrls: ['app.component.scss'],
+  standalone: true,
+  imports: [CommonModule, IonicModule, RouterLink, RouterLinkActive],
 })
 export class AppComponent implements OnInit {
   selectedIndex = 0;

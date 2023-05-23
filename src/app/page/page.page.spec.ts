@@ -1,39 +1,35 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { IonicModule, PopoverController, NavController } from '@ionic/angular';
-import { RouterModule, ActivatedRoute } from '@angular/router';
-import { PagePage } from './page.page';
-import { MarkdownViewModule } from '@app/markdown-view/markdown-view.module';
+import { By } from '@angular/platform-browser';
+import { ActivatedRoute } from '@angular/router';
 import { MenuItemsService } from '@app/core';
 import { createMenuItemsServiceMock } from '@app/core/testing';
+import { PageMenuComponent } from '@app/page-menu/page-menu.component';
+import { NavController, PopoverController } from '@ionic/angular';
 import {
   createActivatedRouteMock,
-  createOverlayElementMock,
-  createOverlayControllerMock,
   createNavControllerMock,
+  createOverlayControllerMock,
+  createOverlayElementMock,
 } from '@test/mocks';
-import { PageMenuComponent } from '@app/page-menu/page-menu.component';
-import { By } from '@angular/platform-browser';
+import { PagePage } from './page.page';
 
 describe('PagePage', () => {
   let component: PagePage;
   let fixture: ComponentFixture<PagePage>;
   let popover: HTMLIonPopoverElement;
+  let popoverController: PopoverController;
 
   beforeEach(waitForAsync(() => {
     popover = createOverlayElementMock('Popover');
+    popoverController = createOverlayControllerMock('PopoverController', popover);
     TestBed.configureTestingModule({
-      declarations: [PagePage],
-      imports: [IonicModule, MarkdownViewModule, RouterModule.forRoot([], {})],
-      providers: [
-        { provide: ActivatedRoute, useFactory: createActivatedRouteMock },
-        { provide: MenuItemsService, useFactory: createMenuItemsServiceMock },
-        {
-          provide: PopoverController,
-          useFactory: () => createOverlayControllerMock('PopoverController', popover),
-        },
-        { provide: NavController, useFactory: createNavControllerMock },
-      ],
-    }).compileComponents();
+      imports: [PagePage],
+    })
+      .overrideProvider(ActivatedRoute, { useFactory: createActivatedRouteMock })
+      .overrideProvider(MenuItemsService, { useFactory: createMenuItemsServiceMock })
+      .overrideProvider(PopoverController, { useValue: popoverController })
+      .overrideProvider(NavController, { useFactory: createNavControllerMock })
+      .compileComponents();
 
     const activatedRoute = TestBed.inject(ActivatedRoute);
     (activatedRoute.snapshot.paramMap.get as any).and.returnValue('1');
@@ -452,7 +448,6 @@ describe('PagePage', () => {
     });
 
     it('creates a popover menu', async () => {
-      const popoverController = TestBed.inject(PopoverController);
       const evt = new Event('click');
       await component.showMenu(evt);
       expect(popoverController.create).toHaveBeenCalledTimes(1);

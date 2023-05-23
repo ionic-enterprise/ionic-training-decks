@@ -1,3 +1,4 @@
+import { CommonModule } from '@angular/common';
 import { Component, Input, OnInit } from '@angular/core';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { FirebaseAnalytics } from '@capacitor-community/firebase-analytics';
@@ -7,6 +8,8 @@ import { marked } from 'marked';
   selector: 'app-markdown-view',
   templateUrl: './markdown-view.component.html',
   styleUrls: ['./markdown-view.component.scss'],
+  standalone: true,
+  imports: [CommonModule],
 })
 export class MarkdownViewComponent implements OnInit {
   @Input() folder: string;

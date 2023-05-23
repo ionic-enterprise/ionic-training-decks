@@ -1,31 +1,23 @@
-import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { TestBed, waitForAsync } from '@angular/core/testing';
-
 import { NavController, Platform } from '@ionic/angular';
-import { RouterTestingModule } from '@angular/router/testing';
-
-import { AppComponent } from './app.component';
-import { createNavControllerMock, createPlatformMock } from '@test/mocks';
-import { MenuItemsService, ApplicationService } from '@app/core';
-import { createMenuItemsServiceMock, createAppliationServiceMock } from '@app/core/testing';
+import { provideRouter } from '@angular/router';
+import { ApplicationService, MenuItemsService } from '@app/core';
+import { createAppliationServiceMock, createMenuItemsServiceMock } from '@app/core/testing';
 import { SplashScreen } from '@capacitor/splash-screen';
+import { createNavControllerMock, createPlatformMock } from '@test/mocks';
+import { AppComponent } from './app.component';
 
 describe('AppComponent', () => {
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [AppComponent],
-      schemas: [CUSTOM_ELEMENTS_SCHEMA],
-      providers: [
-        {
-          provide: ApplicationService,
-          useFactory: createAppliationServiceMock,
-        },
-        { provide: MenuItemsService, useFactory: createMenuItemsServiceMock },
-        { provide: NavController, useFactory: createNavControllerMock },
-        { provide: Platform, useFactory: createPlatformMock },
-      ],
-      imports: [RouterTestingModule.withRoutes([])],
-    }).compileComponents();
+      imports: [AppComponent],
+      providers: [provideRouter([])],
+    })
+      .overrideProvider(ApplicationService, { useFactory: createAppliationServiceMock })
+      .overrideProvider(MenuItemsService, { useFactory: createMenuItemsServiceMock })
+      .overrideProvider(NavController, { useFactory: createNavControllerMock })
+      .overrideProvider(Platform, { useFactory: createPlatformMock })
+      .compileComponents();
   }));
 
   it('should create the app', async () => {

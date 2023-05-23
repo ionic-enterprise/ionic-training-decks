@@ -1,14 +1,19 @@
+import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { MenuItemsService } from '@app/core';
+import { MarkdownViewComponent } from '@app/markdown-view/markdown-view.component';
 import { MenuItem } from '@app/models';
-import { PopoverController, NavController } from '@ionic/angular';
 import { PageMenuComponent } from '@app/page-menu/page-menu.component';
+import { IonicModule, NavController, PopoverController } from '@ionic/angular';
 
 @Component({
   selector: 'app-page',
   templateUrl: './page.page.html',
   styleUrls: ['./page.page.scss'],
+  standalone: true,
+  imports: [CommonModule, FormsModule, IonicModule, MarkdownViewComponent, PageMenuComponent],
 })
 export class PagePage implements OnInit {
   disableMenu = true;
@@ -90,6 +95,9 @@ export class PagePage implements OnInit {
     this.tabParam = this.activatedRoute.snapshot.paramMap.get('tabName');
     const pageParam = this.activatedRoute.snapshot.paramMap.get('page');
     this.pageIdx = pageParam && parseInt(pageParam, 10);
+    console.log('nav params', this.sectionParam, this.tabParam, this.pageIdx);
+    console.log(this.activatedRoute.snapshot);
+    console.log(this.activatedRoute.parent);
   }
 
   private getPages() {
