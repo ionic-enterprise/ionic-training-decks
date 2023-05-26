@@ -1,3 +1,15 @@
+## [5.7.5](https://github.com/ionic-team/ionic-training-decks/compare/v5.7.2...v5.7.5) (2023-05-26)
+
+### Bug Fixes
+
+- **all:** switch to prismjs for code highlighting ([3d07c95](https://github.com/ionic-team/ionic-training-decks/commit/3d07c95b79eb9bf0fbe255168a69e43c35de15cf))
+- **angular:** update specifics found during last live training ([2615501](https://github.com/ionic-team/ionic-training-decks/commit/261550187cabb305aa5b2eac93025628af3a2a0e))
+- **vue:** update to use vite and vitest ([49c9b47](https://github.com/ionic-team/ionic-training-decks/commit/49c9b47d76d942dcafcd194ab1ddcf02e8b05ce4))
+
+### Features
+
+- **react:** update for the v7 release ([5a1878b](https://github.com/ionic-team/ionic-training-decks/commit/5a1878ba0b4043ba5558334b026f9b304c8f4e37))
+
 ## [5.7.4](https://github.com/ionic-team/ionic-training-decks/compare/v4.1.1...v5.7.4) (2023-05-08)
 
 ### Bug Fixes
