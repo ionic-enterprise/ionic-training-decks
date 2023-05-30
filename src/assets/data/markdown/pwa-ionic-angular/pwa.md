@@ -70,7 +70,7 @@ The HTTPS bit is handled by Firebase Hosting. Now we will handle the last two as
 We need to install Angular's PWA library. Some of what the installation is going to do is going to have conflicts with work that `@capacitor/assets` already did for us. Specifically, Angular's PWA library will install some icons as well as a `src/manifest.webmanifest` file. It is that last file that is going to give us trouble, so let's move the existing one out of the way, and then install the Angular PWA tooling:
 
 ```
-git mv src/manifest.webmanifest src/manifest.webmanifest.orig
+git rm src/manifest.webmanifest
 npx ng add @angular/pwa
 ```
 
@@ -133,6 +133,7 @@ The current version of the service worker does not need to be configured. It cur
 
 ```JSON
 {
+  "$schema": "./node_modules/@angular/service-worker/config/schema.json",
   "index": "/index.html",
   "assetGroups": [
     {
@@ -142,18 +143,20 @@ The current version of the service worker does not need to be configured. It cur
         "files": [
           "/favicon.ico",
           "/index.html",
+          "/manifest.webmanifest",
           "/*.css",
           "/*.js"
         ]
       }
-    }, {
+    },
+    {
       "name": "assets",
       "installMode": "lazy",
       "updateMode": "prefetch",
       "resources": {
         "files": [
           "/assets/**",
-          "/*.(eot|svg|cur|jpg|png|webp|gif|otf|ttf|woff|woff2|ani)"
+          "/*.(svg|cur|jpg|jpeg|png|apng|webp|avif|gif|otf|ttf|woff|woff2)"
         ]
       }
     }

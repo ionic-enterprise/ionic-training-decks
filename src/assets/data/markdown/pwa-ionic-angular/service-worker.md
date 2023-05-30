@@ -126,6 +126,7 @@ export class ApplicationService {
       this.update.activateUpdate().then(() => document.location.reload());
     }
   }
+}
 ```
 
 Create a mock factory (filename: `application.service.mock.ts`) using one of the others service's mock factories as model if you need to. Make sure you update the `src/app/core/index.ts` and `src/app/core/testing.ts` files.
@@ -141,35 +142,27 @@ The first thing we need to do in the test is provide the `ApplicationService` an
 ```diff
 --- a/src/app/app.component.spec.ts
 +++ b/src/app/app.component.spec.ts
-@@ -1,7 +1,11 @@
- import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
- import { TestBed, waitForAsync } from '@angular/core/testing';
+@@ -1,15 +1,21 @@
+ import { TestBed } from '@angular/core/testing';
+ import { provideRouter } from '@angular/router';
+ import { SplashScreen } from '@capacitor/splash-screen';
 +import { Platform } from '@ionic/angular';
-+import { createPlatformMock } from '@test/mocks';
-
  import { AppComponent } from './app.component';
 +import { ApplicationService } from './core';
 +import { createApplicationServiceMock } from './core/testing';
 
  describe('AppComponent', () => {
-   beforeEach(
-@@ -9,6 +13,16 @@ describe('AppComponent', () => {
-       TestBed.configureTestingModule({
-         declarations: [AppComponent],
-         schemas: [CUSTOM_ELEMENTS_SCHEMA],
-+        providers: [
-+          {
-+            provide: Platform,
-+            useFactory: createPlatformMock,
-+          },
-+          {
-+            provide: ApplicationService,
-+            useFactory: createApplicationServiceMock,
-+          },
-+        ],
-       }).compileComponents();
-     }),
-   );
+   beforeEach(async () => {
+     await TestBed.configureTestingModule({
+       imports: [AppComponent],
+       providers: [provideRouter([])],
+-    }).compileComponents();
++    })
++      .overrideProvider(ApplicationService, { useFactory: createApplicationServiceMock })
++      .compileComponents();
+   });
+
+   it('should create the app', () => {
 ```
 
 Once that is in place, add a couple of tests, one for a hybrid mobile context, the other for a web context. In the "hybrid mobile context" section show that we _do not_ register for updates. In the "web context" section show that we _do_ register for updates. Note the one line difference between the two tests.
@@ -218,30 +211,29 @@ In the `AppComponent`, inject the `ApplicationService` and `Platform` service. I
 ```diff
 --- a/src/app/app.component.ts
 +++ b/src/app/app.component.ts
-@@ -1,10 +1,21 @@
--import { Component } from '@angular/core';
-+import { Component, OnInit } from '@angular/core';
-+import { Platform } from '@ionic/angular';
+@@ -1,7 +1,8 @@
+ import { CommonModule } from '@angular/common';
+ import { Component, OnInit } from '@angular/core';
+ import { SplashScreen } from '@capacitor/splash-screen';
+-import { IonicModule } from '@ionic/angular';
++import { IonicModule, Platform } from '@ionic/angular';
 +import { ApplicationService } from './core';
 
  @Component({
    selector: 'app-root',
-   templateUrl: 'app.component.html',
-   styleUrls: ['app.component.scss'],
+@@ -11,9 +12,12 @@ import { IonicModule } from '@ionic/angular';
+   imports: [CommonModule, IonicModule],
  })
--export class AppComponent {
+ export class AppComponent implements OnInit {
 -  constructor() {}
-+export class AppComponent implements OnInit {
-+  constructor(
-+    private application: ApplicationService,
-+    private platform: Platform,
-+  ) {}
-+
-+  ngOnInit() {
++  constructor(private application: ApplicationService, private platform: Platform) {}
+
+   ngOnInit() {
+     SplashScreen.hide();
 +    if (!this.platform.is('hybrid')) {
 +      this.application.registerForUpdates();
 +    }
-+  }
+   }
  }
 ```
 
