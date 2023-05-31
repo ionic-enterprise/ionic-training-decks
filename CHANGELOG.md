@@ -1,3 +1,14 @@
+## [5.7.6](https://github.com/ionic-team/ionic-training-decks/compare/v5.7.3...v5.7.6) (2023-05-31)
+
+### Bug Fixes
+
+- **angular:** update specifics found during last live training ([2615501](https://github.com/ionic-team/ionic-training-decks/commit/261550187cabb305aa5b2eac93025628af3a2a0e))
+- **pwa:** modify for NG 16 ([c537f66](https://github.com/ionic-team/ionic-training-decks/commit/c537f668457639c227b479e5d45b3c3467f238fc))
+
+### Features
+
+- **react:** update for the v7 release ([5a1878b](https://github.com/ionic-team/ionic-training-decks/commit/5a1878ba0b4043ba5558334b026f9b304c8f4e37))
+
 ## [5.7.5](https://github.com/ionic-team/ionic-training-decks/compare/v5.7.2...v5.7.5) (2023-05-26)
 
 ### Bug Fixes
