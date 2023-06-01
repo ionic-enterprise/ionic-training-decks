@@ -2,6 +2,12 @@
 
 Now that you are through with the course, here are some extra credit exercises you can use to apply what you have learned or to start digging into something new. If there is time at the end of the training days, this can be done "in class." You can also do this on your own if you wish.
 
+These exercises are all independent of one another so you can do them in any order you choose, or skip some of the entirely. The excercises are:
+
+- Create a better login page.
+- Update the splash screen flow.
+- Pay off some of the tech debt we incurred when creating the notes feature.
+
 ## A Better Login Page
 
 The current login page does not offer a very good look and feel. Let's refactor this page for a better user experience. Have a look at the <a href="https://ionicframework.com/docs/api/card" target="_blank">card component</a>. We have used these elsewhere. Let's also use one here.
@@ -46,9 +52,14 @@ The default behavior for the splash screen is not ideal. On Android, there is a 
   },
 ```
 
-## Tasting Notes Removal Improvements
+## Remove Tasting Notes Tech Debt
 
 The Tasting Notes feature that we added was fairly complete, but some shortcuts were made in order to fit in in "on schedule." Let's remove some of that technical debt was accrued.
+
+The largest pieces of debt are:
+
+- There is no unit testing for the removal of tasting notes.
+- We do not ask the user before removing a note, we just remove it.
 
 ### Unit Testing
 
