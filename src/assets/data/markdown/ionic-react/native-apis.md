@@ -47,7 +47,9 @@ const config: CapacitorConfig = {
   appId: 'io.ionic.teataster',
   appName: 'Tea Tasting Notes',
   webDir: 'dist',
-  bundledWebRuntime: false,
+  server: {
+    androidScheme: 'https',
+  },
   plugins: {
     SplashScreen: {
       launchAutoHide: false,
@@ -88,12 +90,12 @@ This type of mock is called a "manual mock", and many test frameworks (such as V
 
 ### The Splash Container
 
-Create a new folder `src/splash`. In it, create two new files: `SplashContainer.tsx` and `SplashScreen.test.tsx`:
+Create a new folder `src/components/splash`. In it, create two new files: `SplashContainer.tsx` and `SplashContainer.test.tsx`:
 
 ```bash
-mkdir src/splash
-touch src/splash/SplashContainer.tsx
-touch src/splash/SplashContainer.test.tsx
+mkdir src/components/splash
+touch src/components/splash/SplashContainer.tsx
+touch src/components/splash/SplashContainer.test.tsx
 ```
 
 Scaffold out the component like so:
@@ -113,7 +115,7 @@ Import it into `src/App.tsx` and adjust the component template so `<SplashContai
 
 ```tsx
 ...
-import SplashContainer from './splash/SplashContainer';
+import SplashContainer from './components/splash/SplashContainer';
 
 setupIonicReact();
 
@@ -130,7 +132,7 @@ const App: React.FC = () => {
 
 ### Hide the Splash Screen
 
-Let's put our `@capacitor/splash-screen` mock to work. Open `src/splash/SplashContainer.test.tsx` and add the following test:
+Let's put our `@capacitor/splash-screen` mock to work. Open `src/components/splash/SplashContainer.test.tsx` and add the following test:
 
 ```typescript
 import { vi } from 'vitest';
@@ -150,7 +152,7 @@ describe('<SplashContainer />', () => {
 
 Note `vi.mock('@capacitor/splash-screen')`. This line of code tells Vitest that we want to use a mock of the imported `@capacitor/splash-screen` module, and not the real deal. Vitest looks within the `__mocks__` folder, finds `@capacitor/splash-screen.ts`, and uses it instead of the actual implementation for this file. Pretty neat!
 
-The test will fail, as we would expect with TDD. Let's do the bare minimum to make the test pass by tweaking `src/splash/SplashContainer.tsx`:
+The test will fail, as we would expect with TDD. Let's do the bare minimum to make the test pass by tweaking `src/components/splash/SplashContainer.tsx`:
 
 ```tsx
 import { SplashScreen } from '@capacitor/splash-screen';
@@ -178,7 +180,7 @@ The Ionic Framework contains functionality to detect what platform the applicati
 
 Just like the Splash Screen Capacitor plugin, we need to supply a mock for the `isPlatform` method provided by `@ionic/react`. We'll take advantage of "automatic mocking" this time.
 
-First, add `import { isPlatform } from '@ionic/react';` to your list of imports, then add the following code to `src/splash/SplashContainer.tsx`, below `vi.mock('@capacitor/splash-screen');`:
+First, add `import { isPlatform } from '@ionic/react';` to your list of imports, then add the following code to `src/components/splash/SplashContainer.tsx`, below `vi.mock('@capacitor/splash-screen');`:
 
 ```typescript
 vi.mock('@ionic/react', async (getOriginal) => {
@@ -221,7 +223,7 @@ Notice the `beforeEach()` statements. The first one tells the test runner to cle
 
 Looking through the <a href="https://ionicframework.com/docs/react/platform#platforms" target="_blank">Platform API documentation</a> we see the list of all possible platform values `isPlatform` can return. Note that <a href="https://ionicframework.com/docs/react/platform#isplatform" target="_blank">isPlatform</a> can return true for multiple inputs. For instance, an iPad would return true for the `mobile`, `ios`, `ipad`, and `tablet` platforms.
 
-Using this knowledge, update the `useEffect` in `src/splash/SplashContainer` to check if the application is being run in a `hybrid` context. If so, then and only then will we call `SplashScreen.hide`.
+Using this knowledge, update the `useEffect` in `src/components/splash/SplashContainer` to check if the application is being run in a `hybrid` context. If so, then and only then will we call `SplashScreen.hide`.
 
 ```typescript
 useEffect(() => {

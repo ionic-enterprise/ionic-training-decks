@@ -49,12 +49,14 @@ We've done some work already with the Home page. Rather than start over, let's j
 
 This is a multi-part process:
 
-1. Rename `src/pages` to `src/tea`
-2. Replace `Home` with `TeaListPage` for all filenames within `src/tea`
-   - For example, `src/tea/Home.test.tsx` becomes `src/tea/TeaListPage.test.tsx`
-3. Fix the routing
-4. Fix the tests
-5. Make minor updates to the code
+1. Create a subfolder named `src/pages/tea`.
+2. Move the existing files in `src/pages` within the `src/pages/tea` subfolder.
+3. Replace `Home` with `TeaListPage` for all filenames within `src/pages/tea`.
+   - For example, `src/pages/tea/Home.test.tsx` becomes `src/pages/tea/TeaListPage.test.tsx`.
+4. Rename the `Home` component to `TeaListPage`.
+5. Fix the routing.
+6. Fix the tests.
+7. Make minor updates to the code.
 
 ### Fix the Routing
 
@@ -83,7 +85,7 @@ const App: React.FC = () => (
 
 ### Fix the Tests
 
-We need to replace the reference to `<Home />` within `src/tea/TeaListPage.test.tsx` as well.
+We need to replace the reference to `<Home />` within `src/pages/tea/TeaListPage.test.tsx` as well.
 
 ```tsx
 describe('<TeaListPage />', () => {
@@ -121,7 +123,7 @@ Let's mock up how Ionic components will be used in the tea listing page. This al
 
 We don't have a connection to a back end service to get any data for our application. For now we will just add some data directly to our page so we have something to work with.
 
-Just copy-paste the following into your `TeaListPage` component, above the return block:
+Just copy-paste the following into your `TeaListPage` component file, above the component definition:
 
 ```typescript
 export const teaData: Tea[] = [
@@ -234,7 +236,7 @@ We no longer need the test that expects the default text, so remove that test ca
 
 Let's lay out our tests for our current mock data (which has seven teas), and our highest resolution, which will have four teas per row. In this case, our page is expected to render two rows; the first with four columns and the second with three.
 
-We need tests like this in `src/tea/TeaListPage.test.tsx`:
+We need tests like this in `src/pages/tea/TeaListPage.test.tsx`:
 
 ```tsx
 describe('<TeaListPage />', () => {
@@ -258,7 +260,7 @@ it('displays two rows', () => {
 });
 ```
 
-In order to satisfy this requirement, it will be easiest if we convert our list of teas to a matrix. Let's write a method that does just that. Add the following function to `src/tea/TeaListPage.tsx`, above the component definition, like we did for the mock tea data:
+In order to satisfy this requirement, it will be easiest if we convert our list of teas to a matrix. Let's write a method that does just that. Add the following function to `src/pages/tea/TeaListPage.tsx`, above the component definition, like we did for the mock tea data:
 
 ```typescript
 const listToMatrix = (): Tea[][] => {
@@ -388,7 +390,7 @@ Now as you change the type of device that is being emulated on Chrome the layout
 
 ## Cleanup
 
-We have no further use of the `<ExploreContainer />` component that was generated when we generated our project using `ionic start`. Let's remove the statement importing it in `TeaListPage.tsx` and delete the `components` folder.
+We have no further use of the `<ExploreContainer />` component that was generated when we generated our project using `ionic start`. Let's remove the statement importing it in `TeaListPage.tsx` and delete the files from the `components` folder.
 
 Additionally, don't forget to update your component's snapshot!
 
