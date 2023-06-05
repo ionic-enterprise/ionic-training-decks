@@ -11,7 +11,7 @@ Since we are using Firebase to host our app, we already get a lot of benefits fo
 
 Add the following configuration to your `firebase.json` file:
 
-```JSON
+```json
 "headers": [
   {
     "source": "ngsw-worker.js",
@@ -27,15 +27,11 @@ Add the following configuration to your `firebase.json` file:
 
 When you are complete, the `firebase.json` file should look something like this:
 
-```JSON
+```json
 {
   "hosting": {
     "public": "www",
-    "ignore": [
-      "firebase.json",
-      "**/.*",
-      "**/node_modules/**"
-    ],
+    "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
     "rewrites": [
       {
         "source": "**",
@@ -69,7 +65,7 @@ The HTTPS bit is handled by Firebase Hosting. Now we will handle the last two as
 
 We need to install Angular's PWA library. Some of what the installation is going to do is going to have conflicts with work that `@capacitor/assets` already did for us. Specifically, Angular's PWA library will install some icons as well as a `src/manifest.webmanifest` file. It is that last file that is going to give us trouble, so let's move the existing one out of the way, and then install the Angular PWA tooling:
 
-```
+```bash
 git rm src/manifest.webmanifest
 npx ng add @angular/pwa
 ```
@@ -92,7 +88,7 @@ Now is a good time to add the new files to our git repo and commit the other cha
 
 When we generated the original app and ran `@capacitor/assets`, icons for use in a PWA were generated in the `icons` folder. We need to replace the Angular supplied icons with our generated icons.
 
-```
+```bash
 rm -rf src/assets/icons
 git mv icons src/assets
 ```
@@ -103,7 +99,7 @@ The default `src/manifest.webmanifest` needs a couple of customizations for this
 
 - The `name` needs to be updated
 - The `short_name` needs to be updated
-- The `background_color` needs to be updated to match the background of the icon
+- The `background_color` and `theme_color` need to be updated based on our application theme
 - The icons configuration needs to use the icons we just copied over
 
 Here are the first three changes:
@@ -118,14 +114,26 @@ index 97f0552..6bf1d68 100644
  {
 -  "name": "app",
 -  "short_name": "app",
+-  "theme_color": "#1976d2",
+-  "background_color": "#f1ebe1",
 +  "name": "Tea Taster",
 +  "short_name": "TeaTaster",
-   "theme_color": "#1976d2",
--  "background_color": "#fafafa",
-+  "background_color": "#f1ebe1",
++  "theme_color": "#ac9d83",
++  "background_color": "#8a7a5f",
 ```
 
-For the last change, replace the content of the `icons` array with the `icons` array values from `src/manifest.webmanifest.orig`. You can remove `src/manifest.webmanifest.orig` at this point.
+The `src/index.html` file also contains a `theme-color` that needs to be updated.
+
+For the last change, update the contents of the `icons` array based on the contents of the `src/assets/icons` folder. You will need to change the `src`, and in some cases, `sizes`. For example:
+
+```json
+{
+▏ "src": "assets/icons/icon-256.webp",
+▏ "sizes": "256x256",
+▏ "type": "image/png",
+▏ "purpose": "maskable any"
+},
+```
 
 ## Configure the Service Worker
 
