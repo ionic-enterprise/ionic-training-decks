@@ -313,12 +313,28 @@
         {
           "name": "vue",
           "title": "Vue",
-          "folder": "noimp",
+          "folder": "pwa-ionic-vue",
           "icon": "logo-vue",
           "pages": [
             {
               "title": "Introduction",
-              "file": "vue"
+              "file": "intro"
+            },
+            {
+              "title": "Host the Application",
+              "file": "host"
+            },
+            {
+              "title": "Add the PWA Goodies",
+              "file": "pwa"
+            },
+            {
+              "title": "Interact with the Service Worker",
+              "file": "service-worker"
+            },
+            {
+              "title": "PWA Links",
+              "file": "links"
             }
           ]
         }

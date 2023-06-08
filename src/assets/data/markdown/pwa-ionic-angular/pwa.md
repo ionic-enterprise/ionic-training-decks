@@ -7,7 +7,7 @@ Let's raise that PWA score to 100. In this lab you will learn:
 
 ## Optimize Firebase Hosting
 
-Since we are using Firebase to host our app, we already get a lot of benefits for our PWA such as HTTPS and support for HTTP2 push. However there are a couple more optimizations we should make. These optimizations are specified in our <a href="https://ionicframework.com/docs/publishing/progressive-web-app/" target="_blank">Publishing a Progressive Web App</a> documentation and will be updated if anything changes.
+Since we are using Firebase to host our app, we already get a lot of benefits for our PWA such as HTTPS and support for HTTP2 push. However there are a couple more optimizations we should make. These optimizations are derived from the examples specified in our <a href="https://ionicframework.com/docs/angular/pwa#deploying" target="_blank">deployment guide</a>.
 
 Add the following configuration to your `firebase.json` file:
 

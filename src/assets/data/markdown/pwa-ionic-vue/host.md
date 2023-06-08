@@ -12,17 +12,17 @@ In this lab you will learn:
 
 ## Clone the Application
 
-If you participated in the three-day Ionic Angular Framework training, then you should already have a copy of the application on your machine.
+If you participated in the three-day Ionic Vue Framework training, then you should already have a copy of the application on your machine.
 
-If you do not already have the application, you can clone the <a href="https://github.com/ionic-enterprise/tea-taster-ng" target="_blank">Tea Taster repo</a>. This repo contains the model application, including the PWA support. The repo also contains <a href="https://github.com/ionic-enterprise/tea-taster-ng/tags" target="_blank">several tags</a> that represent various milestones in development. To follow along, you should create a branch at one of the non-PWA milestones. We suggest one of the following:
+If you do not already have the application, you can clone the <a href="https://github.com/ionic-enterprise/tea-taster-vue" target="_blank">Tea Taster repo</a>. This repo contains the model application, including the PWA support. The repo also contains <a href="https://github.com/ionic-enterprise/tea-taster-vue/tags" target="_blank">several tags</a> that represent various milestones in development. To follow along, you should create a branch at one of the non-PWA milestones. We suggest one of the following:
 
 - `end-basic-extra-credit`: this milestone represents the complete application without Identity Vault or Auth Connect. Use this tag if are not using those products.
 - `auth-connect`: this milestone represents the application with Identity Vault and Auth Connect. Use this tag if you are using those products.
 
 If you are cloning our repo as a starting point, follow these steps:
 
-1. Clone the repository: <a href="https://github.com/ionic-enterprise/tea-taster-ng" target="\_blank">https://github.com/ionic-enterprise/tea-taster-ng</a>
-1. `cd tea-taster-ng`
+1. Clone the repository: <a href="https://github.com/ionic-enterprise/tea-taster-vue" target="\_blank">https://github.com/ionic-enterprise/tea-taster-vue</a>
+1. `cd tea-taster-vue`
 1. Create a branch at the appropriate tag (example: `git checkout -b feature/pwa auth-connect`)
 1. `npm i`
 1. `npm run build`
@@ -59,7 +59,7 @@ As the PWA is developed, it will need to be hosted. Firebase is one hosting opti
 
 - If you do not already have a Firebase account, create one here: <a href="https://firebase.google.com/" target="_blank">https://firebase.google.com/</a>
 - Go to the console and add a project: <a href="https://console.firebase.google.com/" target="_blank">https://console.firebase.google.com/</a>
-  - Call the project `tea-taster-ng`
+  - Call the project `tea-taster-vue`
   - Firebase will generate a project ID for you
   - Use the default settings
   - If asked about Firebase Analytics, you can turn it off
@@ -71,7 +71,7 @@ That is all you have to do on Firebase itself. The rest of the work needs to be 
 - `npm install -g firebase-tools`
 - `firebase login`
 
-From the `tea-taster-ng` root directory, run `firebase init` which will walk you through some steps to initialize your app:
+From the `tea-taster-vue` root directory, run `firebase init` which will walk you through some steps to initialize your app:
 
 - The only feature you need to chose is "Hosting: Configure and deploy Firebase Hosting sites".
 - For "Project Setup", choose the project you just created
@@ -89,21 +89,21 @@ The deploy process should look something like this:
 ```bash
 $ firebase deploy
 
-=== Deploying to 'tea-taster-ng'...
+=== Deploying to 'tea-taster-vue'...
 
 i  deploying hosting
-i  hosting[tea-taster-ng]: beginning deploy...
-i  hosting[tea-taster-ng]: found 1375 files in www
-✔  hosting[tea-taster-ng]: file upload complete
-i  hosting[tea-taster-ng]: finalizing version...
-✔  hosting[tea-taster-ng]: version finalized
-i  hosting[tea-taster-ng]: releasing new version...
-✔  hosting[tea-taster-ng]: release complete
+i  hosting[tea-taster-vue]: beginning deploy...
+i  hosting[tea-taster-vue]: found 50 files in dist
+✔  hosting[tea-taster-vue]: file upload complete
+i  hosting[tea-taster-vue]: finalizing version...
+✔  hosting[tea-taster-vue]: version finalized
+i  hosting[tea-taster-vue]: releasing new version...
+✔  hosting[tea-taster-vue]: release complete
 
 ✔  Deploy complete!
 
-Project Console: https://console.firebase.google.com/project/tea-taster-ng/overview
-Hosting URL: https://tea-taster-ng.web.app
+Project Console: https://console.firebase.google.com/project/tea-taster-vue/overview
+Hosting URL: https://tea-taster-vue.web.app
 ```
 
 Open an Icognito window and go to the specified `Hosting URL` (**note:** your hosting URL will be different than mine).
