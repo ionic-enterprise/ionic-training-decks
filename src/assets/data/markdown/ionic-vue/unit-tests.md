@@ -20,10 +20,10 @@ This command runs the unit tests in watch mode, which is great for development, 
 - `test:dev`: run the tests in "development mode" (that is, just like `test:unit` currently does)
 - `test:cov`: run the tests once and generate a coverage report
 
-In order to facilitate the coverage report generation, we need to install the `@vitest/coverage-c8` package as a development dependency:
+In order to facilitate the coverage report generation, we need to install the `@vitest/coverage-v8` package as a development dependency:
 
 ```bash
-npm i -D @vitest/coverage-c8
+npm i -D @vitest/coverage-v8
 ```
 
 We can then update the `package.json` file to:
