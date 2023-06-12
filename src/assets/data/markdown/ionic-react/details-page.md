@@ -13,7 +13,7 @@ Ionic supports the common mobile paradigm of stacked navigation, where one page 
 
 Let's start with some fairly boilerplate starting code for a page.
 
-First the test in `src/tea/TeaDetailsPage.test.tsx`:
+First the test in `src/pages/tea-details/TeaDetailsPage.test.tsx`:
 
 ```tsx
 import { vi } from 'vitest';
@@ -36,7 +36,7 @@ describe('<TeaDetailsPage />', () => {
 });
 ```
 
-Then the page itself in `src/tea/TeaDetailsPage.tsx`:
+Then the page itself in `src/pages/tea-details/TeaDetailsPage.tsx`:
 
 ```tsx
 import { IonContent, IonHeader, IonPage, IonTitle, IonToolbar } from '@ionic/react';
@@ -58,14 +58,16 @@ export default TeaDetailsPage;
 
 ## Navigating
 
-Now that we have a details page, let's set up the navigation to the page and then back again. The first thing we should do is set up the route to the page. From a URL perspective, it makes sense that the page should be a child to the `/tea` route. Also, since we will be displaying a particular tea it makes sense that the tea's ID should be part of the route. Add a route in `App.tsx`. It will be similar to the existing `/tea` route with the following differences:
+Now that we have a details page, let's set up the navigation to the page and then back again. The first thing we should do is set up the route to the page. From a URL perspective, it makes sense that the page should be a child to the `/tea` route. Also, since we will be displaying a particular tea it makes sense that the tea's ID should be part of the route.
+
+Copy the `/tea` route in `App.tsx`. Modify it to have the following differences:
 
 - The path will be `/tea/:id`.
 - `<TeaDetailsPage />` will be the component rendered within `TeaProvider`.
 
 **Note:** we do now have two different tea contexts, which defeats the purpose of why we created `TeaProvider` in the first place. This will be fixed in a couple of labs from now.
 
-We want to navigate from the `TeaListPage` page to the `TeaDetailsPage` page. A logical choice for the trigger is to use a click on the tea's card to start the navigation. Let's write a test for that in `src/tea/TeaListPage.test.tsx`.
+We want to navigate from the `TeaListPage` page to the `TeaDetailsPage` page. A logical choice for the trigger is to use a click on the tea's card to start the navigation. Let's write a test for that in `src/pages/tea/TeaListPage.test.tsx`.
 
 ```tsx
 it('navigates to the details page when a tea card is clicked', async () => {
@@ -78,7 +80,7 @@ it('navigates to the details page when a tea card is clicked', async () => {
 });
 ```
 
-The `react-router` mock (located in `__mocks__/react-router.ts`) needs to be updated to spy on `history.push`:
+The `react-router-dom` mock (located in `__mocks__/react-router-dom.ts`) needs to be updated to spy on `history.push`:
 
 ```diff
   import { vi } from 'vitest';
@@ -94,7 +96,7 @@ Based on how we have the test set up, we know we should have seven `ion-card` el
 
 **Note:** you may need to adjust the list a bit based on exactly what your data looks like.
 
-Now that we have a failing test, let's make that click occur in the `src/tea/TeaListPage.tsx` file.
+Now that we have a failing test, let's make that click occur in the `src/pages/tea/TeaListPage.tsx` file.
 
 ```tsx
 <IonCard onClick={() => history.push(`/tea/${tea.id}`)}>
@@ -131,13 +133,13 @@ Now that we have the navigation in place, let's grab the tea and display it.
 
 ### Create the Tests
 
-First we need to figure out what our test setup in `src/tea/TeaDetailsPage.test.tsx` should look like. We know that we will need to do the following in the code:
+First we need to figure out what our test setup in `src/pages/tea-details/TeaDetailsPage.test.tsx` should look like. We know that we will need to do the following in the code:
 
 - Get the `id` parameter from our route.
 - Get the list of teas from our `useTea()` hook.
 - Bind the proper tea to the component.
 
-The mock for `react-router` needs to be updated to mock a new hook we'll be using from the package, `useParams`. Update `__mocks__/react-router.ts`:
+The mock for `react-router-dom` needs to be updated to mock a new hook we'll be using from the package, `useParams`. Update `__mocks__/react-router-dom.ts`:
 
 ```diff
   import { vi } from 'vitest';
@@ -150,20 +152,20 @@ The mock for `react-router` needs to be updated to mock a new hook we'll be usin
 + export { useHistory, useParams };
 ```
 
-Next, we need to configure the tea data so the computed value can be testable. This involves the following steps in `src/tea/TeaDetailsPage.test.tsx`:
+Next, we need to configure the tea data so the computed value can be testable. This involves the following steps in `src/pages/tea-details/TeaDetailsPage.test.tsx`:
 
 Importing the `useTea` and `useParam` hooks.
 
 ```typescript
 import { useTea } from './TeaProvider';
-import { useParams } from 'react-router';
+import { useParams } from 'react-router-dom';
 ```
 
 Mocking their implementation.
 
 ```typescript
-vi.mock('../tea/TeaProvider');
-vi.mock('react-router');
+vi.mock('react-router-dom');
+vi.mock('../../providers/TeaProvider');
 ```
 
 And modifying the `beforeEach()` block that sets up the data and the mocks.
@@ -219,12 +221,12 @@ it('renders the tea description', () => {
 
 ### Update the View
 
-Within `src/tea/TeaDetailsPage.tsx` we need to import the following:
+Within `src/pages/tea-details/TeaDetailsPage.tsx` we need to import the following:
 
 ```typescript
-import { useTea } from './TeaProvider';
-import { useParams } from 'react-router';
-import { Tea } from '../models';
+import { useParams } from 'react-router-dom';
+import { useTea } from '../../providers/TeaProvider';
+import { Tea } from '../../models';
 ```
 
 We need to get the `id` parameter from the route, which we can do with the `useParams` hook and the list of `teas` from the `useTea` hook. Once we have those, we can create a computed property that grabs the correct tea according to the id in the route.
