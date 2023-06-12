@@ -1,3 +1,9 @@
+## [5.8.1](https://github.com/ionic-team/ionic-training-decks/compare/v5.8.0...v5.8.1) (2023-06-12)
+
+### Bug Fixes
+
+- **vue:** update a package name that changed ([b78edd1](https://github.com/ionic-team/ionic-training-decks/commit/b78edd14ba29beda2f7eda294de463bffcd92258))
+
 # [5.8.0](https://github.com/ionic-team/ionic-training-decks/compare/v5.7.6...v5.8.0) (2023-06-12)
 
 ### Bug Fixes
