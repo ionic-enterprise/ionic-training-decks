@@ -11,17 +11,15 @@ We will be creating a reusable component that is used to give up to a five-star 
 
 ### Create the Component Skeleton
 
-Create a `src/shared/Rating.tsx` file with the following contents:
+Create a `src/components/rating/Rating.tsx` file with the following contents:
 
 ```tsx
 import './Rating.css';
 
-export const Rating: React.FC = () => (
-  <div>Rating Component is Working</div>;
-);
+export const Rating: React.FC = () => <div>Rating Component is Working</div>;
 ```
 
-Also create an empty file `src/shared/Rating.css`, and `src/shared/Rating.test.tsx` with the following contents:
+Also create an empty file `src/components/rating/Rating.css`, and `src/components/rating/Rating.test.tsx` with the following contents:
 
 ```tsx
 import { vi } from 'vitest';
@@ -43,7 +41,7 @@ describe('<Rating />', () => {
 In order to see the component as we develop it, let's start using it right away in `TeaDetailsPage`:
 
 - Add `<Rating />` under the description
-- `import { Rating } from '../shared/Rating.tsx`
+- `import { Rating } from '../../components/rating/Rating';`
 
 Update the snapshot and navigate to the tea details page and verify that you see "Rating Component is Working" after the description for the tea.
 
@@ -51,13 +49,13 @@ Update the snapshot and navigate to the tea details page and verify that you see
 
 We don't want a component that just tells us that it works; we want a series of 5 stars that show us a rating.
 
-Import the following icons in `src/shared/Rating.tsx`:
+Import the following icons in `src/components/rating/Rating.tsx`:
 
 ```typescript
 import { star, starOutline } from 'ionicons/icons';
 ```
 
-Our first unit test in `src/shared/Rating.test.tsx` will just ensure that we get 5 outlined star icons by default.
+Our first unit test in `src/components/rating/Rating.test.tsx` will just ensure that we get 5 outlined star icons by default.
 
 ```tsx
 it('renders five empty stars', () => {
@@ -67,7 +65,7 @@ it('renders five empty stars', () => {
 });
 ```
 
-This test should fail at this point. We will now start building our design in `src/shared/Rating.tsx`.
+This test should fail at this point. We will now start building our design in `src/components/rating/Rating.tsx`.
 
 ```tsx
 <div className="rating">
@@ -138,7 +136,7 @@ export const Rating: React.FC<Props> = ({ rating = 0, onRatingChange = () => voi
 
 I leave it to you to wire up the `onClick` event handler in the component template.
 
-For now, let's add some placeholder code within the component definition in `src/tea/TeaDetailsPage.tsx`:
+For now, let's add some placeholder code within the component definition in `src/pages/tea-detail/TeaDetailsPage.tsx`:
 
 ```typescript
 const [rating, setRating] = useState<number>(2);
@@ -156,7 +154,7 @@ Try this out in the tea details page in the browser. You should now be able to c
 
 So far this works well, but the stars are a little small and close together, especially for people with larger hands. Let's apply a little style to make that better.
 
-**`src/shared/Rating.css`**:
+**`src/components/rating/Rating.css`**:
 
 ```css
 .rating ion-icon {

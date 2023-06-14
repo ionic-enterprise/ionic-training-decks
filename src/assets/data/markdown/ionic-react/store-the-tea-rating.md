@@ -25,13 +25,13 @@ Add a `rating` property in `src/models/Tea.ts`. Make it a number
 
 Three tests are using the `Tea` model when creating test data.
 
-- `src/tea/TeaDetailsPage.test.ts`
-- `src/tea/TeaListPage.test.ts`
-- `src/tea/TeaProvider.test.tsx`
+- `src/pages/tea-details/TeaDetailsPage.test.ts`
+- `src/pages/tea/TeaListPage.test.ts`
+- `src/providers/TeaProvider.test.tsx`
 
 Update the `TeaDetailsPage` and `TeaListPage` tests to include a `rating` in any defined `Tea` model. Use any number between 0 and 5 for each tea.
 
-In the `src/tea/TeaProvider.test.tsx` file there are also a few preliminary items to handle:
+In the `src/providers/TeaProvider.test.tsx` file there are also a few preliminary items to handle:
 
 - when adding a rating to each Tea model, use a value of zero for now
 - update the creation of `httpResultTeas` to remove the `rating` just like we do the `image` (also update the type declaration for `httpResultTeas` to omit the 'rating' as well as the 'image')
@@ -39,9 +39,9 @@ In the `src/tea/TeaProvider.test.tsx` file there are also a few preliminary item
 - `import { Preferences } from '@capacitor/preferences';`
 - `vi.mock('@capacitor/preferences');`
 
-Some tests should be failing at this point. In `src/tea/TeaProvider.tsx`, add the rating setting it to zero in `unpack()`. This should fix the failing tests.
+Some tests should be failing at this point. In `src/providers/TeaProvider.tsx`, add the rating setting it to zero in `unpack()`. This should fix the failing tests.
 
-Also, create the shell of the `rate()` method as such (be sure to return it from the `useTea` hook as well as to the `src/tea/__mocks__/TeaProvider.tsx` file):
+Also, create the shell of the `rate()` method as such (be sure to return it from the `useTea` hook as well as to the `src/providers/__mocks__/TeaProvider.tsx` file):
 
 ```typescript
 const rate = async (id: number, rating: number): Promise<void> => {
@@ -61,14 +61,14 @@ describe('rate', () => {
 
   it('saves the rating', async () => {
     const { result } = await waitFor(() => renderHook(() => useTea(), { wrapper }));
-    await result.current.rate(5, 4);
+    await waitFor(async () => await result.current.rate(5, 4));
     expect(Preferences.set).toHaveBeenCalledTimes(1);
     expect(Preferences.set).toHaveBeenCalledWith({ key: 'rating5', value: '4' });
   });
 });
 ```
 
-Add the code to accomplish this in `src/tea/TeaProvider.tsx`:
+Add the code to accomplish this in `src/providers/TeaProvider.tsx`:
 
 ```typescript
 const rate = async (id: number, rating: number): Promise<void> => {
@@ -127,7 +127,7 @@ beforeEach(() => {
 });
 ```
 
-_Note:_ you need to import `GetOptions` from `'capacitor/preferences'`.
+_Note:_ you need to import `GetOptions` from `'@capacitor/preferences'`.
 
 Now for the transform itself. Here is where things get a little complicated. Here is what we are doing in a nut-shell:
 
@@ -159,7 +159,7 @@ I leave it to you to update `loadTeas()` to unpack the data returned from the ne
 
 ## Update the Rating from the Page
 
-With all of that in place, the changes to `src/tea/TeaDetailsPage.tsx` are very straight forward.
+With all of that in place, the changes to `src/pages/tea/TeaDetailsPage.tsx` are very straight forward.
 
 First, change the computed property that selects the tea to be a stateful property. It will be set using a `useEffect`.
 
@@ -171,7 +171,7 @@ useEffect(() => {
 }, [teas]);
 ```
 
-Second, we will need to update the mock in the `beforeEach` block in `src/tea/TeaDetailsPage.test.tsx`:
+Second, we will need to update the mock in the `beforeEach` block in `src/pages/tea/TeaDetailsPage.test.tsx`:
 
 ```diff
 (useTea as Mock).mockReturnValue({
