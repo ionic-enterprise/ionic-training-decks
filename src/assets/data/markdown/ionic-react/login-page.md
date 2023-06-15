@@ -13,11 +13,11 @@ Most applications have more than one page. Our application will eventually have 
 
 Start by writing unit tests for a new page. We'll want to create tests that verify the correct title is displayed and that it renders consistently.
 
-Create a file `src/login/LoginPage.test.tsx` and add the following tests:
+Create a file `src/pages/login/LoginPage.test.tsx` and add the following tests:
 
 ```tsx
 import { vi } from 'vitest';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import LoginPage from './LoginPage';
 
 describe('<LoginPage />', () => {
@@ -36,7 +36,7 @@ describe('<LoginPage />', () => {
 });
 ```
 
-For the contents of `src/login/LoginPage.tsx`, let's just start with a skeleton page that will contain the title of the page and has a "sign in" button on the bottom.
+For the contents of `src/pages/login/LoginPage.tsx`, let's just start with a skeleton page that will contain the title of the page and has a "sign in" button on the bottom.
 
 ```tsx
 import { IonButton, IonContent, IonFooter, IonHeader, IonIcon, IonPage, IonTitle, IonToolbar } from '@ionic/react';
@@ -110,12 +110,12 @@ For this training, we will use <a href="https://react-hook-form.com/" target="_b
 Add the required dependencies to your project.
 
 ```bash
-npm install react-hook-forms yup @hookform/resolvers
+npm install react-hook-form yup @hookform/resolvers
 ```
 
 ## Form Handling
 
-React Hook Form allows us to type forms. Add the following type to `src/login/LoginPage.tsx` _outside_ of the component definition:
+React Hook Form allows us to type forms. Add the following type to `src/pages/login/LoginPage.tsx` _outside_ of the component definition:
 
 ```typescript
 type LoginInputs = { email: string; password: string };
@@ -221,7 +221,7 @@ import { yupResolver } from '@hookform/resolvers/yup';
 
 Your IDE _might_ not pick these up. With our import in place, let's write a function that represents our validation schema.
 
-Place the following function _outside_ of the component definition in `src/login/LoginPage.tsx`:
+Place the following function _outside_ of the component definition in `src/pages/login/LoginPage.tsx`:
 
 ```typescript
 const validationSchema = yup.object({

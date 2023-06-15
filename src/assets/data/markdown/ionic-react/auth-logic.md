@@ -42,14 +42,14 @@ When the user logs in, they establish a session. The session contains informatio
 
 First create two files that will serve as the shells for our test and hook. You will also need to create the proper directories for them as they do not exist yet.
 
-`src/api/session-api.test.ts`
+`src/utils/session.test.ts`
 
 ```typescript
-import { Mock, vi } from 'vitest';
+import { vi } from 'vitest';
 import { Session } from '../models';
-import { clearSession, getSession, setSession } from './session-api';
+import { clearSession, getSession, setSession } from './session';
 
-describe('Session API', () => {
+describe('Session Utilities', () => {
   const testSession: Session = {
     user: {
       id: 314159,
@@ -68,7 +68,7 @@ describe('Session API', () => {
 });
 ```
 
-`src/api/session-api.ts`
+`src/utils/session.ts`
 
 ```typescript
 const key = 'session';
@@ -95,7 +95,7 @@ const setSession = async (s: Session): Promise<void> => {
 export { clearSession, getSession, setSession };
 ```
 
-`src/api/__mocks__/session-api.ts`
+`src/utils/__mocks__/session.ts`
 
 ```typescript
 import { vi } from 'vitest';
@@ -106,8 +106,6 @@ const setSession = vi.fn().mockResolvedValue(undefined);
 
 export { clearSession, getSession, setSession };
 ```
-
-**Note:** The `src/api/__mocks__/session-api.ts` file will be used to facilitate mocking this hook effectively in other unit tests.
 
 ### Install `@capacitor/preferences`
 
@@ -132,13 +130,13 @@ export const Preferences = {
 
 The manual mock should be created as `__mocks__/@capacitor/preferences.ts` under the application's root directory.
 
-Add the following import to `session-api.test.tsx`:
+Add the following import to `session.test.tsx`:
 
 ```typescript
 import { Preferences } from '@capacitor/preferences';
 ```
 
-Then mock it (make sure this line of code lives above `describe('Session API')`):
+Then mock it (make sure this line of code lives above `describe('Session Utilities')`):
 
 ```typescript
 vi.mock('@capacitor/preferences');
@@ -165,10 +163,7 @@ describe('setSession', () => {
   it('stores the session', async () => {
     await setSession(testSession);
     expect(Preferences.set).toHaveBeenCalledTimes(1);
-    expect(Preferences.set).toHaveBeenCalledWith({
-      key: 'session',
-      value: JSON.stringify(testSession),
-    });
+    expect(Preferences.set).toHaveBeenCalledWith({ key: 'session', value: JSON.stringify(testSession) });
   });
 });
 ```
@@ -252,7 +247,7 @@ We will be using <a href="https://www.npmjs.com/package/axios" target="_blank">A
 npm i axios
 ```
 
-We will also create a single Axios instance for our backend API. Create a `src/api/backend-api.ts` file with the following contents:
+We will also create a single Axios instance for our backend API. Create a `src/utils/backend-api.ts` file with the following contents:
 
 ```typescript
 import axios from 'axios';
@@ -270,7 +265,7 @@ const client = axios.create({
 export { client };
 ```
 
-Similar to what we did with the 'session' composition function, we will create a mock in `src/api/__mocks__/backend-api.ts` with the following contents to make our other tests more clean:
+Similar to what we did with the 'session' composition function, we will create a mock in `src/utils/__mocks__/backend-api.ts` with the following contents to make our other tests more clean:
 
 ```typescript
 import { vi } from 'vitest';
@@ -301,27 +296,27 @@ We have logic in place to store the session and an HTTP client to call the backe
 
 First create two files that will serve as the shells for our test and hook.
 
-`src/api/auth-api.test.tsx`
+`src/utils/auth.test.tsx`
 
 ```typescript
 import { vi, Mock } from 'vitest';
 import { User } from '../models';
 import { client } from './backend-api';
-import { clearSession, setSession } from './session-api';
+import { clearSession, setSession } from './session';
 
 vi.mock('./backend-api');
-vi.mock('./session-api');
+vi.mock('./session');
 
-describe('Auth API', () => {
+describe('Auth Utilities', () => {
   beforeEach(() => vi.clearAllMocks());
 });
 ```
 
-`src/api/auth-api.ts`
+`src/utils/auth.ts`
 
 ```typescript
 import { client } from './backend-api';
-import { clearSession, setSession } from './session-api';
+import { clearSession, setSession } from './session';
 
 const login = async (email: string, password: string): Promise<boolean> => {
   return false;
@@ -427,7 +422,7 @@ describe('logout', () => {
 
 ### Create an Auth Mock
 
-We are going to be calling the `login()` and `logout()` methods from our components. As a result, it would be nice to have a nice consistent mock set up for them. Remember the `src/api/__mocks__/session-api.ts` file we created at the start of this lab? Create a very similar one called `src/api/__mocks__/auth-api.ts` with the `login` and `logout` mocks properly defined.
+We are going to be calling the `login()` and `logout()` methods from our components. As a result, it would be nice to have a nice consistent mock set up for them. Remember the `src/utils/__mocks__/session.ts` file we created at the start of this lab? Create a very similar one called `src/utils/__mocks__/auth.ts` with the `login` and `logout` mocks properly defined.
 
 ## Conclusion
 

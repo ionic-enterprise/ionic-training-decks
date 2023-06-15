@@ -8,7 +8,7 @@ In this lab you will:
 
 ## Create New Pages
 
-If we are going to have multiple tabs, we are going to need a place to navigate to. For now, we will just navigate to some blank starter pages. Let's create those now. Add two files: `src/about/AboutPage.tsx` and `src/notes/TastingNotesPage.tsx`. The contents of these files should look like this:
+If we are going to have multiple tabs, we are going to need a place to navigate to. For now, we will just navigate to some blank starter pages. Let's create those now. Add two files: `src/pages/about/AboutPage.tsx` and `src/pages/notes/TastingNotesPage.tsx`. The contents of these files should look like this:
 
 ```tsx
 import { IonContent, IonHeader, IonPage, IonTitle, IonToolbar } from '@ionic/react';
@@ -57,11 +57,11 @@ This application will have a small number of distinct sections, so tabs make the
 
 ### Lay Out the Tabs Page
 
-Create a `src/Tabs.tsx` file with the following contents:
+Create a `src/routes/Tabs.tsx` file with the following contents:
 
 ```tsx
 import { IonIcon, IonLabel, IonRouterOutlet, IonTabBar, IonTabButton, IonTabs } from '@ionic/react';
-import { useRouteMatch } from 'react-router';
+import { useRouteMatch } from 'react-router-dom';
 import { documentText, informationCircle, leaf } from 'ionicons/icons';
 
 const Tabs: React.FC = () => {
@@ -128,7 +128,7 @@ The final change to this router is to update the redirect for the root (`/`) pat
 
 ### Update the Tab Router Outlet
 
-Now open `src/Tabs.tsx`. The first thing we'll do is add back the routes we removed from the main router outlet:
+Now open `src/routes/Tabs.tsx`. The first thing we'll do is add back the routes we removed from the main router outlet:
 
 ```tsx
 <IonRouterOutlet>
@@ -170,8 +170,8 @@ Let's add two new route entries for our new pages:
 
 You will have to modify a couple of the pages to compensate for the change:
 
-- In `src/tea/TeaListPage.test.tsx` find the "navigates to the details page when a tea card is clicked" test and change the expected route from `/tea/4` to `/tabs/tea/4` (the actual ID number may be different in your test).
-- Modify the code in `src/tea/TeaListPage.tsx` accordingly.
+- In `src/pages/tea/TeaListPage.test.tsx` find the "navigates to the details page when a tea card is clicked" test and change the expected route from `/tea/4` to `/tabs/tea/4` (the actual ID number may be different in your test).
+- Modify the code in `src/pages/tea/TeaListPage.tsx` accordingly.
 - Modify the `defaultHref` for the back button in the `TeaDetailsPage` to be `/tabs/teas`.
 
 After making all of these modifications, try the navigation in your app. Examine the DOM with the DevTools and look for the tabs router outlet. Observe how the different pages are rendered within the DOM. Be sure to try this:

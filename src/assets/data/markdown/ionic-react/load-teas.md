@@ -10,16 +10,16 @@ We'll be using tea data across the application, so we should build a context tha
 
 The first thing we need to do is create some templates for our unit tests and context.
 
-**`src/tea/TeaProvider.test.tsx`**
+**`src/providers/TeaProvider.test.tsx`**
 
 ```tsx
 import { vi, Mock } from 'vitest';
 import { render, waitFor } from '@testing-library/react';
-import { client } from '../api/backend-api';
+import { client } from '../utils/backend-api';
 import { Tea } from '../models';
 import TeaProvider, { useTea } from './TeaProvider';
 
-vi.mock('../api/backend-api');
+vi.mock('../utils/backend-api');
 
 const MockChildComponent = () => {
   const { teas } = useTea();
@@ -38,7 +38,7 @@ describe('TeaProvider', () => {
 
   beforeEach(() => {
     initializeTestData();
-    vi.resetAllMocks();
+    vi.clearAllMocks();
     (client.get as Mock).mockResolvedValue({ data: [] });
   });
 
@@ -52,14 +52,13 @@ describe('TeaProvider', () => {
 });
 ```
 
-**`src/tea/TeaProvider.tsx`**
+**`src/providers/TeaProvider.tsx`**
 
 ```tsx
 import { ReactNode, createContext, useContext, useEffect, useState } from 'react';
 import { Tea } from '../models';
 
 type Props = { children?: ReactNode };
-
 type Context = { teas: Tea[] };
 
 const TeaContext = createContext<Context | undefined>(undefined);
@@ -74,13 +73,11 @@ const TeaProvider = ({ children }: Props) => {
 
   return <TeaContext.Provider value={{ teas }}>{children}</TeaContext.Provider>;
 };
-
 export const useTea = () => {
   const context = useContext(TeaContext);
   if (context === undefined) throw new Error('useTea must be used within TeaProvider');
   return context;
 };
-
 export default TeaProvider;
 ```
 
@@ -184,7 +181,7 @@ it('transforms the tea data', async () => {
 
 The HTTP `GET` returns the teas in one shape, we expect the results in the other shape.
 
-So, let's get down to coding this in `src/tea/TeaProvider.tsx`. The first thing we will do is define a type for the data coming back from the HTTP API and the shell of a transforming function. This function can live within the provider component or outside of it, the choice is yours.
+So, let's get down to coding this in `src/providers/TeaProvider.tsx`. The first thing we will do is define a type for the data coming back from the HTTP API and the shell of a transforming function. This function can live within the provider component or outside of it, the choice is yours.
 
 ```typescript
 const unpack = (data: Omit<Tea, 'image'>[]): Tea[] => {
@@ -217,7 +214,7 @@ Obviously, this is a fairly contrived example and it does not compensate for cha
 
 The same applies if, for example, the backend team decides to shorten the property names in order to save on bytes going over the air. You still only need to change this file. The rest of your system is insulated from the external API changes by the use of this provider.
 
-At this point, we should create a `src/tea/__mocks__/TeaProvider.tsx` as well:
+At this point, we should create a `src/providers/__mocks__/TeaProvider.tsx` as well:
 
 ```typescript
 import { vi } from 'vitest';
@@ -227,7 +224,7 @@ export const useTea = vi.fn(() => ({ teas: [] }));
 
 ## Update the Tea Listing Page
 
-Now that we have this put together, we can update the tea listing page to show the actual teas from our API rather than the hard coded teas that are being displayed right now. Open the `src/tea/TeaListPage.tsx` and `src/tea/TeaListPage.test.tsx` files in your editor.
+Now that we have this put together, we can update the tea listing page to show the actual teas from our API rather than the hard coded teas that are being displayed right now. Open the `src/pages/tea/TeaListPage.tsx` and `src/pages/tea/TeaListPage.test.tsx` files in your editor.
 
 ### Modify the Test
 
@@ -237,11 +234,11 @@ Import the mock of the `useTea()` hook we just created:
 
 ```diff
   ...
-+ import { useTea } from './TeaProvider';
++ import { useTea } from '../../providers/TeaProvider';
 
-  vi.mock('../auth/AuthProvider');
-  vi.mock('react-router');
-+ vi.mock('./TeaProvider');
+vi.mock('react-router-dom');
+vi.mock('../../utils/auth');
++ vi.mock('../../providers/TeaProvider');
   ...
 ```
 
@@ -314,7 +311,7 @@ const listToMatrix = (teas: Tea[], cols: number = 4): Tea[][] => {
 };
 
 const TeaListPage: React.FC = () => {
-  const { loadTeas, teas } = useTea();
+  const { teas } = useTea();
   const { logout } = useAuth();
   const history = useHistory();
 

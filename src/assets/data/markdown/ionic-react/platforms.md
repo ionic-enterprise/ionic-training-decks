@@ -23,7 +23,9 @@ const config: CapacitorConfig = {
   appId: 'io.ionic.teataster',
   appName: 'Tea Tasting Notes',
   webDir: 'dist',
-  bundledWebRuntime: false,
+  server: {
+    androidScheme: 'https',
+  },
 };
 
 export default config;
