@@ -28,7 +28,7 @@ Open the application's `tsconfig.json` file and make sure `resolveJsonModule` is
 This will allow us to read the `package.json` file and get some important information from it for our `AboutPage`. Note that there is no need for this data to be part of the component.
 
 ```typescript
-import packageInfo from '../../package.json';
+import packageInfo from '../../../package.json';
 const { author, description, name, version } = packageInfo;
 ```
 
@@ -74,7 +74,7 @@ We start by moving the logout related tests from the `TeaListPage` view's test t
 - 'performs a logout when the logout button is clicked'
 - 'navigates to the login after the logout action is complete'
 
-I also leave it up to you to move the proper code from `src/tea/TeaListPage.tsx` to `src/about/AboutPage.tsx` and then clean up the `TeaListPage` code.
+I also leave it up to you to move the proper code from `src/pages/tea/TeaListPage.tsx` to `src/pages/about/AboutPage.tsx` and then clean up the `TeaListPage` code.
 
 Be sure that:
 

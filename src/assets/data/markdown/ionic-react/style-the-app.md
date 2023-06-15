@@ -16,7 +16,7 @@ Our design team has come back to us with some requirements about how the applica
 
 Generally, we want as much of our styling to be as global as possible in order to give our application an overall consistent look and feel. However, it is sometimes desirable to only apply a particular style within a specific view or component.
 
-Have a look at the bottom of the `src/shared/Rating.css` file. There you will find the following styles:
+Have a look at the bottom of the `src/components/rating/Rating.css` file. There you will find the following styles:
 
 ```css
 .rating ion-icon {
@@ -254,7 +254,7 @@ Nice!
 
 We have a couple of other components where we need to set a specific color. Namely the tabs as well as the footer area on the login page. To modify the color of specific components, we can set the color attribute as such: `color="primary"`. Let's use this to set our colors:
 
-**`src/login/LoginPage.tsx`**
+**`src/pages/login/LoginPage.tsx`**
 
 ```tsx
     <IonFooter>
@@ -262,7 +262,7 @@ We have a couple of other components where we need to set a specific color. Name
         <IonButton
 ```
 
-**`src/Tabs.tsx`**
+**`src/routes/Tabs.tsx`**
 
 ```tsx
     </IonRouterOutlet>
@@ -272,13 +272,15 @@ We have a couple of other components where we need to set a specific color. Name
 
 ### Other Styles
 
-First, our design team wants a slightly more obvious radius on our cards. Since this is in the light DOM we can use traditional styling techniques to accomplish this.
+Our design team wants a slightly more obvious radius on our cards. Since this is in the light DOM we can use traditional styling techniques to accomplish this.
 
 ```css
 ion-card {
   border-radius: 20px;
 }
 ```
+
+We should also add `translucent={true}` to the first `<IonHeader />` in `src/pages/tea/TeaListPage.tsx` to match with the tasting notes page.
 
 ## Conclusion
 

@@ -47,7 +47,7 @@ At this point, the button should display and be clickable, but it is not functio
 
 The designers have let us know that they only want this functionality available when users are running in a mobile context, so let's take care of making sure the button is only visible in that context.
 
-We will start with the test. First, import the `isPlatform` function from `@ionic/react` and mock it. Add the following import and mock to `src/tasting-notes/TastingNoteEditor.test.tsx`:
+We will start with the test. First, import the `isPlatform` function from `@ionic/react` and mock it. Add the following import and mock to `src/components/note-editor/TastingNoteEditor.test.tsx`:
 
 ```typescript
 import { isPlatform } from '@ionic/react';
@@ -125,6 +125,7 @@ const {
   handleSubmit,
   control,
   formState: { errors, isValid, touchedFields, dirtyFields },
+  reset,
 + watch,
 } = useForm<TastingNote>(
   mode: 'onTouched',
@@ -143,7 +144,7 @@ The relevant portion to us is that every time `brand`, `name` or `rating` change
 
 ## Share the Note
 
-The final step is to call the share API when the button is clicked. Let's update the test. First we will need to create a manual mock for the plugin. Create a file named `__mocks/@capacitor/share.ts` with the following contents:
+The final step is to call the share API when the button is clicked. Let's update the test. First we will need to create a manual mock for the plugin. Create a file named `__mocks__/@capacitor/share.ts` with the following contents:
 
 ```typescript
 import { vi } from 'vitest';
@@ -159,7 +160,7 @@ Install the plugin so it is available to us:
 npm i @capacitor/share
 ```
 
-Import and mock the plugin in the `src/tasting-notes/TastingNoteEditor.test.tsx` test file:
+Import and mock the plugin in the `src/components/note-editor/TastingNoteEditor.test.tsx` test file:
 
 ```typescript
 import { Share } from '@capacitor/share';
