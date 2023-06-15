@@ -1,3 +1,17 @@
+## [5.8.2](https://github.com/ionic-team/ionic-training-decks/compare/v5.7.4...v5.8.2) (2023-06-15)
+
+### Bug Fixes
+
+- **angular-pwa:** tweak the colors and icons ([38ea791](https://github.com/ionic-team/ionic-training-decks/commit/38ea7917f1b7a16c1ae4293ddbd3797376eb9469))
+- **angular:** update specifics found during last live training ([2615501](https://github.com/ionic-team/ionic-training-decks/commit/261550187cabb305aa5b2eac93025628af3a2a0e))
+- **pwa:** modify for NG 16 ([c537f66](https://github.com/ionic-team/ionic-training-decks/commit/c537f668457639c227b479e5d45b3c3467f238fc))
+- **vue:** clarify the extra credit a bit ([42600ef](https://github.com/ionic-team/ionic-training-decks/commit/42600ef6b962f9b356e4135f933e51dbf7219b76))
+- **vue:** update a package name that changed ([b78edd1](https://github.com/ionic-team/ionic-training-decks/commit/b78edd14ba29beda2f7eda294de463bffcd92258))
+
+### Features
+
+- **vue:** add the Vue PWA tutorial ([6a109dd](https://github.com/ionic-team/ionic-training-decks/commit/6a109ddb8bdf79c7a9eb0815d24cac2c2686eacd))
+
 ## [5.8.1](https://github.com/ionic-team/ionic-training-decks/compare/v5.8.0...v5.8.1) (2023-06-12)
 
 ### Bug Fixes
