@@ -34,22 +34,22 @@ If you are cloning our repo as a starting point, follow these steps:
 
 ## Building the Application for the Web
 
-We have been building our application for the web using `ng serve` (or a command that ultimately runs `ng serve`), but that is all virtual. It does not actually write the files out to disk so we can serve them in some other way. If you would like to test this for yourself, remove the `www/` directory (if it exists) and start the development server. The usual build steps occur, and you can view your application, but no `www/` folder is generated.
+We have been building our application for the web using `npm run dev` (or a command that ultimately runs `npm run dev`), but that is all virtual. It does not actually write the files out to disk so we can serve them in some other way. If you would like to test this for yourself, remove the `dist/` directory (if it exists) and start the development server. The usual build steps occur, and you can view your application, but no `dist/` folder is generated.
 
-To build for the web, use `ng build --configuration production`. This will build the application into the `www/` folder.
+To build for the web, use `npx tsc && npx vite build`. This will build the application into the `dist/` folder.
 
 Since this is something that will be done often, and I suggest adding it as a script in your `package.json` file. Here is my full set of scripts for this project (this should already be configured properly from the starting repo):
 
 ```json
   "scripts": {
-    "build": "ng build --configuration production && cap copy",
-    "e2e": "ng e2e",
-    "lint": "ng lint",
-    "ng": "ng",
-    "start": "ng serve",
-    "test": "ng test --browsers=ChromeHeadless",
-    "test:ci": "ng test --no-watch --browsers=ChromeHeadlessCI",
-    "test:debug": "ng test"
+ "assets": "capacitor-assets generate --iconBackgroundColor '#f1ebe1' --splashBackgroundColor '#f1ebe1' --iconBackgroundColorDark '#110b00' --splashBackgroundColorDark '#110b00'",
+    "dev": "vite",
+    "build": "tsc && vite build && cap copy",
+    "preview": "vite preview",
+    "prepare": "husky install",
+    "test.e2e": "cypress run",
+    "test.unit": "vitest",
+    "lint": "eslint"
   },
 ```
 
@@ -75,9 +75,9 @@ From the `tea-taster-react` root directory, run `firebase init` which will walk 
 
 - The only feature you need to chose is "Hosting: Configure and deploy Firebase Hosting sites".
 - For "Project Setup", choose the project you just created
-- Use `www` as your public directory
+- Use `dist` as your public directory
 - Answer `Y` to "Configure as a single-page app (rewrite all urls to /index.html)?"
-- Answer `N` to "File www/index.html already exists. Overwrite?" (if asked)
+- Answer `N` to "File dist/index.html already exists. Overwrite?" (if asked)
 
 At this point, you are ready to build and deploy.
 
@@ -106,7 +106,7 @@ Project Console: https://console.firebase.google.com/project/tea-taster-react/ov
 Hosting URL: https://tea-taster-react.web.app
 ```
 
-Open an Icognito window and go to the specified `Hosting URL` (**note:** your hosting URL will be different than mine).
+Open an Incognito window and go to the specified `Hosting URL` (**note:** your hosting URL will be different than mine).
 
 ## Running Lighthouse Audits
 
@@ -118,7 +118,7 @@ run from Chrome's DevTools, but can also be run from the command line or as a No
 Notice that in the last step we opened the application in an Incognito window. It is suggested that you always run the Lighthouse tests in an Incognito window for the most accurate results.
 
 - Open the dev tools and select the `Audits` tab
-- Select the folloing options:
+- Select the following options:
   - Device: Mobile
   - Audits:
     - Performance
@@ -133,7 +133,7 @@ The last time I ran Lighthouse on the app in this stage, I got the following sco
 - **Progressive Web App:** 54
 - **Best Practices:** 100
 
-This indicates that our app is performaing well from a general web application perspective, but it is falling down from a PWA perspetive. The Lighthouse report will tell you exactly which tests the application is failing.
+This indicates that our app is performing well from a general web application perspective, but it is falling down from a PWA perspective. The Lighthouse report will tell you exactly which tests the application is failing.
 
 ## Final Cleanup
 
