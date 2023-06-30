@@ -301,12 +301,28 @@
         {
           "name": "react",
           "title": "React",
-          "folder": "noimp",
+          "folder": "pwa-ionic-react",
           "icon": "logo-react",
           "pages": [
             {
               "title": "Introduction",
-              "file": "react"
+              "file": "intro"
+            },
+            {
+              "title": "Host the Application",
+              "file": "host"
+            },
+            {
+              "title": "Add the PWA Goodies",
+              "file": "pwa"
+            },
+            {
+              "title": "Interact with the Service Worker",
+              "file": "service-worker"
+            },
+            {
+              "title": "PWA Links",
+              "file": "links"
             }
           ]
         },
