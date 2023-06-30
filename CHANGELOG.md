@@ -1,3 +1,9 @@
+# [5.9.0](https://github.com/ionic-team/ionic-training-decks/compare/v5.8.2...v5.9.0) (2023-06-30)
+
+### Features
+
+- **react-pwa:** add PWA content for React ([3090113](https://github.com/ionic-team/ionic-training-decks/commit/3090113a1ba3e6cf0385c75264da7bf4a0daa02d))
+
 ## [5.8.2](https://github.com/ionic-team/ionic-training-decks/compare/v5.7.4...v5.8.2) (2023-06-15)
 
 ### Bug Fixes
