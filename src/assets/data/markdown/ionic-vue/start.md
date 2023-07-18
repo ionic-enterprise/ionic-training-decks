@@ -45,15 +45,19 @@ ionic serve
 
 ## Enforce Consistent Styling
 
-<a href="https://prettier.io/" target="_blank">Prettier</a> is an excellent tool that you can use to keep the formatting of your code consistent and clean. We highly suggest you use a tool such as this. Whether your are a lone developer or part of a team, using a tool such as Prettier means that you do not have to think about the formatting of your code. Better yet, you do not run into "formatting wars" between developers.
+<a href="https://prettier.io/" target="_blank">
+  Prettier
+</a> is an excellent tool that you can use to keep the formatting of your code consistent and clean. We highly suggest you
+use a tool such as this. Whether your are a lone developer or part of a team, using a tool such as Prettier means that you
+do not have to think about the formatting of your code. Better yet, you do not run into "formatting wars" between developers.
 
-Prettier itself is an opinionated code formatter, and Ionic has its own opinions on how it is best configured, so let's install both Prettier and Ionic's Prettier configuration. We will also install <a href="https://www.npmjs.com/package/husky" target="_blank">husky</a> and <a href="https://www.npmjs.com/package/pretty-quick" target="_blank">pretty-quick</a>. This will allow us to set up a commit hook to make sure Prettier is run with each commit. After that we don't have to waste brain cycles thinking about code formatting ever again.
+Prettier itself is an opinionated code formatter, and Ionic has its own opinions on how it is best configured, so let's install both Prettier and Ionic's Prettier configuration. We will also install <a href="https://www.npmjs.com/package/husky" target="_blank">husky</a> and <a href="https://www.npmjs.com/package/lint-staged" target="_blank">lint-staged</a>. This will allow us to set up a commit hook to make sure Prettier is run with each commit. After that we don't have to waste brain cycles thinking about code formatting ever again.
 
 ```bash
-npm install -D @ionic/prettier-config husky prettier pretty-quick
+npm install -D @ionic/prettier-config husky prettier lint-staged
 ```
 
-Modify your `package.json` file. I suggest moving the `description` up to the top and giving it a reasonable value, and then adding the Prettier config portion to the bottom. For example:
+Modify your `package.json` file. I suggest moving the `description` up to the top and giving it a reasonable value, and then adding the `prettier` and `lint-staged` config portions to the bottom. For example:
 
 ```json
 {
@@ -74,7 +78,16 @@ Modify your `package.json` file. I suggest moving the `description` up to the to
   "devDependencies": {
     ...
   },
-  "prettier": "@ionic/prettier-config"
+  "prettier": "@ionic/prettier-config",
+  "lint-staged": {
+    "*.{css,js,jsx,scss,ts,tsx}": [
+      "prettier --write",
+      "eslint --fix"
+    ],
+    "*.{md,json}": [
+      "prettier --write"
+    ]
+  }
 }
 ```
 
@@ -92,7 +105,7 @@ npm install
 By default, the git hooks handled by `husky` are stored in the `.husky` directory. Let's add a couple now:
 
 ```bash
-npx husky add .husky/pre-commit "npx pretty-quick --staged"
+npx husky add .husky/pre-commit "npx lint-staged"
 npx husky add .husky/pre-push "npm run lint"
 ```
 
@@ -136,7 +149,10 @@ It is important to keep our dependencies up to date on a regular basis. At least
 
 ### Semantic Versioning
 
-<a href="https://semver.org/" target="_blank">Semantic Versioning</a> is, at a basic level, a three point versioning scheme as such: `major.minor.patch`. A modification of the version at any level signifies the types of changes made in the version:
+<a href="https://semver.org/" target="_blank">
+  Semantic Versioning
+</a> is, at a basic level, a three point versioning scheme as such: `major.minor.patch`. A modification of the version at
+any level signifies the types of changes made in the version:
 
 - **Major**: breaking changes are contained in this release.
 - **Minor**: new features have been added in this release, but in a backwards compatible manner.
