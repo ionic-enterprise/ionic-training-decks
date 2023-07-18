@@ -284,7 +284,7 @@ With that in place, clean up the tests. Your tests should now look more like thi
 it('updates the component model when the input changes', () => {
   const input = fixture.nativeElement.querySelector('#password-input');
   setInputValue(input, 'MyPas$Word');
-  expect(component.loginForm.password.value).toEqual('MyPas$Word');
+  expect(component.loginForm.controls.password.value).toEqual('MyPas$Word');
 });
 ```
 
