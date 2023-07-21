@@ -81,7 +81,7 @@ Modify your `package.json` file. Move the `description` up to the top and giving
   },
   "prettier": "@ionic/prettier-config",
   "lint-staged": {
-    "*.{css,js,jsx,scss,ts,tsx}": [
+    "*.{css,js,jsx,scss,ts,tsx,html}": [
       "prettier --write",
       "eslint --fix"
     ],

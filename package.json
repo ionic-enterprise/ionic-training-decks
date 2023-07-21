@@ -96,7 +96,7 @@
   },
   "prettier": "@ionic/prettier-config",
   "lint-staged": {
-    "*.{css,js,jsx,scss,ts,tsx}": [
+    "*.{css,js,jsx,scss,ts,tsx,html}": [
       "prettier --write",
       "eslint --fix"
     ],
