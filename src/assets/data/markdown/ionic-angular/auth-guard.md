@@ -84,7 +84,7 @@ import { authGuard } from '@app/core';
 export const routes: Routes = [
   {
     path: '',
-    redirectTo: 'tabs/tea',
+    redirectTo: 'tea',
     pathMatch: 'full',
   },
   {
