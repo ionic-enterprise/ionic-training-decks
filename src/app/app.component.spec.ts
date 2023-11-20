@@ -2,7 +2,7 @@ import { TestBed, waitForAsync } from '@angular/core/testing';
 import { NavController, Platform } from '@ionic/angular';
 import { provideRouter } from '@angular/router';
 import { ApplicationService, MenuItemsService } from '@app/core';
-import { createAppliationServiceMock, createMenuItemsServiceMock } from '@app/core/testing';
+import { createApplicationServiceMock, createMenuItemsServiceMock } from '@app/core/testing';
 import { SplashScreen } from '@capacitor/splash-screen';
 import { createNavControllerMock, createPlatformMock } from '@test/mocks';
 import { AppComponent } from './app.component';
@@ -13,7 +13,7 @@ describe('AppComponent', () => {
       imports: [AppComponent],
       providers: [provideRouter([])],
     })
-      .overrideProvider(ApplicationService, { useFactory: createAppliationServiceMock })
+      .overrideProvider(ApplicationService, { useFactory: createApplicationServiceMock })
       .overrideProvider(MenuItemsService, { useFactory: createMenuItemsServiceMock })
       .overrideProvider(NavController, { useFactory: createNavControllerMock })
       .overrideProvider(Platform, { useFactory: createPlatformMock })

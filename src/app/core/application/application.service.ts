@@ -1,22 +1,26 @@
 import { Injectable } from '@angular/core';
-import { AlertController } from '@ionic/angular';
+import { AlertController } from '@ionic/angular/standalone';
 import { SwUpdate } from '@angular/service-worker';
+import { filter } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ApplicationService {
-  constructor(private alert: AlertController, private update: SwUpdate) {}
+  constructor(
+    private alertController: AlertController,
+    private update: SwUpdate,
+  ) {}
 
   registerForUpdates() {
-    this.update.available.subscribe(() => this.promptUser());
+    this.update.versionUpdates.pipe(filter((evt) => evt.type === 'VERSION_READY')).subscribe(() => this.promptUser());
   }
 
   private async promptUser() {
-    const alert = await this.alert.create({
+    const alert = await this.alertController.create({
       header: 'Update Available',
       message:
-        'An update is available for this application. Would you like to restart this application to get the update?',
+        'An update is available for this application. Would you like to restart this application to get the update?     ',
       buttons: [
         { text: 'Yes', role: 'confirm' },
         { text: 'No', role: 'cancel' },

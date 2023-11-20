@@ -1,4 +1,4 @@
-import { ApplicationService } from './application.service';
-
-export const createAppliationServiceMock = () =>
-  jasmine.createSpyObj<ApplicationService>('ApplicationService', ['registerForUpdates']);
+export const createApplicationServiceMock = () =>
+  jasmine.createSpyObj('ApplicationService', {
+    registerForUpdates: undefined,
+  });
