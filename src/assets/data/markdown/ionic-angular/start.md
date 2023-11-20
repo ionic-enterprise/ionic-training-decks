@@ -81,11 +81,11 @@ Modify your `package.json` file. Move the `description` up to the top and giving
   },
   "prettier": "@ionic/prettier-config",
   "lint-staged": {
-    "*.{css,js,jsx,scss,ts,tsx,html}": [
+    "*.{js,jsx,ts,tsx,html}": [
       "prettier --write",
       "eslint --fix"
     ],
-    "*.{md,json}": [
+    "*.{css,scss,md,json}": [
       "prettier --write"
     ]
   }
@@ -141,24 +141,21 @@ The output should look something like this:
 
 ```
 $ git commit -m "Initial commit"
-🔍  Finding changed files since git revision null.
-🎯  Found 32 changed files.
-✍️  Fixing up .eslintrc.json.
-✍️  Fixing up .vscode/extensions.json.
-✍️  Fixing up angular.json.
-...
-✍️  Fixing up tsconfig.spec.json.
-✅  Everything is awesome!
-[main (root-commit) 879998c] Initial commit
- 39 files changed, 15637 insertions(+)
+⚠ Skipping backup because there’s no initial commit yet.
+
+✔ Preparing lint-staged...
+✔ Hiding unstaged changes to partially staged files...
+✔ Running tasks for staged files...
+✔ Applying modifications from tasks...
+✔ Restoring unstaged changes to partially staged files...
+[main (root-commit) ef22122] Initial commit
+ 37 files changed, 18943 insertions(+)
  create mode 100644 .browserslistrc
- create mode 100644 .editorconfig
- create mode 100644 .eslintrc.json
- create mode 100644 .gitignore
  ...
+ create mode 100644 tsconfig.spec.json
 ```
 
-Notice the "Fixing up" lines. That is the `pre-commit` hook we just set up making sure everything is formatted properly. At this point all of the source should be formatting properly and will remain so automatically with each commit.
+Notice the "lint-staged" lines. That is from the `pre-commit` hook we just set up making sure everything is formatted properly. At this point all of the source should be formatting properly and will remain so automatically with each commit.
 
 ## Update Dependencies
 

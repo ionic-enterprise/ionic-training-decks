@@ -25,7 +25,9 @@ const config: CapacitorConfig = {
   appId: 'io.ionic.starter',
   appName: 'tea-taster',
   webDir: 'www',
-  bundledWebRuntime: false,
+  server: {
+    androidScheme: 'https',
+  },
 };
 
 export default config;
@@ -40,7 +42,9 @@ const config: CapacitorConfig = {
   appId: 'com.kensodemann.teataster',
   appName: 'Tea Taster',
   webDir: 'www',
-  bundledWebRuntime: false,
+  server: {
+    androidScheme: 'https',
+  },
 };
 
 export default config;
@@ -90,8 +94,12 @@ Next, get the source image files that we need. Note that this is just our "produ
 
 - create a `resources` directory at the root level of the application (`mkdir resources`)
 - download the following images to the newly created `resources` directory
-  - <a download href="/assets/packages/ionic-angular/logo.png">logo.png</a>
-  - <a download href="/assets/packages/ionic-angular/logo-dark.png">logo-dark.png</a>
+  - <a download href="/assets/packages/ionic-angular/logo.png">
+      logo.png
+    </a>
+  - <a download href="/assets/packages/ionic-angular/logo-dark.png">
+      logo-dark.png
+    </a>
 
 To generate the required resources and copy them to the native projects, use the following command:
 

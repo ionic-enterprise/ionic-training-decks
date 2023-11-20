@@ -113,6 +113,70 @@ Open the `src/app/app.routes.ts` file and perform the following tasks:
 1. We no longer need the "home" route, so remove it, leaving only the "tea" route.
 1. Change the root page to redirect to the newly created `tea` route.
 
+#### Fix the Tests and Component Importing
+
+Due partially to a bug and partially to the newness of Angular standlone component support a couple of tweaks are required.
+
+First fix a syntax error in the generated unit test file. In `src/app/tea/tea.page.spec.ts`, remove the `woitForAsync` from the `beforeEach`. As it stands, it contains a syntax error, and it is also not needed:
+
+**`src/app/tea/tea.page.spec.ts`**
+
+```typescript
+beforeEach(() => {
+  fixture = TestBed.createComponent(FooPage);
+  component = fixture.componentInstance;
+  fixture.detectChanges();
+});
+```
+
+Second, note that the page was generated as a standalone component, but it is is importing `IonicModule` which will bring in all of Ionic. Have a look at `src/app/home/home.page.ts`. We want to bring in the individual components like that page does.
+
+**`src/app/tea/tea.page.ts` (before):**
+
+```typescript
+import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { IonicModule } from '@ionic/angular';
+
+@Component({
+  selector: 'app-tea',
+  templateUrl: './tea.page.html',
+  styleUrls: ['./tea.page.scss'],
+  standalone: true,
+  imports: [IonicModule, CommonModule, FormsModule],
+})
+export class TeaPage implements OnInit {
+  constructor() {}
+
+  ngOnInit() {}
+}
+```
+
+**`src/app/tea/tea.page.ts` (after):**
+
+```typescript
+import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { IonContent, IonHeader, IonTitle, IonToolbar } from '@ionic/angular/standalone';
+
+@Component({
+  selector: 'app-tea',
+  templateUrl: './tea.page.html',
+  styleUrls: ['./tea.page.scss'],
+  standalone: true,
+  imports: [CommonModule, FormsModule, IonContent, IonHeader, IonToolbar, IonTitle],
+})
+export class TeaPage implements OnInit {
+  constructor() {}
+
+  ngOnInit() {}
+}
+```
+
+Notice that we kept the `CommonModule` and `FormsModule`. We would need to add them back later if we removed them. We only removed the `IonicModule` and replaced it with standalone component imports.
+
 #### Mock the Data
 
 We do not have a connection to a back end service to get any data for our application. So for now we will just add some data directly to our page so we have something to work with. Just copy-paste the following into your `TeaPage` class.
@@ -208,6 +272,8 @@ In `src/app/tea/tea.page.html` place the following inside of the `ion-content`:
 </ion-list>
 ```
 
+**Important:** Make sure you also update the `src/app/tea/tea.page.ts` file to add any new components that you now need to import. **You need to do this any time you start using an Ionic component that you are not currently using within the current page or component.**
+
 This creates a list of cards. Angular's `ngFor` structural directive is used to render the sample template for each item in the `teaData` collection. That looks pretty good, at least when viewed at a phone resolution, but what about other form factors? Those do not look quite as nice. We will fix that shortly, but first go back to an iPhone form factor.
 
 Notice the "Large Title" collapsing to a translucent header as you scroll. This is an iOS specific effect (you will not see it when using Material Design on Android). Have a look at the HTML for the page. There are a few key elements that provide this:
@@ -217,6 +283,7 @@ Notice the "Large Title" collapsing to a translucent header as you scroll. This 
 - the second `ion-header` embedded in the `ion-content`
 
 ```html
+<!-- This markup already exists. It is being shown here as an example. -->
 <ion-header [translucent]="true">
   <ion-toolbar>
     <ion-title>Teas</ion-title>
@@ -281,10 +348,9 @@ describe('TeaPage', () => {
     ];
   }
 
-  beforeEach(
-    waitForAsync(() => {
-      initializeTestData();
-      ...
+  beforeEach(() => {
+    initializeTestData();
+    ...
   });
   ...
 });
@@ -349,9 +415,8 @@ import { DebugElement } from '@angular/core';
 Turning our attention away from the test and back to the code, we can modify the page class by adding a "getter" that transforms our tea list into a matrix:
 
 ```typescript
-  get teaMatrix(): Array<Array<Tea>> {
-    return this.toMatrix(this.teaData);
-  }
+
+  teaMatrix:: Array<Array<Tea>>  = this.toMatrix(this.teaData);
 
 ...
 
@@ -387,6 +452,8 @@ Replace the list in `src/app/tea/tea.page.html` with this:
   </ion-row>
 </ion-grid>
 ```
+
+**Be sure to import the new components in the page's class.**
 
 This loops through the rows and for each row displays a column for each tea in that row. That looks great on a iPad Pro, though the cards are all different sizes and look a little crowded. We can fix that with some simple CSS in `app/src/tea/tea.page.scss`:
 

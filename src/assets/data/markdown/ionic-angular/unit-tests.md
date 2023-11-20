@@ -80,13 +80,9 @@ import { createPlatformMock } from '../../test/mocks';
 
 describe('SomeComponent', () => {
 
-  beforeEach(async(() => {
-    TestBed.configureTestingModule({
-      declarations: [SomeComponent],
-    })
-      .overrideProvider(Platform, { useFactory: createPlatformMock })
-      .compileComponents();
-  }));
+  beforeEach(() => {
+    TestBed.overrideProvider(Platform, { useFactory: createPlatformMock });
+  });
 ...
 ```
 
