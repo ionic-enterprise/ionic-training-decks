@@ -58,14 +58,10 @@ import { createOverlayControllerMock, createPlatformMock } from '@test/mocks';
 describe('TastingNoteEditorComponent', () => {
   ...
     platform = createPlatformMock();
-    TestBed.configureTestingModule({
-      imports: [TastingNoteEditorComponent],
-    })
-      .overrideProvider(TastingNotesService, { useFactory: createTastingNotesServiceMock })
+    TestBed.overrideProvider(TastingNotesService, { useFactory: createTastingNotesServiceMock })
       .overrideProvider(TeaService, { useFactory: createTeaServiceMock })
       .overrideProvider(ModalController, { useValue: modalController })
-      .overrideProvider(Platform, { useValue: platform })
-      .compileComponents();
+      .overrideProvider(Platform, { useValue: platform });
   ...
 ```
 

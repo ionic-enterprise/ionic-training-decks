@@ -12,6 +12,8 @@ The first thing we will need to do is model the session data for our system. The
 
 First let's define the user data. Create a `src/app/models/user.ts` file with the following contents:
 
+**`src/app/models/user.ts`**
+
 ```typescript
 export interface User {
   id: number;
@@ -22,6 +24,8 @@ export interface User {
 ```
 
 Next we will model the current session. Create a `src/app/models/session.ts` file with the following contents:
+
+**`src/app/models/session.ts`**
 
 ```typescript
 import { User } from './user';
@@ -44,6 +48,8 @@ ionic generate service core/session-vault/session-vault
 
 Create `src/app/core/index.ts`. This is the barrel file for all of our `core` services.
 
+**`src/app/core/index.ts`**
+
 ```typescript
 export * from './session-vault/session-vault.service';
 ```
@@ -59,6 +65,8 @@ npm i @capacitor/preferences
 ### Interface Setup
 
 The first thing we will do is define what we want the shape of our service to be. Modify the generated service to include the following properties and methods.
+
+**`src/app/core/session-vault/session-vault.service.ts`**
 
 ```typescript
 import { Injectable } from '@angular/core';
@@ -89,6 +97,8 @@ Now that we have the interface for the service worked out, we can fill out a ske
 
 Edit the `tsconfig.spec.json` file and add a `paths` parameter to the `compilerOptions` as such:
 
+**`tsconfig.spec.json`**
+
 ```json
     "paths": {
       "@app/*": ["src/app/*"],
@@ -101,6 +111,8 @@ Edit the `tsconfig.spec.json` file and add a `paths` parameter to the `compilerO
 Note that this is exactly like the `paths` we added to the base `tsconfig.json` file in order to avoid relative routes in the imports. The change here is the addition of the `@capacitor/*` value. This change tells the build system that when it sees a statement like `import { Foo } from @capacitor/foo`, it should look in the `__mocks__/@capacitor` directory for `foo.ts` rather than under `node_modules`. Since it is in `tsconfig.spec.ts`, it will only do this when building for unit testing.
 
 Next, create a `__mocks__/@capacitor` folder in the project's root and add a `preferences.ts` file with the following contents:
+
+**`__mocks__/@capacitor/preferences.ts`**
 
 ```typescript
 class MockPreferences {
@@ -117,6 +129,8 @@ export { Preferences };
 ```
 
 Now we can begin creating the test for our new `SessionVaultService` in `src/app/core/session-vault/session-vault.service.spec.ts`. Start by importing `Preferences` and `Session` as shown and by adding `describe` blocks for each of our public methods:
+
+**`src/app/core/session-vault/session-vault.service.spec.ts`**
 
 ```typescript
 import { TestBed } from '@angular/core/testing';
@@ -154,6 +168,8 @@ As we start crafting the service, we will do so in a TDD fashion. First write a 
 
 The `set()` method is called at login and stores the session via the Capacitor Preferences plugin.
 
+**`src/app/core/session-vault/session-vault.service.spec.ts`**
+
 ```typescript
 describe('set', () => {
   it('saves the session in preferences', async () => {
@@ -179,6 +195,8 @@ describe('set', () => {
 
 The code for this in the service class then looks like the following:
 
+**`src/app/core/session-vault/session-vault.service.ts`**
+
 ```typescript
 async set(session: Session): Promise<void> {
   await Preferences.set({ key: this.key, value: JSON.stringify(session) });
@@ -190,6 +208,8 @@ Be sure to import `Preferences` from `@capacitor/preferences` at the top of your
 #### Get Session
 
 The `get()` method is used to get the session via the Capacitor Preferences plugin.
+
+**`src/app/core/session-vault/session-vault.service.spec.ts`**
 
 ```typescript
 describe('get session', () => {
@@ -233,11 +253,13 @@ describe('get session', () => {
 });
 ```
 
-**Challenge:** write the code for this method based on the requirements that are defined by this set of tests. Check with the <a href="https://capacitorjs.com/docs/apis/preferences" target="_blank">Preferences Plugin</a> docs if you get stuck.
+**Challenge:** write the code for this method based on the requirements that are defined by this set of tests. Check with the <a href="https://capacitorjs.com/docs/apis/preferences" target="_blank">Preferences Plugin</a> docs if you get stuck. If you are _really_ stuck, you can examine the <a href="https://github.com/ionic-enterprise/tutorials-and-demos-ng/tree/main/demos/tea-taster" target="_blank">completed source</a>.
 
 #### Clear
 
 The `clear()` method is called at logout and removes the session from preferences.
+
+**`src/app/core/session-vault/session-vault.service.spec.ts`**
 
 ```typescript
 describe('clear', () => {
@@ -260,6 +282,8 @@ Eventually, we will want to use this service in other modules. In order to maint
 
 Add a `src/app/core/session-vault/session-vault.service.mock.ts` file and inside of it create a factory used to build mock `SessionVaultService` objects for testing.
 
+**`src/app/core/session-vault/session-vault.service.mock.ts`**
+
 ```typescript
 export const createSessionVaultServiceMock = () =>
   jasmine.createSpyObj('SessionVaultService', {
@@ -270,6 +294,8 @@ export const createSessionVaultServiceMock = () =>
 ```
 
 Also create a `testing` barrel file called `src/app/core/testing.ts` that will eventually contain all of the `core` mock factories.
+
+**`src/app/core/testing.ts`**
 
 ```typescript
 export * from './session-vault/session-vault.service.mock';

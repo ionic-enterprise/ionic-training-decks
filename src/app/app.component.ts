@@ -1,17 +1,67 @@
 import { Component, OnInit } from '@angular/core';
 import { ApplicationService, MenuItemsService } from '@app/core';
-import { IonicModule, NavController, Platform } from '@ionic/angular';
+import { NavController, Platform } from '@ionic/angular/standalone';
 import { FirebaseAnalytics } from '@capacitor-community/firebase-analytics';
 import { SplashScreen } from '@capacitor/splash-screen';
 import { CommonModule } from '@angular/common';
 import { RouterLink, RouterLinkActive } from '@angular/router';
+import { addIcons } from 'ionicons';
+import {
+  book,
+  chevronBack,
+  chevronForward,
+  ellipsisHorizontal,
+  ellipsisVertical,
+  gitBranch,
+  informationCircle,
+  logoAngular,
+  logoCapacitor,
+  logoIonic,
+  logoPwa,
+  logoReact,
+  logoVue,
+  rocket,
+  school,
+} from 'ionicons/icons';
+import {
+  IonRouterLink,
+  IonApp,
+  IonSplitPane,
+  IonMenu,
+  IonContent,
+  IonList,
+  IonListHeader,
+  IonNote,
+  IonIcon,
+  IonMenuToggle,
+  IonItem,
+  IonLabel,
+  IonRouterOutlet,
+} from '@ionic/angular/standalone';
 
 @Component({
   selector: 'app-root',
   templateUrl: 'app.component.html',
   styleUrls: ['app.component.scss'],
   standalone: true,
-  imports: [CommonModule, IonicModule, RouterLink, RouterLinkActive],
+  imports: [
+    CommonModule,
+    RouterLink,
+    RouterLinkActive,
+    IonRouterLink,
+    IonApp,
+    IonSplitPane,
+    IonMenu,
+    IonContent,
+    IonList,
+    IonListHeader,
+    IonNote,
+    IonIcon,
+    IonMenuToggle,
+    IonItem,
+    IonLabel,
+    IonRouterOutlet,
+  ],
 })
 export class AppComponent implements OnInit {
   selectedIndex = 0;
@@ -21,9 +71,26 @@ export class AppComponent implements OnInit {
     private applicationService: ApplicationService,
     private menuItems: MenuItemsService,
     private navController: NavController,
-    private platform: Platform
+    private platform: Platform,
   ) {
     this.initializeApp();
+    addIcons({
+      book,
+      chevronBack,
+      chevronForward,
+      ellipsisHorizontal,
+      ellipsisVertical,
+      gitBranch,
+      informationCircle,
+      logoAngular,
+      logoCapacitor,
+      logoIonic,
+      logoPwa,
+      logoReact,
+      logoVue,
+      rocket,
+      school,
+    });
   }
 
   async initializeApp() {

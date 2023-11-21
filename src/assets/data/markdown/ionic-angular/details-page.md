@@ -30,6 +30,8 @@ Note the output of the command. This generated several files for us and also upd
 
 But, we want details for a specific tea, so our route will need to have the tea ID as part of it. Let's start by modifying the route to take a parameter. Edit the `src/app/app.routes.ts` file to add an `:id` parameter to the path. While we are here, also add the guard to the route.
 
+**`src/app/app.routes.ts`**
+
 ```typescript
   {
     path: 'tea-details/:id',
@@ -51,6 +53,8 @@ The first thing we will do is to integrate the page within the routing flow of t
 #### Navigating to the Page
 
 We will use the NavController to navigate from the `TeaPage` to the child page when a tea card is clicked. In the `src/app/tea/tea.page.spec.ts` file, create the following set of tests:
+
+**`src/app/tea/tea.page.spec.ts`**
 
 ```typescript
 describe('show details page', () => {
@@ -83,6 +87,8 @@ These tests assert that when a card is clicked we will navigate to the `tea-deta
 
 Here is the markup for the template. A `(click)` event binding has been added that will call a method called `showDetailsPage()` passing the tea's ID. The `button` property adds some styling to make the card behave in a "clickable" fashion.
 
+**`src/app/tea/tea.page.html`**
+
 ```html
 <ion-card button (click)="showDetailsPage(tea.id)">
   <!-- the contents of the card is here -->
@@ -111,7 +117,7 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Tea } from '@app/models';
-import { IonicModule } from '@ionic/angular';
+import { IonContent, IonHeader, IonImg, IonTitle, IonToolbar } from '@ionic/angular/standalone';
 import { EMPTY, Observable } from 'rxjs';
 
 @Component({
@@ -119,14 +125,16 @@ import { EMPTY, Observable } from 'rxjs';
   templateUrl: './tea-details.page.html',
   styleUrls: ['./tea-details.page.scss'],
   standalone: true,
-  imports: [CommonModule, FormsModule, IonicModule],
+  imports: [CommonModule, FormsModule, IonContent, IonHeader, IonImg, IonTitle, IonToolbar],
 })
 export class TeaDetailsPage implements OnInit {
   tea$: Observable<Tea> = EMPTY;
 
   constructor() {}
 
-  ngOnInit() {}
+  ngOnInit() {
+    null; // prevents a linting error, we will replace this later
+  }
 }
 ```
 
@@ -156,6 +164,8 @@ This will not display anything right now. First we need to get the data. We will
 
 We need to modify the `TeaService` to include a `get()` method that returns a single tea. Add the following signature to `src/app/core/tea/tea.service.ts`:
 
+**`src/app/core/tea/tea.service.ts`**
+
 ```typescript
   get(id: number): Observable<Tea> {
     // This is the part you will fill in once the tests are in place
@@ -169,6 +179,8 @@ The tests look a lot like the tests for `getAll()` with the following exceptions
 - A single tea is returned and not an array of teas.
 
 Add the following tests to `src/app/core/tea/tea.service.spec.ts`:
+
+**`src/app/core/tea/tea.service.spec.ts`**
 
 ```typescript
 describe('get', () => {
@@ -200,19 +212,17 @@ Now that we are navigating to the `tea-details` page with an ID parameter, we ne
 
 In the `src/app/tea-details/tea-details.page.spec.ts` file, set up the `TestBed` to inject mocks for these services.
 
-```typescript
-beforeEach(waitForAsync(() => {
-  TestBed.configureTestingModule({
-    imports: [TeaDetailsPage],
-  })
-    .overrideProvider(ActivatedRoute, { useFactory: createActivatedRouteMock })
-    .overrideProvider(TeaService, { useFactory: createTeaServiceMock })
-    .compileComponents();
+**`src/app/tea-details/tea-details.page.spec.ts`**
 
+```typescript
+beforeEach(() => {
+  TestBed.overrideProvider(ActivatedRoute, { useFactory: createActivatedRouteMock }).overrideProvider(TeaService, {
+    useFactory: createTeaServiceMock,
+  });
   fixture = TestBed.createComponent(TeaDetailsPage);
   component = fixture.componentInstance;
   fixture.detectChanges();
-}));
+});
 ```
 
 You will need to adjust your import statements accordingly.
@@ -221,19 +231,21 @@ Create an `initialization` section in the test. Also, since we will need to do s
 
 In the `beforeEach()`, we need to set up the current route so it has an ID on it. We also need to set up the value returned by the `TeaService` when `get()` is called.
 
+**`src/app/tea-details/tea-details.page.spec.ts`**
+
 ```typescript
 describe('initialization', () => {
   beforeEach(() => {
     const route = TestBed.inject(ActivatedRoute);
     (route.snapshot.paramMap.get as any).withArgs('id').and.returnValue('7');
     const tea = TestBed.inject(TeaService);
-    (tea.get as jasmine.Spy).and.returnValue(
+    (tea.get as jasmine.Spy).withArgs(7).and.returnValue(
       of({
         id: 7,
         name: 'White',
         description: 'Often looks like frosty silver pine needles',
         image: 'imgs/white.png',
-      })
+      }),
     );
   });
 
@@ -249,6 +261,8 @@ describe('initialization', () => {
 
 The code that satisfies that test looks like this:
 
+**`src/app/tea-details/tea-details.page.ts`**
+
 ```typescript
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
@@ -256,19 +270,23 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { TeaService } from '@app/core';
 import { Tea } from '@app/models';
-import { EMPTY, Observable } from 'rxjs';
+import { IonContent, IonHeader, IonImg, IonTitle, IonToolbar } from '@ionic/angular/standalone';
+import { EMPTY, Observable, of } from 'rxjs';
 
 @Component({
   selector: 'app-tea-details',
   templateUrl: './tea-details.page.html',
   styleUrls: ['./tea-details.page.scss'],
   standalone: true,
-  imports: [CommonModule, FormsModule, IonicModule],
+  imports: [CommonModule, FormsModule, IonContent, IonHeader, IonImg, IonTitle, IonToolbar],
 })
 export class TeaDetailsPage implements OnInit {
   tea$: Observable<Tea> = EMPTY;
 
-  constructor(private route: ActivatedRoute, private tea: TeaService) {}
+  constructor(
+    private route: ActivatedRoute,
+    private tea: TeaService,
+  ) {}
 
   ngOnInit() {
     const id = parseInt(this.route.snapshot.paramMap.get('id') as string, 10);
@@ -288,7 +306,7 @@ We should now be able to get to the details page, but now the user is stuck ther
 
 **Note:** in the example, you will need to scroll over to the `src/app/page-two.component.ts` tab in order to find the markup you are looking for.
 
-If you were already on the `tea-details` page when you did this, then you did not see a back-button. This is because when the page refreshed, the navigation stack was destroyed. If your app needs to still display the back button even if there is no navigation stack (for example, if you are going to deploy to the web where someone could go directly to the tea details page via a link), use the `defaultHref` property.
+If you were already on the `tea-details` page when you did this, then you did not see a back-button. This is because when the page refreshed, the navigation stack was destroyed. If your app needs to still display the back button even if there is no navigation stack (for example, if you are going to use deep-links or deploy to the web where someone could go directly to the tea details page via a link), use the `defaultHref` property.
 
 Feel free to play around with some of the other options if you would like to.
 

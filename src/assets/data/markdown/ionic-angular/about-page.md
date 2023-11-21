@@ -18,7 +18,7 @@ This will allow us to read the `package.json` file and get some important inform
 
 ```typescript
 import { Component } from '@angular/core';
-import { IonicModule } from '@ionic/angular';
+import { IonContent, etc } from '@ionic/angular/standalone'; // Fill in the rest
 import packageInfo from '../../../package.json';
 
 @Component({
@@ -26,7 +26,7 @@ import packageInfo from '../../../package.json';
   templateUrl: './about.page.html',
   styleUrls: ['./about.page.scss'],
   standalone: true,
-  imports: [IonicModule],
+  imports: [IonContent, etc], // Fill in the rest
 })
 export class AboutPage {
   author: string;
@@ -80,7 +80,7 @@ Currently, the logout logic is on the first page. Once the user has logged in, i
 Here is the full test:
 
 ```typescript
-import { ComponentFixture, fakeAsync, TestBed, tick, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, fakeAsync, TestBed, tick } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { AuthenticationService, SessionVaultService } from '@app/core';
 import { createAuthenticationServiceMock, createSessionVaultServiceMock } from '@app/core/testing';
@@ -95,13 +95,9 @@ describe('AboutPage', () => {
   let fixture: ComponentFixture<AboutPage>;
 
   beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      imports: [AboutPage],
-    })
-      .overrideProvider(AuthenticationService, { useFactory: createAuthenticationServiceMock })
+    TestBed.overrideProvider(AuthenticationService, { useFactory: createAuthenticationServiceMock })
       .overrideProvider(NavController, { useFactory: createNavControllerMock })
-      .overrideProvider(SessionVaultService, { useFactory: createSessionVaultServiceMock })
-      .compileComponents();
+      .overrideProvider(SessionVaultService, { useFactory: createSessionVaultServiceMock });
 
     fixture = TestBed.createComponent(AboutPage);
     component = fixture.componentInstance;

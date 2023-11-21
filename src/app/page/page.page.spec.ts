@@ -1,10 +1,10 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { ActivatedRoute } from '@angular/router';
 import { MenuItemsService } from '@app/core';
 import { createMenuItemsServiceMock } from '@app/core/testing';
 import { PageMenuComponent } from '@app/page-menu/page-menu.component';
-import { NavController, PopoverController } from '@ionic/angular';
+import { NavController, PopoverController } from '@ionic/angular/standalone';
 import {
   createActivatedRouteMock,
   createNavControllerMock,
@@ -19,24 +19,20 @@ describe('PagePage', () => {
   let popover: HTMLIonPopoverElement;
   let popoverController: PopoverController;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     popover = createOverlayElementMock('Popover');
     popoverController = createOverlayControllerMock('PopoverController', popover);
-    TestBed.configureTestingModule({
-      imports: [PagePage],
-    })
-      .overrideProvider(ActivatedRoute, { useFactory: createActivatedRouteMock })
+    TestBed.overrideProvider(ActivatedRoute, { useFactory: createActivatedRouteMock })
       .overrideProvider(MenuItemsService, { useFactory: createMenuItemsServiceMock })
       .overrideProvider(PopoverController, { useValue: popoverController })
-      .overrideProvider(NavController, { useFactory: createNavControllerMock })
-      .compileComponents();
+      .overrideProvider(NavController, { useFactory: createNavControllerMock });
 
     const activatedRoute = TestBed.inject(ActivatedRoute);
     (activatedRoute.snapshot.paramMap.get as any).and.returnValue('1');
 
     fixture = TestBed.createComponent(PagePage);
     component = fixture.componentInstance;
-  }));
+  });
 
   const setupCourseWithoutPages = () => {
     const activatedRoute = TestBed.inject(ActivatedRoute);

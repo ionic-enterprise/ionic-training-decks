@@ -157,6 +157,23 @@ $ git commit -m "Initial commit"
 
 Notice the "lint-staged" lines. That is from the `pre-commit` hook we just set up making sure everything is formatted properly. At this point all of the source should be formatting properly and will remain so automatically with each commit.
 
+If you get linting errors, clean them up and try the commit again.
+
+**Note:** you will likely get linting errors due to lifecycle events being empty. To fix that, you have two options:
+
+1. Remove the `ngOnInit()` lifecycle events.
+1. Leave the `ngOnInit()` lifecycle events in the code and give them a `null` body.
+
+We suggest the second choice for now as we will periodically need to use these lifecycle events. We can go in later in development on clean up this technical debt.
+
+Example:
+
+```typescript
+  ngOnInit() {
+    null; // TODO: clean up later if still not used
+  }
+```
+
 ## Update Dependencies
 
 It is important to keep our dependencies up to date on a regular basis. At least once a quarter (though preferably more often than that), we should evaluate our dependencies, and update them to the latest supportable version. Before we do that, though, it is important to know a couple of important concepts: <a href="https://semver.org/" target="_blank">Semantic Versioning</a> (a.k.a. semver), and the `npm` <a href="https://semver.npmjs.com/" target="_blank">Version Range Syntax</a>.

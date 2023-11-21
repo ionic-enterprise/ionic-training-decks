@@ -6,14 +6,40 @@ import { MenuItemsService } from '@app/core';
 import { MarkdownViewComponent } from '@app/markdown-view/markdown-view.component';
 import { MenuItem } from '@app/models';
 import { PageMenuComponent } from '@app/page-menu/page-menu.component';
-import { IonicModule, NavController, PopoverController } from '@ionic/angular';
+import {
+  IonButton,
+  IonButtons,
+  IonContent,
+  IonHeader,
+  IonIcon,
+  IonMenuButton,
+  IonTitle,
+  IonToolbar,
+  NavController,
+  PopoverController,
+} from '@ionic/angular/standalone';
+import { addIcons } from 'ionicons';
+import { chevronBack, chevronForward, ellipsisHorizontal, ellipsisVertical } from 'ionicons/icons';
 
 @Component({
   selector: 'app-page',
   templateUrl: './page.page.html',
   styleUrls: ['./page.page.scss'],
   standalone: true,
-  imports: [CommonModule, FormsModule, IonicModule, MarkdownViewComponent, PageMenuComponent],
+  imports: [
+    CommonModule,
+    FormsModule,
+    MarkdownViewComponent,
+    PageMenuComponent,
+    IonHeader,
+    IonToolbar,
+    IonButtons,
+    IonMenuButton,
+    IonButton,
+    IonIcon,
+    IonTitle,
+    IonContent,
+  ],
 })
 export class PagePage implements OnInit {
   disableMenu = true;
@@ -34,8 +60,10 @@ export class PagePage implements OnInit {
     private activatedRoute: ActivatedRoute,
     private menuItems: MenuItemsService,
     private navController: NavController,
-    private popoverController: PopoverController
-  ) {}
+    private popoverController: PopoverController,
+  ) {
+    addIcons({ chevronBack, chevronForward, ellipsisHorizontal, ellipsisVertical });
+  }
 
   async ngOnInit() {
     this.getNavParams();

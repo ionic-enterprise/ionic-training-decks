@@ -1,5 +1,5 @@
 import { TestBed, waitForAsync } from '@angular/core/testing';
-import { NavController, Platform } from '@ionic/angular';
+import { NavController, Platform } from '@ionic/angular/standalone';
 import { provideRouter } from '@angular/router';
 import { ApplicationService, MenuItemsService } from '@app/core';
 import { createApplicationServiceMock, createMenuItemsServiceMock } from '@app/core/testing';

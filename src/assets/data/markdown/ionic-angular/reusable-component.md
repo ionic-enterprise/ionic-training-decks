@@ -13,16 +13,56 @@ A common convention is to create reusable components that are not specific to a 
 ionic g component shared/rating
 ```
 
-Once the component is created, look at the `@Component` properties in `src/app/shared/rating/rating.component.ts` and ensure that the component is properly configured to be stand alone:
+Once the component is created, modify it to be `standalone` and to import the icons we are going to use (`star` and `starOutline`).
+
+**`src/app/shared/rating/rating.component.ts`**
 
 ```typescript
+import { CommonModule } from '@angular/common';
+import { Component, Input } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { IonIcon } from '@ionic/angular/standalone';
+import { addIcons } from 'ionicons';
+import { star, starOutline } from 'ionicons/icons';
+
 @Component({
   selector: 'app-rating',
   templateUrl: './rating.component.html',
   styleUrls: ['./rating.component.scss'],
   standalone: true,
-  imports: [CommonModule, FormsModule, IonicModule],
+  imports: [CommonModule, FormsModule, IonIcon],
 })
+export class RatingComponent {
+  @Input() rating: number = 0;
+
+  constructor() {
+    addIcons({ star, starOutline });
+  }
+}
+```
+
+You will also need to update the test to build the component as standalone.
+
+**`src/app/shared/rating/rating.component.spec.ts`**
+
+```typescript
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { RatingComponent } from './rating.component';
+
+describe('RatingComponent', () => {
+  let component: RatingComponent;
+  let fixture: ComponentFixture<RatingComponent>;
+
+  beforeEach(() => {
+    fixture = TestBed.createComponent(RatingComponent);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
+  });
+
+  it('should create', () => {
+    expect(component).toBeTruthy();
+  });
+});
 ```
 
 Finally, create a barrel file (`src/app/shared/index.ts`) to export all of the items that we add to the shared folder.
@@ -33,19 +73,28 @@ Our component isn't very useful or interesting yet, but it will be hard to build
 
 The first thing we will need to do is import our `RatingComponent` in the `TeaDetailsPage`.
 
+**`src/app/tea-details/tea-details.page.ts`**
+
 ```typescript
 @Component({
   selector: 'app-tea-details',
   templateUrl: './tea-details.page.html',
   styleUrls: ['./tea-details.page.scss'],
   standalone: true,
-  imports: [CommonModule, FormsModule, IonicModule, RatingComponent],
+  imports: [
+    CommonModule,
+    FormsModule,
+    // Several Ion* components here
+    RatingComponent,
+  ],
 })
 ```
 
 We will also need to do the same when setting up the testing module within `src/app/tea-details/tea-details.page.spec.ts`.
 
 Then we can add the markup to our page. Add the following to `tea-details.page.html` after the description paragraph:
+
+**`src/app/tea-details/tea-details.page.html`**
 
 ```html
 <app-rating></app-rating>
@@ -63,6 +112,8 @@ Our rating component will just be a simple five-star rating system. The followin
 
 First let's just get a row of five stars out there:
 
+**`src/app/shared/rating/rating.component.html`**
+
 ```html
 <div>
   <ion-icon *ngFor="let n of [1, 2, 3, 4, 5]" name="star"></ion-icon>
@@ -71,6 +122,8 @@ First let's just get a row of five stars out there:
 
 Next, add a `rating` property to the class and give it a value greater than zero but less then 5. Change the markup to that number of filled in stars with the rest being outline stars.
 
+**`src/app/shared/rating/rating.component.html`**
+
 ```html
 <div>
   <ion-icon *ngFor="let n of [1, 2, 3, 4, 5]" [name]="n > (rating || 0) ? 'star-outline' : 'star'"></ion-icon>
@@ -78,6 +131,8 @@ Next, add a `rating` property to the class and give it a value greater than zero
 ```
 
 Finally, let's add a `click` handler that will change the rating as the user clicks on a star:
+
+**`src/app/shared/rating/rating.component.html`**
 
 ```html
 <div>
@@ -94,6 +149,8 @@ So far so good.
 ### Style the Component
 
 So far this works well, but the stars are a little small and close together, especially for people with larger hands. Let's apply a little style to make that better. Add the following to `src/app/shared/rating/rating.component.scss`:
+
+**`src/app/shared/rating/rating.component.scss`**
 
 ```scss
 ion-icon {
@@ -113,16 +170,23 @@ If we make our component implement the `ControlValueAccessor` interface, it will
 
 First let's scaffold out the code a little to get the boiler-plate stuff:
 
+**`src/app/shared/rating/rating.component.ts`**
+
 ```typescript
+import { CommonModule } from '@angular/common';
 import { Component, forwardRef, Input, HostBinding } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
+import { FormsModule } from '@angular/forms';
+import { IonIcon } from '@ionic/angular/standalone';
+import { addIcons } from 'ionicons';
+import { star, starOutline } from 'ionicons/icons';
 
 @Component({
   selector: 'app-rating',
   templateUrl: './rating.component.html',
   styleUrls: ['./rating.component.scss'],
   standalone: true,
-  imports: [CommonModule, FormsModule, IonicModule],
+  imports: [CommonModule, FormsModule, IonIcon],
   providers: [
     {
       provide: NG_VALUE_ACCESSOR,
@@ -134,7 +198,9 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 export class RatingComponent implements ControlValueAccessor {
   @Input() rating: number = 0;
 
-  constructor() {}
+  constructor() {
+    addIcons({ star, starOutline });
+  }
 
   onChange = (_rating: number) => {};
 
@@ -159,6 +225,8 @@ Some of the ES6 imports are not used at this point, but we will add stuff later 
 
 Let's also scaffold the test. This one will be a little more complex because we want to test out how the component behaves when it is used, so we will need to create a host component for our tests.
 
+**`src/app/shared/rating/rating.component.spec.ts`**
+
 ```typescript
 import { waitForAsync, ComponentFixture, TestBed } from '@angular/core/testing';
 import { Component } from '@angular/core';
@@ -167,6 +235,8 @@ import { RatingComponent } from './rating.component';
 
 @Component({
   template: `<app-rating [(ngModel)]="rating" [disabled]="disabled" (ngModelChange)="onChange()"> </app-rating>`,
+  standalone: true,
+  imports: [FormsModule, RatingComponent],
 })
 class TestHostComponent {
   disabled = false;
@@ -183,11 +253,6 @@ describe('RatingComponent', () => {
   let fixture: ComponentFixture<TestHostComponent>;
 
   beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [TestHostComponent],
-      imports: [FormsModule, RatingComponent],
-    }).compileComponents();
-
     fixture = TestBed.createComponent(TestHostComponent);
     hostComponent = fixture.componentInstance;
     ratingEl = fixture.nativeElement.querySelector('app-rating');
@@ -204,6 +269,8 @@ describe('RatingComponent', () => {
 #### Update the NgModel
 
 When a star is clicked, we want to make sure that the value bound to the `[(ngModel)]` gets updated and that the change handler gets called. Here is a test for that. The naming of the `describe()` will make more sense later. Add this in `ratings.component.spec.ts`:
+
+**`src/app/shared/rating/rating.component.spec.ts`**
 
 ```typescript
 describe('when enabled', () => {
@@ -226,6 +293,8 @@ This will be easier to implement as we go if we bind the `(click)` event in our 
 
 Open the `src/app/shared/rating/rating.component.html` file and change the `(click)` binding as such:
 
+**`src/app/shared/rating/rating.component.html`**
+
 ```html
 <div>
   <ion-icon
@@ -238,6 +307,8 @@ Open the `src/app/shared/rating/rating.component.html` file and change the `(cli
 
 Then let's create the code. For now, `ratingClicked()` just needs to call through to the boiler-plate `writeValue()` method. Add the following code in `ratings.component.ts`:
 
+**`src/app/shared/rating/rating.component.ts`**
+
 ```typescript
   ratingClicked(rating: number): void {
     this.writeValue(rating);
@@ -248,6 +319,8 @@ Then let's create the code. For now, `ratingClicked()` just needs to call throug
 
 It would be good if we could allow this component to be disabled. When we do this, we should reduce the opacity to make it look "grayed out", and we should disable clicks. Add a test to the "when enabled" section of the test.
 
+**`src/app/shared/rating/rating.component.spec.ts`**
+
 ```typescript
 it('sets the opacity to 1', () => {
   expect(ratingEl.style.opacity).toEqual('1');
@@ -255,6 +328,8 @@ it('sets the opacity to 1', () => {
 ```
 
 Also add a section that shows the behavior when the component is disabled:
+
+**`src/app/shared/rating/rating.component.spec.ts`**
 
 ```typescript
 describe('when disabled', () => {
@@ -282,14 +357,16 @@ describe('when disabled', () => {
 });
 ```
 
-In order to get these tests to pass, add the following code to the `rating.component.ts` file:
+In order to get these tests to pass, add a disabled input and an opacity getting with a host binding.
 
-First add this:
+**`src/app/shared/rating/rating.component.ts`**
 
 ```typescript
 @Input() disabled = false;
 
-constructor() {}
+constructor() {
+  addIcons({ star, starOutline });
+}
 
 @HostBinding('style.opacity')
 get opacity(): number {
@@ -301,6 +378,8 @@ get opacity(): number {
 
 Next, modify `ratingClicked()` to only do anything if the component is not disabled:
 
+**`src/app/shared/rating/rating.component.ts`**
+
 ```typescript
   ratingClicked(rating: number): void {
     if (!this.disabled) {
@@ -310,6 +389,8 @@ Next, modify `ratingClicked()` to only do anything if the component is not disab
 ```
 
 The tests should now be passing, but we will add one more little piece of boiler-plate code that will make the component behave properly when Angular needs to set the component disabled via functional means:
+
+**`src/app/shared/rating/rating.component.ts`**
 
 ```typescript
 setDisabledState(isDisabled: boolean): void {
@@ -331,6 +412,8 @@ We need to modify the `TeaService` to both save and retrieve the rating for each
 ### Update the Model
 
 Update `src/app/models/tea.ts` and add the following property:
+
+**`src/app/model/tea.ts`**
 
 ```typescript
 rating: number;
@@ -361,6 +444,8 @@ We need to do a few things in the service (and test):
 
 In the `expectedTeas` array that is part of the `TeaService` test, add a rating to each tea as shown. For some of them, use zero. This will be the default value for teas that do not yet have a rating.
 
+**`src/app/core/tea/tea.service.spec.ts`**
+
 ```typescript
 {
   id: 1,
@@ -374,6 +459,8 @@ In the `expectedTeas` array that is part of the `TeaService` test, add a rating 
 **Note:** other tests like the `TeaPage` test also set up `Tea` data. Update those to include ratings where needed as well.
 
 The rating is not part of the data coming back from our API, so the API results we use cannot have it. Where the `resultTeas` array is defined, delete the `rating` just like we do for the `image`.
+
+**`src/app/core/tea/tea.service.spec.ts`**
 
 ```typescript
 resultTeas = expectedTeas.map((t: Tea) => {
@@ -389,6 +476,8 @@ Finally, the `TeaService` itself is not compiling. Add some code to the `convert
 We will use the Capacitor Preferences plugin, so we will mock that. There are multiple ways that we could store the ratings. We will just go with the very simple strategy of using a key of `ratingX` where `X` is the `ID` of the tea.
 
 In the main `beforeEach()` of the `TeaService` test, spy on `Preferences.get()` returning a default of `{ value: null }` and add non-zero values for various ratings depending on the changes you made to the test data above.
+
+**`src/app/core/tea/tea.service.spec.ts`**
 
 ```typescript
 ...
@@ -413,6 +502,8 @@ beforeEach(() => {
 ```
 
 We are also going to have to combine code that returns an `Observable` with code that resolves a `Promise`. In order to deal with this cleanly, wrap the tests that perform a `flush()` in the `fakeAsync` zone and call `tick()` after the `flush()` as such:
+
+**`src/app/core/tea/tea.service.spec.ts`**
 
 ```typescript
 it('adds an image to each', fakeAsync(() => {
@@ -440,6 +531,8 @@ At this point, you should still have a failing test. Update the code in `src/app
 
 The first step is to make our private `convert()` method async and then grab the rating from preferences:
 
+**`src/app/core/tea/tea.service.ts`**
+
 ```typescript
 private async convert(tea: TeaResponse): Promise<Tea> {
   const { value } = await Preferences.get({ key: `rating${tea.id}` });
@@ -456,6 +549,8 @@ Make sure you `import { Preferences } from '@capacitor/preferences';`.
 But this makes our `getAll()` and `get()` methods unhappy.
 
 For `getAll()` we are now returning an Observable of an array of promises of tea, but we want an array of teas, not just the promise of eventually getting tea. We can use a `mergeMap()` in conjunction with a `Promise.all()` to fix this:
+
+**`src/app/core/tea/tea.service.ts`**
 
 ```typescript
 getAll(): Observable<Array<Tea>> {
@@ -483,6 +578,8 @@ The save is relatively easy. It will take a full `Tea` model, but at this time t
 
 Here is the test covering our requirements:
 
+**`src/app/core/tea/tea.service.spec.ts`**
+
 ```typescript
 describe('save', () => {
   it('saves the value', () => {
@@ -500,6 +597,8 @@ describe('save', () => {
 ```
 
 The code to add to the `TeaService` in order to accomplish this is straight forward:
+
+**`src/app/core/tea/tea.service.ts`**
 
 ```typescript
 save(tea: Tea): Promise<void> {
@@ -522,6 +621,8 @@ The first thing we will need to do is get the current rating when we select the 
 
 Add a rating to the test tea in our `TeaDetailsPage` test.
 
+**`src/app/tea-details/tea-details.page.spec.ts`**
+
 ```typescript
 (tea.get as jasmine.Spy).withArgs(7).and.returnValue(
   of({
@@ -530,11 +631,13 @@ Add a rating to the test tea in our `TeaDetailsPage` test.
     description: 'Often looks like frosty silver pine needles',
     image: 'imgs/white.png',
     rating: 4,
-  })
+  }),
 );
 ```
 
 Then add a test to verify the initialization of the rating value. This is in the "initialization" describe block.
+
+**`src/app/tea-details/tea-details.page.spec.ts`**
 
 ```typescript
 it('initializes the rating', () => {
@@ -545,6 +648,8 @@ it('initializes the rating', () => {
 
 In the code we can tap into the Observable pipeline and grab the rating:
 
+**`src/app/tea-details/tea-details.page.ts`**
+
 ```typescript
 ...
   rating: number = 0;
@@ -553,6 +658,8 @@ In the code we can tap into the Observable pipeline and grab the rating:
 ```
 
 We can then bind the rating in the template:
+
+**`src/app/tea-details/tea-details.page.html`**
 
 ```HTML
 <app-rating [(ngModel)]="rating"></app-rating>
@@ -563,6 +670,8 @@ We can then bind the rating in the template:
 ### Save the New Rating
 
 When the user clicks on the rating component, we need to save the rating to storage. Here is the test, code, and template markup change.
+
+**`src/app/tea-details/tea-details.page.spec.ts`**
 
 ```typescript
 describe('rating click', () => {
@@ -587,11 +696,15 @@ describe('rating click', () => {
 });
 ```
 
+**`src/app/tea-details/tea-details.page.ts`**
+
 ```typescript
 changeRating(tea: Tea) {
   this.tea.save({ ...tea, rating: this.rating });
 }
 ```
+
+**`src/app/tea-details/tea-details.page.html`**
 
 ```html
 <app-rating [(ngModel)]="rating" (click)="changeRating(tea)"></app-rating>

@@ -1,13 +1,13 @@
 import { CommonModule } from '@angular/common';
 import { Component, Input } from '@angular/core';
-import { IonicModule, PopoverController } from '@ionic/angular';
+import { IonList, IonItem, IonLabel, PopoverController } from '@ionic/angular/standalone';
 
 @Component({
   selector: 'app-page-menu',
   templateUrl: './page-menu.component.html',
   styleUrls: ['./page-menu.component.scss'],
   standalone: true,
-  imports: [CommonModule, IonicModule],
+  imports: [CommonModule, IonList, IonItem, IonLabel],
 })
 export class PageMenuComponent {
   @Input() menuItems: Array<string>;

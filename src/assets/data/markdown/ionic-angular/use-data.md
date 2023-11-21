@@ -16,14 +16,12 @@ For all of the code mentioned here, we are working in one of the files in `src/a
 
 We currently are injecting the following mocks:
 
+**`src/app/tea/tea.page.spec.ts`**
+
 ```typescript
-TestBed.configureTestingModule({
-  imports: [TeaPage],
-})
-  .overrideProvider(AuthenticationService, { useFactory: createAuthenticationServiceMock })
+TestBed.overrideProvider(AuthenticationService, { useFactory: createAuthenticationServiceMock })
   .overrideProvider(NavController, { useFactory: createNavControllerMock })
-  .overrideProvider(SessionVaultService, { useFactory: createSessionVaultServiceMock })
-  .compileComponents();
+  .overrideProvider(SessionVaultService, { useFactory: createSessionVaultServiceMock });
 ```
 
 Using this as a template, add code to provide a mock for the `TeaService`.
@@ -62,6 +60,8 @@ We will switch the code over from having hard coded data to having an `Observabl
 
 The `ngOnInit()` method should set up the observable that we created.
 
+**`src/app/tea/tea.page.ts`**
+
 ```typescript
   ngOnInit() {
     this.teaMatrix$ = this.tea.getAll().pipe(map((teas) => this.toMatrix(teas)));
@@ -73,6 +73,8 @@ Notice that we are not subscribing to the observable. This will be handled in th
 ## Update the Template
 
 The template change is pretty small. Rather than having a `teaMatrix` getter, we will now have a `teaMatrix$` RxJS `Observable` so we need to use it and pipe it through the `async` pipe. The `async` pipe will handle subscribing and unsubscribing for us.
+
+**`src/app/tea/tea.page.html` (diff)**
 
 ```diff
 -    <ion-row *ngFor="let teaRow of teaMatrix" class="ion-align-items-stretch">

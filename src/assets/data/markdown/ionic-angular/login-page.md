@@ -27,7 +27,9 @@ UPDATE src/app/app.routes.ts (353 bytes)
 [OK] Generated page!
 ```
 
-Verify the login page had been added to the application's routes (`src/app/app.routes.ts`):
+Verify the login page had been added to the application's routes.
+
+**`src/app/app.routes.ts`**
 
 ```typescript
   {
@@ -38,31 +40,44 @@ Verify the login page had been added to the application's routes (`src/app/app.r
 
 Let's see if that works by changing the route in our browser to 'http://localhost:8100/login' (your port number may be different). We should be able to navigate to that location just fine. The page is blank, but we can tell that the route is actually working.
 
+**Note:** you will currently need to:
+
+- Fix the test just like you had to for the `TeaPage`.
+- Remove the import of `IonicModule` and replace it with importing the individual components we are using. This is performed in `src/app/login/login.page.ts`.
+
 ## Use Reactive Forms
 
 This is a very simple form, and we could get away with using a template driven form. However, the Reactive forms are far more flexible and ultimately more extensible. As such, we will use them instead. Open `src/app/login/login.page.ts` and import the `ReactiveFormsModule` instead of the `FormsModule`.
 
+**`src/app/login/login.page.ts`**
+
 ```typescript
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { ReactiveFormsModule } from '@angular/forms';
-import { IonicModule } from '@ionic/angular';
+import { IonContent, IonHeader, IonTitle, IonToolbar } from '@ionic/angular/standalone';
 
 @Component({
   selector: 'app-login',
   templateUrl: './login.page.html',
   styleUrls: ['./login.page.scss'],
   standalone: true,
-  imports: [CommonModule, IonicModule, ReactiveFormsModule],
+  imports: [IonContent, IonHeader, IonTitle, IonToolbar, CommonModule, ReactiveFormsModule],
 })
-export class LoginPage {
-  ...
+export class LoginPage implements OnInit {
+  constructor() {}
+
+  ngOnInit() {
+    null;
+  }
 }
 ```
 
 ## Mock the UI
 
 First we will add our "title test", but in this case we will only have the single title. There is no reason for the collapsible title on this page.
+
+**`src/app/login/login.page.spec.ts`**
 
 ```typescript
 it('displays the title properly', () => {
@@ -75,7 +90,7 @@ Notice that the test fails, but we are about to fix that.
 
 **Reminder:** Angular's test server often does not pick up new `*.spec.ts` files so you may need to kill the existing `npm test` run and restart it to see the failed test.
 
-For this page, we will follow the very common <a ref="https://ionicframework.com/docs/layout/structure#header-and-footer" target="_blank">Header and Footer</a> UI pattern. This pattern contains a header with the page title and perhaps some controls (sch as a back button) as applicable, a content section with the main content, and a footer section that typically contains action buttons. Let's mock up the UI for that now.
+For this page, we will follow the very common <a href="https://ionicframework.com/docs/layout/structure#header-and-footer" target="_blank">Header and Footer</a> UI pattern. This pattern contains a header with the page title and perhaps some controls (sch as a back button) as applicable, a content section with the main content, and a footer section that typically contains action buttons. Let's mock up the UI for that now.
 
 Our `ion-header` already contains what we need.
 
@@ -84,6 +99,8 @@ We know we are going to need a form in which to enter our e-mail and our passwor
 We also know that we need an action button for the user to press once they have entered their credentials. We will place that inside the `ion-footer` section.
 
 When we are done, our page markup looks like this:
+
+**`src/app/login/login.page.html`**
 
 ```html
 <ion-header>
@@ -106,7 +123,11 @@ When we are done, our page markup looks like this:
 </ion-footer>
 ```
 
+**Remember to update the component `import`s in the page's class file.**
+
 That's a start, but let's pretty it up a bit. First, let's use the "floating" style labels by adding `label-placement="floating"` to each input. Here is an example:
+
+**`src/app/login/login.page.html`**
 
 ```html
 <ion-input label="Foo Bar" label-placement="floating"></ion-input>
@@ -118,6 +139,8 @@ We should also give the inputs `id`, `name`, and `type` attributes as well as se
 - `id="password-input" name="password" type="password" [errorText]="passwordError"`
 
 The `emailError` and `passwordError` will need to be defined in the page's class:
+
+**`src/app/login/login.page.ts`**
 
 ```typescript
   get emailError(): string {
@@ -141,6 +164,8 @@ Finally, the button should:
 - take up the whole screen width
 - have a sign in icon to go with the text
 
+**`src/app/login/login.page.html`**
+
 ```html
 <ion-footer>
   <ion-toolbar>
@@ -154,24 +179,46 @@ Finally, the button should:
 
 Pay particular attention to the `slot` on the `ion-icon` (`slot="end"`). A slot defines where a child element will be positioned in the parent element. The button component (parent) <a href="https://ionicframework.com/docs/api/button#slots" target="_blank">defines various slots</a>. The child component (`ion-icon` in this case) specifies which slot to use <a href="https://developer.mozilla.org/en-US/docs/Web/Web_Components/Using_templates_and_slots#adding_flexibility_with_slots" target=_blank>via the slot attribute</a>. We point it out here only because it sometimes is a source of confusion for developers who are new to the `slot` paradigm.
 
+Update the page's class to load the icon as well.
+
+**`src/app/login.login.page.ts`**
+
+```typescript
+...
+import { addIcons } from 'ionicons';
+import { logInOutline } from 'ionicons/icons';
+
+...
+
+export class LoginPage implements OnInit {
+
+  ...
+
+  constructor() {
+    addIcons({ logInOutline });
+  }
+
+  ...
+
+}
+
+```
+
 ## Form Handling
 
 ### Set Up the Page Class
 
 For now the `LoginPage` class does not have to do much. It just needs to have a couple of properties to bind to the input fields. It also needs a handler for the button. At this time, the handler will just output a message to the console.
 
+**`src/app/login/login.page.ts`**
+
 ```typescript
-import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+...
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
-import { IonicModule } from '@ionic/angular';
+...
 
 @Component({
-  selector: 'app-login',
-  templateUrl: './login.page.html',
-  styleUrls: ['./login.page.scss'],
-  standalone: true,
-  imports: [CommonModule, IonicModule, ReactiveFormsModule],
+  ...
 })
 export class LoginPage {
   loginForm = this.fb.group({
@@ -183,6 +230,8 @@ export class LoginPage {
 
   constructor(private fb: FormBuilder) {}
 
+  ...
+
   signIn() {
     console.log(this.loginForm.controls.email.value, this.loginForm.controls.password.value);
   }
@@ -193,7 +242,9 @@ export class LoginPage {
 
 Switch back to the test file. The bindings should be tested to make sure they are done correctly. Here are the tests for the Email Address input. Add these and then create similar tests for the password input.
 
-Notice how we are using the `nativeElement` along with standard JavaScript DOM APIs in these tests. We could have also used the `debugElement` and used its `.query(By.css(...))` syntax like before, and then gone down to the native element for the rest of the test. You can use whichever method you are most comfortable with. You should also take into consideration which methodology is going to work best within your test. In these tests we need the HTML element, so I just went that route right away.
+Notice how we are using the `nativeElement` along with standard JavaScript DOM APIs in these tests. We could have also used the `debugElement` and used its `.query(By.css(...))` syntax like before, and then gone down to the native element for the rest of the test. You can use whichever method you are most comfortable with. You should also take into consideration which methodology is going to work best within your test. In these tests we need the HTML element, so we just went that route right away.
+
+**`src/app/login/login.page.spec.ts`**
 
 ```typescript
 describe('email input binding', () => {
@@ -218,6 +269,8 @@ describe('email input binding', () => {
 
 Hook up the inputs in the templates. First, the form needs to be associated with our `loginForm`:
 
+**`src/app/login/login.page.html`**
+
 ```html
 <form [formGroup]="loginForm"></form>
 ```
@@ -225,6 +278,8 @@ Hook up the inputs in the templates. First, the form needs to be associated with
 Next the `formControlName` needs to be set for each of the inputs.
 
 Here is the E-Mail Address input:
+
+**`src/app/login/login.page.html`**
 
 ```html
 <ion-input
@@ -234,6 +289,8 @@ Here is the E-Mail Address input:
 ```
 
 The password input test and markup is similar:
+
+**`src/app/login/login.page.spec.ts`**
 
 ```typescript
 describe('password input binding', () => {
@@ -256,6 +313,8 @@ describe('password input binding', () => {
 });
 ```
 
+**`src/app/login/login.page.html`**
+
 ```html
 <ion-input
   ... (already existing attributes like 'id', 'label', etc)
@@ -269,6 +328,8 @@ Those tests are getting very verbose, especially when it comes to setting a valu
 
 Add a `setInputValue()` function within the main `describe()`.
 
+**`src/app/login/login.page.spec.ts`**
+
 ```typescript
 const setInputValue = (input: HTMLIonInputElement, value: string) => {
   const event = new InputEvent('ionInput');
@@ -278,7 +339,9 @@ const setInputValue = (input: HTMLIonInputElement, value: string) => {
 };
 ```
 
-With that in place, clean up the tests. Your tests should now look more like this:
+With that in place, clean up the tests. Your tests that dispatch an `ionInput` event should now look more like this:
+
+**`src/app/login/login.page.spec.ts`**
 
 ```typescript
 it('updates the component model when the input changes', () => {
@@ -288,9 +351,13 @@ it('updates the component model when the input changes', () => {
 });
 ```
 
+That is much cleaner and easier to maintain.
+
 ### Display Error Messages
 
 The `errorText` property of `ion-input` will show error messages when the input is dirty and in an invalid state. We currently are just binding a generic error message:
+
+**`src/app/login/login.page.ts`**
 
 ```typescript
 get emailError(): string {
@@ -304,6 +371,8 @@ get passwordError(): string {
 
 Let's think about the types of messages we want with each input. Both fields are required. In addition, the e-mail field needs to be a properly formatted e-mail address. Here is the test for the e-mail input:
 
+**`src/app/login/login.page.spec.ts`**
+
 ```typescript
 it('generates appropriate error messages', () => {
   const input = fixture.nativeElement.querySelector('#email-input');
@@ -314,7 +383,7 @@ it('generates appropriate error messages', () => {
   expect(component.emailError).toBe('Valid');
   setInputValue(input, '');
   expect(component.emailError).toBe('Required');
-  setInputValue(input, 'test@test.com');
+  setInputValue(input, 'test@ionic.io');
   expect(component.emailError).toBe('Valid');
 });
 ```
@@ -330,6 +399,8 @@ Turning our attention to the code, we need to do two things:
 
 First the validations. Add `Validators` to the import from `@angular/forms`, then update the code where we build `loginForm`:
 
+**`src/app/login/login.page.ts`**
+
 ```typescript
 loginForm = this.fb.group({
   email: ['', [Validators.email, Validators.required]],
@@ -338,6 +409,8 @@ loginForm = this.fb.group({
 ```
 
 With the validations hooked up, we need to make sure we output the proper error. Here is the code for `emailError`:
+
+**`src/app/login/login.page.ts`**
 
 ```typescript
 get emailError(): string {
@@ -355,6 +428,8 @@ Now when we enter and delete data in the page, we should see error messages as a
 The user should not be able to click the "Sign In" button if the form itself is not valid. Also, when the user does click on the button our page should do something. What that _something_ is currently is undefined, but we will bind the event so it is ready once we do define what it should do.
 
 Let's use our tests to define when the button should be enabled and disabled.
+
+**`src/app/login/login.page.spec.ts`**
 
 ```typescript
 describe('signin button', () => {
@@ -394,6 +469,8 @@ describe('signin button', () => {
 Be sure to fill in the logic for the missing tests.
 
 Now that we have the tests, let's update the HTML with the proper bindings.
+
+**`src/app/login/login.page.html`**
 
 ```html
 <ion-footer>

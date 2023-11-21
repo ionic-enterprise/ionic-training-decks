@@ -5,7 +5,7 @@ import { RouteReuseStrategy, provideRouter, withRouterConfig } from '@angular/ro
 import { provideServiceWorker } from '@angular/service-worker';
 import { AppComponent } from '@app/app.component';
 import { MenuItemsService } from '@app/core';
-import { IonicModule, IonicRouteStrategy } from '@ionic/angular';
+import { IonicRouteStrategy, provideIonicAngular } from '@ionic/angular/standalone';
 import { marked } from 'marked';
 import { environment } from './environments/environment';
 
@@ -52,16 +52,17 @@ bootstrapApplication(AppComponent, {
       deps: [MenuItemsService],
       multi: true,
     },
-    importProvidersFrom(HttpClientModule, IonicModule.forRoot({})),
+    importProvidersFrom(HttpClientModule),
     provideRouter(
       routes,
       withRouterConfig({
         paramsInheritanceStrategy: 'always',
-      })
+      }),
     ),
     provideServiceWorker('ngsw-worker.js', {
       enabled: !isDevMode(),
       registrationStrategy: 'registerWhenStable:30000',
     }),
+    provideIonicAngular({}),
   ],
 });

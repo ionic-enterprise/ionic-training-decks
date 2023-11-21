@@ -14,7 +14,7 @@ There are a couple of preliminary items that we need to get out of the way first
 - Create a data service that performs HTTP requests
 - Add the notes to the store
 
-**Important:** These are a few things we have done multiple times now. As such, we will often provide you with some skeleton code and leave you to fill in the logic. If you get stuck, you can look at the <a href="https://github.com/ionic-enterprise/tea-taster-angular" target="_blank">completed code</a>, but try not to.
+**Important:** These are a few things we have done multiple times now. As such, we will often provide you with some skeleton code and leave you to fill in the logic. If you get stuck, you can look at the <a href="https://github.com/ionic-enterprise/tutorials-and-demos-ng/tree/main/demos/tea-taster" target="_blank">completed code</a>, but try not to.
 
 Once we have a good skeleton in place, we will get back to doing new things that are far less "copy-paste."
 
@@ -46,12 +46,13 @@ export interface TastingNote {
 
 #### Test
 
-```typescript
-import { TestBed } from '@angular/core/testing';
-import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
+**`src/app/core/tasting-notes/tasting-notes.service.spec.ts`**
 
-import { TastingNotesService } from './tasting-notes.service';
+```typescript
+import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
+import { TestBed } from '@angular/core/testing';
 import { environment } from '@env/environment';
+import { TastingNotesService } from './tasting-notes.service';
 
 describe('TastingNotesService', () => {
   let httpTestingController: HttpTestingController;
@@ -126,13 +127,14 @@ describe('TastingNotesService', () => {
 
 I'll provide the skeleton, you provide the actual logic.
 
-```typescript
-import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { EMPTY, Observable } from 'rxjs';
+**`src/app/core/tasting-notes/tasting-notes.service.ts`**
 
+```typescript
+import { HttpClient } from '@angular/common/http';
+import { Injectable } from '@angular/core';
 import { TastingNote } from '@app/models';
 import { environment } from '@env/environment';
+import { EMPTY, Observable } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
@@ -160,6 +162,8 @@ export class TastingNotesService {
 
 #### Mock
 
+**`src/app/core/tasting-notes/tasting-notes.service.mock.ts`**
+
 ```typescript
 import { EMPTY } from 'rxjs';
 import { TastingNotesService } from './tasting-notes.service';
@@ -176,17 +180,16 @@ export const createTastingNotesServiceMock = () =>
 
 ### The Editor Component
 
-#### `src/app/tasting-notes/tasting-note-editor/tasting-note-editor.component.spec.ts`
+**`src/app/tasting-notes/tasting-note-editor/tasting-note-editor.component.spec.ts`**
 
 ```typescript
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { TastingNotesService, TeaService } from '@app/core';
 import { createTastingNotesServiceMock, createTeaServiceMock } from '@app/core/testing';
-import { IonicModule, ModalController } from '@ionic/angular';
+import { ModalController } from '@ionic/angular/standalone';
 import { createOverlayControllerMock } from '@test/mocks';
 import { of } from 'rxjs';
-
 import { TastingNoteEditorComponent } from './tasting-note-editor.component';
 
 describe('TastingNoteEditorComponent', () => {
@@ -202,13 +205,9 @@ describe('TastingNoteEditorComponent', () => {
 
   beforeEach(waitForAsync(() => {
     modalController = createOverlayControllerMock('ModalController');
-    TestBed.configureTestingModule({
-      imports: [TastingNoteEditorComponent],
-    })
-      .overrideProvider(TastingNotesService, { useFactory: createTastingNotesServiceMock })
+    TestBed.overrideProvider(TastingNotesService, { useFactory: createTastingNotesServiceMock })
       .overrideProvider(TeaService, { useFactory: createTeaServiceMock })
-      .overrideProvider(ModalController, { useValue: modalController })
-      .compileComponents();
+      .overrideProvider(ModalController, { useValue: modalController });
 
     fixture = TestBed.createComponent(TastingNoteEditorComponent);
     component = fixture.componentInstance;
@@ -229,7 +228,7 @@ describe('TastingNoteEditorComponent', () => {
           description: 'Yellow tea description.',
           rating: 3,
         },
-      ])
+      ]),
     );
   }));
 
@@ -403,7 +402,7 @@ describe('TastingNoteEditorComponent', () => {
 });
 ```
 
-#### `src/app/tasting-notes/tasting-note-editor/tasting-note-editor.component.html`
+**`src/app/tasting-notes/tasting-note-editor/tasting-note-editor.component.html`**
 
 ```html
 <ion-header>
@@ -466,7 +465,7 @@ describe('TastingNoteEditorComponent', () => {
 </ion-content>
 ```
 
-#### `src/app/tasting-notes/tasting-note-editor/tasting-note-editor.component.ts`
+**`src/app/tasting-notes/tasting-note-editor/tasting-note-editor.component.ts`**
 
 There are two TODOs in the following code. Copy the rest of the code in to your TypeScript file, then fill in the TODOs.
 
@@ -477,7 +476,21 @@ import { FormBuilder, FormControl, ReactiveFormsModule, Validators } from '@angu
 import { TastingNotesService, TeaService } from '@app/core';
 import { TastingNote, Tea } from '@app/models';
 import { RatingComponent } from '@app/shared';
-import { IonicModule, ModalController } from '@ionic/angular';
+import {
+  IonButton,
+  IonButtons,
+  IonContent,
+  IonHeader,
+  IonInput,
+  IonItem,
+  IonLabel,
+  IonSelect,
+  IonSelectOption,
+  IonTextarea,
+  IonTitle,
+  IonToolbar,
+  ModalController,
+} from '@ionic/angular/standalone';
 import { Observable, of, tap } from 'rxjs';
 
 @Component({
@@ -485,11 +498,26 @@ import { Observable, of, tap } from 'rxjs';
   templateUrl: './tasting-note-editor.component.html',
   styleUrls: ['./tasting-note-editor.component.scss'],
   standalone: true,
-  imports: [CommonModule, IonicModule, RatingComponent, ReactiveFormsModule],
+  imports: [
+    CommonModule,
+    IonButton,
+    IonButtons,
+    IonContent,
+    IonHeader,
+    IonInput,
+    IonItem,
+    IonLabel,
+    IonSelect,
+    IonSelectOption,
+    IonTextarea,
+    IonTitle,
+    IonToolbar,
+    RatingComponent,
+    ReactiveFormsModule,
+  ],
 })
 export class TastingNoteEditorComponent implements OnInit {
-  @Input()
-  note: TastingNote | undefined;
+  @Input() note: TastingNote | undefined;
 
   editorForm = this.fb.group({
     brand: ['', Validators.required],
@@ -506,7 +534,7 @@ export class TastingNoteEditorComponent implements OnInit {
     private fb: FormBuilder,
     private modalController: ModalController,
     private tastingNotes: TastingNotesService,
-    private tea: TeaService
+    private tea: TeaService,
   ) {}
 
   close() {
@@ -554,7 +582,7 @@ export class TastingNoteEditorComponent implements OnInit {
 
 ### List the Notes
 
-#### `src/app/tasting-notes/tasting-notes.page.html`
+**`src/app/tasting-notes/tasting-notes.page.html`**
 
 ```html
 <ion-header [translucent]="true">
@@ -581,15 +609,14 @@ export class TastingNoteEditorComponent implements OnInit {
 </ion-content>
 ```
 
-#### `src/app/tasting-notes/tasting-notes.page.spec.ts`
+**`src/app/tasting-notes/tasting-notes.page.spec.ts`**
 
 ```typescript
-import { fakeAsync, tick, waitForAsync, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { TastingNotesService } from '@app/core';
 import { createTastingNotesServiceMock } from '@app/core/testing';
 import { TastingNote } from '@app/models';
-import { IonicModule } from '@ionic/angular';
 import { of } from 'rxjs';
 import { TastingNotesPage } from './tasting-notes.page';
 
@@ -603,19 +630,15 @@ describe('TastingNotesPage', () => {
     nativeEl: {},
   };
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     initializeTestData();
-    TestBed.configureTestingModule({
-      imports: [TastingNotesPage],
-    })
-      .overrideProvider(TastingNotesService, { useFactory: createTastingNotesServiceMock })
-      .compileComponents();
+    TestBed.overrideProvider(TastingNotesService, { useFactory: createTastingNotesServiceMock });
 
     const tastingNotes = TestBed.inject(TastingNotesService);
     (tastingNotes.getAll as jasmine.Spy).and.returnValue(of(testData));
     fixture = TestBed.createComponent(TastingNotesPage);
     component = fixture.componentInstance;
-  }));
+  });
 
   it('should create', () => {
     expect(component).toBeTruthy();
@@ -658,7 +681,7 @@ describe('TastingNotesPage', () => {
 });
 ```
 
-#### `src/app/tasting-notes/tasting-notes.page.ts`
+**`src/app/tasting-notes/tasting-notes.page.ts`**
 
 ```typescript
 import { CommonModule } from '@angular/common';
@@ -666,7 +689,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { TastingNotesService } from '@app/core';
 import { TastingNote } from '@app/models';
-import { IonicModule } from '@ionic/angular';
+import { IonContent, IonHeader, IonItem, IonLabel, IonList, IonTitle, IonToolbar } from '@ionic/angular/standalone';
 import { EMPTY, Observable } from 'rxjs';
 
 @Component({
@@ -674,7 +697,7 @@ import { EMPTY, Observable } from 'rxjs';
   templateUrl: './tasting-notes.page.html',
   styleUrls: ['./tasting-notes.page.scss'],
   standalone: true,
-  imports: [CommonModule, FormsModule, IonicModule],
+  imports: [CommonModule, FormsModule, IonContent, IonHeader, IonItem, IonLabel, IonList, IonTitle, IonToolbar],
 })
 export class TastingNotesPage implements OnInit {
   notes$: Observable<Array<TastingNote>> = EMPTY;
@@ -712,23 +735,19 @@ const mockRouterOutlet = {
   nativeEl: {},
 };
 
-beforeEach(waitForAsync(() => {
+beforeEach(() => {
   initializeTestData();
   modal = createOverlayElementMock('Modal');
   modalController = createOverlayControllerMock('ModalController', modal);
-  TestBed.configureTestingModule({
-    imports: [TastingNotesPage],
-  })
-    .overrideProvider(ModalController, { useValue: modalController })
+  TestBed.overrideProvider(ModalController, { useValue: modalController })
     .overrideProvider(IonRouterOutlet, { useValue: mockRouterOutlet })
-    .overrideProvider(TastingNotesService, { useFactory: createTastingNotesServiceMock })
-    .compileComponents();
+    .overrideProvider(TastingNotesService, { useFactory: createTastingNotesServiceMock });
 
   const tastingNotes = TestBed.inject(TastingNotesService);
   (tastingNotes.getAll as jasmine.Spy).and.returnValue(of(testData));
   fixture = TestBed.createComponent(TastingNotesPage);
   component = fixture.componentInstance;
-}));
+});
 ```
 
 In `src/app/tasting-notes/tasting-notes.page.ts`, add the `TastingNoteEditorComponent` to the `imports` list and inject the same items that we just set up providers for:
@@ -739,7 +758,7 @@ In `src/app/tasting-notes/tasting-notes.page.ts`, add the `TastingNoteEditorComp
   templateUrl: './tasting-notes.page.html',
   styleUrls: ['./tasting-notes.page.scss'],
   standalone: true,
-  imports: [CommonModule, FormsModule, IonicModule, TastingNoteEditorComponent],
+  imports: [CommonModule, FormsModule, IonContent, IonHeader, IonItem, IonLabel, IonList, IonTitle, IonToolbar],
 })
 ...
   constructor(
@@ -760,6 +779,8 @@ Adding a new node will be handled via a <a href="https://ionicframework.com/docs
   </ion-fab-button>
 </ion-fab>
 ```
+
+Be sure to import the new components in the class as well as call `addIcons` with the `add` icon in the constructor.
 
 In our test, we will verify that the modal is properly opened:
 

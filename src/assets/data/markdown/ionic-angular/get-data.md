@@ -28,6 +28,8 @@ While we are in there, let's also create stub for the method we are going to nee
 
 Not every service has all of these methods, but when a data service needs a specific method these are the names that I use. The details here are not quite as important as making sure you develop a standard and then enforce it across your data services.
 
+**`src/app/core/tea/tea.service.ts`**
+
 ```typescript
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
@@ -51,10 +53,11 @@ Angular's <a href="https://angular.io/api/common/http/HttpClient" target="_blank
 
 You should see one test failing (note that since we added a test file you will likely need to restart the Angular testing service). That is the test for this service, and it is failing because the testing module does not know how to inject the `HttpClient` service. The `@angular/common/http/testing` library will be used to mock the `HttpClient` for our tests. Here is the configuration needed to rectify that:
 
+**`src/app/core/tea/tea.service.spec.ts`**
+
 ```typescript
 import { TestBed } from '@angular/core/testing';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
-
 import { environment } from '@env/environment';
 import { TeaService } from './tea.service';
 
@@ -88,6 +91,8 @@ We are going to need some test data. For our application, the data we get back f
 
 First, create `expectedTeas` and `resultTeas` variables within the main `describe()` for the test (in the same area where the other variables are declared):
 
+**`src/app/core/tea/tea.service.spec.ts`**
+
 ```typescript
 ...
   let expectedTeas: Array<Tea>;
@@ -96,6 +101,8 @@ First, create `expectedTeas` and `resultTeas` variables within the main `describ
 ```
 
 We can then use `expectedTeas` to manufacture a set of `resultTeas` by deleting the `image`. The `resultTeas` will be the result of our API call. Create the following function at the bottom of the main `describe()` function callback.
+
+**`src/app/core/tea/tea.service.spec.ts`**
 
 ```typescript
 const initializeTestData = () => {
@@ -162,6 +169,8 @@ Call this function from the main `beforeEach()`.
 
 Create a `describe` for the "get all" functionality. All of our tests for the `getAll()` requirements will go there.
 
+**`src/app/core/tea/tea.service.spec.ts`**
+
 ```typescript
 describe('get all', () => {
   // Test cases will go here...
@@ -169,6 +178,8 @@ describe('get all', () => {
 ```
 
 #### Test #1 - Getting Data from the Correct Endpoint
+
+**`src/app/core/tea/tea.service.spec.ts`**
 
 ```typescript
 it('gets the tea categories', () => {
@@ -188,6 +199,8 @@ Let's have a look at that test.
 
 Write the minimal code required to make that test pass. Basically, this:
 
+**`src/app/core/tea/tea.service.ts`**
+
 ```typescript
   getAll(): Observable<Array<Tea>> {
     return this.http.get<Array<Omit<Tea, 'image'>>>(`${environment.dataService}/tea-categories`) as any;
@@ -199,6 +212,8 @@ The casting to `any` is only needed here to make TypeScript happy. It will be re
 #### Test #2 - Convert the Data
 
 As sometimes happens, the backend team has not quite figured out how they want to supply the pictures yet, so we will just hook them up based on the ID for now. We have already defined what the API result set looks like and what we expect out of the service.
+
+**`src/app/core/tea/tea.service.spec.ts`**
 
 ```typescript
 it('adds an image to each', () => {
@@ -221,6 +236,8 @@ The test currently fails because we are not converting the data. Let's work on t
 
 In our service code, we can define an array of images.
 
+**`src/app/core/tea/tea.service.ts`**
+
 ```typescript
 private images: Array<string> = [
   'green',
@@ -235,6 +252,8 @@ private images: Array<string> = [
 ```
 
 We can then use the Array `map` operator to convert the individual teas, and the RxJS `map` operator to convert the output of the Observable.
+
+**`src/app/core/tea/tea.service.ts`**
 
 ```typescript
   getAll(): Observable<Array<Tea>> {
@@ -253,6 +272,8 @@ We can then use the Array `map` operator to convert the individual teas, and the
 
 The code that you have for this method looks like this:
 
+**`src/app/core/tea/tea.service.ts`**
+
 ```typescript
 getAll(): Observable<Array<Tea>> {
   return this.http.get<Array<Omit<Tea, 'image'>>>(`${environment.dataService}/tea-categories`).pipe(
@@ -269,6 +290,8 @@ getAll(): Observable<Array<Tea>> {
 The problem here is that there is a lot for future you to parse when you come back to maintain this. The method is responsible for more than one thing: getting the data, and doing the conversion. Let's fix that by abstracting the code that does the conversion on a tea object into a local `convert()` method.
 
 When you are done, the code should look more like this:
+
+**`src/app/core/tea/tea.service.ts`**
 
 ```typescript
 getAll(): Observable<Array<Tea>> {

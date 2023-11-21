@@ -10,7 +10,7 @@ In this lab you will add learn how to:
 Update both of the files under `src/environments` to include the following property:
 
 ```typescript
-dataService: 'https://cs-demo-api.herokuapp.com';
+dataService: 'https://cs-demo-api.herokuapp.com',
 ```
 
 These files define the `dev` and `prod` environments. Typically they would have different values for something like the data service, but for our app we only have a single API server. Also, you can create more environments (QA, Testing, etc), but doing so is beyond the scope of this training.
@@ -28,6 +28,8 @@ Be sure to add it to the `src/app/core/index.ts`.
 ### Interface Setup
 
 Just like when we created the session vault service, we will start the actual coding by figuring out the initial shape of our API. Update `src/app/core/authentication/authentication.service.ts` to contain the following methods:
+
+**`src/app/core/authentication/authentication.service.ts`**
 
 ```typescript
 import { Injectable } from '@angular/core';
@@ -57,10 +59,11 @@ export class AuthenticationService {
 
 With the initial shape of our API in place, we are better informed in how to set up our unit test. Let's do that now. Update `src/app/core/authentication/authentication.service.spec.ts` as follows:
 
+**`src/app/core/authentication/authentication.service.spec.ts`**
+
 ```typescript
 import { TestBed } from '@angular/core/testing';
 import { HttpTestingController, HttpClientTestingModule } from '@angular/common/http/testing';
-
 import { AuthenticationService } from './authentication.service';
 
 describe('AuthenticationService', () => {
@@ -216,7 +219,7 @@ return this.http
     map((res: LoginResponse) => {
       const { success, ...session } = res;
       return session;
-    })
+    }),
   );
 ```
 
@@ -290,7 +293,7 @@ export class AuthenticationService {
         map((res: LoginResponse) => {
           const { success, ...session } = res;
           return success ? session : undefined;
-        })
+        }),
       );
   }
 

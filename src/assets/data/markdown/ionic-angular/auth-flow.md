@@ -16,8 +16,6 @@ For the login process, we need to perform the following tasks:
   - Navigate to the main page of the application.
 - If the login fails, display an indication for the user.
 
-All of the following code belongs in the files in the `src/app/login` folder.
-
 ### Inject the Services
 
 Three services are required in order to complete our login workflow:
@@ -30,24 +28,24 @@ Three services are required in order to complete our login workflow:
 
 We need to set up the test to inject mock services (remember that unit tests should execute the unit under test in isolation).
 
+**`src/app/login/login.page.spec.ts`**
+
 ```typescript
 import { AuthenticationService, SessionVaultService } from '@app/core';
 import { createAuthenticationServiceMock, createSessionVaultServiceMock } from '@app/core/testing';
 import { IonicModule, NavController } from '@ionic/angular';
 import { createNavControllerMock } from '@test/mocks';
 ...
-    TestBed.configureTestingModule({
-      imports: [LoginPage],
-    })
-      .overrideProvider(AuthenticationService, { useFactory: createAuthenticationServiceMock })
+    TestBed.overrideProvider(AuthenticationService, { useFactory: createAuthenticationServiceMock })
       .overrideProvider(SessionVaultService, { useFactory: createSessionVaultServiceMock })
-      .overrideProvider(NavController, { useFactory: createNavControllerMock })
-      .compileComponents();
+      .overrideProvider(NavController, { useFactory: createNavControllerMock });
 ```
 
 #### Code
 
 We then need to inject the services into the class for our page.
+
+**`src/app/login/login.page.ts`**
 
 ```typescript
 import { AuthenticationService, SessionVaultService } from '@app/core';
@@ -67,15 +65,23 @@ When the user clicks the sign in button, we need to post a login request and the
 
 #### Test
 
-We have a function that performs input operations. We need a similar one that clicks buttons. Once we have that in place we click the button and verify that the `login()` call is made.
+We have a function called `setInputValue()` that performs input operations. We need a similar one that clicks buttons.
+
+**`src/app/login/login.page.spec.ts`**
 
 ```typescript
-  const click = (button: HTMLElement) => {
-    const event = new Event('click');
-    button.dispatchEvent(event);
-    fixture.detectChanges();
-  };
-...
+const click = (button: HTMLElement) => {
+  const event = new Event('click');
+  button.dispatchEvent(event);
+  fixture.detectChanges();
+};
+```
+
+With that in place, create a test that clicks the button and verifies that the `login()` call is made.
+
+**`src/app/login/login.page.spec.ts`**
+
+```typescript
   describe('signin button', () => {
     ...
     describe('on click', () => {
@@ -100,6 +106,8 @@ We have a function that performs input operations. We need a similar one that cl
 
 For now, we can just call the method passing in the entered values.
 
+**`src/app/login/login.page.ts`**
+
 ```typescript
 signIn() {
   const controls = this.loginForm.controls;
@@ -112,7 +120,27 @@ signIn() {
 
 #### Test
 
-If the `login()` succeeds, a session will be returned. In that case, we need to store it in the session vault. The "on success" group of tests should be nested within the "on click" group.
+If the `login()` succeeds, a session will be returned. The "on success" group of tests should be nested within the "on click" group. That is:
+
+```typescript
+describe('LoginPage', () => {
+  // global setup and other test sections are here
+  describe('signin button', () => {
+    // Other sign in button tests are here
+    describe('on click', () => {
+      // The prior on click tests are here
+      describe('on success', () => {
+        // The new tests go here
+      });
+    });
+  });
+  // The click() and setInputValue() functions are likely defined here
+});
+```
+
+Notice the logical progression to the nesting of the tests and test groups. When a login succeeds, we need to store the results in the session vault.
+
+**`src/app/login/login.page.spec.ts`**
 
 ```typescript
 describe('on success', () => {
@@ -145,6 +173,8 @@ describe('on success', () => {
 
 Within the code, we create an Observable pipeline and tap into it to grab the session and save it. The `take(1)` call ensures that the subscription will be completed. This is not strictly needed, but is here for completeness.
 
+**`src/app/login/login.page.ts`**
+
 ```typescript
   signIn() {
     const controls = this.loginForm.controls;
@@ -172,6 +202,8 @@ After the session is saved, we need to navigate to the root path. Note that the 
 
 Add this test within the "on success" group of tests.
 
+**`src/app/login/login.page.spec.ts`**
+
 ```typescript
 it('navigates to the main page', fakeAsync(() => {
   const nav = TestBed.inject(NavController);
@@ -187,6 +219,8 @@ it('navigates to the main page', fakeAsync(() => {
 #### Code
 
 In the code, we just need to add the navigation right after we set the session within the pipeline.
+
+**`src/app/login/login.page.ts`**
 
 ```typescript
   signIn() {
@@ -229,16 +263,18 @@ NullInjectorError: R3InjectorError(LoginPageModule)[AuthenticationService -> Aut
     at injectInjectorOnly (:8100/vendor.js:70360:33)
 ```
 
-This is because we are using the Angular HTTP Client, but we never registered it with Angular's injector. Open `src/main.ts` and add an import for `HttpClientModule` to the `importProvidersFrom()` call that is part of the application bootstrapping.
+This is because we are using the Angular HTTP Client, but we never registered it with Angular's injector. Open `src/main.ts` and add a call to `provideHttpClient()`.
+
+**`src/main.ts`**
 
 ```typescript
-import { HttpClientModule } from '@angular/common/http';
-import { enableProdMode, importProvidersFrom } from '@angular/core';
+import { provideHttpClient } from '@angular/common/http';
+import { enableProdMode } from '@angular/core';
 import { bootstrapApplication } from '@angular/platform-browser';
-import { provideRouter, RouteReuseStrategy } from '@angular/router';
-import { AppComponent } from '@app/app.component';
-import { routes } from '@app/app.routes';
-import { IonicModule, IonicRouteStrategy } from '@ionic/angular';
+import { RouteReuseStrategy, provideRouter } from '@angular/router';
+import { IonicRouteStrategy, provideIonicAngular } from '@ionic/angular/standalone';
+import { AppComponent } from './app/app.component';
+import { routes } from './app/app.routes';
 import { environment } from './environments/environment';
 
 if (environment.production) {
@@ -248,7 +284,8 @@ if (environment.production) {
 bootstrapApplication(AppComponent, {
   providers: [
     { provide: RouteReuseStrategy, useClass: IonicRouteStrategy },
-    importProvidersFrom(HttpClientModule, IonicModule.forRoot({})),
+    provideHttpClient(),
+    provideIonicAngular(),
     provideRouter(routes),
   ],
 });
@@ -267,6 +304,8 @@ The user can enter the wrong email or password. If they do so, we will not store
 
 We will use a <a href="https://ionicframework.com/docs/api/toast" target="_blank">toast</a> to inform the user when they enter invalid credentials. First add the following markup somewhere within the page. It does not really matter where. I placed it after the footer.
 
+**`src/app/login/login.page.html`**
+
 ```html
 <ion-toast
   [isOpen]="loginFailed"
@@ -280,6 +319,10 @@ We will use a <a href="https://ionicframework.com/docs/api/toast" target="_blank
 Note that we are using `loginFailed` to open the toast. The toast will open when `loginFailed` is set to `true`. The toast stays up for three seconds and then closes. When it closes, `didDismiss` is fired and we set `loginFailed` to `false`.
 
 In the class, we need to define the property, initialize it to `false`, and set it to `true` if the login fails.
+
+`IonToast` also needs to be imported properly in the class. This is not shown because you have done this multiple times now.
+
+**`src/app/login/login.page.ts`**
 
 ```typescript
   loginFailed = false;
@@ -307,15 +350,15 @@ In the class, we need to define the property, initialize it to `false`, and set 
 
 ## Hook up the Logout
 
-For now, we will add a logout button to the `TeaPage`. The button will log out the user and navigate to the login page so they can log in again. We will need to make changes to the following files:
-
-- `src/app/tea/tea.page.spec.ts`
-- `src/app/tea/tea.page.ts`
-- `src/app/tea/tea.page.html`
+For now, we will add a logout button to the `TeaPage`. The button will log out the user and navigate to the login page so they can log in again.
 
 ### Inject the Services
 
 #### Test
+
+Mock the injected services.
+
+**`src/app/tea/tea.page.spec.ts`**
 
 ```typescript
 import { AuthenticationService, SessionVaultService } from '@app/core';
@@ -323,16 +366,14 @@ import { createAuthenticationServiceMock, createSessionVaultServiceMock } from '
 import { IonicModule, NavController } from '@ionic/angular';
 import { createNavControllerMock } from '@test/mocks';
 ...
-    TestBed.configureTestingModule({
-      imports: [TeaPage],
-    })
-      .overrideProvider(AuthenticationService, { useFactory: createAuthenticationServiceMock })
+    TestBed.overrideProvider(AuthenticationService, { useFactory: createAuthenticationServiceMock })
       .overrideProvider(NavController, { useFactory: createNavControllerMock })
-      .overrideProvider(SessionVaultService, { useFactory: createSessionVaultServiceMock })
-      .compileComponents();
+      .overrideProvider(SessionVaultService, { useFactory: createSessionVaultServiceMock });
 ```
 
 #### Code
+
+**`src/app/tea/tea.page.ts`**
 
 ```typescript
 import { AuthenticationService, SessionVaultService } from '@app/core';
@@ -349,6 +390,8 @@ import { NavController } from '@ionic/angular';
 
 In the header section after the `ion-title`
 
+**`src/app/tea/tea.page.html`**
+
 ```html
 <ion-buttons slot="end">
   <ion-button (click)="logout()" data-testid="logout-button">
@@ -357,40 +400,67 @@ In the header section after the `ion-title`
 </ion-buttons>
 ```
 
+**`src/app/tea/tea.page.ts`**
+
+Add a call to `addIcons()` to ensure that the logout icon is available in the app. Also, create a stub for the `logout()` handler.
+
 ```typescript
+  import { addIcons } from 'ionicons';
+  import { logOutOutline } from 'ionicons/icons';
+
+  ...
+
+  constructor(
+    private auth: AuthenticationService,
+    private nav: NavController,
+    private sessionVault: SessionVaultService,
+   ) {
+    addIcons({ logOutOutline });
+  }
+  ...
   logout() {
     null;
   }
 ```
 
+Remember to update the `imports` for the newly used components as well!
+
 ### Call the Logout
 
 #### Test
 
-Copy the `click()` function from `src/app/login/login.page.spec.ts`. With that in place, add a section for the _logout button_ and nest one inside of that for _on click_. Our first test calls the logout.
+Copy the `click()` function from `src/app/login/login.page.spec.ts`.
+
+**`src/app/tea/tea.page.spec.ts`**
 
 ```typescript
-  const click = (button: HTMLElement) => {
-    const event = new Event('click');
-    button.dispatchEvent(event);
-    fixture.detectChanges();
-  };
-...
-  describe('logout button', () => {
-    describe('on click', () => {
-      beforeEach(() => {
-        const auth = TestBed.inject(AuthenticationService);
-        (auth.logout as jasmine.Spy).and.returnValue(of(undefined));
-      });
+const click = (button: HTMLElement) => {
+  const event = new Event('click');
+  button.dispatchEvent(event);
+  fixture.detectChanges();
+};
+```
 
-      it('calls the logout', () => {
-        const auth = TestBed.inject(AuthenticationService);
-        const button = fixture.debugElement.query(By.css('[data-testid="logout-button"]')).nativeElement;
-        click(button);
-        expect(auth.logout).toHaveBeenCalledTimes(1);
-      });
+With that in place, add a section for the _logout button_ and nest one inside of that for _on click_. Our first test calls the logout.
+
+**`src/app/tea/tea.page.spec.ts`**
+
+```typescript
+describe('logout button', () => {
+  describe('on click', () => {
+    beforeEach(() => {
+      const auth = TestBed.inject(AuthenticationService);
+      (auth.logout as jasmine.Spy).and.returnValue(of(undefined));
+    });
+
+    it('calls the logout', () => {
+      const auth = TestBed.inject(AuthenticationService);
+      const button = fixture.debugElement.query(By.css('[data-testid="logout-button"]')).nativeElement;
+      click(button);
+      expect(auth.logout).toHaveBeenCalledTimes(1);
     });
   });
+});
 ```
 
 #### Code
@@ -402,6 +472,8 @@ The code is left as a challenge to the reader, but will be _very_ similar to wha
 #### Test
 
 Add the following test within the _on click_ section.
+
+**`src/app/tea/tea.page.spec.ts`**
 
 ```typescript
 it('clears the session', () => {
@@ -422,6 +494,8 @@ Add the following test within the _on click_ section.
 
 #### Test
 
+**`src/app/tea/tea.page.spec.ts`**
+
 ```typescript
 it('navigates to the login page', fakeAsync(() => {
   const button = fixture.debugElement.query(By.css('[data-testid="logout-button"]')).nativeElement;
@@ -436,6 +510,8 @@ it('navigates to the login page', fakeAsync(() => {
 #### Code
 
 Your final code should look something like this:
+
+**`src/app/tea/tea.page.spec.ts`**
 
 ```typescript
 logout() {

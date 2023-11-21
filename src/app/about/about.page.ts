@@ -1,15 +1,45 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { IonicModule } from '@ionic/angular';
 import packageInfo from '../../../package.json';
+import {
+  IonHeader,
+  IonToolbar,
+  IonButtons,
+  IonMenuButton,
+  IonTitle,
+  IonContent,
+  IonIcon,
+  IonList,
+  IonListHeader,
+  IonItem,
+  IonLabel,
+  IonNote,
+} from '@ionic/angular/standalone';
+import { addIcons } from 'ionicons';
+import { school } from 'ionicons/icons';
 
 @Component({
   selector: 'app-about',
   templateUrl: './about.page.html',
   styleUrls: ['./about.page.scss'],
   standalone: true,
-  imports: [CommonModule, FormsModule, IonicModule],
+  imports: [
+    CommonModule,
+    FormsModule,
+    IonHeader,
+    IonToolbar,
+    IonButtons,
+    IonMenuButton,
+    IonTitle,
+    IonContent,
+    IonIcon,
+    IonList,
+    IonListHeader,
+    IonItem,
+    IonLabel,
+    IonNote,
+  ],
 })
 export class AboutPage implements OnInit {
   author: string;
@@ -17,7 +47,9 @@ export class AboutPage implements OnInit {
   capacitorVersion: string;
   frameworkVersion: string;
 
-  constructor() {}
+  constructor() {
+    addIcons({ school });
+  }
 
   ngOnInit() {
     const verSpec = /[\^~]/;

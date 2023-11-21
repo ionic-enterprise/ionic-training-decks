@@ -77,11 +77,10 @@ describe('TabsPage', () => {
   let component: TabsPage;
   let fixture: ComponentFixture<TabsPage>;
 
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      imports: [TabsPage],
+  beforeEach(() => {
+    TestBed.configureTestingModule({
       providers: [provideRouter([])],
-    }).compileComponents();
+    });
 ...
 ```
 
@@ -225,7 +224,7 @@ Now go change the `TeaPage` source accordingly so the test will pass. Try it in 
 
 #### Step 4: Redirects and Other Details
 
-If you load the application from root, it will go to the `tabs` route, but we really need it to display one of the pages. The `tabs/tea` route makes the most sense. Modify the current redirect within `src/app/app.routes.ts` to go to `tabs/tea`.
+Notice that we added the following redirect as we created the child routes under `tabs`:
 
 ```typescript
   {
@@ -234,6 +233,8 @@ If you load the application from root, it will go to the `tabs` route, but we re
     pathMatch: 'full',
   },
 ```
+
+If you remove this redirect and then load the application from the root location, the app will just load the tabs page and not one of the tabs. The redirect was added so we load the proper tab on launch.
 
 One other minor detail is in the markup for the `TeaDetailsPage`. The `defaultHref` for the `ion-back-button` needs to point to the `tabs/tea` route now, and not just the `tea` route.
 
