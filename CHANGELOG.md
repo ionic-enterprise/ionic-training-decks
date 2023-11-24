@@ -1,3 +1,9 @@
+## [5.9.2](https://github.com/ionic-team/ionic-training-decks/compare/v5.9.1...v5.9.2) (2023-11-24)
+
+### Bug Fixes
+
+- **NG:** continue modification for NG 17 and standalone ([909f994](https://github.com/ionic-team/ionic-training-decks/commit/909f99455c283e819cb98c56303c63bc43741a59))
+
 ## [5.9.1](https://github.com/ionic-team/ionic-training-decks/compare/v5.8.1...v5.9.1) (2023-11-21)
 
 ### Features
