@@ -115,14 +115,16 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const sessionVault = inject(SessionVaultService);
 
   return from(sessionVault.get()).pipe(
-    tap((session) => {
-      if (session && requestRequiresToken(req)) {
-        req = req.clone({
-          setHeaders: {
-            Authorization: 'Bearer ' + session.token,
-          },
-        });
-      }
+    tap({
+      next: (session) => {
+        if (session && requestRequiresToken(req)) {
+          req = req.clone({
+            setHeaders: {
+              Authorization: 'Bearer ' + session.token,
+            },
+          });
+        }
+      },
     }),
     mergeMap(() => next(req)),
   );
@@ -147,14 +149,13 @@ export const unauthInterceptor: HttpInterceptorFn = (req, next) => {
   const navController = inject(NavController);
 
   return next(req).pipe(
-    tap(
-      (event: HttpEvent<unknown>) => {},
-      async (err: unknown) => {
+    tap({
+      error: async (err: unknown) => {
         if (err instanceof HttpErrorResponse && err.status === 401) {
-          You need to fill this in...
+          You will need to fill this in...
         }
       },
-    ),
+    }),
   );
 };
 ```
