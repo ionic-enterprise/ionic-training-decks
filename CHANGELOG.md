@@ -1,3 +1,9 @@
+## [5.9.3](https://github.com/ionic-team/ionic-training-decks/compare/v5.9.2...v5.9.3) (2023-11-27)
+
+### Bug Fixes
+
+- **ng:** fix the syntax on the tap calls ([d40592a](https://github.com/ionic-team/ionic-training-decks/commit/d40592ae7398a500143ea51e87f433392414711b))
+
 ## [5.9.2](https://github.com/ionic-team/ionic-training-decks/compare/v5.9.1...v5.9.2) (2023-11-24)
 
 ### Bug Fixes
