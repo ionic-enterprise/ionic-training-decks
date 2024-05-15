@@ -1,1 +1,11 @@
-{}
+{
+  "packageClassList": [
+    "FirebaseAnalytics",
+    "FirebaseAnalytics",
+    "AppPlugin",
+    "HapticsPlugin",
+    "KeyboardPlugin",
+    "SplashScreenPlugin",
+    "CDVPlugin"
+  ]
+}
