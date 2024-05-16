@@ -20,28 +20,29 @@ import 'prismjs/components/prism-scss';
 import 'prismjs/components/prism-tsx';
 import 'prismjs/components/prism-typescript';
 import { routes } from '@app/app.routes';
+import { markedHighlight } from 'marked-highlight';
 
 if (environment.production) {
   enableProdMode();
 }
 
-marked.setOptions({
-  renderer: new marked.Renderer(),
-  highlight: (code, lang) => {
-    const grammar = Prism.languages[lang];
-    if (grammar) {
-      return Prism.highlight(code, grammar, lang);
-    }
-    return code;
+marked.use(
+  {
+    renderer: new marked.Renderer(),
+    pedantic: false,
+    gfm: true,
+    breaks: false,
   },
-  pedantic: false,
-  gfm: true,
-  breaks: false,
-  sanitize: false,
-  smartLists: true,
-  smartypants: false,
-  xhtml: false,
-});
+  markedHighlight({
+    highlight(code, lang) {
+      const grammar = Prism.languages[lang];
+      if (grammar) {
+        return Prism.highlight(code, grammar, lang);
+      }
+      return code;
+    },
+  }),
+);
 
 bootstrapApplication(AppComponent, {
   providers: [

@@ -46,7 +46,7 @@ Since this is something that will be done often, and I suggest adding it as a sc
     "dev": "vite",
     "build": "tsc && vite build && cap copy",
     "preview": "vite preview",
-    "prepare": "husky install",
+    "prepare": "husky",
     "test.e2e": "cypress run",
     "test.unit": "vitest",
     "lint": "eslint"

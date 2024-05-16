@@ -33,6 +33,6 @@ export class MarkdownViewComponent implements OnInit {
     });
 
     const data = await fetch(`/assets/data/markdown${this.folder ? '/' + this.folder : ''}/${this.file}.md`);
-    this.markup = this.sanitizer.bypassSecurityTrustHtml(marked(await data.text()));
+    this.markup = this.sanitizer.bypassSecurityTrustHtml(await marked(await data.text()));
   }
 }

@@ -58,7 +58,7 @@ Prettier itself is an opinionated code formatter, and Ionic has its own opinions
 npm install -D @ionic/prettier-config husky prettier lint-staged
 ```
 
-Modify your `package.json` file. Move the `description` up to the top and giving it a reasonable value, add a `prepare` script that runs `husky install` to make sure the hooks are available, and then add the `prettier` and `lint-staged` config portions to the bottom. For example:
+Modify your `package.json` file. Move the `description` up to the top and giving it a reasonable value, add a `prepare` script that runs `husky` to make sure the hooks are available, and then add the `prettier` and `lint-staged` config portions to the bottom. For example:
 
 ```json
 {
@@ -69,7 +69,7 @@ Modify your `package.json` file. Move the `description` up to the top and giving
   "homepage": "https://ionicframework.com/",
   "scripts": {
     ...
-    "prepare": "husky install",
+    "prepare": "husky",
     ...
   },
   "private": true,
@@ -107,11 +107,9 @@ The output of the `npm install` should look something like this:
 $ npm install
 
 > tea-taster@0.0.1 prepare
-> husky install
+> husky
 
-husky - Git hooks installed
-
-up to date, audited 1157 packages in 2s
+up to date, audited 1293 packages in 952ms
 
 163 packages are looking for funding
   run `npm fund` for details
@@ -119,13 +117,20 @@ up to date, audited 1157 packages in 2s
 found 0 vulnerabilities
 ```
 
-**Note:** we also could have run `npx husky install` but using `npm install` ensures that we have the `prepare` set up properly.
+**Note:** we also could have run `npx husky` but using `npm install` ensures that we have the `prepare` set up properly.
 
 By default, the git hooks handled by `husky` are stored in the `.husky` directory. Let's add a couple now:
 
+**`.husky/pre-commit`**
+
 ```bash
-npx husky add .husky/pre-commit "npx lint-staged"
-npx husky add .husky/pre-push "npm run lint"
+npx lint-staged
+```
+
+**`.husky/pre-push`**
+
+```bash
+npm run lint
 ```
 
 This will ensure our code is properly formatted before each commit. It will also ensure that our code does not have any linting errors before we push it out to the `origin` repo. It would also be good to run the unit tests in the `pre-push` hook, but we have not gotten that far yet.
@@ -140,22 +145,18 @@ git commit -m "Initial commit"
 The output should look something like this:
 
 ```
-$ git commit -m "Initial commit"
+$ git commit -m "Initial Commit"
 ⚠ Skipping backup because there’s no initial commit yet.
 
 ✔ Preparing lint-staged...
-✔ Hiding unstaged changes to partially staged files...
 ✔ Running tasks for staged files...
 ✔ Applying modifications from tasks...
-✔ Restoring unstaged changes to partially staged files...
-[main (root-commit) ef22122] Initial commit
- 37 files changed, 18943 insertions(+)
- create mode 100644 .browserslistrc
+[main (root-commit) 07550c7] Initial Commit
+ 37 files changed, 18348 insertions(+)
  ...
- create mode 100644 tsconfig.spec.json
 ```
 
-Notice the "lint-staged" lines. That is from the `pre-commit` hook we just set up making sure everything is formatted properly. At this point all of the source should be formatting properly and will remain so automatically with each commit.
+At this point all of the source should be formatting properly and will remain so automatically with each commit.
 
 If you get linting errors, clean them up and try the commit again.
 

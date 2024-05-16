@@ -130,7 +130,7 @@ I like to have my build ensure that that web-app and plugins are up to date in m
     "build": "ng build --configuration production && cap sync",
     "lint": "ng lint",
     "ng": "ng",
-    "prepare": "husky install",
+    "prepare": "husky",
     "start": "ng serve",
     "test": "ng test",
     "watch": "ng build --watch --configuration development"

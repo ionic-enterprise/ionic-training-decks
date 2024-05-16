@@ -57,7 +57,7 @@ Prettier itself is an opinionated code formatter, and Ionic has its own opinions
 npm install -D @ionic/prettier-config husky prettier lint-staged
 ```
 
-Modify your `package.json` file. Move the `description` up to the top and giving it a reasonable value, add a `prepare` script that runs `husky install` to make sure the hooks are available, and then add the `prettier` and `lint-staged` config portions to the bottom. For example:
+Modify your `package.json` file. Move the `description` up to the top and giving it a reasonable value, add a `prepare` script that runs `husky` to make sure the hooks are available, and then add the `prettier` and `lint-staged` config portions to the bottom. For example:
 
 ```json
 {
@@ -71,7 +71,7 @@ Modify your `package.json` file. Move the `description` up to the top and giving
   "private": true,
   "scripts": {
     ...
-    "prepare": "husky install",
+    "prepare": "husky",
     ...
   },
   "dependencies": {
@@ -82,11 +82,10 @@ Modify your `package.json` file. Move the `description` up to the top and giving
   },
   "prettier": "@ionic/prettier-config",
   "lint-staged": {
-    "*.{css,js,jsx,scss,ts,tsx,html}": [
+    "*.{js,jsx,ts,tsx}": [
       "prettier --write",
-      "eslint --fix"
     ],
-    "*.{md,json}": [
+    "*.{css,scss,html,md,json}": [
       "prettier --write"
     ]
   }
@@ -108,11 +107,9 @@ The output of the `npm install` should look something like this:
 $ npm install
 
 > tea-taster@0.0.1 prepare
-> husky install
+> husky
 
-husky - Git hooks installed
-
-up to date, audited 1157 packages in 2s
+up to date, audited 801 packages in 851ms
 
 163 packages are looking for funding
   run `npm fund` for details
@@ -120,13 +117,20 @@ up to date, audited 1157 packages in 2s
 found 0 vulnerabilities
 ```
 
-**Note:** we also could have run `npx husky install` but using `npm install` ensures that we have the `prepare` set up properly.
+**Note:** we also could have run `npx husky` but using `npm install` ensures that we have the `prepare` set up properly.
 
 By default, the git hooks handled by `husky` are stored in the `.husky` directory. Let's add a couple now:
 
+**`.husky/pre-commit`**
+
 ```bash
-npx husky add .husky/pre-commit "npx lint-staged"
-npx husky add .husky/pre-push "npm run lint"
+npx lint-staged
+```
+
+**`.husky/pre-push`**
+
+```bash
+npm run lint
 ```
 
 This will ensure our code is properly formatted before each commit. It will also ensure that our code does not have any linting errors before we push it out to the `origin` repo. It would also be good to run the unit tests in the `pre-push` hook, but we have not gotten that far yet.
@@ -141,24 +145,18 @@ git commit -m "Initial commit"
 The output should look something like this:
 
 ```
-$ git commit -m "Initial commit"
-🔍  Finding changed files since git revision null.
-🎯  Found 26 changed files.
-✍️  Fixing up .eslintrc.js.
-✍️  Fixing up .vscode/extensions.json.
-✍️  Fixing up cypress.config.ts.
-...
-✍️  Fixing up vite.config.ts.
-✅  Everything is awesome!
-[main (root-commit) 3439c22] Initial commit
- 31 files changed, 7839 insertions(+)
- create mode 100644 .browserslistrc
- create mode 100644 .eslintrc.js
- create mode 100644 .gitignore
+$ git commit -m "Initial Commit"
+⚠ Skipping backup because there’s no initial commit yet.
+
+✔ Preparing lint-staged...
+✔ Running tasks for staged files...
+✔ Applying modifications from tasks...
+[main (root-commit) 07550c7] Initial Commit
+ 28 files changed, 10517 insertions(+)
  ...
 ```
 
-Notice the "Fixing up" lines. That is the `pre-commit` hook we just set up making sure everything is formatted properly. At this point all of the source should be formatting properly and will remain so automatically with each commit.
+At this point all of the source should be formatting properly and will remain so automatically with each commit.
 
 ## Update Dependencies
 

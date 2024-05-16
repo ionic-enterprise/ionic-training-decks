@@ -71,18 +71,28 @@ The trainings will be displayed in the main menu in the order in which they are 
 
 Given the structure of the application, please only go one level deep with the trainings. That is, do not try and nest a list of pages on a page within a specific page on a training. That used to work in older versions of this application, but supporting it makes the UI overly complex and is a feature that was never used.
 
+### Commits and Changesets
+
+1. You _do not_ need to use conventional commits, but should still use a good commit description.
+1. Significant commits must include a changeset (`npx changeset`) so the version is bumped properly.
+
+There are no real rules on the versioning, but basically follow something logical. For example:
+
+**patch:** Fixes to the application or trainings.
+**minor:** New trainings added or whole new sections added to trainings.
+**major:** Trainings removed or changed is such a significant was as to be considered "breaking."
+
+If there is a question, don't sweat it, just pick what seems best to you.
+
 ### Releasing
 
-A `release` npm script has been created to make the release process easy. It will ask you a few basic questions and then do all of the work. There are just a few items to make sure of first:
+- Make sure you are on the `main` branch.
+- Make sure all changes have been pushed to `main` and that you have all changes from `origin`.
+- Make sure you are logged in to `firebase` as the `support@ionic.io` user
 
-- make sure you are on the `main` branch
-- make sure all changes have been pushed to `main` and that you have all changes from `origin`
-- make sure you are logged in to `firebase` as the `support@ionic.io` user
+Once you have done that:
 
-Once you have done that, type `npm run release`, answer a couple of questions, and you are off to the races.
-
-```bash
-➜  ionic-training-decks git:(main) ✗ firebase login
-Already logged in as support@ionic.io
-➜  ionic-training-decks git:(main) ✗ npm run release
-```
+1. `npm run bump` to apply the changesets.
+1. `git commit` for the release.
+1. `npm run build`
+1. `firebase deploy`

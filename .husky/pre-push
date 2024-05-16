@@ -1,5 +1,7 @@
-#!/bin/sh
-. "$(dirname "$0")/_/husky.sh"
-
 npm run lint
 
+branch=`git rev-parse --abbrev-ref HEAD`
+if [ "main" = "$branch" ]; then
+  npm run build
+  npm run test:ci
+fi;

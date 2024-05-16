@@ -68,7 +68,7 @@ Modify your `package.json` file. I suggest moving the `description` up to the to
   "homepage": "https://ionicframework.com/",
   "scripts": {
     ...
-    "prepare": "husky install",
+    "prepare": "husky",
     ...
   },
   "private": true,
@@ -80,11 +80,11 @@ Modify your `package.json` file. I suggest moving the `description` up to the to
   },
   "prettier": "@ionic/prettier-config",
   "lint-staged": {
-    "*.{css,js,jsx,scss,ts,tsx,html,vue}": [
+    "*.{js,jsx,ts,tsx,vue}": [
       "prettier --write",
       "eslint --fix"
     ],
-    "*.{md,json}": [
+    "*.{css,scss,html,md,json}": [
       "prettier --write"
     ]
   }
@@ -100,13 +100,20 @@ git init
 npm install
 ```
 
-**Note:** we also could have run `npx husky install` but using `install` ensures that we have set up the `prepare` properly.
+**Note:** we also could have run `npx husky` or `npm run prepare` but using `install` ensures that we have set up the `prepare` properly and that it runs with the `install`.
 
 By default, the git hooks handled by `husky` are stored in the `.husky` directory. Let's add a couple now:
 
+**`.husky/pre-commit`**
+
 ```bash
-npx husky add .husky/pre-commit "npx lint-staged"
-npx husky add .husky/pre-push "npm run lint"
+npx lint-staged
+```
+
+**`.husky/pre-push`**
+
+```bash
+npm run lint
 ```
 
 This will ensure our code is properly formatted before each commit. It will also ensure that our code does not have any linting errors before we push it out to the `origin` repo. It is also a good idea to run the unit tests in the `pre-push` hook, but we have not gotten that far yet.
@@ -121,22 +128,15 @@ git commit -m "Initial commit"
 If the hooks are installed correctly, the output of the `git commit` should look something like this:
 
 ```bash
-$ git ci -m "Initial Commit"
-🔍  Finding changed files since git revision null.
-🎯  Found 22 changed files.
-✍️  Fixing up .eslintrc.js.
-✍️  Fixing up .vscode/extensions.json.
-...
-✍️  Fixing up tests/unit/example.spec.ts.
-✍️  Fixing up vite.config.ts.
-✅  Everything is awesome!
-[main (root-commit) f302601] Initial Commit
- 27 files changed, 6970 insertions(+)
- create mode 100644 .browserslistrc
- create mode 100644 .eslintrc.js
+$ git commit -m "Initial Commit"
+⚠ Skipping backup because there’s no initial commit yet.
+
+✔ Preparing lint-staged...
+✔ Running tasks for staged files...
+✔ Applying modifications from tasks...
+[main (root-commit) 07550c7] Initial Commit
+ 28 files changed, 10517 insertions(+)
  ...
- create mode 100644 tsconfig.node.json
- create mode 100644 vite.config.ts
 ```
 
 At this point all of the source should be formatting properly and will remain so automatically with each commit.

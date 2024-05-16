@@ -88,8 +88,12 @@ Next, get the source image files that we need. Note that this is just our "produ
 
 - create a `resources` directory at the root level of the application (`mkdir resources`)
 - download the following images to the newly created `resources` directory
-  - <a download href="/assets/packages/ionic-vue/logo.png">logo.png</a>
-  - <a download href="/assets/packages/ionic-vue/logo-dark.png">logo-dark.png</a>
+  - <a download href="/assets/packages/ionic-vue/logo.png">
+      logo.png
+    </a>
+  - <a download href="/assets/packages/ionic-vue/logo-dark.png">
+      logo-dark.png
+    </a>
 
 To generate the required resources and copy them to the native projects, use the following command:
 
@@ -129,7 +133,7 @@ I like to have my build do a copy for me. For this reason, I do a `cap sync` wit
     "build": "vue-tsc && vite build && cap sync",
     "dev": "vite",
     "lint": "eslint",
-    "prepare": "husky install",
+    "prepare": "husky",
     "preview": "vite preview",
     "test": "vitest run",
     "test:cov": "vitest run --coverage",

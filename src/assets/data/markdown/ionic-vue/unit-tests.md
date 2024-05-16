@@ -36,7 +36,7 @@ We can then update the `package.json` file to:
   "scripts": {
     "build": "vue-tsc && vite build",
     "dev": "vite",
-    "prepare": "husky install",
+    "prepare": "husky",
     "preview": "vite preview",
     "lint": "eslint",
     "test": "vitest run",

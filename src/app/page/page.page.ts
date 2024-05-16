@@ -123,9 +123,6 @@ export class PagePage implements OnInit {
     this.tabParam = this.activatedRoute.snapshot.paramMap.get('tabName');
     const pageParam = this.activatedRoute.snapshot.paramMap.get('page');
     this.pageIdx = pageParam && parseInt(pageParam, 10);
-    console.log('nav params', this.sectionParam, this.tabParam, this.pageIdx);
-    console.log(this.activatedRoute.snapshot);
-    console.log(this.activatedRoute.parent);
   }
 
   private getPages() {
