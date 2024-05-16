@@ -1,11 +1,12 @@
 {
   "name": "ionic-training-decks",
-  "version": "5.9.3",
+  "version": "5.9.4",
   "author": "The Ionic Customer Success Team",
   "homepage": "https://ionicframework.com/",
   "description": "The labs used during Customer Success hosted Enterprise training sessions",
   "scripts": {
-    "build": "ng build --configuration production && cap copy",
+    "build": "npm run build:web && cap copy",
+    "build:web": "ng build --configuration production",
     "bump": "changeset version",
     "e2e": "ng e2e",
     "lint": "ng lint",

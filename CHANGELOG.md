@@ -1,5 +1,13 @@
 ## [5.9.3](https://github.com/ionic-team/ionic-training-decks/compare/v5.9.2...v5.9.3) (2023-11-27)
 
+## 5.9.4
+
+### Patch Changes
+
+- 8967ee9: fix the husky portion of the training to use modern husky paradigms
+- 8967ee9: switch the release process to use changesets rather than the conventional changelog and custom scripting
+- 8967ee9: update all dependencies
+
 ### Bug Fixes
 
 - **ng:** fix the syntax on the tap calls ([d40592a](https://github.com/ionic-team/ionic-training-decks/commit/d40592ae7398a500143ea51e87f433392414711b))
