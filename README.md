@@ -79,7 +79,9 @@ Given the structure of the application, please only go one level deep with the t
 There are no real rules on the versioning, but basically follow something logical. For example:
 
 **patch:** Fixes to the application or trainings.
+
 **minor:** New trainings added or whole new sections added to trainings.
+
 **major:** Trainings removed or changed is such a significant was as to be considered "breaking."
 
 If there is a question, don't sweat it, just pick what seems best to you.
