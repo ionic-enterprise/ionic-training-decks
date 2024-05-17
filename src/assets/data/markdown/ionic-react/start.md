@@ -43,6 +43,17 @@ $ cd tea-taster
 $ ionic serve
 ```
 
+**Version Note:**
+
+This process was last tested with the following versions of key libraries:
+
+- **React**: `18.3.1`
+- **Capacitor**: `6.0.0`
+- **Ionic**: `8.1.2`
+- **Husky**: `9.0.11`
+
+Over time, modifications in these and other libraries and tooling in the ecosystem can easily change how things work. You may need to perform minor modifications to any step in this training. Please [let us know](mailto:support@ionic.io) if you run into any major issues in any step.
+
 ## Enforce Consistent Styling
 
 <a href="https://prettier.io/" target="_blank">

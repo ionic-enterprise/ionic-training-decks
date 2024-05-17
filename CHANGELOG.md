@@ -1,5 +1,11 @@
 ## [5.9.3](https://github.com/ionic-team/ionic-training-decks/compare/v5.9.2...v5.9.3) (2023-11-27)
 
+## 5.9.5
+
+### Patch Changes
+
+- add a note about the last tested version of important parts of the tooling
+
 ## 5.9.4
 
 ### Patch Changes
