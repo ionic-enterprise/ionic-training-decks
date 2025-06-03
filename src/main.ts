@@ -1,5 +1,5 @@
 import { provideHttpClient } from '@angular/common/http';
-import { APP_INITIALIZER, enableProdMode, isDevMode } from '@angular/core';
+import { enableProdMode, isDevMode, inject, provideAppInitializer } from '@angular/core';
 import { bootstrapApplication } from '@angular/platform-browser';
 import { RouteReuseStrategy, provideRouter, withRouterConfig } from '@angular/router';
 import { provideServiceWorker } from '@angular/service-worker';
@@ -47,12 +47,13 @@ marked.use(
 bootstrapApplication(AppComponent, {
   providers: [
     { provide: RouteReuseStrategy, useClass: IonicRouteStrategy },
-    {
-      provide: APP_INITIALIZER,
-      useFactory: (menu: MenuItemsService) => () => menu.load(),
-      deps: [MenuItemsService],
-      multi: true,
-    },
+    provideAppInitializer(() => {
+      const initializerFn = (
+        (menu: MenuItemsService) => () =>
+          menu.load()
+      )(inject(MenuItemsService));
+      return initializerFn();
+    }),
     provideHttpClient(),
     provideRouter(
       routes,

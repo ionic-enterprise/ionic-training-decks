@@ -8,7 +8,6 @@ import { marked } from 'marked';
   selector: 'app-markdown-view',
   templateUrl: './markdown-view.component.html',
   styleUrls: ['./markdown-view.component.scss'],
-  standalone: true,
   imports: [CommonModule],
 })
 export class MarkdownViewComponent implements OnInit {

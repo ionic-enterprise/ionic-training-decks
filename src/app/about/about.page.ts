@@ -23,7 +23,6 @@ import { school } from 'ionicons/icons';
   selector: 'app-about',
   templateUrl: './about.page.html',
   styleUrls: ['./about.page.scss'],
-  standalone: true,
   imports: [
     CommonModule,
     FormsModule,

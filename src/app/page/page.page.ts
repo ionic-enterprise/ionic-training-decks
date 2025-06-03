@@ -25,7 +25,6 @@ import { chevronBack, chevronForward, ellipsisHorizontal, ellipsisVertical } fro
   selector: 'app-page',
   templateUrl: './page.page.html',
   styleUrls: ['./page.page.scss'],
-  standalone: true,
   imports: [
     CommonModule,
     FormsModule,

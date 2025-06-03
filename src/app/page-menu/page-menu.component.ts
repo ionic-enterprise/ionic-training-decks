@@ -6,7 +6,6 @@ import { IonList, IonItem, IonLabel, PopoverController } from '@ionic/angular/st
   selector: 'app-page-menu',
   templateUrl: './page-menu.component.html',
   styleUrls: ['./page-menu.component.scss'],
-  standalone: true,
   imports: [CommonModule, IonList, IonItem, IonLabel],
 })
 export class PageMenuComponent {
