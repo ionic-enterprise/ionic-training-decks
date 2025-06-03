@@ -1,15 +1,17 @@
 import { TestBed, waitForAsync } from '@angular/core/testing';
-import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 
 import { MenuItemsService } from './menu-items.service';
 import { MenuItem } from '@app/models';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 describe('MenuItemsService', () => {
   let testMenu: { pages: Array<MenuItem> };
   let httpTestingController: HttpTestingController;
   beforeEach(() => {
     TestBed.configureTestingModule({
-      imports: [HttpClientTestingModule],
+      imports: [],
+      providers: [provideHttpClient(withInterceptorsFromDi()), provideHttpClientTesting()],
     });
     httpTestingController = TestBed.inject(HttpTestingController);
     initializeTestData();
@@ -32,14 +34,12 @@ describe('MenuItemsService', () => {
 
   describe('after load', () => {
     let service: MenuItemsService;
-    beforeEach(
-      waitForAsync(() => {
-        service = TestBed.inject(MenuItemsService);
-        service.load();
-        const req = httpTestingController.expectOne('assets/data/menu.json');
-        req.flush(testMenu);
-      })
-    );
+    beforeEach(waitForAsync(() => {
+      service = TestBed.inject(MenuItemsService);
+      service.load();
+      const req = httpTestingController.expectOne('assets/data/menu.json');
+      req.flush(testMenu);
+    }));
 
     describe('main menu', () => {
       it('returns the title, icon, and path for each top level item', () => {
