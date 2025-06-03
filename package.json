@@ -76,7 +76,7 @@
     "lint-staged": "^16.1.0",
     "listr": "~0.14.3",
     "prettier": "^3.0.0",
-    "prismjs": "~1.29.0",
+    "prismjs": "~1.30.0",
     "protractor": "~7.0.0",
     "semver": "^7.7.2",
     "ts-node": "~10.9.1",
