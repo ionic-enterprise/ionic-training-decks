@@ -8,6 +8,7 @@ export const createMenuItemsServiceMock = () => {
     url: undefined,
     redirectUrl: undefined,
   });
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   (spy as any).mainMenu = [];
   return spy;
 };

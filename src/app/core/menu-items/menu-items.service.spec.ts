@@ -6,7 +6,7 @@ import { MenuItem } from '@app/models';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 describe('MenuItemsService', () => {
-  let testMenu: { pages: Array<MenuItem> };
+  let testMenu: { pages: MenuItem[] };
   let httpTestingController: HttpTestingController;
   beforeEach(() => {
     TestBed.configureTestingModule({

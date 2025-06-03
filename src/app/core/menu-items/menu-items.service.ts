@@ -1,22 +1,22 @@
-import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-
+import { Injectable } from '@angular/core';
 import { MenuItem } from '@app/models';
+import { firstValueFrom } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
 })
 export class MenuItemsService {
-  private items: Array<MenuItem>;
+  private items: MenuItem[];
 
   constructor(private http: HttpClient) {}
 
-  get mainMenu(): Array<{
+  get mainMenu(): {
     name: string;
     title: string;
     icon: string;
     url: string;
-  }> {
+  }[] {
     return this.items.map((item) => ({
       name: item.name,
       title: item.title,
@@ -25,13 +25,13 @@ export class MenuItemsService {
     }));
   }
 
-  async courses(): Promise<Array<MenuItem>> {
+  async courses(): Promise<MenuItem[]> {
     return this.items;
   }
 
   async load(): Promise<void> {
-    const res: any = await this.http.get('assets/data/menu.json').toPromise();
-    this.items = res.pages;
+    const res = await firstValueFrom(this.http.get('assets/data/menu.json'));
+    this.items = (res as unknown as { pages: MenuItem[] }).pages;
   }
 
   folder(courseName: string, tabName?: string, pageIndex?: number): string {

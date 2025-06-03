@@ -8,7 +8,7 @@ import { IonList, IonItem, IonLabel, PopoverController } from '@ionic/angular/st
   imports: [IonList, IonItem, IonLabel],
 })
 export class PageMenuComponent {
-  @Input() menuItems: Array<string>;
+  @Input() menuItems: string[];
 
   constructor(public popoverController: PopoverController) {}
 }

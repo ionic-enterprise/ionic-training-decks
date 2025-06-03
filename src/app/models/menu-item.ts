@@ -4,8 +4,8 @@ export class MenuItem {
   file?: string;
   folder?: string;
   icon?: string;
-  pages?: Array<MenuItem>;
-  tabs?: Array<MenuItem>;
+  pages?: MenuItem[];
+  tabs?: MenuItem[];
 
   constructor(data: MenuItem) {
     this.title = data.title;

@@ -32,7 +32,7 @@ describe('ApplicationService', () => {
 
   describe('registered for updates', () => {
     beforeEach(() => {
-      (alert.onDidDismiss as any).and.returnValue(Promise.resolve({ role: 'cancel' }));
+      (alert.onDidDismiss as jasmine.Spy).and.returnValue(Promise.resolve({ role: 'cancel' }));
       const service: ApplicationService = TestBed.inject(ApplicationService);
       service.registerForUpdates();
     });
@@ -41,7 +41,7 @@ describe('ApplicationService', () => {
       const update = TestBed.inject(SwUpdate);
       const alertController = TestBed.inject(AlertController);
       expect(alertController.create).not.toHaveBeenCalled();
-      (update.versionUpdates as any).next({ type: 'VERSION_READY' });
+      (update.versionUpdates as unknown as Subject<{ type: string }>).next({ type: 'VERSION_READY' });
       expect(alertController.create).toHaveBeenCalledTimes(1);
       expect(alertController.create).toHaveBeenCalled();
     });
@@ -50,7 +50,7 @@ describe('ApplicationService', () => {
       const update = TestBed.inject(SwUpdate);
       const alertController = TestBed.inject(AlertController);
       expect(alertController.create).not.toHaveBeenCalled();
-      (update.versionUpdates as any).next({ type: 'VERSION_INSTALLATION_FAILED' });
+      (update.versionUpdates as unknown as Subject<{ type: string }>).next({ type: 'VERSION_INSTALLATION_FAILED' });
       expect(alertController.create).not.toHaveBeenCalled();
     });
 
@@ -58,7 +58,7 @@ describe('ApplicationService', () => {
       const update = TestBed.inject(SwUpdate);
       const alertController = TestBed.inject(AlertController);
       expect(alertController.create).not.toHaveBeenCalled();
-      (update.versionUpdates as any).next({ type: 'VERSION_DETECTED' });
+      (update.versionUpdates as unknown as Subject<{ type: string }>).next({ type: 'VERSION_DETECTED' });
       expect(alertController.create).not.toHaveBeenCalled();
     });
   });

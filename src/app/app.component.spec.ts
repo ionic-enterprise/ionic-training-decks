@@ -38,7 +38,7 @@ describe('AppComponent', () => {
     describe('as a hybrid mobile app', () => {
       beforeEach(() => {
         const platform = TestBed.inject(Platform);
-        (platform as any).is.withArgs('hybrid').and.returnValue(true);
+        (platform as jasmine.SpyObj<Platform>).is.withArgs('hybrid').and.returnValue(true);
       });
 
       it('does not register for updates', () => {
@@ -51,7 +51,7 @@ describe('AppComponent', () => {
     describe('as any app other than hybrid mobile', () => {
       beforeEach(() => {
         const platform = TestBed.inject(Platform);
-        (platform as any).is.withArgs('hybrid').and.returnValue(false);
+        (platform as jasmine.SpyObj<Platform>).is.withArgs('hybrid').and.returnValue(false);
       });
 
       it('registers for updates', () => {

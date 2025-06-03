@@ -21,9 +21,9 @@ describe('TabsPage', () => {
     component = fixture.componentInstance;
 
     const activatedRoute = TestBed.inject(ActivatedRoute);
-    (activatedRoute.snapshot.paramMap.get as any).withArgs('section').and.returnValue('ionic-framework');
+    (activatedRoute.snapshot.paramMap.get as jasmine.Spy).withArgs('section').and.returnValue('ionic-framework');
     const menuItemsService = TestBed.inject(MenuItemsService);
-    (menuItemsService.page as any).withArgs('ionic-framework').and.returnValue({
+    (menuItemsService.page as jasmine.Spy).withArgs('ionic-framework').and.returnValue({
       name: 'ionic-framework',
       icon: 'logo-ionic',
       title: 'Ionic Framework',
