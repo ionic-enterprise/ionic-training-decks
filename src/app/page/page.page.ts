@@ -1,4 +1,3 @@
-import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
@@ -26,7 +25,6 @@ import { chevronBack, chevronForward, ellipsisHorizontal, ellipsisVertical } fro
   templateUrl: './page.page.html',
   styleUrls: ['./page.page.scss'],
   imports: [
-    CommonModule,
     FormsModule,
     MarkdownViewComponent,
     PageMenuComponent,

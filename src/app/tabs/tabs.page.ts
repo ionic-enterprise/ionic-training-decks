@@ -1,4 +1,3 @@
-import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
@@ -10,7 +9,7 @@ import { IonTabs, IonTabBar, IonTabButton, IonLabel, IonIcon } from '@ionic/angu
   selector: 'app-tabs',
   templateUrl: './tabs.page.html',
   styleUrls: ['./tabs.page.scss'],
-  imports: [CommonModule, FormsModule, IonTabs, IonTabBar, IonTabButton, IonLabel, IonIcon],
+  imports: [FormsModule, IonTabs, IonTabBar, IonTabButton, IonLabel, IonIcon],
 })
 export class TabsPage implements OnInit {
   section: MenuItem;

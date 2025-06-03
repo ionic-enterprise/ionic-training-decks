@@ -1,5 +1,7 @@
 <ion-list>
-  <ion-item *ngFor="let item of menuItems; index as idx" (click)="popoverController.dismiss(idx, 'select')">
-    <ion-label>{{ item }}</ion-label>
-  </ion-item>
+  @for (item of menuItems; track item; let idx = $index) {
+    <ion-item (click)="popoverController.dismiss(idx, 'select')">
+      <ion-label>{{ item }}</ion-label>
+    </ion-item>
+  }
 </ion-list>

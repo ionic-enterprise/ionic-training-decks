@@ -1,4 +1,3 @@
-import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import packageInfo from '../../../package.json';
@@ -24,7 +23,6 @@ import { school } from 'ionicons/icons';
   templateUrl: './about.page.html',
   styleUrls: ['./about.page.scss'],
   imports: [
-    CommonModule,
     FormsModule,
     IonHeader,
     IonToolbar,

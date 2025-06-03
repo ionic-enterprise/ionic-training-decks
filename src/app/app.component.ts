@@ -3,7 +3,7 @@ import { ApplicationService, MenuItemsService } from '@app/core';
 import { NavController, Platform } from '@ionic/angular/standalone';
 import { FirebaseAnalytics } from '@capacitor-community/firebase-analytics';
 import { SplashScreen } from '@capacitor/splash-screen';
-import { CommonModule } from '@angular/common';
+
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { addIcons } from 'ionicons';
 import {
@@ -44,7 +44,6 @@ import {
   templateUrl: 'app.component.html',
   styleUrls: ['app.component.scss'],
   imports: [
-    CommonModule,
     RouterLink,
     RouterLinkActive,
     IonRouterLink,

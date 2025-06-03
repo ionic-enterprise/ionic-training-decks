@@ -21,6 +21,8 @@
 <ion-content [fullscreen]="true">
   <div class="ion-padding" id="container">
     <div class="ion-text-center error-message">{{ errorMessage }}</div>
-    <app-markdown-view *ngIf="file" [folder]="folder" [file]="file"></app-markdown-view>
+    @if (file) {
+    <app-markdown-view [folder]="folder" [file]="file"></app-markdown-view>
+    }
   </div>
 </ion-content>
