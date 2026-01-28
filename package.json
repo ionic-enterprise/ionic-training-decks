@@ -45,11 +45,11 @@
   },
   "devDependencies": {
     "@angular-devkit/build-angular": "^20.0.0",
-    "@angular/cli": "^20.0.0",
+    "@angular/cli": "^20.3.15",
     "@angular/compiler": "^20.0.0",
     "@angular/compiler-cli": "^20.0.0",
     "@angular/language-service": "^20.0.0",
-    "@capacitor/cli": "^7.0.0",
+    "@capacitor/cli": "^8.0.2",
     "@changesets/cli": "^2.29.4",
     "@chiragrupani/karma-chromium-edge-launcher": "^2.4.1",
     "@ionic/angular-toolkit": "^12.2.0",
